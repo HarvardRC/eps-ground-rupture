@@ -1,0 +1,46 @@
+[tool.poetry]
+name = "eps-ground-rapture"
+version = "0.1.0"
+description = "Data pipelines for 2D DEM earthquake-rupture analysis, producing tidy datasets for Tableau and Apache Superset dashboards."
+authors = ["Michael Bouzinier <michael.bouzinier@forome.org>"]
+license = "Apache-2.0"
+readme = "README.md"
+packages = [{ include = "eps_ground_rapture", from = "src" }]
+
+[tool.poetry.dependencies]
+python = ">=3.11,<3.14"
+pandas = "^2.2"
+numpy = "^2.0"
+pyarrow = "^18.0"
+scikit-learn = "^1.5"
+duckdb = "^1.1"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3"
+ruff = "^0.7"
+black = "^24.10"
+mypy = "^1.13"
+matplotlib = "^3.9"
+seaborn = "^0.13"
+
+[tool.poetry.scripts]
+egr-build = "eps_ground_rapture.cli:main"
+
+[build-system]
+requires = ["poetry-core>=1.8.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
