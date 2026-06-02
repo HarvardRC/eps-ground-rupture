@@ -26,12 +26,33 @@ def load_dem(path: Path | str | None = None) -> pd.DataFrame:
 
 
 def load_fdhi(path: Path | str | None = None) -> pd.DataFrame:
-    """Load the FDHI (Fault Displacement Hazard Initiative) flatfile measurements."""
-    path = Path(path) if path else RAW_DIR / "02_FDHI_FLATFILE_MEASUREMENTS_20220719.csv"
+    """Load the **pre-cleaned** FDHI measurements supplied by the prior owner.
+
+    This is the small (~20-row) CSV that the prior owner's
+    `FDHI-SURE-DEM_SCATTER.py` script produces from the full FDHI flatfile.
+    We consume it as-is for now; replacing it with raw-flatfile + in-pipeline
+    cleaning is on the TODO list (see repo-root TODO.md).
+    """
+    path = Path(path) if path else RAW_DIR / "FDHI_Cleaned_Measurements.csv"
     return pd.read_csv(path)
+
+
+def load_sure(path: Path | str | None = None) -> pd.DataFrame:
+    """Load the SURE (Surface Rupture Earthquake) database.
+
+    The CSV ships with a UTF-8 BOM on the first column header — we strip it
+    via ``encoding="utf-8-sig"`` so column names compare cleanly.
+    """
+    path = Path(path) if path else RAW_DIR / "SURE.csv"
+    return pd.read_csv(path, encoding="utf-8-sig")
 
 
 def load_kern_combined(path: Path | str | None = None) -> pd.DataFrame:
-    """Load the combined Buwalda/FDHI Kern County dataset."""
+    """Load the combined Buwalda/FDHI/SDC Kern County dataset.
+
+    The CSV has a UTF-8 BOM and three columns literally named "Comments";
+    ``encoding="utf-8-sig"`` strips the BOM, and pandas auto-renames the
+    duplicates to ``Comments``, ``Comments.1``, ``Comments.2``.
+    """
     path = Path(path) if path else RAW_DIR / "Combine_BuwaldaFDHI_KernSDC.csv"
-    return pd.read_csv(path)
+    return pd.read_csv(path, encoding="utf-8-sig")

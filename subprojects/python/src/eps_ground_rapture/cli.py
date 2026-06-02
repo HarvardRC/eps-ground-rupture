@@ -1,9 +1,12 @@
 """Command-line entry point: `poetry run egr-build`.
 
-Reads raw inputs from `data/raw/`, applies cleaning, writes Parquet tables
-to `data/processed/<table>/data.parquet`, and emits DDL scripts under
+Reads raw inputs from `data/raw/`, writes Parquet tables to
+`data/processed/<table>/data.parquet`, and emits DDL scripts under
 `dashboards/sql/` for both production (Athena over S3) and development
 (Spark Thrift over local filesystem).
+
+No cleaning step today — every input arrives in a state we ship directly.
+See repo-root TODO.md for the FDHI raw-flatfile + cleaning revisit.
 """
 
 from __future__ import annotations
@@ -12,7 +15,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from . import io, prep, register
+from . import io, register, views
 from .config import PROCESSED_DIR, REPO_ROOT
 from .export import export_tidy
 
@@ -23,11 +26,6 @@ SQL_OUT_DIR = REPO_ROOT / "dashboards" / "sql"
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Build Parquet tables and DDL for dashboards.")
-    parser.add_argument(
-        "--skip-fdhi",
-        action="store_true",
-        help="Skip the FDHI cleaning step (use when the raw flatfile is absent).",
-    )
     parser.add_argument(
         "--database",
         default=DEFAULT_DATABASE,
@@ -44,17 +42,22 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     tables: list[register.Table] = []
-
-    dem_dir = export_tidy(io.load_dem(), "dem")
-    tables.append(register.Table(name="dem", location=dem_dir))
-    print(f"dem -> {dem_dir}/data.parquet")
-
-    if not args.skip_fdhi:
-        fdhi_dir = export_tidy(prep.clean_fdhi(io.load_fdhi()), "fdhi_cleaned")
-        tables.append(register.Table(name="fdhi_cleaned", location=fdhi_dir))
-        print(f"fdhi_cleaned -> {fdhi_dir}/data.parquet")
+    for name, loader in (
+        ("dem", io.load_dem),
+        ("fdhi_cleaned", io.load_fdhi),
+        ("sure", io.load_sure),
+        ("kern_combined", io.load_kern_combined),
+    ):
+        path = export_tidy(loader(), name)
+        tables.append(register.Table(name=name, location=path))
+        print(f"{name} -> {path}/data.parquet")
 
     _write_sql_scripts(tables, database=args.database, s3_prefix=args.s3_prefix)
+
+    duckdb_path = views.build_duckdb_views()
+    print(f"duckdb views -> {_rel(duckdb_path)}")
+    print(f"  Tableau JDBC URL: {views.jdbc_url(duckdb_path)}")
+
     return 0
 
 

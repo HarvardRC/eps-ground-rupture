@@ -1,11 +1,12 @@
-"""Smoke tests: package imports, paths resolve, prep + export + DDL all work."""
+"""Smoke tests: package imports, paths resolve, IO + export + DDL + views all work."""
 
 from pathlib import Path
 
+import duckdb
 import pandas as pd
 import pytest
 
-from eps_ground_rapture import __version__, config, export, prep, register
+from eps_ground_rapture import __version__, config, export, io, register, views
 
 
 def test_version_present():
@@ -17,24 +18,15 @@ def test_repo_paths_exist():
     assert config.DATA_DIR.is_dir()
 
 
-def test_clean_fdhi_filters():
-    df = pd.DataFrame(
-        {
-            "style": ["Reverse", "Strike-Slip", "Reverse-Oblique"],
-            "rupture_rank": ["Principal", "Principal", "Secondary"],
-            "vs_central_meters": [1.0, 1.0, 1.0],
-            "vs_low_meters": [0.0, 0.0, 0.0],
-            "vs_high_meters": [0.0, 0.0, 0.0],
-            "sh_central_meters": [0.0, 0.0, 0.0],
-            "sh_low_meters": [0.0, 0.0, 0.0],
-            "sh_high_meters": [0.0, 0.0, 0.0],
-            "fzw_central_meters": [10.0, 10.0, 10.0],
-            "recommended_net_preferred_usage_flag": ["Keep", "Keep", "Keep"],
-        }
-    )
-    out = prep.clean_fdhi(df)
-    assert len(out) == 1
-    assert out.iloc[0]["style"] == "Reverse"
+def test_sure_loader_strips_bom_and_returns_frame():
+    """The SURE CSV ships with a UTF-8 BOM on `IdE`; load_sure must strip it."""
+    if not (config.RAW_DIR / "SURE.csv").is_file():
+        pytest.skip("data/raw/SURE.csv not present in this checkout")
+    df = io.load_sure()
+    assert "IdE" in df.columns and "﻿IdE" not in df.columns
+    # Columns the prior owner's script depends on for the overlay scatter.
+    for col in ("eq_name", "FNC", "SH"):
+        assert col in df.columns
 
 
 def _sample_frame() -> pd.DataFrame:
@@ -81,3 +73,41 @@ def test_spark_ddl_infers_via_using_parquet(tmp_path: Path):
 def test_athena_type_map_rejects_unknown():
     with pytest.raises(ValueError):
         register._athena_type("list<int32>")
+
+
+def test_build_duckdb_views_creates_unified_view(tmp_path: Path):
+    """Build Parquet tables and a DuckDB views file in an isolated tmp dir,
+    then confirm the `unified_observations` view groups rows by source.
+    """
+    processed_dir = tmp_path / "processed"
+    dem = pd.DataFrame({"DZW": [1.0], "Scarp_Height": [0.5], "Scarp_Class": ["Simple"],
+                        "Fault_Dip": [30], "Cohesion": ["R1"], "Set": ["Homogeneous"]})
+    fdhi = pd.DataFrame({"fzw_central_meters": [10.0], "vs_central_meters": [2.0],
+                         "eq_name": ["Wenchuan"]})
+    sure = pd.DataFrame({"FNC": [5.0], "SH": [1.0], "eq_name": ["Chi-Chi"]})
+    kern = pd.DataFrame({"DZW": [3.0], "Vertical": [0.3]})
+
+    for name, df in (("dem", dem), ("fdhi_cleaned", fdhi), ("sure", sure), ("kern_combined", kern)):
+        export.export_tidy(df, name, out_dir=processed_dir)
+
+    duckdb_path = views.build_duckdb_views(
+        processed_dir=processed_dir,
+        duckdb_path=tmp_path / "eps.duckdb",
+    )
+    assert duckdb_path.is_file()
+
+    con = duckdb.connect(str(duckdb_path), read_only=True)
+    try:
+        rows = con.execute(
+            "SELECT source, COUNT(*) AS n FROM unified_observations GROUP BY source ORDER BY source"
+        ).fetchall()
+    finally:
+        con.close()
+    assert rows == [("DEM", 1), ("FDHI", 1), ("Kern", 1), ("SURE", 1)]
+
+
+def test_jdbc_url_shape(tmp_path: Path):
+    target = tmp_path / "eps.duckdb"
+    url = views.jdbc_url(target)
+    assert url.startswith("jdbc:duckdb:/")
+    assert url.endswith("eps.duckdb")
