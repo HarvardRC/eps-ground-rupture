@@ -13,7 +13,10 @@ this file via the DuckDB JDBC driver and sees five logical tables:
 The unified view is what makes the cross-source DZW-vs-Scarp-Height
 scatter natural in Tableau: every row has `source`, `dzw`,
 `scarp_height`, plus source-specific labels (`scarp_class`, `eq_name`)
-that downstream filters can pivot on.
+that downstream filters can pivot on. Latitude / longitude come along
+where the source supplies them; for Kern (which has no per-measurement
+location) we tag every row with the 1952 Kern County epicenter
+(35.0° N, 118.9° W).
 """
 
 from __future__ import annotations
@@ -25,6 +28,12 @@ import duckdb
 from .config import PROCESSED_DIR, REPO_ROOT
 
 DEFAULT_DUCKDB_PATH = REPO_ROOT / "dashboards" / "duckdb" / "eps.duckdb"
+
+# Kern County (1952 M 7.36) epicenter, per project owner. The Kern CSV holds
+# no per-measurement location; we tag every Kern row with this point so it
+# can be mapped alongside per-measurement FDHI/SURE points.
+KERN_LATITUDE = 35.0
+KERN_LONGITUDE = -118.9  # negative = west
 
 
 def build_duckdb_views(
@@ -67,6 +76,18 @@ def build_duckdb_views(
                 f"SELECT * FROM read_parquet('{path}')"
             )
 
+        # Kern's raw CSV has no per-row location. Attach the 1952 epicenter
+        # as a separate view so map-style dashboards have something to plot.
+        con.execute(
+            f"""
+            CREATE OR REPLACE VIEW kern_combined_geo AS
+              SELECT *,
+                     CAST({KERN_LATITUDE}  AS DOUBLE) AS latitude,
+                     CAST({KERN_LONGITUDE} AS DOUBLE) AS longitude
+              FROM read_parquet('{parquet_files['kern_combined']}')
+            """
+        )
+
         # Unified observation table. Each row: one (source, dzw, scarp_height) point
         # plus the labels each source happens to expose.
         con.execute(
@@ -80,7 +101,9 @@ def build_duckdb_views(
                 NULL            AS eq_name,
                 "Fault_Dip"     AS fault_dip,
                 "Cohesion"      AS cohesion,
-                "Set"           AS dem_set
+                "Set"           AS dem_set,
+                CAST(NULL AS DOUBLE) AS latitude,
+                CAST(NULL AS DOUBLE) AS longitude
               FROM read_parquet('{parquet_files['dem']}')
               WHERE "DZW" > 0 AND "Scarp_Height" > 0
 
@@ -94,7 +117,9 @@ def build_duckdb_views(
                 eq_name                 AS eq_name,
                 NULL                    AS fault_dip,
                 NULL                    AS cohesion,
-                NULL                    AS dem_set
+                NULL                    AS dem_set,
+                latitude_degrees        AS latitude,
+                longitude_degrees       AS longitude
               FROM read_parquet('{parquet_files['fdhi_cleaned']}')
               -- FDHI uses -999 as a missing-data sentinel; `> 0` filters
               -- those out alongside actual nulls.
@@ -110,7 +135,9 @@ def build_duckdb_views(
                 eq_name          AS eq_name,
                 NULL             AS fault_dip,
                 NULL             AS cohesion,
-                NULL             AS dem_set
+                NULL             AS dem_set,
+                "Latitude"       AS latitude,
+                "Longitude"      AS longitude
               FROM read_parquet('{parquet_files['sure']}')
               WHERE "FNC" > 0 AND "SH" > 0
 
@@ -124,7 +151,9 @@ def build_duckdb_views(
                 'Kern County (1952)'     AS eq_name,
                 NULL                     AS fault_dip,
                 NULL                     AS cohesion,
-                NULL                     AS dem_set
+                NULL                     AS dem_set,
+                CAST({KERN_LATITUDE}  AS DOUBLE) AS latitude,
+                CAST({KERN_LONGITUDE} AS DOUBLE) AS longitude
               FROM read_parquet('{parquet_files['kern_combined']}')
               WHERE "DZW" > 0 AND "Vertical" > 0
             """

@@ -83,8 +83,10 @@ def test_build_duckdb_views_creates_unified_view(tmp_path: Path):
     dem = pd.DataFrame({"DZW": [1.0], "Scarp_Height": [0.5], "Scarp_Class": ["Simple"],
                         "Fault_Dip": [30], "Cohesion": ["R1"], "Set": ["Homogeneous"]})
     fdhi = pd.DataFrame({"fzw_central_meters": [10.0], "vs_central_meters": [2.0],
-                         "eq_name": ["Wenchuan"]})
-    sure = pd.DataFrame({"FNC": [5.0], "SH": [1.0], "eq_name": ["Chi-Chi"]})
+                         "eq_name": ["Wenchuan"],
+                         "latitude_degrees": [31.0], "longitude_degrees": [103.0]})
+    sure = pd.DataFrame({"FNC": [5.0], "SH": [1.0], "eq_name": ["Chi-Chi"],
+                         "Latitude": [23.8], "Longitude": [120.8]})
     kern = pd.DataFrame({"DZW": [3.0], "Vertical": [0.3]})
 
     for name, df in (("dem", dem), ("fdhi_cleaned", fdhi), ("sure", sure), ("kern_combined", kern)):
@@ -101,9 +103,17 @@ def test_build_duckdb_views_creates_unified_view(tmp_path: Path):
         rows = con.execute(
             "SELECT source, COUNT(*) AS n FROM unified_observations GROUP BY source ORDER BY source"
         ).fetchall()
+        # Each source contributes the lat/lon we'd expect.
+        geo = dict(con.execute(
+            "SELECT source, latitude FROM unified_observations ORDER BY source"
+        ).fetchall())
     finally:
         con.close()
     assert rows == [("DEM", 1), ("FDHI", 1), ("Kern", 1), ("SURE", 1)]
+    assert geo["DEM"] is None
+    assert geo["FDHI"] == 31.0
+    assert geo["SURE"] == 23.8
+    assert geo["Kern"] == views.KERN_LATITUDE
 
 
 def test_jdbc_url_shape(tmp_path: Path):
