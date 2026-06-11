@@ -39,6 +39,7 @@ quick reference.
 | [0011](adr/0011-postgres-not-warehouse.md)            | PostgreSQL as warehouse?         | No — engine-class mismatch with prod |
 | [0012](adr/0012-plotting-libs-dev-only.md)            | Plotting libs                    | `matplotlib`/`seaborn` in `dev` group only |
 | [0013](adr/0013-gradle-multi-project-subprojects-layout.md) | Repository layout          | Gradle multi-project; code modules under `subprojects/` |
+| [0014](adr/0014-terraform-aws-data-deployment.md)     | AWS deployment                   | Terraform (S3 + Glue + Athena per env); sanitized Athena columns |
 
 ## Repository layout
 
@@ -99,31 +100,31 @@ eps_ground_rapture.export.export_tidy       Parquet writer (dir-per-table)
 data/processed/<table>/data.parquet         physical storage
         │
         ▼
-eps_ground_rapture.register                 emits DDL for both engines
+eps_ground_rapture.register                 emits schema artifacts
         │
-        ├──► dashboards/sql/athena.sql         ──► Athena (S3)         ──► Tableau Cloud / Superset
-        └──► dashboards/sql/spark-thrift.sql   ──► Spark Thrift (local) ──► Tableau Desktop / Superset
+        ├──► dashboards/sql/athena.sql         ──► reference DDL (prod is Terraform-managed)
+        ├──► dashboards/sql/spark-thrift.sql   ──► Spark Thrift (local) ──► Tableau Desktop / Superset
+        ├──► deploy/terraform/tables.json      ──► Terraform → Glue/Athena (ADR-0014; committed)
+        └──► dashboards/duckdb/eps.duckdb      ──► DuckDB views ──► Tableau Desktop (first pass)
 ```
 
-Single CLI: `poetry run egr-build` writes both the Parquet files and the
-two DDL scripts. Flags:
+Single CLI: `poetry run egr-build` writes the Parquet files and all four
+schema artifacts above. Flags:
 
-- `--skip-fdhi` — skip the FDHI stage while the raw file is unavailable.
 - `--database <name>` — logical schema name in the DDL (default `eps_ground_rapture`).
-- `--s3-prefix <uri>` — S3 prefix baked into Athena DDL (default placeholder
-  `s3://CHANGE_ME/eps-ground-rapture/processed/`).
+- `--s3-prefix <uri>` — S3 prefix baked into the reference `athena.sql`
+  (default placeholder `s3://CHANGE_ME/processed/`). To match a
+  Terraform-provisioned env: `--database eps_ground_rapture_<env>
+  --s3-prefix s3://eps-ground-rapture-<env>/processed/`.
 
 ## Ported logic so far
 
-Only one piece of notebook logic has been ported, intentionally:
-
-- **`prep.clean_fdhi`** — reproduces the filter chain in
-  `2D DEM - Figures for 2024 DEM Paper.ipynb`:
-  - `style ∈ {Reverse, Reverse-Oblique}`
-  - `rupture_rank == 'Principal'`
-  - any positive scarp-height measurement across `vs_*` / `sh_*` columns
-  - `0 < fzw_central_meters < 50`
-  - `recommended_net_preferred_usage_flag ∈ {Check, Keep}`
+No notebook *cleaning* logic currently lives in the pipeline: the FDHI
+table arrives pre-cleaned from the prior owner
+(`data/raw/FDHI_Cleaned_Measurements.csv`), and the other inputs ship
+as-is, so `prep.py` is intentionally empty. (An earlier `prep.clean_fdhi`
+port was removed when the pre-cleaned CSV landed; re-adding it against
+the raw FDHI flatfile is tracked in `TODO.md`.)
 
 Everything else in the legacy notebooks is plotting code (matplotlib /
 seaborn). That work belongs in Tableau/Superset, not in the Python
@@ -166,17 +167,20 @@ Verified end-to-end on 2026-05-24:
 
 ## Known gaps / open work
 
-- **FDHI raw file missing.** `02_FDHI_FLATFILE_MEASUREMENTS_20220719.csv`
-  is an externally-curated dataset (FDHI Project release of 2022-07-19).
-  Until it lands in `data/raw/`, run with `--skip-fdhi`.
+- **FDHI is consumed pre-cleaned.** The pipeline reads
+  `data/raw/FDHI_Cleaned_Measurements.csv` (a ~20-row extract from the
+  prior owner) rather than cleaning the raw FDHI flatfile itself.
+  Replacing it with the raw flatfile + in-pipeline cleaning is tracked
+  in `TODO.md`.
 - **Kern County loader is stubbed** (`io.load_kern_combined`) but no
   cleaning routine exists; the legacy notebook uses it mostly as-is. See
   `docs/datasets.md` for what the file is and how it's used.
-- **No dashboards yet.** `dashboards/tableau/` and `dashboards/superset/`
-  contain only READMEs describing the intended workflow.
-- **No Athena/Glue automation.** The pipeline emits DDL text; running it
-  in AWS (or via a Glue Crawler) is a manual step. Could be wired through
-  `boto3` later if needed.
+- **Dashboards in progress.** `dashboards/tableau/dem-overview.twb` holds
+  the first dashboard; Superset exports still absent. See
+  `notes/Roadmap.md`.
+- **AWS deployment via Terraform** (`deploy/terraform/`, ADR-0014):
+  S3 bucket + Glue database/tables + Athena workgroup per env (dev/prod).
+  Not yet applied to the account.
 - **Notebook 2 (`2Ddem 2025 Paper Revisions ...`)** has not been ported.
   Most of its filtering is by `Set ∈ {Homogeneous, Heterogeneous}` and
   `Cohesion` — both already columns in the DEM table, so the dashboards
@@ -205,11 +209,15 @@ source /opt/python/venvs/eps-ground-rapture/bin/activate
 cd subprojects/python
 poetry install
 poetry run pytest
-poetry run egr-build --skip-fdhi    # writes data/processed/<table>/ + dashboards/sql/*
+poetry run egr-build    # writes data/processed/<table>/, dashboards/sql/*,
+                        # dashboards/duckdb/eps.duckdb, deploy/terraform/tables.json
 
-# Development: start Spark Thrift, then in beeline / DBeaver / Tableau:
-#   $ beeline -u jdbc:hive2://localhost:10000 -f dashboards/sql/spark-thrift.sql
+# Local development — either:
+#   DuckDB: connect Tableau to dashboards/duckdb/eps.duckdb (see dashboards/duckdb/README.md)
+#   Spark Thrift: beeline -u jdbc:hive2://localhost:10000 -f dashboards/sql/spark-thrift.sql
 #
-# Production: upload data/processed/ to S3, edit dashboards/sql/athena.sql
-# (or pass --s3-prefix at build time), then run it in the Athena console.
+# AWS (dev/prod) — Terraform-managed (ADR-0014):
+#   cd deploy/terraform/envs/dev && terraform apply
+#   aws --profile urc s3 sync data/processed/ s3://eps-ground-rapture-dev/processed/ --exclude '*.gitkeep'
+#   (details + BI connection strings: deploy/terraform/README.md)
 ```

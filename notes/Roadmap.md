@@ -7,138 +7,141 @@ Treat this as a working document — update as decisions are made and
 scope shifts. For longer-lived design decisions, promote items to an
 ADR under `docs/adr/`. For point-in-time chores, use `TODO.md`.
 
-## Legacy-figure inventory
+## Chart inventory
 
-Themes underlying the legacy notebooks and the 2025 revisions script:
+The canonical inventory of chart types in the paper and notebooks lives
+in [`chart-families.md`](chart-families.md) — six conceptually distinct
+families plus non-chart illustrations. Summary:
 
-| Theme | What the legacy figures show |
-|-------|------------------------------|
-| **A. DEM cloud vs historic earthquakes** | DZW × Scarp_Height scatter colored by Scarp_Class; same colored by Fault_Dip (gradient palette); FDHI / SURE / Kern stars overlaid; multi-panel with 2D + 3D DEM + field observations (the prior owner's most recent figure). |
-| **B. Slip-vs-displacement relationships** | Slip × VDHW, Slip × Scarp_Height, Slip × DZW, Slip × HD_HW; multi-panel grids; color by Fault_Dip. |
-| **C. Distributions** | DZW histograms with vertical lines marking historic event values; Scarp_Height histograms; boxplots by Scarp_Class and by event. |
-| **D. DEM-internal material analysis** (notebook 2) | Homogeneous vs Heterogeneous; Cohesion effects; Sediment_Strength; Density. Distributions and scatters faceted by material properties. |
-| **E. Regression / intersections** | Per-Fault_Dip linear fits on the DEM cloud; back-projecting Kern's measured vertical displacement onto fits to infer slip. |
+| Family | Question it answers | Status |
+|--------|---------------------|--------|
+| 1. Model vs reality scatter | Does the simulation behave like real earthquakes? | ✅ built |
+| 2. Driver→response curves | How does the model respond to slip/magnitude per condition? | **next** |
+| 3. Faceted distributions | What's the spread of each output; which parameter shifts it? | later |
+| 4. Mean ± σ summary | Typical values and spreads per scarp class at a glance? | later |
+| 5. Per-event boxplots | How variable are field measurements within each event? | priority 3 |
+| 6. Regression + inference | What slip would produce an observed displacement? | priority 4 |
+| Illustrations (static images) | Context: photos, schematics, model snapshots | lowest |
 
-## Dashboard structure
+(The earlier A–E "theme" taxonomy is superseded by the families; the
+mapping is at the bottom of `chart-families.md`.)
 
-**Recommendation: one workbook with three dashboard tabs**, plus B/E as
-optional follow-ons. One workbook lets shared filters and parameters
-cross-propagate via Tableau Actions (a Scarp_Class click on Dashboard 1
-narrows Dashboard 2 automatically). Trade-off: bigger `.twb` file,
-slightly bigger diffs. Open for review — see "Open questions" below.
+## Build order (priorities set 2026-06-10)
 
-### Dashboard 1 — DEM Cloud and Historic Overlays *(theme A)*
-Extends the existing `dashboards/tableau/dem-overview.twb`.
+1. ~~**Dashboard 1 — Model vs reality** (family 1)~~ — **built**:
+   dual-axis DZW × Scarp_Height scatter, Event Map, Combinations
+   coverage matrix, two dashboards in `dashboards/tableau/dem-overview.twb`.
+   Remaining polish (from the workbook review):
+   - Unify event color/shape encodings between the scatter and the map.
+   - Trend line: per-color or remove (currently one pooled OLS line).
+   - Map-only non-null `latitude` filter (perf: stop querying 333k rows for 79 points).
+   - Title zone width; exhaustive `Point Color` CASE; `'0 none'` coverage bucket.
+2. **Dashboard 2 — DEM response curves** (family 2).
+   - Driver→response grid: `Slip` / `Magnitude` (parameter-switchable x)
+     vs `Scarp_Height`, `DZW`, `Scarp_Dip`, `VDHW`.
+   - Color/facet by `Scarp_Class`, `Fault_Dip`, `Cohesion`, `Set` —
+     reuse the `Row By` / `Col By` parameter pattern from the
+     Combinations sheet.
+   - Pure DEM data; needs the `dem` view only (already exists).
+3. **Dashboard 3 — Per-event field statistics** (family 5).
+   - Boxplots of FDHI `fzw` / `sh` / `vs` per `eq_name`; SURE FNC/SH
+     similarly via `unified_observations`.
+   - DEM distribution alongside as context (paper Fig. 13 layout).
+   - Mostly served by existing views; FDHI's three measures need the
+     `fdhi_cleaned` view directly.
+4. **Dashboard 4 — Regression & inference** (family 6).
+   - Per-Fault_Dip linear fits of Slip × VDHW + Kern back-projection
+     (paper Fig. 14 / Equation 2).
+   - Requires the `dem_regression` DuckDB view (see data-side work).
+5. **Dashboard 5 — Distributions & summary stats** (families 3 + 4).
+   - Faceted histograms (hue = class / density / depth / dip / strength)
+     with historic-event reference lines.
+   - Mean ± σ per scarp class (paper Fig. 8 — no notebook code exists;
+     reconstruct from the `dem` view with AVG + stdev whiskers).
+   - Needs the `historic_events` view for the reference lines.
+6. **Static-image embedding** (lowest priority).
+   - Embed selected paper illustrations (rupture photos Fig. 1, scarp
+     morphology schematic Fig. 2, DEM snapshots Fig. 7) as dashboard
+     context images — extract from the PDF as PNGs into
+     `dashboards/tableau/images/` (gitignore question: small PNGs are
+     fine to commit).
+   - Pure Tableau layout work; no data plumbing.
 
-- Main scatter: DZW × Scarp_Height, DEM cloud + FDHI / SURE / Kern overlay markers.
-- Color toggle via a `Color By` parameter (Source / Event, Fault_Dip, Scarp_Class).
-- Dual-axis treatment so DEM dots stay small + faded while overlay stars are large.
-- Optional trend lines per Fault_Dip via `Analytics → Trend Line`.
-- Filters: `Source / Event`, `Scarp_Class`, `Fault_Dip`, magnitude (when surfaced).
-
-### Dashboard 2 — Distributions *(theme C)*
-- DZW histogram with marker lines / shaded bands at FDHI / SURE / Kern event values.
-- Scarp_Height histogram similarly.
-- Boxplot grid: each metric broken out by `Scarp_Class`.
-- Action filters from Dashboard 1.
-
-### Dashboard 3 — DEM Material Analysis *(theme D)*
-- DEM scatter colored / faceted by `Set` (Homogeneous vs Heterogeneous).
-- Per-`Cohesion` small multiples.
-- `Density` and `Sediment_Strength` as additional axes or color encodings.
-- Action filters from Dashboards 1 / 2.
-
-### Optional — Slip-vs-displacement *(theme B)*
-2×2 grid: Slip × VDHW, Slip × HD_HW, Slip × DZW, Slip × Scarp_Height.
-Color by Fault_Dip. Pure DEM data; trivial to add — only worth doing if
-audience asks.
-
-### Optional — Regression intersections *(theme E)*
-Needs Python-side work (see "Data-side work" below). Highest analytical
-value but biggest lift; defer until B and C are settled.
+Rough estimate: 1–2 sessions per dashboard; the regression dashboard
+(#4) carries the data-side lift.
 
 ## Data-side work
 
-Additions to `subprojects/python/src/eps_ground_rapture/views.py`:
+Additions to `subprojects/python/src/eps_ground_rapture/views.py`,
+re-ordered to match the build order:
 
-1. **`historic_events` view** — small UNION over FDHI / SURE / Kern with
-   `(event_label, dzw, scarp_height, magnitude)` per event. Powers
-   marker-line overlays on histograms in Dashboard 2.
-2. **`dem_with_bands` view** *(optional)* — adds a `fault_dip_band`
+1. *(for #4)* **`dem_regression` view** — per Fault_Dip, fit
+   `VDHW ~ Slip` (and optionally `Scarp_Height ~ DZW`) using DuckDB's
+   `regr_slope()` / `regr_intercept()` / `regr_r2()`; emit
+   `(fault_dip, slope, intercept, r2)`. SQL-only — no Python regression
+   import needed.
+2. *(for #5)* **`historic_events` view** — small UNION over FDHI / SURE
+   / Kern with `(event_label, dzw, scarp_height, magnitude)` per event.
+   Powers marker-line overlays on histograms.
+3. *(optional)* **`dem_with_bands` view** — adds a `fault_dip_band`
    column (`20–30`, `30–40`, …) for cleaner small-multiples. Or do this
    as a calculated field in Tableau and skip the view.
-3. **`dem_regression` view** *(theme E only)* — per Fault_Dip, fit
-   `Scarp_Height ~ DZW` using DuckDB's `regr_slope()` / `regr_intercept()`;
-   emit `(fault_dip, slope, intercept, r2)`. SQL-only — no Python
-   regression import needed.
 
 ## Tableau-side scaffolding
 
 - **Calculated fields**:
-  - `Source / Event` — `IFNULL([eq_name], [source])`. Treats DEM and each
-    field event as peers in legends and filters.
+  - `Source / Event` and `Event` — exist; **consolidate to one** (they
+    currently carry conflicting color/shape palettes; see workbook review).
   - `Fault_Dip Band` — buckets the integer dip into ranges for facets.
   - `Scarp_Class Family` — strips the `_Collapse` suffix to collapse
     `Monoclinal` / `Monoclinal Collapse` into one group when desired.
 - **Parameters**:
-  - `Color By` — discrete: `Source / Event`, `Fault_Dip`, `Scarp_Class`.
-    Drives a `CASE` calc that the Color mark uses.
+  - `Color By` — exists; make its CASE exhaustive and consider adding
+    `Cohesion` / `DEM Set` members.
+  - `Row By` / `Col By` — exist (drive the Combinations matrix); reuse
+    the same pattern for Dashboard 2's response-curve grid.
+  - New for Dashboard 2: an `X Driver` parameter (`Slip` vs `Magnitude`).
 - **Color palettes**: align to the legacy figure where readable:
-  - Monoclinal: `#009ffa`
-  - Pressure Ridge: `#f47820`
-  - Simple: `#ed2024`
-  - Each `_Collapse` variant: a darker shade of its parent
-  - Event overlays: distinct from any DEM hue (whites, blacks, stars).
-
-## Suggested build order
-
-1. **Polish Dashboard 1** (1–2 sessions).
-   - Add the `Color By` parameter and the Fault_Dip color variant.
-   - Dual-axis the overlays so they don't drown in the DEM cloud.
-   - Save canonical `.twb` after each session so diffs are reviewable.
-2. **Build Dashboard 2** (1–2 sessions).
-   - Add the `historic_events` view to `views.py` first.
-   - Build histograms and boxplots; wire Action filters from Dashboard 1.
-3. **Build Dashboard 3** (1–2 sessions).
-   - Material-property exploration. Same filter wiring.
-4. **Compose into one workbook with three dashboard tabs**; add a small
-   navigation strip if you want a polished feel.
-5. **Re-decide on B/E** based on audience feedback.
-
-Rough estimate: ~6–10 hours of Tableau work for Dashboards 1–3 if
-nothing surprises us; more if matching the published palette exactly
-turns out to be fiddly.
+  - Monoclinal: `#009ffa`; Pressure Ridge: `#f47820`; Simple: `#ed2024`;
+    each `_Collapse` variant a darker shade of its parent.
+  - Event overlays: distinct from any DEM hue (black/white fills, star
+    shapes).
 
 ## Decisions made
 
 - **Engine**: DuckDB via JDBC for first pass (ADR-0005). Same Parquet
   data, same UNION view powering every dashboard.
-- **Layout source**: `unified_observations` view (already exists).
-  Tableau workbook uses it everywhere a cross-source plot is needed;
-  per-source plots use the individual views (`dem`, `fdhi_cleaned`,
-  `sure`, `kern_combined`).
+- **Layout source**: `unified_observations` view for cross-source plots;
+  per-source views (`dem`, `fdhi_cleaned`, `sure`, `kern_combined`) for
+  single-source plots.
 - **Reference figure**: `legacy/FDHI-SURE-DEM-2D-3D-Scatter_ONLY.pdf`
-  (the prior owner's most recent figure) is the canonical visual target
-  for Dashboard 1. The 2024 notebook figures and 2025 revisions figure
-  are supplementary references.
+  is the canonical visual target for Dashboard 1; paper Figs. 6, 8,
+  13–15 anchor Dashboards 2–5.
+- **Priorities (2026-06-10)**: after the response-curve dashboard (#2),
+  build per-event boxplots (#3) and regression/inference (#4) ahead of
+  the distribution/summary dashboards (#5). Static images last.
 
 ## Open questions
 
-- [ ] **Workbook structure**: single `.twb` with three dashboard tabs
-  (recommended) vs three separate `.twb` files. Single is better for
-  cross-dashboard filter actions; separate is better for delivering
-  distinct files to distinct audiences. **Pending decision.**
+- [ ] **Workbook structure**: single `.twb` with all dashboard tabs
+  (current de-facto state — `dem-overview.twb` already has two) vs
+  splitting per audience. Single favors cross-dashboard filter actions.
+  **Pending; default is single until it hurts.**
 - [ ] **3D DEM data**: `combinedCases123_v2.csv` and `combinedCase4_v2.csv`
   referenced by the prior owner's script aren't in `data/raw/` yet.
-  Without them, Dashboard 1 reproduces the 2D-DEM slice of the legacy
-  multi-DEM figure. With them, it reproduces the full thing.
-  Tracked in `TODO.md`.
-- [ ] **Regression analysis (theme E)**: build it or defer? Highest
-  insight per chart; biggest implementation cost. **Pending decision.**
+  Without them, Dashboard 1 covers the 2D-DEM slice only. Tracked in
+  `TODO.md`.
+- [ ] **Magnitude in `unified_observations`**: FDHI/SURE carry event
+  magnitudes; surfacing them would enable magnitude filters on
+  Dashboard 1 and labels on Dashboard 3. Small `views.py` change —
+  fold into the #3 data work.
 
 ## Related
 
-- `dashboards/tableau/dem-overview.twb` — starter workbook for Dashboard 1.
+- `notes/chart-families.md` — canonical chart-type inventory (this
+  roadmap's build order references its family numbers).
+- `dashboards/tableau/dem-overview.twb` — the workbook (Dashboard 1 +
+  Viable Combinations live here).
 - `dashboards/duckdb/eps.duckdb` — DuckDB views file Tableau connects to.
 - `subprojects/python/src/eps_ground_rapture/views.py` — view definitions.
 - `TODO.md` — point-in-time chores (raw-FDHI cleaning, 3D DEM data).

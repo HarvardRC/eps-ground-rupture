@@ -41,10 +41,26 @@ With the venv activated:
 
 ```bash
 # from subprojects/python (with /opt/python/venvs/eps-ground-rapture activated)
-poetry run egr-build --skip-fdhi    # writes data/processed/<table>/ + dashboards/sql/
-poetry run egr-build                # same, including the FDHI table
+poetry run egr-build                # writes data/processed/<table>/, dashboards/sql/,
+                                    # dashboards/duckdb/eps.duckdb, deploy/terraform/tables.json
 poetry run pytest                   # smoke tests
 ```
+
+CLI flags:
+
+| Flag              | Default                       | Effect |
+|-------------------|-------------------------------|--------|
+| `--database NAME` | `eps_ground_rapture`          | Schema name baked into the generated DDL scripts. |
+| `--s3-prefix URI` | `s3://CHANGE_ME/processed/`   | S3 prefix baked into the reference `athena.sql`. Per-table dirs are appended. For a Terraform-provisioned env use `s3://eps-ground-rapture-<env>/processed/` with `--database eps_ground_rapture_<env>`. |
+
+(Neither flag affects the Terraform path — `deploy/terraform/tables.json`
+carries only the schema; bucket and database names live in the Terraform
+module. See `../../deploy/terraform/README.md`.)
+
+Raw inputs go in `../../data/raw/` (e.g. `DEM_dataset.csv`,
+`FDHI_Cleaned_Measurements.csv`, `SURE.csv`,
+`Combine_BuwaldaFDHI_KernSDC.csv` — see `../../data/README.md`). Parquet
+outputs land in `../../data/processed/<table>/data.parquet`.
 
 Or via Gradle from anywhere (no manual activation — Gradle sets `VIRTUAL_ENV`
 and `PATH` on each task):
@@ -91,19 +107,6 @@ task that copied the underlying cache XML, but it required a full IDEA
 "Invalidate Caches → Restart" to take effect, which is heavier than just
 re-selecting the SDK. The manual click is the steady state until JetBrains
 closes the gap.)
-
-CLI flags:
-
-| Flag                  | Default                                                   | Effect |
-|-----------------------|-----------------------------------------------------------|--------|
-| `--skip-fdhi`         | off                                                       | Skip the FDHI clean step (use when raw flatfile is missing). |
-| `--database NAME`     | `eps_ground_rapture`                                      | Schema name baked into both DDL scripts. |
-| `--s3-prefix URI`     | `s3://CHANGE_ME/eps-ground-rapture/processed/`            | S3 prefix baked into Athena DDL. Per-table dirs are appended. |
-
-Raw inputs go in `../../data/raw/` (e.g. `DEM_dataset.csv`,
-`02_FDHI_FLATFILE_MEASUREMENTS_20220719.csv`). Parquet outputs land in
-`../../data/processed/<table>/data.parquet`; DDL lands in
-`../../dashboards/sql/`.
 
 ## Layout
 

@@ -24,6 +24,7 @@ Format: lightweight MADR (Context → Decision → Alternatives → Consequences
 | [0011](0011-postgres-not-warehouse.md)            | PostgreSQL not used as warehouse layer      | Accepted |
 | [0012](0012-plotting-libs-dev-only.md)            | Plotting libraries as dev-only optional deps | Accepted |
 | [0013](0013-gradle-multi-project-subprojects-layout.md) | Gradle multi-project layout, code modules under `subprojects/` | Accepted |
+| [0014](0014-terraform-aws-data-deployment.md)     | Terraform for the AWS data layer; sanitized Athena columns | Accepted |
 
 ## Adding a new ADR
 

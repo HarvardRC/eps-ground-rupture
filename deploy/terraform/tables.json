@@ -1,0 +1,1235 @@
+{
+  "dem": [
+    {
+      "name": "trial",
+      "type": "string",
+      "comment": "Parquet field: Trial"
+    },
+    {
+      "name": "depth",
+      "type": "bigint",
+      "comment": "Parquet field: Depth"
+    },
+    {
+      "name": "density",
+      "type": "string",
+      "comment": "Parquet field: Density"
+    },
+    {
+      "name": "cohesion",
+      "type": "string",
+      "comment": "Parquet field: Cohesion"
+    },
+    {
+      "name": "sediment_strength",
+      "type": "string",
+      "comment": "Parquet field: Sediment_Strength"
+    },
+    {
+      "name": "set",
+      "type": "string",
+      "comment": "Parquet field: Set"
+    },
+    {
+      "name": "fault_dip",
+      "type": "bigint",
+      "comment": "Parquet field: Fault_Dip"
+    },
+    {
+      "name": "fault_seed",
+      "type": "double",
+      "comment": "Parquet field: Fault_Seed"
+    },
+    {
+      "name": "fs_depth",
+      "type": "double",
+      "comment": "Parquet field: FS_depth"
+    },
+    {
+      "name": "unrupturedsed",
+      "type": "double",
+      "comment": "Parquet field: UnrupturedSed"
+    },
+    {
+      "name": "conversion_factor",
+      "type": "double",
+      "comment": "Parquet field: Conversion_Factor"
+    },
+    {
+      "name": "slip",
+      "type": "double",
+      "comment": "Parquet field: Slip"
+    },
+    {
+      "name": "vd_hw",
+      "type": "double",
+      "comment": "Parquet field: VD_HW"
+    },
+    {
+      "name": "hd_hw",
+      "type": "double",
+      "comment": "Parquet field: HD_HW"
+    },
+    {
+      "name": "scarp_height",
+      "type": "double",
+      "comment": "Parquet field: Scarp_Height"
+    },
+    {
+      "name": "us_ud",
+      "type": "double",
+      "comment": "Parquet field: Us - Ud"
+    },
+    {
+      "name": "us_x",
+      "type": "double",
+      "comment": "Parquet field: Us_x"
+    },
+    {
+      "name": "us_y",
+      "type": "double",
+      "comment": "Parquet field: Us_y"
+    },
+    {
+      "name": "dzw",
+      "type": "double",
+      "comment": "Parquet field: DZW"
+    },
+    {
+      "name": "dzw_xmin",
+      "type": "double",
+      "comment": "Parquet field: DZW xmin"
+    },
+    {
+      "name": "dzw_xmin_y",
+      "type": "double",
+      "comment": "Parquet field: DZW xmin_y"
+    },
+    {
+      "name": "dzw_xmax",
+      "type": "double",
+      "comment": "Parquet field: DZW xmax"
+    },
+    {
+      "name": "dzw_xmax_y",
+      "type": "double",
+      "comment": "Parquet field: DZW xmax_y"
+    },
+    {
+      "name": "scarp_dip",
+      "type": "double",
+      "comment": "Parquet field: Scarp_Dip"
+    },
+    {
+      "name": "scarp_class",
+      "type": "string",
+      "comment": "Parquet field: Scarp_Class"
+    },
+    {
+      "name": "r_2_value",
+      "type": "double",
+      "comment": "Parquet field: R^2 Value"
+    }
+  ],
+  "fdhi_cleaned": [
+    {
+      "name": "index",
+      "type": "bigint",
+      "comment": "Parquet field: index"
+    },
+    {
+      "name": "eq_id",
+      "type": "bigint",
+      "comment": "Parquet field: EQ_ID"
+    },
+    {
+      "name": "eq_name",
+      "type": "string",
+      "comment": "Parquet field: eq_name"
+    },
+    {
+      "name": "eq_date",
+      "type": "string",
+      "comment": "Parquet field: eq_date"
+    },
+    {
+      "name": "region",
+      "type": "string",
+      "comment": "Parquet field: region"
+    },
+    {
+      "name": "magnitude",
+      "type": "double",
+      "comment": "Parquet field: magnitude"
+    },
+    {
+      "name": "convert",
+      "type": "double",
+      "comment": "Parquet field: convert"
+    },
+    {
+      "name": "slip",
+      "type": "double",
+      "comment": "Parquet field: slip"
+    },
+    {
+      "name": "magnitude_type",
+      "type": "string",
+      "comment": "Parquet field: magnitude_type"
+    },
+    {
+      "name": "style",
+      "type": "string",
+      "comment": "Parquet field: style"
+    },
+    {
+      "name": "multi_event_flag",
+      "type": "bigint",
+      "comment": "Parquet field: multi_event_flag"
+    },
+    {
+      "name": "aftershock_flag",
+      "type": "bigint",
+      "comment": "Parquet field: aftershock_flag"
+    },
+    {
+      "name": "hypocenter_longitude_degrees",
+      "type": "double",
+      "comment": "Parquet field: hypocenter_longitude_degrees"
+    },
+    {
+      "name": "hypocenter_latitude_degrees",
+      "type": "double",
+      "comment": "Parquet field: hypocenter_latitude_degrees"
+    },
+    {
+      "name": "hypocenter_depth_km",
+      "type": "double",
+      "comment": "Parquet field: hypocenter_depth_km"
+    },
+    {
+      "name": "epsg_for_analysis",
+      "type": "bigint",
+      "comment": "Parquet field: epsg_for_analysis"
+    },
+    {
+      "name": "pt_ds_id",
+      "type": "bigint",
+      "comment": "Parquet field: PT_DS_ID"
+    },
+    {
+      "name": "dataset_completion",
+      "type": "string",
+      "comment": "Parquet field: dataset_completion"
+    },
+    {
+      "name": "mapping_scale",
+      "type": "string",
+      "comment": "Parquet field: mapping_scale"
+    },
+    {
+      "name": "pt_id",
+      "type": "bigint",
+      "comment": "Parquet field: PT_ID"
+    },
+    {
+      "name": "meas_id",
+      "type": "bigint",
+      "comment": "Parquet field: MEAS_ID"
+    },
+    {
+      "name": "obs_year",
+      "type": "bigint",
+      "comment": "Parquet field: obs_year"
+    },
+    {
+      "name": "obs_mody",
+      "type": "bigint",
+      "comment": "Parquet field: obs_mody"
+    },
+    {
+      "name": "days_elapsed",
+      "type": "bigint",
+      "comment": "Parquet field: days_elapsed"
+    },
+    {
+      "name": "obs_date_approx_flag",
+      "type": "bigint",
+      "comment": "Parquet field: obs_date_approx_flag"
+    },
+    {
+      "name": "measurement_uncertainty_type",
+      "type": "string",
+      "comment": "Parquet field: measurement_uncertainty_type"
+    },
+    {
+      "name": "location_basis",
+      "type": "string",
+      "comment": "Parquet field: location_basis"
+    },
+    {
+      "name": "aperture_max_meters",
+      "type": "bigint",
+      "comment": "Parquet field: aperture_max_meters"
+    },
+    {
+      "name": "longitude_degrees",
+      "type": "double",
+      "comment": "Parquet field: longitude_degrees"
+    },
+    {
+      "name": "latitude_degrees",
+      "type": "double",
+      "comment": "Parquet field: latitude_degrees"
+    },
+    {
+      "name": "originator_id",
+      "type": "string",
+      "comment": "Parquet field: originator_id"
+    },
+    {
+      "name": "originator_quality_note",
+      "type": "string",
+      "comment": "Parquet field: originator_quality_note"
+    },
+    {
+      "name": "measured_feature",
+      "type": "string",
+      "comment": "Parquet field: measured_feature"
+    },
+    {
+      "name": "n_splays",
+      "type": "string",
+      "comment": "Parquet field: n_splays"
+    },
+    {
+      "name": "slip_unknown_lateral_nonzero",
+      "type": "bigint",
+      "comment": "Parquet field: slip_unknown_lateral_nonzero"
+    },
+    {
+      "name": "slip_unknown_unspecified_nonzero",
+      "type": "bigint",
+      "comment": "Parquet field: slip_unknown_unspecified_nonzero"
+    },
+    {
+      "name": "slip_unknown_vertical_nonzero",
+      "type": "bigint",
+      "comment": "Parquet field: slip_unknown_vertical_nonzero"
+    },
+    {
+      "name": "fzw_central_meters",
+      "type": "double",
+      "comment": "Parquet field: fzw_central_meters"
+    },
+    {
+      "name": "fzw_low_meters",
+      "type": "double",
+      "comment": "Parquet field: fzw_low_meters"
+    },
+    {
+      "name": "fzw_high_meters",
+      "type": "double",
+      "comment": "Parquet field: fzw_high_meters"
+    },
+    {
+      "name": "fzw_meas_type",
+      "type": "string",
+      "comment": "Parquet field: fzw_meas_type"
+    },
+    {
+      "name": "fps_central_meters",
+      "type": "double",
+      "comment": "Parquet field: fps_central_meters"
+    },
+    {
+      "name": "fps_low_meters",
+      "type": "double",
+      "comment": "Parquet field: fps_low_meters"
+    },
+    {
+      "name": "fps_high_meters",
+      "type": "double",
+      "comment": "Parquet field: fps_high_meters"
+    },
+    {
+      "name": "fps_meas_type",
+      "type": "string",
+      "comment": "Parquet field: fps_meas_type"
+    },
+    {
+      "name": "fps_style",
+      "type": "string",
+      "comment": "Parquet field: fps_style"
+    },
+    {
+      "name": "fns_central_meters",
+      "type": "double",
+      "comment": "Parquet field: fns_central_meters"
+    },
+    {
+      "name": "fns_low_meters",
+      "type": "double",
+      "comment": "Parquet field: fns_low_meters"
+    },
+    {
+      "name": "fns_high_meters",
+      "type": "double",
+      "comment": "Parquet field: fns_high_meters"
+    },
+    {
+      "name": "fns_meas_type",
+      "type": "string",
+      "comment": "Parquet field: fns_meas_type"
+    },
+    {
+      "name": "fns_style",
+      "type": "string",
+      "comment": "Parquet field: fns_style"
+    },
+    {
+      "name": "nhs_central_meters",
+      "type": "double",
+      "comment": "Parquet field: nhs_central_meters"
+    },
+    {
+      "name": "nhs_low_meters",
+      "type": "double",
+      "comment": "Parquet field: nhs_low_meters"
+    },
+    {
+      "name": "nhs_high_meters",
+      "type": "double",
+      "comment": "Parquet field: nhs_high_meters"
+    },
+    {
+      "name": "nhs_meas_type",
+      "type": "string",
+      "comment": "Parquet field: nhs_meas_type"
+    },
+    {
+      "name": "nhs_style",
+      "type": "string",
+      "comment": "Parquet field: nhs_style"
+    },
+    {
+      "name": "vs_central_meters",
+      "type": "double",
+      "comment": "Parquet field: vs_central_meters"
+    },
+    {
+      "name": "vs_low_meters",
+      "type": "double",
+      "comment": "Parquet field: vs_low_meters"
+    },
+    {
+      "name": "vs_high_meters",
+      "type": "double",
+      "comment": "Parquet field: vs_high_meters"
+    },
+    {
+      "name": "vs_meas_type",
+      "type": "string",
+      "comment": "Parquet field: vs_meas_type"
+    },
+    {
+      "name": "vs_style",
+      "type": "string",
+      "comment": "Parquet field: vs_style"
+    },
+    {
+      "name": "vs_downside",
+      "type": "string",
+      "comment": "Parquet field: vs_downside"
+    },
+    {
+      "name": "sh_central_meters",
+      "type": "double",
+      "comment": "Parquet field: sh_central_meters"
+    },
+    {
+      "name": "sh_low_meters",
+      "type": "double",
+      "comment": "Parquet field: sh_low_meters"
+    },
+    {
+      "name": "sh_high_meters",
+      "type": "double",
+      "comment": "Parquet field: sh_high_meters"
+    },
+    {
+      "name": "sh_meas_type",
+      "type": "string",
+      "comment": "Parquet field: sh_meas_type"
+    },
+    {
+      "name": "sh_style",
+      "type": "string",
+      "comment": "Parquet field: sh_style"
+    },
+    {
+      "name": "sh_downside",
+      "type": "string",
+      "comment": "Parquet field: sh_downside"
+    },
+    {
+      "name": "ads_central_meters",
+      "type": "double",
+      "comment": "Parquet field: ads_central_meters"
+    },
+    {
+      "name": "ads_low_meters",
+      "type": "double",
+      "comment": "Parquet field: ads_low_meters"
+    },
+    {
+      "name": "ads_high_meters",
+      "type": "double",
+      "comment": "Parquet field: ads_high_meters"
+    },
+    {
+      "name": "ads_meas_type",
+      "type": "string",
+      "comment": "Parquet field: ads_meas_type"
+    },
+    {
+      "name": "ads_style",
+      "type": "string",
+      "comment": "Parquet field: ads_style"
+    },
+    {
+      "name": "ads_downside",
+      "type": "string",
+      "comment": "Parquet field: ads_downside"
+    },
+    {
+      "name": "tds_central_meters",
+      "type": "double",
+      "comment": "Parquet field: tds_central_meters"
+    },
+    {
+      "name": "tds_low_meters",
+      "type": "double",
+      "comment": "Parquet field: tds_low_meters"
+    },
+    {
+      "name": "tds_high_meters",
+      "type": "double",
+      "comment": "Parquet field: tds_high_meters"
+    },
+    {
+      "name": "tds_meas_type",
+      "type": "string",
+      "comment": "Parquet field: tds_meas_type"
+    },
+    {
+      "name": "geo_ds_id",
+      "type": "bigint",
+      "comment": "Parquet field: GEO_DS_ID"
+    },
+    {
+      "name": "geology",
+      "type": "string",
+      "comment": "Parquet field: geology"
+    },
+    {
+      "name": "lithology",
+      "type": "string",
+      "comment": "Parquet field: lithology"
+    },
+    {
+      "name": "unit_age",
+      "type": "string",
+      "comment": "Parquet field: unit_age"
+    },
+    {
+      "name": "distance_to_bedrock_meters",
+      "type": "bigint",
+      "comment": "Parquet field: distance_to_bedrock_meters"
+    },
+    {
+      "name": "existing_scarp",
+      "type": "bigint",
+      "comment": "Parquet field: existing_scarp"
+    },
+    {
+      "name": "structure",
+      "type": "string",
+      "comment": "Parquet field: structure"
+    },
+    {
+      "name": "elevation_meters",
+      "type": "bigint",
+      "comment": "Parquet field: elevation_meters"
+    },
+    {
+      "name": "slope_percent_gaussian_gradient",
+      "type": "double",
+      "comment": "Parquet field: slope_percent_gaussian_gradient"
+    },
+    {
+      "name": "slope_percent_gdal_horns_formula",
+      "type": "double",
+      "comment": "Parquet field: slope_percent_gdal_horns_formula"
+    },
+    {
+      "name": "terrain_class",
+      "type": "bigint",
+      "comment": "Parquet field: terrain_class"
+    },
+    {
+      "name": "terrain_roughness",
+      "type": "bigint",
+      "comment": "Parquet field: terrain_roughness"
+    },
+    {
+      "name": "topo_position_index",
+      "type": "double",
+      "comment": "Parquet field: topo_position_index"
+    },
+    {
+      "name": "terrain_ruggedness_index",
+      "type": "double",
+      "comment": "Parquet field: terrain_ruggedness_index"
+    },
+    {
+      "name": "prominence_125_meter_radius",
+      "type": "double",
+      "comment": "Parquet field: prominence_125_meter_radius"
+    },
+    {
+      "name": "prominence_250_meter_radius",
+      "type": "double",
+      "comment": "Parquet field: prominence_250_meter_radius"
+    },
+    {
+      "name": "prominence_500_meter_radius",
+      "type": "double",
+      "comment": "Parquet field: prominence_500_meter_radius"
+    },
+    {
+      "name": "prominence_1000_meter_radius",
+      "type": "double",
+      "comment": "Parquet field: prominence_1000_meter_radius"
+    },
+    {
+      "name": "rup_ds_id",
+      "type": "bigint",
+      "comment": "Parquet field: RUP_DS_ID"
+    },
+    {
+      "name": "rup_id",
+      "type": "bigint",
+      "comment": "Parquet field: RUP_ID"
+    },
+    {
+      "name": "distance_to_rupture_meters",
+      "type": "bigint",
+      "comment": "Parquet field: distance_to_rupture_meters"
+    },
+    {
+      "name": "rupture_rank",
+      "type": "string",
+      "comment": "Parquet field: rupture_rank"
+    },
+    {
+      "name": "fault_dip_central",
+      "type": "double",
+      "comment": "Parquet field: fault_dip_central"
+    },
+    {
+      "name": "fault_dip_low",
+      "type": "double",
+      "comment": "Parquet field: fault_dip_low"
+    },
+    {
+      "name": "fault_dip_high",
+      "type": "double",
+      "comment": "Parquet field: fault_dip_high"
+    },
+    {
+      "name": "fault_dip_meas_type",
+      "type": "string",
+      "comment": "Parquet field: fault_dip_meas_type"
+    },
+    {
+      "name": "fault_strike_central",
+      "type": "double",
+      "comment": "Parquet field: fault_strike_central"
+    },
+    {
+      "name": "fault_strike_low",
+      "type": "bigint",
+      "comment": "Parquet field: fault_strike_low"
+    },
+    {
+      "name": "fault_strike_high",
+      "type": "bigint",
+      "comment": "Parquet field: fault_strike_high"
+    },
+    {
+      "name": "fault_strike_meas_type",
+      "type": "string",
+      "comment": "Parquet field: fault_strike_meas_type"
+    },
+    {
+      "name": "slip_plunge_central",
+      "type": "double",
+      "comment": "Parquet field: slip_plunge_central"
+    },
+    {
+      "name": "slip_plunge_low",
+      "type": "bigint",
+      "comment": "Parquet field: slip_plunge_low"
+    },
+    {
+      "name": "slip_plunge_high",
+      "type": "bigint",
+      "comment": "Parquet field: slip_plunge_high"
+    },
+    {
+      "name": "slip_plunge_meas_type",
+      "type": "string",
+      "comment": "Parquet field: slip_plunge_meas_type"
+    },
+    {
+      "name": "slip_rake_central",
+      "type": "bigint",
+      "comment": "Parquet field: slip_rake_central"
+    },
+    {
+      "name": "slip_rake_low",
+      "type": "bigint",
+      "comment": "Parquet field: slip_rake_low"
+    },
+    {
+      "name": "slip_rake_high",
+      "type": "bigint",
+      "comment": "Parquet field: slip_rake_high"
+    },
+    {
+      "name": "slip_rake_meas_type",
+      "type": "string",
+      "comment": "Parquet field: slip_rake_meas_type"
+    },
+    {
+      "name": "slip_azimuth_central",
+      "type": "double",
+      "comment": "Parquet field: slip_azimuth_central"
+    },
+    {
+      "name": "slip_azimuth_low",
+      "type": "double",
+      "comment": "Parquet field: slip_azimuth_low"
+    },
+    {
+      "name": "slip_azimuth_high",
+      "type": "double",
+      "comment": "Parquet field: slip_azimuth_high"
+    },
+    {
+      "name": "slip_azimuth_meas_type",
+      "type": "string",
+      "comment": "Parquet field: slip_azimuth_meas_type"
+    },
+    {
+      "name": "fault_dip_azimuth_central",
+      "type": "bigint",
+      "comment": "Parquet field: fault_dip_azimuth_central"
+    },
+    {
+      "name": "fault_dip_azimuth_low",
+      "type": "bigint",
+      "comment": "Parquet field: fault_dip_azimuth_low"
+    },
+    {
+      "name": "fault_dip_azimuth_high",
+      "type": "bigint",
+      "comment": "Parquet field: fault_dip_azimuth_high"
+    },
+    {
+      "name": "fault_dip_azimuth_meas_type",
+      "type": "string",
+      "comment": "Parquet field: fault_dip_azimuth_meas_type"
+    },
+    {
+      "name": "u",
+      "type": "double",
+      "comment": "Parquet field: u"
+    },
+    {
+      "name": "t",
+      "type": "double",
+      "comment": "Parquet field: t"
+    },
+    {
+      "name": "measurement_category",
+      "type": "string",
+      "comment": "Parquet field: measurement_category"
+    },
+    {
+      "name": "rank",
+      "type": "string",
+      "comment": "Parquet field: rank"
+    },
+    {
+      "name": "rank_confidence",
+      "type": "bigint",
+      "comment": "Parquet field: rank_confidence"
+    },
+    {
+      "name": "hwfw_flag",
+      "type": "string",
+      "comment": "Parquet field: hwfw_flag"
+    },
+    {
+      "name": "recommended_net_preferred_for_analysis_meters",
+      "type": "double",
+      "comment": "Parquet field: recommended_net_preferred_for_analysis_meters"
+    },
+    {
+      "name": "recommended_net_low_for_analysis_meters",
+      "type": "double",
+      "comment": "Parquet field: recommended_net_low_for_analysis_meters"
+    },
+    {
+      "name": "recommended_net_high_for_analysis_meters",
+      "type": "double",
+      "comment": "Parquet field: recommended_net_high_for_analysis_meters"
+    },
+    {
+      "name": "recommended_net_preferred_vector_basis",
+      "type": "string",
+      "comment": "Parquet field: recommended_net_preferred_vector_basis"
+    },
+    {
+      "name": "recommended_net_preferred_usage_flag",
+      "type": "string",
+      "comment": "Parquet field: recommended_net_preferred_usage_flag"
+    },
+    {
+      "name": "quality_code",
+      "type": "string",
+      "comment": "Parquet field: quality_code"
+    },
+    {
+      "name": "location_id",
+      "type": "bigint",
+      "comment": "Parquet field: location_id"
+    },
+    {
+      "name": "group_id",
+      "type": "string",
+      "comment": "Parquet field: group_id"
+    }
+  ],
+  "sure": [
+    {
+      "name": "ide",
+      "type": "bigint",
+      "comment": "Parquet field: IdE"
+    },
+    {
+      "name": "eq_name",
+      "type": "string",
+      "comment": "Parquet field: eq_name"
+    },
+    {
+      "name": "ids",
+      "type": "bigint",
+      "comment": "Parquet field: IdS"
+    },
+    {
+      "name": "ido",
+      "type": "bigint",
+      "comment": "Parquet field: IdO"
+    },
+    {
+      "name": "date",
+      "type": "string",
+      "comment": "Parquet field: Date"
+    },
+    {
+      "name": "references",
+      "type": "string",
+      "comment": "Parquet field: References"
+    },
+    {
+      "name": "observer",
+      "type": "double",
+      "comment": "Parquet field: Observer"
+    },
+    {
+      "name": "ido_obs",
+      "type": "string",
+      "comment": "Parquet field: IdO-Obs"
+    },
+    {
+      "name": "longitude",
+      "type": "double",
+      "comment": "Parquet field: Longitude"
+    },
+    {
+      "name": "latitude",
+      "type": "double",
+      "comment": "Parquet field: Latitude"
+    },
+    {
+      "name": "elevation",
+      "type": "double",
+      "comment": "Parquet field: Elevation"
+    },
+    {
+      "name": "ss",
+      "type": "double",
+      "comment": "Parquet field: SS"
+    },
+    {
+      "name": "ss_sense",
+      "type": "string",
+      "comment": "Parquet field: SS_sense"
+    },
+    {
+      "name": "ss_uc_plus",
+      "type": "double",
+      "comment": "Parquet field: SS_uc+"
+    },
+    {
+      "name": "ss_uc_minus",
+      "type": "double",
+      "comment": "Parquet field: SS_uc-"
+    },
+    {
+      "name": "ss_max",
+      "type": "double",
+      "comment": "Parquet field: SS_max"
+    },
+    {
+      "name": "ss_min",
+      "type": "double",
+      "comment": "Parquet field: SS_min"
+    },
+    {
+      "name": "ss_lao",
+      "type": "double",
+      "comment": "Parquet field: SS_LAO"
+    },
+    {
+      "name": "ss_lao_uc_plus",
+      "type": "double",
+      "comment": "Parquet field: SS_LAO_uc+"
+    },
+    {
+      "name": "ss_lao_uc_minus",
+      "type": "double",
+      "comment": "Parquet field: SS_LAO_uc-"
+    },
+    {
+      "name": "fnc",
+      "type": "double",
+      "comment": "Parquet field: FNC"
+    },
+    {
+      "name": "fnc_sense",
+      "type": "string",
+      "comment": "Parquet field: FNC_sense"
+    },
+    {
+      "name": "fnc_uc_plus",
+      "type": "double",
+      "comment": "Parquet field: FNC_uc+"
+    },
+    {
+      "name": "fnc_uc_minus",
+      "type": "double",
+      "comment": "Parquet field: FNC_uc-"
+    },
+    {
+      "name": "fnc_max",
+      "type": "double",
+      "comment": "Parquet field: FNC_max"
+    },
+    {
+      "name": "fnc_min",
+      "type": "double",
+      "comment": "Parquet field: FNC_min"
+    },
+    {
+      "name": "opening",
+      "type": "double",
+      "comment": "Parquet field: Opening"
+    },
+    {
+      "name": "law",
+      "type": "double",
+      "comment": "Parquet field: LAW"
+    },
+    {
+      "name": "law_uc_plus",
+      "type": "double",
+      "comment": "Parquet field: LAW_uc+"
+    },
+    {
+      "name": "law_uc_minus",
+      "type": "double",
+      "comment": "Parquet field: LAW_uc-"
+    },
+    {
+      "name": "t",
+      "type": "double",
+      "comment": "Parquet field: T"
+    },
+    {
+      "name": "t_uc_plus",
+      "type": "double",
+      "comment": "Parquet field: T_uc+"
+    },
+    {
+      "name": "t_uc_minus",
+      "type": "double",
+      "comment": "Parquet field: T_uc-"
+    },
+    {
+      "name": "t_max",
+      "type": "double",
+      "comment": "Parquet field: T_max"
+    },
+    {
+      "name": "t_min",
+      "type": "double",
+      "comment": "Parquet field: T_min"
+    },
+    {
+      "name": "sh",
+      "type": "double",
+      "comment": "Parquet field: SH"
+    },
+    {
+      "name": "t_lao",
+      "type": "double",
+      "comment": "Parquet field: T_LAO"
+    },
+    {
+      "name": "t_lao_uc_plus",
+      "type": "double",
+      "comment": "Parquet field: T_LAO_uc+"
+    },
+    {
+      "name": "t_lao_uc_minus",
+      "type": "double",
+      "comment": "Parquet field: T_LAO_uc-"
+    },
+    {
+      "name": "ds",
+      "type": "double",
+      "comment": "Parquet field: DS"
+    },
+    {
+      "name": "ds_uc_plus",
+      "type": "double",
+      "comment": "Parquet field: DS_uc+"
+    },
+    {
+      "name": "ds_uc_minus",
+      "type": "double",
+      "comment": "Parquet field: DS_uc-"
+    },
+    {
+      "name": "upside",
+      "type": "string",
+      "comment": "Parquet field: Upside"
+    },
+    {
+      "name": "ns",
+      "type": "double",
+      "comment": "Parquet field: NS"
+    },
+    {
+      "name": "ns_uc_plus",
+      "type": "double",
+      "comment": "Parquet field: NS_uc+"
+    },
+    {
+      "name": "ns_uc_minus",
+      "type": "double",
+      "comment": "Parquet field: NS_uc-"
+    },
+    {
+      "name": "ns_max",
+      "type": "double",
+      "comment": "Parquet field: NS_max"
+    },
+    {
+      "name": "ns_min",
+      "type": "double",
+      "comment": "Parquet field: NS_min"
+    },
+    {
+      "name": "sv_plunge",
+      "type": "double",
+      "comment": "Parquet field: SV_plunge"
+    },
+    {
+      "name": "ns_dir",
+      "type": "double",
+      "comment": "Parquet field: NS_dir"
+    },
+    {
+      "name": "rake",
+      "type": "double",
+      "comment": "Parquet field: Rake"
+    },
+    {
+      "name": "net_lao",
+      "type": "double",
+      "comment": "Parquet field: Net_LAO"
+    },
+    {
+      "name": "strike",
+      "type": "double",
+      "comment": "Parquet field: Strike"
+    },
+    {
+      "name": "strike_uc_plus",
+      "type": "double",
+      "comment": "Parquet field: Strike_uc+"
+    },
+    {
+      "name": "strike_uc_minus",
+      "type": "double",
+      "comment": "Parquet field: Strike_uc-"
+    },
+    {
+      "name": "strike_max",
+      "type": "double",
+      "comment": "Parquet field: Strike_max"
+    },
+    {
+      "name": "strike_min",
+      "type": "double",
+      "comment": "Parquet field: Strike_min"
+    },
+    {
+      "name": "dip",
+      "type": "double",
+      "comment": "Parquet field: Dip"
+    },
+    {
+      "name": "dip_uc_plus",
+      "type": "double",
+      "comment": "Parquet field: Dip_uc+"
+    },
+    {
+      "name": "dip_uc_minus",
+      "type": "double",
+      "comment": "Parquet field: Dip_uc-"
+    },
+    {
+      "name": "dip_max",
+      "type": "double",
+      "comment": "Parquet field: Dip_max"
+    },
+    {
+      "name": "dip_min",
+      "type": "double",
+      "comment": "Parquet field: Dip_min"
+    },
+    {
+      "name": "cover_bed",
+      "type": "double",
+      "comment": "Parquet field: Cover_bed"
+    },
+    {
+      "name": "cover_nat",
+      "type": "double",
+      "comment": "Parquet field: Cover_nat"
+    },
+    {
+      "name": "thickness",
+      "type": "double",
+      "comment": "Parquet field: Thickness"
+    },
+    {
+      "name": "struct_cont",
+      "type": "double",
+      "comment": "Parquet field: Struct_cont"
+    },
+    {
+      "name": "hw_fw_pf",
+      "type": "string",
+      "comment": "Parquet field: HW_FW_PF"
+    },
+    {
+      "name": "hw_fw_near",
+      "type": "string",
+      "comment": "Parquet field: HW_FW_near"
+    },
+    {
+      "name": "slope",
+      "type": "double",
+      "comment": "Parquet field: Slope"
+    },
+    {
+      "name": "loc_topo",
+      "type": "double",
+      "comment": "Parquet field: Loc_topo"
+    },
+    {
+      "name": "water_dep",
+      "type": "double",
+      "comment": "Parquet field: Water_dep"
+    },
+    {
+      "name": "comments",
+      "type": "string",
+      "comment": "Parquet field: Comments"
+    },
+    {
+      "name": "auth_rank",
+      "type": "double",
+      "comment": "Parquet field: Auth_rank"
+    },
+    {
+      "name": "comp_rank",
+      "type": "double",
+      "comment": "Parquet field: Comp_rank"
+    },
+    {
+      "name": "geom_rev",
+      "type": "string",
+      "comment": "Parquet field: Geom_rev"
+    }
+  ],
+  "kern_combined": [
+    {
+      "name": "location_id",
+      "type": "bigint",
+      "comment": "Parquet field: Location ID"
+    },
+    {
+      "name": "vertical",
+      "type": "double",
+      "comment": "Parquet field: Vertical"
+    },
+    {
+      "name": "dzw",
+      "type": "double",
+      "comment": "Parquet field: DZW"
+    },
+    {
+      "name": "comments",
+      "type": "string",
+      "comment": "Parquet field: Comments"
+    },
+    {
+      "name": "comments_1",
+      "type": "string",
+      "comment": "Parquet field: Comments.1"
+    },
+    {
+      "name": "comments_2",
+      "type": "string",
+      "comment": "Parquet field: Comments.2"
+    }
+  ]
+}

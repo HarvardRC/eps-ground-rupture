@@ -7,9 +7,13 @@ CSV/Parquet files into Tableau. The SQL engine depends on the environment:
   `../duckdb/eps.duckdb`, a tiny views-only file projecting the Parquet
   outputs. Tableau connects via the DuckDB JDBC driver. See
   `../duckdb/README.md` for the one-time driver install and the JDBC URL.
-- **Production**: AWS Athena (Parquet on S3, Glue catalog). Apply
-  `../sql/athena.sql` to register the external tables, then connect
-  Tableau Cloud to Athena.
+- **Production**: AWS Athena (Parquet on S3, Glue catalog). The Glue
+  tables and Athena workgroup are provisioned by Terraform — run
+  `terraform apply` in `deploy/terraform/envs/<env>` and sync the Parquet
+  to S3; `../../deploy/terraform/README.md` has the exact Tableau
+  connection parameters (server, staging directory, workgroup, database,
+  access-key requirement). `../sql/athena.sql` is generated reference DDL,
+  not the deployment path.
 - **Production-fidelity dev** (optional, later): Apache Spark Thrift
   Server. Apply `../sql/spark-thrift.sql` and connect Tableau Desktop via
   the Spark SQL connector. See ADR-0004.

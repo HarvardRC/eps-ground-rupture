@@ -257,3 +257,11 @@ dashboards/duckdb/*.duckdb.wal
 
 # Gradle local cache (per-machine; build outputs use the existing `build/` rule)
 .gradle/
+
+# Terraform — local state and provider caches stay out of VCS.
+# (.terraform.lock.hcl and deploy/terraform/tables.json ARE committed.)
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log

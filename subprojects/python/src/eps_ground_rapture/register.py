@@ -9,10 +9,26 @@
 
 The same logical table can therefore be registered against either engine
 from the same Parquet files — only the location and the column list differ.
+
+Athena column-name caveat: our raw Parquet carries names Athena cannot
+query (spaces, `^`, `+`, `-` — e.g. the DEM dataset's "Us - Ud" or SURE's
+"SS_uc+"). We therefore expose **sanitized** snake_case column names and
+tell the Parquet SerDe to map columns **by ordinal position**
+(`parquet.column.index.access = true`) instead of by name. The Parquet
+files themselves keep their original names, so DuckDB / Spark / Tableau
+paths are unaffected. The trade-off: column order in the Parquet is
+load-bearing for Athena — which is fine, because both the files and this
+DDL are regenerated together from the same pipeline run (ADR-0007).
+
+The same sanitized schema is exported as JSON (`glue_tables_payload` /
+`write_tables_json`) for the Terraform deployment under
+`deploy/terraform/`, which creates the Glue tables in AWS.
 """
 
 from __future__ import annotations
 
+import json
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -71,21 +87,103 @@ def _read_schema(table_dir: Path) -> list[tuple[str, str]]:
     return [(field.name, str(field.type)) for field in schema]
 
 
+def sanitize_column(name: str) -> str:
+    """Make a Parquet column name legal for Athena / Glue.
+
+    Athena only supports lowercase letters, digits, and underscores in
+    column names. Mapping rules, applied in order:
+
+    - `+` → `_plus`, `-` → `_minus` *when adjacent to a word character*
+      (preserves the distinction between SURE's "SS_uc+" and "SS_uc-",
+      which would otherwise both collapse to "ss_uc")
+    - any remaining run of non-alphanumerics → single `_`
+    - lowercase; trim leading/trailing `_`; collapse repeats
+    - prefix `c_` if the result starts with a digit; `col` if empty
+    """
+    s = name.strip()
+    s = re.sub(r"(?<=\w)\+", "_plus", s)
+    s = re.sub(r"(?<=\w)-(?!\w)", "_minus", s)  # trailing "-" as in "FNC_uc-"
+    s = re.sub(r"[^0-9a-zA-Z]+", "_", s)
+    s = re.sub(r"_+", "_", s).strip("_").lower()
+    if not s:
+        return "col"
+    if s[0].isdigit():
+        s = f"c_{s}"
+    return s
+
+
+def _sanitized_schema(table_dir: Path) -> list[dict[str, str]]:
+    """Read a table's Parquet schema and return Glue-ready column dicts.
+
+    Each entry: {"name": <sanitized>, "type": <glue type, lowercase>,
+    "comment": "Parquet field: <original>"}. Names are deduplicated with
+    numeric suffixes so the list is always a valid Glue column set.
+    """
+    used: set[str] = set()
+    out: list[dict[str, str]] = []
+    for original, arrow_type in _read_schema(table_dir):
+        base = sanitize_column(original)
+        # Probe suffixes until the candidate is genuinely unused — a plain
+        # per-base counter can collide with another column whose *direct*
+        # sanitization already is "base_N" (e.g. "Comments", "Comments",
+        # "Comments.2" → comments, comments_2, comments_2).
+        name, n = base, 1
+        while name in used:
+            n += 1
+            name = f"{base}_{n}"
+        used.add(name)
+        out.append(
+            {
+                "name": name,
+                "type": _athena_type(arrow_type).lower(),
+                "comment": f"Parquet field: {original}",
+            }
+        )
+    return out
+
+
+def glue_tables_payload(tables: list[Table]) -> dict[str, list[dict[str, str]]]:
+    """Build the {table_name: [column, ...]} payload consumed by Terraform."""
+    return {t.name: _sanitized_schema(t.location) for t in tables}
+
+
+def write_tables_json(tables: list[Table], path: Path) -> Path:
+    """Write the Glue schema payload as JSON for `deploy/terraform/`."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(glue_tables_payload(tables), indent=2) + "\n")
+    return path
+
+
 def athena_ddl(table: Table, *, database: str, s3_location: str) -> str:
     """Emit Athena `CREATE EXTERNAL TABLE` DDL for `table`.
 
     `s3_location` should be an `s3://bucket/prefix/` URI — the directory
     containing the Parquet files, not an individual file.
+
+    Column names are sanitized (see `sanitize_column`) and mapped to the
+    Parquet fields by ordinal position via
+    `parquet.column.index.access = true`, because the raw names are not
+    legal Athena identifiers.
     """
-    cols = _read_schema(table.location)
-    col_lines = ",\n  ".join(f"`{name}` {_athena_type(t)}" for name, t in cols)
+    cols = _sanitized_schema(table.location)
+
+    def esc(s: str) -> str:
+        # HiveQL string literal: backslash is the escape character.
+        return s.replace("\\", "\\\\").replace("'", "\\'")
+
+    col_lines = ",\n  ".join(
+        f"`{c['name']}` {c['type']} COMMENT '{esc(c['comment'])}'" for c in cols
+    )
     if not s3_location.endswith("/"):
         s3_location = s3_location + "/"
     return (
         f"CREATE EXTERNAL TABLE IF NOT EXISTS `{database}`.`{table.name}` (\n"
         f"  {col_lines}\n"
         f")\n"
-        f"STORED AS PARQUET\n"
+        f"ROW FORMAT SERDE 'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'\n"
+        f"WITH SERDEPROPERTIES ('parquet.column.index.access'='true')\n"
+        f"STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat'\n"
+        f"OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat'\n"
         f"LOCATION '{s3_location}'\n"
         f"TBLPROPERTIES ('parquet.compression'='SNAPPY');"
     )

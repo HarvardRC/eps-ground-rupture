@@ -8,10 +8,11 @@ lives under `legacy/` as local reference artifacts (gitignored). This repo
 turns that notebook-driven workflow into:
 
 1. A **Python data pipeline** (modules + CLI; no notebooks) that ingests
-   raw measurements and writes Parquet tables.
-2. **DDL scripts** that register those tables against AWS Athena (production,
-   Parquet on S3) and Apache Spark Thrift Server (development, Parquet on
-   local filesystem).
+   raw measurements and writes Parquet tables, plus the schema artifacts
+   derived from them (DDL scripts, DuckDB views, Glue table definitions).
+2. An **AWS data layer managed by Terraform** (`deploy/terraform/`):
+   S3 + Glue + Athena per environment (dev/prod). For local development,
+   DuckDB views and Spark Thrift DDL serve the same tables.
 3. **Dashboards** in Tableau and Apache Superset that query those tables
    via SQL.
 
@@ -27,11 +28,15 @@ data/
   processed/           dir-per-table Parquet outputs (gitignored)
                          e.g. data/processed/dem/data.parquet
 dashboards/
+  duckdb/              generated DuckDB views file (gitignored) — first-pass Tableau source
   sql/                 generated CREATE TABLE scripts (gitignored)
-                         athena.sql       — production DDL (S3 locations)
+                         athena.sql       — reference DDL (prod is Terraform-managed)
                          spark-thrift.sql — development DDL (local file:// URIs)
   tableau/             Tableau workbooks (.twb / .twbx)
   superset/            Superset YAML exports
+deploy/
+  terraform/           AWS data layer: S3 + Glue + Athena per env (dev/prod);
+                         tables.json — generated schema lockfile (committed)
 ai/                    initial scoping conversation (gitignored)
 legacy/                original notebooks and 2025 paper PDF (gitignored)
 
@@ -62,24 +67,32 @@ Or directly via Poetry:
 ```bash
 cd subprojects/python
 poetry install
-poetry run egr-build --skip-fdhi    # writes data/processed/<table>/ + dashboards/sql/*
+poetry run egr-build    # writes data/processed/<table>/, dashboards/sql/*,
+                        # dashboards/duckdb/eps.duckdb, deploy/terraform/tables.json
 poetry run pytest
 ```
 
 Then either:
-- **Dev**: point Spark Thrift Server at `dashboards/sql/spark-thrift.sql`, then
-  connect Tableau Desktop / Superset to Spark Thrift via JDBC.
-- **Prod**: sync `data/processed/` to S3, run `dashboards/sql/athena.sql` in
-  the Athena console (or pass `--s3-prefix s3://your-bucket/...` at build
-  time so the DDL points at the right location), then connect Tableau Cloud
-  / Superset to Athena.
+- **Local dev**: connect Tableau Desktop to `dashboards/duckdb/eps.duckdb`
+  via the DuckDB JDBC driver (see `dashboards/duckdb/README.md`), or run a
+  Spark Thrift Server with `dashboards/sql/spark-thrift.sql`.
+- **AWS (dev or prod)**: `./gradlew :deploy:terraform:applyDev` then
+  `./gradlew :deploy:terraform:syncDataDev` (or the `…Prod` variants;
+  raw `terraform` / `aws s3 sync` work too).
+  See `deploy/terraform/README.md` for connection details (Tableau, Superset).
+  (`dashboards/sql/athena.sql` remains as reference DDL for manual setups —
+  pass `--database eps_ground_rapture_<env>
+  --s3-prefix s3://eps-ground-rapture-<env>/processed/` to `egr-build` so it
+  matches the Terraform layout.)
 
 ## Documentation
 
 - `docs/setup.md` — what's scaffolded, decisions taken, known gaps
 - `docs/adr/` — Architecture Decision Records (one per major decision)
 - `docs/datasets.md` — reference notes on the input datasets (DEM, FDHI, Kern)
+- `notes/Roadmap.md` — dashboard build plan; `notes/chart-families.md` — chart inventory
 - `subprojects/python/README.md` — pipeline package usage
+- `deploy/terraform/README.md` — AWS deployment (S3 + Glue + Athena, dev/prod)
 - `dashboards/tableau/README.md`, `dashboards/superset/README.md` — dashboard conventions
 
 ## License

@@ -20,8 +20,12 @@ from .config import PROCESSED_DIR, REPO_ROOT
 from .export import export_tidy
 
 DEFAULT_DATABASE = "eps_ground_rapture"
-DEFAULT_S3_PREFIX = "s3://CHANGE_ME/eps-ground-rapture/processed/"
+# Matches the Terraform bucket layout: s3://<bucket>/processed/<table>/.
+# For a Terraform-provisioned env, invoke e.g.:
+#   egr-build --database eps_ground_rapture_dev --s3-prefix s3://eps-ground-rapture-dev/processed/
+DEFAULT_S3_PREFIX = "s3://CHANGE_ME/processed/"
 SQL_OUT_DIR = REPO_ROOT / "dashboards" / "sql"
+TERRAFORM_TABLES_JSON = REPO_ROOT / "deploy" / "terraform" / "tables.json"
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -54,6 +58,9 @@ def main(argv: list[str] | None = None) -> int:
 
     _write_sql_scripts(tables, database=args.database, s3_prefix=args.s3_prefix)
 
+    register.write_tables_json(tables, TERRAFORM_TABLES_JSON)
+    print(f"terraform schema -> {_rel(TERRAFORM_TABLES_JSON)}")
+
     duckdb_path = views.build_duckdb_views()
     print(f"duckdb views -> {_rel(duckdb_path)}")
     print(f"  Tableau JDBC URL: {views.jdbc_url(duckdb_path)}")
@@ -73,6 +80,10 @@ def _write_sql_scripts(
     spark_path = SQL_OUT_DIR / "spark-thrift.sql"
     spark_path.write_text(register.spark_script(tables, database=database))
     print(f"spark-thrift DDL -> {_rel(spark_path)}")
+
+    athena_views_path = SQL_OUT_DIR / "athena-views.sql"
+    athena_views_path.write_text(views.athena_unified_view_sql())
+    print(f"athena views -> {_rel(athena_views_path)}")
 
 
 def _rel(path: Path) -> str:

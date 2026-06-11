@@ -29,10 +29,28 @@ specs). Add new entries here rather than scattering them across files.
   analyses still work — but adding them would let dashboards reproduce the
   full multi-DEM scatter overlay in `legacy/FDHI-SURE-DEM-2D-3D-Scatter_ONLY.pdf`.
 
+### Consider snake_case column names at export time
+- Athena columns are now sanitized versions of the Parquet names, mapped
+  by ordinal position (ADR-0014). The cleaner long-term story is to emit
+  snake_case names from `export_tidy` itself so every engine sees the
+  same identifiers — but that breaks the existing Tableau workbook and
+  DuckDB views, so it's a coordinated migration: rename at export →
+  regenerate views/DDL/tables.json → repoint the workbook. Do it when
+  there's a natural breaking-change moment (e.g. the FDHI raw-flatfile
+  switch above).
+
+## Deployment
+
+- Terraform for S3 + Glue + Athena exists under `deploy/terraform/`
+  (ADR-0014). Not yet applied to the AWS account — first
+  `terraform apply` (dev) + `aws s3 sync` + Athena smoke query still to
+  be run by the owner.
+- Local TF state; move to an S3 backend if collaborators arrive.
+
 ## Dashboards
 
-- No Tableau workbooks or Superset YAML exports yet — only the READMEs
-  under `dashboards/{tableau,superset}/` describing the intended workflow.
+- `dashboards/tableau/dem-overview.twb` holds Dashboard 1 + Viable
+  Combinations; Superset YAML exports still absent.
 
 ## Tooling friction (open JetBrains issue)
 
