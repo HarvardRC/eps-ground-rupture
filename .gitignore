@@ -265,3 +265,19 @@ dashboards/duckdb/*.duckdb.wal
 *.tfstate.*
 *.tfplan
 crash.log
+
+# Google service-account / OAuth keys — NEVER commit. egr-push-sheets reads
+# the key by PATH (GOOGLE_SHEETS_SA_KEYFILE, default resources/local/
+# eps-sheets-sa.json); the key file stays under the gitignored resources/local/
+# below. These name globs are a backstop in case a key is dropped elsewhere.
+# (.env.example IS committed; the `.env` rule above only matches `.env`.)
+*service-account*.json
+*service_account*.json
+*-sa.json
+sa.json
+# Google's default SA-key download name (service-account email + .json):
+*.iam.gserviceaccount.com.json
+gcp-*.json
+credentials.json
+client_secret*.json
+/resources/local/*

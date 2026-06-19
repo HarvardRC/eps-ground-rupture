@@ -81,6 +81,47 @@ val egrBuild by tasks.registering(Exec::class) {
     dependsOn(poetryInstall)
 }
 
+/**
+ * Resolve the Google service-account key-file path for the push, in order:
+ *   1. `-Pgoogle.sheets.keyfile=...` Gradle property
+ *   2. `GOOGLE_SHEETS_SA_KEYFILE` environment variable
+ *   3. `GOOGLE_SHEETS_SA_KEYFILE=` line in the repo-root `.env` (convenience —
+ *      Gradle does the "source .env" the Python CLI deliberately won't)
+ * Returns null if none is set, in which case egr-push-sheets falls back to its
+ * own default path (resources/local/eps-sheets-sa.json).
+ */
+fun resolveSheetsKeyfile(): String? {
+    fun fromDotEnv(): String? {
+        val envFile = rootProject.layout.projectDirectory.file(".env").asFile
+        if (!envFile.isFile) return null
+        return envFile.readLines()
+            .map { it.trim() }
+            .firstOrNull { it.startsWith("GOOGLE_SHEETS_SA_KEYFILE=") }
+            ?.substringAfter("=")?.trim()?.trim('"', '\'')
+            ?.takeIf { it.isNotEmpty() }
+    }
+    return findProperty("google.sheets.keyfile")?.toString()
+        ?: System.getenv("GOOGLE_SHEETS_SA_KEYFILE")
+        ?: fromDotEnv()
+}
+
+// Publish step — NOT wired into check/assemble so it never runs as a build
+// side effect (it sends data to an external service). Run it explicitly.
+val pushSheets by tasks.registering(Exec::class) {
+    group = "deployment"
+    description =
+        "Push DuckDB views to Google Sheets for Tableau Public (egr-push-sheets). " +
+            "Key path from -Pgoogle.sheets.keyfile, GOOGLE_SHEETS_SA_KEYFILE, or .env. " +
+            "Extra CLI args via -Psheets.args=\"--view unified_observations\"."
+    workingDir = projectDir
+    useVenv()
+    resolveSheetsKeyfile()?.let { environment("GOOGLE_SHEETS_SA_KEYFILE", it) }
+    val extraArgs = (findProperty("sheets.args")?.toString() ?: "")
+        .split(" ").filter { it.isNotBlank() }
+    commandLine(listOf(poetryBin, "run", "egr-push-sheets") + extraArgs)
+    dependsOn(poetryInstall)
+}
+
 // Build artifacts live under a single top-level `dist/` with one subdir per
 // subproject — e.g. `dist/python/<wheel>`, future `dist/java/<jar>`.
 val wheelOutDir = rootProject.layout.projectDirectory.dir("dist/python").asFile

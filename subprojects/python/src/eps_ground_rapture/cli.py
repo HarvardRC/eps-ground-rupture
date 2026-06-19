@@ -26,6 +26,7 @@ DEFAULT_DATABASE = "eps_ground_rapture"
 DEFAULT_S3_PREFIX = "s3://CHANGE_ME/processed/"
 SQL_OUT_DIR = REPO_ROOT / "dashboards" / "sql"
 TERRAFORM_TABLES_JSON = REPO_ROOT / "deploy" / "terraform" / "tables.json"
+SHEETS_TARGETS_YAML = REPO_ROOT / "dashboards" / "sheets" / "targets.yaml"
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -68,9 +69,7 @@ def main(argv: list[str] | None = None) -> int:
     return 0
 
 
-def _write_sql_scripts(
-    tables: list[register.Table], *, database: str, s3_prefix: str
-) -> None:
+def _write_sql_scripts(tables: list[register.Table], *, database: str, s3_prefix: str) -> None:
     SQL_OUT_DIR.mkdir(parents=True, exist_ok=True)
 
     athena_path = SQL_OUT_DIR / "athena.sql"
@@ -93,9 +92,119 @@ def _rel(path: Path) -> str:
         return str(path)
 
 
+# --------------------------------------------------------------------------
+# egr-push-sheets — push DuckDB views to Google Sheets for Tableau Public
+# --------------------------------------------------------------------------
+
+_SPREADSHEET_ID_PLACEHOLDER = "PUT_SPREADSHEET_ID_HERE"
+
+
+def load_sheet_targets(path: Path) -> dict[str, dict[str, str]]:
+    """Parse `targets.yaml` into `{view: {spreadsheet_id, worksheet}}`.
+
+    Accepts either a top-level `targets:` mapping or a bare mapping. The
+    `worksheet` key defaults to the view name when omitted.
+    """
+    import yaml
+
+    if not path.is_file():
+        raise FileNotFoundError(
+            f"Sheets targets file not found: {path}. " f"See dashboards/sheets/README.md."
+        )
+    data = yaml.safe_load(path.read_text()) or {}
+    raw = data.get("targets", data) if isinstance(data, dict) else {}
+    if not isinstance(raw, dict) or not raw:
+        raise ValueError(f"No targets defined in {path}.")
+
+    targets: dict[str, dict[str, str]] = {}
+    for view, cfg in raw.items():
+        if not isinstance(cfg, dict) or "spreadsheet_id" not in cfg:
+            raise ValueError(
+                f"Target {view!r} in {path} needs a 'spreadsheet_id' "
+                f"(and optionally a 'worksheet')."
+            )
+        targets[view] = {
+            "spreadsheet_id": str(cfg["spreadsheet_id"]),
+            "worksheet": str(cfg.get("worksheet", view)),
+        }
+    return targets
+
+
+def push_sheets_main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        description="Push DuckDB views to Google Sheets so Tableau Public can auto-refresh.",
+    )
+    parser.add_argument(
+        "--targets",
+        default=str(SHEETS_TARGETS_YAML),
+        help=f"targets.yaml mapping views to Sheets (default: {_rel(SHEETS_TARGETS_YAML)}).",
+    )
+    parser.add_argument(
+        "--view",
+        action="append",
+        metavar="VIEW",
+        help="Push only this view (repeatable); default: every target in the file.",
+    )
+    parser.add_argument(
+        "--duckdb",
+        default=None,
+        help="Path to eps.duckdb (default: dashboards/duckdb/eps.duckdb).",
+    )
+    args = parser.parse_args(argv)
+
+    # Lazy imports: keep `egr-build` from paying gspread's import cost.
+    from . import sheets
+
+    # Setup errors (missing creds, unreadable/empty targets file) should read
+    # as a clean message + exit 2, not a traceback.
+    try:
+        targets = load_sheet_targets(Path(args.targets))
+        if args.view:
+            wanted = set(args.view)
+            missing = wanted - set(targets)
+            if missing:
+                parser.error(f"--view not found in targets file: {sorted(missing)}")
+            targets = {k: v for k, v in targets.items() if k in wanted}
+        keyfile = sheets.resolve_keyfile()
+    except (FileNotFoundError, ValueError, RuntimeError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+
+    duckdb_path = Path(args.duckdb) if args.duckdb else views.DEFAULT_DUCKDB_PATH
+
+    failures = 0
+    for view, cfg in targets.items():
+        sid = cfg["spreadsheet_id"]
+        if not sid or sid == _SPREADSHEET_ID_PLACEHOLDER:
+            print(
+                f"FAILED {view}: spreadsheet_id is still the placeholder "
+                f"({_SPREADSHEET_ID_PLACEHOLDER!r}); set the real ID in {args.targets}.",
+                file=sys.stderr,
+            )
+            failures += 1
+            continue
+        try:
+            result = sheets.push_view_to_sheet(
+                view,
+                sid,
+                cfg["worksheet"],
+                duckdb_path=duckdb_path,
+                keyfile=keyfile,
+            )
+            print(
+                f"pushed {result.view}: {result.rows:,} rows x {result.cols} cols "
+                f"-> {result.url}"
+            )
+        except Exception as exc:  # noqa: BLE001 — report per-target, continue others
+            print(f"FAILED {view}: {exc}", file=sys.stderr)
+            failures += 1
+
+    return 1 if failures else 0
+
+
 if __name__ == "__main__":
     sys.exit(main())
 
 
 # Re-export for tests / shells that want it.
-__all__ = ["main", "PROCESSED_DIR", "SQL_OUT_DIR"]
+__all__ = ["main", "push_sheets_main", "load_sheet_targets", "PROCESSED_DIR", "SQL_OUT_DIR"]

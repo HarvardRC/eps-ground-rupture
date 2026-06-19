@@ -34,6 +34,8 @@ dashboards/
                          spark-thrift.sql — development DDL (local file:// URIs)
   tableau/             Tableau workbooks (.twb / .twbx)
   superset/            Superset YAML exports
+  sheets/              push DuckDB views to Google Sheets for Tableau Public
+                         (egr-push-sheets; see dashboards/sheets/README.md)
 deploy/
   terraform/           AWS data layer: S3 + Glue + Athena per env (dev/prod);
                          tables.json — generated schema lockfile (committed)
@@ -72,7 +74,7 @@ poetry run egr-build    # writes data/processed/<table>/, dashboards/sql/*,
 poetry run pytest
 ```
 
-Then either:
+Then pick a delivery path:
 - **Local dev**: connect Tableau Desktop to `dashboards/duckdb/eps.duckdb`
   via the DuckDB JDBC driver (see `dashboards/duckdb/README.md`), or run a
   Spark Thrift Server with `dashboards/sql/spark-thrift.sql`.
@@ -84,6 +86,9 @@ Then either:
   pass `--database eps_ground_rapture_<env>
   --s3-prefix s3://eps-ground-rapture-<env>/processed/` to `egr-build` so it
   matches the Terraform layout.)
+- **Tableau Public**: Tableau *Public* can't connect to DuckDB or Athena, so
+  publish a view to Google Sheets and let it auto-refresh:
+  `poetry run egr-push-sheets` (see `dashboards/sheets/README.md`).
 
 ## Documentation
 
@@ -94,6 +99,7 @@ Then either:
 - `subprojects/python/README.md` — pipeline package usage
 - `deploy/terraform/README.md` — AWS deployment (S3 + Glue + Athena, dev/prod)
 - `dashboards/tableau/README.md`, `dashboards/superset/README.md` — dashboard conventions
+- `dashboards/sheets/README.md` — Google Sheets push for Tableau Public (`egr-push-sheets`)
 
 ## License
 

@@ -203,7 +203,8 @@ def athena_unified_view_sql() -> str:
         "FROM sure WHERE fnc > 0 AND sh > 0\n"
         "UNION ALL\n"
         f"SELECT 'Kern', dzw, vertical, CAST(NULL AS varchar),\n"
-        "       'Kern County (1952)', CAST(NULL AS bigint), CAST(NULL AS varchar), CAST(NULL AS varchar),\n"
+        "       'Kern County (1952)', CAST(NULL AS bigint),\n"
+        "       CAST(NULL AS varchar), CAST(NULL AS varchar),\n"
         f"       {KERN_LATITUDE}, {KERN_LONGITUDE}\n"
         "FROM kern_combined WHERE dzw > 0 AND vertical > 0;\n"
     )
