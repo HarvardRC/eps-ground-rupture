@@ -202,9 +202,54 @@ def push_sheets_main(argv: list[str] | None = None) -> int:
     return 1 if failures else 0
 
 
+# --------------------------------------------------------------------------
+# egr-csv — export a DuckDB view to a CSV file
+# --------------------------------------------------------------------------
+
+
+def csv_main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(
+        description="Export a DuckDB view to a CSV file (e.g. the Drive-CSV fallback for `dem`).",
+    )
+    parser.add_argument(
+        "--view",
+        default="dem",
+        help="View in eps.duckdb to export (default: dem).",
+    )
+    parser.add_argument(
+        "--out",
+        default=None,
+        help="Output CSV path (default: dist/csv/<view>.csv).",
+    )
+    parser.add_argument(
+        "--duckdb",
+        default=None,
+        help="Path to eps.duckdb (default: dashboards/duckdb/eps.duckdb).",
+    )
+    args = parser.parse_args(argv)
+
+    from . import csvexport
+
+    duckdb_path = Path(args.duckdb) if args.duckdb else views.DEFAULT_DUCKDB_PATH
+    try:
+        result = csvexport.view_to_csv(args.view, args.out, duckdb_path=duckdb_path)
+    except (FileNotFoundError, ValueError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+    print(f"wrote {result.view}: {result.rows:,} rows -> {_rel(result.path)}")
+    return 0
+
+
 if __name__ == "__main__":
     sys.exit(main())
 
 
 # Re-export for tests / shells that want it.
-__all__ = ["main", "push_sheets_main", "load_sheet_targets", "PROCESSED_DIR", "SQL_OUT_DIR"]
+__all__ = [
+    "main",
+    "push_sheets_main",
+    "csv_main",
+    "load_sheet_targets",
+    "PROCESSED_DIR",
+    "SQL_OUT_DIR",
+]

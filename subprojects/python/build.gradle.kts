@@ -122,6 +122,43 @@ val pushSheets by tasks.registering(Exec::class) {
     dependsOn(poetryInstall)
 }
 
+// Export a DuckDB view to CSV (e.g. the Drive-CSV fallback for the full `dem`
+// view). Output defaults to dist/csv/<view>.csv (gitignored under dist/).
+val csvOutDir = rootProject.layout.projectDirectory.dir("dist/csv").asFile
+
+// Generic, parameterized export — for a custom view or output path.
+// (IDEA can't pass -P on a double-click, so use the per-view tasks below for
+// menu/double-click runs.)
+val csvExport by tasks.registering(Exec::class) {
+    group = "csv"
+    description =
+        "Export a DuckDB view to CSV. -Pview=<view> (default dem), -Pcsv.out=<path>. " +
+            "For a double-click in IDEA use one of the csvExport<View> tasks."
+    workingDir = projectDir
+    useVenv()
+    val args = mutableListOf(poetryBin, "run", "egr-csv", "--view", findProperty("view")?.toString() ?: "dem")
+    findProperty("csv.out")?.toString()?.let { args += listOf("--out", it) }
+    commandLine(args)
+    dependsOn(poetryInstall)
+}
+
+// Per-view convenience tasks — double-clickable in IDEA (no -P needed), one
+// per view in dashboards/duckdb/eps.duckdb. Mirrors views.build_duckdb_views;
+// add a name here if a new view should be CSV-exportable from the menu.
+val csvViews = listOf("dem", "fdhi_cleaned", "sure", "kern_combined", "unified_observations")
+
+csvViews.forEach { view ->
+    val taskName = "csvExport" + view.split("_").joinToString("") { it.replaceFirstChar(Char::uppercase) }
+    tasks.register<Exec>(taskName) {
+        group = "csv"
+        description = "Export the `$view` view to dist/csv/$view.csv."
+        workingDir = projectDir
+        useVenv()
+        commandLine(poetryBin, "run", "egr-csv", "--view", view)
+        dependsOn(poetryInstall)
+    }
+}
+
 // Build artifacts live under a single top-level `dist/` with one subdir per
 // subproject — e.g. `dist/python/<wheel>`, future `dist/java/<jar>`.
 val wheelOutDir = rootProject.layout.projectDirectory.dir("dist/python").asFile
@@ -146,10 +183,10 @@ val wheel by tasks.registering(Exec::class) {
     outputs.dir(wheelOutDir)
 }
 
-// `gradle clean` should also remove this module's slice of dist/; `base`
+// `gradle clean` should also remove this module's slices of dist/; `base`
 // plugin only cleans `build/`.
 tasks.named<Delete>("clean") {
-    delete(wheelOutDir)
+    delete(wheelOutDir, csvOutDir)
 }
 
 // Wire into Gradle lifecycle so `./gradlew check` and `./gradlew build`

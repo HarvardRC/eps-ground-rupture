@@ -29,6 +29,7 @@ seaborn = "^0.13"
 [tool.poetry.scripts]
 egr-build = "eps_ground_rapture.cli:main"
 egr-push-sheets = "eps_ground_rapture.cli:push_sheets_main"
+egr-csv = "eps_ground_rapture.cli:csv_main"
 
 [build-system]
 requires = ["poetry-core>=1.8.0"]

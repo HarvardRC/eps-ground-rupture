@@ -101,12 +101,14 @@ For `dem`, use the **Drive-CSV fallback**: publish the CSV to Google Drive
 and point Tableau Public at the file URL instead of a Sheet.
 
 ```bash
-# 1. Export the view to CSV from DuckDB:
-duckdb dashboards/duckdb/eps.duckdb \
-  -c "COPY (SELECT * FROM dem) TO 'dem.csv' (HEADER, FORMAT csv)"
+# 1. Export the view to CSV (writes dist/csv/<view>.csv, gitignored):
+./gradlew :subprojects:python:csvExport                    # default: dem
+#   or a specific view / path:
+#   ./gradlew :subprojects:python:csvExport -Pview=dem -Pcsv.out=/tmp/dem.csv
+#   or directly:  poetry run egr-csv --view dem
 
-# 2. Upload dem.csv to Drive (folder shared with the service account, or
-#    your own Drive), then set link-sharing to 'Anyone with the link'.
+# 2. Upload dist/csv/dem.csv to Drive (folder shared with the service
+#    account, or your own Drive), set link-sharing to 'Anyone with the link'.
 # 3. In Tableau Public, connect to the published CSV's direct-download URL.
 ```
 
