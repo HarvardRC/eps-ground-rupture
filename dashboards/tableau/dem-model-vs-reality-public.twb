@@ -281,6 +281,10 @@
       <column caption='Scarp Class' datatype='string' name='[scarp_class]' role='dimension' type='nominal' />
       <column caption='Scarp Height' datatype='real' name='[scarp_height]' role='measure' type='quantitative' />
       <column caption='Source' datatype='string' name='[source]' role='dimension' type='nominal' />
+      <column-instance column='[Calculation_1191193594212352]' derivation='None' name='[none:Calculation_1191193594212352:nk]' pivot='key' type='nominal' />
+      <column-instance column='[Calculation_1191193594687491]' derivation='None' name='[none:Calculation_1191193594687491:nk]' pivot='key' type='nominal' />
+      <column-instance column='[Calculation_1302657277816832]' derivation='None' name='[none:Calculation_1302657277816832:nk]' pivot='key' type='nominal' />
+      <column-instance column='[Calculation_0975140307451908]' derivation='User' name='[usr:Calculation_0975140307451908:nk]' pivot='key' type='nominal' />
       <extract _.fcp.VConnDownstreamExtractsWithWarnings.true...user-specific='false' count='-1' enabled='true' object-id='' units='records'>
         <connection access_mode='readonly' authentication='auth-none' author-locale='en_US' class='hyper' dbname='/Users/misha/Documents/My Tableau Repository/Datasources/GroundRaptureUnifiedObservationsCSV.hyper' default-settings='yes' schema='Extract' sslmode='' tablename='Extract' update-time='06/24/2026 09:14:50 PM' username='tableau_internal_user'>
           <relation name='Extract' table='[Extract].[Extract]' type='table' />
@@ -451,6 +455,144 @@
             </map>
             <map to='#f28e2b'>
               <bucket>&quot;FDHI&quot;</bucket>
+            </map>
+          </encoding>
+          <encoding attr='color' field='[none:Calculation_1191193594687491:nk]' type='palette'>
+            <map to='#009ffa'>
+              <bucket>&quot;Monoclinal&quot;</bucket>
+            </map>
+            <map to='#3f67b1'>
+              <bucket>&quot;Monoclinal Collapse&quot;</bucket>
+            </map>
+            <map to='#4e79a7'>
+              <bucket>&quot;Chi-Chi&quot;</bucket>
+            </map>
+            <map to='#59a14f'>
+              <bucket>&quot;45&quot;</bucket>
+            </map>
+            <map to='#59a14f'>
+              <bucket>&quot;Wenchuan&quot;</bucket>
+            </map>
+            <map to='#76b7b2'>
+              <bucket>&quot;40&quot;</bucket>
+            </map>
+            <map to='#76b7b2'>
+              <bucket>&quot;Kern County (1952)&quot;</bucket>
+            </map>
+            <map to='#9f1d20'>
+              <bucket>&quot;Simple Collapse&quot;</bucket>
+            </map>
+            <map to='#af773e'>
+              <bucket>&quot;Pressure Ridge Collapse&quot;</bucket>
+            </map>
+            <map to='#b07aa1'>
+              <bucket>&quot;60&quot;</bucket>
+            </map>
+            <map to='#cccccc'>
+              <bucket>%null%</bucket>
+            </map>
+            <map to='#e15759'>
+              <bucket>&quot;30&quot;</bucket>
+            </map>
+            <map to='#e15759'>
+              <bucket>&quot;Kashmir&quot;</bucket>
+            </map>
+            <map to='#ed2024'>
+              <bucket>&quot;Simple&quot;</bucket>
+            </map>
+            <map to='#edc948'>
+              <bucket>&quot;50&quot;</bucket>
+            </map>
+            <map to='#f28e2b'>
+              <bucket>&quot;20&quot;</bucket>
+            </map>
+            <map to='#f28e2b'>
+              <bucket>&quot;DEM&quot;</bucket>
+            </map>
+            <map to='#f47820'>
+              <bucket>&quot;Pressure Ridge&quot;</bucket>
+            </map>
+            <map to='#ff9da7'>
+              <bucket>&quot;70&quot;</bucket>
+            </map>
+          </encoding>
+          <encoding attr='color' field='[none:Calculation_1191193594212352:nk]' type='palette'>
+            <map to='#4e79a7'>
+              <bucket>&quot;Chi-Chi&quot;</bucket>
+            </map>
+            <map to='#59a14f'>
+              <bucket>&quot;Wenchuan&quot;</bucket>
+            </map>
+            <map to='#76b7b2'>
+              <bucket>&quot;Kern County (1952)&quot;</bucket>
+            </map>
+            <map to='#e15759'>
+              <bucket>&quot;Kashmir&quot;</bucket>
+            </map>
+            <map to='#f28e2b'>
+              <bucket>&quot;DEM&quot;</bucket>
+            </map>
+          </encoding>
+          <encoding attr='shape' field='[none:Calculation_1191193594212352:nk]' type='shape'>
+            <map to=':filled/circle'>
+              <bucket>&quot;Chi-Chi&quot;</bucket>
+            </map>
+            <map to=':filled/diamond'>
+              <bucket>&quot;Kern County (1952)&quot;</bucket>
+            </map>
+            <map to=':filled/square'>
+              <bucket>&quot;Kashmir&quot;</bucket>
+            </map>
+            <map to='asterisk'>
+              <bucket>&quot;Wenchuan&quot;</bucket>
+            </map>
+            <map to='square'>
+              <bucket>&quot;DEM&quot;</bucket>
+            </map>
+          </encoding>
+          <encoding attr='shape' field='[none:Calculation_1302657277816832:nk]' palette=':default' type='shape'>
+            <map to=':filled/asterisk'>
+              <bucket>&quot;Kern County (1952)&quot;</bucket>
+            </map>
+            <map to=':filled/circle'>
+              <bucket>&quot;Chi-Chi&quot;</bucket>
+            </map>
+            <map to=':filled/square'>
+              <bucket>&quot;Kashmir&quot;</bucket>
+            </map>
+            <map to='circle'>
+              <bucket>&quot;DEM (Simulation)&quot;</bucket>
+            </map>
+            <map to='diamond'>
+              <bucket>&quot;Wenchuan&quot;</bucket>
+            </map>
+          </encoding>
+          <encoding attr='color' field='[none:Calculation_1302657277816832:nk]' type='palette'>
+            <map to='#4e79a7'>
+              <bucket>&quot;Chi-Chi&quot;</bucket>
+            </map>
+            <map to='#59a14f'>
+              <bucket>&quot;DEM (Simulation)&quot;</bucket>
+            </map>
+            <map to='#76b7b2'>
+              <bucket>&quot;Wenchuan&quot;</bucket>
+            </map>
+            <map to='#e15759'>
+              <bucket>&quot;Kern County (1952)&quot;</bucket>
+            </map>
+            <map to='#f28e2b'>
+              <bucket>&quot;Kashmir&quot;</bucket>
+            </map>
+          </encoding>
+          <encoding attr='color' field='[usr:Calculation_0975140307451908:nk]' type='palette'>
+            <map to='#2171b5'>
+              <bucket>&quot;dense&quot;</bucket>
+            </map>
+            <map to='#6baed6'>
+              <bucket>&quot;moderate&quot;</bucket>
+            </map>
+            <map to='#c6dbef'>
+              <bucket>&quot;sparse&quot;</bucket>
             </map>
           </encoding>
         </style-rule>
@@ -1381,7 +1523,9 @@ always too sparse to rely on alone.</run>
             <card param='[federated.00a4m750ny8p0d19b09rj1xvnmb0].[none:source:nk]' type='filter' />
             <card mode='checkdropdown' param='[federated.00a4m750ny8p0d19b09rj1xvnmb0].[none:fault_dip:ok]' type='filter' />
             <card mode='checkdropdown' param='[federated.00a4m750ny8p0d19b09rj1xvnmb0].[none:scarp_class:nk]' type='filter' />
+            <card pane-specification-id='1' param='[federated.00a4m750ny8p0d19b09rj1xvnmb0].[none:Calculation_1191193594687491:nk]' type='color' />
             <card mode='compact' param='[Parameters].[Parameter 1]' type='parameter' />
+            <card pane-specification-id='2' param='[federated.00a4m750ny8p0d19b09rj1xvnmb0].[none:Calculation_1302657277816832:nk]' type='shape' />
           </strip>
         </edge>
         <edge name='bottom'>

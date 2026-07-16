@@ -65,7 +65,7 @@
       <connection class='federated'>
         <named-connections>
           <named-connection caption='EPS Ground Rapture' name='athena.17zn27t1375i2b1chkoa81gwppr4'>
-            <connection authentication='auth-user-pass' class='athena' dbname='AwsDataCatalog' one-time-sql='' port='443' schema='eps_ground_rapture_dev' server='athena.us-east-1.amazonaws.com' username='AKIAXP6UPDESE2YMGRVL' warehouse='s3://eps-ground-rapture-dev/athena-results/'>
+            <connection authentication='auth-user-pass' class='athena' dbname='AwsDataCatalog' one-time-sql='' port='443' schema='eps_ground_rapture_dev' server='athena.us-east-1.amazonaws.com' username='' warehouse='s3://eps-ground-rapture-dev/athena-results/'>
               <connection-customization class='athena' enabled='false' version='18.1'>
                 <vendor name='athena' />
                 <driver name='athena' />

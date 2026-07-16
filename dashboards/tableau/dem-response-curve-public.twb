@@ -22,1116 +22,6 @@
     <preference name='ui.shelf.height' value='26' />
   </preferences>
   <datasources>
-    <datasource caption='EPS Ground Rapture Athena (DEM)' inline='true' name='EPS Ground Rapture Athena' version='18.1'>
-      <connection class='federated'>
-        <named-connections>
-          <named-connection caption='EPS Ground Rapture' name='athena.17zn27t1375i2b1chkoa81gwppr4'>
-            <connection authentication='auth-user-pass' class='athena' dbname='AwsDataCatalog' one-time-sql='' port='443' schema='eps_ground_rapture_dev' server='athena.us-east-1.amazonaws.com' username='AKIAXP6UPDESE2YMGRVL' warehouse='s3://eps-ground-rapture-dev/athena-results/'>
-              <connection-customization class='athena' enabled='false' version='18.1'>
-                <vendor name='athena' />
-                <driver name='athena' />
-                <customizations>
-                  <customization name='CAP_AUTH_DB_IMPERSONATE' value='no' />
-                  <customization name='CAP_AUTH_KERBEROS_IMPERSONATE' value='no' />
-                  <customization name='CAP_COLLECT_TABLE_STATISTICS' value='no' />
-                  <customization name='CAP_CONNECT_STORED_PROCEDURE' value='no' />
-                  <customization name='CAP_CREATE_TEMP_TABLES' value='no' />
-                  <customization name='CAP_DATASERVER_MAGIC_NUMBER' value='no' />
-                  <customization name='CAP_DEFERS_CONNECTION_VERIFICATION' value='no' />
-                  <customization name='CAP_DISABLE_EXTRACT_TABLE_INDEXING' value='no' />
-                  <customization name='CAP_EQUALITY_JOINS_ONLY' value='no' />
-                  <customization name='CAP_EQUIJOINS_ONLY' value='no' />
-                  <customization name='CAP_FAST_METADATA' value='yes' />
-                  <customization name='CAP_FORCE_COUNT_FOR_NUMBEROFRECORDS' value='no' />
-                  <customization name='CAP_GREENPLUM_TRUST_METADATA_CONTAINSNULL' value='no' />
-                  <customization name='CAP_HIVE_FIX_METADATA_NAMES' value='no' />
-                  <customization name='CAP_INCLUDE_OTHER_CATALOG_NAME' value='no' />
-                  <customization name='CAP_INDEX_TEMP_TABLES' value='no' />
-                  <customization name='CAP_INSERT_TEMP_EXEC_STORED_PROCEDURE' value='no' />
-                  <customization name='CAP_JDBC_QUERY_USE_PREPARE_PARAMETER_MARKER' value='no' />
-                  <customization name='CAP_LOCAL_ALIASES_CASE_INSENSITIVE' value='no' />
-                  <customization name='CAP_METADATA_SHOW_OTHER_CATALOGS' value='no' />
-                  <customization name='CAP_OAUTH_FEDERATE_ACCCESS_TOKEN' value='no' />
-                  <customization name='CAP_OAUTH_FEDERATE_ID_TOKEN' value='no' />
-                  <customization name='CAP_OAUTH_VALIDATE_ALWAYS' value='no' />
-                  <customization name='CAP_ODBC_ALWAYS_THROW_CONNECT_ERRORS' value='no' />
-                  <customization name='CAP_ODBC_BIND_FORCE_DATETIME_AS_CHAR' value='no' />
-                  <customization name='CAP_ODBC_BIND_FORCE_DATE_AS_CHAR' value='no' />
-                  <customization name='CAP_ODBC_BIND_FORCE_MAX_STRING_BUFFERS' value='no' />
-                  <customization name='CAP_ODBC_BIND_FORCE_MEDIUM_STRING_BUFFERS' value='no' />
-                  <customization name='CAP_ODBC_BIND_FORCE_SIGNED' value='no' />
-                  <customization name='CAP_ODBC_BIND_FORCE_SMALL_STRING_BUFFERS' value='no' />
-                  <customization name='CAP_ODBC_BIND_SUPPRESS_INT64' value='no' />
-                  <customization name='CAP_ODBC_BIND_SUPPRESS_PREFERRED_TYPES' value='no' />
-                  <customization name='CAP_ODBC_BIND_SUPPRESS_WIDE_CHAR' value='no' />
-                  <customization name='CAP_ODBC_CURSOR_DYNAMIC' value='no' />
-                  <customization name='CAP_ODBC_CURSOR_FORWARD_ONLY' value='no' />
-                  <customization name='CAP_ODBC_CURSOR_KEYSET_DRIVEN' value='no' />
-                  <customization name='CAP_ODBC_CURSOR_STATIC' value='no' />
-                  <customization name='CAP_ODBC_DRIVER_HIVE_ASSUME_LATEST' value='no' />
-                  <customization name='CAP_ODBC_ERROR_IGNORE_FALSE_ALARM' value='no' />
-                  <customization name='CAP_ODBC_FETCH_BUFFERS_RESIZABLE' value='no' />
-                  <customization name='CAP_ODBC_FETCH_BUFFERS_SIZE_MASSIVE' value='no' />
-                  <customization name='CAP_ODBC_FETCH_CONTINUE_ON_ERROR' value='no' />
-                  <customization name='CAP_ODBC_FETCH_FORCE_VERIFY_TRUNCATE_BY_CELLSTATUS' value='no' />
-                  <customization name='CAP_ODBC_FETCH_INT_TRUNCATION_AS_ERROR' value='no' />
-                  <customization name='CAP_ODBC_FORCE_SINGLE_ROW_BINDING' value='no' />
-                  <customization name='CAP_ODBC_IMPORT_GETDATA_BUFFER_LARGE' value='no' />
-                  <customization name='CAP_ODBC_METADATA_STRING_LENGTH_UNKNOWN' value='no' />
-                  <customization name='CAP_ODBC_METADATA_SUPPRESS_SQLCOLUMNS_API' value='no' />
-                  <customization name='CAP_ODBC_METADATA_SUPPRESS_SQLFOREIGNKEYS_API' value='no' />
-                  <customization name='CAP_ODBC_METADATA_SUPPRESS_SQLPRIMARYKEYS_API' value='no' />
-                  <customization name='CAP_ODBC_METADATA_SUPPRESS_SQLSTATISTICS_API' value='no' />
-                  <customization name='CAP_ODBC_QUERY_USE_PREPARE_PARAMETER_MARKER' value='no' />
-                  <customization name='CAP_ODBC_REBIND_SKIP_UNBIND' value='no' />
-                  <customization name='CAP_ODBC_SCHEMAS_OPTIONAL' value='no' />
-                  <customization name='CAP_ODBC_TRIM_VARCHAR_PADDING' value='no' />
-                  <customization name='CAP_ODBC_UNBIND_AUTO' value='no' />
-                  <customization name='CAP_ODBC_UNBIND_BATCH' value='no' />
-                  <customization name='CAP_ODBC_UNBIND_EACH' value='no' />
-                  <customization name='CAP_ODBC_USE_NATIVE_PROTOCOL' value='no' />
-                  <customization name='CAP_PADDED_SEMANTICS_NCHAR_NVARCHAR' value='no' />
-                  <customization name='CAP_PERSIST_SQL_RELATION_ON_LEAF_CONNECTION' value='no' />
-                  <customization name='CAP_QUERY_ALLOW_JOIN_REORDER' value='yes' />
-                  <customization name='CAP_QUERY_ALLOW_PARTIAL_AGGREGATION' value='yes' />
-                  <customization name='CAP_QUERY_ALWAYS_USE_AQ_CACHE' value='no' />
-                  <customization name='CAP_QUERY_AVOID_EXPRESSION_INLINING' value='no' />
-                  <customization name='CAP_QUERY_BLENDING_ALWAYS_USE_LOCAL_MAPPING_TABLES' value='no' />
-                  <customization name='CAP_QUERY_BLENDING_PREFER_LOCAL_MAPPING_TABLES' value='yes' />
-                  <customization name='CAP_QUERY_BLENDING_REMOTE_MAPPING_TABLES' value='yes' />
-                  <customization name='CAP_QUERY_BOOLEXPR_TO_INTEXPR' value='no' />
-                  <customization name='CAP_QUERY_BOOL_IDENTIFIER_TO_LOGICAL' value='no' />
-                  <customization name='CAP_QUERY_CAST_MONEY_AS_NUMERIC' value='no' />
-                  <customization name='CAP_QUERY_CONVERT_DATETIMES_TO_DATES' value='no' />
-                  <customization name='CAP_QUERY_EMPTY_DOMAIN_TOP' value='no' />
-                  <customization name='CAP_QUERY_FORCE_AGGREGATE_MEASURES' value='no' />
-                  <customization name='CAP_QUERY_GROUP_BY_ALIAS' value='no' />
-                  <customization name='CAP_QUERY_GROUP_BY_DEGREE' value='no' />
-                  <customization name='CAP_QUERY_HAVING_REQUIRES_GROUP_BY' value='no' />
-                  <customization name='CAP_QUERY_HAVING_UNSUPPORTED' value='no' />
-                  <customization name='CAP_QUERY_IGNORE_HINT_CHECK_NOT_NULL' value='no' />
-                  <customization name='CAP_QUERY_IGNORE_HINT_MAKE_DOMAIN_PREDICATE' value='no' />
-                  <customization name='CAP_QUERY_INLINE_COMPLEX_GROUPBYS_IN_SELECTS' value='yes' />
-                  <customization name='CAP_QUERY_JOIN_ACROSS_SCHEMAS' value='yes' />
-                  <customization name='CAP_QUERY_JOIN_ASSUME_CONSTRAINED' value='no' />
-                  <customization name='CAP_QUERY_JOIN_PUSH_DOWN_CONDITION_EXPRESSIONS' value='no' />
-                  <customization name='CAP_QUERY_JOIN_REQUIRES_SCOPE' value='no' />
-                  <customization name='CAP_QUERY_JOIN_REQUIRES_SUBQUERY' value='no' />
-                  <customization name='CAP_QUERY_MINMAX_FORCE_GROUPBYS' value='no' />
-                  <customization name='CAP_QUERY_NULL_REQUIRES_CAST' value='no' />
-                  <customization name='CAP_QUERY_OUTER_JOIN_CONDITION_NO_TRIVIAL' value='no' />
-                  <customization name='CAP_QUERY_RECOMPILE_FAILED_QUERY' value='no' />
-                  <customization name='CAP_QUERY_SELECT_ALIASES_SORTED' value='no' />
-                  <customization name='CAP_QUERY_SORT_BY' value='yes' />
-                  <customization name='CAP_QUERY_SORT_BY_DEGREE' value='yes' />
-                  <customization name='CAP_QUERY_SUBQUERIES' value='yes' />
-                  <customization name='CAP_QUERY_SUBQUERIES_WITH_TOP' value='yes' />
-                  <customization name='CAP_QUERY_SUBQUERIES_WITH_TOP_ALTERNATIVE' value='no' />
-                  <customization name='CAP_QUERY_SUBQUERY_QUERY_CONTEXT' value='yes' />
-                  <customization name='CAP_QUERY_SUPPORTS_LODJOINS' value='yes' />
-                  <customization name='CAP_QUERY_SUPPORT_ANALYTIC_FUNCTIONS' value='yes' />
-                  <customization name='CAP_QUERY_SUPPORT_EMPTY_GROUPBY' value='no' />
-                  <customization name='CAP_QUERY_SUPPRESS_CHECK_DOMAIN_LITERALS_THRESHOLD' value='no' />
-                  <customization name='CAP_QUERY_SUPPRESS_NULL_CHECK_QUERIES' value='no' />
-                  <customization name='CAP_QUERY_TAGS_IN_SQL_TEXT' value='no' />
-                  <customization name='CAP_QUERY_TIME_REQUIRES_CAST' value='no' />
-                  <customization name='CAP_QUERY_TOPSTYLE_LIMIT' value='no' />
-                  <customization name='CAP_QUERY_TOPSTYLE_ROWNUM' value='no' />
-                  <customization name='CAP_QUERY_TOPSTYLE_TOP' value='no' />
-                  <customization name='CAP_QUERY_TOP_0_METADATA' value='yes' />
-                  <customization name='CAP_QUERY_TOP_N' value='yes' />
-                  <customization name='CAP_QUERY_USE_DOMAIN_EXCEPT_OPTIMIZATION' value='no' />
-                  <customization name='CAP_QUERY_USE_DOMAIN_RANGES_OPTIMIZATION' value='no' />
-                  <customization name='CAP_QUERY_USE_DOMAIN_RANGES_OPTIMIZATION_STRINGS' value='no' />
-                  <customization name='CAP_QUERY_USE_QUERY_FUSION' value='yes' />
-                  <customization name='CAP_QUERY_USE_STRCMP_WITH_WHERE_EXISTS' value='no' />
-                  <customization name='CAP_QUERY_WHERE_FALSE_METADATA' value='no' />
-                  <customization name='CAP_RELDATEFILT_CASTTODATE' value='no' />
-                  <customization name='CAP_RENAME_TABLE_USE_LEAF_CONNECTION_DIALECT' value='no' />
-                  <customization name='CAP_SDK_SUPPORTS_PREP_WRITE_TO_DB' value='no' />
-                  <customization name='CAP_SELECT_INTO' value='no' />
-                  <customization name='CAP_SELECT_TOP_INTO' value='no' />
-                  <customization name='CAP_STORED_PROCEDURE_PREFER_TEMP_TABLE' value='no' />
-                  <customization name='CAP_STORED_PROCEDURE_REPAIR_TEMP_TABLE_STRINGS' value='no' />
-                  <customization name='CAP_STORED_PROCEDURE_TEMP_TABLE_FROM_BUFFER' value='no' />
-                  <customization name='CAP_STORED_PROCEDURE_TEMP_TABLE_FROM_NEW_PROTOCOL' value='no' />
-                  <customization name='CAP_SUPPRESS_CONNECTION_POOLING' value='no' />
-                  <customization name='CAP_SUPPRESS_DISCOVERY_QUERIES' value='no' />
-                  <customization name='CAP_SUPPRESS_ENUMERATE_SCHEMAS_VIA_SQL' value='no' />
-                  <customization name='CAP_SUPPRESS_ENUMERATE_TABLES_VIA_SQL' value='no' />
-                  <customization name='CAP_SUPPRESS_GET_SERVER_TIME' value='yes' />
-                  <customization name='CAP_SUPPRESS_QUICK_FILTER_ACCELERATION_VIEWS' value='no' />
-                  <customization name='CAP_SUPPRESS_TEMP_TABLE_CHECKS' value='no' />
-                </customizations>
-              </connection-customization>
-            </connection>
-          </named-connection>
-        </named-connections>
-        <relation connection='athena.17zn27t1375i2b1chkoa81gwppr4' name='GroundRaptureDEM-CSV' table='[eps_ground_rapture_dev].[dem]' type='table' />
-        <metadata-records>
-          <metadata-record class='column'>
-            <remote-name>trial</remote-name>
-            <remote-type>129</remote-type>
-            <local-name>[trial]</local-name>
-            <parent-name>[GroundRaptureDEM-CSV]</parent-name>
-            <remote-alias>trial</remote-alias>
-            <ordinal>1</ordinal>
-            <local-type>string</local-type>
-            <aggregation>Count</aggregation>
-            <width>65535</width>
-            <contains-null>true</contains-null>
-            <collation flag='0' name='binary' />
-            <attributes>
-              <attribute datatype='string' name='TypeIsVarchar'>&quot;true&quot;</attribute>
-            </attributes>
-            <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-          </metadata-record>
-          <metadata-record class='column'>
-            <remote-name>depth</remote-name>
-            <remote-type>20</remote-type>
-            <local-name>[depth]</local-name>
-            <parent-name>[GroundRaptureDEM-CSV]</parent-name>
-            <remote-alias>depth</remote-alias>
-            <ordinal>2</ordinal>
-            <local-type>integer</local-type>
-            <aggregation>Sum</aggregation>
-            <precision>8</precision>
-            <contains-null>true</contains-null>
-            <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-          </metadata-record>
-          <metadata-record class='column'>
-            <remote-name>density</remote-name>
-            <remote-type>129</remote-type>
-            <local-name>[density]</local-name>
-            <parent-name>[GroundRaptureDEM-CSV]</parent-name>
-            <remote-alias>density</remote-alias>
-            <ordinal>3</ordinal>
-            <local-type>string</local-type>
-            <aggregation>Count</aggregation>
-            <width>65535</width>
-            <contains-null>true</contains-null>
-            <collation flag='0' name='binary' />
-            <attributes>
-              <attribute datatype='string' name='TypeIsVarchar'>&quot;true&quot;</attribute>
-            </attributes>
-            <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-          </metadata-record>
-          <metadata-record class='column'>
-            <remote-name>cohesion</remote-name>
-            <remote-type>129</remote-type>
-            <local-name>[cohesion]</local-name>
-            <parent-name>[GroundRaptureDEM-CSV]</parent-name>
-            <remote-alias>cohesion</remote-alias>
-            <ordinal>4</ordinal>
-            <local-type>string</local-type>
-            <aggregation>Count</aggregation>
-            <width>65535</width>
-            <contains-null>true</contains-null>
-            <collation flag='0' name='binary' />
-            <attributes>
-              <attribute datatype='string' name='TypeIsVarchar'>&quot;true&quot;</attribute>
-            </attributes>
-            <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-          </metadata-record>
-          <metadata-record class='column'>
-            <remote-name>sediment_strength</remote-name>
-            <remote-type>129</remote-type>
-            <local-name>[sediment_strength]</local-name>
-            <parent-name>[GroundRaptureDEM-CSV]</parent-name>
-            <remote-alias>sediment_strength</remote-alias>
-            <ordinal>5</ordinal>
-            <local-type>string</local-type>
-            <aggregation>Count</aggregation>
-            <width>65535</width>
-            <contains-null>true</contains-null>
-            <collation flag='0' name='binary' />
-            <attributes>
-              <attribute datatype='string' name='TypeIsVarchar'>&quot;true&quot;</attribute>
-            </attributes>
-            <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-          </metadata-record>
-          <metadata-record class='column'>
-            <remote-name>set</remote-name>
-            <remote-type>129</remote-type>
-            <local-name>[set]</local-name>
-            <parent-name>[GroundRaptureDEM-CSV]</parent-name>
-            <remote-alias>set</remote-alias>
-            <ordinal>6</ordinal>
-            <local-type>string</local-type>
-            <aggregation>Count</aggregation>
-            <width>65535</width>
-            <contains-null>true</contains-null>
-            <collation flag='0' name='binary' />
-            <attributes>
-              <attribute datatype='string' name='TypeIsVarchar'>&quot;true&quot;</attribute>
-            </attributes>
-            <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-          </metadata-record>
-          <metadata-record class='column'>
-            <remote-name>fault_dip</remote-name>
-            <remote-type>20</remote-type>
-            <local-name>[fault_dip]</local-name>
-            <parent-name>[GroundRaptureDEM-CSV]</parent-name>
-            <remote-alias>fault_dip</remote-alias>
-            <ordinal>7</ordinal>
-            <local-type>integer</local-type>
-            <aggregation>Sum</aggregation>
-            <precision>8</precision>
-            <contains-null>true</contains-null>
-            <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-          </metadata-record>
-          <metadata-record class='column'>
-            <remote-name>fault_seed</remote-name>
-            <remote-type>5</remote-type>
-            <local-name>[fault_seed]</local-name>
-            <parent-name>[GroundRaptureDEM-CSV]</parent-name>
-            <remote-alias>fault_seed</remote-alias>
-            <ordinal>8</ordinal>
-            <local-type>real</local-type>
-            <aggregation>Sum</aggregation>
-            <precision>8</precision>
-            <contains-null>true</contains-null>
-            <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-          </metadata-record>
-          <metadata-record class='column'>
-            <remote-name>fs_depth</remote-name>
-            <remote-type>5</remote-type>
-            <local-name>[fs_depth]</local-name>
-            <parent-name>[GroundRaptureDEM-CSV]</parent-name>
-            <remote-alias>fs_depth</remote-alias>
-            <ordinal>9</ordinal>
-            <local-type>real</local-type>
-            <aggregation>Sum</aggregation>
-            <precision>8</precision>
-            <contains-null>true</contains-null>
-            <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-          </metadata-record>
-          <metadata-record class='column'>
-            <remote-name>unrupturedsed</remote-name>
-            <remote-type>5</remote-type>
-            <local-name>[unrupturedsed]</local-name>
-            <parent-name>[GroundRaptureDEM-CSV]</parent-name>
-            <remote-alias>unrupturedsed</remote-alias>
-            <ordinal>10</ordinal>
-            <local-type>real</local-type>
-            <aggregation>Sum</aggregation>
-            <precision>8</precision>
-            <contains-null>true</contains-null>
-            <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-          </metadata-record>
-          <metadata-record class='column'>
-            <remote-name>conversion_factor</remote-name>
-            <remote-type>5</remote-type>
-            <local-name>[conversion_factor]</local-name>
-            <parent-name>[GroundRaptureDEM-CSV]</parent-name>
-            <remote-alias>conversion_factor</remote-alias>
-            <ordinal>11</ordinal>
-            <local-type>real</local-type>
-            <aggregation>Sum</aggregation>
-            <precision>8</precision>
-            <contains-null>true</contains-null>
-            <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-          </metadata-record>
-          <metadata-record class='column'>
-            <remote-name>slip</remote-name>
-            <remote-type>5</remote-type>
-            <local-name>[slip]</local-name>
-            <parent-name>[GroundRaptureDEM-CSV]</parent-name>
-            <remote-alias>slip</remote-alias>
-            <ordinal>12</ordinal>
-            <local-type>real</local-type>
-            <aggregation>Sum</aggregation>
-            <precision>8</precision>
-            <contains-null>true</contains-null>
-            <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-          </metadata-record>
-          <metadata-record class='column'>
-            <remote-name>vd_hw</remote-name>
-            <remote-type>5</remote-type>
-            <local-name>[vd_hw]</local-name>
-            <parent-name>[GroundRaptureDEM-CSV]</parent-name>
-            <remote-alias>vd_hw</remote-alias>
-            <ordinal>13</ordinal>
-            <local-type>real</local-type>
-            <aggregation>Sum</aggregation>
-            <precision>8</precision>
-            <contains-null>true</contains-null>
-            <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-          </metadata-record>
-          <metadata-record class='column'>
-            <remote-name>hd_hw</remote-name>
-            <remote-type>5</remote-type>
-            <local-name>[hd_hw]</local-name>
-            <parent-name>[GroundRaptureDEM-CSV]</parent-name>
-            <remote-alias>hd_hw</remote-alias>
-            <ordinal>14</ordinal>
-            <local-type>real</local-type>
-            <aggregation>Sum</aggregation>
-            <precision>8</precision>
-            <contains-null>true</contains-null>
-            <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-          </metadata-record>
-          <metadata-record class='column'>
-            <remote-name>scarp_height</remote-name>
-            <remote-type>5</remote-type>
-            <local-name>[scarp_height]</local-name>
-            <parent-name>[GroundRaptureDEM-CSV]</parent-name>
-            <remote-alias>scarp_height</remote-alias>
-            <ordinal>15</ordinal>
-            <local-type>real</local-type>
-            <aggregation>Sum</aggregation>
-            <precision>8</precision>
-            <contains-null>true</contains-null>
-            <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-          </metadata-record>
-          <metadata-record class='column'>
-            <remote-name>us_ud</remote-name>
-            <remote-type>5</remote-type>
-            <local-name>[us_ud]</local-name>
-            <parent-name>[GroundRaptureDEM-CSV]</parent-name>
-            <remote-alias>us_ud</remote-alias>
-            <ordinal>16</ordinal>
-            <local-type>real</local-type>
-            <aggregation>Sum</aggregation>
-            <precision>8</precision>
-            <contains-null>true</contains-null>
-            <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-          </metadata-record>
-          <metadata-record class='column'>
-            <remote-name>us_x</remote-name>
-            <remote-type>5</remote-type>
-            <local-name>[us_x]</local-name>
-            <parent-name>[GroundRaptureDEM-CSV]</parent-name>
-            <remote-alias>us_x</remote-alias>
-            <ordinal>17</ordinal>
-            <local-type>real</local-type>
-            <aggregation>Sum</aggregation>
-            <precision>8</precision>
-            <contains-null>true</contains-null>
-            <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-          </metadata-record>
-          <metadata-record class='column'>
-            <remote-name>us_y</remote-name>
-            <remote-type>5</remote-type>
-            <local-name>[us_y]</local-name>
-            <parent-name>[GroundRaptureDEM-CSV]</parent-name>
-            <remote-alias>us_y</remote-alias>
-            <ordinal>18</ordinal>
-            <local-type>real</local-type>
-            <aggregation>Sum</aggregation>
-            <precision>8</precision>
-            <contains-null>true</contains-null>
-            <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-          </metadata-record>
-          <metadata-record class='column'>
-            <remote-name>dzw</remote-name>
-            <remote-type>5</remote-type>
-            <local-name>[dzw]</local-name>
-            <parent-name>[GroundRaptureDEM-CSV]</parent-name>
-            <remote-alias>dzw</remote-alias>
-            <ordinal>19</ordinal>
-            <local-type>real</local-type>
-            <aggregation>Sum</aggregation>
-            <precision>8</precision>
-            <contains-null>true</contains-null>
-            <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-          </metadata-record>
-          <metadata-record class='column'>
-            <remote-name>dzw_xmin</remote-name>
-            <remote-type>5</remote-type>
-            <local-name>[dzw_xmin]</local-name>
-            <parent-name>[GroundRaptureDEM-CSV]</parent-name>
-            <remote-alias>dzw_xmin</remote-alias>
-            <ordinal>20</ordinal>
-            <local-type>real</local-type>
-            <aggregation>Sum</aggregation>
-            <precision>8</precision>
-            <contains-null>true</contains-null>
-            <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-          </metadata-record>
-          <metadata-record class='column'>
-            <remote-name>dzw_xmin_y</remote-name>
-            <remote-type>5</remote-type>
-            <local-name>[dzw_xmin_y]</local-name>
-            <parent-name>[GroundRaptureDEM-CSV]</parent-name>
-            <remote-alias>dzw_xmin_y</remote-alias>
-            <ordinal>21</ordinal>
-            <local-type>real</local-type>
-            <aggregation>Sum</aggregation>
-            <precision>8</precision>
-            <contains-null>true</contains-null>
-            <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-          </metadata-record>
-          <metadata-record class='column'>
-            <remote-name>dzw_xmax</remote-name>
-            <remote-type>5</remote-type>
-            <local-name>[dzw_xmax]</local-name>
-            <parent-name>[GroundRaptureDEM-CSV]</parent-name>
-            <remote-alias>dzw_xmax</remote-alias>
-            <ordinal>22</ordinal>
-            <local-type>real</local-type>
-            <aggregation>Sum</aggregation>
-            <precision>8</precision>
-            <contains-null>true</contains-null>
-            <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-          </metadata-record>
-          <metadata-record class='column'>
-            <remote-name>dzw_xmax_y</remote-name>
-            <remote-type>5</remote-type>
-            <local-name>[dzw_xmax_y]</local-name>
-            <parent-name>[GroundRaptureDEM-CSV]</parent-name>
-            <remote-alias>dzw_xmax_y</remote-alias>
-            <ordinal>23</ordinal>
-            <local-type>real</local-type>
-            <aggregation>Sum</aggregation>
-            <precision>8</precision>
-            <contains-null>true</contains-null>
-            <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-          </metadata-record>
-          <metadata-record class='column'>
-            <remote-name>scarp_dip</remote-name>
-            <remote-type>5</remote-type>
-            <local-name>[scarp_dip]</local-name>
-            <parent-name>[GroundRaptureDEM-CSV]</parent-name>
-            <remote-alias>scarp_dip</remote-alias>
-            <ordinal>24</ordinal>
-            <local-type>real</local-type>
-            <aggregation>Sum</aggregation>
-            <precision>8</precision>
-            <contains-null>true</contains-null>
-            <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-          </metadata-record>
-          <metadata-record class='column'>
-            <remote-name>scarp_class</remote-name>
-            <remote-type>129</remote-type>
-            <local-name>[scarp_class]</local-name>
-            <parent-name>[GroundRaptureDEM-CSV]</parent-name>
-            <remote-alias>scarp_class</remote-alias>
-            <ordinal>25</ordinal>
-            <local-type>string</local-type>
-            <aggregation>Count</aggregation>
-            <width>65535</width>
-            <contains-null>true</contains-null>
-            <collation flag='0' name='binary' />
-            <attributes>
-              <attribute datatype='string' name='TypeIsVarchar'>&quot;true&quot;</attribute>
-            </attributes>
-            <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-          </metadata-record>
-          <metadata-record class='column'>
-            <remote-name>r_2_value</remote-name>
-            <remote-type>5</remote-type>
-            <local-name>[r_2_value]</local-name>
-            <parent-name>[GroundRaptureDEM-CSV]</parent-name>
-            <remote-alias>r_2_value</remote-alias>
-            <ordinal>26</ordinal>
-            <local-type>real</local-type>
-            <aggregation>Sum</aggregation>
-            <precision>8</precision>
-            <contains-null>true</contains-null>
-            <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-          </metadata-record>
-        </metadata-records>
-      </connection>
-      <aliases enabled='yes' />
-      <column caption='Magnitude' datatype='real' name='[Calculation_5561481032470528]' role='measure' type='quantitative'>
-        <calculation class='tableau' formula='6.94 + 1.14*LOG([slip])' />
-      </column>
-      <column caption='Driver Value' datatype='real' name='[Calculation_5561481033752577]' role='measure' type='quantitative'>
-        <calculation class='tableau' formula='CASE [Parameters].[Parameter 1]&#10;  WHEN &apos;Slip&apos;      THEN [slip]&#10;  WHEN &apos;Magnitude&apos; THEN [Calculation_5561481032470528]&#10;END' />
-      </column>
-      <column caption='Response Value' datatype='real' name='[Calculation_5561481033887746]' role='measure' type='quantitative'>
-        <calculation class='tableau' formula='CASE [Parameters].[Parameter 2]&#10;  WHEN &apos;Scarp_Height&apos; THEN [scarp_height]&#10;  WHEN &apos;DZW&apos;          THEN [dzw]&#10;  WHEN &apos;Scarp_Dip&apos;    THEN [scarp_dip]&#10;  WHEN &apos;Us - Ud&apos;      THEN [us_ud]&#10;END' />
-      </column>
-      <column caption='Condition' datatype='string' name='[Calculation_5561481034330115]' role='dimension' type='nominal'>
-        <calculation class='tableau' formula='CASE [Parameters].[Parameter 3]&#10;  WHEN &apos;Scarp_Class&apos;       THEN [scarp_class]&#10;  WHEN &apos;Fault_Dip&apos;         THEN STR([fault_dip])&#10;  WHEN &apos;Cohesion&apos;          THEN [cohesion]&#10;  WHEN &apos;Set&apos;               THEN [set]&#10;  WHEN &apos;Density&apos;           THEN STR([density])&#10;  WHEN &apos;Sediment_Strength&apos; THEN STR([sediment_strength])&#10;END' />
-      </column>
-      <column caption='GroundRaptureDEM-CSV' datatype='table' name='[__tableau_internal_object_id__].[dem_4F5E281D2B2C443CB81B61909CC15A72]' role='measure' type='quantitative' />
-      <column caption='Cohesion' datatype='string' name='[cohesion]' role='dimension' type='nominal' />
-      <column caption='Conversion Factor' datatype='real' name='[conversion_factor]' role='measure' type='quantitative' />
-      <column caption='Density' datatype='string' name='[density]' role='dimension' type='nominal' />
-      <column caption='Depth' datatype='integer' name='[depth]' role='measure' type='quantitative' />
-      <column caption='DZW' datatype='real' name='[dzw]' role='measure' type='quantitative' />
-      <column caption='Dzw Xmax' datatype='real' name='[dzw_xmax]' role='measure' type='quantitative' />
-      <column caption='Dzw Xmax Y' datatype='real' name='[dzw_xmax_y]' role='measure' type='quantitative' />
-      <column caption='Dzw Xmin' datatype='real' name='[dzw_xmin]' role='measure' type='quantitative' />
-      <column caption='Dzw Xmin Y' datatype='real' name='[dzw_xmin_y]' role='measure' type='quantitative' />
-      <column caption='Fault Dip' datatype='integer' name='[fault_dip]' role='measure' type='quantitative' />
-      <column caption='Fault Seed' datatype='real' name='[fault_seed]' role='measure' type='quantitative' />
-      <column caption='Fs Depth' datatype='real' name='[fs_depth]' role='measure' type='quantitative' />
-      <column caption='Hd Hw' datatype='real' name='[hd_hw]' role='measure' type='quantitative' />
-      <column caption='R 2 Value' datatype='real' name='[r_2_value]' role='measure' type='quantitative' />
-      <column caption='Scarp Class' datatype='string' name='[scarp_class]' role='dimension' type='nominal' />
-      <column caption='Scarp Dip' datatype='real' name='[scarp_dip]' role='measure' type='quantitative' />
-      <column caption='Scarp Height' datatype='real' name='[scarp_height]' role='measure' type='quantitative' />
-      <column caption='Sediment Strength' datatype='string' name='[sediment_strength]' role='dimension' type='nominal' />
-      <column caption='Set' datatype='string' name='[set]' role='dimension' type='nominal' />
-      <column caption='Slip' datatype='real' name='[slip]' role='measure' type='quantitative' />
-      <column caption='Trial' datatype='string' name='[trial]' role='dimension' type='nominal' />
-      <column caption='Unrupturedsed' datatype='real' name='[unrupturedsed]' role='measure' type='quantitative' />
-      <column caption='Us-Ud' datatype='real' name='[us_ud]' role='measure' type='quantitative' />
-      <column caption='Us X' datatype='real' name='[us_x]' role='measure' type='quantitative' />
-      <column caption='Us Y' datatype='real' name='[us_y]' role='measure' type='quantitative' />
-      <column caption='Vd Hw' datatype='real' name='[vd_hw]' role='measure' type='quantitative' />
-      <column-instance column='[Calculation_5561481034330115]' derivation='None' name='[none:Calculation_5561481034330115:nk]' pivot='key' type='nominal' />
-      <extract _.fcp.VConnDownstreamExtractsWithWarnings.true...user-specific='false' count='-1' enabled='false' object-id='' units='records'>
-        <connection access_mode='readonly' authentication='auth-none' author-locale='en_US' class='hyper' dbname='/Users/misha/Documents/My Tableau Repository/Datasources/EPS Ground Rapture Athena (DEM).hyper' default-settings='yes' schema='Extract' sslmode='' tablename='Extract' update-time='06/25/2026 09:22:02 PM' username='tableau_internal_user'>
-          <relation name='Extract' table='[Extract].[Extract]' type='table' />
-          <refresh>
-            <refresh-event add-from-file-path='EPS Ground Rapture Athena (DEM)' increment-value='%null%' refresh-type='create' rows-inserted='346834' timestamp-start='2026-06-25 21:18:46.223' />
-          </refresh>
-          <metadata-records>
-            <metadata-record class='column'>
-              <remote-name>trial</remote-name>
-              <remote-type>129</remote-type>
-              <local-name>[trial]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>trial</remote-alias>
-              <ordinal>0</ordinal>
-              <family>GroundRaptureDEM-CSV</family>
-              <local-type>string</local-type>
-              <aggregation>Count</aggregation>
-              <approx-count>20683</approx-count>
-              <contains-null>true</contains-null>
-              <collation flag='0' name='binary' />
-              <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>depth</remote-name>
-              <remote-type>20</remote-type>
-              <local-name>[depth]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>depth</remote-alias>
-              <ordinal>1</ordinal>
-              <family>GroundRaptureDEM-CSV</family>
-              <local-type>integer</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>3</approx-count>
-              <contains-null>true</contains-null>
-              <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>density</remote-name>
-              <remote-type>129</remote-type>
-              <local-name>[density]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>density</remote-alias>
-              <ordinal>2</ordinal>
-              <family>GroundRaptureDEM-CSV</family>
-              <local-type>string</local-type>
-              <aggregation>Count</aggregation>
-              <approx-count>3</approx-count>
-              <contains-null>true</contains-null>
-              <collation flag='0' name='binary' />
-              <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>cohesion</remote-name>
-              <remote-type>129</remote-type>
-              <local-name>[cohesion]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>cohesion</remote-alias>
-              <ordinal>3</ordinal>
-              <family>GroundRaptureDEM-CSV</family>
-              <local-type>string</local-type>
-              <aggregation>Count</aggregation>
-              <approx-count>26</approx-count>
-              <contains-null>true</contains-null>
-              <collation flag='0' name='binary' />
-              <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>sediment_strength</remote-name>
-              <remote-type>129</remote-type>
-              <local-name>[sediment_strength]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>sediment_strength</remote-alias>
-              <ordinal>4</ordinal>
-              <family>GroundRaptureDEM-CSV</family>
-              <local-type>string</local-type>
-              <aggregation>Count</aggregation>
-              <approx-count>6</approx-count>
-              <contains-null>true</contains-null>
-              <collation flag='0' name='binary' />
-              <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>set</remote-name>
-              <remote-type>129</remote-type>
-              <local-name>[set]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>set</remote-alias>
-              <ordinal>5</ordinal>
-              <family>GroundRaptureDEM-CSV</family>
-              <local-type>string</local-type>
-              <aggregation>Count</aggregation>
-              <approx-count>2</approx-count>
-              <contains-null>true</contains-null>
-              <collation flag='0' name='binary' />
-              <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>fault_dip</remote-name>
-              <remote-type>20</remote-type>
-              <local-name>[fault_dip]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>fault_dip</remote-alias>
-              <ordinal>6</ordinal>
-              <family>GroundRaptureDEM-CSV</family>
-              <local-type>integer</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>7</approx-count>
-              <contains-null>true</contains-null>
-              <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>fault_seed</remote-name>
-              <remote-type>5</remote-type>
-              <local-name>[fault_seed]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>fault_seed</remote-alias>
-              <ordinal>7</ordinal>
-              <family>GroundRaptureDEM-CSV</family>
-              <local-type>real</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>4</approx-count>
-              <contains-null>true</contains-null>
-              <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>fs_depth</remote-name>
-              <remote-type>5</remote-type>
-              <local-name>[fs_depth]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>fs_depth</remote-alias>
-              <ordinal>8</ordinal>
-              <family>GroundRaptureDEM-CSV</family>
-              <local-type>real</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>8</approx-count>
-              <contains-null>true</contains-null>
-              <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>unrupturedsed</remote-name>
-              <remote-type>5</remote-type>
-              <local-name>[unrupturedsed]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>unrupturedsed</remote-alias>
-              <ordinal>9</ordinal>
-              <family>GroundRaptureDEM-CSV</family>
-              <local-type>real</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>9</approx-count>
-              <contains-null>true</contains-null>
-              <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>conversion_factor</remote-name>
-              <remote-type>5</remote-type>
-              <local-name>[conversion_factor]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>conversion_factor</remote-alias>
-              <ordinal>10</ordinal>
-              <family>GroundRaptureDEM-CSV</family>
-              <local-type>real</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>18</approx-count>
-              <contains-null>true</contains-null>
-              <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>slip</remote-name>
-              <remote-type>5</remote-type>
-              <local-name>[slip]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>slip</remote-alias>
-              <ordinal>11</ordinal>
-              <family>GroundRaptureDEM-CSV</family>
-              <local-type>real</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>4099</approx-count>
-              <contains-null>true</contains-null>
-              <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>vd_hw</remote-name>
-              <remote-type>5</remote-type>
-              <local-name>[vd_hw]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>vd_hw</remote-alias>
-              <ordinal>12</ordinal>
-              <family>GroundRaptureDEM-CSV</family>
-              <local-type>real</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>19845</approx-count>
-              <contains-null>true</contains-null>
-              <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>hd_hw</remote-name>
-              <remote-type>5</remote-type>
-              <local-name>[hd_hw]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>hd_hw</remote-alias>
-              <ordinal>13</ordinal>
-              <family>GroundRaptureDEM-CSV</family>
-              <local-type>real</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>20021</approx-count>
-              <contains-null>true</contains-null>
-              <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>scarp_height</remote-name>
-              <remote-type>5</remote-type>
-              <local-name>[scarp_height]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>scarp_height</remote-alias>
-              <ordinal>14</ordinal>
-              <family>GroundRaptureDEM-CSV</family>
-              <local-type>real</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>10807</approx-count>
-              <contains-null>true</contains-null>
-              <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>us_ud</remote-name>
-              <remote-type>5</remote-type>
-              <local-name>[us_ud]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>us_ud</remote-alias>
-              <ordinal>15</ordinal>
-              <family>GroundRaptureDEM-CSV</family>
-              <local-type>real</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>50258</approx-count>
-              <contains-null>true</contains-null>
-              <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>us_x</remote-name>
-              <remote-type>5</remote-type>
-              <local-name>[us_x]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>us_x</remote-alias>
-              <ordinal>16</ordinal>
-              <family>GroundRaptureDEM-CSV</family>
-              <local-type>real</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>20240</approx-count>
-              <contains-null>true</contains-null>
-              <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>us_y</remote-name>
-              <remote-type>5</remote-type>
-              <local-name>[us_y]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>us_y</remote-alias>
-              <ordinal>17</ordinal>
-              <family>GroundRaptureDEM-CSV</family>
-              <local-type>real</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>14493</approx-count>
-              <contains-null>true</contains-null>
-              <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>dzw</remote-name>
-              <remote-type>5</remote-type>
-              <local-name>[dzw]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>dzw</remote-alias>
-              <ordinal>18</ordinal>
-              <family>GroundRaptureDEM-CSV</family>
-              <local-type>real</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>37408</approx-count>
-              <contains-null>true</contains-null>
-              <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>dzw_xmin</remote-name>
-              <remote-type>5</remote-type>
-              <local-name>[dzw_xmin]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>dzw_xmin</remote-alias>
-              <ordinal>19</ordinal>
-              <family>GroundRaptureDEM-CSV</family>
-              <local-type>real</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>24284</approx-count>
-              <contains-null>true</contains-null>
-              <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>dzw_xmin_y</remote-name>
-              <remote-type>5</remote-type>
-              <local-name>[dzw_xmin_y]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>dzw_xmin_y</remote-alias>
-              <ordinal>20</ordinal>
-              <family>GroundRaptureDEM-CSV</family>
-              <local-type>real</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>11880</approx-count>
-              <contains-null>true</contains-null>
-              <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>dzw_xmax</remote-name>
-              <remote-type>5</remote-type>
-              <local-name>[dzw_xmax]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>dzw_xmax</remote-alias>
-              <ordinal>21</ordinal>
-              <family>GroundRaptureDEM-CSV</family>
-              <local-type>real</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>22971</approx-count>
-              <contains-null>true</contains-null>
-              <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>dzw_xmax_y</remote-name>
-              <remote-type>5</remote-type>
-              <local-name>[dzw_xmax_y]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>dzw_xmax_y</remote-alias>
-              <ordinal>22</ordinal>
-              <family>GroundRaptureDEM-CSV</family>
-              <local-type>real</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>272</approx-count>
-              <contains-null>true</contains-null>
-              <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>scarp_dip</remote-name>
-              <remote-type>5</remote-type>
-              <local-name>[scarp_dip]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>scarp_dip</remote-alias>
-              <ordinal>23</ordinal>
-              <family>GroundRaptureDEM-CSV</family>
-              <local-type>real</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>59754</approx-count>
-              <contains-null>true</contains-null>
-              <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>scarp_class</remote-name>
-              <remote-type>129</remote-type>
-              <local-name>[scarp_class]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>scarp_class</remote-alias>
-              <ordinal>24</ordinal>
-              <family>GroundRaptureDEM-CSV</family>
-              <local-type>string</local-type>
-              <aggregation>Count</aggregation>
-              <approx-count>7</approx-count>
-              <contains-null>true</contains-null>
-              <collation flag='0' name='binary' />
-              <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-            </metadata-record>
-            <metadata-record class='column'>
-              <remote-name>r_2_value</remote-name>
-              <remote-type>5</remote-type>
-              <local-name>[r_2_value]</local-name>
-              <parent-name>[Extract]</parent-name>
-              <remote-alias>r_2_value</remote-alias>
-              <ordinal>25</ordinal>
-              <family>GroundRaptureDEM-CSV</family>
-              <local-type>real</local-type>
-              <aggregation>Sum</aggregation>
-              <approx-count>248050</approx-count>
-              <contains-null>true</contains-null>
-              <object-id>[dem_4F5E281D2B2C443CB81B61909CC15A72]</object-id>
-            </metadata-record>
-          </metadata-records>
-        </connection>
-      </extract>
-      <layout dim-ordering='alphabetic' measure-ordering='alphabetic' show-structure='true' />
-      <style>
-        <style-rule element='mark'>
-          <encoding attr='color' field='[none:Calculation_5561481034330115:nk]' type='palette'>
-            <map to='#009ffa'>
-              <bucket>&quot;Monoclinal&quot;</bucket>
-            </map>
-            <map to='#3f67b1'>
-              <bucket>&quot;Monoclinal Collapse&quot;</bucket>
-            </map>
-            <map to='#499894'>
-              <bucket>&quot;A&quot;</bucket>
-            </map>
-            <map to='#499894'>
-              <bucket>&quot;F&quot;</bucket>
-            </map>
-            <map to='#4e79a7'>
-              <bucket>%null%</bucket>
-            </map>
-            <map to='#4e79a7'>
-              <bucket>&quot;Dense&quot;</bucket>
-            </map>
-            <map to='#4e79a7'>
-              <bucket>&quot;Heterogeneous&quot;</bucket>
-            </map>
-            <map to='#4e79a7'>
-              <bucket>&quot;R6&quot;</bucket>
-            </map>
-            <map to='#59a14f'>
-              <bucket>&quot;45&quot;</bucket>
-            </map>
-            <map to='#59a14f'>
-              <bucket>&quot;R10&quot;</bucket>
-            </map>
-            <map to='#76b7b2'>
-              <bucket>&quot;40&quot;</bucket>
-            </map>
-            <map to='#79706e'>
-              <bucket>&quot;L&quot;</bucket>
-            </map>
-            <map to='#86bcb6'>
-              <bucket>&quot;G&quot;</bucket>
-            </map>
-            <map to='#8cd17d'>
-              <bucket>&quot;1.50E+06&quot;</bucket>
-            </map>
-            <map to='#8cd17d'>
-              <bucket>&quot;S&quot;</bucket>
-            </map>
-            <map to='#9d7660'>
-              <bucket>&quot;R4&quot;</bucket>
-            </map>
-            <map to='#9f1d20'>
-              <bucket>&quot;Simple Collapse&quot;</bucket>
-            </map>
-            <map to='#a0cbe8'>
-              <bucket>&quot;1.00E+05&quot;</bucket>
-            </map>
-            <map to='#a0cbe8'>
-              <bucket>&quot;R7&quot;</bucket>
-            </map>
-            <map to='#af773e'>
-              <bucket>&quot;Pressure Ridge Collapse&quot;</bucket>
-            </map>
-            <map to='#b07aa1'>
-              <bucket>&quot;60&quot;</bucket>
-            </map>
-            <map to='#b07aa1'>
-              <bucket>&quot;R2&quot;</bucket>
-            </map>
-            <map to='#b6992d'>
-              <bucket>&quot;2.00E+06&quot;</bucket>
-            </map>
-            <map to='#b6992d'>
-              <bucket>&quot;B&quot;</bucket>
-            </map>
-            <map to='#bab0ac'>
-              <bucket>&quot;M&quot;</bucket>
-            </map>
-            <map to='#d37295'>
-              <bucket>&quot;Q&quot;</bucket>
-            </map>
-            <map to='#d4a6c8'>
-              <bucket>&quot;R3&quot;</bucket>
-            </map>
-            <map to='#d7b5a6'>
-              <bucket>&quot;R5&quot;</bucket>
-            </map>
-            <map to='#e15759'>
-              <bucket>&quot;30&quot;</bucket>
-            </map>
-            <map to='#e15759'>
-              <bucket>&quot;H&quot;</bucket>
-            </map>
-            <map to='#e15759'>
-              <bucket>&quot;Medium&quot;</bucket>
-            </map>
-            <map to='#ed2024'>
-              <bucket>&quot;Simple&quot;</bucket>
-            </map>
-            <map to='#edc948'>
-              <bucket>&quot;50&quot;</bucket>
-            </map>
-            <map to='#f1ce63'>
-              <bucket>&quot;5.00E+05&quot;</bucket>
-            </map>
-            <map to='#f1ce63'>
-              <bucket>&quot;C&quot;</bucket>
-            </map>
-            <map to='#f28e2b'>
-              <bucket>&quot;20&quot;</bucket>
-            </map>
-            <map to='#f28e2b'>
-              <bucket>&quot;Homogeneous&quot;</bucket>
-            </map>
-            <map to='#f28e2b'>
-              <bucket>&quot;Loose&quot;</bucket>
-            </map>
-            <map to='#f28e2b'>
-              <bucket>&quot;R8&quot;</bucket>
-            </map>
-            <map to='#f47820'>
-              <bucket>&quot;Pressure Ridge&quot;</bucket>
-            </map>
-            <map to='#fabfd2'>
-              <bucket>&quot;R1&quot;</bucket>
-            </map>
-            <map to='#ff9d9a'>
-              <bucket>&quot;K&quot;</bucket>
-            </map>
-            <map to='#ff9da7'>
-              <bucket>&quot;70&quot;</bucket>
-            </map>
-            <map to='#ffbe7d'>
-              <bucket>&quot;1.00E+06&quot;</bucket>
-            </map>
-            <map to='#ffbe7d'>
-              <bucket>&quot;R9&quot;</bucket>
-            </map>
-          </encoding>
-        </style-rule>
-      </style>
-      <semantic-values>
-        <semantic-value key='[Country].[Name]' value='&quot;United States&quot;' />
-      </semantic-values>
-      <datasource-dependencies datasource='Parameters'>
-        <column caption='Driver' datatype='string' name='[Parameter 1]' param-domain-type='list' role='measure' type='nominal' value='&quot;Slip&quot;'>
-          <calculation class='tableau' formula='&quot;Slip&quot;' />
-        </column>
-        <column alias='Scarp Height' caption='Response' datatype='string' name='[Parameter 2]' param-domain-type='list' role='measure' type='nominal' value='&quot;Scarp_Height&quot;'>
-          <calculation class='tableau' formula='&quot;Scarp_Height&quot;' />
-          <aliases>
-            <alias key='&quot;Scarp_Dip&quot;' value='Scarp Dip' />
-            <alias key='&quot;Scarp_Height&quot;' value='Scarp Height' />
-          </aliases>
-        </column>
-        <column alias='Scarp Class' caption='Condition By' datatype='string' name='[Parameter 3]' param-domain-type='list' role='measure' type='nominal' value='&quot;Scarp_Class&quot;'>
-          <calculation class='tableau' formula='&quot;Scarp_Class&quot;' />
-          <aliases>
-            <alias key='&quot;Fault_Dip&quot;' value='Fault Dip' />
-            <alias key='&quot;Scarp_Class&quot;' value='Scarp Class' />
-            <alias key='&quot;Sediment_Strength&quot;' value='Sediment Strength' />
-          </aliases>
-        </column>
-      </datasource-dependencies>
-      <object-graph>
-        <objects>
-          <object caption='GroundRaptureDEM-CSV' id='dem_4F5E281D2B2C443CB81B61909CC15A72'>
-            <properties context=''>
-              <relation connection='athena.17zn27t1375i2b1chkoa81gwppr4' name='GroundRaptureDEM-CSV' table='[eps_ground_rapture_dev].[dem]' type='table' />
-            </properties>
-            <properties context='extract'>
-              <relation name='Extract' table='[Extract].[Extract]' type='table' />
-            </properties>
-          </object>
-        </objects>
-      </object-graph>
-    </datasource>
     <datasource hasconnection='false' inline='true' name='Parameters' version='18.1'>
       <aliases enabled='yes' />
       <column caption='Driver' datatype='string' name='[Parameter 1]' param-domain-type='list' role='measure' type='nominal' value='&quot;Slip&quot;'>
@@ -1586,6 +476,7 @@
       <column caption='Us y' datatype='real' name='[Us_y]' role='measure' type='quantitative' />
       <column caption='Vd Hw' datatype='real' name='[VD_HW]' role='measure' type='quantitative' />
       <column caption='dem.csv' datatype='table' name='[__tableau_internal_object_id__].[dem.csv_1C3C3D9256B74D358421B1E058EB7210]' role='measure' type='quantitative' />
+      <column-instance column='[Calculation_5561481034330115]' derivation='None' name='[none:Calculation_5561481034330115:nk]' pivot='key' type='nominal' />
       <extract _.fcp.VConnDownstreamExtractsWithWarnings.true...user-specific='false' count='-1' enabled='true' object-id='' units='records'>
         <connection access_mode='readonly' authentication='auth-none' author-locale='en_US' class='hyper' dbname='/Users/misha/Documents/My Tableau Repository/Datasources/GroundRaptureDEM-CSV.hyper' default-settings='yes' schema='Extract' sslmode='' tablename='Extract' update-time='06/25/2026 09:29:26 PM' username='tableau_internal_user'>
           <relation name='Extract' table='[Extract].[Extract]' type='table' />
@@ -1967,6 +858,147 @@
         </connection>
       </extract>
       <layout dim-ordering='alphabetic' measure-ordering='alphabetic' show-structure='true' />
+      <style>
+        <style-rule element='mark'>
+          <encoding attr='color' field='[none:Calculation_5561481034330115:nk]' type='palette'>
+            <map to='#009ffa'>
+              <bucket>&quot;Monoclinal&quot;</bucket>
+            </map>
+            <map to='#3f67b1'>
+              <bucket>&quot;Monoclinal Collapse&quot;</bucket>
+            </map>
+            <map to='#499894'>
+              <bucket>&quot;A&quot;</bucket>
+            </map>
+            <map to='#499894'>
+              <bucket>&quot;F&quot;</bucket>
+            </map>
+            <map to='#4e79a7'>
+              <bucket>%null%</bucket>
+            </map>
+            <map to='#4e79a7'>
+              <bucket>&quot;Dense&quot;</bucket>
+            </map>
+            <map to='#4e79a7'>
+              <bucket>&quot;Heterogeneous&quot;</bucket>
+            </map>
+            <map to='#4e79a7'>
+              <bucket>&quot;R6&quot;</bucket>
+            </map>
+            <map to='#59a14f'>
+              <bucket>&quot;45&quot;</bucket>
+            </map>
+            <map to='#59a14f'>
+              <bucket>&quot;R10&quot;</bucket>
+            </map>
+            <map to='#76b7b2'>
+              <bucket>&quot;40&quot;</bucket>
+            </map>
+            <map to='#79706e'>
+              <bucket>&quot;L&quot;</bucket>
+            </map>
+            <map to='#86bcb6'>
+              <bucket>&quot;G&quot;</bucket>
+            </map>
+            <map to='#8cd17d'>
+              <bucket>&quot;1.50E+06&quot;</bucket>
+            </map>
+            <map to='#8cd17d'>
+              <bucket>&quot;S&quot;</bucket>
+            </map>
+            <map to='#9d7660'>
+              <bucket>&quot;R4&quot;</bucket>
+            </map>
+            <map to='#9f1d20'>
+              <bucket>&quot;Simple Collapse&quot;</bucket>
+            </map>
+            <map to='#a0cbe8'>
+              <bucket>&quot;1.00E+05&quot;</bucket>
+            </map>
+            <map to='#a0cbe8'>
+              <bucket>&quot;R7&quot;</bucket>
+            </map>
+            <map to='#af773e'>
+              <bucket>&quot;Pressure Ridge Collapse&quot;</bucket>
+            </map>
+            <map to='#b07aa1'>
+              <bucket>&quot;60&quot;</bucket>
+            </map>
+            <map to='#b07aa1'>
+              <bucket>&quot;R2&quot;</bucket>
+            </map>
+            <map to='#b6992d'>
+              <bucket>&quot;2.00E+06&quot;</bucket>
+            </map>
+            <map to='#b6992d'>
+              <bucket>&quot;B&quot;</bucket>
+            </map>
+            <map to='#bab0ac'>
+              <bucket>&quot;M&quot;</bucket>
+            </map>
+            <map to='#d37295'>
+              <bucket>&quot;Q&quot;</bucket>
+            </map>
+            <map to='#d4a6c8'>
+              <bucket>&quot;R3&quot;</bucket>
+            </map>
+            <map to='#d7b5a6'>
+              <bucket>&quot;R5&quot;</bucket>
+            </map>
+            <map to='#e15759'>
+              <bucket>&quot;30&quot;</bucket>
+            </map>
+            <map to='#e15759'>
+              <bucket>&quot;H&quot;</bucket>
+            </map>
+            <map to='#e15759'>
+              <bucket>&quot;Medium&quot;</bucket>
+            </map>
+            <map to='#ed2024'>
+              <bucket>&quot;Simple&quot;</bucket>
+            </map>
+            <map to='#edc948'>
+              <bucket>&quot;50&quot;</bucket>
+            </map>
+            <map to='#f1ce63'>
+              <bucket>&quot;5.00E+05&quot;</bucket>
+            </map>
+            <map to='#f1ce63'>
+              <bucket>&quot;C&quot;</bucket>
+            </map>
+            <map to='#f28e2b'>
+              <bucket>&quot;20&quot;</bucket>
+            </map>
+            <map to='#f28e2b'>
+              <bucket>&quot;Homogeneous&quot;</bucket>
+            </map>
+            <map to='#f28e2b'>
+              <bucket>&quot;Loose&quot;</bucket>
+            </map>
+            <map to='#f28e2b'>
+              <bucket>&quot;R8&quot;</bucket>
+            </map>
+            <map to='#f47820'>
+              <bucket>&quot;Pressure Ridge&quot;</bucket>
+            </map>
+            <map to='#fabfd2'>
+              <bucket>&quot;R1&quot;</bucket>
+            </map>
+            <map to='#ff9d9a'>
+              <bucket>&quot;K&quot;</bucket>
+            </map>
+            <map to='#ff9da7'>
+              <bucket>&quot;70&quot;</bucket>
+            </map>
+            <map to='#ffbe7d'>
+              <bucket>&quot;1.00E+06&quot;</bucket>
+            </map>
+            <map to='#ffbe7d'>
+              <bucket>&quot;R9&quot;</bucket>
+            </map>
+          </encoding>
+        </style-rule>
+      </style>
       <semantic-values>
         <semantic-value key='[Country].[Name]' value='&quot;United States&quot;' />
       </semantic-values>
@@ -2359,7 +1391,7 @@
             <card mode='compact' param='[Parameters].[Parameter 1]' type='parameter' />
             <card mode='compact' param='[Parameters].[Parameter 2]' type='parameter' />
             <card mode='compact' param='[Parameters].[Parameter 3]' type='parameter' />
-            <card pane-specification-id='0' param='[EPS Ground Rapture Athena].[none:Calculation_5561481034330115:nk]' type='color' />
+            <card pane-specification-id='0' param='[federated.1or8g8o1xpy8wd1a368cu1icvhuo].[none:Calculation_5561481034330115:nk]' type='color' />
           </strip>
         </edge>
       </cards>
