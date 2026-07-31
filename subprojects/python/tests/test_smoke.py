@@ -161,21 +161,29 @@ def test_athena_ddl_uses_sanitized_names_and_index_access(tmp_path: Path):
     assert "parquet.column.index.access" in ddl
 
 
-def test_build_duckdb_views_creates_unified_view(tmp_path: Path):
-    """Build Parquet tables and a DuckDB views file in an isolated tmp dir,
-    then confirm the `unified_observations` view groups rows by source.
-    """
-    processed_dir = tmp_path / "processed"
+def _views_fixture_frames() -> dict[str, pd.DataFrame]:
     dem = pd.DataFrame({"DZW": [1.0], "Scarp_Height": [0.5], "Scarp_Class": ["Simple"],
                         "Fault_Dip": [30], "Cohesion": ["R1"], "Set": ["Homogeneous"]})
     fdhi = pd.DataFrame({"fzw_central_meters": [10.0], "vs_central_meters": [2.0],
-                         "eq_name": ["Wenchuan"],
+                         "eq_name": ["Wenchuan"], "magnitude": [7.9],
                          "latitude_degrees": [31.0], "longitude_degrees": [103.0]})
-    sure = pd.DataFrame({"FNC": [5.0], "SH": [1.0], "eq_name": ["Chi-Chi"],
-                         "Latitude": [23.8], "Longitude": [120.8]})
+    # NB: the trailing NBSP on the second eq_name is deliberate — SURE.csv
+    # really contains 'Tennant Creek\xa0', and the magnitude lookup must
+    # normalize it.
+    sure = pd.DataFrame({"FNC": [5.0, 6.0], "SH": [1.0, 1.2],
+                         "eq_name": ["Chi-Chi", "Tennant Creek\xa0"],
+                         "Latitude": [23.8, -19.8], "Longitude": [120.8, 134.0]})
     kern = pd.DataFrame({"DZW": [3.0], "Vertical": [0.3]})
+    return {"dem": dem, "fdhi_cleaned": fdhi, "sure": sure, "kern_combined": kern}
 
-    for name, df in (("dem", dem), ("fdhi_cleaned", fdhi), ("sure", sure), ("kern_combined", kern)):
+
+def test_build_duckdb_views_creates_unified_view(tmp_path: Path):
+    """Build Parquet tables and a DuckDB views file in an isolated tmp dir,
+    then confirm the `unified_observations` view groups rows by source and
+    carries per-source event magnitudes.
+    """
+    processed_dir = tmp_path / "processed"
+    for name, df in _views_fixture_frames().items():
         export.export_tidy(df, name, out_dir=processed_dir)
 
     duckdb_path = views.build_duckdb_views(
@@ -191,15 +199,57 @@ def test_build_duckdb_views_creates_unified_view(tmp_path: Path):
         ).fetchall()
         # Each source contributes the lat/lon we'd expect.
         geo = dict(con.execute(
-            "SELECT source, latitude FROM unified_observations ORDER BY source"
+            "SELECT source, MIN(latitude) FROM unified_observations GROUP BY source"
+        ).fetchall())
+        mags = dict(con.execute(
+            "SELECT coalesce(eq_name, source), magnitude FROM unified_observations"
         ).fetchall())
     finally:
         con.close()
-    assert rows == [("DEM", 1), ("FDHI", 1), ("Kern", 1), ("SURE", 1)]
+    assert rows == [("DEM", 1), ("FDHI", 1), ("Kern", 1), ("SURE", 2)]
     assert geo["DEM"] is None
     assert geo["FDHI"] == 31.0
-    assert geo["SURE"] == 23.8
+    assert geo["SURE"] == -19.8  # MIN over the two SURE fixture rows
     assert geo["Kern"] == views.KERN_LATITUDE
+    # Magnitude semantics: DEM rows have none; FDHI carries its own column;
+    # SURE values come from the config lookup (NBSP-tolerant); Kern is 1952.
+    assert mags["DEM"] is None
+    assert mags["Wenchuan"] == 7.9
+    assert mags["Chi-Chi"] == 7.6
+    assert mags["Tennant Creek\xa0"] == 6.6
+    assert mags["Kern County (1952)"] == views.KERN_MAGNITUDE
+
+
+def test_build_duckdb_views_optional_fdhi_measurements(tmp_path: Path):
+    """The fdhi_measurements view exists exactly when its Parquet does."""
+    processed_dir = tmp_path / "processed"
+    for name, df in _views_fixture_frames().items():
+        export.export_tidy(df, name, out_dir=processed_dir)
+
+    def view_names(db: Path) -> set[str]:
+        con = duckdb.connect(str(db), read_only=True)
+        try:
+            return {r[0] for r in con.execute(
+                "SELECT view_name FROM duckdb_views() WHERE NOT internal"
+            ).fetchall()}
+        finally:
+            con.close()
+
+    without = views.build_duckdb_views(
+        processed_dir=processed_dir, duckdb_path=tmp_path / "a.duckdb")
+    assert "fdhi_measurements" not in view_names(without)
+
+    export.export_tidy(
+        pd.DataFrame({"eq_name": ["Wenchuan"], "sh_central_meters": [1.0]}),
+        "fdhi_measurements", out_dir=processed_dir)
+    with_it = views.build_duckdb_views(
+        processed_dir=processed_dir, duckdb_path=tmp_path / "b.duckdb")
+    assert "fdhi_measurements" in view_names(with_it)
+    con = duckdb.connect(str(with_it), read_only=True)
+    try:
+        assert con.execute("SELECT COUNT(*) FROM fdhi_measurements").fetchone()[0] == 1
+    finally:
+        con.close()
 
 
 def test_athena_unified_view_sql_shape():
@@ -212,6 +262,48 @@ def test_athena_unified_view_sql_shape():
     # all four sources present, Kern pinned to its epicenter
     for token in ("'DEM'", "'FDHI'", "'SURE'", "'Kern'", str(views.KERN_LATITUDE)):
         assert token in sql
+    # magnitude comes along: SURE via the NBSP-normalizing CASE lookup,
+    # Kern as the 1952 constant.
+    assert "magnitude" in sql
+    assert "chr(160)" in sql
+    assert "WHEN 'Chi-Chi' THEN 7.6" in sql
+    assert str(views.KERN_MAGNITUDE) in sql
+
+
+def test_sure_magnitude_case_skips_unknowns():
+    from eps_ground_rapture.config import SURE_EVENT_MAGNITUDES
+
+    case = views._sure_magnitude_case("eq_name")
+    for name, mw in SURE_EVENT_MAGNITUDES.items():
+        if mw is None:
+            assert f"'{name}'" not in case  # falls through to NULL
+        else:
+            assert f"WHEN '{name}' THEN {mw}" in case
+
+
+def test_sure_enriched_view(tmp_path: Path):
+    """`sure_enriched` keeps every SURE row and joins the magnitude in,
+    tolerating the trailing-NBSP eq_name variants."""
+    processed_dir = tmp_path / "processed"
+    for name, df in _views_fixture_frames().items():
+        export.export_tidy(df, name, out_dir=processed_dir)
+    db = views.build_duckdb_views(
+        processed_dir=processed_dir, duckdb_path=tmp_path / "eps.duckdb")
+
+    con = duckdb.connect(str(db), read_only=True)
+    try:
+        got = dict(con.execute(
+            "SELECT eq_name, magnitude FROM sure_enriched").fetchall())
+    finally:
+        con.close()
+    assert got == {"Chi-Chi": 7.6, "Tennant Creek\xa0": 6.6}
+
+
+def test_athena_sure_enriched_view_sql_shape():
+    sql = views.athena_sure_enriched_view_sql()
+    assert "CREATE OR REPLACE VIEW sure_enriched" in sql
+    assert "FROM sure" in sql
+    assert "chr(160)" in sql and "WHEN 'Chi-Chi' THEN 7.6" in sql
 
 
 def test_jdbc_url_shape(tmp_path: Path):

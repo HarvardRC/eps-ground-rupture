@@ -16,10 +16,10 @@ families plus non-chart illustrations. Summary:
 | Family | Question it answers | Status |
 |--------|---------------------|--------|
 | 1. Model vs reality scatter | Does the simulation behave like real earthquakes? | ✅ built |
-| 2. Driver→response curves | How does the model respond to slip/magnitude per condition? | **next** |
+| 2. Driver→response curves | How does the model respond to slip/magnitude per condition? | ✅ built |
 | 3. Faceted distributions | What's the spread of each output; which parameter shifts it? | later |
 | 4. Mean ± σ summary | Typical values and spreads per scarp class at a glance? | later |
-| 5. Per-event boxplots | How variable are field measurements within each event? | priority 3 |
+| 5. Per-event boxplots | How variable are field measurements within each event? | **next** |
 | 6. Regression + inference | What slip would produce an observed displacement? | priority 4 |
 | Illustrations (static images) | Context: photos, schematics, model snapshots | lowest |
 
@@ -30,20 +30,21 @@ mapping is at the bottom of `chart-families.md`.)
 
 1. ~~**Dashboard 1 — Model vs reality** (family 1)~~ — **built**:
    dual-axis DZW × Scarp_Height scatter, Event Map, Combinations
-   coverage matrix, two dashboards in `dashboards/tableau/dem-overview.twb`.
+   coverage matrix, two dashboards in
+   `dashboards/tableau/dem-model-vs-reality.twb` (formerly
+   `dem-overview.twb`; public variant `dem-model-vs-reality-public.twb`
+   on Tableau Public).
    Remaining polish (from the workbook review):
    - Unify event color/shape encodings between the scatter and the map.
    - Trend line: per-color or remove (currently one pooled OLS line).
    - Map-only non-null `latitude` filter (perf: stop querying 333k rows for 79 points).
    - Title zone width; exhaustive `Point Color` CASE; `'0 none'` coverage bucket.
-2. **Dashboard 2 — DEM response curves** (family 2).
-   - Driver→response grid: `Slip` / `Magnitude` (parameter-switchable x)
-     vs `Scarp_Height`, `DZW`, `Scarp_Dip`, `VDHW`.
-   - Color/facet by `Scarp_Class`, `Fault_Dip`, `Cohesion`, `Set` —
-     reuse the `Row By` / `Col By` parameter pattern from the
-     Combinations sheet.
-   - Pure DEM data; needs the `dem` view only (already exists).
-3. **Dashboard 3 — Per-event field statistics** (family 5).
+2. ~~**Dashboard 2 — DEM response curves** (family 2)~~ — **built**
+   (2026-06-17, published to Tableau Public 2026-06-25):
+   driver→response grid (`Slip`/`Magnitude` × responses) in
+   `dashboards/tableau/dem-response-curve.twb`; public variant
+   `dem-response-curve-public.twb` fed by the Drive CSV of `dem`.
+3. **Dashboard 3 — Per-event field statistics** (family 5). ← **next**
    - Boxplots of FDHI `fzw` / `sh` / `vs` per `eq_name`; SURE FNC/SH
      similarly via `unified_observations`.
    - DEM distribution alongside as context (paper Fig. 13 layout).
@@ -120,13 +121,19 @@ re-ordered to match the build order:
 - **Priorities (2026-06-10)**: after the response-curve dashboard (#2),
   build per-event boxplots (#3) and regression/inference (#4) ahead of
   the distribution/summary dashboards (#5). Static images last.
+- **Delivery paths (2026-06)**: original workbooks query Athena
+  (Terraform-provisioned, ADR-0014); each dashboard also gets a
+  `-public` Tableau Public variant fed by Google Sheets
+  (`egr-push-sheets`, for `unified_observations`) or a Drive CSV
+  (for over-limit views like `dem`).
 
 ## Open questions
 
-- [ ] **Workbook structure**: single `.twb` with all dashboard tabs
-  (current de-facto state — `dem-overview.twb` already has two) vs
-  splitting per audience. Single favors cross-dashboard filter actions.
-  **Pending; default is single until it hurts.**
+- [x] **Workbook structure**: resolved in practice (2026-06) — one
+  workbook per dashboard family (`dem-model-vs-reality.twb`,
+  `dem-response-curve.twb`), each with a `-public` twin for Tableau
+  Public. Cross-dashboard filter actions would need tabs merged back
+  into one workbook; revisit only if that need materializes.
 - [ ] **3D DEM data**: `combinedCases123_v2.csv` and `combinedCase4_v2.csv`
   referenced by the prior owner's script aren't in `data/raw/` yet.
   Without them, Dashboard 1 covers the 2D-DEM slice only. Tracked in
@@ -140,8 +147,10 @@ re-ordered to match the build order:
 
 - `notes/chart-families.md` — canonical chart-type inventory (this
   roadmap's build order references its family numbers).
-- `dashboards/tableau/dem-overview.twb` — the workbook (Dashboard 1 +
-  Viable Combinations live here).
+- `dashboards/tableau/dem-model-vs-reality.twb` — Dashboard 1 + Viable
+  Combinations (public twin: `dem-model-vs-reality-public.twb`).
+- `dashboards/tableau/dem-response-curve.twb` — Dashboard 2 (public
+  twin: `dem-response-curve-public.twb`).
 - `dashboards/duckdb/eps.duckdb` — DuckDB views file Tableau connects to.
 - `subprojects/python/src/eps_ground_rapture/views.py` — view definitions.
 - `TODO.md` — point-in-time chores (raw-FDHI cleaning, 3D DEM data).

@@ -49,8 +49,10 @@ specs). Add new entries here rather than scattering them across files.
 
 ## Dashboards
 
-- `dashboards/tableau/dem-overview.twb` holds Dashboard 1 + Viable
-  Combinations; Superset YAML exports still absent.
+- `dashboards/tableau/dem-model-vs-reality.twb` holds Dashboard 1 +
+  Viable Combinations; `dem-response-curve.twb` holds Dashboard 2; each
+  has a `-public` Tableau Public twin. Superset YAML exports still
+  absent.
 
 ## Tooling friction (open JetBrains issue)
 

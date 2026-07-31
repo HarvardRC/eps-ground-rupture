@@ -5,8 +5,12 @@ Reads raw inputs from `data/raw/`, writes Parquet tables to
 `dashboards/sql/` for both production (Athena over S3) and development
 (Spark Thrift over local filesystem).
 
-No cleaning step today — every input arrives in a state we ship directly.
-See repo-root TODO.md for the FDHI raw-flatfile + cleaning revisit.
+FDHI is the one input with a cleaning step: when the raw UCLA flatfile is
+present in `data/raw/` (see `io.FDHI_FLATFILE_GLOB`), both `fdhi_cleaned`
+(scatter subset, prior owner's chain) and `fdhi_measurements` (per-event
+statistics base) are derived from it in-pipeline. Without it, the build
+falls back to the prior owner's pre-cleaned CSV for `fdhi_cleaned` and
+skips `fdhi_measurements` — see repo-root TODO.md for the download.
 """
 
 from __future__ import annotations
@@ -15,7 +19,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from . import io, register, views
+from . import io, prep, register, views
 from .config import PROCESSED_DIR, REPO_ROOT
 from .export import export_tidy
 
@@ -46,14 +50,25 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
+    frames = [("dem", io.load_dem())]
+    flatfile = io.find_fdhi_flatfile()
+    if flatfile is not None:
+        raw_fdhi = io.load_fdhi_flatfile(flatfile)
+        frames.append(("fdhi_cleaned", prep.clean_fdhi(raw_fdhi)))
+        frames.append(("fdhi_measurements", prep.fdhi_measurements(raw_fdhi)))
+        print(f"fdhi source: {flatfile.name} (raw flatfile, cleaned in-pipeline)")
+    else:
+        frames.append(("fdhi_cleaned", io.load_fdhi()))
+        print(
+            "fdhi source: FDHI_Cleaned_Measurements.csv (pre-cleaned fallback; "
+            "no fdhi_measurements table — download the raw flatfile, see TODO.md)"
+        )
+    frames.append(("sure", io.load_sure()))
+    frames.append(("kern_combined", io.load_kern_combined()))
+
     tables: list[register.Table] = []
-    for name, loader in (
-        ("dem", io.load_dem),
-        ("fdhi_cleaned", io.load_fdhi),
-        ("sure", io.load_sure),
-        ("kern_combined", io.load_kern_combined),
-    ):
-        path = export_tidy(loader(), name)
+    for name, df in frames:
+        path = export_tidy(df, name)
         tables.append(register.Table(name=name, location=path))
         print(f"{name} -> {path}/data.parquet")
 
@@ -81,7 +96,9 @@ def _write_sql_scripts(tables: list[register.Table], *, database: str, s3_prefix
     print(f"spark-thrift DDL -> {_rel(spark_path)}")
 
     athena_views_path = SQL_OUT_DIR / "athena-views.sql"
-    athena_views_path.write_text(views.athena_unified_view_sql())
+    athena_views_path.write_text(
+        views.athena_unified_view_sql() + "\n" + views.athena_sure_enriched_view_sql()
+    )
     print(f"athena views -> {_rel(athena_views_path)}")
 
 
