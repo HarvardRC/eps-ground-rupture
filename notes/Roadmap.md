@@ -26,24 +26,32 @@ families plus non-chart illustrations. Summary:
 (The earlier A–E "theme" taxonomy is superseded by the families; the
 mapping is at the bottom of `chart-families.md`.)
 
-## Build order (priorities set 2026-06-10)
+## Build order (priorities set 2026-06-10; statuses updated 2026-07-25)
 
-1. ~~**Dashboard 1 — Model vs reality** (family 1)~~ — **built**:
-   dual-axis DZW × Scarp_Height scatter, Event Map, Combinations
-   coverage matrix, two dashboards in
-   `dashboards/tableau/dem-model-vs-reality.twb` (formerly
-   `dem-overview.twb`; public variant `dem-model-vs-reality-public.twb`
-   on Tableau Public).
-   Remaining polish (from the workbook review):
+1. ~~**Dashboard 1 — Model vs reality** (family 1)~~ — **built &
+   published**: dual-axis DZW × Scarp_Height scatter, Event Map,
+   Combinations coverage matrix; two dashboards ("Dashboard 1 — DEM
+   Cloud & Historic Overlays", "Viable Combinations") in
+   `dashboards/tableau/dem-model-vs-reality.twb` (renamed from
+   `dem-overview.twb`), plus a `-public` twin
+   (`dem-model-vs-reality-public.twb`) on Tableau Public fed from a
+   CSV export of `unified_observations`.
+   Remaining polish (from the workbook review; not re-audited since the
+   cosmetic-edit / palette commits — re-check which are still open):
    - Unify event color/shape encodings between the scatter and the map.
    - Trend line: per-color or remove (currently one pooled OLS line).
    - Map-only non-null `latitude` filter (perf: stop querying 333k rows for 79 points).
    - Title zone width; exhaustive `Point Color` CASE; `'0 none'` coverage bucket.
-2. ~~**Dashboard 2 — DEM response curves** (family 2)~~ — **built**
-   (2026-06-17, published to Tableau Public 2026-06-25):
-   driver→response grid (`Slip`/`Magnitude` × responses) in
-   `dashboards/tableau/dem-response-curve.twb`; public variant
-   `dem-response-curve-public.twb` fed by the Drive CSV of `dem`.
+2. ~~**Dashboard 2 — DEM response curves** (family 2)~~ — **built &
+   published** (built 2026-06-17, on Tableau Public 2026-06-25):
+   "DEM Response Curves" dashboard in
+   `dashboards/tableau/dem-response-curve.twb` — `Driver` /
+   `Driver Value` parameters switch the x-axis (`Slip` / `Magnitude`)
+   against `Scarp_Height`, `DZW`, `Scarp_Dip`; `-public` twin
+   (`dem-response-curve-public.twb`) fed by the Drive CSV of the
+   `dem` view.
+   - Dropped from the original spec: the `VDHW` response — add it here
+     or fold it into Dashboard 4 (whose regressions center on `VDHW`).
 3. **Dashboard 3 — Per-event field statistics** (family 5). ← **next**
    - Boxplots of FDHI `fzw` / `sh` / `vs` per `eq_name`; SURE FNC/SH
      similarly via `unified_observations`.
@@ -76,15 +84,20 @@ Rough estimate: 1–2 sessions per dashboard; the regression dashboard
 Additions to `subprojects/python/src/eps_ground_rapture/views.py`,
 re-ordered to match the build order:
 
-1. *(for #4)* **`dem_regression` view** — per Fault_Dip, fit
+1. *(for #3)* ~~**`magnitude` in `unified_observations`**~~ — **done**
+   (2026-07-31): FDHI per-measurement Mw (−999 sentinel nulled), Kern
+   pinned to 7.36, SURE looked up from `config.SURE_EVENT_MAGNITUDES`
+   (NBSP-normalized names), DEM NULL. Dashboard 3 gets event labels;
+   Dashboard 1 can now gain a magnitude filter.
+2. *(for #4)* **`dem_regression` view** — per Fault_Dip, fit
    `VDHW ~ Slip` (and optionally `Scarp_Height ~ DZW`) using DuckDB's
    `regr_slope()` / `regr_intercept()` / `regr_r2()`; emit
    `(fault_dip, slope, intercept, r2)`. SQL-only — no Python regression
    import needed.
-2. *(for #5)* **`historic_events` view** — small UNION over FDHI / SURE
+3. *(for #5)* **`historic_events` view** — small UNION over FDHI / SURE
    / Kern with `(event_label, dzw, scarp_height, magnitude)` per event.
    Powers marker-line overlays on histograms.
-3. *(optional)* **`dem_with_bands` view** — adds a `fault_dip_band`
+4. *(optional)* **`dem_with_bands` view** — adds a `fault_dip_band`
    column (`20–30`, `30–40`, …) for cleaner small-multiples. Or do this
    as a calculated field in Tableau and skip the view.
 
@@ -101,7 +114,8 @@ re-ordered to match the build order:
     `Cohesion` / `DEM Set` members.
   - `Row By` / `Col By` — exist (drive the Combinations matrix); reuse
     the same pattern for Dashboard 2's response-curve grid.
-  - New for Dashboard 2: an `X Driver` parameter (`Slip` vs `Magnitude`).
+  - ~~New for Dashboard 2: an `X Driver` parameter~~ — built as the
+    `Driver` / `Driver Value` parameters in `dem-response-curve.twb`.
 - **Color palettes**: align to the legacy figure where readable:
   - Monoclinal: `#009ffa`; Pressure Ridge: `#f47820`; Simple: `#ed2024`;
     each `_Collapse` variant a darker shade of its parent.
@@ -121,11 +135,16 @@ re-ordered to match the build order:
 - **Priorities (2026-06-10)**: after the response-curve dashboard (#2),
   build per-event boxplots (#3) and regression/inference (#4) ahead of
   the distribution/summary dashboards (#5). Static images last.
-- **Delivery paths (2026-06)**: original workbooks query Athena
-  (Terraform-provisioned, ADR-0014); each dashboard also gets a
-  `-public` Tableau Public variant fed by Google Sheets
-  (`egr-push-sheets`, for `unified_observations`) or a Drive CSV
-  (for over-limit views like `dem`).
+- **Tableau Public delivery (2026-07)**: Public can't connect to DuckDB
+  or Athena, so each workbook has a `-public` twin fed from CSV exports
+  of the views (`egr-csv`); the Google Sheets push (`egr-push-sheets`)
+  also exists for `unified_observations` (the full `dem` view exceeds
+  the Sheets cell cap). See `dashboards/sheets/README.md`.
+- **Engines in practice (2026-07)**: the desktop workbooks connect to
+  Athena (AwsDataCatalog, URC Dev; Terraform-provisioned, ADR-0014)
+  with local `.hyper` extracts; DuckDB remains the local fallback.
+  Further AWS/Terraform work is parked, low priority — status and
+  revisit triggers in `TODO.md` → Deployment.
 
 ## Open questions
 
@@ -138,10 +157,10 @@ re-ordered to match the build order:
   referenced by the prior owner's script aren't in `data/raw/` yet.
   Without them, Dashboard 1 covers the 2D-DEM slice only. Tracked in
   `TODO.md`.
-- [ ] **Magnitude in `unified_observations`**: FDHI/SURE carry event
-  magnitudes; surfacing them would enable magnitude filters on
-  Dashboard 1 and labels on Dashboard 3. Small `views.py` change —
-  fold into the #3 data work.
+- [x] **Magnitude in `unified_observations`**: done (2026-07-31) — the
+  view carries event `magnitude` (FDHI per measurement, Kern pinned,
+  SURE via `config.SURE_EVENT_MAGNITUDES`), enabling magnitude filters
+  on Dashboard 1 and labels on Dashboard 3.
 
 ## Related
 

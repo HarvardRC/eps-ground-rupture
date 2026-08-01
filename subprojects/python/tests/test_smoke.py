@@ -164,9 +164,14 @@ def test_athena_ddl_uses_sanitized_names_and_index_access(tmp_path: Path):
 def _views_fixture_frames() -> dict[str, pd.DataFrame]:
     dem = pd.DataFrame({"DZW": [1.0], "Scarp_Height": [0.5], "Scarp_Class": ["Simple"],
                         "Fault_Dip": [30], "Cohesion": ["R1"], "Set": ["Homogeneous"]})
-    fdhi = pd.DataFrame({"fzw_central_meters": [10.0], "vs_central_meters": [2.0],
-                         "eq_name": ["Wenchuan"], "magnitude": [7.9],
-                         "latitude_degrees": [31.0], "longitude_degrees": [103.0]})
+    # NB: the second FDHI row has valid measures but the -999
+    # missing-magnitude sentinel — the unified view must null it.
+    fdhi = pd.DataFrame({"fzw_central_meters": [10.0, 4.0],
+                         "vs_central_meters": [2.0, 1.5],
+                         "eq_name": ["Wenchuan", "Landers"],
+                         "magnitude": [7.9, -999.0],
+                         "latitude_degrees": [31.0, 34.2],
+                         "longitude_degrees": [103.0, -116.4]})
     # NB: the trailing NBSP on the second eq_name is deliberate — SURE.csv
     # really contains 'Tennant Creek\xa0', and the magnitude lookup must
     # normalize it.
@@ -206,7 +211,7 @@ def test_build_duckdb_views_creates_unified_view(tmp_path: Path):
         ).fetchall())
     finally:
         con.close()
-    assert rows == [("DEM", 1), ("FDHI", 1), ("Kern", 1), ("SURE", 2)]
+    assert rows == [("DEM", 1), ("FDHI", 2), ("Kern", 1), ("SURE", 2)]
     assert geo["DEM"] is None
     assert geo["FDHI"] == 31.0
     assert geo["SURE"] == -19.8  # MIN over the two SURE fixture rows
@@ -215,6 +220,7 @@ def test_build_duckdb_views_creates_unified_view(tmp_path: Path):
     # SURE values come from the config lookup (NBSP-tolerant); Kern is 1952.
     assert mags["DEM"] is None
     assert mags["Wenchuan"] == 7.9
+    assert mags["Landers"] is None  # -999 sentinel nulled, not passed through
     assert mags["Chi-Chi"] == 7.6
     assert mags["Tennant Creek\xa0"] == 6.6
     assert mags["Kern County (1952)"] == views.KERN_MAGNITUDE
@@ -262,9 +268,10 @@ def test_athena_unified_view_sql_shape():
     # all four sources present, Kern pinned to its epicenter
     for token in ("'DEM'", "'FDHI'", "'SURE'", "'Kern'", str(views.KERN_LATITUDE)):
         assert token in sql
-    # magnitude comes along: SURE via the NBSP-normalizing CASE lookup,
-    # Kern as the 1952 constant.
+    # magnitude comes along: FDHI with its -999 sentinel nulled, SURE via
+    # the NBSP-normalizing CASE lookup, Kern as the 1952 constant.
     assert "magnitude" in sql
+    assert "CASE WHEN magnitude > 0 THEN magnitude END" in sql
     assert "chr(160)" in sql
     assert "WHEN 'Chi-Chi' THEN 7.6" in sql
     assert str(views.KERN_MAGNITUDE) in sql

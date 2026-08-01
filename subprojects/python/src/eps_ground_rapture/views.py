@@ -179,7 +179,8 @@ def build_duckdb_views(
                 vs_central_meters       AS scarp_height,
                 NULL                    AS scarp_class,
                 eq_name                 AS eq_name,
-                magnitude               AS magnitude,
+                -- same -999 sentinel convention as the measures below
+                CASE WHEN magnitude > 0 THEN magnitude END AS magnitude,
                 NULL                    AS fault_dip,
                 NULL                    AS cohesion,
                 NULL                    AS dem_set,
@@ -260,7 +261,7 @@ def athena_unified_view_sql() -> str:
         "FROM dem WHERE dzw > 0 AND scarp_height > 0\n"
         "UNION ALL\n"
         "SELECT 'FDHI', fzw_central_meters, vs_central_meters, CAST(NULL AS varchar),\n"
-        "       eq_name, magnitude,\n"
+        "       eq_name, CASE WHEN magnitude > 0 THEN magnitude END,\n"
         "       CAST(NULL AS bigint), CAST(NULL AS varchar), CAST(NULL AS varchar),\n"
         "       latitude_degrees, longitude_degrees\n"
         "-- FDHI uses -999 as a missing-data sentinel; > 0 drops it.\n"

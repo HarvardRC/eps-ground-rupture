@@ -41,18 +41,42 @@ specs). Add new entries here rather than scattering them across files.
 
 ## Deployment
 
-- Terraform for S3 + Glue + Athena exists under `deploy/terraform/`
-  (ADR-0014). Not yet applied to the AWS account — first
-  `terraform apply` (dev) + `aws s3 sync` + Athena smoke query still to
-  be run by the owner.
-- Local TF state; move to an S3 backend if collaborators arrive.
+### AWS (Terraform) — parked, low priority (2026-07-25)
+
+- **Whether we need it at all is open.** Current delivery works without
+  it: DuckDB locally, CSV-fed `-public` workbooks on Tableau Public.
+  The desktop workbooks *do* carry Athena (AwsDataCatalog, URC Dev)
+  connections, but they run off local `.hyper` extracts — if the AWS
+  side lapses they keep working and can be repointed at DuckDB.
+- **It becomes worth applying/keeping when** one of these materializes:
+  - a live shared SQL endpoint — Tableau Cloud/Server or a hosted
+    Superset querying Athena directly instead of file handoffs;
+  - collaborators who need to query the tables without cloning the repo
+    and rebuilding the Parquet locally;
+  - data outgrowing the CSV/Sheets handoff path.
+- **How to stand it up (when needed)**: in `deploy/terraform/envs/dev`
+  run `terraform init` + `terraform apply`, then
+  `aws s3 sync data/processed/ s3://eps-ground-rapture-dev/processed/`,
+  then an Athena smoke query; BI connection details are in
+  `deploy/terraform/README.md`. Unapplied it costs nothing; applied,
+  storage + queries at this data size are negligible.
+- Terraform state is local and absent from this clone — verify actual
+  AWS state (URC Dev console, or the machine the apply ran from) before
+  assuming resources exist or re-applying. Move state to an S3 backend
+  if collaborators arrive.
 
 ## Dashboards
 
-- `dashboards/tableau/dem-model-vs-reality.twb` holds Dashboard 1 +
-  Viable Combinations; `dem-response-curve.twb` holds Dashboard 2; each
-  has a `-public` Tableau Public twin. Superset YAML exports still
-  absent.
+- Shipped: `dem-model-vs-reality.twb` (Dashboard 1 + Viable
+  Combinations) and `dem-response-curve.twb` (Dashboard 2, response
+  curves), each with a CSV-fed `-public` twin on Tableau Public
+  (`dem-overview.twb` was split/renamed into these).
+- Next: Dashboard 3 — per-event boxplots (see `notes/Roadmap.md`,
+  Build order); its data-side prep — `magnitude` in
+  `unified_observations` — is done (2026-07-31).
+- Superset YAML exports still absent. A *hosted* Superset presupposes a
+  shared SQL endpoint (the parked AWS item above); a local Superset
+  over DuckDB is possible without it.
 
 ## Tooling friction (open JetBrains issue)
 

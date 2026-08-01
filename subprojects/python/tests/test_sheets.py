@@ -335,5 +335,5 @@ def test_real_unified_observations_load():
     if not db.is_file():
         pytest.skip("eps.duckdb not built; run egr-build")
     df = sheets._load_view("unified_observations", db)
-    assert df.shape[1] == 10
+    assert df.shape[1] == 11  # incl. magnitude (added 2026-07-31)
     assert df.shape[0] > 0
