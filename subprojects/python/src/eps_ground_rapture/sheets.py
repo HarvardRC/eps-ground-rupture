@@ -35,7 +35,7 @@ import numpy as np
 import pandas as pd
 
 from .config import REPO_ROOT
-from .views import DEFAULT_DUCKDB_PATH
+from .views import DEFAULT_DUCKDB_PATH, require_view
 
 #: Environment variable holding the *path* to the service-account key file.
 GOOGLE_SHEETS_SA_KEYFILE_ENV = "GOOGLE_SHEETS_SA_KEYFILE"
@@ -113,6 +113,7 @@ def _load_view(view: str, duckdb_path: Path | str) -> pd.DataFrame:
         )
     con = duckdb.connect(str(duckdb_path), read_only=True)
     try:
+        require_view(con, view, duckdb_path)
         return con.execute(f"SELECT * FROM {view}").df()
     finally:
         con.close()

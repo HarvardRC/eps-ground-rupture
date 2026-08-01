@@ -5,22 +5,22 @@ specs). Add new entries here rather than scattering them across files.
 
 ## Data pipeline
 
-### Replace pre-cleaned FDHI CSV with raw flatfile + in-pipeline cleaning
-- **Current state**: `subprojects/python/src/eps_ground_rapture/io.py::load_fdhi`
-  reads `data/raw/FDHI_Cleaned_Measurements.csv` directly. That CSV is a
-  cleaned ~20-row extract produced by the prior owner's `legacy/FDHI-SURE-DEM_SCATTER.py`,
-  not a pipeline-managed artifact.
-- **What to do**: download the raw FDHI flatfile from UCLA Dataverse —
-  DOI `10.25346/S6/Y4F9LJ`, file `ABRP7B` (version 1.4 at time of writing).
-  Add it to `data/raw/` as `02_FDHI_FLATFILE_MEASUREMENTS_<date>.csv`.
-  Re-add a `prep.clean_fdhi` matching the prior owner's updated filter
-  chain: reverse / reverse-oblique style, positive vs_*/sh_* measurements,
-  `0 < fzw_central_meters < 50`, usage flag in {Check, Keep}.
-  Note this is *not* the same as the legacy notebook's chain — the
-  `rupture_rank == 'Principal'` filter was dropped in the new version.
-- **Why now is fine without it**: pre-cleaned CSV is sufficient for v1
-  dashboards. The pipeline-side cleaning is a reproducibility / freshness
-  concern, not a feature concern.
+### ~~Replace pre-cleaned FDHI CSV with raw flatfile + in-pipeline cleaning~~ — done (2026-08-01)
+- The raw flatfile (`02_FDHI_FLATFILE_MEASUREMENTS_20220719.csv`, UCLA
+  Dataverse DOI `10.25346/S6/Y4F9LJ`, file `ABRP7B`) is in `data/raw/`, and
+  `prep.clean_fdhi` / `prep.fdhi_measurements` clean it in-pipeline. The
+  chain is reverse / reverse-oblique style, positive `vs_*`/`sh_*`,
+  `0 < fzw_central_meters < 50`, usage flag in {Check, Keep} — with **no**
+  `rupture_rank == 'Principal'` filter (dropped in the prior owner's newer
+  version). `tests/test_prep.py` pins it, including equivalence with the
+  shipped `FDHI_Cleaned_Measurements.csv`.
+- `egr-build` now **requires** the flatfile rather than falling back to the
+  pre-cleaned CSV: the fallback produced a differently-shaped `fdhi_cleaned`
+  and no `fdhi_measurements`, which left the Parquet, the DDL and the
+  committed Glue schema disagreeing.
+- **Still open**: `data/raw/` is gitignored and populated by hand. Worth
+  automating — mirror the inputs on Zenodo, or script the UCLA Dataverse
+  download — so a fresh clone can fetch them.
 
 ### Optional: incorporate the 3D DEM datasets when files arrive
 - The prior owner's updated script also references `combinedCases123_v2.csv`

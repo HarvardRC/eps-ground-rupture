@@ -56,7 +56,10 @@ data/
 dashboards/
   sql/                       generated CREATE TABLE scripts (gitignored)
     athena.sql                 prod DDL: external tables over `s3://.../<table>/`
+    athena-views.sql           Athena/Trino twins of `unified_observations` + `sure_enriched`
     spark-thrift.sql           dev DDL: `USING parquet LOCATION 'file:///.../<table>/'`
+  duckdb/eps.duckdb          DuckDB view definitions Tableau connects to (gitignored)
+  sheets/                    Google Sheets push targets (targets.yaml + README)
   tableau/                   Tableau workbooks (.twb / .twbx)
   superset/                  Superset YAML exports
 docs/                        this directory + adr/
@@ -74,12 +77,16 @@ subprojects/
     src/                     Python "src-layout" (ADR-0013)
       eps_ground_rapture/
         config.py            repo-relative paths, categorical vocab, palettes
-        io.py                DEM / FDHI / Kern CSV loaders
-        prep.py              cleaning/filtering ported from the legacy notebooks
+        io.py                DEM / FDHI / SURE / Kern CSV loaders
+        prep.py              FDHI cleaning/filtering (clean_fdhi, fdhi_measurements)
         export.py            Parquet writer (Arrow type coercion, dir-per-table)
         register.py          Athena + Spark Thrift DDL generators
-        cli.py               `egr-build` entry point
-    tests/test_smoke.py
+        views.py             DuckDB view definitions + Athena/Trino twins
+        csvexport.py         view -> dist/csv/<view>.csv (`egr-csv`)
+        sheets.py            view -> Google Sheets (`egr-push-sheets`)
+        cli.py               `egr-build` / `egr-csv` / `egr-push-sheets` entry points
+    tests/                   test_smoke.py, test_prep.py, test_raw_inputs.py,
+                             test_csvexport.py, test_sheets.py
 ```
 
 ## Pipeline overview
@@ -100,16 +107,34 @@ eps_ground_rapture.export.export_tidy       Parquet writer (dir-per-table)
 data/processed/<table>/data.parquet         physical storage
         │
         ▼
-eps_ground_rapture.register                 emits schema artifacts
+eps_ground_rapture.register                 emits table schemas
         │
         ├──► dashboards/sql/athena.sql         ──► reference DDL (prod is Terraform-managed)
         ├──► dashboards/sql/spark-thrift.sql   ──► Spark Thrift (local) ──► Tableau Desktop / Superset
-        ├──► deploy/terraform/tables.json      ──► Terraform → Glue/Athena (ADR-0014; committed)
-        └──► dashboards/duckdb/eps.duckdb      ──► DuckDB views ──► Tableau Desktop (first pass)
+        └──► deploy/terraform/tables.json      ──► Terraform → Glue/Athena (ADR-0014; committed)
+
+eps_ground_rapture.views                    emits view definitions
+        │
+        ├──► dashboards/duckdb/eps.duckdb      ──► DuckDB views ──► Tableau Desktop (first pass)
+        └──► dashboards/sql/athena-views.sql   ──► Athena/Trino twins of `unified_observations`
+                                                   and `sure_enriched` (the two the dashboards need)
 ```
 
-Single CLI: `poetry run egr-build` writes the Parquet files and all four
-schema artifacts above. Flags:
+Single CLI: `poetry run egr-build` writes the Parquet files and all five
+schema/view artifacts above.
+
+**Every raw input is required**, and the build checks for all of them before
+writing anything: a missing file means exit 2 and one message naming what's
+absent and where to get it, rather than a traceback partway through a run
+that has already rewritten half the artifacts. (Only *presence* is checked —
+an empty or malformed file still fails later, in the loader that reads it.)
+There is deliberately no fallback to the pre-cleaned FDHI CSV: it yields a
+`fdhi_cleaned` of a different shape and no `fdhi_measurements`, so a build
+from it would leave the Parquet, the DDL and the Terraform schema
+describing different things. `egr-build` also warns when a processed table
+was not rebuilt this run — its Parquet lingers and still backs a view.
+
+Flags:
 
 - `--database <name>` — logical schema name in the DDL (default `eps_ground_rapture`).
 - `--s3-prefix <uri>` — S3 prefix baked into the reference `athena.sql`
@@ -119,12 +144,17 @@ schema artifacts above. Flags:
 
 ## Ported logic so far
 
-No notebook *cleaning* logic currently lives in the pipeline: the FDHI
-table arrives pre-cleaned from the prior owner
-(`data/raw/FDHI_Cleaned_Measurements.csv`), and the other inputs ship
-as-is, so `prep.py` is intentionally empty. (An earlier `prep.clean_fdhi`
-port was removed when the pre-cleaned CSV landed; re-adding it against
-the raw FDHI flatfile is tracked in `TODO.md`.)
+FDHI is the one input with cleaning logic in the pipeline. `prep.py`
+holds `clean_fdhi` (the prior owner's filter chain, reproducing the
+scatter-overlay subset that used to arrive as
+`data/raw/FDHI_Cleaned_Measurements.csv`) and `fdhi_measurements` (the
+reverse-style rows — the per-event statistics base — with the `-999`
+sentinel nulled in numeric columns; string sentinels are left alone and
+no row-level filters are applied, those being per-chart choices). Both
+derive from the raw UCLA Dataverse flatfile, which the build requires.
+The other inputs ship as-is. `tests/test_prep.py` pins both chains,
+including a check that `clean_fdhi` reproduces the prior owner's shipped
+`FDHI_Cleaned_Measurements.csv` row-for-row.
 
 Everything else in the legacy notebooks is plotting code (matplotlib /
 seaborn). That work belongs in Tableau/Superset, not in the Python
@@ -132,23 +162,28 @@ pipeline, so it has been deliberately not ported.
 
 ## What runs today
 
-Verified end-to-end on 2026-05-24:
+Verified end-to-end on 2026-08-01:
 
 - `poetry install` from `subprojects/python/` — clean install on Python
-  3.13.7 (Poetry 2.4.1) at the new module location.
-- `poetry run pytest` — **7/7** smoke tests pass: version present, repo
-  paths resolve (`config.REPO_ROOT` still correct after the move), `clean_fdhi`
-  filters correctly, `export_tidy` produces dir-per-table Parquet,
-  `athena_ddl` emits explicit columns from inferred schema, `spark_ddl` uses
-  `USING parquet` inference, and unknown Arrow types raise a clear
-  `ValueError`.
-- `poetry run egr-build --skip-fdhi` — produces:
-  - `data/processed/dem/data.parquet` (~10.6 MB; 73 MB raw input)
-  - `dashboards/sql/athena.sql` (CREATE DATABASE + CREATE EXTERNAL TABLE)
-  - `dashboards/sql/spark-thrift.sql` (CREATE DATABASE + USE + CREATE TABLE)
-
-- `./gradlew :subprojects:python:pytest` — 7/7 pass via the Gradle
-  orchestrator (Gradle 8.10.2 wrapper, JDK 21).
+  3.13.7 (Poetry 2.4.1). Note `poetry.toml` sets
+  `virtualenvs.create = false`, so the project venv must already be
+  **activated** before any bare `poetry` command; otherwise Poetry falls
+  back to the system Python and fails. The Gradle tasks activate it for
+  you — see the venv setup below, and `EGR_VENV` / `-Ppython.venv` to
+  point them at a different location.
+- `poetry run pytest` — **85/85** pass, covering the FDHI cleaning chains,
+  Parquet export, Athena/Spark DDL generation, the DuckDB views
+  (including event `magnitude` and the optional `fdhi_measurements`),
+  CSV export, and the Sheets targets.
+- `poetry run egr-build` — no flags needed; requires the raw FDHI flatfile
+  in `data/raw/` and exits 2 if any raw input is missing. Produces:
+  - `data/processed/<table>/data.parquet` for `dem`, `fdhi_cleaned`,
+    `fdhi_measurements`, `sure`, `kern_combined`
+  - `dashboards/sql/athena.sql`, `spark-thrift.sql`, `athena-views.sql`
+  - `deploy/terraform/tables.json` and `dashboards/duckdb/eps.duckdb`
+- `./gradlew :subprojects:python:pytest` — 85/85 pass via the Gradle
+  orchestrator (Gradle 8.10.2 wrapper; verified on JDK 17, and nothing in
+  the build pins a toolchain version).
 
 ## Issues encountered and fixed
 
@@ -167,17 +202,17 @@ Verified end-to-end on 2026-05-24:
 
 ## Known gaps / open work
 
-- **FDHI is consumed pre-cleaned.** The pipeline reads
-  `data/raw/FDHI_Cleaned_Measurements.csv` (a ~20-row extract from the
-  prior owner) rather than cleaning the raw FDHI flatfile itself.
-  Replacing it with the raw flatfile + in-pipeline cleaning is tracked
-  in `TODO.md`.
+- ~~**FDHI is consumed pre-cleaned.**~~ Resolved 2026-07-31: the pipeline
+  now cleans the raw UCLA flatfile in-process (`prep.clean_fdhi`,
+  `prep.fdhi_measurements`) whenever it is in `data/raw/`, falling back to
+  `FDHI_Cleaned_Measurements.csv` only when it is not.
 - **Kern County loader is stubbed** (`io.load_kern_combined`) but no
   cleaning routine exists; the legacy notebook uses it mostly as-is. See
   `docs/datasets.md` for what the file is and how it's used.
-- **Dashboards in progress.** `dashboards/tableau/dem-overview.twb` holds
-  the first dashboard; Superset exports still absent. See
-  `notes/Roadmap.md`.
+- **Dashboards in progress.** `dem-model-vs-reality.twb` (Dashboard 1 +
+  Viable Combinations) and `dem-response-curve.twb` (Dashboard 2) are
+  shipped, each with a `-public` Tableau Public twin; Dashboard 3 is next.
+  Superset exports still absent. See `notes/Roadmap.md`.
 - **AWS deployment via Terraform** (`deploy/terraform/`, ADR-0014):
   S3 bucket + Glue database/tables + Athena workgroup per env (dev/prod).
   Not yet applied to the account.
@@ -196,8 +231,11 @@ cd eps-ground-rapture
 cp /path/to/DEM_dataset.csv data/raw/
 
 # One-time: create the venv at the project convention location.
+# /opt is root-owned on macOS — make the parent writable first:
+sudo mkdir -p /opt/python/venvs && sudo chown "$(whoami)" /opt/python/venvs
 python3.13 -m venv /opt/python/venvs/eps-ground-rapture
-# (Or override with EGR_VENV=/your/path before running Gradle.)
+# (Or keep it elsewhere: EGR_VENV=/your/path, -Ppython.venv=/your/path, or
+#  python.venv=/your/path in ~/.gradle/gradle.properties.)
 
 # Via Gradle (orchestrates Poetry behind the scenes; sets VIRTUAL_ENV per task):
 ./gradlew :subprojects:python:poetryInstall

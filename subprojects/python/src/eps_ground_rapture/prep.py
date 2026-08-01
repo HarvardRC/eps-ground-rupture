@@ -1,5 +1,16 @@
 """Cleaning and filtering routines for raw inputs.
 
+``legacy/FDHI-SURE-DEM_SCATTER.py``, referenced below as the source of
+:func:`clean_fdhi`'s chain, is **not present in this repo or in the local
+gitignored ``legacy/`` directory** (which holds only the notebooks and the
+paper PDF) — request it from the prior owner if you need to re-derive the
+chain. What anchors the claim instead: running :func:`clean_fdhi` over the
+raw flatfile reproduces the shipped ``FDHI_Cleaned_Measurements.csv``
+row-for-row, which ``tests/test_prep.py`` checks when both files are
+present; the rest of that module pins the behavior documented here against
+synthetic frames, including the quirks that are deliberate (the duplicate
+rows, the absent ``rupture_rank`` filter).
+
 The FDHI story: the raw UCLA Dataverse flatfile
 (``02_FDHI_FLATFILE_MEASUREMENTS_<date>.csv``, DOI 10.25346/S6/Y4F9LJ) is
 the source of truth, and two tables are derived from it:

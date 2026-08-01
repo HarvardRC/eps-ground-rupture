@@ -226,6 +226,22 @@ def test_build_duckdb_views_creates_unified_view(tmp_path: Path):
     assert mags["Kern County (1952)"] == views.KERN_MAGNITUDE
 
 
+def test_build_duckdb_views_handles_apostrophe_in_path(tmp_path: Path):
+    """Parquet paths are interpolated into DDL, so a checkout under e.g.
+    `/Users/o'brien/...` must not produce unparseable SQL."""
+    processed_dir = tmp_path / "o'brien" / "processed"
+    for name, df in _views_fixture_frames().items():
+        export.export_tidy(df, name, out_dir=processed_dir)
+
+    db = views.build_duckdb_views(
+        processed_dir=processed_dir, duckdb_path=tmp_path / "eps.duckdb")
+    con = duckdb.connect(str(db), read_only=True)
+    try:
+        assert con.execute("SELECT COUNT(*) FROM unified_observations").fetchone()[0] > 0
+    finally:
+        con.close()
+
+
 def test_build_duckdb_views_optional_fdhi_measurements(tmp_path: Path):
     """The fdhi_measurements view exists exactly when its Parquet does."""
     processed_dir = tmp_path / "processed"
@@ -275,6 +291,25 @@ def test_athena_unified_view_sql_shape():
     assert "chr(160)" in sql
     assert "WHEN 'Chi-Chi' THEN 7.6" in sql
     assert str(views.KERN_MAGNITUDE) in sql
+
+
+def test_sure_magnitude_case_escapes_apostrophes(monkeypatch):
+    """An event name with an apostrophe (e.g. L'Aquila) must not break the
+    generated SQL — the literal is escaped by doubling the quote."""
+    monkeypatch.setattr(
+        views, "SURE_EVENT_MAGNITUDES", {"L'Aquila": 6.3, "Chi-Chi": 7.6}
+    )
+    case = views._sure_magnitude_case("eq_name")
+    assert "WHEN 'L''Aquila' THEN 6.3" in case
+    # and the result is still parseable SQL
+    con = duckdb.connect()
+    try:
+        got = con.execute(
+            f"SELECT {case} FROM (SELECT 'L''Aquila' AS eq_name)"
+        ).fetchone()[0]
+    finally:
+        con.close()
+    assert got == 6.3
 
 
 def test_sure_magnitude_case_skips_unknowns():

@@ -15,7 +15,7 @@ from pathlib import Path
 import duckdb
 
 from .config import REPO_ROOT
-from .views import DEFAULT_DUCKDB_PATH
+from .views import DEFAULT_DUCKDB_PATH, require_view
 
 #: Default output directory (gitignored via the top-level `dist/` rule).
 DEFAULT_CSV_DIR = REPO_ROOT / "dist" / "csv"
@@ -47,8 +47,9 @@ def view_to_csv(
     """Write ``SELECT * FROM <view>`` to a CSV file (with header).
 
     Returns the output path and the row count. Raises ``ValueError`` for a
-    non-identifier view name and ``FileNotFoundError`` if the DuckDB file is
-    absent (run ``egr-build`` first).
+    non-identifier view name or a view the database doesn't define, and
+    ``FileNotFoundError`` if the DuckDB file is absent (run ``egr-build``
+    first).
     """
     if not _IDENTIFIER_RE.fullmatch(view):
         raise ValueError(
@@ -66,6 +67,7 @@ def view_to_csv(
 
     con = duckdb.connect(str(duckdb_path), read_only=True)
     try:
+        require_view(con, view, duckdb_path)
         con.execute(f"COPY (SELECT * FROM {view}) TO '{out_literal}' (HEADER, FORMAT csv)")
         rows = con.execute(f"SELECT COUNT(*) FROM {view}").fetchone()[0]
     finally:

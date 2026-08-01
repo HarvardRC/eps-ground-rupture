@@ -74,10 +74,10 @@ val pytest by tasks.registering(Exec::class) {
 
 val egrBuild by tasks.registering(Exec::class) {
     group = "build"
-    description = "Run the egr-build pipeline (Parquet outputs + DDL scripts). --skip-fdhi by default."
+    description = "Run the egr-build pipeline (Parquet outputs + DDL scripts). Requires every raw input in data/raw/, including the FDHI flatfile; exits 2 naming any that are missing."
     workingDir = projectDir
     useVenv()
-    commandLine(poetryBin, "run", "egr-build", "--skip-fdhi")
+    commandLine(poetryBin, "run", "egr-build")
     dependsOn(poetryInstall)
 }
 
@@ -145,7 +145,15 @@ val csvExport by tasks.registering(Exec::class) {
 // Per-view convenience tasks — double-clickable in IDEA (no -P needed), one
 // per view in dashboards/duckdb/eps.duckdb. Mirrors views.build_duckdb_views;
 // add a name here if a new view should be CSV-exportable from the menu.
-val csvViews = listOf("dem", "fdhi_cleaned", "sure", "kern_combined", "unified_observations")
+//
+// `fdhi_measurements` is in views.OPTIONAL_TABLES: its view exists only when
+// its Parquet was found at view-build time. The task is still registered —
+// where the view is absent it exits 2 with a message naming the available
+// views (see views.require_view).
+val csvViews = listOf(
+    "dem", "fdhi_cleaned", "fdhi_measurements", "sure", "sure_enriched",
+    "kern_combined", "kern_combined_geo", "unified_observations",
+)
 
 csvViews.forEach { view ->
     val taskName = "csvExport" + view.split("_").joinToString("") { it.replaceFirstChar(Char::uppercase) }

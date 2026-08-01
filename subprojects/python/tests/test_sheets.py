@@ -159,6 +159,16 @@ def test_identifier_guard(tmp_path):
         sheets._load_view("v; DROP TABLE x", path)
 
 
+def test_undefined_view_guard(tmp_path):
+    """A targets.yaml entry naming an optional view that wasn't built (no
+    raw input on this machine) reports it, rather than surfacing a raw
+    DuckDB CatalogException through the CLI's broad except."""
+    path = _make_duckdb(tmp_path, pd.DataFrame({"a": [1]}))
+    with pytest.raises(ValueError, match="not defined") as exc:
+        sheets._load_view("fdhi_measurements", path)
+    assert "Available: v, v_t." in str(exc.value)
+
+
 def test_cell_limit_guard(tmp_path, monkeypatch):
     df = pd.DataFrame({"a": range(5), "b": range(5)})  # 5x2 = 10 cells
     path = _make_duckdb(tmp_path, df)

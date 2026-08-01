@@ -28,7 +28,8 @@ def _coerce_object_columns(df: pd.DataFrame) -> pd.DataFrame:
 
     Mixed `str` + `NaN` object columns (e.g. the DEM dataset's `Cohesion`)
     break Arrow type inference; casting to pandas' `string` dtype yields a
-    clean nullable Arrow `large_string` column.
+    clean nullable Arrow string column. (`register` maps both `string` and
+    `large_string` to Athena STRING, so either Arrow encoding is fine.)
     """
     out = df.copy()
     for col in out.select_dtypes(include=["object"]).columns:

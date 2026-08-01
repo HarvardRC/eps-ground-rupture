@@ -5,12 +5,14 @@ Reads raw inputs from `data/raw/`, writes Parquet tables to
 `dashboards/sql/` for both production (Athena over S3) and development
 (Spark Thrift over local filesystem).
 
-FDHI is the one input with a cleaning step: when the raw UCLA flatfile is
-present in `data/raw/` (see `io.FDHI_FLATFILE_GLOB`), both `fdhi_cleaned`
-(scatter subset, prior owner's chain) and `fdhi_measurements` (per-event
-statistics base) are derived from it in-pipeline. Without it, the build
-falls back to the prior owner's pre-cleaned CSV for `fdhi_cleaned` and
-skips `fdhi_measurements` — see repo-root TODO.md for the download.
+FDHI is the one input with a cleaning step: both `fdhi_cleaned` (scatter
+subset, prior owner's chain) and `fdhi_measurements` (per-event statistics
+base) are derived in-pipeline from the raw UCLA flatfile (see
+`io.FDHI_FLATFILE_GLOB`).
+
+Every raw input is required. `data/raw/` is gitignored, so the build checks
+for all of them up front and exits 2 with one message naming what's missing
+rather than writing a partial, self-inconsistent set of artifacts.
 """
 
 from __future__ import annotations
@@ -50,19 +52,24 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    frames = [("dem", io.load_dem())]
+    # Fail fast, before anything is written: an incomplete input set would
+    # otherwise rewrite generated artifacts (including the tracked
+    # deploy/terraform/tables.json) partway through, leaving them describing
+    # different things.
+    try:
+        io.require_raw_inputs()
+    except FileNotFoundError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+
     flatfile = io.find_fdhi_flatfile()
-    if flatfile is not None:
-        raw_fdhi = io.load_fdhi_flatfile(flatfile)
-        frames.append(("fdhi_cleaned", prep.clean_fdhi(raw_fdhi)))
-        frames.append(("fdhi_measurements", prep.fdhi_measurements(raw_fdhi)))
-        print(f"fdhi source: {flatfile.name} (raw flatfile, cleaned in-pipeline)")
-    else:
-        frames.append(("fdhi_cleaned", io.load_fdhi()))
-        print(
-            "fdhi source: FDHI_Cleaned_Measurements.csv (pre-cleaned fallback; "
-            "no fdhi_measurements table — download the raw flatfile, see TODO.md)"
-        )
+    raw_fdhi = io.load_fdhi_flatfile(flatfile)
+    frames = [
+        ("dem", io.load_dem()),
+        ("fdhi_cleaned", prep.clean_fdhi(raw_fdhi)),
+        ("fdhi_measurements", prep.fdhi_measurements(raw_fdhi)),
+    ]
+    print(f"fdhi source: {flatfile.name} (raw flatfile, cleaned in-pipeline)")
     frames.append(("sure", io.load_sure()))
     frames.append(("kern_combined", io.load_kern_combined()))
 
@@ -71,6 +78,8 @@ def main(argv: list[str] | None = None) -> int:
         path = export_tidy(df, name)
         tables.append(register.Table(name=name, location=path))
         print(f"{name} -> {path}/data.parquet")
+
+    _warn_stale_tables({name for name, _ in frames})
 
     _write_sql_scripts(tables, database=args.database, s3_prefix=args.s3_prefix)
 
@@ -82,6 +91,34 @@ def main(argv: list[str] | None = None) -> int:
     print(f"  Tableau JDBC URL: {views.jdbc_url(duckdb_path)}")
 
     return 0
+
+
+def _warn_stale_tables(built: set[str]) -> None:
+    """Flag processed tables this run did not rebuild.
+
+    `export_tidy` only writes; it never removes. So a table that drops out of
+    the build — `fdhi_measurements` when the raw flatfile is gone, say —
+    leaves its Parquet behind, and `views.build_duckdb_views` keeps serving
+    it: silently stale data sitting next to freshly built neighbors.
+    """
+    if not PROCESSED_DIR.is_dir():
+        return
+    stale = sorted(
+        p.name
+        for p in PROCESSED_DIR.iterdir()
+        if p.is_dir() and (p / "data.parquet").is_file() and p.name not in built
+    )
+    if not stale:
+        return
+    print(
+        f"warning: {len(stale)} processed table(s) not rebuilt by this run: "
+        f"{', '.join(stale)}\n"
+        "         they are stale relative to the rest but still back views in "
+        "eps.duckdb.\n"
+        "         Remove with: rm -rf "
+        + " ".join(f"{_rel(PROCESSED_DIR)}/{name}" for name in stale),
+        file=sys.stderr,
+    )
 
 
 def _write_sql_scripts(tables: list[register.Table], *, database: str, s3_prefix: str) -> None:

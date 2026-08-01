@@ -12,6 +12,7 @@ this file via the DuckDB JDBC driver and sees these logical tables:
 * `sure`           — the SURE database (surface-rupture observations)
 * `sure_enriched`  — SURE + an event `magnitude` column (lookup-joined)
 * `kern_combined`  — the Buwalda / FDHI / SDC Kern County dataset
+* `kern_combined_geo` — `kern_combined` + the 1952 epicenter as lat/lon
 * `unified_observations` — the sources UNIONed with normalized columns
 
 The unified view is what makes the cross-source DZW-vs-Scarp-Height
@@ -54,6 +55,38 @@ REQUIRED_TABLES: tuple[str, ...] = ("dem", "fdhi_cleaned", "sure", "kern_combine
 OPTIONAL_TABLES: tuple[str, ...] = ("fdhi_measurements",)
 
 
+def _sql_literal(value: object) -> str:
+    """A single-quoted SQL string literal, with embedded quotes doubled.
+
+    Parquet paths are interpolated into DDL, so a repo checked out under a
+    directory containing an apostrophe would otherwise emit unparseable SQL.
+    """
+    return "'" + str(value).replace("'", "''") + "'"
+
+
+def require_view(con: duckdb.DuckDBPyConnection, view: str, source: object) -> None:
+    """Raise ``ValueError`` if ``view`` isn't defined in the connected DB.
+
+    Views for :data:`OPTIONAL_TABLES` exist only when their Parquet was
+    found at view-build time, so a caller (a Gradle task, a Sheets target)
+    can outlive the view. Callers already handle ``ValueError``; without
+    this they'd surface a raw DuckDB ``CatalogException`` instead.
+    """
+    available = sorted(
+        r[0] for r in con.execute(
+            "SELECT table_name FROM information_schema.tables "
+            "WHERE table_schema = 'main'"
+        ).fetchall()
+    )
+    # DuckDB resolves identifiers case-insensitively; don't be stricter.
+    if view.lower() not in {name.lower() for name in available}:
+        raise ValueError(
+            f"View {view!r} is not defined in {source}. "
+            f"Available: {', '.join(available)}. "
+            f"(Optional views need their raw input in data/raw/ at `egr-build` time.)"
+        )
+
+
 def _sure_magnitude_case(column: str) -> str:
     """A CASE expression mapping SURE `eq_name` values to event Mw.
 
@@ -63,9 +96,13 @@ def _sure_magnitude_case(column: str) -> str:
     exist in both DuckDB and Trino (Athena), so the same expression
     serves both engines. Events with no established magnitude are simply
     absent from the CASE and fall through to NULL.
+
+    Event names are interpolated as SQL string literals, so any apostrophe
+    is doubled — "L'Aquila" is a plausible future entry and would otherwise
+    emit unparseable SQL into both eps.duckdb and dashboards/sql/.
     """
     whens = "\n".join(
-        f"                  WHEN '{name}' THEN {mw}"
+        f"                  WHEN {_sql_literal(name)} THEN {mw}"
         for name, mw in SURE_EVENT_MAGNITUDES.items()
         if mw is not None
     )
@@ -114,7 +151,7 @@ def build_duckdb_views(
         for name, path in parquet_files.items():
             con.execute(
                 f"CREATE OR REPLACE VIEW {name} AS "
-                f"SELECT * FROM read_parquet('{path}')"
+                f"SELECT * FROM read_parquet({_sql_literal(path)})"
             )
 
         # Optional tables: only viewable when their Parquet was built
@@ -124,7 +161,7 @@ def build_duckdb_views(
             if path.is_file():
                 con.execute(
                     f"CREATE OR REPLACE VIEW {name} AS "
-                    f"SELECT * FROM read_parquet('{path}')"
+                    f"SELECT * FROM read_parquet({_sql_literal(path)})"
                 )
 
         # SURE with the event magnitude joined in (SURE.csv itself has no
@@ -135,7 +172,7 @@ def build_duckdb_views(
             CREATE OR REPLACE VIEW sure_enriched AS
               SELECT *,
                      {_sure_magnitude_case("eq_name")} AS magnitude
-              FROM read_parquet('{parquet_files['sure']}')
+              FROM read_parquet({_sql_literal(parquet_files['sure'])})
             """
         )
 
@@ -147,7 +184,7 @@ def build_duckdb_views(
               SELECT *,
                      CAST({KERN_LATITUDE}  AS DOUBLE) AS latitude,
                      CAST({KERN_LONGITUDE} AS DOUBLE) AS longitude
-              FROM read_parquet('{parquet_files['kern_combined']}')
+              FROM read_parquet({_sql_literal(parquet_files['kern_combined'])})
             """
         )
 
@@ -168,7 +205,7 @@ def build_duckdb_views(
                 "Set"           AS dem_set,
                 CAST(NULL AS DOUBLE) AS latitude,
                 CAST(NULL AS DOUBLE) AS longitude
-              FROM read_parquet('{parquet_files['dem']}')
+              FROM read_parquet({_sql_literal(parquet_files['dem'])})
               WHERE "DZW" > 0 AND "Scarp_Height" > 0
 
               UNION ALL
@@ -186,7 +223,7 @@ def build_duckdb_views(
                 NULL                    AS dem_set,
                 latitude_degrees        AS latitude,
                 longitude_degrees       AS longitude
-              FROM read_parquet('{parquet_files['fdhi_cleaned']}')
+              FROM read_parquet({_sql_literal(parquet_files['fdhi_cleaned'])})
               -- FDHI uses -999 as a missing-data sentinel; `> 0` filters
               -- those out alongside actual nulls.
               WHERE fzw_central_meters > 0 AND vs_central_meters > 0
@@ -205,7 +242,7 @@ def build_duckdb_views(
                 NULL             AS dem_set,
                 "Latitude"       AS latitude,
                 "Longitude"      AS longitude
-              FROM read_parquet('{parquet_files['sure']}')
+              FROM read_parquet({_sql_literal(parquet_files['sure'])})
               WHERE "FNC" > 0 AND "SH" > 0
 
               UNION ALL
@@ -222,7 +259,7 @@ def build_duckdb_views(
                 NULL                     AS dem_set,
                 CAST({KERN_LATITUDE}  AS DOUBLE) AS latitude,
                 CAST({KERN_LONGITUDE} AS DOUBLE) AS longitude
-              FROM read_parquet('{parquet_files['kern_combined']}')
+              FROM read_parquet({_sql_literal(parquet_files['kern_combined'])})
               WHERE "DZW" > 0 AND "Vertical" > 0
             """
         )

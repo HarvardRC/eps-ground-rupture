@@ -17,6 +17,9 @@ instead of creating its own under `~/Library/Caches/pypoetry/`.
 
 ```bash
 # 1. Create the venv (one time, outside the project).
+#    /opt is root-owned on macOS, so this needs a writable parent first:
+#      sudo mkdir -p /opt/python/venvs && sudo chown "$(whoami)" /opt/python/venvs
+#    If you keep venvs elsewhere, use that path and see the override below.
 python3.13 -m venv /opt/python/venvs/eps-ground-rapture
 # Python 3.13 because pyarrow 18 has no 3.14 wheel — see ADR-0010.
 
@@ -33,7 +36,9 @@ brew install poetry            # or: pipx install poetry
 ```
 
 To use a different venv location, set `EGR_VENV=/path/to/venv` in your
-environment or pass `-Ppython.venv=/path/to/venv` to Gradle.
+environment or pass `-Ppython.venv=/path/to/venv` to Gradle. To make the
+override stick for both terminal and IDEA-launched Gradle, put
+`python.venv=/path/to/venv` in `~/.gradle/gradle.properties`.
 
 ## Usage
 
@@ -58,9 +63,11 @@ carries only the schema; bucket and database names live in the Terraform
 module. See `../../deploy/terraform/README.md`.)
 
 Raw inputs go in `../../data/raw/` (e.g. `DEM_dataset.csv`,
-`FDHI_Cleaned_Measurements.csv`, `SURE.csv`,
-`Combine_BuwaldaFDHI_KernSDC.csv` — see `../../data/README.md`). Parquet
-outputs land in `../../data/processed/<table>/data.parquet`.
+`02_FDHI_FLATFILE_MEASUREMENTS_<date>.csv`, `SURE.csv`,
+`Combine_BuwaldaFDHI_KernSDC.csv` — see `../../data/README.md`). All four
+are required: `egr-build` checks for them up front and exits 2 naming any
+that are missing. Parquet outputs land in
+`../../data/processed/<table>/data.parquet`.
 
 Or via Gradle from anywhere (no manual activation — Gradle sets `VIRTUAL_ENV`
 and `PATH` on each task):
@@ -116,13 +123,17 @@ the module root. See [ADR-0013](../../docs/adr/0013-gradle-multi-project-subproj
 ```
 src/
   eps_ground_rapture/
-    config.py     repo-relative paths, categorical vocab
-    io.py         loaders for DEM, FDHI, Kern datasets
-    prep.py       cleaning/filtering (ported from legacy notebooks)
+    config.py     repo-relative paths, categorical vocab, SURE magnitudes
+    io.py         loaders for DEM, FDHI, SURE, Kern; raw-input checks
+    prep.py       FDHI cleaning/filtering (clean_fdhi, fdhi_measurements)
     export.py     Parquet writer with Arrow type coercion (dir-per-table)
     register.py   Athena + Spark Thrift DDL generation
-    cli.py        `egr-build` entry point
-tests/            pytest smoke tests
+    views.py      DuckDB view definitions + their Athena/Trino twins
+    csvexport.py  view -> dist/csv/<view>.csv (`egr-csv`)
+    sheets.py     view -> Google Sheets (`egr-push-sheets`)
+    cli.py        `egr-build` / `egr-csv` / `egr-push-sheets` entry points
+tests/            test_smoke, test_prep, test_raw_inputs, test_csvexport,
+                  test_sheets
 ```
 
 `duckdb` is a runtime dependency for the embedded query path (tests,
