@@ -155,7 +155,7 @@ val csvViews = listOf(
     "kern_combined", "kern_combined_geo", "unified_observations",
 )
 
-csvViews.forEach { view ->
+val csvExportTasks = csvViews.map { view ->
     val taskName = "csvExport" + view.split("_").joinToString("") { it.replaceFirstChar(Char::uppercase) }
     tasks.register<Exec>(taskName) {
         group = "csv"
@@ -165,6 +165,14 @@ csvViews.forEach { view ->
         commandLine(poetryBin, "run", "egr-csv", "--view", view)
         dependsOn(poetryInstall)
     }
+}
+
+// One task to refresh every CSV — what the Tableau Public workbooks are fed
+// from, so they should be regenerated together after an egrBuild.
+tasks.register("csvExportAll") {
+    group = "csv"
+    description = "Export every view in dist/csv/ (${csvViews.size} files; `dem` alone is ~70 MB)."
+    dependsOn(csvExportTasks)
 }
 
 // Build artifacts live under a single top-level `dist/` with one subdir per
