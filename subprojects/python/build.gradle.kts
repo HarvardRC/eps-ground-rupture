@@ -153,6 +153,8 @@ val csvExport by tasks.registering(Exec::class) {
 val csvViews = listOf(
     "dem", "fdhi_cleaned", "fdhi_measurements", "sure", "sure_enriched",
     "kern_combined", "kern_combined_geo", "unified_observations",
+    // Dashboard 4 (regression + inference) — all tiny.
+    "dem_regression", "dem_regression_lines", "kern_inferred_slip",
 )
 
 val csvExportTasks = csvViews.map { view ->

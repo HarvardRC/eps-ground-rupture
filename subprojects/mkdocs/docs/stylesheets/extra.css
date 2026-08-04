@@ -1,0 +1,55 @@
+/* Wider content column. The dashboards are 800–1200 px natively, so
+ * Material's default 61rem grid squeezes them; 1400px gives the embeds room
+ * and the scale-to-fit script then fills whatever is left. */
+.md-grid {
+  max-width: 1400px;
+}
+
+/* Body text one step up from Material's default 0.8rem — the pages are
+ * long-form prose, and 0.8rem reads small on a wide column. Everything else
+ * (headings, admonitions, tables) is sized in em off this, so they follow. */
+.md-typeset {
+  font-size: 0.9rem;
+}
+
+/* Keep the left sidebar's own type from growing with the body text. */
+.md-nav {
+  font-size: 0.75rem;
+}
+
+/* Scale-to-fit wrapper for the Tableau embeds.
+ *
+ * docs/javascripts/tableau-fit.js sets `height` and `overflow` inline once it
+ * knows the scale factor; the rules here are what applies before that runs
+ * and what the JS does not own. Keep the fallback paragraph OUTSIDE this
+ * element — the JS clips the wrapper to the scaled viz height, so anything
+ * else inside would be hidden. */
+.tableau-fit {
+  position: relative;
+  width: 100%;
+  margin: 1.2rem 0 0.4rem;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 0.2rem;
+  background: var(--md-default-bg-color);
+  /* Before the JS runs, clip rather than letting a full-size viz overflow
+     the column; the JS replaces this with the exact scaled height. */
+  overflow: hidden;
+}
+
+.tableau-fit tableau-viz {
+  display: block;
+}
+
+/* The escape hatch under each embed — a plain Markdown link, so it stays
+   useful with JavaScript disabled or if the embedding API fails to load,
+   and it reaches the full-size dashboard where the page shows the narrow
+   web variant. Markdown wraps it in a <p>, so the spacing lives there and
+   the muted styling on the link itself. */
+.tableau-fit + p {
+  margin: 0.35rem 0 1.6rem;
+}
+
+a.embed-fallback {
+  font-size: 0.75rem;
+  color: var(--md-default-fg-color--light);
+}

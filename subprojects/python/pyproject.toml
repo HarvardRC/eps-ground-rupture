@@ -18,6 +18,12 @@ gspread = "^6.2.1"
 gspread-dataframe = "^4.0.0"
 pyyaml = "^6.0.3"
 
+[tool.poetry.group.docs.dependencies]
+# The MkDocs companion site under subprojects/mkdocs/. One venv for the whole
+# repo, so the docs toolchain is a group here rather than a second project.
+mkdocs = "^1.6"
+mkdocs-material = "^9.5"
+
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3"
 ruff = "^0.7"

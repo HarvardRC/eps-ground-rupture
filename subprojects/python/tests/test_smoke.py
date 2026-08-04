@@ -162,8 +162,11 @@ def test_athena_ddl_uses_sanitized_names_and_index_access(tmp_path: Path):
 
 
 def _views_fixture_frames() -> dict[str, pd.DataFrame]:
+    # Slip / VD_HW are what the dem_regression views fit; they are part of the
+    # real dem table, so the fixture carries them or those views fail to bind.
     dem = pd.DataFrame({"DZW": [1.0], "Scarp_Height": [0.5], "Scarp_Class": ["Simple"],
-                        "Fault_Dip": [30], "Cohesion": ["R1"], "Set": ["Homogeneous"]})
+                        "Fault_Dip": [30], "Cohesion": ["R1"], "Set": ["Homogeneous"],
+                        "Slip": [2.0], "VD_HW": [1.0]})
     # NB: the second FDHI row has valid measures but the -999
     # missing-magnitude sentinel — the unified view must null it.
     fdhi = pd.DataFrame({"fzw_central_meters": [10.0, 4.0],
@@ -178,7 +181,8 @@ def _views_fixture_frames() -> dict[str, pd.DataFrame]:
     sure = pd.DataFrame({"FNC": [5.0, 6.0], "SH": [1.0, 1.2],
                          "eq_name": ["Chi-Chi", "Tennant Creek\xa0"],
                          "Latitude": [23.8, -19.8], "Longitude": [120.8, 134.0]})
-    kern = pd.DataFrame({"DZW": [3.0], "Vertical": [0.3]})
+    # "Location ID" is used by kern_inferred_slip.
+    kern = pd.DataFrame({"DZW": [3.0], "Vertical": [0.3], "Location ID": ["K-1"]})
     return {"dem": dem, "fdhi_cleaned": fdhi, "sure": sure, "kern_combined": kern}
 
 

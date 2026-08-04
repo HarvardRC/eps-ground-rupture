@@ -134,7 +134,15 @@ def _write_sql_scripts(tables: list[register.Table], *, database: str, s3_prefix
 
     athena_views_path = SQL_OUT_DIR / "athena-views.sql"
     athena_views_path.write_text(
-        views.athena_unified_view_sql() + "\n" + views.athena_sure_enriched_view_sql()
+        "\n".join(
+            (
+                views.athena_unified_view_sql(),
+                views.athena_sure_enriched_view_sql(),
+                views.athena_dem_regression_view_sql(),
+                views.athena_dem_regression_lines_view_sql(),
+                views.athena_kern_inferred_slip_view_sql(),
+            )
+        )
     )
     print(f"athena views -> {_rel(athena_views_path)}")
 

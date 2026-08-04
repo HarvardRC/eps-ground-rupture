@@ -14,6 +14,9 @@ this file via the DuckDB JDBC driver and sees these logical tables:
 * `kern_combined`  — the Buwalda / FDHI / SDC Kern County dataset
 * `kern_combined_geo` — `kern_combined` + the 1952 epicenter as lat/lon
 * `unified_observations` — the sources UNIONed with normalized columns
+* `dem_regression` — per-`Fault_Dip` OLS fit of `VD_HW ~ Slip`
+* `dem_regression_lines` — two endpoint rows per dip, for drawing the fits
+* `kern_inferred_slip` — Kern verticals back-projected through each fit
 
 The unified view is what makes the cross-source DZW-vs-Scarp-Height
 scatter natural in Tableau: every row has `source`, `dzw`,
@@ -263,6 +266,79 @@ def build_duckdb_views(
               WHERE "DZW" > 0 AND "Vertical" > 0
             """
         )
+
+        # ------------------------------------------------------------------
+        # Dashboard 4 — regression and inference (paper Fig. 14 / Equation 2)
+        # ------------------------------------------------------------------
+        # Ordinary least squares of vertical displacement on slip, one fit per
+        # fault dip. No Set/Cohesion subsetting — the whole dip subset is
+        # fitted, as the legacy notebook does; rows with a null in either axis
+        # drop out, matching pandas' NaN handling there.
+        # DuckDB's regr_* take (y, x) — y first.
+        #
+        # The slopes come out ≈ sin(dip), which is Equation 2's physical
+        # content: the vertical component of slip on a dipping fault. Left as
+        # a comment rather than an assertion — it is a property of the data,
+        # not a constraint the pipeline should impose.
+        con.execute(
+            f"""
+            CREATE OR REPLACE VIEW dem_regression AS
+              SELECT "Fault_Dip"                     AS fault_dip,
+                     COUNT(*)                        AS n,
+                     regr_slope("VD_HW", "Slip")     AS slope,
+                     regr_intercept("VD_HW", "Slip") AS intercept,
+                     regr_r2("VD_HW", "Slip")        AS r2
+              FROM read_parquet({_sql_literal(parquet_files['dem'])})
+              WHERE "Slip" IS NOT NULL AND "VD_HW" IS NOT NULL
+              GROUP BY 1
+              ORDER BY 1
+            """
+        )
+
+        # Two endpoint rows per dip, spanning that dip's own Slip range, so
+        # Tableau can draw the fit fan as line marks straight from data.
+        # Chosen over Tableau's native per-colour trend lines, which
+        # recompute client-side and so cannot be pinned by tests.
+        con.execute(
+            f"""
+            CREATE OR REPLACE VIEW dem_regression_lines AS
+              WITH bounds AS (
+                SELECT "Fault_Dip"  AS fault_dip,
+                       MIN("Slip")  AS slip_min,
+                       MAX("Slip")  AS slip_max
+                FROM read_parquet({_sql_literal(parquet_files['dem'])})
+                WHERE "Slip" IS NOT NULL AND "VD_HW" IS NOT NULL
+                GROUP BY 1
+              )
+              SELECT r.fault_dip,
+                     p.point_order,
+                     CASE p.point_order WHEN 0 THEN b.slip_min ELSE b.slip_max END AS slip,
+                     r.slope * (CASE p.point_order WHEN 0 THEN b.slip_min ELSE b.slip_max END)
+                       + r.intercept AS vdhw_hat
+              FROM dem_regression r
+              JOIN bounds b USING (fault_dip)
+              CROSS JOIN (SELECT 0 AS point_order UNION ALL SELECT 1) p
+              ORDER BY r.fault_dip, p.point_order
+            """
+        )
+
+        # Back-projection: invert each fit to ask what slip would have
+        # produced Kern County's measured vertical displacements. Every dip is
+        # emitted; the dashboard defaults to 30 (the notebook's choice) and
+        # can expose the rest as a parameter.
+        con.execute(
+            f"""
+            CREATE OR REPLACE VIEW kern_inferred_slip AS
+              SELECT k."Location ID"                       AS location_id,
+                     k."Vertical"                          AS vertical,
+                     r.fault_dip,
+                     (k."Vertical" - r.intercept) / r.slope AS inferred_slip
+              FROM read_parquet({_sql_literal(parquet_files['kern_combined'])}) k
+              CROSS JOIN dem_regression r
+              WHERE k."Vertical" IS NOT NULL
+              ORDER BY r.fault_dip, k."Location ID"
+            """
+        )
     finally:
         con.close()
 
@@ -328,4 +404,68 @@ def athena_sure_enriched_view_sql() -> str:
         "SELECT *,\n"
         f"       {_sure_magnitude_case('eq_name')} AS magnitude\n"
         "FROM sure;\n"
+    )
+
+
+def athena_dem_regression_view_sql() -> str:
+    """Athena (Trino) twin of the DuckDB `dem_regression` view.
+
+    Trino spells the regression aggregates `regr_slope` / `regr_intercept`
+    like DuckDB, but has no `regr_r2` — the coefficient of determination is
+    the square of `corr(y, x)`, which agrees with DuckDB's `regr_r2` exactly
+    on this data. The two differ only where the response has zero variance:
+    `regr_r2` special-cases that to 1.0, `power(corr(...), 2)` yields NaN.
+    Not reachable here (every r² is ≈ 0.999), but worth knowing before
+    reusing this against a degenerate group.
+    """
+    return (
+        "-- Per-dip OLS fit of vertical displacement on slip (paper Eq. 2).\n"
+        "-- Slopes come out ~ sin(dip): the vertical component of fault slip.\n"
+        "CREATE OR REPLACE VIEW dem_regression AS\n"
+        "SELECT fault_dip,\n"
+        "       COUNT(*)                        AS n,\n"
+        "       regr_slope(vd_hw, slip)         AS slope,\n"
+        "       regr_intercept(vd_hw, slip)     AS intercept,\n"
+        "       power(corr(vd_hw, slip), 2)     AS r2\n"
+        "FROM dem\n"
+        "WHERE slip IS NOT NULL AND vd_hw IS NOT NULL\n"
+        "GROUP BY fault_dip;\n"
+    )
+
+
+def athena_dem_regression_lines_view_sql() -> str:
+    """Athena (Trino) twin of the DuckDB `dem_regression_lines` view."""
+    return (
+        "-- Two endpoint rows per dip so a BI tool can draw the fit as a line.\n"
+        "CREATE OR REPLACE VIEW dem_regression_lines AS\n"
+        "WITH bounds AS (\n"
+        "  SELECT fault_dip, MIN(slip) AS slip_min, MAX(slip) AS slip_max\n"
+        "  FROM dem\n"
+        "  WHERE slip IS NOT NULL AND vd_hw IS NOT NULL\n"
+        "  GROUP BY fault_dip\n"
+        ")\n"
+        "SELECT r.fault_dip,\n"
+        "       p.point_order,\n"
+        "       IF(p.point_order = 0, b.slip_min, b.slip_max) AS slip,\n"
+        "       r.slope * IF(p.point_order = 0, b.slip_min, b.slip_max)\n"
+        "         + r.intercept AS vdhw_hat\n"
+        "FROM dem_regression r\n"
+        "JOIN bounds b ON b.fault_dip = r.fault_dip\n"
+        "CROSS JOIN (SELECT 0 AS point_order UNION ALL SELECT 1) p;\n"
+    )
+
+
+def athena_kern_inferred_slip_view_sql() -> str:
+    """Athena (Trino) twin of the DuckDB `kern_inferred_slip` view."""
+    return (
+        "-- Invert each per-dip fit: what slip would produce Kern's measured\n"
+        "-- vertical displacement? Fig. 14 uses the dip-30 fit.\n"
+        "CREATE OR REPLACE VIEW kern_inferred_slip AS\n"
+        "SELECT k.location_id,\n"
+        "       k.vertical,\n"
+        "       r.fault_dip,\n"
+        "       (k.vertical - r.intercept) / r.slope AS inferred_slip\n"
+        "FROM kern_combined k\n"
+        "CROSS JOIN dem_regression r\n"
+        "WHERE k.vertical IS NOT NULL;\n"
     )
