@@ -1,11 +1,11 @@
 [tool.poetry]
-name = "eps-ground-rapture"
+name = "eps-ground-rupture"
 version = "0.1.0"
 description = "Data pipelines for 2D DEM earthquake-rupture analysis, producing tidy datasets for Tableau and Apache Superset dashboards."
 authors = ["Michael Bouzinier <michael.bouzinier@forome.org>"]
 license = "Apache-2.0"
 readme = "README.md"
-packages = [{ include = "eps_ground_rapture", from = "src" }]
+packages = [{ include = "eps_ground_rupture", from = "src" }]
 
 [tool.poetry.dependencies]
 python = ">=3.11,<3.14"
@@ -33,9 +33,9 @@ matplotlib = "^3.9"
 seaborn = "^0.13"
 
 [tool.poetry.scripts]
-egr-build = "eps_ground_rapture.cli:main"
-egr-push-sheets = "eps_ground_rapture.cli:push_sheets_main"
-egr-csv = "eps_ground_rapture.cli:csv_main"
+egr-build = "eps_ground_rupture.cli:main"
+egr-push-sheets = "eps_ground_rupture.cli:push_sheets_main"
+egr-csv = "eps_ground_rupture.cli:csv_main"
 
 [build-system]
 requires = ["poetry-core>=1.8.0"]

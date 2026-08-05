@@ -71,7 +71,7 @@ recorded in `subprojects/mkdocs/DEPLOY.md` in the source repository.*
 
 The pipeline that produces the data behind every dashboard — and this site
 itself — lives in
-[HarvardRC/eps-ground-rapture](https://github.com/HarvardRC/eps-ground-rapture)
+[HarvardRC/eps-ground-rupture](https://github.com/HarvardRC/eps-ground-rupture)
 under the Apache-2.0 licence.
 
 [^abstract]: Chiama et al. (2025), abstract.

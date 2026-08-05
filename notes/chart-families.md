@@ -11,7 +11,8 @@ Sources scanned:
   ~17 figure cells).
 - **nb2** = `2Ddem 2025 Paper Revisions - FDHI Scarp Height & DZW.ipynb`
   (30 code cells, ~20 figure cells).
-- The prior owner's latest script `legacy/FDHI-SURE-DEM_SCATTER.py`.
+- The prior owner's latest scatter script, `FDHI-SURE-DEM_SCATTER.py`,
+  from the handoff materials (not in the repo).
 
 ## Family 1 — Model vs. reality: overlay scatter
 

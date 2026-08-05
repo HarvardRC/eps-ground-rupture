@@ -63,5 +63,5 @@ nothing else:
 ## References
 
 - `subprojects/python/pyproject.toml`, `poetry.lock`
-- `subprojects/python/src/eps_ground_rapture/cli.py`
+- `subprojects/python/src/eps_ground_rupture/cli.py`
 - `docs/setup.md` — pipeline overview, what runs today

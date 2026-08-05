@@ -2,10 +2,15 @@
 // Poetry owns the Python dependency graph and lockfile. Each task
 // shells out via Exec — no Python-specific Gradle plugin required.
 //
-// Project convention: the virtualenv lives at /opt/python/venvs/<name>/
-// (not in Poetry's cache). poetry.toml sets virtualenvs.create=false so
-// Poetry installs into the venv we activate here rather than creating
-// its own.
+// Project convention: the virtualenv lives outside Poetry's cache, at a
+// fixed path. poetry.toml sets virtualenvs.create=false so Poetry installs
+// into the venv we activate here rather than creating its own.
+//
+// NB: the `venvDir` default below is /opt/python/venvs/<name>, but that
+// directory does not exist on the current dev machine, where venvs live at
+// /opt/venv/<name>. That machine overrides it via python.venv in
+// ~/.gradle/gradle.properties. Verify which convention holds before
+// changing the default — see docs/setup.md → Setup.
 
 import java.io.File
 
@@ -183,7 +188,7 @@ val wheelOutDir = rootProject.layout.projectDirectory.dir("dist/python").asFile
 
 val wheel by tasks.registering(Exec::class) {
     group = "build"
-    description = "Build a wheel for the Python package (output: dist/python/eps_ground_rapture-*.whl)."
+    description = "Build a wheel for the Python package (output: dist/python/eps_ground_rupture-*.whl)."
     workingDir = projectDir
     useVenv()
     commandLine(

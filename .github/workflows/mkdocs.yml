@@ -1,6 +1,9 @@
 # Builds the companion site and deploys it to GitHub Pages. Builds with
 # --strict, so a dead internal link or a bad config fails the run instead
 # of publishing a damaged site. See subprojects/mkdocs/DEPLOY.md.
+#
+# Publishing model: only pushes to main deploy. Pull requests touching the
+# site run the same strict build as a validation check, without deploying.
 
 name: Companion site
 
@@ -12,10 +15,15 @@ on:
       - 'subprojects/python/pyproject.toml'
       - 'subprojects/python/poetry.lock'
       - '.github/workflows/mkdocs.yml'
-  # Lets you publish on demand without waiting for a push. NB: this can be
-  # dispatched from ANY branch, so it is the one way to publish before the
-  # work merges to main — intentional, but don't mistake the push filter
-  # above for a hard guarantee.
+  pull_request:
+    paths:
+      - 'subprojects/mkdocs/**'
+      - 'subprojects/python/pyproject.toml'
+      - 'subprojects/python/poetry.lock'
+      - '.github/workflows/mkdocs.yml'
+  # Manual publish without waiting for a push. NB: the github-pages
+  # environment only permits deploys from main, so dispatch from other
+  # branches will build but not deploy.
   workflow_dispatch:
 
 # Least privilege: only the deploy job gets Pages write access.
@@ -30,9 +38,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
 
@@ -43,32 +51,23 @@ jobs:
       # there is one lockfile for the whole repo. --only docs skips pandas /
       # pyarrow / duckdb, which the site does not need; --no-root skips
       # installing the pipeline package itself.
-      #
-      # subprojects/python/poetry.toml sets virtualenvs.create = false, so
-      # Poetry installs into whatever venv is ACTIVE. We must therefore make
-      # one first: without it Poetry targets the runner's system Python and
-      # fails trying to replace root-owned packages that ship with the image
-      # (jinja2 is one, and mkdocs-material needs a newer one).
-      # This mirrors the documented local workflow — activate, then install.
+      # NB: subprojects/python/poetry.toml sets virtualenvs.create = false,
+      # so this installs into the runner's Python — which is what we want here.
       - name: Install docs dependencies
         working-directory: subprojects/python
-        run: |
-          python -m venv .venv
-          source .venv/bin/activate
-          poetry install --only docs --no-root
+        run: poetry install --only docs --no-root
 
-      # Run from the mkdocs directory, not via `mkdocs -f`: pymdownx.snippets
-      # resolves base_path from the working directory, so building from
-      # elsewhere cannot find docs/includes/abbreviations.md.
       - name: Build site
         working-directory: subprojects/mkdocs
-        run: ../python/.venv/bin/mkdocs build --strict
+        run: mkdocs build --strict
 
       - uses: actions/upload-pages-artifact@v3
         with:
           path: subprojects/mkdocs/site
 
   deploy:
+    # PRs only validate the build; publishing happens on push to main.
+    if: github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
     # configure-pages runs here rather than in `build` because it calls the

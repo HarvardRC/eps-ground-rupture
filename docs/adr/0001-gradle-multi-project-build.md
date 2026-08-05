@@ -24,7 +24,7 @@ single orchestrator.
 project-level resources and contains no application code; code modules are
 Gradle subprojects under `subprojects/` (matching Gradle's own
 vocabulary). `subprojects/python/` uses the modern Python **src-layout**
-(`src/eps_ground_rapture/`), with a thin `build.gradle.kts` of Exec tasks
+(`src/eps_ground_rupture/`), with a thin `build.gradle.kts` of Exec tasks
 that shell out to Poetry (`poetryInstall`, `pytest`, `egrBuild`), wired
 into Gradle's `check`/`assemble` lifecycle. Poetry stays authoritative for
 Python dependencies ([ADR-0002](0002-python-pipeline-shape-and-toolchain.md));

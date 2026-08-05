@@ -12,7 +12,7 @@ from __future__ import annotations
 import pandas as pd
 import pytest
 
-from eps_ground_rapture import io, prep
+from eps_ground_rupture import io, prep
 
 
 def _row(**overrides):

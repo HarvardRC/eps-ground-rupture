@@ -71,6 +71,6 @@ files (text-scan connections + extracts):
 
 ## References
 
-- `subprojects/python/src/eps_ground_rapture/csvexport.py` (`egr-csv`)
+- `subprojects/python/src/eps_ground_rupture/csvexport.py` (`egr-csv`)
 - `dist/csv/` — the export target (gitignored)
 - `dashboards/sheets/README.md` — the dormant alternative

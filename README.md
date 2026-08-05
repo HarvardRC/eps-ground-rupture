@@ -1,9 +1,9 @@
-# eps-ground-rapture
+# eps-ground-rupture
 
 Productizing 2D DEM earthquake-rupture analyses as interactive dashboards
 and a companion web site.
 
-- **Companion site**: <https://harvardrc.github.io/eps-ground-rapture/>
+- **Companion site**: <https://harvardrc.github.io/eps-ground-rupture/>
 - **Dashboards**: <https://public.tableau.com/app/profile/michael.bouzinier>
   (free to view, no login)
 - **The paper**: Chiama et al. (2025), *Earthquake Spectra* **41**(5),
@@ -111,9 +111,13 @@ Then:
 
 ## Documentation
 
-- `docs/setup.md` — what's scaffolded, decisions taken, known gaps
+- `docs/setup.md` — the developer manual: layout, pipeline, the `egr-*` and
+  Gradle tool surface, setup, known gaps
 - `docs/adr/` — active decisions + [dead-ends.md](docs/adr/dead-ends.md)
-- `docs/datasets.md` — reference notes on the input datasets (DEM, FDHI, SURE, Kern)
+- `docs/datasets.md` — the input datasets (DEM, FDHI, SURE, Kern) and the
+  eleven derived views
+- `docs/dashboards/` — per-dashboard developer docs: data contracts,
+  calculated fields, how to edit a workbook safely
 - `notes/Roadmap.md` — build plan and statuses; `notes/chart-families.md` —
   chart inventory; `notes/dashboard-*-build-spec.md` — per-dashboard specs
 - `subprojects/python/README.md` — pipeline package usage

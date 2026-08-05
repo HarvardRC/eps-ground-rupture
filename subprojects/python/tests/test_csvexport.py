@@ -9,7 +9,7 @@ import duckdb
 import pandas as pd
 import pytest
 
-from eps_ground_rapture import csvexport
+from eps_ground_rupture import csvexport
 
 
 def _make_duckdb(tmp_path: Path, df: pd.DataFrame, view: str = "v") -> Path:
@@ -78,7 +78,7 @@ def test_view_to_csv_is_case_insensitive(tmp_path):
 
 def test_csv_main_reports_undefined_view(tmp_path, capsys):
     """The CLI exits 2 with a message rather than a traceback."""
-    from eps_ground_rapture import cli
+    from eps_ground_rupture import cli
 
     db = _make_duckdb(tmp_path, pd.DataFrame({"a": [1]}))
     rc = cli.csv_main(

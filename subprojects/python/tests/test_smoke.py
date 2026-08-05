@@ -6,7 +6,7 @@ import duckdb
 import pandas as pd
 import pytest
 
-from eps_ground_rapture import __version__, config, export, io, register, views
+from eps_ground_rupture import __version__, config, export, io, register, views
 
 
 def test_version_present():
@@ -317,7 +317,7 @@ def test_sure_magnitude_case_escapes_apostrophes(monkeypatch):
 
 
 def test_sure_magnitude_case_skips_unknowns():
-    from eps_ground_rapture.config import SURE_EVENT_MAGNITUDES
+    from eps_ground_rupture.config import SURE_EVENT_MAGNITUDES
 
     case = views._sure_magnitude_case("eq_name")
     for name, mw in SURE_EVENT_MAGNITUDES.items():

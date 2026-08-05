@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import pytest
 
-from eps_ground_rapture import cli, io
+from eps_ground_rupture import cli, io
 
 
 def _populate(raw_dir, *names):

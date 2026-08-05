@@ -6,7 +6,7 @@ Provisions, per environment (`dev` / `prod`):
 |---|---|---|
 | S3 bucket | `eps-ground-rapture-dev` (destroyable, unversioned) | `eps-ground-rapture-prod` (protected, versioned) |
 | Glue database | `eps_ground_rapture_dev` | `eps_ground_rapture_prod` |
-| Glue tables | `dem`, `fdhi_cleaned`, `sure`, `kern_combined` | same |
+| Glue tables | one per Parquet dir — currently 5; see `tables.json` | same |
 | Athena workgroup | `eps-ground-rapture-dev` | `eps-ground-rapture-prod` |
 
 The bucket holds the Parquet under `processed/<table>/` and Athena query
@@ -29,7 +29,7 @@ deploy/terraform/
 ## Schema single-source-of-truth (read before editing)
 
 `tables.json` is **generated** by `poetry run egr-build` (from the actual
-Parquet schemas, via `eps_ground_rapture.register`). Do not hand-edit.
+Parquet schemas, via `eps_ground_rupture.register`). Do not hand-edit.
 After a pipeline change that alters a table's columns:
 
 ```bash

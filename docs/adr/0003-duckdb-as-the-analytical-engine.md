@@ -26,7 +26,7 @@ Two pressures made views-in-DuckDB the right center:
 
 All tabular products are **DuckDB SQL views over the tidy Parquet**
 (`data/processed/<table>/`), defined in
-`eps_ground_rapture.views` and materialized into a views-only database
+`eps_ground_rupture.views` and materialized into a views-only database
 file (`dashboards/duckdb/eps.duckdb`, gitignored, rebuilt by `egr-build`):
 
 - normalization views (`unified_observations`, `sure_enriched`, per-source
@@ -67,7 +67,7 @@ parked AWS lane would need have Athena/Trino twins in the same module
 
 ## References
 
-- `subprojects/python/src/eps_ground_rapture/views.py`
+- `subprojects/python/src/eps_ground_rupture/views.py`
 - `subprojects/python/tests/test_regression_views.py`
 - `dashboards/duckdb/README.md`
 - `notes/dashboard-4-build-spec.md` — the pinned coefficient table
