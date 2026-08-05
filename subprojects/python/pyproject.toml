@@ -1,0 +1,57 @@
+[tool.poetry]
+name = "eps-ground-rapture"
+version = "0.1.0"
+description = "Data pipelines for 2D DEM earthquake-rupture analysis, producing tidy datasets for Tableau and Apache Superset dashboards."
+authors = ["Michael Bouzinier <michael.bouzinier@forome.org>"]
+license = "Apache-2.0"
+readme = "README.md"
+packages = [{ include = "eps_ground_rapture", from = "src" }]
+
+[tool.poetry.dependencies]
+python = ">=3.11,<3.14"
+pandas = "^2.2"
+numpy = "^2.0"
+pyarrow = "^18.0"
+scikit-learn = "^1.5"
+duckdb = "^1.1"
+gspread = "^6.2.1"
+gspread-dataframe = "^4.0.0"
+pyyaml = "^6.0.3"
+
+[tool.poetry.group.docs.dependencies]
+# The MkDocs companion site under subprojects/mkdocs/. One venv for the whole
+# repo, so the docs toolchain is a group here rather than a second project.
+mkdocs = "^1.6"
+mkdocs-material = "^9.5"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3"
+ruff = "^0.7"
+black = "^24.10"
+mypy = "^1.13"
+matplotlib = "^3.9"
+seaborn = "^0.13"
+
+[tool.poetry.scripts]
+egr-build = "eps_ground_rapture.cli:main"
+egr-push-sheets = "eps_ground_rapture.cli:push_sheets_main"
+egr-csv = "eps_ground_rapture.cli:csv_main"
+
+[build-system]
+requires = ["poetry-core>=1.8.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"

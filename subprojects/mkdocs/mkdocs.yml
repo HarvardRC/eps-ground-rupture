@@ -1,0 +1,124 @@
+site_name: EPS Ground Rupture — interactive companion
+site_description: >-
+  An interactive companion to Chiama et al. (2025), Earthquake Spectra —
+  the paper's figures re-experienced as live Tableau Public dashboards.
+site_url: https://harvardrc.github.io/eps-ground-rapture/
+
+repo_url: https://github.com/HarvardRC/eps-ground-rapture
+repo_name: HarvardRC/eps-ground-rapture
+edit_uri: edit/main/subprojects/mkdocs/docs/
+
+# Site authorship, per Michael 2026-08-02: Kristen Chiama, Andreas Plesch,
+# John H. Shaw. The names render via `copyright` below (site footer) and the
+# "Site authors" section of docs/index.md — Material has no built-in authors
+# key, so those two places are the source of truth. Keep them in step.
+#
+# TODO(michael): confirm the byline with Kristen before publishing.
+#   Candidates to add — William Bednarz and Robb Moss (the paper's other two
+#   authors), and Michael Bouzinier (pipeline and dashboards). Ask when
+#   showing her the site. Also tracked in DEPLOY.md, which the site links to.
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/HarvardRC/eps-ground-rapture
+      name: Source repository
+
+copyright: >-
+  © The Author(s) 2025. Site by Kristen Chiama, Andreas Plesch and John H. Shaw.
+  Dashboards and pipeline released under Apache-2.0; the underlying paper is
+  not open access.
+
+theme:
+  name: material
+  language: en
+  features:
+    - navigation.instant
+    - navigation.tracking
+    # A nested, always-open tree in the left sidebar: top-level entries with
+    # their children indented beneath them. `navigation.sections` is
+    # deliberately NOT enabled — it flattens a section into a bold label and
+    # loses the visible parent/child relationship.
+    # NB: Material only shows this sidebar at viewport widths >= 76.25em
+    # (~1220px); below that it collapses into the hamburger menu.
+    - navigation.expand
+    # Previous/next links at the foot of every page, so the site reads as a
+    # sequence rather than a set of dead ends.
+    - navigation.footer
+    - navigation.top
+    - content.code.copy
+    # Upgrades the acronym tooltips from bare `title` attributes (invisible
+    # on touch, unreachable by keyboard) to Material's accessible ones.
+    - content.tooltips
+    - toc.follow
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+nav:
+  - Home: index.md
+  - Glossary: glossary.md
+  - Dashboards:
+      - Model vs reality: dashboards/model-vs-reality.md
+      - Response curves: dashboards/response-curves.md
+      - Per-event boxplots: dashboards/per-event-boxplots.md
+      - Slip regression: dashboards/slip-regression.md
+  - Data: data.md
+  - The paper: paper.md
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - footnotes
+  # The glossary is written as definition lists; without this they render as
+  # paragraphs with a literal leading colon.
+  - def_list
+  # Hover tooltips on every acronym, site-wide. The definitions live in
+  # docs/includes/abbreviations.md and are appended to every page by the
+  # snippets extension below, so no page carries any per-term markup.
+  - abbr
+  - pymdownx.snippets:
+      base_path: [docs]
+      auto_append: [includes/abbreviations.md]
+      check_paths: true
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences
+
+# The Tableau Embedding API v3 is loaded once here rather than repeated in
+# every page, so the <tableau-viz> web component is defined site-wide.
+# See EMBEDS.md (alongside this file) for the markup pattern each page reuses.
+extra_javascript:
+  - path: https://public.tableau.com/javascripts/api/tableau.embedding.3.latest.min.js
+    type: module
+  # Scales each embed to the available column width — see the file header.
+  - javascripts/tableau-fit.js
+
+extra_css:
+  - stylesheets/extra.css
+
+# The abbreviation definitions are an include, not a page.
+exclude_docs: |
+  includes/
+
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+  # Deep links into the glossary are load-bearing, and a broken #anchor is
+  # only INFO by default — which --strict ignores. Promote it.
+  anchors: warn

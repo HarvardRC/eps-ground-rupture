@@ -1,0 +1,19 @@
+# Default: treat files as text with platform-native line endings on checkout.
+* text=auto
+
+# Gradle wrapper:
+#   gradlew is a POSIX shell script — must keep LF even on Windows checkouts.
+#   gradlew.bat is a Windows batch file — must keep CRLF on Windows checkouts.
+gradlew     text eol=lf
+*.sh        text eol=lf
+gradlew.bat text eol=crlf
+*.bat       text eol=crlf
+*.cmd       text eol=crlf
+
+# Binary artifacts — never line-end-munge.
+*.jar       binary
+*.parquet   binary
+*.pdf       binary
+*.png       binary
+*.jpg       binary
+*.twbx      binary

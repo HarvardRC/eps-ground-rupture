@@ -1,0 +1,76 @@
+# Builds the companion site and deploys it to GitHub Pages. Builds with
+# --strict, so a dead internal link or a bad config fails the run instead
+# of publishing a damaged site. See subprojects/mkdocs/DEPLOY.md.
+
+name: Companion site
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'subprojects/mkdocs/**'
+      - 'subprojects/python/pyproject.toml'
+      - 'subprojects/python/poetry.lock'
+      - '.github/workflows/mkdocs.yml'
+  # Lets you publish on demand without waiting for a push. NB: this can be
+  # dispatched from ANY branch, so it is the one way to publish before the
+  # work merges to main — intentional, but don't mistake the push filter
+  # above for a hard guarantee.
+  workflow_dispatch:
+
+# Least privilege: only the deploy job gets Pages write access.
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install Poetry
+        run: pipx install poetry
+
+      # The docs toolchain is a dependency group of the python subproject, so
+      # there is one lockfile for the whole repo. --only docs skips pandas /
+      # pyarrow / duckdb, which the site does not need; --no-root skips
+      # installing the pipeline package itself.
+      # NB: subprojects/python/poetry.toml sets virtualenvs.create = false,
+      # so this installs into the runner's Python — which is what we want here.
+      - name: Install docs dependencies
+        working-directory: subprojects/python
+        run: poetry install --only docs --no-root
+
+      - name: Build site
+        working-directory: subprojects/mkdocs
+        run: mkdocs build --strict
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: subprojects/mkdocs/site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    # configure-pages runs here rather than in `build` because it calls the
+    # Pages API, which needs the `pages` permission this job grants and the
+    # build job deliberately withholds. (Its usual role — exporting a base
+    # URL for the build — is not needed: mkdocs.yml already sets site_url.)
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v5
+      - id: deployment
+        uses: actions/deploy-pages@v4

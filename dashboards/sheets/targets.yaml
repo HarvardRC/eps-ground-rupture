@@ -1,0 +1,19 @@
+# Google Sheets push targets for `egr-push-sheets`.
+#
+# Maps a DuckDB view (in dashboards/duckdb/eps.duckdb) to a destination
+# spreadsheet + worksheet. Spreadsheet IDs are CONFIGURATION, not secrets —
+# the ID is the path segment after /d/ in a Sheet URL:
+#   https://docs.google.com/spreadsheets/d/<SPREADSHEET_ID>/edit
+# Credentials are separate: a service-account key file, located via
+# GOOGLE_SHEETS_SA_KEYFILE (default resources/local/eps-sheets-sa.json).
+# See README.md for setup.
+#
+# `worksheet` defaults to the view name if omitted.
+
+targets:
+  unified_observations:
+    spreadsheet_id: 1XMrjHmaJ4zjzJfy65oByG30yMxvkTkpiQ0Mc6RC8JjQ
+    worksheet: unified_observations
+
+  # The full `dem` view (~9.0M cells) is over the per-Sheet cell limit;
+  # do NOT add it here — use the Drive-CSV fallback in README.md instead.
