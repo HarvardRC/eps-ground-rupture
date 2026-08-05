@@ -10,16 +10,31 @@ earthquake — and does the model's range cover them?
 
 This is the inverse of [Model vs reality](model-vs-reality.md). Instead of
 scattering individual field points over the simulated cloud, it summarises
-the spread of measurements event by event, with the model's own
-distribution alongside for comparison.
+the spread of measurements event by event, with the distribution from the
+[distinct element method (DEM)](../glossary.md#dem) simulations alongside
+for comparison.
 
-Every data panel is a box-and-whisker plot: the box spans the interquartile
-range, the line inside is the median, and the whiskers extend to the most
-extreme observation lying within 1.5 × IQR of the box — the default shared
-by Tableau and by the plotting library used in the original analysis, which
-is what lets these boxes be compared with the paper's.[^spec] On the field
-panels each box is one earthquake; on the DEM panels each box is one **scarp
-class**, which is how the model's range is broken down.[^spec]
+!!! tip "Unfamiliar terms?"
+    **Median**, **interquartile range**, **whiskers** and **log scale** are
+    defined under [statistics](../glossary.md#statistics-terms);
+    **FDHI**, **SURE**, **vertical separation** and **principal rupture**
+    under [the field counterparts](../glossary.md#the-field-counterparts)
+    and [the datasets](../glossary.md#the-datasets).
+
+Every data panel is a box-and-whisker plot. The box spans the
+[interquartile range](../glossary.md#iqr), the line inside is the median,
+and the [whiskers](../glossary.md#whiskers) reach the most extreme
+measurement still within 1.5 × IQR of the box. That is the default in both
+Tableau and the plotting library used in the original analysis, which is
+what lets these boxes be compared with the paper's.[^spec]
+
+On the field panels each box is one earthquake. On the DEM panels each box
+is one [scarp class](../glossary.md#scarp-classes) instead — that is how the
+model's range is broken down.[^spec] The six are
+[`Monoclinal`](../glossary.md#monoclinal),
+[`Pressure Ridge`](../glossary.md#pressure-ridge),
+[`Simple`](../glossary.md#simple) and a
+[`… Collapse`](../glossary.md#collapse) variant of each.
 
 Two dashboards divide the material.
 
@@ -27,8 +42,9 @@ Two dashboards divide the material.
 
 This dashboard stacks each DEM distribution above the comparable field
 measure, on a shared axis, for the two quantities the paper compares:
-**deformation zone width** (DZW — in the field data, fault zone width) and
-**scarp height**.
+[deformation zone width](../glossary.md#dzw) (in the field data,
+[fault zone width](../glossary.md#fzw)) and
+[scarp height](../glossary.md#scarp-height).
 
 <div class="tableau-fit" data-width="800" data-height="1200" markdown="0">
   <tableau-viz src="https://public.tableau.com/views/per-event-box-plots-public/Per-EventBoxplotsModelvsField" width="800" height="1200"
@@ -39,7 +55,8 @@ measure, on a shared axis, for the two quantities the paper compares:
 
 ### Why the width axis is logarithmic
 
-The width panels use a **fixed logarithmic axis spanning 0.01–2,000 m**, and
+The width panels use a fixed
+[logarithmic axis](../glossary.md#log-scale) spanning **0.01–2,000 m**, and
 this is the most consequential presentation choice on the site — because it
 is a deliberate departure from how the paper treats the same comparison.
 
@@ -68,11 +85,12 @@ linear axis holds both, hence the log scale.
 ## Vertical separation and SURE
 
 The second dashboard carries measures that have no DEM counterpart on the
-same axis, so they stand alone: **vertical separation** (the vertical offset
-across the rupture, which the field compilation treats as comparable to
-scarp height[^assumption]) and two measures from the SURE
-compilation — **fault-normal component** (the horizontal displacement
-perpendicular to the fault) and its own scarp height.
+same axis, so they stand alone:
+[vertical separation](../glossary.md#vertical-separation) (the vertical
+offset across the rupture, which the field compilation treats as comparable
+to scarp height[^assumption]) and two measures from the SURE
+compilation — [fault-normal component](../glossary.md#fnc) (the horizontal
+displacement measured perpendicular to the fault) and its own scarp height.
 
 Coverage differs sharply between them. After the per-sheet filters described
 below, vertical separation is the richest panel at 2,106 measurements across
@@ -92,12 +110,13 @@ so you can narrow the 23 events to a comparable subset.
 
 !!! info "How each panel is filtered, and where the magnitudes come from"
     The FDHI panels keep only measurements the compilation marks as
-    **principal** ruptures — the main fault trace, as opposed to distributed
-    or secondary rupture — and only those with a positive value for the
-    measure in question. The counts above are after those filters.[^spec]
+    [**principal** ruptures](../glossary.md#principal-rupture) — the main
+    fault trace, as opposed to distributed or secondary rupture — and only
+    those with a positive value for the measure in question. The counts above are after those filters.[^spec]
     The SURE panels apply no row filter.
 
-    Event labels carry a moment magnitude where one is available. For the
+    Event labels carry a [moment magnitude](../glossary.md#magnitude) where
+    one is available. For the
     FDHI measurements that value travels with the data; **for SURE it does
     not** — the SURE release records no magnitude column, so those values
     come from a small lookup table curated inside this project, several
@@ -110,6 +129,16 @@ This is **chart family 5** in the project's inventory, which maps it to the
 boxplot panels of the paper's Figure 13.[^families] The measurements come
 from the FDHI flatfile and the SURE database, and the model context from the
 DEM experiment set — all described on the [Data](../data.md) page.
+
+## Where to go next
+
+- **[Model vs reality](model-vs-reality.md)** — the same comparison as a
+  scatter of individual measurements rather than summaries.
+- **[Response curves](response-curves.md)** — what drives the model's own
+  range in the first place.
+- **[Slip regression](slip-regression.md)** — inferring the slip behind a
+  measured displacement.
+- **[Data](../data.md)** — where the FDHI and SURE measurements come from.
 
 [^families]: `notes/chart-families.md` in the source repository.
 [^spec]: `notes/dashboard-3-build-spec.md` in the source repository, which

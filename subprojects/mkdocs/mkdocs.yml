@@ -41,8 +41,14 @@ theme:
     # NB: Material only shows this sidebar at viewport widths >= 76.25em
     # (~1220px); below that it collapses into the hamburger menu.
     - navigation.expand
+    # Previous/next links at the foot of every page, so the site reads as a
+    # sequence rather than a set of dead ends.
+    - navigation.footer
     - navigation.top
     - content.code.copy
+    # Upgrades the acronym tooltips from bare `title` attributes (invisible
+    # on touch, unreachable by keyboard) to Material's accessible ones.
+    - content.tooltips
     - toc.follow
   palette:
     - media: "(prefers-color-scheme: light)"
@@ -62,10 +68,12 @@ theme:
 
 nav:
   - Home: index.md
+  - Glossary: glossary.md
   - Dashboards:
       - Model vs reality: dashboards/model-vs-reality.md
       - Response curves: dashboards/response-curves.md
       - Per-event boxplots: dashboards/per-event-boxplots.md
+      - Slip regression: dashboards/slip-regression.md
   - Data: data.md
   - The paper: paper.md
 
@@ -75,6 +83,17 @@ markdown_extensions:
   - md_in_html
   - tables
   - footnotes
+  # The glossary is written as definition lists; without this they render as
+  # paragraphs with a literal leading colon.
+  - def_list
+  # Hover tooltips on every acronym, site-wide. The definitions live in
+  # docs/includes/abbreviations.md and are appended to every page by the
+  # snippets extension below, so no page carries any per-term markup.
+  - abbr
+  - pymdownx.snippets:
+      base_path: [docs]
+      auto_append: [includes/abbreviations.md]
+      check_paths: true
   - toc:
       permalink: true
   - pymdownx.details
@@ -92,7 +111,14 @@ extra_javascript:
 extra_css:
   - stylesheets/extra.css
 
+# The abbreviation definitions are an include, not a page.
+exclude_docs: |
+  includes/
+
 validation:
   omitted_files: warn
   absolute_links: warn
   unrecognized_links: warn
+  # Deep links into the glossary are load-bearing, and a broken #anchor is
+  # only INFO by default — which --strict ignores. Promote it.
+  anchors: warn

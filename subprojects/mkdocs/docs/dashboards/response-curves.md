@@ -8,20 +8,38 @@ hide:
 **The question:** how do the measured surface characteristics change as
 slip accumulates, and which conditions change that relationship?
 
-This dashboard stays inside the simulations — no field measurements are
-plotted. Each point is one model stage; the trend line through them is the
-relationship you are reading.
+This dashboard stays inside the simulations — the two-dimensional
+[distinct element method (DEM)](../glossary.md#dem) experiments — with no
+field measurements plotted. Each point is one
+[model stage](../glossary.md#model-stage): a snapshot of the modelled ground
+surface after another 0.05 m of [slip](../glossary.md#slip). The trend line
+through them is the relationship you are reading.
+
+!!! tip "Unfamiliar terms?"
+    **Slip**, **fault dip**, **DZW**, **Us − Ud**,
+    [**r²**](../glossary.md#r2), and the sediment settings — all defined in
+    the [glossary](../glossary.md), which also explains
+    [why each curve's slope lands near sin(fault dip)](../glossary.md#how-the-quantities-relate).
 
 Three controls define the view:
 
-- **Driver** (the x-axis): `Slip` or `Magnitude`.
-- **Response** (the y-axis): `Scarp_Height`, `DZW` (deformation zone width —
-  the span of disturbed ground, defined on the
-  [model vs reality](model-vs-reality.md) page), `Scarp_Dip`, or `Us - Ud`
-  (the scarp height minus the downthrown-side displacement, which separates
-  folding and uplift from the fault's own vertical offset).[^abstract]
-- **Condition By** (the colouring): `Scarp_Class`, `Fault_Dip`, `Cohesion`,
-  `Set`, `Density` or `Sediment_Strength`.
+- **Driver** (the x-axis): [`Slip`](../glossary.md#slip) or
+  [`Magnitude`](../glossary.md#magnitude).
+- **Response** (the y-axis): [`Scarp_Height`](../glossary.md#scarp-height),
+  [`DZW`](../glossary.md#dzw), [`Scarp_Dip`](../glossary.md#scarp-dip), or
+  [`Us - Ud`](../glossary.md#us-ud) — the height added at the surface by
+  folding and secondary faulting, over and above what the fault itself
+  lifted.[^abstract]
+- **Condition By** (the colouring):
+  [`Scarp_Class`](../glossary.md#scarp-classes) (the six shapes —
+  [monoclinal](../glossary.md#monoclinal),
+  [pressure ridge](../glossary.md#pressure-ridge),
+  [simple](../glossary.md#simple), and each after
+  [collapse](../glossary.md#collapse)),
+  [`Fault_Dip`](../glossary.md#fault-dip),
+  [`Cohesion`](../glossary.md#cohesion), [`Set`](../glossary.md#set)
+  (homogeneous or layered sediment), [`Density`](../glossary.md#sediment-strength)
+  or [`Sediment_Strength`](../glossary.md#sediment-strength).
 
 Holding the driver fixed and re-colouring by each condition in turn is the
 fastest way to see which inputs separate the curves and which leave them
@@ -56,6 +74,17 @@ scatter panels in a single figure, one per material case.[^families]
 
 The underlying data is the DEM experiment set described on the
 [Data](../data.md) page.
+
+## Where to go next
+
+- **[Model vs reality](model-vs-reality.md)** — put the simulations side by
+  side with measurements from real earthquakes.
+- **[Per-event boxplots](per-event-boxplots.md)** — how much the field
+  measurements vary within a single earthquake.
+- **[Slip regression](slip-regression.md)** — that same sin(dip) relationship
+  fitted per dip, then inverted to infer slip from a field measurement.
+- **[Glossary](../glossary.md#how-the-quantities-relate)** — why each curve's
+  slope lands so close to sin(fault dip).
 
 [^abstract]: Chiama et al. (2025), abstract — the measured characteristics
     are scarp height, uplift, deformation zone width and scarp dip.

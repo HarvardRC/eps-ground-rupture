@@ -17,14 +17,26 @@ finds that the simulations "comprehensively describe the range of historic
 surface rupture observations" in the field compilation.[^abstract]
 
 Each dashboard answers a different form of that comparison.
-**Model vs reality** overlays field measurements on the simulated cloud.
-**Response curves** stay inside the model, showing how each measured output
-changes as slip accumulates under different conditions. **Per-event
-boxplots** invert the first view — summarising the spread of real
-measurements within each earthquake, with the model's own distribution
-alongside. The
-[figure → dashboard crosswalk](paper.md#figure-dashboard-crosswalk) maps
-each one back to the figure it derives from.
+**[Model vs reality](dashboards/model-vs-reality.md)** overlays field
+measurements on the simulated cloud.
+**[Response curves](dashboards/response-curves.md)** stay inside the model,
+showing how each measured output changes as slip accumulates under different
+conditions. **[Per-event boxplots](dashboards/per-event-boxplots.md)** invert
+the first view — summarising the spread of real measurements within each
+earthquake, with the model's own distribution alongside.
+**[Slip regression](dashboards/slip-regression.md)** does arithmetic on the
+model — a fitted slip-to-uplift law per fault dip, run backwards to infer
+the slip behind Kern County's 1952 field measurements. The
+[figure → dashboard crosswalk](paper.md#figure-dashboard-crosswalk) maps each
+one back to the figure it derives from.
+
+!!! tip "New to this? Start with the glossary"
+    Faults, scarps, DZW, FDHI, SURE — the field has a lot of vocabulary, and
+    the paper assumes you already have it. **[The glossary](glossary.md)**
+    assumes you have none of it: it defines every term and abbreviation used
+    here in plain language, and explains
+    [how the measured quantities relate to each other](glossary.md#how-the-quantities-relate).
+    Nothing else on the site depends on reading it first.
 
 !!! note "Reading this without the paper"
     The pages assume no prior reading. Every claim about the science is

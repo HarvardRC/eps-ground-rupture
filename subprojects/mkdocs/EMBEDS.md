@@ -76,6 +76,7 @@ committed workbooks (2026-08-04) — never guessed.
 | `response-curves.md` | `dem-response-curve-public/DEMResponseCurvesweb` | 800 × 1000 | `DEMResponseCurves` (landscape original) |
 | `per-event-boxplots.md` | `per-event-box-plots-public/Per-EventBoxplotsModelvsField` | 800 × 1200 | itself (resized in place — it *is* the web layout) |
 | `per-event-boxplots.md` | `per-event-box-plots-public/Per-EventBoxplotsVSSUREweb` | 800 × 2000 | `Per-EventBoxplotsVSSURE` (1200 × 1200 original) |
+| `slip-regression.md` | `dem-slip-regression-public/SlipRegressionKernInference` | 800 × 850 | itself (single dashboard, already portrait) |
 
 Tableau derives a view slug from the dashboard name by keeping
 alphanumerics and hyphens and dropping everything else — spaces, `&`, em

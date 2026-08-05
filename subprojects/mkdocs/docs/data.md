@@ -3,10 +3,17 @@
 Four datasets sit behind the dashboards: one produced by simulation, three
 compiled from field observations of real earthquakes.
 
-## DEM model outputs
+!!! tip "Unfamiliar terms?"
+    Every abbreviation on this page — **DEM**, **FDHI**, **SURE**, **DZW**,
+    **FZW** — is defined in plain language in the
+    [glossary](glossary.md#abbreviations-at-a-glance).
 
-The paper reports **3,434 distinct element method experiments**, each a
-distinct combination of geological and fault conditions. Within an
+## Simulation outputs (DEM)
+
+The paper reports **3,434 distinct element method (DEM) experiments** — a
+technique that models sediment as many interacting particles, so faults and
+collapses emerge rather than being prescribed. Each experiment is one
+combination of geological and fault conditions. Within an
 experiment the modelled fault slips progressively, and the ground surface is
 measured at every 0.05 m of slip — **346,834 model stages** in
 total.[^abstract] So a row is a stage, not an experiment: the fixed
@@ -47,9 +54,9 @@ model-vs-reality view.[^spec]
 
 ## SURE database
 
-The **SUrface Ruptures due to Earthquakes (SURE) database**, version 2.0 — a public
-compilation of surface-rupture observations across many historical
-earthquakes. Roughly 1,400 measurement records covering identifiers,
+**SURE** — "a worldwide and unified database of surface ruptures … for fault
+displacement hazard analyses", version 2.0.[^sure] A public compilation of
+surface-rupture observations across many historical earthquakes. Roughly 1,400 measurement records covering identifiers,
 location, strike-slip / fault-normal / vertical displacement components and
 their uncertainties, scarp height, and event metadata.[^datasets]
 
@@ -69,8 +76,8 @@ project's own notes record that expansion as unconfirmed.[^datasets]
 
 Kern is the project's worked example for inverting the model — placing a
 measured vertical displacement on a fitted relationship to infer the slip
-that produced it.[^datasets] That inversion is not yet a dashboard; see the
-[crosswalk](paper.md#figure-dashboard-crosswalk).
+that produced it.[^datasets] That inversion is the
+[slip regression](dashboards/slip-regression.md) dashboard.
 
 ## How the data reaches the dashboards
 
@@ -90,13 +97,36 @@ tables, views and schemas, a second exports the CSVs — and the pipeline
 fails fast if any raw input is missing rather than producing a partial set
 of artifacts.
 
+Most exports are simply a table made readable. Three are different: they
+carry results the pipeline *computed*, so that the
+[slip regression](dashboards/slip-regression.md) dashboard displays numbers
+the project's tests pin rather than recomputing them in the browser.
+
+| Export | What it holds |
+|---|---|
+| `dem_regression.csv` | One row per fault dip: the fitted slope, intercept and r² of vertical displacement against slip. |
+| `dem_regression_lines.csv` | Two endpoints per dip, so the fitted line can be drawn as a line rather than re-fitted. |
+| `kern_inferred_slip.csv` | Each Kern County vertical displacement [back-projected](glossary.md#back-projection) through every dip's fit. |
+
 !!! info "Raw data is not redistributed here"
     The raw inputs are not committed to the repository — they come from the
     sources cited above, or from the project owner. The repository documents
     the expected filenames and their provenance.
+
+## Where to go next
+
+- **[Glossary](glossary.md)** — what DZW, FZW, vertical separation and the
+  sediment settings actually mean.
+- **[Model vs reality](dashboards/model-vs-reality.md)** — these datasets on
+  one plot.
+- **[The paper](paper.md)** — which figure each dashboard replaces.
 
 [^abstract]: Chiama et al. (2025), abstract — see [The paper](paper.md).
 [^spec]: `notes/dashboard-3-build-spec.md` in the source repository.
 [^datasets]: `docs/datasets.md` in the source repository — reference notes
     on each input dataset and how the legacy analyses used it.
 [^roadmap]: `notes/Roadmap.md` in the source repository.
+[^sure]: Baize, S., Nurminen, F., Sarmiento, A., *et al.* (2019). "A worldwide
+    and unified database of surface ruptures (SURE) for fault displacement
+    hazard analyses." *Seismological Research Letters* 91: 499–520 — the
+    reference Chiama et al. (2025) cites for this dataset.

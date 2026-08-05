@@ -1,10 +1,6 @@
-# DRAFT — not active. Copy to .github/workflows/mkdocs.yml to enable.
-# See subprojects/mkdocs/DEPLOY.md for the activation steps (including
-# switching Settings → Pages → Source to "GitHub Actions" first).
-#
-# Builds the companion site and deploys it to GitHub Pages on every push to
-# the default branch. Builds with --strict, so a dead internal link or a bad
-# config fails the run instead of publishing a damaged site.
+# Builds the companion site and deploys it to GitHub Pages. Builds with
+# --strict, so a dead internal link or a bad config fails the run instead
+# of publishing a damaged site. See subprojects/mkdocs/DEPLOY.md.
 
 name: Companion site
 

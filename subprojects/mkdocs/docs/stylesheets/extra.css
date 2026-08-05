@@ -17,6 +17,29 @@
   font-size: 0.75rem;
 }
 
+/* Material sets tables to 0.64rem regardless of body size, which left the
+ * glossary's abbreviation table noticeably smaller than the prose around it.
+ * Match the body instead — these tables are content, not dense data grids. */
+.md-typeset table:not([class]) {
+  font-size: 0.85rem;
+}
+
+/* Abbreviations get a hover tooltip via the `abbr` extension. Mark them so
+ * a reader can see there is something to hover over. */
+.md-typeset abbr {
+  text-decoration: underline dotted;
+  text-underline-offset: 0.2em;
+  cursor: help;
+  border-bottom: none;
+}
+
+/* …except inside a link, where the pointer must still say "clickable" and
+   the link's own underline should win. */
+.md-typeset a abbr {
+  cursor: pointer;
+  text-decoration: none;
+}
+
 /* Scale-to-fit wrapper for the Tableau embeds.
  *
  * docs/javascripts/tableau-fit.js sets `height` and `overflow` inline once it

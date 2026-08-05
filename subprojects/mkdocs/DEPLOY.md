@@ -1,43 +1,48 @@
 # Deploying the companion site
 
-**Nothing here is active yet.** No workflow is installed and no site has been
-published — activating deployment is a deliberate step, taken by the repo
-owner.
+**Active since 2026-08-04.** The site publishes to
+<https://harvardrc.github.io/eps-ground-rapture/> from
+`.github/workflows/mkdocs.yml`, with the repository's Pages **Source** set
+to *GitHub Actions*.
 
-The repository is public, so **GitHub Pages served from this repo** is the
-recommended path: no extra hosting, and the site rebuilds from the same
-commit as the pipeline that produced its data.
+The repository is public, so Pages served from this repo needs no extra
+hosting, and the site rebuilds from the same commit as the pipeline that
+produced its data. The published URL is set as `site_url` in `mkdocs.yml`.
 
-Published site URL would be
-`https://harvardrc.github.io/eps-ground-rapture/`, which is already set as
-`site_url` in `mkdocs.yml`.
+## How it is set up
 
-## Recommended: GitHub Actions → Pages
+- **Pages Source = GitHub Actions**, set on the repository (via the REST
+  API; the equivalent control is **Settings → Pages → Build and deployment
+  → Source**). This is what lets `actions/deploy-pages` publish at all.
+- **The workflow** lives at `.github/workflows/mkdocs.yml`. It runs on
+  pushes to `main` that touch `subprojects/mkdocs/**`, the python
+  subproject's `pyproject.toml` / `poetry.lock`, or the workflow itself —
+  and can also be triggered by hand from any branch via
+  `workflow_dispatch`.
+- **Publishing from `main` only.** Development happens on a branch and
+  reaches the site by being merged, so the published site always matches
+  the default branch. To preview before merging, run `mkdocs serve` locally
+  (see below) or dispatch the workflow by hand.
+- **Build is `--strict`**, so a broken internal link or a bad config fails
+  the run rather than publishing a damaged site.
+- **Dependencies** come from the `docs` group of
+  `subprojects/python/pyproject.toml` via `poetry install --only docs
+  --no-root`, so CI installs mkdocs-material without pandas, pyarrow or
+  duckdb.
 
-A ready-to-commit workflow is drafted alongside this file as
-**`github-workflow-mkdocs.yml.draft`**. To activate it:
+!!! note "Permissions"
+    The build job runs with `contents: read` only. `pages: write` and
+    `id-token: write` are granted to the deploy job alone, which is also
+    where `actions/configure-pages` runs — it calls the Pages API and would
+    fail without them.
 
-1. In the repo settings, set **Settings → Pages → Source** to
-   **GitHub Actions**.
-2. Copy the draft into place and commit it:
-
-   ```bash
-   mkdir -p .github/workflows
-   cp subprojects/mkdocs/github-workflow-mkdocs.yml.draft .github/workflows/mkdocs.yml
-   ```
-
-3. Check the branch filter in the workflow matches the branch you want to
-   publish from. The draft targets `main`; this work is currently on
-   `dev-v.0.1.x`, so nothing publishes until it merges — which is the safer
-   default.
-
-The workflow builds with `--strict`, so a broken internal link or a bad
-config fails the run rather than publishing a damaged site.
-
-!!! note
-    Review the draft before committing it. It grants the workflow the
-    `pages: write` and `id-token: write` permissions that Pages deployment
-    requires, scoped to that job only.
+!!! warning "If you ever publish from another branch"
+    The `github-pages` environment restricts deployments to the default
+    branch unless told otherwise, so a run from any other branch fails with
+    *"Branch … is not allowed to deploy to github-pages due to environment
+    protection rules"* — including a hand-dispatched one. Fix by adding a
+    deployment branch policy under **Settings → Environments →
+    github-pages → Deployment branches and tags**, then re-run the job.
 
 ## Fallback: manual `gh-deploy`
 
