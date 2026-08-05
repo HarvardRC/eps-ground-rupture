@@ -20,7 +20,7 @@ dashboards — so they can be version-controlled and re-imported.
 2. Register tables in your query engine:
    - Dev: `beeline -u jdbc:hive2://localhost:10000 -f dashboards/sql/spark-thrift.sql`
    - Prod: provision via Terraform — `deploy/terraform/` (see its README
-     and ADR-0014). **Do not use a Glue Crawler**: it registers the raw
+     and the retired AWS-lane design, `docs/adr/dead-ends.md`). **Do not use a Glue Crawler**: it registers the raw
      Parquet column names (`Us - Ud`, `SS_uc+`, …), which are illegal in
      Athena — that's exactly why the Terraform path exists.
 3. Build dashboards in the Superset UI against the registered database.

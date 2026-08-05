@@ -1,36 +1,40 @@
 # Architecture Decision Records
 
-Each ADR captures one architecturally significant decision: what we chose,
-what we rejected, and why. ADRs are immutable — superseded ones get a
-`Superseded by ADR-NNNN` note in the status line and a new ADR takes their
-place.
+Each ADR captures one architecturally significant decision that is **live
+today**: what we chose, what we rejected, and why. Format: lightweight MADR
+(Context → Decision → Alternatives → Consequences).
 
-Format: lightweight MADR (Context → Decision → Alternatives → Consequences).
+ADRs are immutable going forward — a changed decision gets a new ADR and a
+`Superseded by ADR-NNNN` note on the old one.
+
+**History note.** The original set (ADR-0001…0014, May–June 2026) described
+a SQL-engine-first architecture that the pivot to Tableau Public made
+largely obsolete. Rather than keep fourteen superseded stubs, the active
+decisions were rewritten as the set below (2026-08-05) and the retired ones
+became one narrative: **[Dead ends](dead-ends.md)** — which also maps every
+old number to its fate. The originals remain in git history.
 
 ## Index
 
-| #    | Title                                                         | Status   |
-|------|---------------------------------------------------------------|----------|
-| [0001](0001-bi-platforms-tableau-and-superset.md) | BI platforms — Tableau and Apache Superset | Accepted |
-| [0002](0002-no-notebooks-no-python-ui.md)         | No notebooks, no Python UI — modules + CLI only | Accepted |
-| [0003](0003-production-query-engine-athena.md)    | Production query engine — AWS Athena over S3 Parquet | Accepted |
-| [0004](0004-development-query-engine-spark-thrift.md) | Development query engine — Spark Thrift Server | Accepted |
-| [0005](0005-embedded-sql-engine-duckdb.md)        | Embedded SQL engine — DuckDB                | Accepted |
-| [0006](0006-parquet-only-dir-per-table.md)        | Output format — Parquet only, dir-per-table | Proposed |
-| [0007](0007-ddl-generation-in-python.md)          | DDL generation strategy — Python-emitted scripts | Proposed |
-| [0008](0008-python-toolchain-poetry.md)           | Python toolchain — Poetry                   | Accepted |
-| [0009](0009-repository-layout-src-python.md)      | Repository layout — `src/python/` under language-agnostic `src/` | Superseded by [0013](0013-gradle-multi-project-subprojects-layout.md) |
-| [0010](0010-python-version-range.md)              | Python version range — `>=3.11,<3.14`       | Proposed |
-| [0011](0011-postgres-not-warehouse.md)            | PostgreSQL not used as warehouse layer      | Accepted |
-| [0012](0012-plotting-libs-dev-only.md)            | Plotting libraries as dev-only optional deps | Accepted |
-| [0013](0013-gradle-multi-project-subprojects-layout.md) | Gradle multi-project layout, code modules under `subprojects/` | Accepted |
-| [0014](0014-terraform-aws-data-deployment.md)     | Terraform for the AWS data layer; sanitized Athena columns | Accepted |
+| #    | Title                                                | Status   |
+|------|------------------------------------------------------|----------|
+| [0001](0001-gradle-multi-project-build.md)            | Gradle multi-project build; code modules under `subprojects/` | Accepted |
+| [0002](0002-python-pipeline-shape-and-toolchain.md)   | Python pipeline — modules + CLI, Poetry, no notebooks | Accepted |
+| [0003](0003-duckdb-as-the-analytical-engine.md)       | DuckDB views as the single analytical engine | Accepted |
+| [0004](0004-tableau-as-the-dashboard-platform.md)     | Tableau as the (only) dashboard platform     | Accepted |
+| [0005](0005-tableau-public-as-the-publication-channel.md) | Tableau Public as the publication channel | Accepted |
+| [0006](0006-csv-extracts-for-tableau-public.md)       | CSV exports feed the published workbooks     | Accepted |
+| [0007](0007-dashboard-design-conventions.md)          | Dashboard design conventions (palette, web variants, interactivity) | Accepted |
+| [0008](0008-mkdocs-material-companion-site.md)        | MkDocs Material for the companion site       | Accepted |
+| [0009](0009-github-pages-hosting.md)                  | GitHub Pages (via Actions) as site hosting   | Accepted |
+| [—](dead-ends.md)                                     | **Dead ends** — the retired 2026-05/06 architecture, as one story | Retrospective |
 
 ## Adding a new ADR
 
-1. Pick the next number.
+1. Pick the next number (`0010` is next).
 2. Filename: `NNNN-short-kebab-title.md`.
 3. Copy the structure of an existing ADR (or use MADR's template).
 4. Add a row to this index.
 5. If the new decision supersedes an older one, update the older ADR's
-   status to `Superseded by ADR-NNNN`.
+   status to `Superseded by ADR-NNNN`. (Don't repeat the 2026-08-05 mass
+   rewrite for a single change — that was a one-time reset after a pivot.)
