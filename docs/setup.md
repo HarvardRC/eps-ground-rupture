@@ -79,7 +79,7 @@ subprojects/
     pyproject.toml           Poetry config (ADR-0002)
     poetry.lock              committed lockfile
     src/                     Python "src-layout" (ADR-0001)
-      eps_ground_rapture/
+      eps_ground_rupture/
         config.py            repo-relative paths, categorical vocab, palettes
         io.py                DEM / FDHI / SURE / Kern CSV loaders
         prep.py              FDHI cleaning/filtering (clean_fdhi, fdhi_measurements)
@@ -99,25 +99,25 @@ subprojects/
 data/raw/*.csv                              raw inputs (user-supplied)
         │
         ▼
-eps_ground_rapture.io.load_*                typed loaders
+eps_ground_rupture.io.load_*                typed loaders
         │
         ▼
-eps_ground_rapture.prep.*                   filtering (e.g. clean_fdhi)
+eps_ground_rupture.prep.*                   filtering (e.g. clean_fdhi)
         │
         ▼
-eps_ground_rapture.export.export_tidy       Parquet writer (dir-per-table)
+eps_ground_rupture.export.export_tidy       Parquet writer (dir-per-table)
         │
         ▼
 data/processed/<table>/data.parquet         physical storage
         │
         ▼
-eps_ground_rapture.register                 emits table schemas
+eps_ground_rupture.register                 emits table schemas
         │
         ├──► dashboards/sql/athena.sql         ──► reference DDL (prod is Terraform-managed)
         ├──► dashboards/sql/spark-thrift.sql   ──► Spark Thrift (local) ──► Tableau Desktop / Superset
         └──► deploy/terraform/tables.json      ──► Terraform → Glue/Athena (parked; committed)
 
-eps_ground_rapture.views                    emits view definitions
+eps_ground_rupture.views                    emits view definitions
         │
         ├──► dashboards/duckdb/eps.duckdb      ──► DuckDB views ──► Tableau Desktop (first pass)
         └──► dashboards/sql/athena-views.sql   ──► Athena/Trino twins of `unified_observations`

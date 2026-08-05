@@ -154,4 +154,4 @@ DEM experiment set — all described on the [Data](../data.md) page.
     separation is "similar enough to the scarp heights to foster these
     comparisons", citing the FDHI report in support.
 [^magnitudes]: `SURE_EVENT_MAGNITUDES` in
-    `subprojects/python/src/eps_ground_rapture/config.py`.
+    `subprojects/python/src/eps_ground_rupture/config.py`.

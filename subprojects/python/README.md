@@ -76,7 +76,7 @@ and `PATH` on each task):
 ./gradlew :subprojects:python:poetryInstall
 ./gradlew :subprojects:python:pytest
 ./gradlew :subprojects:python:egrBuild
-./gradlew :subprojects:python:wheel          # → dist/python/eps_ground_rapture-*.whl
+./gradlew :subprojects:python:wheel          # → dist/python/eps_ground_rupture-*.whl
 ./gradlew :subprojects:python:clean          # removes dist/python/
 ```
 
@@ -122,7 +122,7 @@ the module root. See [ADR-0001](../../docs/adr/0001-gradle-multi-project-build.m
 
 ```
 src/
-  eps_ground_rapture/
+  eps_ground_rupture/
     config.py     repo-relative paths, categorical vocab, SURE magnitudes
     io.py         loaders for DEM, FDHI, SURE, Kern; raw-input checks
     prep.py       FDHI cleaning/filtering (clean_fdhi, fdhi_measurements)

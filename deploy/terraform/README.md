@@ -29,7 +29,7 @@ deploy/terraform/
 ## Schema single-source-of-truth (read before editing)
 
 `tables.json` is **generated** by `poetry run egr-build` (from the actual
-Parquet schemas, via `eps_ground_rapture.register`). Do not hand-edit.
+Parquet schemas, via `eps_ground_rupture.register`). Do not hand-edit.
 After a pipeline change that alters a table's columns:
 
 ```bash

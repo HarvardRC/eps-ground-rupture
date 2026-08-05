@@ -99,7 +99,7 @@ Rough estimate: 1–2 sessions per dashboard; the regression dashboard
 
 ## Data-side work
 
-Additions to `subprojects/python/src/eps_ground_rapture/views.py`,
+Additions to `subprojects/python/src/eps_ground_rupture/views.py`,
 re-ordered to match the build order:
 
 1. *(for #3)* ~~**`magnitude` in `unified_observations`**~~ — **done**
@@ -207,6 +207,6 @@ re-ordered to match the build order:
 - `subprojects/mkdocs/` — the companion site the dashboards embed into.
 - `dashboards/duckdb/eps.duckdb` — DuckDB views file (pipeline-side;
   desktop Tableau can still connect to it directly).
-- `subprojects/python/src/eps_ground_rapture/views.py` — view definitions.
+- `subprojects/python/src/eps_ground_rupture/views.py` — view definitions.
 - `TODO.md` — point-in-time chores (raw-FDHI cleaning, 3D DEM data).
 - `docs/adr/` — locked architectural decisions backing this work.

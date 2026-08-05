@@ -1,4 +1,4 @@
-rootProject.name = "eps-ground-rapture"
+rootProject.name = "eps-ground-rupture"
 
 include(":subprojects:python")
 include(":subprojects:mkdocs")

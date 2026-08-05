@@ -19,7 +19,7 @@ import pandas as pd
 import pytest
 import requests
 
-from eps_ground_rapture import cli, config, sheets
+from eps_ground_rupture import cli, config, sheets
 
 # --------------------------------------------------------------------------
 # helpers: build a tiny DuckDB with a view, and a fake gspread client

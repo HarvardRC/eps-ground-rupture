@@ -18,7 +18,7 @@ from __future__ import annotations
 import duckdb
 import pytest
 
-from eps_ground_rapture import config, views
+from eps_ground_rupture import config, views
 
 #: (fault_dip, n, slope, intercept) computed from the shipped dem data,
 #: cross-checked against the legacy notebook's per-dip fits.

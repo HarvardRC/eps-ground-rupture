@@ -183,7 +183,7 @@ val wheelOutDir = rootProject.layout.projectDirectory.dir("dist/python").asFile
 
 val wheel by tasks.registering(Exec::class) {
     group = "build"
-    description = "Build a wheel for the Python package (output: dist/python/eps_ground_rapture-*.whl)."
+    description = "Build a wheel for the Python package (output: dist/python/eps_ground_rupture-*.whl)."
     workingDir = projectDir
     useVenv()
     commandLine(

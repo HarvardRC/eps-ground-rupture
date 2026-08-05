@@ -6,7 +6,7 @@ dataset actually is and how the pipeline / legacy notebooks use it.
 
 ## DEM trials (`DEM_dataset.csv`)
 
-Loader: `eps_ground_rapture.io.load_dem`.
+Loader: `eps_ground_rupture.io.load_dem`.
 
 The main 2D DEM (Discrete Element Method) measurements dataset produced by
 the simulation runs underlying Chiama et al. 2025. Each row is one trial
@@ -20,7 +20,7 @@ Notes:
 
 ## FDHI (pre-cleaned) (`FDHI_Cleaned_Measurements.csv`)
 
-Loader: `eps_ground_rapture.io.load_fdhi`.
+Loader: `eps_ground_rupture.io.load_fdhi`.
 
 A pre-filtered ~20-row extract from the **Fault Displacement Hazard
 Initiative (FDHI) Project** flatfile, produced by the prior owner's
@@ -45,7 +45,7 @@ estimate), `sh_central_meters` (scarp height central estimate),
 
 ## SURE database (`SURE.csv`)
 
-Loader: `eps_ground_rapture.io.load_sure`.
+Loader: `eps_ground_rupture.io.load_sure`.
 
 ### What it is
 
@@ -79,7 +79,7 @@ the data is shipped as-is from the upstream release.
 
 ## Kern County (`Combine_BuwaldaFDHI_KernSDC.csv`)
 
-Loader: `eps_ground_rapture.io.load_kern_combined`.
+Loader: `eps_ground_rupture.io.load_kern_combined`.
 
 ### What it is
 
