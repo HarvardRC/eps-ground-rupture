@@ -21,7 +21,7 @@ instead of creating its own under `~/Library/Caches/pypoetry/`.
 #      sudo mkdir -p /opt/python/venvs && sudo chown "$(whoami)" /opt/python/venvs
 #    If you keep venvs elsewhere, use that path and see the override below.
 python3.13 -m venv /opt/python/venvs/eps-ground-rapture
-# Python 3.13 because pyarrow 18 has no 3.14 wheel — see ADR-0010.
+# Python 3.13 because pyarrow 18 has no 3.14 wheel — see ADR-0002.
 
 # 2. Activate, then install via Poetry.
 source /opt/python/venvs/eps-ground-rapture/bin/activate
@@ -94,7 +94,7 @@ by hand.
 **The Module SDK is not.** IDEA's Gradle integration doesn't carry Python
 SDK assignments through from `build.gradle.kts`; it always resets the
 module's interpreter to the project JDK after each sync. This is a
-JetBrains limitation — see ADR-0013. Workaround is a small manual step,
+JetBrains limitation — see ADR-0001. Workaround is a small manual step,
 described below.
 
 ### One-time setup
@@ -118,7 +118,7 @@ closes the gap.)
 ## Layout
 
 Uses Python's modern "src-layout" — package code lives under `src/`, not at
-the module root. See [ADR-0013](../../docs/adr/0013-gradle-multi-project-subprojects-layout.md).
+the module root. See [ADR-0001](../../docs/adr/0001-gradle-multi-project-build.md).
 
 ```
 src/

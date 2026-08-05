@@ -31,7 +31,8 @@ specs). Add new entries here rather than scattering them across files.
 
 ### Consider snake_case column names at export time
 - Athena columns are now sanitized versions of the Parquet names, mapped
-  by ordinal position (ADR-0014). The cleaner long-term story is to emit
+  by ordinal position (part of the parked AWS lane — see
+  `docs/adr/dead-ends.md`). The cleaner long-term story is to emit
   snake_case names from `export_tidy` itself so every engine sees the
   same identifiers — but that breaks the existing Tableau workbook and
   DuckDB views, so it's a coordinated migration: rename at export →
@@ -81,7 +82,7 @@ specs). Add new entries here rather than scattering them across files.
 ## Tooling friction (open JetBrains issue)
 
 - IDEA Module SDK for `:subprojects:python` resets to the project JDK on
-  every Gradle sync (see ADR-0013 → known limitations). Manual five-click
+  every Gradle sync (see ADR-0001 → consequences). Manual five-click
   re-apply via `Project Structure → Modules → :subprojects:python →
   Dependencies` until JetBrains closes the gap. Investigated workarounds
   (`iml.withXml`, cache XML snapshot/restore) all required IDE restart

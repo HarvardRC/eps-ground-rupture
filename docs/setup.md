@@ -4,6 +4,12 @@ A snapshot of what's been scaffolded, decisions taken, and where the work is
 parked. Mirrors the conversation in `ai/inital-conversation.md` and the work
 done on top of it.
 
+> **Update 2026-08-05**: delivery has since pivoted to **Tableau Public fed
+> by CSV exports**, with a MkDocs companion site on GitHub Pages. Superset
+> and the Athena/Spark SQL path are retired or parked — the story is in
+> [`adr/dead-ends.md`](adr/dead-ends.md). Sections below that describe those
+> lanes are kept as setup reference for the parked code.
+
 ## Goal
 
 Turn the two legacy notebooks under `legacy/` into a productized, interactive
@@ -20,26 +26,24 @@ dashboard. Specifically:
 
 ## Decisions
 
-Each row links to its own ADR under `docs/adr/`, which is the source of
-truth (context, alternatives considered, consequences). This table is a
-quick reference.
+Decisions live in `docs/adr/`, which is the source of truth (context,
+alternatives considered, consequences). The **active set** was rewritten
+2026-08-05 after the Tableau Public pivot; the retired 2026-05/06
+architecture is told once in [`adr/dead-ends.md`](adr/dead-ends.md). This
+table is a quick reference.
 
-| ADR | Decision                                          | Choice |
-|-----|---------------------------------------------------|--------|
-| [0001](adr/0001-bi-platforms-tableau-and-superset.md) | Dashboard platforms              | Tableau **and** Apache Superset |
-| [0002](adr/0002-no-notebooks-no-python-ui.md)         | UI surface                       | No notebooks, no Python UI — modules + CLI only |
-| [0003](adr/0003-production-query-engine-athena.md)    | Production query engine          | AWS Athena over S3 Parquet (Glue catalog) |
-| [0004](adr/0004-development-query-engine-spark-thrift.md) | Development query engine    | Apache Spark Thrift Server over local Parquet |
-| [0005](adr/0005-embedded-sql-engine-duckdb.md)        | Embedded SQL engine              | DuckDB (for tests + CLI checks) |
-| [0006](adr/0006-parquet-only-dir-per-table.md)        | Output format                    | Parquet only, dir-per-table layout |
-| [0007](adr/0007-ddl-generation-in-python.md)          | DDL generation                   | Python-emitted scripts from pyarrow schema |
-| [0008](adr/0008-python-toolchain-poetry.md)           | Python toolchain                 | Poetry |
-| ~~[0009](adr/0009-repository-layout-src-python.md)~~  | ~~Repository layout~~            | ~~`src/python/` under language-agnostic `src/`~~ — superseded by 0013 |
-| [0010](adr/0010-python-version-range.md)              | Python version range             | `>=3.11,<3.14` |
-| [0011](adr/0011-postgres-not-warehouse.md)            | PostgreSQL as warehouse?         | No — engine-class mismatch with prod |
-| [0012](adr/0012-plotting-libs-dev-only.md)            | Plotting libs                    | `matplotlib`/`seaborn` in `dev` group only |
-| [0013](adr/0013-gradle-multi-project-subprojects-layout.md) | Repository layout          | Gradle multi-project; code modules under `subprojects/` |
-| [0014](adr/0014-terraform-aws-data-deployment.md)     | AWS deployment                   | Terraform (S3 + Glue + Athena per env); sanitized Athena columns |
+| ADR | Decision                | Choice |
+|-----|-------------------------|--------|
+| [0001](adr/0001-gradle-multi-project-build.md)            | Build & repo layout        | Gradle multi-project; code modules under `subprojects/` |
+| [0002](adr/0002-python-pipeline-shape-and-toolchain.md)   | Pipeline shape & toolchain | Modules + CLI, Poetry, no notebooks/UI; Python `>=3.11,<3.14` |
+| [0003](adr/0003-duckdb-as-the-analytical-engine.md)       | Analytical engine          | DuckDB views over tidy Parquet, pinned by tests |
+| [0004](adr/0004-tableau-as-the-dashboard-platform.md)     | Dashboard platform         | Tableau only (Superset retired) |
+| [0005](adr/0005-tableau-public-as-the-publication-channel.md) | Publication channel    | Tableau Public (vs Cloud / Server) |
+| [0006](adr/0006-csv-extracts-for-tableau-public.md)       | Published data format      | CSV exports (`egr-csv` → `dist/csv/`) |
+| [0007](adr/0007-dashboard-design-conventions.md)          | Dashboard conventions      | Paper palette, web variants, interactivity baseline |
+| [0008](adr/0008-mkdocs-material-companion-site.md)        | Companion site             | MkDocs Material (`subprojects/mkdocs/`) |
+| [0009](adr/0009-github-pages-hosting.md)                  | Site hosting               | GitHub Pages via Actions (`--strict` gate) |
+| [—](adr/dead-ends.md)                                     | The retired plan           | Athena / Spark Thrift / Superset / DDL / Sheets — one story |
 
 ## Repository layout
 
@@ -64,7 +68,7 @@ dashboards/
   superset/                  Superset YAML exports
 docs/                        this directory + adr/
 
-# Gradle root — orchestrator only (ADR-0013)
+# Gradle root — orchestrator only (ADR-0001)
 settings.gradle.kts          lists subprojects
 build.gradle.kts             cross-cutting tasks (currently just `base` plugin)
 
@@ -72,9 +76,9 @@ build.gradle.kts             cross-cutting tasks (currently just `base` plugin)
 subprojects/
   python/                    Poetry-managed pipeline package
     build.gradle.kts         thin Exec wrapper around Poetry
-    pyproject.toml           Poetry config (ADR-0008)
+    pyproject.toml           Poetry config (ADR-0002)
     poetry.lock              committed lockfile
-    src/                     Python "src-layout" (ADR-0013)
+    src/                     Python "src-layout" (ADR-0001)
       eps_ground_rapture/
         config.py            repo-relative paths, categorical vocab, palettes
         io.py                DEM / FDHI / SURE / Kern CSV loaders
@@ -111,7 +115,7 @@ eps_ground_rapture.register                 emits table schemas
         │
         ├──► dashboards/sql/athena.sql         ──► reference DDL (prod is Terraform-managed)
         ├──► dashboards/sql/spark-thrift.sql   ──► Spark Thrift (local) ──► Tableau Desktop / Superset
-        └──► deploy/terraform/tables.json      ──► Terraform → Glue/Athena (ADR-0014; committed)
+        └──► deploy/terraform/tables.json      ──► Terraform → Glue/Athena (parked; committed)
 
 eps_ground_rapture.views                    emits view definitions
         │
@@ -213,7 +217,8 @@ Verified end-to-end on 2026-08-01:
   Viable Combinations) and `dem-response-curve.twb` (Dashboard 2) are
   shipped, each with a `-public` Tableau Public twin; Dashboard 3 is next.
   Superset exports still absent. See `notes/Roadmap.md`.
-- **AWS deployment via Terraform** (`deploy/terraform/`, ADR-0014):
+- **AWS deployment via Terraform** (`deploy/terraform/`; parked — see
+  `adr/dead-ends.md`):
   S3 bucket + Glue database/tables + Athena workgroup per env (dev/prod).
   Not yet applied to the account.
 - **Notebook 2 (`2Ddem 2025 Paper Revisions ...`)** has not been ported.
@@ -254,7 +259,7 @@ poetry run egr-build    # writes data/processed/<table>/, dashboards/sql/*,
 #   DuckDB: connect Tableau to dashboards/duckdb/eps.duckdb (see dashboards/duckdb/README.md)
 #   Spark Thrift: beeline -u jdbc:hive2://localhost:10000 -f dashboards/sql/spark-thrift.sql
 #
-# AWS (dev/prod) — Terraform-managed (ADR-0014):
+# AWS (dev/prod) — Terraform-managed (parked; see docs/adr/dead-ends.md):
 #   cd deploy/terraform/envs/dev && terraform apply
 #   aws --profile urc s3 sync data/processed/ s3://eps-ground-rapture-dev/processed/ --exclude '*.gitkeep'
 #   (details + BI connection strings: deploy/terraform/README.md)

@@ -1,58 +1,77 @@
 # eps-ground-rapture
 
-Productizing 2D DEM earthquake-rupture analyses (Chiama et al., 2025,
-*Earthquake Spectra*) as interactive dashboards.
+Productizing 2D DEM earthquake-rupture analyses as interactive dashboards
+and a companion web site.
+
+- **Companion site**: <https://harvardrc.github.io/eps-ground-rapture/>
+- **Dashboards**: <https://public.tableau.com/app/profile/michael.bouzinier>
+  (free to view, no login)
+- **The paper**: Chiama et al. (2025), *Earthquake Spectra* **41**(5),
+  3977–4014, DOI
+  [10.1177/87552930251346434](https://doi.org/10.1177/87552930251346434)
+  — not open access; no paper content is reproduced in this repo.
 
 The legacy material — two Jupyter notebooks and the accompanying paper —
 lives under `legacy/` as local reference artifacts (gitignored). This repo
 turns that notebook-driven workflow into:
 
 1. A **Python data pipeline** (modules + CLI; no notebooks) that ingests
-   raw measurements and writes Parquet tables, plus the schema artifacts
-   derived from them (DDL scripts, DuckDB views, Glue table definitions).
-2. An **AWS data layer managed by Terraform** (`deploy/terraform/`):
-   S3 + Glue + Athena per environment (dev/prod). For local development,
-   DuckDB views and Spark Thrift DDL serve the same tables.
-3. **Dashboards** in Tableau and Apache Superset that query those tables
-   via SQL.
+   the raw measurement sets, writes tidy Parquet tables, defines every
+   derived product as a DuckDB SQL view, pins the analytical results with
+   tests, and exports the CSVs the dashboards consume.
+2. **Interactive Tableau Public dashboards** — four chart families
+   published so far: the model-vs-reality scatter (+ coverage matrix),
+   response curves, per-event boxplots, and the slip regression with
+   Kern County inference.
+3. A **MkDocs companion site** on GitHub Pages that embeds the dashboards
+   and reads as an interactive version of the paper — glossary, data
+   documentation, figure-by-figure crosswalk.
+
+Architecture decisions live in `docs/adr/`: nine active ADRs, plus
+[the story of the dead ends](docs/adr/dead-ends.md) — the earlier
+SQL-engine/AWS/Superset architecture, retired or parked.
 
 ## Repository layout
 
 ```
 # Project-level (root owns these)
 README.md, LICENSE, .gitignore
-docs/                  design notes, ADRs, dataset notes
+docs/                  setup notes, ADRs (active + dead-ends.md), dataset notes
 data/
   raw/                 raw CSVs (gitignored; drop inputs here)
   interim/             intermediate cleaning artifacts (gitignored)
   processed/           dir-per-table Parquet outputs (gitignored)
                          e.g. data/processed/dem/data.parquet
+dist/
+  csv/                 CSV exports feeding the public workbooks
+                         (gitignored; regenerate with egr-csv)
 dashboards/
-  duckdb/              generated DuckDB views file (gitignored) — first-pass Tableau source
-  sql/                 generated CREATE TABLE scripts (gitignored)
-                         athena.sql       — reference DDL (prod is Terraform-managed)
-                         spark-thrift.sql — development DDL (local file:// URIs)
-  tableau/             Tableau workbooks (.twb / .twbx)
-  superset/            Superset YAML exports
-  sheets/              push DuckDB views to Google Sheets for Tableau Public
-                         (egr-push-sheets; see dashboards/sheets/README.md)
+  tableau/             Tableau workbooks: June families as desktop +
+                         `-public` twins; August families public-only
+  duckdb/              generated views-only DuckDB file (gitignored)
+  sql/                 generated DDL for the parked AWS lane (gitignored)
+  sheets/              dormant Google Sheets push — the central `dem` view
+                         exceeds the Sheets cell cap (see dead-ends.md)
+  superset/            retired; README only (see dead-ends.md)
 deploy/
-  terraform/           AWS data layer: S3 + Glue + Athena per env (dev/prod);
-                         tables.json — generated schema lockfile (committed)
+  terraform/           AWS data layer — parked; revival triggers in TODO.md
+notes/                 roadmap, chart inventory, dashboard build specs
 ai/                    initial scoping conversation (gitignored)
 legacy/                original notebooks and 2025 paper PDF (gitignored)
 
-# Gradle root — orchestrator only
+# Gradle root — orchestrator only (ADR-0001)
 settings.gradle.kts    lists subprojects
 build.gradle.kts       cross-cutting tasks
+.github/workflows/     mkdocs.yml — builds and deploys the site to Pages
 
 # Code modules (Gradle subprojects)
 subprojects/
   python/              Poetry-managed pipeline package
                          (see subprojects/python/README.md)
+  mkdocs/              the companion site (MkDocs Material)
 ```
 
-See [ADR-0013](docs/adr/0013-gradle-multi-project-subprojects-layout.md)
+See [ADR-0001](docs/adr/0001-gradle-multi-project-build.md)
 for the layout rationale.
 
 ## Quickstart
@@ -61,46 +80,48 @@ Via Gradle (orchestrates Poetry behind the scenes):
 
 ```bash
 ./gradlew :subprojects:python:pytest        # tests
-./gradlew :subprojects:python:egrBuild      # pipeline
+./gradlew :subprojects:python:egrBuild      # pipeline: Parquet + views
 ```
 
-Or directly via Poetry:
+Or directly via Poetry (activate the project venv first — see
+`docs/setup.md`):
 
 ```bash
 cd subprojects/python
 poetry install
-poetry run egr-build    # writes data/processed/<table>/, dashboards/sql/*,
-                        # dashboards/duckdb/eps.duckdb, deploy/terraform/tables.json
 poetry run pytest
+poetry run egr-build    # data/processed/<table>/ + dashboards/duckdb/eps.duckdb
+poetry run egr-csv      # dist/csv/*.csv — the dashboards' data
 ```
 
-Then pick a delivery path:
-- **Local dev**: connect Tableau Desktop to `dashboards/duckdb/eps.duckdb`
-  via the DuckDB JDBC driver (see `dashboards/duckdb/README.md`), or run a
-  Spark Thrift Server with `dashboards/sql/spark-thrift.sql`.
-- **AWS (dev or prod)**: `./gradlew :deploy:terraform:applyDev` then
-  `./gradlew :deploy:terraform:syncDataDev` (or the `…Prod` variants;
-  raw `terraform` / `aws s3 sync` work too).
-  See `deploy/terraform/README.md` for connection details (Tableau, Superset).
-  (`dashboards/sql/athena.sql` remains as reference DDL for manual setups —
-  pass `--database eps_ground_rapture_<env>
-  --s3-prefix s3://eps-ground-rapture-<env>/processed/` to `egr-build` so it
-  matches the Terraform layout.)
-- **Tableau Public**: Tableau *Public* can't connect to DuckDB or Athena, so
-  publish a view to Google Sheets and let it auto-refresh:
-  `poetry run egr-push-sheets` (see `dashboards/sheets/README.md`).
+Then:
+
+- **Dashboards**: open a workbook from `dashboards/tableau/` in the
+  Tableau app and refresh extracts so they rebuild from your
+  `dist/csv/`. The published versions live on the Tableau Public
+  profile linked above.
+- **Companion site, locally**: one-time
+  `poetry install --only docs --no-root` (from `subprojects/python`),
+  then `cd subprojects/mkdocs && mkdocs serve`. Deployment to GitHub
+  Pages is automatic via `.github/workflows/mkdocs.yml`
+  ([ADR-0009](docs/adr/0009-github-pages-hosting.md)).
+- **Optional desktop lanes**: Tableau Desktop can connect straight to
+  `dashboards/duckdb/eps.duckdb`; the AWS/Athena lane is parked — status
+  and revival triggers in `TODO.md` → Deployment.
 
 ## Documentation
 
 - `docs/setup.md` — what's scaffolded, decisions taken, known gaps
-- `docs/adr/` — Architecture Decision Records (one per major decision)
-- `docs/datasets.md` — reference notes on the input datasets (DEM, FDHI, Kern)
-- `notes/Roadmap.md` — dashboard build plan; `notes/chart-families.md` — chart inventory
+- `docs/adr/` — active decisions + [dead-ends.md](docs/adr/dead-ends.md)
+- `docs/datasets.md` — reference notes on the input datasets (DEM, FDHI, SURE, Kern)
+- `notes/Roadmap.md` — build plan and statuses; `notes/chart-families.md` —
+  chart inventory; `notes/dashboard-*-build-spec.md` — per-dashboard specs
 - `subprojects/python/README.md` — pipeline package usage
-- `deploy/terraform/README.md` — AWS deployment (S3 + Glue + Athena, dev/prod)
-- `dashboards/tableau/README.md`, `dashboards/superset/README.md` — dashboard conventions
-- `dashboards/sheets/README.md` — Google Sheets push for Tableau Public (`egr-push-sheets`)
+- `subprojects/mkdocs/DEPLOY.md` — site deployment, plus the open byline
+  and figure-rights questions
+- `deploy/terraform/README.md` — the parked AWS lane
 
 ## License
 
-Apache 2.0 — see `LICENSE`.
+Apache 2.0 — see `LICENSE`. The underlying paper is not open access and
+is not reproduced here.
