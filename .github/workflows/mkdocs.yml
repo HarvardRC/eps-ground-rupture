@@ -30,9 +30,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.13'
 
@@ -43,15 +43,26 @@ jobs:
       # there is one lockfile for the whole repo. --only docs skips pandas /
       # pyarrow / duckdb, which the site does not need; --no-root skips
       # installing the pipeline package itself.
-      # NB: subprojects/python/poetry.toml sets virtualenvs.create = false,
-      # so this installs into the runner's Python — which is what we want here.
+      #
+      # subprojects/python/poetry.toml sets virtualenvs.create = false, so
+      # Poetry installs into whatever venv is ACTIVE. We must therefore make
+      # one first: without it Poetry targets the runner's system Python and
+      # fails trying to replace root-owned packages that ship with the image
+      # (jinja2 is one, and mkdocs-material needs a newer one).
+      # This mirrors the documented local workflow — activate, then install.
       - name: Install docs dependencies
         working-directory: subprojects/python
-        run: poetry install --only docs --no-root
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          poetry install --only docs --no-root
 
+      # Run from the mkdocs directory, not via `mkdocs -f`: pymdownx.snippets
+      # resolves base_path from the working directory, so building from
+      # elsewhere cannot find docs/includes/abbreviations.md.
       - name: Build site
         working-directory: subprojects/mkdocs
-        run: mkdocs build --strict
+        run: ../python/.venv/bin/mkdocs build --strict
 
       - uses: actions/upload-pages-artifact@v3
         with:
