@@ -1,9 +1,9 @@
 # Dashboard roadmap
 
 A plan for reproducing the legacy notebook figures and the prior owner's
-`legacy/FDHI-SURE-DEM_SCATTER.py` script as interactive Tableau dashboards,
-now embedded in the MkDocs companion site (`subprojects/mkdocs/`,
-ADR-0008/0009).
+scatter script from the handoff materials (not in the repo) as interactive
+Tableau dashboards, now embedded in the MkDocs companion site
+(`subprojects/mkdocs/`, ADR-0008/0009).
 
 Treat this as a working document — update as decisions are made and
 scope shifts. For longer-lived design decisions, promote items to an

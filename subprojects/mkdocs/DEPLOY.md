@@ -1,40 +1,28 @@
 # Deploying the companion site
 
-**Activation in progress (2026-08-05).** The workflow is installed at
-`.github/workflows/mkdocs.yml` and publishes from `dev-v.0.1.x` (the
-draft-review period) as well as `main`. Remaining before the first
-deploy: enable Pages (Source = **GitHub Actions**), commit + push, and
-watch the first run — steps and contingencies in
-`notes/2026-08-04/claude-code-task-deploy-pages.md`.
+**Live.** The site publishes at
+`https://harvardrc.github.io/eps-ground-rupture/` via
+`.github/workflows/mkdocs.yml` (GitHub Actions → Pages; Pages Source =
+"GitHub Actions"; first successful deploy 2026-08-05).
 
 The repository is public, so **GitHub Pages served from this repo** is the
 chosen path (ADR-0009): no extra hosting, and the site rebuilds from the
 same commit as the pipeline that produced its data.
 
-Site URL: `https://harvardrc.github.io/eps-ground-rupture/` (already set
-as `site_url` in `mkdocs.yml`).
+## Publishing model
 
-## Recommended: GitHub Actions → Pages
+- **Push or merge to `main`** touching `subprojects/mkdocs/**`, the
+  poetry files, or the workflow itself → strict build → deploy.
+- **Pull requests** touching the same paths run the same `--strict`
+  build as a validation check — **no deploy**.
+- **Manual**: `workflow_dispatch` (Actions → "Companion site" → Run
+  workflow). The `github-pages` environment only permits deploys from
+  `main`, so a dispatch from another branch builds without deploying.
+- Pushes to other branches trigger nothing.
 
-The workflow (formerly drafted alongside this file) now lives at
-**`.github/workflows/mkdocs.yml`**. One-time setup it still needs:
-
-1. **Settings → Pages → Source = GitHub Actions** — or
-   `gh api -X POST repos/HarvardRC/eps-ground-rupture/pages -f build_type=workflow`.
-2. If the deploy job is refused with an environment-protection error for
-   `dev-v.0.1.x`, allow that branch on the `github-pages` environment
-   (exact command in the task file referenced above).
-
-The push branch filter includes `dev-v.0.1.x` for the draft-review
-period; drop it after the merge to `main`.
-
-The workflow builds with `--strict`, so a broken internal link or a bad
-config fails the run rather than publishing a damaged site.
-
-!!! note
-    Review the draft before committing it. It grants the workflow the
-    `pages: write` and `id-token: write` permissions that Pages deployment
-    requires, scoped to that job only.
+The `--strict` build is the gate: a broken internal link or a bad config
+fails the run rather than publishing a damaged site. The workflow grants
+`pages: write` / `id-token: write` to the deploy job only.
 
 ## Fallback: manual `gh-deploy`
 
@@ -53,9 +41,9 @@ for a one-off preview; prefer Actions for anything ongoing, because
 `gh-deploy` publishes whatever is in your working tree with no review step
 and no record of which commit produced it.
 
-## Before publishing
+## Open questions for the author team
 
-Two open questions should be settled first, both the author team's call:
+Both are the author team's call, and both are in the review email:
 
 - **The byline.** The site currently credits Kristen Chiama, Andreas Plesch
   and John H. Shaw. Whether to add William Bednarz and Robb Moss (the

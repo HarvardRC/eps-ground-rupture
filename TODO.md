@@ -79,6 +79,30 @@ specs). Add new entries here rather than scattering them across files.
   shared SQL endpoint (the parked AWS item above); a local Superset
   over DuckDB is possible without it.
 
+### Dashboard responsiveness (2026-08-05)
+
+The published dashboards feel slow. Nothing is measured yet — first step
+is to establish which one, and whether it's load or interaction. Candidate
+levers, cheapest first:
+
+- **Fewer marks.** Dashboard 3's two DEM boxplot sheets render ~330k
+  disaggregated marks *each* because `boxplot-mark-exclusion='false'` —
+  "hide underlying marks (except outliers)" was never ticked, though the
+  walkthrough asked for it. That is the single largest known cost and it
+  is a checkbox. (Already noted as deferred polish; promote it.)
+- **Pre-aggregated views.** For panes that only ever show a summary, the
+  aggregation belongs in `views.py`, where it is computed once and pinned
+  by tests, rather than in the browser on every interaction. This is what
+  `dem_regression_lines` already does for Dashboard 4's fit lines.
+- **Leaner tooltips** and **extract-only fields** — drop columns no sheet
+  reads before the extract is built. `fdhi_measurements` ships 136 columns
+  to draw three measures.
+- **Longer term: a Parquet-backed delivery lane.** CSV + `.hyper` is what
+  Tableau Public accepts, not what the data wants. A live query endpoint or
+  a different front end would build on `data/processed/`, not replace it —
+  see `docs/setup.md` → Pipeline overview. Overlaps the parked AWS item
+  above, but does not require AWS specifically.
+
 ## Tooling friction (open JetBrains issue)
 
 - IDEA Module SDK for `:subprojects:python` resets to the project JDK on

@@ -178,7 +178,7 @@ def test_athena_twins_exist_for_each_regression_view():
     }
     for name, sql in sqls.items():
         assert f"CREATE OR REPLACE VIEW {name}" in sql
-        # sanitized Athena names (ADR-0014), not the quoted Parquet originals
+        # sanitized Athena names (docs/adr/dead-ends.md), not quoted Parquet originals
         assert '"Fault_Dip"' not in sql and '"VD_HW"' not in sql
     # Trino has no regr_r2; the twin squares corr() instead
     assert "regr_r2" not in sqls["dem_regression"]
