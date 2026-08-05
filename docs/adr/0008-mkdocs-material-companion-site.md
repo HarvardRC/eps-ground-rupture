@@ -16,7 +16,7 @@ Constraints: the repo is public with an existing Python toolchain
 ([ADR-0002](0002-python-pipeline-shape-and-toolchain.md)); the paper
 itself is **not open access**, so the site must quote sparingly with
 citation and reproduce no typeset figures unless rights are granted
-(placeholders mark where Figures 1, 2, 7 would sit); content must be
+(placeholders mark where Figures 1, 2, 5 and 7 would sit); content must be
 verifiable — quotes checked against the paper, numbers pinned by pipeline
 tests ([ADR-0003](0003-duckdb-as-the-analytical-engine.md)).
 

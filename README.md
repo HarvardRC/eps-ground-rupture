@@ -1,9 +1,9 @@
-# eps-ground-rapture
+# eps-ground-rupture
 
 Productizing 2D DEM earthquake-rupture analyses as interactive dashboards
 and a companion web site.
 
-- **Companion site**: <https://harvardrc.github.io/eps-ground-rapture/>
+- **Companion site**: <https://harvardrc.github.io/eps-ground-rupture/>
 - **Dashboards**: <https://public.tableau.com/app/profile/michael.bouzinier>
   (free to view, no login)
 - **The paper**: Chiama et al. (2025), *Earthquake Spectra* **41**(5),

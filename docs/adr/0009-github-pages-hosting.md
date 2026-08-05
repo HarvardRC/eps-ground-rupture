@@ -21,7 +21,7 @@ public on GitHub.
   `actions/deploy-pages`; Pages source set to "GitHub Actions".
 - The `--strict` build is the deployment gate — a broken link or bad
   config fails the run rather than publishing a damaged site.
-- Site URL: `https://harvardrc.github.io/eps-ground-rapture/`
+- Site URL: `https://harvardrc.github.io/eps-ground-rupture/`
   (`site_url` in `mkdocs.yml`).
 - During the draft-review period the workflow also publishes from
   `dev-v.0.1.x`; after merge, `main` is the publishing branch.

@@ -89,3 +89,19 @@ then reopen + refresh sources. If after a schema change (new column in
 a CSV) an extract refresh fails with SQLSTATE 42703, re-pick the same
 file via Data Source tab → Connections → Edit Connection to bust the
 workbook's cached schema.
+
+## Repo renamed to `eps-ground-rupture` (2026-08-05)
+
+The GitHub repo was renamed to fix the rapture/rupture typo. The **local
+directory keeps the old name** on both machines — the canonical path
+`~/harvard/projects/github/eps-ground-rapture` is baked into the Tableau
+workbooks' CSV connections, and renaming it would force a four-workbook
+repair. Consequences:
+
+- Remote update, once per machine:
+  `git remote set-url origin git@github.com:HarvardRC/eps-ground-rupture.git`
+  (done on the Mac Pro 2026-08-05; **laptop still pending**).
+- Fresh clones must pin the directory name:
+  `git clone git@github.com:HarvardRC/eps-ground-rupture.git eps-ground-rapture`
+- Old `github.com` URLs redirect; a future local-dir rename should ride a
+  planned breaking-change moment (e.g. the snake_case column migration).

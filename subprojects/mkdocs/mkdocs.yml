@@ -2,10 +2,10 @@ site_name: EPS Ground Rupture — interactive companion
 site_description: >-
   An interactive companion to Chiama et al. (2025), Earthquake Spectra —
   the paper's figures re-experienced as live Tableau Public dashboards.
-site_url: https://harvardrc.github.io/eps-ground-rapture/
+site_url: https://harvardrc.github.io/eps-ground-rupture/
 
-repo_url: https://github.com/HarvardRC/eps-ground-rapture
-repo_name: HarvardRC/eps-ground-rapture
+repo_url: https://github.com/HarvardRC/eps-ground-rupture
+repo_name: HarvardRC/eps-ground-rupture
 edit_uri: edit/main/subprojects/mkdocs/docs/
 
 # Site authorship, per Michael 2026-08-02: Kristen Chiama, Andreas Plesch,
@@ -20,7 +20,7 @@ edit_uri: edit/main/subprojects/mkdocs/docs/
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/HarvardRC/eps-ground-rapture
+      link: https://github.com/HarvardRC/eps-ground-rupture
       name: Source repository
 
 copyright: >-

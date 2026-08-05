@@ -6,7 +6,7 @@ name: Companion site
 
 on:
   push:
-    branches: [main]
+    branches: [main, dev-v.0.1.x]  # dev branch included for the draft-review period; drop after merge
     paths:
       - 'subprojects/mkdocs/**'
       - 'subprojects/python/pyproject.toml'

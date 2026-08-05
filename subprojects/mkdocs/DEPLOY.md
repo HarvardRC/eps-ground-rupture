@@ -1,48 +1,40 @@
 # Deploying the companion site
 
-**Active since 2026-08-04.** The site publishes to
-<https://harvardrc.github.io/eps-ground-rapture/> from
-`.github/workflows/mkdocs.yml`, with the repository's Pages **Source** set
-to *GitHub Actions*.
+**Activation in progress (2026-08-05).** The workflow is installed at
+`.github/workflows/mkdocs.yml` and publishes from `dev-v.0.1.x` (the
+draft-review period) as well as `main`. Remaining before the first
+deploy: enable Pages (Source = **GitHub Actions**), commit + push, and
+watch the first run — steps and contingencies in
+`notes/2026-08-04/claude-code-task-deploy-pages.md`.
 
-The repository is public, so Pages served from this repo needs no extra
-hosting, and the site rebuilds from the same commit as the pipeline that
-produced its data. The published URL is set as `site_url` in `mkdocs.yml`.
+The repository is public, so **GitHub Pages served from this repo** is the
+chosen path (ADR-0009): no extra hosting, and the site rebuilds from the
+same commit as the pipeline that produced its data.
 
-## How it is set up
+Site URL: `https://harvardrc.github.io/eps-ground-rupture/` (already set
+as `site_url` in `mkdocs.yml`).
 
-- **Pages Source = GitHub Actions**, set on the repository (via the REST
-  API; the equivalent control is **Settings → Pages → Build and deployment
-  → Source**). This is what lets `actions/deploy-pages` publish at all.
-- **The workflow** lives at `.github/workflows/mkdocs.yml`. It runs on
-  pushes to `main` that touch `subprojects/mkdocs/**`, the python
-  subproject's `pyproject.toml` / `poetry.lock`, or the workflow itself —
-  and can also be triggered by hand from any branch via
-  `workflow_dispatch`.
-- **Publishing from `main` only.** Development happens on a branch and
-  reaches the site by being merged, so the published site always matches
-  the default branch. To preview before merging, run `mkdocs serve` locally
-  (see below) or dispatch the workflow by hand.
-- **Build is `--strict`**, so a broken internal link or a bad config fails
-  the run rather than publishing a damaged site.
-- **Dependencies** come from the `docs` group of
-  `subprojects/python/pyproject.toml` via `poetry install --only docs
-  --no-root`, so CI installs mkdocs-material without pandas, pyarrow or
-  duckdb.
+## Recommended: GitHub Actions → Pages
 
-!!! note "Permissions"
-    The build job runs with `contents: read` only. `pages: write` and
-    `id-token: write` are granted to the deploy job alone, which is also
-    where `actions/configure-pages` runs — it calls the Pages API and would
-    fail without them.
+The workflow (formerly drafted alongside this file) now lives at
+**`.github/workflows/mkdocs.yml`**. One-time setup it still needs:
 
-!!! warning "If you ever publish from another branch"
-    The `github-pages` environment restricts deployments to the default
-    branch unless told otherwise, so a run from any other branch fails with
-    *"Branch … is not allowed to deploy to github-pages due to environment
-    protection rules"* — including a hand-dispatched one. Fix by adding a
-    deployment branch policy under **Settings → Environments →
-    github-pages → Deployment branches and tags**, then re-run the job.
+1. **Settings → Pages → Source = GitHub Actions** — or
+   `gh api -X POST repos/HarvardRC/eps-ground-rupture/pages -f build_type=workflow`.
+2. If the deploy job is refused with an environment-protection error for
+   `dev-v.0.1.x`, allow that branch on the `github-pages` environment
+   (exact command in the task file referenced above).
+
+The push branch filter includes `dev-v.0.1.x` for the draft-review
+period; drop it after the merge to `main`.
+
+The workflow builds with `--strict`, so a broken internal link or a bad
+config fails the run rather than publishing a damaged site.
+
+!!! note
+    Review the draft before committing it. It grants the workflow the
+    `pages: write` and `id-token: write` permissions that Pages deployment
+    requires, scoped to that job only.
 
 ## Fallback: manual `gh-deploy`
 
@@ -70,7 +62,9 @@ Two open questions should be settled first, both the author team's call:
   paper's other two authors) and Michael Bouzinier is marked `TODO(michael)`
   in `mkdocs.yml` and `docs/index.md`.
 - **Figure reuse.** The paper is not open access, so no figures from it are
-  reproduced; three placeholders in `docs/paper.md` mark where Figures 1, 2
-  and 7 would sit. Publishing with the placeholders is fine — they name what
-  is missing and cite the source — but the pages read better with the
-  schematic in Figure 2, if reuse is granted.
+  reproduced; four placeholders in `docs/paper.md` mark where Figures 1, 2,
+  5 and 7 would sit. Publishing with the placeholders is fine — they name
+  what is missing and cite the source — but the pages read best with
+  **Figure 5** (it defines the measured quantities every dashboard plots —
+  the first one to ask for) and the Figure 2 scarp-morphology schematic,
+  if reuse is granted.
