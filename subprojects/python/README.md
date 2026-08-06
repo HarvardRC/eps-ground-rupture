@@ -1,8 +1,9 @@
 # Python pipeline
 
-Pipeline that turns the legacy DEM notebooks into Parquet tables and the
-DDL needed to register them in AWS Athena (production) or Apache Spark
-Thrift Server (development).
+Pipeline that turns the legacy DEM notebooks into tidy Parquet tables,
+the DuckDB views the analyses are defined over, and the CSV exports the
+published Tableau workbooks read. It also emits Athena / Spark Thrift DDL,
+but nothing consumes that today — see `docs/adr/dead-ends.md`.
 
 This module is a Gradle subproject — `./gradlew :subprojects:python:check`
 runs the tests, `./gradlew :subprojects:python:egrBuild` runs the pipeline.
@@ -17,14 +18,15 @@ instead of creating its own under `~/Library/Caches/pypoetry/`.
 
 ```bash
 # 1. Create the venv (one time, outside the project).
+#    Machine convention: venvs live at /opt/venv/<name>.
 #    /opt is root-owned on macOS, so this needs a writable parent first:
-#      sudo mkdir -p /opt/python/venvs && sudo chown "$(whoami)" /opt/python/venvs
+#      sudo mkdir -p /opt/venv && sudo chown "$(whoami)" /opt/venv
 #    If you keep venvs elsewhere, use that path and see the override below.
-python3.13 -m venv /opt/python/venvs/eps-ground-rapture
+python3.13 -m venv /opt/venv/eps-ground-rapture
 # Python 3.13 because pyarrow 18 has no 3.14 wheel — see ADR-0002.
 
 # 2. Activate, then install via Poetry.
-source /opt/python/venvs/eps-ground-rapture/bin/activate
+source /opt/venv/eps-ground-rapture/bin/activate
 cd subprojects/python
 poetry install
 ```
@@ -40,15 +42,21 @@ environment or pass `-Ppython.venv=/path/to/venv` to Gradle. To make the
 override stick for both terminal and IDEA-launched Gradle, put
 `python.venv=/path/to/venv` in `~/.gradle/gradle.properties`.
 
+Note `build.gradle.kts` still *defaults* to the older
+`/opt/python/venvs/<name>` convention, which is why the override above is
+set on this machine. Verify which path actually exists before trusting
+either.
+
 ## Usage
 
 With the venv activated:
 
 ```bash
-# from subprojects/python (with /opt/python/venvs/eps-ground-rapture activated)
+# from subprojects/python (with /opt/venv/eps-ground-rapture activated)
 poetry run egr-build                # writes data/processed/<table>/, dashboards/sql/,
                                     # dashboards/duckdb/eps.duckdb, deploy/terraform/tables.json
-poetry run pytest                   # smoke tests
+poetry run egr-csv --view <name>    # a DuckDB view -> dist/csv/<name>.csv
+poetry run pytest                   # the full suite
 ```
 
 CLI flags:
@@ -76,8 +84,10 @@ and `PATH` on each task):
 ./gradlew :subprojects:python:poetryInstall
 ./gradlew :subprojects:python:pytest
 ./gradlew :subprojects:python:egrBuild
+./gradlew :subprojects:python:csvExportAll   # every view → dist/csv/ (dem alone ~73 MB)
+./gradlew :subprojects:python:csvExportDem   # one view; one task exists per view
 ./gradlew :subprojects:python:wheel          # → dist/python/eps_ground_rupture-*.whl
-./gradlew :subprojects:python:clean          # removes dist/python/
+./gradlew :subprojects:python:clean          # removes dist/python/ AND dist/csv/
 ```
 
 Build artifacts from every subproject collect under the repo-level `dist/`
@@ -101,7 +111,7 @@ described below.
 
 1. Create the Python SDK in IDEA:
    `Settings → Project Structure → SDKs → + → Python SDK → Virtualenv → Existing environment`.
-2. Interpreter: `/opt/python/venvs/eps-ground-rapture/bin/python`.
+2. Interpreter: `/opt/venv/eps-ground-rapture/bin/python`.
 3. Name it whatever you like; we recommend `Python 3.13 (eps-ground-rapture)` for clarity.
 4. OK.
 
@@ -132,8 +142,8 @@ src/
     csvexport.py  view -> dist/csv/<view>.csv (`egr-csv`)
     sheets.py     view -> Google Sheets (`egr-push-sheets`)
     cli.py        `egr-build` / `egr-csv` / `egr-push-sheets` entry points
-tests/            test_smoke, test_prep, test_raw_inputs, test_csvexport,
-                  test_sheets
+tests/            test_smoke, test_prep, test_raw_inputs,
+                  test_regression_views, test_csvexport, test_sheets
 ```
 
 `duckdb` is a runtime dependency for the embedded query path (tests,

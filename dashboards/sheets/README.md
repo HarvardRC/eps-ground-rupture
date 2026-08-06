@@ -10,7 +10,7 @@ to Tableau Public stays in sync with the pipeline.
 DuckDB view ──egr-push-sheets──► Google Sheet ──Tableau Public refresh──► dashboard
 ```
 
-By default it pushes `unified_observations` (329,124 rows × 10 cols ≈ 3.3M
+By default it pushes `unified_observations` (329,124 rows × 11 cols ≈ 3.6M
 cells — comfortably under the per-Sheet cell limit).
 
 ## One-time Google setup
@@ -73,7 +73,7 @@ poetry run egr-push-sheets --duckdb /path/to/eps.duckdb  # non-default DB
 It prints, per target, the rows × cols pushed and the Sheet URL:
 
 ```
-pushed unified_observations: 329,124 rows x 10 cols -> https://docs.google.com/spreadsheets/d/.../edit#gid=0
+pushed unified_observations: 329,124 rows x 11 cols -> https://docs.google.com/spreadsheets/d/.../edit#gid=0
 ```
 
 Re-running is safe: each push **clears and rewrites** the worksheet (full

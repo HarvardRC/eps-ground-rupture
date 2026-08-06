@@ -68,13 +68,15 @@ specs). Add new entries here rather than scattering them across files.
 
 ## Dashboards
 
-- Shipped: `dem-model-vs-reality.twb` (Dashboard 1 + Viable
-  Combinations) and `dem-response-curve.twb` (Dashboard 2, response
-  curves), each with a CSV-fed `-public` twin on Tableau Public
-  (`dem-overview.twb` was split/renamed into these).
-- Next: Dashboard 3 — per-event boxplots (see `notes/Roadmap.md`,
-  Build order); its data-side prep — `magnitude` in
-  `unified_observations` — is done (2026-07-31).
+- Shipped: Dashboards 1-4, all published to Tableau Public —
+  `dem-model-vs-reality` (Dashboard 1 + Viable Combinations),
+  `dem-response-curve` (Dashboard 2), `per-event-box-plots-public`
+  (Dashboard 3, 2026-08-02) and `dem-slip-regression-public`
+  (Dashboard 4, 2026-08-04). Dashboards 1 and 2 also keep a desktop
+  Athena copy; 3 and 4 were built public-first. Per-workbook detail:
+  `dashboards/tableau/README.md` and `docs/dashboards/`.
+- Next: Dashboard 5 — faceted distributions + mean ± σ summaries
+  (chart families 3 and 4; see `notes/Roadmap.md`, Build order).
 - Superset YAML exports still absent. A *hosted* Superset presupposes a
   shared SQL endpoint (the parked AWS item above); a local Superset
   over DuckDB is possible without it.

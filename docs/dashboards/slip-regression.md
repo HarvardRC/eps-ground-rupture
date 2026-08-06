@@ -27,11 +27,6 @@ per-colour trend lines recompute client-side and cannot be pinned by tests
 | Embedded at | site `dashboards/slip-regression.md` at 800×850. **No `(web)` variant** — the single dashboard is already portrait, so its escape hatch points at itself |
 | Specs | `notes/dashboard-4-build-spec.md`, `notes/2026-08-04/dashboard-4-tableau-walkthrough.md` |
 
-⚠️ **This workbook is untracked in git.** `git ls-files dashboards/tableau/`
-lists the other five `.twb` files but not this one — it was authored
-2026-08-04 and never committed. Nothing derived from it is reproducible
-from a clean checkout until it is.
-
 ## Data contract
 
 **One union of three CSVs**, all through a single text-scan connection
@@ -174,15 +169,14 @@ but is not placed on the dashboard.
    `Slip` and `VD_HW` — that figure is the sum of `n` across
    `dem_regression`. A materially different count means the union or a calc
    regressed.
-4. **Commit the workbook.** It is currently untracked.
+4. Publish and save locally, then commit the `.twb` — it is XML, so the
+   diff shows exactly what your edit changed.
 
 Never rename a CSV export. Every calculated field keys on Tableau's
 `[Table Name]` discriminator using the literal filenames.
 
 ## Known quirks
 
-- **Untracked in git** (see above) — the single most important thing to fix
-  about this family.
 - **Everything keys on `[Table Name]`** with literal filenames
   (`"dem.csv"`, `"kern_inferred_slip.csv"`, `"dem_regression_lines.csv"`).
   Renaming an export silently breaks `Layer`, `Y points`, `Y lines` and

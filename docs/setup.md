@@ -68,14 +68,14 @@ dist/                        build outputs (gitignored)
   csv/                       egr-csv exports — what the published workbooks read
   python/                    the wheel
 dashboards/
-  duckdb/eps.duckdb          the view definitions Tableau/DuckDB clients connect to
+  duckdb/eps.duckdb          the view definitions clients connect to (gitignored)
   tableau/                   the six .twb workbooks + README
   sql/                       generated DDL (gitignored; parked AWS lane)
     athena.sql                 external tables over s3://.../<table>/
     athena-views.sql           Athena/Trino twins of five DuckDB views
     spark-thrift.sql           USING parquet LOCATION 'file:///.../<table>/'
   sheets/                    Google Sheets push targets (targets.yaml + README; dormant)
-  superset/                  empty placeholder — Superset was retired (ADR-0004)
+  superset/                  retired (ADR-0004); README kept for its connector strings
 deploy/
   terraform/                 AWS data layer (parked); tables.json is committed
 docs/                        this file, datasets.md, adr/, dashboards/
@@ -208,9 +208,11 @@ read several files each.
 ### `egr-push-sheets` — dormant
 
 Pushes a view to Google Sheets so a Tableau Public workbook could
-auto-refresh from it. Superseded by the CSV lane and not in use: a Google
-spreadsheet caps at 10,000,000 cells and `dem` alone is ~9.0M, so the
-largest table barely fits and leaves no headroom. Setup is in
+auto-refresh from it. Superseded by the CSV lane and not in use — and the
+largest table cannot go through it anyway: a Google spreadsheet caps at
+10,000,000 cells, `sheets.CELL_LIMIT` guards at 9,000,000, and `dem` is
+346,834 × 26 = 9,017,684 cells, so `egr-push-sheets --view dem` raises
+rather than uploading. Views that big need the Drive-CSV route. Setup is in
 `dashboards/sheets/README.md`; the story is in
 [`adr/dead-ends.md`](adr/dead-ends.md).
 
@@ -255,8 +257,8 @@ To use a different location, set `EGR_VENV=/path/to/venv` or pass
 `-Ppython.venv=/path/to/venv`. To make it stick for both the terminal and
 IDEA-launched Gradle, put `python.venv=/path/to/venv` in
 `~/.gradle/gradle.properties` — which is what this machine does, because
-`build.gradle.kts` still defaults to the older `/opt/python/venvs/<name>`
-convention.
+`subprojects/python/build.gradle.kts` still defaults to the older
+`/opt/python/venvs/<name>` convention.
 
 IntelliJ IDEA needs one manual step after every Gradle sync (the Python
 Module SDK resets to the project JDK — a JetBrains limitation). Details in
@@ -270,14 +272,23 @@ Verified 2026-08-05:
 - `poetry run pytest` — **102 passed** in ~7 s: `test_csvexport` 7,
   `test_prep` 20, `test_raw_inputs` 15, `test_regression_views` 17,
   `test_sheets` 21, `test_smoke` 22. Coverage spans the FDHI cleaning
-  chains, the required-input checks, Parquet export, DDL generation, all
-  eleven DuckDB views (including the Dashboard 4 regression coefficients,
-  pinned to four decimal places), CSV export and the Sheets targets.
+  chains, the required-input checks, Parquet export, DDL generation, the
+  DuckDB views, CSV export and the Sheets targets.
+
+  Two limits worth knowing. The view tests build from **synthetic fixture
+  frames**, not from `data/raw/`, so they pin *behaviour* — shapes, filters,
+  sentinel handling, the regression algebra — and not the row counts this
+  repo's real inputs happen to produce. And `kern_combined_geo` has no
+  assertions at all: it is executed as a side effect of `build_duckdb_views`
+  but nothing checks its columns or its constants. The Dashboard 4
+  coefficients are pinned with `pytest.approx(..., abs=0.001)`, so despite
+  being written to four decimals they are enforced to three.
 - `./gradlew :subprojects:python:pytest` — same 102 via the orchestrator
   (Gradle 8.10.2 wrapper; nothing in the build pins a JDK toolchain).
 - `poetry run egr-build` — requires all four raw inputs, exits 2 naming any
   that are missing.
-- The companion site builds `--strict` and deploys from `main` on push.
+- The companion site builds `--strict` on every pull request that touches
+  it (validation only, no deploy) and deploys from `main` on push.
 
 ## Ported logic
 
@@ -313,8 +324,6 @@ That work belongs in Tableau, so it has deliberately not been ported.
 - **Published dashboards are slow.** Candidate levers are recorded in
   `TODO.md`; the biggest single one is that Dashboard 3's two DEM boxplot
   sheets render ~330k disaggregated marks each.
-- **`dem-slip-regression-public.twb` is untracked.** Dashboard 4 is
-  published but not reproducible from a clean checkout.
 - **AWS deployment via Terraform** is parked and never applied to the
   account. `TODO.md` → Deployment records the revival triggers.
 - **Notebook 2** (`2Ddem 2025 Paper Revisions …`) has not been ported. Most

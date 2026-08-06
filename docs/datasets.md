@@ -43,10 +43,12 @@ Notes:
 - `Cohesion` is a categorical **string** column mixing letter codes
   (`R1`–`R10`, `Q`, `S`, and `A`, `B`, `C`, `F`, `G`, `H`, `K`, `L`, `M` —
   note the letters are not contiguous) with five scientific-notation
-  strings (`1.00E+05`, `5.00E+05`, `1.00E+06`, `1.50E+06`, `2.00E+06`),
-  plus NaNs. 26 distinct values in all. That mix is why `io.load_dem`
-  passes `low_memory=False` and why `export.py` coerces every `object`
-  column to pandas' nullable `string` dtype before writing Parquet.
+  strings (`1.00E+05`, `5.00E+05`, `1.00E+06`, `1.50E+06`, `2.00E+06`).
+  26 distinct values, no nulls. That mix of numeric-looking and
+  letter-coded values across a large file is why `io.load_dem` passes
+  `low_memory=False` — chunk-boundary type inference would otherwise warn —
+  and why `export.py` coerces every `object` column to pandas' nullable
+  `string` dtype before writing Parquet.
 - 3,434 rows have a null `Scarp_Class` — exactly one per trial, the initial
   stage. Those same rows also have null `Scarp_Height` and `DZW`, so they
   contribute no marks to any chart.
@@ -205,8 +207,15 @@ above; the other six are where the analysis lives.
 
 Row counts are as of 2026-08-05 with the current `data/raw/`; the
 authoritative definitions are in
-`subprojects/python/src/eps_ground_rupture/views.py`, and the numbers are
-pinned by `tests/test_smoke.py` and `tests/test_regression_views.py`.
+`subprojects/python/src/eps_ground_rupture/views.py`.
+
+**Only three of these counts are pinned by tests** — `dem_regression` (7),
+`dem_regression_lines` (14) and `kern_inferred_slip` (112), in
+`tests/test_regression_views.py`, because they are derived and a silent
+change would mean the arithmetic broke. The other eight follow from
+whatever is in `data/raw/`, and the view tests build from synthetic
+fixtures rather than the real inputs, so nothing catches a drift here.
+Re-run the counts rather than trusting this table.
 
 `egr-csv` exports any of these to `dist/csv/<view>.csv`;
 `./gradlew :subprojects:python:csvExportAll` does all eleven. Which

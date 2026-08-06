@@ -173,12 +173,16 @@ filter or URL actions anywhere.
   sheet, no palette element anywhere, zero occurrences of the Dashboards
   1–2 scarp-class hexes. Both the spec's "one hue per measure" and the
   walkthrough's "colour by Scarp_Class" are unimplemented.
-- **Sort is inconsistent.** FZW, VS and both SURE sheets sort by
-  `MAX(magnitude)` descending; `SH per Event (FDHI)` has no sort element at
-  all, so its three events fall back to alphabetical while the panel above
-  it on the same dashboard is magnitude-sorted. The DEM sheets have no sort
-  either — their six classes come out in the requested order only because
-  it happens to coincide with alphabetical.
+- **Sort is inconsistent, and one sheet sorts by the wrong thing.** FZW,
+  VS, `SURE FNC` and `SURE SH` each carry a `<computed-sort>` on
+  `MAX(magnitude)` descending. `SH per Event (FDHI)` instead carries a
+  `<shelf-sort-v2>` on `SUM(sh_central_meters)` descending — a different
+  mechanism *and* a different key, so its three events are ordered by total
+  scarp height while the FZW panel beside it on the same dashboard is
+  ordered by magnitude. Summing a per-measurement quantity is also the
+  Sort dialog's default trap (it should be Maximum). The two DEM sheets
+  have no sort at all — their six classes come out in the requested order
+  only because it happens to coincide with alphabetical.
 - **The 45.8 m "DEM envelope" reference line was never added.** Max DZW in
   the export is 45.811 m, so the boundary the paired log axes exist to
   dramatise is currently unmarked.
