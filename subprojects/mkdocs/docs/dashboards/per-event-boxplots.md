@@ -115,13 +115,12 @@ so you can narrow the 23 events to a comparable subset.
     those with a positive value for the measure in question. The counts above are after those filters.[^spec]
     The SURE panels apply no row filter.
 
-    Event labels carry a [moment magnitude](../glossary.md#magnitude) where
-    one is available. For the
-    FDHI measurements that value travels with the data; **for SURE it does
-    not** — the SURE release records no magnitude column, so those values
-    come from a small lookup table curated inside this project, several
-    entries of which are still marked for confirmation.[^magnitudes] Events
-    with no value appear without a magnitude suffix.
+    Event labels carry a [moment magnitude](../glossary.md#magnitude). For
+    the FDHI measurements that value travels with the data; **for SURE it
+    does not** — the SURE release records no magnitude column, so those
+    values come from a small lookup table curated inside this project,
+    every entry of which is sourced from the SURE 2.0 data
+    descriptor.[^magnitudes]
 
 ## Where this comes from
 
@@ -154,4 +153,8 @@ DEM experiment set — all described on the [Data](../data.md) page.
     separation is "similar enough to the scarp heights to foster these
     comparisons", citing the FDHI report in support.
 [^magnitudes]: `SURE_EVENT_MAGNITUDES` in
-    `subprojects/python/src/eps_ground_rupture/config.py`.
+    `subprojects/python/src/eps_ground_rupture/config.py`, with every value
+    confirmed against the SURE 2.0 data descriptor — Nurminen, F., *et al.*
+    (2022), "SURE 2.0 — new release of the worldwide database of surface
+    ruptures for fault displacement hazard analyses," *Scientific Data* 9,
+    DOI [10.1038/s41597-022-01835-z](https://doi.org/10.1038/s41597-022-01835-z).

@@ -63,16 +63,17 @@ their uncertainties, scarp height, and event metadata.[^datasets]
 It supplies the fault-normal-component and scarp-height panels in the
 per-event boxplots. Note that the release carries no event magnitude; the
 magnitudes shown on those panels come from a lookup curated inside this
-project.[^datasets]
+project, with every value sourced from the SURE 2.0 data descriptor
+(Nurminen et al. 2022).[^datasets]
 
 ## Kern County (1952)
 
 A hand-compiled merge of three sources of surface-rupture measurements from
 the **1952 M 7.36 Kern County earthquake** on the White Wolf fault in
 California: the classic Buwalda & St. Amand (1955) field survey, the Kern
-entries from the FDHI flatfile, and an "SDC" contribution — most likely a
-surface-displacement catalogue added by the original analyst, though the
-project's own notes record that expansion as unconfirmed.[^datasets]
+entries from the FDHI flatfile, and the event's SDC — surface deformation
+characteristics, the authors' umbrella term for the measured surface
+quantities: scarp height, deformation zone width and scarp dip.[^datasets]
 
 Kern is the project's worked example for inverting the model — placing a
 measured vertical displacement on a fitted relationship to infer the slip
@@ -112,6 +113,53 @@ the project's tests pin rather than recomputing them in the browser.
     The raw inputs are not committed to the repository — they come from the
     sources cited above, or from the project owner. The repository documents
     the expected filenames and their provenance.
+
+## How to cite this data
+
+These dashboards are a convenience layer. If you use the data in your own
+work, please cite the underlying publications and archives rather than this
+site — the dashboards only repackage them, and the papers are the citable
+record.
+
+**The study itself:**
+
+> Chiama, K., Bednarz, W., Moss, R., Plesch, A., and Shaw, J. H. (2025).
+> "Quantifying relationships between fault parameters and rupture
+> characteristics associated with thrust and reverse fault earthquakes."
+> *Earthquake Spectra*, 41(5), 3977–4014.
+> DOI: [10.1177/87552930251346434](https://doi.org/10.1177/87552930251346434)
+
+**The 2D DEM experiments behind these dashboards**, archived open-access on
+DesignSafe-CI:
+
+- Chiama, K., W. Bednarz, R. Moss, A. Plesch, and J. Shaw (2024a).
+  "Homogeneous 2D DEM Experiments," in *Influence of sediment depth,
+  sediment strength, fault dip, and slip on fault scarp morphology*,
+  DesignSafe-CI.
+  DOI: [10.17603/ds2-xpq0-gw80](https://doi.org/10.17603/ds2-xpq0-gw80)
+- Chiama, K., W. Bednarz, R. Moss, A. Plesch, and J. Shaw (2024b).
+  "Heterogeneous 2D DEM Experiments," in *Influence of sediment depth,
+  sediment strength, fault dip, and slip on fault scarp morphology*,
+  DesignSafe-CI.
+  DOI: [10.17603/ds2-gfsj-pp60](https://doi.org/10.17603/ds2-gfsj-pp60)
+
+**The wider project's 3D DEM models** (not part of these dashboards), also
+on DesignSafe-CI:
+
+- Chiama, K., Plesch, A., and Shaw, J. H. (2025a). "Case 3 — Variable Fault
+  Gouge in 3D DEM Models."
+  DOI: [10.17603/ds2-8kb3-5g63](https://doi.org/10.17603/ds2-8kb3-5g63)
+- Chiama, K., Plesch, A., and Shaw, J. H. (2025b). "Case 2 — Variable Fault
+  Dip in 3D DEM Models."
+  DOI: [10.17603/ds2-zt8x-6e73](https://doi.org/10.17603/ds2-zt8x-6e73)
+- Chiama, K., Plesch, A., and Shaw, J. H. (2025c). "Case 1 — Cylindrical 3D
+  DEM Models."
+  DOI: [10.17603/ds2-xgqp-ay07](https://doi.org/10.17603/ds2-xgqp-ay07)
+
+**The field compilations** carry their own citations: the FDHI flatfile is
+UCLA Dataverse DOI
+[10.25346/S6/Y4F9LJ](https://doi.org/10.25346/S6/Y4F9LJ), and SURE is Baize
+et al. (2019).[^sure]
 
 ## Where to go next
 

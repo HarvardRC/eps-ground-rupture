@@ -131,9 +131,11 @@ Notes:
   does the Tableau `Event Label` calc.
 - **SURE records no earthquake magnitude of its own.**
   `config.SURE_EVENT_MAGNITUDES` supplies one per event, sourced from the
-  SURE 2.0 paper (Nurminen et al. 2022) where stated. Several entries are
-  marked "confirm" — common literature values awaiting verification — and
-  unknown events emit NULL.
+  SURE 2.0 data descriptor (Nurminen et al. 2022,
+  doi:`10.1038/s41597-022-01835-z`). All sixteen entries were confirmed
+  against that paper by the project owner on 2026-08-06 — none awaits
+  verification, and every event carries a value. (An event absent from
+  the lookup would still emit NULL; none does today.)
 - `IdE` is a YYYYMMDD integer event id, not a date, despite what type
   inference does with it.
 
@@ -150,9 +152,12 @@ Wolf fault. **28 rows × 6 columns.** The filename encodes the merge:
 
 - **Buwalda** — Buwalda & St. Amand (1955), the classic field survey.
 - **FDHI** — the Kern entries from the FDHI flatfile (`eq_name == 'Kern'`).
-- **SDC** — expansion unconfirmed; most likely a "Surface Displacement
-  Catalog" component added by the original notebook author. Worth asking
-  the author team.
+- **SDC** — **Surface Deformation Characteristics** (confirmed by the
+  project owner, 2026-08-06): the umbrella term for the measured surface
+  quantities — scarp height, deformation zone width and scarp dip. Here it
+  names the Kern scarp-characteristic measurements folded into the
+  compilation. (Our earlier "Surface Displacement Catalog" guess was
+  wrong.)
 
 It is **not a public dataset.** Obtained from the prior project owner.
 

@@ -120,7 +120,9 @@ The `IFNULL(" (M " + STR([magnitude]) + ")", "")` idiom relies on null
 propagating through concatenation: `STR(NULL)` is null, so the whole
 parenthesised expression is null and `IFNULL` substitutes `""`. Refactoring
 to `" (M " + IFNULL(STR([magnitude]), "") + ")"` would leave a bare `" (M )"`
-on the two null-magnitude SURE events.
+on any null-magnitude SURE event. (Since the 2026-08-06 magnitude
+confirmation all sixteen SURE events carry a value, so the idiom now guards
+only a future unknown event.)
 
 The `*Positive` booleans exist because a log axis cannot place values ≤ 0.
 `DZW Positive` drops 3,996 rows (333,148 non-null DZW → 329,152 positive).

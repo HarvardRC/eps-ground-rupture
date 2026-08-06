@@ -13,6 +13,12 @@ licence, so it is treated here as **not open access**. This site therefore
 reproduces no figures and no extended text from the typeset article; it
 cites and links instead.
 
+!!! info "Using the data? Cite the papers and the archives"
+    If you reuse numbers you found through these dashboards, cite the paper
+    above and the DesignSafe data deposits rather than this site — the
+    dashboards only repackage them. The full list, with DOIs, is under
+    [How to cite this data](data.md#how-to-cite-this-data).
+
 !!! tip "Reading the paper itself"
     It is written for specialists. If you want to follow it, the
     [glossary](glossary.md) defines the vocabulary it assumes — including
