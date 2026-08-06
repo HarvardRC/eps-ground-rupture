@@ -9,6 +9,7 @@
 *[SURE]: The worldwide database of surface ruptures (Baize et al. 2019) — field measurements from many historical earthquakes
 *[IQR]: Interquartile Range — the range the middle half of the measurements occupies
 *[OLS]: Ordinary Least Squares — the standard way of fitting a straight line to data
+*[SDC]: Surface Deformation Characteristics — the umbrella term for the measured surface quantities: scarp height, deformation zone width and scarp dip
 
 <!-- No entry for VD_HW: the site only ever writes it inside a code span,
      and the abbr extension does not process code. It is explained in prose

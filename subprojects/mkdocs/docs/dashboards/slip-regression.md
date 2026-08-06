@@ -50,10 +50,14 @@ have produced it — [back-projection](../glossary.md#back-projection),
 
 The stars are sixteen vertical-displacement measurements from the
 [1952 Kern County earthquake](../glossary.md#kern-county-1952) compilation,
-placed on the chosen dip's fit line. At the default assumption of a 30°
-fault they imply slips spanning **0.16 to 2.74 m**.[^fits] The paper's own
-figure reaches the same conclusion — up to about 3 m of near-surface slip,
-consistent with independent published estimates.[^kern]
+placed on the chosen dip's fit line. Kern is the worked example rather than
+a special case: a California event with well-documented surface-rupture
+measurements *and* a known fault geometry — its 30° dip is a direct field
+measurement, reported in the classic Buwalda & St. Amand (1955)
+survey.[^kerndip] On the fit for that measured dip, the sixteen
+displacements imply slips spanning **0.16 to 2.74 m**.[^fits] The paper's
+own figure reaches the same conclusion — up to about 3 m of near-surface
+slip, consistent with independent published estimates.[^kern]
 
 !!! note "One assumption rides along"
     What field geologists measured at Kern is scarp height, and the
@@ -73,24 +77,29 @@ consistent with independent published estimates.[^kern]
 
 ## What the printed figure cannot do
 
-The paper's Figure 14 shows this analysis once, at one set of assumptions.
-Here the assumptions are yours to move.
+The paper's Figure 14 shows this analysis once, at one fault geometry.
+Here the geometry is yours to move.
 
 - **The fault-dip checkboxes** filter the cloud, the fit line and the stars
   together, so you can isolate one dip and see its band cleanly, or compare
   two.
 - **The `Kern Assumed Dip` parameter** slides the stars from one fit line to
   another — re-reading the same sixteen field measurements under a different
-  assumption about the fault's geometry.
+  fault geometry. For Kern itself the measured 30° dip is the right setting;
+  the other positions show how the same measurements would read at a site
+  whose fault dips differently.
 - **Hovering** picks out a single dip's band and its line.
 
-That second control is worth playing with, because it makes the sensitivity
-visible. Kern County's fault dip is an assumption, not a measurement, and
-the inferred slip depends on it: move the parameter from 30° to 45° and the
-implied slips shrink from 0.16–2.74 m to **0.12–1.95 m**.[^fits] A steeper
-fault converts more of each metre of slip into uplift, so less slip is
-needed to explain the same step at the surface. The static figure has to
-pick one dip; this one lets you ask how much that choice mattered.
+That second control is worth playing with, because it makes the fits'
+generality visible. The linear slip–displacement relationships are not
+specific to Kern County — they are properties of the simulations, and they
+extrapolate to any rupture site with those fault dips. That is exactly why
+a well-measured event makes the right demonstration.[^kerndip] Move the
+parameter from the measured 30° to 45° and the implied slips shrink from
+0.16–2.74 m to **0.12–1.95 m**.[^fits] A steeper fault converts more of
+each metre of slip into uplift, so less slip is needed to explain the same
+step at the surface. The static figure has to show one geometry; this one
+lets you read any site's geometry off the same fits.
 
 ## Where this comes from
 
@@ -125,3 +134,7 @@ pin.[^fits] Those exports are listed on the [Data](../data.md) page.
     of 1–3 m and 1–4 m from earlier studies; the relationship uses scarp
     height "which we assume to equal vertical displacement".
 [^families]: `notes/chart-families.md` in the source repository.
+[^kerndip]: Buwalda & St. Amand (1955), the classic field survey of the
+    1952 rupture, reports the 30° fault dip directly. The per-dip fits
+    themselves are properties of the simulations, not of Kern — they apply
+    to any rupture site with the modelled dips.

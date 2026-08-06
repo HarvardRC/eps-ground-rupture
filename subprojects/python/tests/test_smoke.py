@@ -327,6 +327,24 @@ def test_sure_magnitude_case_skips_unknowns():
             assert f"WHEN '{name}' THEN {mw}" in case
 
 
+def test_sure_event_magnitudes_fully_sourced_per_nurminen_2022():
+    """Owner-confirmed against the SURE 2.0 data descriptor (Nurminen et al.
+    2022, doi:10.1038/s41597-022-01835-z) on 2026-08-06: every SURE event
+    carries a magnitude — nothing is awaiting verification — and the four
+    values that changed in that confirmation are pinned so a stale copy of
+    the table cannot creep back in.
+    """
+    from eps_ground_rupture.config import SURE_EVENT_MAGNITUDES
+
+    assert all(mw is not None for mw in SURE_EVENT_MAGNITUDES.values())
+    # The 2026-08-06 corrections: 5.8 → 5.7, 5.2 → 5.4, and the two
+    # formerly-None events gaining values.
+    assert SURE_EVENT_MAGNITUDES["Marryat Creek"] == 5.7
+    assert SURE_EVENT_MAGNITUDES["Pukatja"] == 5.4
+    assert SURE_EVENT_MAGNITUDES["Parina"] == 6.2
+    assert SURE_EVENT_MAGNITUDES["Coalinga (Nuñez)"] == 5.4
+
+
 def test_sure_enriched_view(tmp_path: Path):
     """`sure_enriched` keeps every SURE row and joins the magnitude in,
     tolerating the trailing-NBSP eq_name variants."""

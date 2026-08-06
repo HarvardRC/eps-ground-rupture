@@ -113,8 +113,10 @@ Caveats learned the hard way, both of which will mislead you:
 Re-check the sizes in the mapping table above against
 `<dashboard>/<size>` in the committed workbook and update the `data-*`
 attributes to match. The scale factor derives from them, so a stale value
-leaves either a dead band below the viz or a clipped bottom edge. All five
-dashboards are `sizing-mode='fixed'`.
+leaves either a dead band below the viz or a clipped bottom edge. Five of
+the six embedded dashboards carry `sizing-mode='fixed'`; `Viable
+Combinations` has no `sizing-mode` attribute at all, but its `<size>` pins
+min and max to 1000 × 800, so it is fixed in effect.
 
 Then re-verify each slug per the section above — a renamed dashboard silently
 changes its slug.

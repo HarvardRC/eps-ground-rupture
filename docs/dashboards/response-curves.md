@@ -7,7 +7,7 @@ Chart family 2; "Dashboard 2" in the Roadmap build order.
 A driver→response scatter over the DEM trials: pick what drives the model
 (slip, or a magnitude derived from it), pick what responds (scarp height,
 DZW, scarp dip, `Us - Ud`), pick what to colour by, and read off one OLS
-trend line per colour. Three parameters, one worksheet, 346,834 marks. The
+trend line per colour. Three parameters, one worksheet, ~333k marks. The
 science is on the site page
 ([`subprojects/mkdocs/docs/dashboards/response-curves.md`](../../subprojects/mkdocs/docs/dashboards/response-curves.md)).
 
@@ -64,10 +64,14 @@ y = `SUM(Response Value)`, colour = `Condition`. `<aggregation
 value='false'/>` (Aggregate Measures OFF), so those `sum:` pills draw one
 disaggregated circle per model stage. `<trendline enabled='true'
 fit='linear' exclude-color='false' enable-confidence-bands='false'/>` —
-one OLS line per colour, no bands. Marks at 39 % opacity.
+one OLS line per colour, no bands. `mark-transparency` is 39 — on
+Tableau's 0-255 scale, so roughly 15 % opacity, not 39 %.
 
-The `<table>` structure is byte-identical between the two workbooks apart
-from the datasource name prefix.
+The two workbooks' `<table>` blocks are structurally the same chart, but
+they are not textually interchangeable: besides the datasource name, the
+desktop copy binds lowercase Glue identifiers where the public copy binds
+the CSV headers, and the two `<datasource-dependencies>` blocks appear in
+opposite order.
 
 ### Calculated fields
 
@@ -119,16 +123,21 @@ All three are string lists.
 | Response | `[Parameter 2]` | Scarp_Height, DZW, Scarp_Dip, `Us - Ud` | `Scarp_Height` |
 | Condition By | `[Parameter 3]` | Scarp_Class, Fault_Dip, Cohesion, Set, Density, Sediment_Strength | `Scarp_Class` |
 
-Each is duplicated in three places per workbook (the inline `Parameters`
-datasource, the worksheet's `<datasource-dependencies>`, and the `(web)`
-dashboard's). Edit through the UI, not by hand.
+Each is duplicated in **five** places in the public workbook (four in the
+desktop copy, which has no `(web)` dashboard): the inline `Parameters`
+datasource, the CSV datasource's `<datasource-dependencies>`, the
+worksheet's, and one per dashboard. `grep -c param-domain-type` returns 15
+= 3 parameters x 5. Edit through the UI, not by hand — a hand edit that
+misses a copy leaves the stale value live somewhere.
 
 ### Filters and actions
 
 **Neither, anywhere.** Zero `<filter>` and zero `<action>` elements in both
 workbooks. Every interaction is a parameter control plus one colour legend.
-Consequence: the sheet always plots all 346,834 rows — nothing subsets it,
-including the 3,434 rows with `Slip = 0`.
+Consequence: nothing subsets the data — not even the 3,434 rows with
+`Slip = 0`. The mark count is still below `dem.csv`'s 346,834 rows,
+because a null Response draws nothing: 333,159 marks at the default
+Scarp_Height (and for `Us - Ud`), 333,148 for DZW, 330,187 for Scarp_Dip.
 
 ## How to edit safely
 

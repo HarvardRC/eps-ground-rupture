@@ -49,6 +49,7 @@ Everything below is the vocabulary needed to read that.
 | **SURE** | the name of a database of **s**urface **ru**ptur**e**s | A second published field compilation — [see below](#sure). |
 | **IQR** | Interquartile Range | A spread measure — see [statistics](#statistics-terms). |
 | **OLS** | Ordinary Least Squares | The standard way of fitting a straight line to data. |
+| **SDC** | Surface Deformation Characteristics | The authors' umbrella term for the measured surface quantities: scarp height, DZW and scarp dip. |
 
 ## The simulations
 
@@ -294,7 +295,8 @@ outside these categories.
   of the fault-normal-component and scarp-height panels on the
   [per-event boxplots](dashboards/per-event-boxplots.md). Note the database
   records no earthquake magnitude of its own; the magnitudes on those panels
-  come from a lookup curated inside this project.
+  come from a lookup curated inside this project, sourced from the SURE 2.0
+  data descriptor (Nurminen et al. 2022).
 
 **Kern County (1952)** { #kern-county-1952 }
 : A magnitude 7.36 earthquake on the White Wolf fault in California, and one
@@ -323,8 +325,8 @@ This is the part that makes the dashboards click.
 : Because the relationship is so tight, it can be inverted: given a vertical
   displacement measured in the field, estimate the slip that must have
   produced it — `slip = (vertical − intercept) / slope` for the fit at the
-  assumed fault dip. The [slip regression](dashboards/slip-regression.md)
-  dashboard does exactly this, and lets you vary the assumed dip. The paper does this for Kern County and arrives at up to about
+  chosen fault dip. The [slip regression](dashboards/slip-regression.md)
+  dashboard does exactly this, and lets you vary the dip. The paper does this for Kern County and arrives at up to about
   3 m of near-surface slip, consistent with independent published
   estimates.[^kern] One assumption rides along — what is measured in the
   field is scarp height, and the inversion treats that as equal to vertical

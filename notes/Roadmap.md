@@ -86,11 +86,12 @@ mapping is at the bottom of `chart-families.md`.)
    - Needs the `historic_events` view for the reference lines.
 6. **Static-image embedding** (lowest priority — reframed 2026-08-05).
    - The companion site, not the dashboards, is now the natural home for
-     the paper illustrations (Figs. 1, 2, 7) — and the paper is **not
+     the paper illustrations (Figs. 1, 2, 5, 7) — and the paper is **not
      open access**, so no typeset imagery may be reproduced until rights
-     are confirmed with the author team. Placeholders naming those
+     are confirmed with the author team. Four placeholders naming those
      figures already sit in the site's `paper.md`; the rights question
-     is tracked in `subprojects/mkdocs/DEPLOY.md` → Before publishing.
+     is tracked in `subprojects/mkdocs/DEPLOY.md` → Open questions for
+     the author team.
    - The old plan — extract PNGs into `dashboards/tableau/images/` — is
      dropped.
 

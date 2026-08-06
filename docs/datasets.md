@@ -43,10 +43,12 @@ Notes:
 - `Cohesion` is a categorical **string** column mixing letter codes
   (`R1`–`R10`, `Q`, `S`, and `A`, `B`, `C`, `F`, `G`, `H`, `K`, `L`, `M` —
   note the letters are not contiguous) with five scientific-notation
-  strings (`1.00E+05`, `5.00E+05`, `1.00E+06`, `1.50E+06`, `2.00E+06`),
-  plus NaNs. 26 distinct values in all. That mix is why `io.load_dem`
-  passes `low_memory=False` and why `export.py` coerces every `object`
-  column to pandas' nullable `string` dtype before writing Parquet.
+  strings (`1.00E+05`, `5.00E+05`, `1.00E+06`, `1.50E+06`, `2.00E+06`).
+  26 distinct values, no nulls. That mix of numeric-looking and
+  letter-coded values across a large file is why `io.load_dem` passes
+  `low_memory=False` — chunk-boundary type inference would otherwise warn —
+  and why `export.py` coerces every `object` column to pandas' nullable
+  `string` dtype before writing Parquet.
 - 3,434 rows have a null `Scarp_Class` — exactly one per trial, the initial
   stage. Those same rows also have null `Scarp_Height` and `DZW`, so they
   contribute no marks to any chart.
@@ -129,9 +131,11 @@ Notes:
   does the Tableau `Event Label` calc.
 - **SURE records no earthquake magnitude of its own.**
   `config.SURE_EVENT_MAGNITUDES` supplies one per event, sourced from the
-  SURE 2.0 paper (Nurminen et al. 2022) where stated. Several entries are
-  marked "confirm" — common literature values awaiting verification — and
-  unknown events emit NULL.
+  SURE 2.0 data descriptor (Nurminen et al. 2022,
+  doi:`10.1038/s41597-022-01835-z`). All sixteen entries were confirmed
+  against that paper by the project owner on 2026-08-06 — none awaits
+  verification, and every event carries a value. (An event absent from
+  the lookup would still emit NULL; none does today.)
 - `IdE` is a YYYYMMDD integer event id, not a date, despite what type
   inference does with it.
 
@@ -148,9 +152,12 @@ Wolf fault. **28 rows × 6 columns.** The filename encodes the merge:
 
 - **Buwalda** — Buwalda & St. Amand (1955), the classic field survey.
 - **FDHI** — the Kern entries from the FDHI flatfile (`eq_name == 'Kern'`).
-- **SDC** — expansion unconfirmed; most likely a "Surface Displacement
-  Catalog" component added by the original notebook author. Worth asking
-  the author team.
+- **SDC** — **Surface Deformation Characteristics** (confirmed by the
+  project owner, 2026-08-06): the umbrella term for the measured surface
+  quantities — scarp height, deformation zone width and scarp dip. Here it
+  names the Kern scarp-characteristic measurements folded into the
+  compilation. (Our earlier "Surface Displacement Catalog" guess was
+  wrong.)
 
 It is **not a public dataset.** Obtained from the prior project owner.
 
@@ -205,8 +212,15 @@ above; the other six are where the analysis lives.
 
 Row counts are as of 2026-08-05 with the current `data/raw/`; the
 authoritative definitions are in
-`subprojects/python/src/eps_ground_rupture/views.py`, and the numbers are
-pinned by `tests/test_smoke.py` and `tests/test_regression_views.py`.
+`subprojects/python/src/eps_ground_rupture/views.py`.
+
+**Only three of these counts are pinned by tests** — `dem_regression` (7),
+`dem_regression_lines` (14) and `kern_inferred_slip` (112), in
+`tests/test_regression_views.py`, because they are derived and a silent
+change would mean the arithmetic broke. The other eight follow from
+whatever is in `data/raw/`, and the view tests build from synthetic
+fixtures rather than the real inputs, so nothing catches a drift here.
+Re-run the counts rather than trusting this table.
 
 `egr-csv` exports any of these to `dist/csv/<view>.csv`;
 `./gradlew :subprojects:python:csvExportAll` does all eleven. Which
