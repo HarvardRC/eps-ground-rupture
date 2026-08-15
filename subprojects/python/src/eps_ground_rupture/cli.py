@@ -144,6 +144,7 @@ def _write_sql_scripts(tables: list[register.Table], *, database: str, s3_prefix
                 views.athena_dem_regression_view_sql(),
                 views.athena_dem_regression_lines_view_sql(),
                 views.athena_kern_inferred_slip_view_sql(),
+                views.athena_historic_events_view_sql(),
             )
         )
     )

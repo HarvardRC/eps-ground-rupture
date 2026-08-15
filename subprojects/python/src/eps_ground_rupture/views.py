@@ -17,6 +17,9 @@ this file via the DuckDB JDBC driver and sees these logical tables:
 * `dem_regression` — per-`Fault_Dip` OLS fit of `VD_HW ~ Slip`
 * `dem_regression_lines` — two endpoint rows per dip, for drawing the fits
 * `kern_inferred_slip` — Kern verticals back-projected through each fit
+* `historic_events` — field measurements (FDHI flatfile / SURE / Kern),
+  one row per measurement, for Fig-15-style reference lines on the
+  Dashboard-5 histograms (present only alongside `fdhi_measurements`)
 
 The unified view is what makes the cross-source DZW-vs-Scarp-Height
 scatter natural in Tableau: every row has `source`, `dzw`,
@@ -339,6 +342,65 @@ def build_duckdb_views(
               ORDER BY r.fault_dip, k."Location ID"
             """
         )
+
+        # ------------------------------------------------------------------
+        # Dashboard 5 — historic reference values (paper Fig. 15 flavor)
+        # ------------------------------------------------------------------
+        # One row per FIELD MEASUREMENT, not per event: nb2 draws its
+        # reference overlays as one axvline per measurement value
+        # (`for x in df_KernNew["DZW"]: ...`), so the within-event spread is
+        # part of the figure. Per-event aggregates were considered and
+        # rejected against that ground truth (dashboard-5-build-spec, O1).
+        #
+        # Measures are per-column nullable — a row keeps whichever of
+        # dzw / scarp_height clears the sentinel filter (`> 0` drops both
+        # FDHI's -999 sentinels and true nulls), and survives if it has at
+        # least one. This differs from unified_observations, which demands
+        # BOTH (a scatter needs x AND y; a reference line needs only its
+        # own axis).
+        #
+        # The FDHI arm reads `fdhi_measurements` (the raw-flatfile lane), not
+        # the 19-row `fdhi_cleaned` subset — the notebook's labelled events
+        # (Killari etc.) only exist in the full flatfile. The view is
+        # therefore created only when that optional Parquet exists, and is
+        # skipped otherwise, exactly like the table itself.
+        fdhi_meas_parquet = processed_dir / "fdhi_measurements" / "data.parquet"
+        if fdhi_meas_parquet.is_file():
+            con.execute(
+                f"""
+                CREATE OR REPLACE VIEW historic_events AS
+                  SELECT
+                    'FDHI'    AS source,
+                    eq_name   AS eq_name,
+                    CASE WHEN fzw_central_meters > 0 THEN fzw_central_meters END AS dzw,
+                    CASE WHEN vs_central_meters  > 0 THEN vs_central_meters  END AS scarp_height,
+                    CASE WHEN magnitude > 0 THEN magnitude END AS magnitude
+                  FROM read_parquet({_sql_literal(fdhi_meas_parquet)})
+                  WHERE fzw_central_meters > 0 OR vs_central_meters > 0
+
+                  UNION ALL
+
+                  SELECT
+                    'SURE'   AS source,
+                    eq_name  AS eq_name,
+                    CASE WHEN "FNC" > 0 THEN "FNC" END AS dzw,
+                    CASE WHEN "SH"  > 0 THEN "SH"  END AS scarp_height,
+                    {_sure_magnitude_case("eq_name")} AS magnitude
+                  FROM read_parquet({_sql_literal(parquet_files['sure'])})
+                  WHERE "FNC" > 0 OR "SH" > 0
+
+                  UNION ALL
+
+                  SELECT
+                    'Kern'                AS source,
+                    'Kern County (1952)'  AS eq_name,
+                    CASE WHEN "DZW"      > 0 THEN "DZW"      END AS dzw,
+                    CASE WHEN "Vertical" > 0 THEN "Vertical" END AS scarp_height,
+                    CAST({KERN_MAGNITUDE} AS DOUBLE) AS magnitude
+                  FROM read_parquet({_sql_literal(parquet_files['kern_combined'])})
+                  WHERE "DZW" > 0 OR "Vertical" > 0
+                """
+            )
     finally:
         con.close()
 
@@ -469,4 +531,38 @@ def athena_kern_inferred_slip_view_sql() -> str:
         "FROM kern_combined k\n"
         "CROSS JOIN dem_regression r\n"
         "WHERE k.vertical IS NOT NULL;\n"
+    )
+
+
+def athena_historic_events_view_sql() -> str:
+    """Athena (Trino) twin of the DuckDB `historic_events` view.
+
+    Same three arms and per-column sentinel handling, against the
+    sanitized Athena names. Requires the `fdhi_measurements` Glue table,
+    which only exists where the raw-flatfile lane has been synced — the
+    script fails at CREATE time otherwise, matching the DuckDB build's
+    behaviour of skipping the view when the Parquet is absent.
+    """
+    return (
+        "-- Historic field measurements, one row per measurement (Fig. 15\n"
+        "-- reference lines). A row keeps whichever measure clears the\n"
+        "-- sentinel filter; unified_observations demands both, this view\n"
+        "-- deliberately does not.\n"
+        "CREATE OR REPLACE VIEW historic_events AS\n"
+        "SELECT 'FDHI' AS source, eq_name,\n"
+        "       IF(fzw_central_meters > 0, fzw_central_meters) AS dzw,\n"
+        "       IF(vs_central_meters  > 0, vs_central_meters)  AS scarp_height,\n"
+        "       IF(magnitude > 0, magnitude) AS magnitude\n"
+        "FROM fdhi_measurements\n"
+        "WHERE fzw_central_meters > 0 OR vs_central_meters > 0\n"
+        "UNION ALL\n"
+        "SELECT 'SURE', eq_name,\n"
+        "       IF(fnc > 0, fnc), IF(sh > 0, sh),\n"
+        f"       {_sure_magnitude_case('eq_name')}\n"
+        "FROM sure WHERE fnc > 0 OR sh > 0\n"
+        "UNION ALL\n"
+        "SELECT 'Kern', 'Kern County (1952)',\n"
+        "       IF(dzw > 0, dzw), IF(vertical > 0, vertical),\n"
+        f"       CAST({KERN_MAGNITUDE} AS double)\n"
+        "FROM kern_combined WHERE dzw > 0 OR vertical > 0;\n"
     )

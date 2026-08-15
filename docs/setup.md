@@ -203,7 +203,11 @@ poetry run egr-csv --view unified_observations
 
 Eleven views are wired up as Gradle tasks; `csvExportAll` refreshes all of
 them, which is what you want after any `egr-build`, since the workbooks
-read several files each.
+read several files each. Note that a bare `csvExportAll` exports from
+whatever views the *last* `egr-build` left in `eps.duckdb` — on a machine
+that hasn't built since the view list grew, it dies mid-run on the first
+missing view. `egrBuildAndExport` is the guard-railed combination (build
+first, then every export); prefer it on arrive-on-a-machine days.
 
 ### `egr-push-sheets` — dormant
 
@@ -225,6 +229,7 @@ Gradle sets `VIRTUAL_ENV` and `PATH` per task, so no manual activation.
 ./gradlew :subprojects:python:pytest
 ./gradlew :subprojects:python:egrBuild
 ./gradlew :subprojects:python:csvExportAll   # every view -> dist/csv/ (dem alone ~73 MB)
+./gradlew :subprojects:python:egrBuildAndExport  # egrBuild + csvExportAll, ordered — the safe one-click refresh
 ./gradlew :subprojects:python:csvExportDem   # one view; one task per view exists
 ./gradlew :subprojects:python:wheel          # -> dist/python/eps_ground_rupture-*.whl
 ./gradlew :subprojects:python:clean          # removes dist/python/ and dist/csv/

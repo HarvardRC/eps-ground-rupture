@@ -282,3 +282,11 @@ gcp-*.json
 credentials.json
 client_secret*.json
 /resources/local/*
+
+# --- project-local additions (2026-08-15) ---------------------------------
+# Local-only Tableau datasource (Athena connection config); stays per-machine.
+dashboards/tableau/*.tds
+
+# Deletion staging: the Cowork sandbox VM cannot rm files on the mount, so
+# doomed files get parked here for a manual purge. Never commit it.
+_to_delete/

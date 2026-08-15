@@ -1,6 +1,6 @@
 # Tableau workbooks
 
-Six `.twb` files: four **published** to Tableau Public and fed by
+Seven `.twb` files: five **published** to Tableau Public and fed by
 `dist/csv/*.csv`, and two **desktop authoring copies** kept from the
 pre-pivot AWS lane. Published workbooks read CSV because Tableau Public
 cannot hold a live connection to DuckDB or Athena — that is the whole
@@ -23,6 +23,7 @@ extract, which is large, binary and immediately stale.
 | `dem-response-curve.twb` | `DEM Response Curves` | — (not published) | Athena `dem` + a June `.hyper` | same |
 | `per-event-box-plots-public.twb` | `Per-Event Boxplots — Model vs Field` (800×1200)<br>`Per-Event Boxplots — VS & SURE` (1200×1200)<br>`Per-Event Boxplots — VS & SURE (web)` (800×2000) | `Per-EventBoxplotsModelvsField`<br>`Per-EventBoxplotsVSSURE`<br>`Per-EventBoxplotsVSSUREweb` | `fdhi_measurements.csv`, `sure_enriched.csv`, `dem.csv` | [per-event-boxplots](../../docs/dashboards/per-event-boxplots.md) |
 | `dem-slip-regression-public.twb` | `Slip Regression & Kern Inference` (800×850) | `SlipRegressionKernInference` | `dem.csv` + `kern_inferred_slip.csv` + `dem_regression_lines.csv` (one union) | [slip-regression](../../docs/dashboards/slip-regression.md) |
+| `dem-distributions-public.twb` | `Distributions & Summary (web)` (800×1200) | `DistributionsSummaryweb` | `dem.csv` + `historic_events.csv` (one union) | [distributions](../../docs/dashboards/distributions.md) |
 
 Published URLs are
 `https://public.tableau.com/views/<workbook>/<slug>` for embeds and

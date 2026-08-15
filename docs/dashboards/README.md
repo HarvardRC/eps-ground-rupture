@@ -16,7 +16,7 @@ there. Neither replaces the other: same objects, different audiences.
 | 2 — Driver→response curves | [response-curves.md](response-curves.md) | `dem-response-curve{,-public}.twb` | published |
 | 5 — Per-event boxplots | [per-event-boxplots.md](per-event-boxplots.md) | `per-event-box-plots-public.twb` | published |
 | 6 — Regression + inference | [slip-regression.md](slip-regression.md) | `dem-slip-regression-public.twb` | published |
-| 3 + 4 — Faceted distributions, mean ± σ | *not yet built* | — | next (Dashboard 5) |
+| 3 + 4 — Faceted distributions, mean ± σ | [distributions.md](distributions.md) | `dem-distributions-public.twb` | published |
 
 Family numbers are the chart taxonomy in `notes/chart-families.md`;
 "Dashboard N" is the build order in `notes/Roadmap.md`. They do not line up

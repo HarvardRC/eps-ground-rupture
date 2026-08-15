@@ -160,6 +160,10 @@ val csvViews = listOf(
     "kern_combined", "kern_combined_geo", "unified_observations",
     // Dashboard 4 (regression + inference) — all tiny.
     "dem_regression", "dem_regression_lines", "kern_inferred_slip",
+    // Dashboard 5 — per-measurement historic reference values (Fig. 15).
+    // Like fdhi_measurements, needs the raw-flatfile lane: where the view is
+    // absent the task exits 2 naming the available views (views.require_view).
+    "historic_events",
 )
 
 val csvExportTasks = csvViews.map { view ->
@@ -171,6 +175,13 @@ val csvExportTasks = csvViews.map { view ->
         useVenv()
         commandLine(poetryBin, "run", "egr-csv", "--view", view)
         dependsOn(poetryInstall)
+        // Exports read whatever views the last egrBuild left in eps.duckdb.
+        // Never *require* the build here (a plain export must stay cheap),
+        // but when both are in the task graph, order the build first —
+        // otherwise `csvExportAll` against a stale eps.duckdb dies mid-run
+        // on a view the old file has never heard of (the 2026-08-15 laptop
+        // footgun: June duckdb, post-June view list).
+        mustRunAfter(egrBuild)
     }
 }
 
@@ -179,6 +190,17 @@ val csvExportTasks = csvViews.map { view ->
 tasks.register("csvExportAll") {
     group = "csv"
     description = "Export every view in dist/csv/ (${csvViews.size} files; `dem` alone is ~70 MB)."
+    dependsOn(csvExportTasks)
+}
+
+// The safe one-click refresh: pipeline rebuild, then every export, in that
+// order. This is the task to double-click in IDEA on arrive-on-a-machine
+// days (see notes/multi-machine.md) — it cannot export from a stale
+// eps.duckdb the way a bare `csvExportAll` can.
+tasks.register("egrBuildAndExport") {
+    group = "csv"
+    description = "egrBuild, then csvExportAll — full refresh of dist/csv/ in one click."
+    dependsOn(egrBuild)
     dependsOn(csvExportTasks)
 }
 

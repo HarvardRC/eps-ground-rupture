@@ -68,15 +68,18 @@ specs). Add new entries here rather than scattering them across files.
 
 ## Dashboards
 
-- Shipped: Dashboards 1-4, all published to Tableau Public —
+- Shipped: Dashboards 1-5, all published to Tableau Public —
   `dem-model-vs-reality` (Dashboard 1 + Viable Combinations),
   `dem-response-curve` (Dashboard 2), `per-event-box-plots-public`
-  (Dashboard 3, 2026-08-02) and `dem-slip-regression-public`
-  (Dashboard 4, 2026-08-04). Dashboards 1 and 2 also keep a desktop
-  Athena copy; 3 and 4 were built public-first. Per-workbook detail:
+  (Dashboard 3, 2026-08-02), `dem-slip-regression-public`
+  (Dashboard 4, 2026-08-04) and `dem-distributions-public`
+  (Dashboard 5, 2026-08-15). Dashboards 1 and 2 also keep a desktop
+  Athena copy; 3–5 were built public-first. Per-workbook detail:
   `dashboards/tableau/README.md` and `docs/dashboards/`.
-- Next: Dashboard 5 — faceted distributions + mean ± σ summaries
-  (chart families 3 and 4; see `notes/Roadmap.md`, Build order).
+- Next: build order #6 (static-image embedding) is parked on the
+  figure-rights question; remaining dashboard work is polish and the
+  open questions in `notes/dashboard-5-build-spec.md` (Fig-8
+  population, count-vs-probability, q3 log-axis).
 - Superset YAML exports still absent. A *hosted* Superset presupposes a
   shared SQL endpoint (the parked AWS item above); a local Superset
   over DuckDB is possible without it.
