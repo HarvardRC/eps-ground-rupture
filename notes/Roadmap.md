@@ -19,8 +19,8 @@ families plus non-chart illustrations. Summary:
 |--------|---------------------|--------|
 | 1. Model vs reality scatter | Does the simulation behave like real earthquakes? | ✅ built |
 | 2. Driver→response curves | How does the model respond to slip/magnitude per condition? | ✅ built |
-| 3. Faceted distributions | What's the spread of each output; which parameter shifts it? | **next** (Dashboard 5) |
-| 4. Mean ± σ summary | Typical values and spreads per scarp class at a glance? | **next** (Dashboard 5) |
+| 3. Faceted distributions | What's the spread of each output; which parameter shifts it? | ✅ built (Dashboard 5) |
+| 4. Mean ± σ summary | Typical values and spreads per scarp class at a glance? | ✅ built (Dashboard 5) |
 | 5. Per-event boxplots | How variable are field measurements within each event? | ✅ built (Dashboard 3) |
 | 6. Regression + inference | What slip would produce an observed displacement? | ✅ built (Dashboard 4) |
 | Illustrations (static images) | Context: photos, schematics, model snapshots | lowest — now a site/rights question (see build order #6) |
@@ -78,12 +78,17 @@ mapping is at the bottom of `chart-families.md`.)
    computed in the pipeline, not the workbook (data-side work #2). Spec:
    `notes/dashboard-4-build-spec.md` (click-by-click walkthrough
    alongside in `notes/2026-08-04/`).
-5. **Dashboard 5 — Distributions & summary stats** (families 3 + 4). ← **next**
-   - Faceted histograms (hue = class / density / depth / dip / strength)
-     with historic-event reference lines.
-   - Mean ± σ per scarp class (paper Fig. 8 — no notebook code exists;
-     reconstruct from the `dem` view with AVG + stdev whiskers).
-   - Needs the `historic_events` view for the reference lines.
+5. ~~**Dashboard 5 — Distributions & summary stats** (families 3 + 4)~~ —
+   **built & published** (2026-08-15): "Distributions & Summary (web)"
+   (800×1200, the only dashboard — a landscape twin was tried and
+   dropped) in `dashboards/tableau/dem-distributions-public.twb`
+   (**public-only**), fed from `dem.csv` + `historic_events.csv` in one
+   union. Parameter-driven layered histogram (`Measure` × `Hue By` ×
+   `Population`, per-measure bin widths) with per-measurement historic
+   needles (LOD-sized, data-driven), plus the Fig-8 mean ± σ
+   reconstruction (candidate populations pinned in
+   `notes/dashboard-5-build-spec.md`; which one Fig. 8 used stays open
+   until q8 resolves). Spec: `dashboard-5-build-spec.md`.
 6. **Static-image embedding** (lowest priority — reframed 2026-08-05).
    - The companion site, not the dashboards, is now the natural home for
      the paper illustrations (Figs. 1, 2, 5, 7) — and the paper is **not
@@ -117,9 +122,14 @@ re-ordered to match the build order:
    twins alongside; coefficients pinned by
    `tests/test_regression_views.py`. The optional `Scarp_Height ~ DZW`
    fit was never needed.
-3. *(for #5)* **`historic_events` view** — small UNION over FDHI / SURE
-   / Kern with `(event_label, dzw, scarp_height, magnitude)` per event.
-   Powers marker-line overlays on histograms.
+3. *(for #5)* ~~**`historic_events` view**~~ — **done** (2026-08-15),
+   with a grain revision against nb2 ground truth: **one row per field
+   measurement**, not per event (`for x in df_KernNew["DZW"]:
+   axvline(x)` — the notebook draws every measurement). Three arms
+   (fdhi_measurements / sure / kern_combined), per-column sentinel
+   filters, row kept when either measure survives; 2,616 rows pinned by
+   `tests/test_historic_events.py`. Optional-table semantics (needs the
+   raw-flatfile lane), Athena twin alongside.
 4. *(optional)* **`dem_with_bands` view** — adds a `fault_dip_band`
    column (`20–30`, `30–40`, …) for cleaner small-multiples. Or do this
    as a calculated field in Tableau and skip the view.

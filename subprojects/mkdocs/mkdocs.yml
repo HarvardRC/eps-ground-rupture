@@ -74,6 +74,7 @@ nav:
       - Response curves: dashboards/response-curves.md
       - Per-event boxplots: dashboards/per-event-boxplots.md
       - Slip regression: dashboards/slip-regression.md
+      - Distributions: dashboards/distributions.md
   - Data: data.md
   - The paper: paper.md
 
