@@ -288,7 +288,7 @@
       <column caption='unified_observations.csv' datatype='table' name='[__tableau_internal_object_id__].[unified_observations.csv_11DB97573E8C465E8C5F6A82EFC89060]' role='measure' type='quantitative' />
       <column caption='Cohesion' datatype='string' name='[cohesion]' role='dimension' type='nominal' />
       <column caption='Dem Set' datatype='string' name='[dem_set]' role='dimension' type='nominal' />
-      <column caption='Dzw' datatype='real' name='[dzw]' role='measure' type='quantitative' />
+      <column caption='Deformation Zone Width (m)' datatype='real' name='[dzw]' role='measure' type='quantitative' />
       <column caption='Eq Name' datatype='string' name='[eq_name]' role='dimension' type='nominal' />
       <column caption='Fault Dip' datatype='integer' name='[fault_dip]' role='dimension' type='ordinal' />
       <column aggregation='Avg' caption='Latitude' datatype='real' name='[latitude]' role='measure' semantic-role='[Geographical].[Latitude]' type='quantitative' />
@@ -487,6 +487,20 @@
             </map>
           </encoding>
           <encoding attr='color' field='[none:Calculation_1191193594687491:nk]' type='palette'>
+                <map key='&quot;Monoclinal&quot;' value='#009ffa' />
+                <map key='&quot;Monoclinal Collapse&quot;' value='#3f67b1' />
+                <map key='&quot;Pressure Ridge&quot;' value='#f47820' />
+                <map key='&quot;Pressure Ridge Collapse&quot;' value='#af773e' />
+                <map key='&quot;Simple&quot;' value='#ed2024' />
+                <map key='&quot;Simple Collapse&quot;' value='#9f1d20' />
+                <map key='&quot;20&quot;' value='#ffc685' />
+                <map key='&quot;30&quot;' value='#f6ad51' />
+                <map key='&quot;40&quot;' value='#f48e32' />
+                <map key='&quot;45&quot;' value='#ed6f20' />
+                <map key='&quot;50&quot;' value='#d55b21' />
+                <map key='&quot;60&quot;' value='#ba4c23' />
+                <map key='&quot;70&quot;' value='#9e3d22' />
+                <map key='%null%' value='#b0b0b0' />
             <map to='#009ffa'>
               <bucket>&quot;Monoclinal&quot;</bucket>
             </map>
@@ -757,7 +771,7 @@
             </column>
             <column caption='Cohesion' datatype='string' name='[cohesion]' role='dimension' type='nominal' />
             <column caption='Dem Set' datatype='string' name='[dem_set]' role='dimension' type='nominal' />
-            <column caption='Dzw' datatype='real' name='[dzw]' role='measure' type='quantitative' />
+            <column caption='Deformation Zone Width (m)' datatype='real' name='[dzw]' role='measure' type='quantitative' />
             <column caption='Eq Name' datatype='string' name='[eq_name]' role='dimension' type='nominal' />
             <column caption='Fault Dip' datatype='integer' name='[fault_dip]' role='dimension' type='ordinal' />
             <column-instance column='[Calculation_0975140305399809]' derivation='None' name='[none:Calculation_0975140305399809:nk]' pivot='key' type='nominal' />
@@ -885,7 +899,7 @@ always too sparse to rely on alone.</run>
             <column caption='Event' datatype='string' name='[Calculation_1302657277816832]' role='dimension' type='nominal'>
               <calculation class='tableau' formula='IFNULL([eq_name], &apos;DEM (Simulation)&apos;)' />
             </column>
-            <column caption='Dzw' datatype='real' name='[dzw]' role='measure' type='quantitative' />
+            <column caption='Deformation Zone Width (m)' datatype='real' name='[dzw]' role='measure' type='quantitative' />
             <column caption='Eq Name' datatype='string' name='[eq_name]' role='dimension' type='nominal' />
             <column caption='Fault Dip' datatype='integer' name='[fault_dip]' role='dimension' type='ordinal' />
             <column-instance column='[Calculation_1191193594687491]' derivation='None' name='[none:Calculation_1191193594687491:nk]' pivot='key' type='nominal' />
@@ -946,7 +960,7 @@ always too sparse to rely on alone.</run>
               <color column='[federated.00a4m750ny8p0d19b09rj1xvnmb0].[none:Calculation_1191193594687491:nk]' />
               <lod column='[federated.00a4m750ny8p0d19b09rj1xvnmb0].[none:eq_name:nk]' />
             </encodings>
-            <trendline enable-confidence-bands='false' enable-instant-analytics='true' enabled='true' exclude-color='true' exclude-intercept='false' fit='linear' />
+            <trendline enable-confidence-bands='false' enable-instant-analytics='true' enabled='false' exclude-color='true' exclude-intercept='false' fit='linear' />
             <style>
               <style-rule element='mark'>
                 <format attr='size' value='0.29585635662078857' />

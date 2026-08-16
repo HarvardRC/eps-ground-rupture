@@ -73,7 +73,7 @@ mapping is at the bottom of `chart-families.md`.)
    (800×850) in `dem-slip-regression-public.twb` (**public-only**
    workbook). Dual axis over a 3-way CSV union: DEM cloud + seven
    per-dip black OLS fit lines (slopes ≈ sin dip) + Kern County stars
-   that **slide between fit lines** via the `Kern Assumed Dip` parameter
+   that **slide between fit lines** via the `Kern Dip (measured: 30°)` parameter (renamed 2026-08-16)
    (20–70°, default 30°); dip checkbox filter and hover highlight. Fits
    computed in the pipeline, not the workbook (data-side work #2). Spec:
    `notes/dashboard-4-build-spec.md` (click-by-click walkthrough

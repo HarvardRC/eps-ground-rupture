@@ -26,7 +26,7 @@
   <datasources>
     <datasource hasconnection='false' inline='true' name='Parameters' version='18.1'>
       <aliases enabled='yes' />
-      <column caption='Kern Assumed Dip' datatype='integer' name='[Parameter 6111666072276998]' param-domain-type='list' role='measure' type='quantitative' value='30'>
+      <column caption='Kern Dip (measured: 30°)' datatype='integer' name='[Parameter 6111666072276998]' param-domain-type='list' role='measure' type='quantitative' value='30'>
         <calculation class='tableau' formula='30' />
         <members>
           <member value='20' />
@@ -1075,7 +1075,7 @@
         <semantic-value key='[Country].[Name]' value='&quot;United States&quot;' />
       </semantic-values>
       <datasource-dependencies datasource='Parameters'>
-        <column caption='Kern Assumed Dip' datatype='integer' name='[Parameter 6111666072276998]' param-domain-type='list' role='measure' type='quantitative' value='30'>
+        <column caption='Kern Dip (measured: 30°)' datatype='integer' name='[Parameter 6111666072276998]' param-domain-type='list' role='measure' type='quantitative' value='30'>
           <calculation class='tableau' formula='30' />
         </column>
       </datasource-dependencies>
@@ -1193,7 +1193,7 @@
             <datasource name='Parameters' />
           </datasources>
           <datasource-dependencies datasource='Parameters'>
-            <column caption='Kern Assumed Dip' datatype='integer' name='[Parameter 6111666072276998]' param-domain-type='list' role='measure' type='quantitative' value='30'>
+            <column caption='Kern Dip (measured: 30°)' datatype='integer' name='[Parameter 6111666072276998]' param-domain-type='list' role='measure' type='quantitative' value='30'>
               <calculation class='tableau' formula='30' />
             </column>
           </datasource-dependencies>
@@ -1313,7 +1313,7 @@
         <annotations>
           <annotation class='area' id='0' text-pinx='0.5' text-piny='0.5' text-width-delta='-18'>
             <formatted-text>
-              <run fontalignment='0' fontcolor='#000000' fontname='Benton Sans Book'>y = 0.502·x − 0.005 (R² 0.999)</run>
+              <run fontalignment='0' fontcolor='#000000' fontname='Benton Sans Book'>Dip-30 fit: y = 0.502·x − 0.005 (R² 0.999)</run>
             </formatted-text>
             <top-left>
               <visual-coordinate class='axis'>
@@ -1361,7 +1361,7 @@
         <datasource caption='DEM + Fits + Kern' name='federated.0n494rb0k5wrfm14n7drc1cr3cju' />
       </datasources>
       <datasource-dependencies datasource='Parameters'>
-        <column caption='Kern Assumed Dip' datatype='integer' name='[Parameter 6111666072276998]' param-domain-type='list' role='measure' type='quantitative' value='30'>
+        <column caption='Kern Dip (measured: 30°)' datatype='integer' name='[Parameter 6111666072276998]' param-domain-type='list' role='measure' type='quantitative' value='30'>
           <calculation class='tableau' formula='30' />
           <members>
             <member value='20' />

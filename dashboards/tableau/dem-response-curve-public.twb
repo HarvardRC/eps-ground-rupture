@@ -862,6 +862,20 @@
       <style>
         <style-rule element='mark'>
           <encoding attr='color' field='[none:Calculation_5561481034330115:nk]' type='palette'>
+                <map key='&quot;Monoclinal&quot;' value='#009ffa' />
+                <map key='&quot;Monoclinal Collapse&quot;' value='#3f67b1' />
+                <map key='&quot;Pressure Ridge&quot;' value='#f47820' />
+                <map key='&quot;Pressure Ridge Collapse&quot;' value='#af773e' />
+                <map key='&quot;Simple&quot;' value='#ed2024' />
+                <map key='&quot;Simple Collapse&quot;' value='#9f1d20' />
+                <map key='&quot;20&quot;' value='#ffc685' />
+                <map key='&quot;30&quot;' value='#f6ad51' />
+                <map key='&quot;40&quot;' value='#f48e32' />
+                <map key='&quot;45&quot;' value='#ed6f20' />
+                <map key='&quot;50&quot;' value='#d55b21' />
+                <map key='&quot;60&quot;' value='#ba4c23' />
+                <map key='&quot;70&quot;' value='#9e3d22' />
+                <map key='%null%' value='#b0b0b0' />
             <map to='#009ffa'>
               <bucket>&quot;Monoclinal&quot;</bucket>
             </map>
