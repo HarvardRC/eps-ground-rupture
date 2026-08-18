@@ -78,7 +78,8 @@ This is the *updated* filter — the legacy notebook also required
 `FDHI_Cleaned_Measurements.csv` row for row.
 
 **`fdhi_measurements`** — `prep.fdhi_measurements`. 4,121 rows × 136
-columns across 25 events; the per-event statistics base behind Dashboard 3.
+columns across 25 events; the per-event statistics base behind Dashboard 3
+and the FDHI arm of `historic_events` (Dashboard 5).
 It keeps every Reverse (1,987) and Reverse-Oblique (2,134) row and masks
 the `-999` sentinel in numeric columns — and applies **no other row
 filter**. Positivity and rupture rank are per-chart choices and live in the
@@ -174,7 +175,9 @@ Notes:
 
 Used as reference overlay points on the DEM scatter — where the 1952 event
 sits in (DZW, scarp-height) space relative to the model cloud — and, since
-Dashboard 4, as the input to the slip back-projection.
+Dashboard 4, as the input to the slip back-projection and, since
+Dashboard 5, as the Kern arm of `historic_events` (21 of the 28 rows clear
+one axis or the other).
 
 ## The tidy Parquet layer
 
@@ -192,15 +195,15 @@ different front end) builds on the Parquet, not on the CSVs.
 
 ## Derived views
 
-`views.build_duckdb_views` creates **11 views** in
+`views.build_duckdb_views` creates **12 views** in
 `dashboards/duckdb/eps.duckdb`. Five are passthroughs over the Parquet
-above; the other six are where the analysis lives.
+above; the other seven are where the analysis lives.
 
 | View | Rows | What it adds |
 |------|------|--------------|
 | `dem` | 346,834 | passthrough |
 | `fdhi_cleaned` | 19 | passthrough |
-| `fdhi_measurements` | 4,121 | passthrough (exists only when the flatfile was built) |
+| `fdhi_measurements` | 4,121 | passthrough (`views.OPTIONAL_TABLES`: skipped only if its Parquet is absent, which never happens after a full `egr-build` — the flatfile is required) |
 | `sure` | 1,402 | passthrough |
 | `kern_combined` | 28 | passthrough |
 | `sure_enriched` | 1,402 | event `magnitude` from `config.SURE_EVENT_MAGNITUDES`, matched on an NBSP-scrubbed `eq_name` |
@@ -209,25 +212,28 @@ above; the other six are where the analysis lives.
 | `dem_regression` | 7 | one OLS fit of `VD_HW` on `Slip` per `Fault_Dip`: `n`, `slope`, `intercept`, `r2` |
 | `dem_regression_lines` | 14 | two endpoint rows per dip, spanning that dip's own `Slip` range |
 | `kern_inferred_slip` | 112 | each fit inverted — what slip would produce Kern's measured verticals — for all 7 dips × 16 non-null verticals |
+| `historic_events` | 2,616 | `UNION ALL` of `fdhi_measurements`, `sure`, `kern_combined` onto `(source, eq_name, dzw, scarp_height, magnitude)` — one row per field measurement, the reference lines behind Dashboard 5; a row survives if **either** axis is `> 0` (unlike `unified_observations`, which needs both). Exists only alongside `fdhi_measurements`. By source: FDHI 2,392 / SURE 203 / Kern 21 |
 
-Row counts are as of 2026-08-05 with the current `data/raw/`; the
+Row counts are as of 2026-08-18 with the current `data/raw/`; the
 authoritative definitions are in
 `subprojects/python/src/eps_ground_rupture/views.py`.
 
-**Only three of these counts are pinned by tests** — `dem_regression` (7),
-`dem_regression_lines` (14) and `kern_inferred_slip` (112), in
-`tests/test_regression_views.py`, because they are derived and a silent
-change would mean the arithmetic broke. The other eight follow from
+**Only four of these counts are pinned by tests** — `dem_regression` (7),
+`dem_regression_lines` (14) and `kern_inferred_slip` (112) in
+`tests/test_regression_views.py`, and `historic_events` (2,616, and per
+source) in `tests/test_historic_events.py` — because they are derived and
+a silent change would mean the arithmetic broke. The other eight follow from
 whatever is in `data/raw/`, and the view tests build from synthetic
 fixtures rather than the real inputs, so nothing catches a drift here.
 Re-run the counts rather than trusting this table.
 
 `egr-csv` exports any of these to `dist/csv/<view>.csv`;
-`./gradlew :subprojects:python:csvExportAll` does all eleven. Which
+`./gradlew :subprojects:python:csvExportAll` does all twelve. Which
 dashboard reads which file is documented per family in
 [`docs/dashboards/`](dashboards/).
 
-Athena/Trino twins exist for five views (`unified_observations`,
-`sure_enriched`, and the three regression views) and are written to
+Athena/Trino twins exist for six views (`unified_observations`,
+`sure_enriched`, `historic_events`, and the three regression views) and
+are written to
 `dashboards/sql/athena-views.sql`. Nothing consumes them today — that lane
 is parked ([`adr/dead-ends.md`](adr/dead-ends.md)).

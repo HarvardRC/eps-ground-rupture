@@ -28,11 +28,12 @@ The conventions, in rough order of importance:
    parameters and highlight actions where they carry meaning (e.g. the
    regression dashboard's `Kern Dip (measured: 30°)`, renamed from `Kern Assumed Dip` 2026-08-16). A static reproduction is
    not worth publishing.
-3. **Web variants for the companion site.** Each workbook carries, besides
-   its full-size dashboard, a `…web` variant laid out vertically at
-   ~800 px width for embedding
-   ([ADR-0008](0008-mkdocs-material-companion-site.md)); the site's
-   scale-to-fit wrapper handles the rest. Fixed-size layouts, not Range.
+3. **Web variants for the companion site.** Each workbook carries a
+   dashboard laid out vertically at ~800 px width for embedding
+   ([ADR-0008](0008-mkdocs-material-companion-site.md)) — a `…(web)`
+   twin beside the full-size original (Dashboards 1–3), or that layout
+   alone (Dashboards 4–5, built public-first); the site's scale-to-fit
+   wrapper handles the rest. Fixed-size layouts, not Range.
 4. **Publish hygiene.** Tabs hidden on Public; the intended default view
    is the active tab at save time; unused fields hidden before publish
    (keep-list exceptions documented); extracts present
@@ -71,5 +72,9 @@ The conventions, in rough order of importance:
 
 - `notes/Roadmap.md` — palette values and reusable parameter patterns
 - `notes/chart-families.md` — the six families
-- `notes/dashboard-3-build-spec.md`, `notes/dashboard-4-build-spec.md`
+- `notes/dashboard-3-build-spec.md`, `notes/dashboard-4-build-spec.md`,
+  `notes/dashboard-5-build-spec.md`
+- `docs/dashboards/visual-identity.md` — palette/opacity/legend rules
+  codified 2026-08-16, extending these conventions
+- `docs/dashboards/tableau-editing-notes.md` — the editing traps
 - `dashboards/tableau/README.md`

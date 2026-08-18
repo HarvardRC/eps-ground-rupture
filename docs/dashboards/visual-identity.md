@@ -41,8 +41,10 @@ needles (D5), grey-blue restrained boxes (D3). Event labels compose
 ## Ordered variables
 
 Fault dip (and any ordered driver) uses a single-hue ordered ramp
-(D4's warm flare: 20° light → 70° dark), never categorical hues. Fit
-lines drawn from data (`dem_regression_lines` pattern), black.
+(the warm flare 20° `#ffc685` → 70° `#9e3d22` on D1/D2; D4 has carried
+a blue ramp `#dce4ee` → `#2a4a75` since 2026-08-17 — one of the two is
+off-spec), never categorical hues. Fit lines drawn from data
+(`dem_regression_lines` pattern), black.
 
 ## Axes, titles, annotations
 
@@ -57,7 +59,8 @@ parameter-driven; frozen text that a control can contradict is a defect
 
 Fixed ~800-wide portrait, title zone → chart(s) → parameter controls in
 the right rail or between charts; filter rails carry only
-non-overlapping controls (drop subset-duplicates like Event ⊂ Source);
+non-overlapping controls (drop subset-duplicates like Event ⊂ Source —
+still open on D1, where both cards remain on all three dashboards);
 whole-workbook publish with the web dashboard as active tab. Legend
 aliases short enough to survive the 800-px rail without truncation.
 

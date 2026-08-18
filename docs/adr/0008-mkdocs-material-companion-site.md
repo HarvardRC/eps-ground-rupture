@@ -28,7 +28,7 @@ tests ([ADR-0003](0003-duckdb-as-the-analytical-engine.md)).
   subproject — one lockfile for pipeline and site; CI installs
   `--only docs`.
 - Builds run `--strict` with link/anchor validation promoted to warnings
-  that fail the build — a glossary of ~50 anchored definitions is
+  that fail the build — a glossary of ~40 anchored definitions is
   load-bearing, so a broken deep link is a build failure, not a shrug.
 - Dashboards embed via the Tableau Embedding API v3 (`<tableau-viz>`),
   wrapped in a scale-to-fit shim (`tableau-fit.js`) sized for the

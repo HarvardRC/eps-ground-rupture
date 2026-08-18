@@ -146,7 +146,7 @@ DEM experiment set — all described on the [Data](../data.md) page.
 [^limit]: Chiama et al. (2025), section comparing DEM results with the FDHI
     dataset.
 [^dzwrange]: Chiama et al. (2025): "The DZW has a wide range across all the
-    experiments (0–40.76 m)." The committed export reaches ~45.8 m, from a
+    experiments (0–40.76 m)." The shipped export reaches ~45.8 m, from a
     handful of heterogeneous rows at very low slip — the regime the paper
     excludes as high-uncertainty.
 [^assumption]: Chiama et al. (2025), which assumes measured vertical

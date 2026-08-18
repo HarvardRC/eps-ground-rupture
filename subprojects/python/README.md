@@ -18,15 +18,15 @@ instead of creating its own under `~/Library/Caches/pypoetry/`.
 
 ```bash
 # 1. Create the venv (one time, outside the project).
-#    Machine convention: venvs live at /opt/venv/<name>.
+#    Convention (and the Gradle default): venvs live at /opt/python/venvs/<name>.
 #    /opt is root-owned on macOS, so this needs a writable parent first:
-#      sudo mkdir -p /opt/venv && sudo chown "$(whoami)" /opt/venv
+#      sudo mkdir -p /opt/python/venvs && sudo chown "$(whoami)" /opt/python/venvs
 #    If you keep venvs elsewhere, use that path and see the override below.
-python3.13 -m venv /opt/venv/eps-ground-rapture
+python3.13 -m venv /opt/python/venvs/eps-ground-rapture
 # Python 3.13 because pyarrow 18 has no 3.14 wheel — see ADR-0002.
 
 # 2. Activate, then install via Poetry.
-source /opt/venv/eps-ground-rapture/bin/activate
+source /opt/python/venvs/eps-ground-rapture/bin/activate
 cd subprojects/python
 poetry install
 ```
@@ -42,24 +42,24 @@ environment or pass `-Ppython.venv=/path/to/venv` to Gradle. To make the
 override stick for both terminal and IDEA-launched Gradle, put
 `python.venv=/path/to/venv` in `~/.gradle/gradle.properties`.
 
-Note `build.gradle.kts` still *defaults* to the older
-`/opt/python/venvs/<name>` convention, which is why the override above is
-set on this machine. Verify which path actually exists before trusting
-either.
+`build.gradle.kts` defaults to `/opt/python/venvs/<name>`, so with the
+convention above no override is needed. Some machines keep venvs under
+`/opt/venv/<name>` (on the laptop a symlink to the same directory) — verify
+which path actually exists before trusting either spelling.
 
 ## Usage
 
 With the venv activated:
 
 ```bash
-# from subprojects/python (with /opt/venv/eps-ground-rapture activated)
+# from subprojects/python (with the venv activated)
 poetry run egr-build                # writes data/processed/<table>/, dashboards/sql/,
                                     # dashboards/duckdb/eps.duckdb, deploy/terraform/tables.json
 poetry run egr-csv --view <name>    # a DuckDB view -> dist/csv/<name>.csv
 poetry run pytest                   # the full suite
 ```
 
-CLI flags:
+`egr-build` flags:
 
 | Flag              | Default                       | Effect |
 |-------------------|-------------------------------|--------|
@@ -68,7 +68,9 @@ CLI flags:
 
 (Neither flag affects the Terraform path — `deploy/terraform/tables.json`
 carries only the schema; bucket and database names live in the Terraform
-module. See `../../deploy/terraform/README.md`.)
+module. See `../../deploy/terraform/README.md`.) `egr-csv` takes `--view`
+(default `dem`), `--out` (default `dist/csv/<view>.csv`) and `--duckdb`;
+`egr-push-sheets` takes `--targets`, `--view` (repeatable) and `--duckdb`.
 
 Raw inputs go in `../../data/raw/` (e.g. `DEM_dataset.csv`,
 `02_FDHI_FLATFILE_MEASUREMENTS_<date>.csv`, `SURE.csv`,
@@ -86,6 +88,9 @@ and `PATH` on each task):
 ./gradlew :subprojects:python:egrBuild
 ./gradlew :subprojects:python:csvExportAll   # every view → dist/csv/ (dem alone ~73 MB)
 ./gradlew :subprojects:python:csvExportDem   # one view; one task exists per view
+./gradlew :subprojects:python:egrBuildAndExport  # egrBuild, then csvExportAll — the safe full refresh
+./gradlew :subprojects:python:csvExport -Pview=<view> [-Pcsv.out=<path>]  # generic export
+./gradlew :subprojects:python:pushSheets     # egr-push-sheets (dormant lane; dashboards/sheets/README.md)
 ./gradlew :subprojects:python:wheel          # → dist/python/eps_ground_rupture-*.whl
 ./gradlew :subprojects:python:clean          # removes dist/python/ AND dist/csv/
 ```
@@ -111,7 +116,7 @@ described below.
 
 1. Create the Python SDK in IDEA:
    `Settings → Project Structure → SDKs → + → Python SDK → Virtualenv → Existing environment`.
-2. Interpreter: `/opt/venv/eps-ground-rapture/bin/python`.
+2. Interpreter: `/opt/python/venvs/eps-ground-rapture/bin/python` (or wherever your venv is).
 3. Name it whatever you like; we recommend `Python 3.13 (eps-ground-rapture)` for clarity.
 4. OK.
 
@@ -143,10 +148,11 @@ src/
     sheets.py     view -> Google Sheets (`egr-push-sheets`)
     cli.py        `egr-build` / `egr-csv` / `egr-push-sheets` entry points
 tests/            test_smoke, test_prep, test_raw_inputs,
-                  test_regression_views, test_csvexport, test_sheets
+                  test_regression_views, test_historic_events,
+                  test_csvexport, test_sheets, test_fdhi_flatfile
 ```
 
-`duckdb` is a runtime dependency for the embedded query path (tests,
-optional CLI inspection). It's not required for the pipeline to write
-Parquet — pyarrow does that — but it's useful for verifying outputs without
-spinning up a server.
+`duckdb` is a hard runtime dependency: `egr-build` writes
+`dashboards/duckdb/eps.duckdb` (the views every dashboard is defined over)
+on every run, and `egr-csv` / `egr-push-sheets` read from it. Only the
+Parquet step itself is pyarrow-only.

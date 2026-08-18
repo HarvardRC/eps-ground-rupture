@@ -34,8 +34,8 @@ authoritative embed map.
 **The two `-public`-less files are not backups.** They connect to Athena
 (`schema=eps_ground_rapture_dev`), carry `.hyper` extracts dated June, and
 lack the `(web)` dashboards entirely. Copying one over its twin would
-delete the site's embed target. Dashboards 3 and 4 were built public-first
-and have no desktop copy at all.
+delete the site's embed target. Dashboards 3, 4 and 5 were built
+public-first and have no desktop copy at all.
 
 ## Feeding the workbooks
 
@@ -65,9 +65,12 @@ workbook and do **Data → \<source\> → Refresh**, then republish.
    extract-based sources (error `3C242D89` otherwise); a dangling extract
    path in a fresh clone is normal and the refresh rebuilds it.
 3. Click the tab you want as the **default view** — Tableau Public takes
-   the active sheet at save time. For the two families with a landscape
-   original plus a `(web)` twin, that means clicking the *original* tab,
-   so the escape-hatch link keeps working.
+   the active sheet at save time. For the three families with a landscape
+   original plus a `(web)` twin (Dashboards 1, 2, 3), click the `(web)`
+   tab — the web variant is the default view
+   ([`visual-identity.md`](../../docs/dashboards/visual-identity.md),
+   2026-08-16); the escape-hatch link reaches the original by its own
+   slug either way.
 4. **File → Save to Tableau Public As…** Publishing uploads the whole
    workbook, every tab, not just the active one.
 5. **File → Save** locally afterwards, so the committed `.twb` matches

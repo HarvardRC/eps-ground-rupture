@@ -21,7 +21,8 @@ and a one-standard-deviation band for each
 [scarp class](../glossary.md#scarp-classes).
 
 !!! tip "Unfamiliar terms?"
-    **Mean**, **standard deviation** and **histogram** are covered under
+    [**Mean**, **standard deviation**](../glossary.md#mean-sd) and
+    [**histogram**](../glossary.md#histogram) are covered under
     [statistics](../glossary.md#statistics-terms); the six
     [scarp classes](../glossary.md#scarp-classes) —
     [`Monoclinal`](../glossary.md#monoclinal),
@@ -37,8 +38,9 @@ measurements** — one line per individual measurement, not one per
 earthquake, so an event's internal spread is visible: the
 [1952 Kern County](../glossary.md#kern-county-1952) compilation
 contributes eleven deformation-zone widths and sixteen vertical
-displacements, and Wenchuan, Kashmir and Killari contribute their FDHI
-flatfile measurements.[^events] Where the model's histogram and the
+displacements, and every FDHI-flatfile and SURE event in the export —
+Kaikoura, Chi-Chi, Wenchuan, Kashmir and the rest — contributes each of
+its own measurements.[^events] Where the model's histogram and the
 field's needles overlap, the simulations bracket reality — the same
 conversation as the paper's Figure 15, which overlays Kern County lines
 on exactly this kind of distribution.[^families]

@@ -6,11 +6,12 @@
 // fixed path. poetry.toml sets virtualenvs.create=false so Poetry installs
 // into the venv we activate here rather than creating its own.
 //
-// NB: the `venvDir` default below is /opt/python/venvs/<name>, but that
-// directory does not exist on the current dev machine, where venvs live at
-// /opt/venv/<name>. That machine overrides it via python.venv in
-// ~/.gradle/gradle.properties. Verify which convention holds before
-// changing the default — see docs/setup.md → Setup.
+// NB: the `venvDir` default below is /opt/python/venvs/<name>. Some
+// machines keep venvs under /opt/venv/<name> instead (on the laptop that is
+// a symlink to the same directory); if it is a different place, override
+// via EGR_VENV, -Ppython.venv, or python.venv in ~/.gradle/gradle.properties.
+// Verify which convention holds before changing the default — see
+// docs/setup.md → Setup.
 
 import java.io.File
 

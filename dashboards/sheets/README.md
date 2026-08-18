@@ -1,5 +1,11 @@
 # Google Sheets push (for Tableau Public)
 
+**Status: dormant** (since 2026-06-24). Superseded by the CSV lane — the
+published workbooks read `dist/csv/` (ADR-0006), and the central `dem` view
+does not fit a Sheet anyway (see the cell-cap section below). The code
+still works for sub-cap views; the story — and when it might be worth
+reviving — is in `docs/adr/dead-ends.md`.
+
 Tableau **Public** can't connect to DuckDB or Athena — but it *can* connect
 to a Google Sheet and refresh from it on a schedule. `egr-push-sheets`
 writes a DuckDB view (from `dashboards/duckdb/eps.duckdb`) into a Google
@@ -68,7 +74,13 @@ cd subprojects/python
 poetry run egr-push-sheets                 # push every target in targets.yaml
 poetry run egr-push-sheets --view unified_observations   # just one
 poetry run egr-push-sheets --duckdb /path/to/eps.duckdb  # non-default DB
+poetry run egr-push-sheets --targets other.yaml          # alternate targets file
 ```
+
+Or via Gradle, from the repo root:
+`./gradlew :subprojects:python:pushSheets -Psheets.args="--view unified_observations"`
+— the task also picks the key path up from `-Pgoogle.sheets.keyfile` or
+the repo `.env` (the bare CLI does not read `.env`).
 
 It prints, per target, the rows × cols pushed and the Sheet URL:
 
@@ -97,8 +109,11 @@ guards at **9,000,000** (rows × cols) and refuses to push a larger view,
 naming the view and its size. The full **`dem`** view is ~**346,834 × 26 =
 9.0M cells** — over the guard — so it cannot go to Sheets directly.
 
-For `dem`, use the **Drive-CSV fallback**: publish the CSV to Google Drive
-and point Tableau Public at the file URL instead of a Sheet.
+For `dem` the project's route is ADR-0006: export with `egr-csv` /
+`./gradlew :subprojects:python:csvExportAll` and build the Tableau Public
+extract from the local `dist/csv/dem.csv`. The Drive-hosted variant below
+is only relevant if you want a Google-side scheduled refresh, which nothing
+uses today:
 
 ```bash
 # 1. Export the view to CSV (writes dist/csv/<view>.csv, gitignored):
@@ -123,7 +138,8 @@ natural follow-on — not built yet.)
   gitignored `resources/local/`, and `.gitignore` additionally blocks common
   key filenames as a backstop.
 - **Idempotent.** Safe to wire into a cron / CI step after `egr-build`.
-- **Tableau Public refresh.** Once a Public workbook is connected to the
-  Sheet, Tableau Public refreshes Google Sheets connections automatically
-  (≈ daily); re-run `egr-push-sheets` whenever the pipeline data changes so
-  the next refresh picks it up.
+- **Tableau Public refresh.** A Public workbook connected to a Sheet would
+  refresh from it automatically (≈ daily) — that was the point of the lane.
+  None of the published workbooks is; they are republished from `dist/csv/`
+  (ADR-0006). If a sub-cap view is ever wired this way, re-run
+  `egr-push-sheets` after each `egr-build`.

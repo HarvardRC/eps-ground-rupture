@@ -49,12 +49,17 @@ workbook and/or one `-public` twin per dashboard family.
   so re-platforming the viz layer would lose workbooks, not data or
   analytics.
 - Authoring know-how is written down as it's learned: build specs and
-  click-by-click walkthroughs in `notes/`, traps in the session status
-  doc, conventions in
+  click-by-click walkthroughs in `notes/`, traps in
+  `docs/dashboards/tableau-editing-notes.md` (per-dashboard developer
+  docs alongside it in `docs/dashboards/`), conventions in
   [ADR-0007](0007-dashboard-design-conventions.md).
 
 ## References
 
 - `dashboards/tableau/` — the workbooks and their README
-- `notes/dashboard-3-build-spec.md`, `notes/dashboard-4-build-spec.md`
+- `notes/dashboard-3-build-spec.md`, `notes/dashboard-4-build-spec.md`,
+  `notes/dashboard-5-build-spec.md` (and the walkthrough in
+  `notes/2026-08-15/`)
+- `docs/dashboards/` — per-dashboard developer docs and
+  `tableau-editing-notes.md`
 - [Dead ends](dead-ends.md) — the Superset half of the original decision

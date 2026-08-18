@@ -30,8 +30,9 @@ files (text-scan connections + extracts):
   (`notes/multi-machine.md`) keeps the workbooks' absolute file paths
   valid on every machine.
 - What gets exported is exactly "a DuckDB view, written out"
-  ([ADR-0003](0003-duckdb-as-the-analytical-engine.md)) — currently 11
-  files, from `dem.csv` to `kern_inferred_slip.csv`.
+  ([ADR-0003](0003-duckdb-as-the-analytical-engine.md)) — currently 12
+  files, from `dem.csv` to `historic_events.csv` (the list is `csvViews`
+  in `subprojects/python/build.gradle.kts`).
 - Workbook extracts are rebuilt from these files on refresh; dangling
   extract paths in a fresh clone are normal and heal on first refresh.
 
@@ -59,7 +60,8 @@ files (text-scan connections + extracts):
 - CSV's type-lossiness moves schema discipline into the workbooks: the
   relation-embedded column schema inside each `.twb` is authoritative
   for the text-scan, and **must be updated when the export schema
-  changes** (a hard-won lesson; see the session traps list).
+  changes** (a hard-won lesson; see
+  `docs/dashboards/tableau-editing-notes.md`).
 - Data updates are a manual chain — `egr-build` → `egr-csv` → extract
   refresh → re-save to Public — acceptable at the project's publication
   cadence.

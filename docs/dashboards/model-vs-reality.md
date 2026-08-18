@@ -72,11 +72,11 @@ column, `test_real_unified_observations_load` fails and tells you; the
 - **DZW vs Scarp Height** — the main chart. Disaggregated dual-axis
   scatter: x = `dzw`; rows = `SUM(DEM Scarp_Height) + SUM(Overlay
   Scarp_Height)` with the axes synchronised. Pane 1 is Circle marks (the
-  faint cloud, size 0.2959, transparency 27) coloured by `Point Color`,
-  with a linear trendline. Pane 2 is Shape marks forced to
-  `:filled/asterisk` in `#000000` — the black field-overlay stars.
+  faint cloud, size 0.2959, transparency 153 ≈ 60 % opacity) coloured by `Point
+  Color`; no trend line (removed 2026-08-17). Pane 2 is Shape marks forced
+  to `:filled/asterisk` in `#000000` — the black field-overlay stars.
 - **Event Map** — symbol map, x = `AVG(longitude)`, y = `AVG(latitude)`,
-  colour and shape both from `Event`. A worksheet filter keeps
+  colour from `Source / Event`, shape from `Event`. A worksheet filter keeps
   `latitude` non-null, which is what excludes the ~329k DEM rows.
 - **Combinations** — the coverage matrix. Square marks in a text table:
   rows = `Row Field`, cols = `Col Field` (both `include-empty='true'`),
@@ -172,9 +172,13 @@ The only worksheet-local filter is `Event Map`'s `latitude` non-null.
    `egr-csv --view unified_observations`).
 2. Open `dem-model-vs-reality-public.twb` via **File → Open**.
 3. **Data → GroundRaptureUnifiedObservationsCSV → Refresh** — the committed
-   extract is stamped June 2026 and predates the current export.
-4. Edit. Before saving, click the **`Dashboard 1 — DEM Cloud & Historic
-   Overlays`** tab so the landscape original stays the default view.
+   extract points at a `/var/folders/…/tableau-temp/` `.hyper` (stamped
+   2026-08-18) that will not exist on another machine; accept the
+   dangling-extract dialog, then refresh.
+4. Edit. Before saving, click the **`DEM Cloud & Historic Overlays (web)`**
+   tab — the active tab at publish becomes the default view, and the web
+   variant is the intended default; the landscape original stays reachable
+   through its own slug.
 5. **File → Save to Tableau Public As…**, then **File → Save** locally.
 6. Re-check the site embed if you touched any dashboard's name or size.
 
@@ -188,18 +192,21 @@ no `(web)` dashboard and reads Athena, not CSV.
   `s3://eps-ground-rapture-dev/athena-results/`) plus a `.hyper` dated
   2026-06-18, and holds only two dashboards. Opening it without AWS
   credentials silently serves the stale June extract.
-- **`Event` and `Source / Event` carry conflicting palettes**, and the two
-  sheets use different ones — so the same earthquake is a different colour
-  on the map than on the scatter. Map: Chi-Chi `#4e79a7`, DEM `#59a14f`,
-  Wenchuan `#76b7b2`, Kern `#e15759`, Kashmir `#f28e2b`. Scatter: Chi-Chi
-  `#4e79a7`, Wenchuan `#59a14f`, Kern `#76b7b2`, Kashmir `#e15759`, DEM
-  `#f28e2b`. Consolidating the two calcs is the fix; it is an open polish
+- **`Event` and `Source / Event` still carry conflicting palettes.**
+  `Event`: Chi-Chi `#4e79a7`, DEM `#59a14f`, Wenchuan `#76b7b2`, Kern
+  `#e15759`, Kashmir `#f28e2b`. `Source / Event`: Chi-Chi `#4e79a7`,
+  Wenchuan `#59a14f`, Kern `#76b7b2`, Kashmir `#e15759`, DEM `#f28e2b`.
+  Since 2026-08-17 the map colours by `Source / Event` (the calc `Point
+  Color` falls through to) and both sheets shape by `Event`, so map and
+  scatter agree — but re-encoding either sheet by `Event` reintroduces the
+  mismatch. Consolidating the two calcs is the fix; it is an open polish
   item in the Roadmap. The shape palettes disagree the same way.
 - **`Point Color` is one string-keyed palette shared across all three Color
-  By modes**, so stringified dips collide with event names: `"20"`/`DEM`
-  both `#f28e2b`, `"30"`/`Kashmir` both `#e15759`, `"40"`/`Kern County
-  (1952)` both `#76b7b2`, `"45"`/`Wenchuan` both `#59a14f`. Recolouring one
-  mode silently recolours another.
+  By modes.** As of 2026-08-17 no keys collide (dips: warm ramp `#ffc685`
+  → `#9e3d22`; classes: paper palette; events: Tableau 10; `%null%`
+  `#b0b0b0`), but a member added to one mode with the same string as
+  another mode's member silently shares its colour, and recolouring it
+  recolours both.
 - **`Row Field` and `Col Field` have no `ELSE`.** Add a member to either
   parameter without editing *both* duplicated formulas and the matrix goes
   blank for that member.
@@ -211,9 +218,12 @@ no `(web)` dashboard and reads Athena, not CSV.
   value='false'/>`) even though the shelf pills read `sum:`. That is what
   makes a 329k-point disaggregated cloud possible; ticking it back on
   collapses the cloud to a handful of marks.
-- **The trendline is pooled**, on the DEM pane only, with
-  `exclude-color='true'` — one OLS fit across every colour, and none on the
-  field overlay. Roadmap: "trend line — per-colour or remove".
+- **No trend line in the `-public` workbook.** The pooled OLS line (one
+  fit across every colour, `exclude-color='true'`, DEM pane only) was
+  disabled 2026-08-16 and removed 2026-08-17 — the Roadmap's "per-colour
+  or remove" resolved as remove; the desktop copy still carries it.
+  Per-colour fits, if ever wanted, belong in SQL (`dem_regression_lines`
+  pattern), not a Tableau trendline.
 - **The Event Map's extent is hard-pinned** (`range-type='fixed'`,
   EPSG:3857, spanning roughly the whole world). Pan/zoom will not persist
   and it will not auto-fit to the 79 plotted points.

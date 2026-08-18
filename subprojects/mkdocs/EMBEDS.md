@@ -67,7 +67,7 @@ Notes:
 
 What each page embeds, and where its escape hatch points. Sizes are the
 dashboards' true fixed sizes, read from `<dashboard>/<size>` in the
-committed workbooks (2026-08-04) — never guessed.
+committed workbooks (last re-checked 2026-08-18) — never guessed.
 
 | Page | Embedded view | `data-width` × `data-height` | Escape hatch links to |
 |---|---|---|---|
@@ -114,8 +114,8 @@ Caveats learned the hard way, both of which will mislead you:
 Re-check the sizes in the mapping table above against
 `<dashboard>/<size>` in the committed workbook and update the `data-*`
 attributes to match. The scale factor derives from them, so a stale value
-leaves either a dead band below the viz or a clipped bottom edge. Five of
-the six embedded dashboards carry `sizing-mode='fixed'`; `Viable
+leaves either a dead band below the viz or a clipped bottom edge. Six of
+the seven embedded dashboards carry `sizing-mode='fixed'`; `Viable
 Combinations` has no `sizing-mode` attribute at all, but its `<size>` pins
 min and max to 1000 × 800, so it is fixed in effect.
 

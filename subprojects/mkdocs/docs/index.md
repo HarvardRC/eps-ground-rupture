@@ -106,8 +106,9 @@ one back to the figure it derives from.
 
 Kristen Chiama, Andreas Plesch, John H. Shaw.
 
-*Additional contributors may be added before publication; the candidates are
-recorded in `subprojects/mkdocs/DEPLOY.md` in the source repository.*
+*The byline is provisional — additional contributors may be added; the
+candidates are recorded in `subprojects/mkdocs/DEPLOY.md` in the source
+repository.*
 
 ## Source code
 

@@ -22,10 +22,27 @@ specs). Add new entries here rather than scattering them across files.
   automating — mirror the inputs on Zenodo, or script the UCLA Dataverse
   download — so a fresh clone can fetch them.
 
+### Two failing tests surfaced 2026-08-18
+- `tests/test_fdhi_flatfile.py` still imported the pre-rename package
+  (`eps_ground_rapture`), so since 2026-08-05 the whole suite died at
+  collection on any venv without a stale install lying around. Import
+  fixed; the suite now collects 115 and two fail:
+  - `test_smoke::test_build_duckdb_views_optional_fdhi_measurements` —
+    its one-row `fdhi_measurements` fixture (`eq_name`, `sh_central_meters`)
+    predates the `historic_events` view (2026-08-15), which also reads
+    `fzw_central_meters` etc. → `BinderException`. Widen the fixture (or
+    guard the view on the columns it needs).
+  - `test_fdhi_flatfile::test_fdhi_measurements_is_a_real_boxplot_population`
+    — asserts Bohol is among the reverse-style FDHI events with a usable
+    `fzw_central_meters`; the current chain yields only Kashmir, Kern,
+    Wenchuan. Decide whether the expectation or the cleaning is wrong
+    (Bohol was a notebook boxplot cell).
+
 ### Optional: incorporate the 3D DEM datasets when files arrive
 - The prior owner's updated script also references `combinedCases123_v2.csv`
-  (3D DEM Cases 1–3) and `combinedCase4_v2.csv` (3D DEM Case 4). Neither
-  is in `data/raw/` yet. They're not blockers for v1 — the legacy 2D DEM
+  (3D DEM Cases 1–3) and `combinedCase4_v2.csv` (3D DEM Case 4). The first
+  arrived 2026-08-05 (in the laptop's `data/raw/`; nothing ingests it yet),
+  the second is still missing. They're not blockers for v1 — the legacy 2D DEM
   analyses still work — but adding them would let dashboards reproduce the
   full multi-DEM scatter overlay in `legacy/FDHI-SURE-DEM-2D-3D-Scatter_ONLY.pdf`.
 
@@ -34,11 +51,12 @@ specs). Add new entries here rather than scattering them across files.
   by ordinal position (part of the parked AWS lane — see
   `docs/adr/dead-ends.md`). The cleaner long-term story is to emit
   snake_case names from `export_tidy` itself so every engine sees the
-  same identifiers — but that breaks the existing Tableau workbook and
-  DuckDB views, so it's a coordinated migration: rename at export →
-  regenerate views/DDL/tables.json → repoint the workbook. Do it when
-  there's a natural breaking-change moment (e.g. the FDHI raw-flatfile
-  switch above).
+  same identifiers — but that breaks the existing Tableau workbooks (seven)
+  and DuckDB views, so it's a coordinated migration: rename at export →
+  regenerate views/DDL/tables.json → repoint the workbooks. Do it at the
+  next natural breaking-change moment (the FDHI raw-flatfile switch passed
+  without it); pair it with the local-dir rename in
+  `notes/multi-machine.md`.
 
 ## Deployment
 
@@ -77,8 +95,9 @@ specs). Add new entries here rather than scattering them across files.
   Athena copy; 3–5 were built public-first. Per-workbook detail:
   `dashboards/tableau/README.md` and `docs/dashboards/`.
 - Next: build order #6 (static-image embedding) is parked on the
-  figure-rights question; remaining dashboard work is polish and the
-  open questions in `notes/dashboard-5-build-spec.md` (Fig-8
+  figure-rights question; remaining dashboard work is the polish left
+  open in `notes/design-review-2026-08-16.md` (Priority B hand edits)
+  and the open questions in `notes/dashboard-5-build-spec.md` (Fig-8
   population, count-vs-probability, q3 log-axis).
 - Superset YAML exports still absent. A *hosted* Superset presupposes a
   shared SQL endpoint (the parked AWS item above); a local Superset
@@ -90,11 +109,11 @@ The published dashboards feel slow. Nothing is measured yet — first step
 is to establish which one, and whether it's load or interaction. Candidate
 levers, cheapest first:
 
-- **Fewer marks.** Dashboard 3's two DEM boxplot sheets render ~330k
-  disaggregated marks *each* because `boxplot-mark-exclusion='false'` —
-  "hide underlying marks (except outliers)" was never ticked, though the
-  walkthrough asked for it. That is the single largest known cost and it
-  is a checkbox. (Already noted as deferred polish; promote it.)
+- ~~**Fewer marks.** Dashboard 3's two DEM boxplot sheets render ~330k
+  disaggregated marks *each* because `boxplot-mark-exclusion='false'`~~ —
+  done 2026-08-16: "hide underlying marks (except outliers)" is ticked on
+  every boxplot sheet. Measure whether it helped before pulling the next
+  lever.
 - **Pre-aggregated views.** For panes that only ever show a summary, the
   aggregation belongs in `views.py`, where it is computed once and pinned
   by tests, rather than in the browser on every interaction. This is what

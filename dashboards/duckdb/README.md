@@ -14,7 +14,9 @@ Regeneration is fast because the views don't copy data.
 
 ## Views exposed
 
-**Currently 11.** The authoritative list is
+**Currently 12** (10 when the optional FDHI flatfile is absent —
+`fdhi_measurements` and `historic_events` are skipped together). The
+authoritative list is
 `subprojects/python/src/eps_ground_rupture/views.py` — `build_duckdb_views`
 creates them in one pass, so read that function rather than trusting a
 count here. They fall into three layers:
@@ -31,13 +33,14 @@ count here. They fall into three layers:
 | `unified_observations` | UNION ALL of `dem`, `fdhi_cleaned`, `sure` and `kern_combined` onto one `(source, dzw, scarp_height, scarp_class, eq_name, magnitude, fault_dip, cohesion, dem_set, latitude, longitude)` shape. Each arm filters on **both axes `> 0`**, which drops nulls, zeros and FDHI's `-999` sentinel in a single condition. |
 
 **Derived analytics** — Dashboard 4's regression layer (paper Fig. 14 /
-Equation 2):
+Equation 2) and Dashboard 5's reference lines (Fig. 15):
 
 | Name | What |
 |------|------|
 | `dem_regression` | One OLS fit of `VD_HW` on `Slip` per `Fault_Dip`: `n`, `slope`, `intercept`, `r2`. Note DuckDB's `regr_*` take **(y, x)** — y first. |
 | `dem_regression_lines` | Two endpoint rows per dip spanning that dip's own `Slip` range, so Tableau draws the fit fan from data instead of a native trend line. |
 | `kern_inferred_slip` | Each fit inverted — what slip would have produced Kern's measured verticals — for every dip, not just the notebook's 30°. |
+| `historic_events` | One row per **field measurement** (FDHI flatfile via `fdhi_measurements`, SURE, Kern): `source, eq_name, dzw, scarp_height, magnitude`. Each measure is nullable on its own — a row survives if *either* axis clears the `> 0` sentinel filter, unlike `unified_observations`, which demands both. Feeds the Distributions dashboard's reference lines; created only when the optional FDHI flatfile Parquet is present. |
 
 Source labels in `unified_observations.source`: `DEM`, `FDHI`, `SURE`, `Kern`.
 
@@ -51,7 +54,8 @@ row counts before extracting.
 One-time driver setup:
 
 1. Download the **DuckDB JDBC driver** from
-   <https://duckdb.org/docs/api/java>. Single `.jar` file (~30 MB).
+   <https://duckdb.org/docs/api/java>. Single `.jar` file (~85 MB — it
+   bundles natives for every platform).
 2. Drop it under Tableau's drivers folder:
    - macOS: `~/Library/Tableau/Drivers/`
    - Linux: `/opt/tableau/tableau_driver/jdbc/` (or `~/.tableau/Drivers/`)

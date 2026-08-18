@@ -10,8 +10,8 @@ and how the pipeline / legacy notebooks use it, see `docs/datasets.md`.
 
 - `DEM_dataset.csv` — main 2D DEM trial measurements (Homogeneous + Heterogeneous sets)
 - `02_FDHI_FLATFILE_MEASUREMENTS_<date>.csv` — the raw FDHI flatfile from
-  UCLA Dataverse (DOI `10.25346/S6/Y4F9LJ`, file `ABRP7B`). **Preferred
-  FDHI source**: the pipeline cleans it in-process, producing both
+  UCLA Dataverse (DOI `10.25346/S6/Y4F9LJ`, file `ABRP7B`). **The FDHI
+  source** (required): the pipeline cleans it in-process, producing both
   `fdhi_cleaned` and `fdhi_measurements`.
 - `FDHI_Cleaned_Measurements.csv` — the prior owner's pre-cleaned FDHI
   extract (~20 rows). **Not** a pipeline input any more: `egr-build`
@@ -23,10 +23,13 @@ and how the pipeline / legacy notebooks use it, see `docs/datasets.md`.
 
 ## Generated outputs
 
-- `data/interim/` — partial cleaning artifacts (rarely committed)
+- `data/interim/` — reserved for partial cleaning artifacts; gitignored, and
+  nothing writes here today
 - `data/processed/<table>/data.parquet` — one Parquet file per logical
   table, in the dir-per-table layout Athena and Spark Thrift expect.
-  Currently produced: `dem/`, `fdhi_cleaned/`, `sure/`, `kern_combined/`,
-  plus `fdhi_measurements/` when the raw FDHI flatfile is present.
+  Currently produced on every run: `dem/`, `fdhi_cleaned/`,
+  `fdhi_measurements/`, `sure/`, `kern_combined/` — the FDHI flatfile is a
+  required input, so `fdhi_measurements/` is no longer conditional
+  (`views.py` still lists it under `OPTIONAL_TABLES`).
 - `dashboards/duckdb/eps.duckdb` — DuckDB views over the Parquet above;
   `dashboards/sql/*.sql` and `deploy/terraform/tables.json` — schemas.

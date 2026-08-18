@@ -20,11 +20,12 @@ file on save; your hand edits vanish without a diff.
 connection fails with error `3C242D89`.
 
 **Dangling extract paths in a fresh clone are normal.** The `.twb` files
-reference `.hyper` files under `~/Documents/My Tableau Repository/` or
-`/var/folders/.../tableau-temp/` — machine-private paths that never sync
-and, for the temp ones, don't survive a reboot. Accept whatever dialog
-option removes the extract, recreate it from the Data Source tab, and
-refresh.
+reference `.hyper` files under `~/Documents/My Tableau Repository/`,
+`/var/folders/.../tableau-temp/`, or (Dashboard 5) a gitignored
+`<workbook>.twb Files/Data/tableau-temp/` beside the workbook —
+machine-private paths that never sync (and `/var/folders/…` doesn't
+survive a reboot). Accept whatever dialog option removes the extract,
+recreate it from the Data Source tab, and refresh.
 
 **Re-running `egr-csv` changes nothing on screen.** The extract sits
 between the CSV and the view. After any pipeline change: open the workbook,
@@ -37,7 +38,7 @@ are months older than the data they shadow.
 `/Users/misha/harvard/projects/github/eps-ground-rapture/dist/csv`. This is
 why the local checkout keeps the pre-rename `rapture` spelling even though
 the GitHub repo is now `eps-ground-rupture` — renaming the folder would
-force a connection repair across four workbooks. Use the canonical path on
+force a connection repair across five workbooks. Use the canonical path on
 every machine (`notes/multi-machine.md`).
 
 **Repair a broken connection by re-picking the same file**, via Data Source

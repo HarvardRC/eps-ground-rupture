@@ -7,6 +7,12 @@
 > first embed lazy-paints ~10 s after scroll-into-view). Palette checks
 > are computed, not eyeballed (validator output at bottom).
 
+> Outcome (2026-08-18): Priority A 1–7 and 9 shipped, 8 partly (annotation
+> relabeled "Dip-30 fit: …", still frozen; parameter retitled); all of
+> Priority C shipped (d5d46f7, d5e97fe, a62db9c, 04da4e0, 8770835). Open:
+> the `Hue By` family option; Priority B's filter wall, `Point Color` CASE
+> and legend aliases (the map's latitude filter already exists).
+
 ## The one systemic finding
 
 **The site's dashboards do not share one visual system.** D3/D5 (August

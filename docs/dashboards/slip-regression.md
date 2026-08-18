@@ -25,7 +25,7 @@ per-colour trend lines recompute client-side and cannot be pinned by tests
 | Dashboard | `Slip Regression & Kern Inference`, fixed 800×850 |
 | Slug | `SlipRegressionKernInference` |
 | Embedded at | site `dashboards/slip-regression.md` at 800×850. **No `(web)` variant** — the single dashboard is already portrait, so its escape hatch points at itself |
-| Specs | `notes/dashboard-4-build-spec.md`, `notes/2026-08-04/dashboard-4-tableau-walkthrough.md` |
+| Specs | `notes/dashboard-4-build-spec.md`; the dated 2026-08-04 Tableau walkthrough was retired 2026-08-15 — "the walkthrough" below refers to it |
 
 ## Data contract
 
@@ -89,18 +89,19 @@ One dual-axis pane. Columns = `SUM([X])` titled "Slip (m)"; Rows =
 Measures is **off**, so the `SUM(...)` pill names are row-level.
 
 - **Pane 1 (Y points)** — Automatic marks; Colour = `Point Color`,
-  Shape = `Layer`, Size = `Layer`; size 2.2585, transparency 180 (~70 %).
+  Shape = `Layer`, Size = `Layer`; size 1.1754, transparency 255 (opaque).
 - **Pane 2 (Y lines)** — Line marks; Path = `SUM([point_order])`,
   Detail = `Point Color`, and a flat `mark-color = #000000`. The seven fit
   lines are **black**, not ramp-coloured.
 
 Colour palette on `Point Color`, hard-coded hexes: Kern County 1952
-`#000000`, 70 `#9e3d22`, 60 `#ba4c23`, 50 `#d55b21`, 45 `#ed6f20`,
-40 `#f48e32`, 30 `#f6ad51`, 20 `#ffc685`. Shapes on `Layer`: Kern →
+`#000000`, 70 `#2a4a75`, 60 `#3f608f`, 50 `#5d7fa8`, 45 `#7f9cbd`,
+40 `#a3b8d1`, 30 `#c2cfe0`, 20 `#dce4ee` — a single-hue blue ramp, darker
+with dip (replaced the warm ramp 2026-08-17). Shapes on `Layer`: Kern →
 `:filled/asterisk`, Fit → `:filled/square`, DEM model → circle. Size is a
 catsize encoding, min 0.0886 (the cloud) to max 1 (the stars).
 
-One area annotation, hand-typed: `y = 0.502·x − 0.005 (R² 0.999)`.
+One area annotation, hand-typed: `Dip-30 fit: y = 0.502·x − 0.005 (R² 0.999)`.
 
 ### Calculated fields
 
@@ -139,8 +140,9 @@ chosen dip; DEM and fit rows always pass.
 
 One: **Kern Dip (measured: 30°)** (renamed from `Kern Assumed Dip`, 2026-08-16, per q9 — 30° is Buwalda & St. Amand's direct measurement), `[Parameter 6111666072276998]`, integer list,
 allowable values 20/30/40/45/50/60/70 (exactly the modelled dips), default
-30. Consumed only by `Keep Row`. Surfaced as a compact parameter control in
-the 160 px right strip.
+30. Consumed only by `Keep Row`. Surfaced as a compact floating parameter
+control lower-centre over the chart (the 160 px right strip was removed
+2026-08-17).
 
 ### Filters and actions
 
@@ -150,11 +152,14 @@ the 160 px right strip.
   fit lines and stars together.
 - A manual sort on `Point Color` forces "Kern County 1952" to the top of
   the legend, then 20…70.
-- One action, `Highlight Dip`: hover-brush on `Point Color`, source and
-  target both this dashboard. No filter, URL or parameter actions.
+- Two actions: `Highlight Dip`, hover-brush on `Point Color`, source and
+  target both this dashboard; and an auto-generated `Highlight 1 (generated)`,
+  select-brush on `Layer` scoped to the worksheet (legend highlighting). No
+  filter, URL or parameter actions.
 
-Right-strip zones top to bottom: Fault Dip filter, Shape legend, Colour
-legend, Kern Dip (measured: 30°) control. The Size legend exists on the worksheet
+Zones float over the full-width chart (since 2026-08-17; no right strip):
+Colour legend upper-left, Shape legend upper-middle, Fault Dip filter
+lower-right, Kern Dip (measured: 30°) control lower-centre. The Size legend exists on the worksheet
 but is not placed on the dashboard.
 
 ## How to edit safely
@@ -203,9 +208,9 @@ Never rename a CSV export. Every calculated field keys on Tableau's
   at the end unless you edit it. The current dips sort correctly by luck —
   `"20"`…`"70"` happen to be lexicographically ordered; a dip of 5 or 100
   would not be.
-- **The annotation is frozen text.** `y = 0.502·x − 0.005 (R² 0.999)` is
+- **The annotation is frozen text.** `Dip-30 fit: y = 0.502·x − 0.005 (R² 0.999)` is
   hand-typed and pinned to axis coordinates. It does not follow the Kern
-  Assumed Dip parameter and does not read `dem_regression.csv` — move the
+  Dip (measured: 30°) parameter and does not read `dem_regression.csv` — move the
   parameter to 45 and the label still shows the dip-30 equation. It uses
   U+2212 and U+00B7, not ASCII.
 - **The Kern dip is a live parameter**, not pinned to 30 as the build spec's
@@ -214,7 +219,8 @@ Never rename a CSV export. Every calculated field keys on Tableau's
   walkthrough permitted the substitution. `"Fit"` maps to `:filled/square`
   but never renders, since fit rows draw only on the Line pane.
 - **Mark sizing is deliberately extreme** (catsize 0.0886 → 1) and
-  transparency is 180/255, not the ~30 % the walkthrough suggested.
+  marks are fully opaque (255/255 since 2026-08-17), not the ~30 % the
+  walkthrough suggested.
   Resetting the Size legend re-inflates the cloud and hides everything.
 - **Aggregate Measures is off** despite `sum:`-flavoured pill names.
   Turning it on collapses the cloud to one point and one line.

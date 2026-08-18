@@ -37,7 +37,7 @@ DZW xmin_y, DZW xmax, DZW xmax_y, Scarp_Dip, Scarp_Class, R^2 Value`.
 
 Produced by the `dem` view — a plain passthrough,
 `SELECT * FROM read_parquet(.../dem/data.parquet)`. This family touches
-**none** of the other ten views.
+**none** of the other eleven views.
 
 Pinned by:
 
@@ -64,8 +64,8 @@ y = `SUM(Response Value)`, colour = `Condition`. `<aggregation
 value='false'/>` (Aggregate Measures OFF), so those `sum:` pills draw one
 disaggregated circle per model stage. `<trendline enabled='true'
 fit='linear' exclude-color='false' enable-confidence-bands='false'/>` —
-one OLS line per colour, no bands. `mark-transparency` is 39 — on
-Tableau's 0-255 scale, so roughly 15 % opacity, not 39 %.
+one OLS line per colour, no bands. `mark-transparency` is 90 — on
+Tableau's 0-255 scale, so roughly 35 % opacity, not 90 %.
 
 The two workbooks' `<table>` blocks are structurally the same chart, but
 they are not textually interchangeable: besides the datasource name, the
@@ -144,11 +144,12 @@ Scarp_Height (and for `Us - Ud`), 333,148 for DZW, 330,187 for Scarp_Dip.
 1. `egr-build`, then `egr-csv --view dem` (or `csvExportAll`).
 2. Open `dem-response-curve-public.twb` via **File → Open**.
 3. **Data → GroundRaptureDEM-CSV → Refresh.** The committed extract is
-   stamped 2026-06-25; `dem.csv` was regenerated 2026-08-01. Until you
+   stamped 2026-06-25 and predates every export since. Until you
    refresh, nothing you changed upstream is visible.
-4. Edit. Click the **`DEM Response Curves`** (landscape) tab before saving
-   — the committed workbook has `(web)` maximized, and whatever is active
-   at publish time becomes the default view.
+4. Edit. Click the **`DEM Response Curves (web)`** tab before saving —
+   whatever is active at publish time becomes the default view, and the
+   web variant is the intended default; the landscape original stays
+   reachable via its own slug.
 5. **File → Save to Tableau Public As…**, then **File → Save** locally.
 
 Never copy a calculation between the desktop and public copies: the
@@ -179,11 +180,11 @@ identifiers differ.
   hits in either workbook's colour map. Tableau auto-assigns, so that one
   setting's colours are unstable across re-opens and republishes.
 - **`Scarp_Class` contains nulls**, and the palette maps `%null%` to
-  `#4e79a7` — "Null" is a legend member, not an absence.
-- **The axis titles never change.** They are the calculated-field captions
-  "Driver Value" and "Response Value", with no per-parameter override —
-  so units switch silently between metres (Scarp_Height, DZW, `Us - Ud`)
-  and degrees (Scarp_Dip) with nothing on screen to say so.
+  `#b0b0b0` (neutral grey) — "Null" is a legend member, not an absence.
+- **The axis titles are static.** Overridden (2026-08-17) to "Driver (Slip
+  m / Magnitude)" and "Response (m; ° for Scarp Dip)", so the switch
+  between metres (Scarp_Height, DZW, `Us - Ud`) and degrees (Scarp_Dip) is
+  at least named on screen; they still do not change with the parameter.
 - **The desktop copy reads nothing from `dist/csv/`.** Two Athena
   connections, zero text-scan. Chasing a bug seen on the website means the
   `-public` file.
