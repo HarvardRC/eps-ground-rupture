@@ -90,6 +90,19 @@ a CSV) an extract refresh fails with SQLSTATE 42703, re-pick the same
 file via Data Source tab → Connections → Edit Connection to bust the
 workbook's cached schema.
 
+A harder variant (2026-08-16): a workbook can embed the *shadow-extract*
+temp path of the machine that last saved it
+(`/var/folders/<hash>/T/tableau-temp/#TableauTemp_….hyper`). On the
+other machine that hash does not exist, and Tableau refuses to open the
+workbook at all — SQLSTATE 58S01, "unable to resolve the database path:
+Directory does not exist", before any refresh can run. Diagnosis:
+`grep -o '/var/folders/[a-z0-9_/]*' <file>.twb | sort -u` and compare
+with `getconf DARWIN_USER_TEMP_DIR` on the machine at hand. Fix: open
+and republish on the machine it was last saved on (paths re-bind on
+save), or strip the stale hyper reference in the closed XML. Rebooting
+the refusing machine does nothing — the dead path belongs to the other
+Mac.
+
 ## Repo renamed to `eps-ground-rupture` (2026-08-05)
 
 The GitHub repo was renamed to fix the rapture/rupture typo. The **local

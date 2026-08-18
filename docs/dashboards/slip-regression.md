@@ -137,7 +137,7 @@ chosen dip; DEM and fit rows always pass.
 
 ### Parameters
 
-One: **Kern Assumed Dip**, `[Parameter 6111666072276998]`, integer list,
+One: **Kern Dip (measured: 30°)** (renamed from `Kern Assumed Dip`, 2026-08-16, per q9 — 30° is Buwalda & St. Amand's direct measurement), `[Parameter 6111666072276998]`, integer list,
 allowable values 20/30/40/45/50/60/70 (exactly the modelled dips), default
 30. Consumed only by `Keep Row`. Surfaced as a compact parameter control in
 the 160 px right strip.
@@ -154,7 +154,7 @@ the 160 px right strip.
   target both this dashboard. No filter, URL or parameter actions.
 
 Right-strip zones top to bottom: Fault Dip filter, Shape legend, Colour
-legend, Kern Assumed Dip control. The Size legend exists on the worksheet
+legend, Kern Dip (measured: 30°) control. The Size legend exists on the worksheet
 but is not placed on the dashboard.
 
 ## How to edit safely

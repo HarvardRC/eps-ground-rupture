@@ -39,13 +39,15 @@ against — each one replaces a family of static figures.
 | Fig. 13 (boxplot panels) | How variable are field measurements within each event? | [Per-event boxplots](dashboards/per-event-boxplots.md) | Published |
 | — (no figure) | Which parameter pairings are well covered by the data? | [Viable Combinations](dashboards/model-vs-reality.md#viable-combinations) | Published |
 | Fig. 14 | What links slip to vertical displacement, and what slip would produce an observed displacement? | [Slip regression](dashboards/slip-regression.md) | Published |
-| Fig. 8 | What are typical values and spreads per scarp class? | — | Planned |
-| Figs. 9–12, 15 | What is the spread of each output, and which input shifts it? | — | Planned |
+| Fig. 8 | What are typical values and spreads per scarp class? | [Distributions](dashboards/distributions.md) | Published |
+| Figs. 9–12, 15 | What is the spread of each output, and which input shifts it? | [Distributions](dashboards/distributions.md) | Published |
 | Figs. 1–5, 7 | Context illustrations (not data charts) | — | See below |
 
 Two notes. Figure 8 is the only *data chart* in the paper with no
 corresponding code in either legacy notebook — it was produced
-elsewhere.[^families] Figure 14 is the one family that needed an analytical
+elsewhere, so the [Distributions](dashboards/distributions.md) page
+*reconstructs* its mean ± σ summary from the shipped simulation data
+directly, and says so.[^families] Figure 14 is the one family that needed an analytical
 pre-compute step (per-dip linear fits, then inverting them to back-project
 the Kern County measurements) — which is why it stands as its own dashboard,
 with the fits computed and tested in the data pipeline rather than

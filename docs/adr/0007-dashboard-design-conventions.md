@@ -26,7 +26,7 @@ The conventions, in rough order of importance:
 2. **Every dashboard earns its interactivity.** A published dashboard
    must offer something the printed figure cannot — filters at minimum,
    parameters and highlight actions where they carry meaning (e.g. the
-   regression dashboard's `Kern Assumed Dip`). A static reproduction is
+   regression dashboard's `Kern Dip (measured: 30°)`, renamed from `Kern Assumed Dip` 2026-08-16). A static reproduction is
    not worth publishing.
 3. **Web variants for the companion site.** Each workbook carries, besides
    its full-size dashboard, a `…web` variant laid out vertically at

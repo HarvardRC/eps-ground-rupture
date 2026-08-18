@@ -83,7 +83,7 @@ Here the geometry is yours to move.
 - **The fault-dip checkboxes** filter the cloud, the fit line and the stars
   together, so you can isolate one dip and see its band cleanly, or compare
   two.
-- **The `Kern Assumed Dip` parameter** slides the stars from one fit line to
+- **The `Kern Dip (measured: 30°)` parameter** slides the stars from one fit line to
   another — re-reading the same sixteen field measurements under a different
   fault geometry. For Kern itself the measured 30° dip is the right setting;
   the other positions show how the same measurements would read at a site

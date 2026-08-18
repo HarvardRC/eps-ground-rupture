@@ -874,7 +874,7 @@
             <map to='#499894'>
               <bucket>&quot;F&quot;</bucket>
             </map>
-            <map to='#4e79a7'>
+            <map to='#b0b0b0'>
               <bucket>%null%</bucket>
             </map>
             <map to='#4e79a7'>
@@ -886,13 +886,13 @@
             <map to='#4e79a7'>
               <bucket>&quot;R6&quot;</bucket>
             </map>
-            <map to='#59a14f'>
+            <map to='#ed6f20'>
               <bucket>&quot;45&quot;</bucket>
             </map>
             <map to='#59a14f'>
               <bucket>&quot;R10&quot;</bucket>
             </map>
-            <map to='#76b7b2'>
+            <map to='#f48e32'>
               <bucket>&quot;40&quot;</bucket>
             </map>
             <map to='#79706e'>
@@ -922,7 +922,7 @@
             <map to='#af773e'>
               <bucket>&quot;Pressure Ridge Collapse&quot;</bucket>
             </map>
-            <map to='#b07aa1'>
+            <map to='#ba4c23'>
               <bucket>&quot;60&quot;</bucket>
             </map>
             <map to='#b07aa1'>
@@ -946,7 +946,7 @@
             <map to='#d7b5a6'>
               <bucket>&quot;R5&quot;</bucket>
             </map>
-            <map to='#e15759'>
+            <map to='#f6ad51'>
               <bucket>&quot;30&quot;</bucket>
             </map>
             <map to='#e15759'>
@@ -958,7 +958,7 @@
             <map to='#ed2024'>
               <bucket>&quot;Simple&quot;</bucket>
             </map>
-            <map to='#edc948'>
+            <map to='#d55b21'>
               <bucket>&quot;50&quot;</bucket>
             </map>
             <map to='#f1ce63'>
@@ -967,7 +967,7 @@
             <map to='#f1ce63'>
               <bucket>&quot;C&quot;</bucket>
             </map>
-            <map to='#f28e2b'>
+            <map to='#ffc685'>
               <bucket>&quot;20&quot;</bucket>
             </map>
             <map to='#f28e2b'>
@@ -988,7 +988,7 @@
             <map to='#ff9d9a'>
               <bucket>&quot;K&quot;</bucket>
             </map>
-            <map to='#ff9da7'>
+            <map to='#9e3d22'>
               <bucket>&quot;70&quot;</bucket>
             </map>
             <map to='#ffbe7d'>
@@ -1136,8 +1136,12 @@
             </encodings>
             <trendline enable-confidence-bands='false' enable-instant-analytics='true' enabled='true' exclude-color='false' exclude-intercept='false' fit='linear' />
             <style>
+              <style-rule element='axis'>
+                <format attr='title' class='0' field='[federated.1or8g8o1xpy8wd1a368cu1icvhuo].[sum:Calculation_5561481033752577:qk]' scope='cols' value='Driver (Slip m / Magnitude)' />
+                <format attr='title' class='0' field='[federated.1or8g8o1xpy8wd1a368cu1icvhuo].[sum:Calculation_5561481033887746:qk]' scope='rows' value='Response (m; ° for Scarp Dip)' />
+              </style-rule>
               <style-rule element='mark'>
-                <format attr='mark-transparency' value='39' />
+                <format attr='mark-transparency' value='90' />
               </style-rule>
             </style>
           </pane>
