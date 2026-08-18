@@ -50,21 +50,14 @@ theme:
     # on touch, unreachable by keyboard) to Material's accessible ones.
     - content.tooltips
     - toc.follow
+  # Pinned to light (Michael, 2026-08-17). The Tableau embeds render
+  # light-mode regardless of the site scheme (visual-identity.md), so the
+  # slate scheme just framed every page's main content in a bright white
+  # box. One scheme, no toggle.
   palette:
-    - media: "(prefers-color-scheme: light)"
-      scheme: default
-      primary: indigo
-      accent: indigo
-      toggle:
-        icon: material/brightness-7
-        name: Switch to dark mode
-    - media: "(prefers-color-scheme: dark)"
-      scheme: slate
-      primary: indigo
-      accent: indigo
-      toggle:
-        icon: material/brightness-4
-        name: Switch to light mode
+    scheme: default
+    primary: indigo
+    accent: indigo
 
 nav:
   - Home: index.md

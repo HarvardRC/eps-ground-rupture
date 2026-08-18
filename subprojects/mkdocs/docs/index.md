@@ -26,9 +26,51 @@ the first view — summarising the spread of real measurements within each
 earthquake, with the model's own distribution alongside.
 **[Slip regression](dashboards/slip-regression.md)** does arithmetic on the
 model — a fitted slip-to-uplift law per fault dip, run backwards to infer
-the slip behind Kern County's 1952 field measurements. The
+the slip behind Kern County's 1952 field measurements. And
+**[Distributions](dashboards/distributions.md)** looks at the shape of the
+model's results as a whole — the spread of each output, split by any input,
+with the field's measurements standing in the histograms as reference
+lines. The
 [figure → dashboard crosswalk](paper.md#figure-dashboard-crosswalk) maps each
 one back to the figure it derives from.
+
+<div class="grid cards" markdown>
+
+-   **[Model vs reality](dashboards/model-vs-reality.md)**
+
+    ---
+
+    Every simulated point and every field point on one canvas.
+
+-   **[Response curves](dashboards/response-curves.md)**
+
+    ---
+
+    How each measured output grows as slip accumulates, condition by
+    condition.
+
+-   **[Per-event boxplots](dashboards/per-event-boxplots.md)**
+
+    ---
+
+    The field data's own spread, event by event, with the model
+    alongside.
+
+-   **[Slip regression](dashboards/slip-regression.md)**
+
+    ---
+
+    A slip-to-uplift law fitted per fault dip — run backwards on Kern
+    County 1952.
+
+-   **[Distributions](dashboards/distributions.md)**
+
+    ---
+
+    The spread of each output across all simulations, and which input
+    shifts it.
+
+</div>
 
 !!! tip "New to this? Start with the glossary"
     Faults, scarps, DZW, FDHI, SURE — the field has a lot of vocabulary, and

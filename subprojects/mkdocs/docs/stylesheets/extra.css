@@ -40,6 +40,13 @@
   text-decoration: none;
 }
 
+/* The home page's dashboard cards. Material's grid asks for 16rem (320px)
+   per card, which in our content column yields an unbalanced 2+2+1; 12rem
+   lets the five cards sit 3+2, and small screens still wrap to one. */
+.md-typeset .grid.cards {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+}
+
 /* Scale-to-fit wrapper for the Tableau embeds.
  *
  * docs/javascripts/tableau-fit.js sets `height` and `overflow` inline once it
@@ -57,10 +64,46 @@
   /* Before the JS runs, clip rather than letting a full-size viz overflow
      the column; the JS replaces this with the exact scaled height. */
   overflow: hidden;
+  /* Give the box its shape (and the skeleton text somewhere to sit) before
+     tableau-fit.js measures the real scaled height — which is always taller
+     than this, so the min never fights the script. */
+  min-height: 12rem;
 }
 
 .tableau-fit tableau-viz {
   display: block;
+  /* Positioned so it paints above the ::before skeleton text — the viz's
+     iframe covers the message the moment Tableau draws. */
+  position: relative;
+}
+
+/* Loading skeleton — visual-identity.md: "Loading skeleton text on
+   .tableau-fit while Tableau paints." The message lives in the wrapper's
+   own ::before layer, BEHIND the viz, so nothing has to dismiss it: the
+   iframe's opaque background covers it on first paint. If the Embedding
+   API never loads (blocked, offline, JS off), the text stays put and the
+   escape-hatch link below the wrapper is the way out. */
+.tableau-fit::before {
+  content: "Loading the interactive dashboard from Tableau Public…";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 5rem;
+  font-size: 0.75rem;
+  color: var(--md-default-fg-color--light);
+  animation: tableau-skeleton-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes tableau-skeleton-pulse {
+  50% { opacity: 0.4; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tableau-fit::before {
+    animation: none;
+  }
 }
 
 /* The escape hatch under each embed — a plain Markdown link, so it stays
