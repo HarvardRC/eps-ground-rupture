@@ -1136,8 +1136,12 @@
             </encodings>
             <trendline enable-confidence-bands='false' enable-instant-analytics='true' enabled='true' exclude-color='false' exclude-intercept='false' fit='linear' />
             <style>
+              <style-rule element='axis'>
+                <format attr='title' class='0' field='[federated.1or8g8o1xpy8wd1a368cu1icvhuo].[sum:Calculation_5561481033752577:qk]' scope='cols' value='Driver (Slip m / Magnitude)' />
+                <format attr='title' class='0' field='[federated.1or8g8o1xpy8wd1a368cu1icvhuo].[sum:Calculation_5561481033887746:qk]' scope='rows' value='Response (m; ° for Scarp Dip)' />
+              </style-rule>
               <style-rule element='mark'>
-                <format attr='mark-transparency' value='39' />
+                <format attr='mark-transparency' value='90' />
               </style-rule>
             </style>
           </pane>

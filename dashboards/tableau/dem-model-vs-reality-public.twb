@@ -909,6 +909,8 @@ always too sparse to rely on alone.</run>
         <style>
           <style-rule element='axis'>
             <encoding attr='space' class='0' field='[federated.00a4m750ny8p0d19b09rj1xvnmb0].[sum:Calculation_1191193594585090:qk]' field-type='quantitative' fold='true' scope='rows' synchronized='true' type='space' />
+            <format attr='display' class='0' field='[federated.00a4m750ny8p0d19b09rj1xvnmb0].[sum:Calculation_1191193594585090:qk]' scope='rows' value='false' />
+            <format attr='title' class='0' field='[federated.00a4m750ny8p0d19b09rj1xvnmb0].[sum:Calculation_1191193594449921:qk]' scope='rows' value='Scarp Height (m)' />
           </style-rule>
           <style-rule element='table'>
             <format attr='show-null-value-warning' value='false' />
@@ -946,7 +948,7 @@ always too sparse to rely on alone.</run>
             <style>
               <style-rule element='mark'>
                 <format attr='size' value='0.29585635662078857' />
-                <format attr='mark-transparency' value='27' />
+                <format attr='mark-transparency' value='153' />
               </style-rule>
             </style>
           </pane>
