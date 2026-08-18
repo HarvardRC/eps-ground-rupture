@@ -1,5 +1,7 @@
 # Data
 
+<p class="cite-open-row"><button class="cite-open" type="button">How to cite</button></p>
+
 Four datasets sit behind the dashboards: one produced by simulation, three
 compiled from field observations of real earthquakes.
 
@@ -128,9 +130,10 @@ populations likewise pinned by tests.
 These dashboards are a convenience layer. If you use the data in your own
 work, please cite the underlying publications and archives rather than this
 site — the dashboards only repackage them, and the papers are the citable
-record.
+record. Any DOI issued for this site or its source code identifies the
+*software* that builds these views; it does not replace the citations below.
 
-**The study itself:**
+**Please cite the study itself as:**
 
 > Chiama, K., Bednarz, W., Moss, R., Plesch, A., and Shaw, J. H. (2025).
 > "Quantifying relationships between fault parameters and rupture
@@ -177,6 +180,10 @@ et al. (2019).[^sure]
 - **[Model vs reality](dashboards/model-vs-reality.md)** — these datasets on
   one plot.
 - **[The paper](paper.md)** — which figure each dashboard replaces.
+
+<p class="cite-open-row"><button class="cite-open" type="button">How to cite</button></p>
+
+--8<-- "includes/cite-root.md"
 
 [^abstract]: Chiama et al. (2025), abstract — see [The paper](paper.md).
 [^spec]: `notes/dashboard-3-build-spec.md` in the source repository.

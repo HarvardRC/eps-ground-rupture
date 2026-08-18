@@ -5,6 +5,8 @@ hide:
 
 # Distributions & summary statistics
 
+<p class="cite-open-row"><button class="cite-open" type="button">How to cite</button></p>
+
 **The questions:** what is the spread of each measured output across all
 the simulations — and which input parameter shifts it? And what are the
 typical values, class by class, at a glance?
@@ -82,7 +84,7 @@ describes exactly the population and measure on display.
     toolbar="bottom" hide-tabs></tableau-viz>
 </div>
 
-[Open full-size on Tableau Public](https://public.tableau.com/app/profile/michael.bouzinier/viz/dem-distributions-public/DistributionsSummaryweb){ .embed-fallback }
+[Open full-size on Tableau Public](https://public.tableau.com/app/profile/michael.bouzinier/viz/dem-distributions-public/DistributionsSummaryweb){ .embed-fallback } <button class="cite-open" type="button">How to cite</button>
 
 ## What the printed figures cannot do
 
@@ -111,6 +113,10 @@ project's tests.[^pins]
   and every field point on one canvas.
 - **[Slip regression](slip-regression.md)** — the one dashboard that
   does arithmetic on the simulations rather than displaying them.
+
+<p class="cite-open-row"><button class="cite-open" type="button">How to cite</button></p>
+
+--8<-- "includes/cite-sub.md"
 
 [^families]: `notes/chart-families.md` in the source repository maps
     family 3 to Figures 9–12 (histograms of one output, hue = one model

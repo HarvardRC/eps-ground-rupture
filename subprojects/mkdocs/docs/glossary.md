@@ -1,5 +1,7 @@
 # Glossary
 
+<p class="cite-open-row"><button class="cite-open" type="button">How to cite</button></p>
+
 The paper this site accompanies is written for specialists. This page is the
 opposite: it assumes you know nothing about faults, and defines the terms and
 abbreviations used across this site in plain language. Nothing here is needed
@@ -406,6 +408,10 @@ This is the part that makes the dashboards click.
 - **[Distributions](dashboards/distributions.md)** — the spread of each
   output across all simulations, and which input shifts it.
 - **[Data](data.md)** — where all four datasets come from.
+
+<p class="cite-open-row"><button class="cite-open" type="button">How to cite</button></p>
+
+--8<-- "includes/cite-root.md"
 
 [^abstract]: Chiama et al. (2025), abstract — see [The paper](paper.md).
 [^scope]: Chiama et al. (2025), introduction: the motivation is the impact of

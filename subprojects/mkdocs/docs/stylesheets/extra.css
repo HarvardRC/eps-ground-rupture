@@ -119,3 +119,101 @@ a.embed-fallback {
   font-size: 0.75rem;
   color: var(--md-default-fg-color--light);
 }
+
+/* "How to cite" — the button, and the modal it opens.
+ *
+ * Behaviour lives in docs/javascripts/cite-modal.js; these rules are the
+ * two states it switches between. The button is hidden until the script
+ * announces itself with `cite-js` on <html>, and the citation block is
+ * hidden until the script moves it inside the dialog — so with JavaScript
+ * off (where a <noscript> rule in includes/cite.md re-reveals the block)
+ * the page shows the citation inline and no dead buttons. */
+.cite-open {
+  display: none;
+  font: inherit;
+  font-size: 0.7rem;
+  line-height: 1.2;
+  padding: 0.3em 0.75em;
+  color: var(--md-primary-fg-color);
+  background: transparent;
+  border: 1px solid var(--md-primary-fg-color);
+  border-radius: 1em;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 125ms, color 125ms;
+}
+
+.cite-js .cite-open {
+  display: inline-block;
+}
+
+.cite-open:hover,
+.cite-open:focus-visible {
+  color: var(--md-primary-bg-color);
+  background: var(--md-primary-fg-color);
+}
+
+/* Sits on the escape-hatch line under an embed; the small offset keeps it
+   optically level with that line's smaller text. */
+.tableau-fit + p .cite-open {
+  margin-left: 0.6rem;
+  vertical-align: 0.05rem;
+}
+
+/* Under the page title, and again at the foot of the page, the button is
+   its own block and carries the surrounding rhythm. */
+p.cite-open-row {
+  margin: 0.6rem 0 1.4rem;
+}
+
+.cite-source {
+  display: none;
+}
+
+.cite-dialog {
+  max-width: min(40rem, calc(100vw - 2rem));
+  padding: 1.2rem 1.4rem 0.9rem;
+  border: 1px solid var(--md-default-fg-color--lighter);
+  border-radius: 0.3rem;
+  background: var(--md-default-bg-color);
+  color: var(--md-default-fg-color);
+  box-shadow: 0 0.2rem 1.2rem rgba(0, 0, 0, 0.25);
+}
+
+.cite-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+/* Inside the dialog the block is the content, so it shows; and the
+   md-typeset class the script adds gives it Material's own typography. */
+.cite-dialog .cite-source {
+  display: block;
+}
+
+.cite-dialog .cite-source > :first-child {
+  margin-top: 0;
+}
+
+.cite-dialog .cite-source > :last-child {
+  margin-bottom: 0;
+}
+
+.cite-dialog__close {
+  display: block;
+  margin: 1rem 0 0 auto;
+  font: inherit;
+  font-size: 0.7rem;
+  padding: 0.3em 0.9em;
+  color: var(--md-primary-fg-color);
+  background: transparent;
+  border: 1px solid var(--md-default-fg-color--lighter);
+  border-radius: 1em;
+  cursor: pointer;
+}
+
+.cite-dialog__close:hover,
+.cite-dialog__close:focus-visible {
+  color: var(--md-primary-bg-color);
+  background: var(--md-primary-fg-color);
+  border-color: var(--md-primary-fg-color);
+}

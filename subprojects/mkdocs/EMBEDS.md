@@ -63,6 +63,73 @@ Notes:
 - Each dashboard page also sets `hide: [toc]` in its front matter, so the
   embed gets the full content column.
 
+## The "How to cite" button
+
+Every page carries the citation notice as one modal, opened from as many
+buttons as that page wants. Two pieces, and both are needed:
+
+1. **The text**, included exactly once per page — conventionally at the
+   foot, after "Where to go next" and before the footnote definitions.
+   Which include depends on where the page sits:
+
+    ```markdown
+    --8<-- "includes/cite-root.md"   ← pages at the docs root
+    --8<-- "includes/cite-sub.md"    ← pages one directory down (dashboards/)
+    ```
+
+2. **A button**, written inline wherever one is wanted, any number of times:
+
+    ```html
+    <button class="cite-open" type="button">How to cite</button>
+    ```
+
+`docs/javascripts/cite-modal.js` moves the included block into a `<dialog>`
+appended to `<body>` and points every button on the page at it, so the
+wording lives in one file however many buttons a page carries.
+
+Current placement: every page puts one button under its H1 and one at the
+foot; dashboard pages add one on the escape-hatch line beneath each embed.
+
+### Why two includes
+
+All the wording lives in `includes/cite.md`, which no page includes
+directly. The one thing that cannot be shared is the link to the Data page,
+because a relative path differs by depth — `data.md` from the root,
+`../data.md` from `dashboards/`. So that link is written in the shared file
+as a **reference**, `[How to cite this data][cite-data-page]`, and each
+wrapper supplies nothing but the matching definition:
+
+```markdown
+--8<-- "includes/cite.md"
+
+[cite-data-page]: data.md#how-to-cite-this-data
+```
+
+Reference definitions are collected document-wide, and snippets are textual
+inclusion, so the definition from the wrapper resolves the usage inside the
+shared file. Adding a page at a third depth means one more two-line wrapper,
+never a second copy of the wording.
+
+Notes:
+
+- **A button on an escape-hatch line goes inside that line**, after the link
+  and its `{ .embed-fallback }` attribute list, so the two share a paragraph
+  and sit side by side. Standalone buttons are wrapped in
+  `<p class="cite-open-row">…</p>` for spacing.
+- **Include the text once.** A second include on the same page is dead
+  markup — the script wires the first block it finds that is not already
+  inside a dialog.
+- **A button without the include does nothing.** The script leaves it
+  unbound rather than opening an empty dialog.
+- **Use the wrapper that matches the page's depth.** The wrong one leaves
+  the Data-page link unresolved, which `mkdocs build --strict` reports.
+- **JavaScript off is a supported state.** `extra.css` hides the buttons
+  until the script adds `cite-js` to `<html>`, and a `<noscript>` rule in
+  the shared file reveals the citation in place — a reader sees the text
+  inline and no buttons, never a button that does nothing.
+- **Do not write the snippet directive inside an HTML comment.** The
+  snippets extension matches it there too, and it expands silently.
+
 ## View ↔ page ↔ size mapping
 
 What each page embeds, and where its escape hatch points. Sizes are the

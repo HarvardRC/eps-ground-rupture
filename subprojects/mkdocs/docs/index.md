@@ -1,5 +1,7 @@
 # EPS Ground Rupture — interactive companion
 
+<p class="cite-open-row"><button class="cite-open" type="button">How to cite</button></p>
+
 This site is a companion to a 2025 *Earthquake Spectra* paper on thrust and
 reverse-fault surface rupture. The paper's figures are static; the same
 underlying data is republished here as **live dashboards** you can filter
@@ -88,11 +90,27 @@ one back to the figure it derives from.
 
 ## The paper
 
+Everything on this site comes from one study. **Please cite as:**
+
 > Chiama, K., Bednarz, W., Moss, R., Plesch, A., and Shaw, J. H. (2025).
 > "Quantifying relationships between fault parameters and rupture
 > characteristics associated with thrust and reverse fault earthquakes."
 > *Earthquake Spectra*, 41(5), 3977–4014.
 > DOI: [10.1177/87552930251346434](https://doi.org/10.1177/87552930251346434)
+
+!!! quote "Cite the papers and the archives — not this site"
+    These dashboards add no new results. They are a convenience layer that
+    makes already-published data easier to reach, so if you use anything you
+    found here — a value read off a chart, an exported view, a figure — cite
+    the paper above, and cite the data archives as well where you used the
+    data itself. The DEM experiments are deposited open-access on
+    DesignSafe-CI and the field compilations carry their own citations; the
+    full list, with DOIs, is under
+    [How to cite this data](data.md#how-to-cite-this-data).
+
+    Any DOI issued for this site or its source code identifies the
+    *software* — a pointer to the code that built these views, not a
+    substitute for the citations above.
 
 !!! warning "Not open access"
     The article carries a "© The Author(s) 2025" line with no Creative
@@ -116,5 +134,9 @@ The pipeline that produces the data behind every dashboard — and this site
 itself — lives in
 [HarvardRC/eps-ground-rupture](https://github.com/HarvardRC/eps-ground-rupture)
 under the Apache-2.0 licence.
+
+<p class="cite-open-row"><button class="cite-open" type="button">How to cite</button></p>
+
+--8<-- "includes/cite-root.md"
 
 [^abstract]: Chiama et al. (2025), abstract.

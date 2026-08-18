@@ -101,6 +101,9 @@ extra_javascript:
     type: module
   # Scales each embed to the available column width — see the file header.
   - javascripts/tableau-fit.js
+  # Turns the "How to cite" buttons into one shared modal — see the file
+  # header and includes/cite.md.
+  - javascripts/cite-modal.js
 
 extra_css:
   - stylesheets/extra.css

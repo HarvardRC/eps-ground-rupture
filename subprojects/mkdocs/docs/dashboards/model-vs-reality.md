@@ -5,6 +5,8 @@ hide:
 
 # Model vs reality
 
+<p class="cite-open-row"><button class="cite-open" type="button">How to cite</button></p>
+
 **The question:** does the simulation reproduce the range of deformation we
 measure after real earthquakes?
 
@@ -78,7 +80,7 @@ oversteepened face gave way.
     toolbar="bottom" hide-tabs></tableau-viz>
 </div>
 
-[Open full-size on Tableau Public](https://public.tableau.com/app/profile/michael.bouzinier/viz/dem-model-vs-reality-public/Dashboard1DEMCloudHistoricOverlays){ .embed-fallback }
+[Open full-size on Tableau Public](https://public.tableau.com/app/profile/michael.bouzinier/viz/dem-model-vs-reality-public/Dashboard1DEMCloudHistoricOverlays){ .embed-fallback } <button class="cite-open" type="button">How to cite</button>
 
 ## Viable combinations
 
@@ -100,7 +102,7 @@ one no observed earthquake happens to occupy.
     toolbar="bottom" hide-tabs></tableau-viz>
 </div>
 
-[Open full-size on Tableau Public](https://public.tableau.com/app/profile/michael.bouzinier/viz/dem-model-vs-reality-public/ViableCombinations){ .embed-fallback }
+[Open full-size on Tableau Public](https://public.tableau.com/app/profile/michael.bouzinier/viz/dem-model-vs-reality-public/ViableCombinations){ .embed-fallback } <button class="cite-open" type="button">How to cite</button>
 
 ## Where this comes from
 
@@ -127,6 +129,10 @@ Figure 13.[^families]
   uplift, and what slip explains Kern County's measured displacement.
 - **[Glossary](../glossary.md)** — what scarp height, DZW and scarp class
   actually mean.
+
+<p class="cite-open-row"><button class="cite-open" type="button">How to cite</button></p>
+
+--8<-- "includes/cite-sub.md"
 
 [^abstract]: Chiama et al. (2025), abstract.
 [^paper-methods]: Chiama et al. (2025), measurement methods; the paper's
