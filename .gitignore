@@ -290,3 +290,7 @@ dashboards/tableau/*.tds
 # Deletion staging: the Cowork sandbox VM cannot rm files on the mount, so
 # doomed files get parked here for a manual purge. Never commit it.
 _to_delete/
+
+# Tableau "Save As" companion folders (local extract cache) — never committed
+dashboards/tableau/*.twb Files/
+dashboards/tableau/*.twbx
