@@ -5,6 +5,8 @@ hide:
 
 # Distributions & summary statistics
 
+<p class="cite-open-row"><button class="cite-open" type="button">How to cite</button></p>
+
 **The questions:** what is the spread of each measured output across all
 the simulations — and which input parameter shifts it? And what are the
 typical values, class by class, at a glance?
@@ -21,7 +23,8 @@ and a one-standard-deviation band for each
 [scarp class](../glossary.md#scarp-classes).
 
 !!! tip "Unfamiliar terms?"
-    **Mean**, **standard deviation** and **histogram** are covered under
+    [**Mean**, **standard deviation**](../glossary.md#mean-sd) and
+    [**histogram**](../glossary.md#histogram) are covered under
     [statistics](../glossary.md#statistics-terms); the six
     [scarp classes](../glossary.md#scarp-classes) —
     [`Monoclinal`](../glossary.md#monoclinal),
@@ -37,8 +40,9 @@ measurements** — one line per individual measurement, not one per
 earthquake, so an event's internal spread is visible: the
 [1952 Kern County](../glossary.md#kern-county-1952) compilation
 contributes eleven deformation-zone widths and sixteen vertical
-displacements, and Wenchuan, Kashmir and Killari contribute their FDHI
-flatfile measurements.[^events] Where the model's histogram and the
+displacements, and every FDHI-flatfile and SURE event in the export —
+Kaikoura, Chi-Chi, Wenchuan, Kashmir and the rest — contributes each of
+its own measurements.[^events] Where the model's histogram and the
 field's needles overlap, the simulations bracket reality — the same
 conversation as the paper's Figure 15, which overlays Kern County lines
 on exactly this kind of distribution.[^families]
@@ -80,7 +84,7 @@ describes exactly the population and measure on display.
     toolbar="bottom" hide-tabs></tableau-viz>
 </div>
 
-[Open full-size on Tableau Public](https://public.tableau.com/app/profile/michael.bouzinier/viz/dem-distributions-public/DistributionsSummaryweb){ .embed-fallback }
+[Open full-size on Tableau Public](https://public.tableau.com/app/profile/michael.bouzinier/viz/dem-distributions-public/DistributionsSummaryweb){ .embed-fallback } <button class="cite-open" type="button">How to cite</button>
 
 ## What the printed figures cannot do
 
@@ -109,6 +113,10 @@ project's tests.[^pins]
   and every field point on one canvas.
 - **[Slip regression](slip-regression.md)** — the one dashboard that
   does arithmetic on the simulations rather than displaying them.
+
+<p class="cite-open-row"><button class="cite-open" type="button">How to cite</button></p>
+
+--8<-- "includes/cite-sub.md"
 
 [^families]: `notes/chart-families.md` in the source repository maps
     family 3 to Figures 9–12 (histograms of one output, hue = one model

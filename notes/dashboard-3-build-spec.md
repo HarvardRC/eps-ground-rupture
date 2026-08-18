@@ -15,8 +15,9 @@ cells 19/20/21 (one boxplot per measure) and 25 (combined panels — in
 the final version DEM **boxplots by scarp class**, not histograms).
 
 **Build walkthrough**: step-by-step Tableau instructions with per-sheet
-acceptance counts at `notes/2026-08-01/dashboard-3-tableau-public-build.md`
-(nb2 re-read + populations computed 2026-08-01).
+acceptance counts lived at `notes/2026-08-01/dashboard-3-tableau-public-build.md`
+(nb2 re-read + populations computed 2026-08-01; the dated note was retired
+2026-08-15 — the durable version is `docs/dashboards/per-event-boxplots.md`).
 
 ## Data sources
 

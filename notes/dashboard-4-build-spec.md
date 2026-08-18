@@ -40,7 +40,7 @@ content — vertical displacement = slip × sin(dip)); intercepts ≈ 0.
 Kern inferred slip (dip 30): **0.162 … 2.742 m** from Vertical
 0.076 … 1.372 m. Good interpretive hook for the MkDocs page later.
 
-## Data-side work (Claude's lane — task file in notes/2026-08-02/)
+## Data-side work (Claude's lane — task file was in notes/2026-08-02/, retired 2026-08-15)
 
 Three DuckDB views in `views.py` (+ Athena twins per existing pattern;
 Athena stays parked):

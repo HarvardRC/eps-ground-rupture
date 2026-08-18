@@ -20,7 +20,7 @@ the site page
 | Dashboards | `Per-Event Boxplots — Model vs Field` 800×1200 · `Per-Event Boxplots — VS & SURE` 1200×1200 · `Per-Event Boxplots — VS & SURE (web)` 800×2000 |
 | Slugs | `Per-EventBoxplotsModelvsField` · `Per-EventBoxplotsVSSURE` · `Per-EventBoxplotsVSSUREweb` |
 | Embedded at | site `dashboards/per-event-boxplots.md` — Model vs Field at 800×1200 (resized in place; it *is* the web layout, so its escape hatch points at itself), and the VS & SURE `(web)` variant at 800×2000 |
-| Specs | `notes/dashboard-3-build-spec.md`, `notes/2026-08-01/dashboard-3-tableau-public-build.md`, `notes/2026-08-02/dashboard-assembly.md`, `notes/2026-08-02/fzw-sheet-rebuild.md` |
+| Specs | `notes/dashboard-3-build-spec.md`; the dated 2026-08-01/02 build, assembly and FZW-rebuild notes were retired 2026-08-15 — "the walkthrough" below refers to them |
 
 Built public-first because `fdhi_measurements` never reached Athena — it
 only would once the parked Terraform applied the regenerated `tables.json`.
@@ -91,7 +91,7 @@ Not a mark type. It is a reference line:
 
 ```xml
 <reference-line id='refline0' scope='per-cell' boxplot-whisker-type='standard'
-                boxplot-mark-exclusion='false' formula='average' probability='95'/>
+                boxplot-mark-exclusion='true' formula='average' probability='95'/>
 ```
 
 `formula` and `probability` are inert boilerplate for the boxplot flavour.
@@ -152,7 +152,8 @@ filter or URL actions anywhere.
 2. Open via **File → Open**. All three extracts point at `/var/folders/.../
    tableau-temp/#TableauTemp_*.hyper` — OS temp files that will be gone.
    Expect a missing-extract complaint.
-3. Per `notes/2026-08-02/fzw-sheet-rebuild.md` Phase 0: accept whatever
+3. Per [tableau-editing-notes.md](tableau-editing-notes.md) (formerly the
+   retired `fzw-sheet-rebuild.md` Phase 0): accept whatever
    option removes the extract, then **Data Source tab → Create Extract**
    for each of the three sources, then **Data → \<source\> → Refresh**.
 4. Edit. Remember the `(web)` dashboard is a hand-duplicated tab, not a
@@ -165,12 +166,11 @@ filter or URL actions anywhere.
 - **No desktop twin exists** — don't go looking. Correspondingly, the usual
   "the desktop copy carries a legacy Athena connection" caveat does not
   apply here: zero Athena hits in this file.
-- **`boxplot-mark-exclusion='false'` on both DEM sheets** means "hide
-  underlying marks" is *unchecked*, against the walkthrough's explicit
-  request. As committed, `DEM DZW by Class` renders 329,152 disaggregated
-  marks and `DEM Scarp Height by Class` 333,159. This is the workbook's
-  dominant render cost on Tableau Public and the first thing to try if the
-  published page feels slow.
+- **`boxplot-mark-exclusion='true'` on all seven sheets** (since 2026-08-16)
+  means "hide underlying marks" is on: only outliers draw. The populations
+  in the table above are still evaluated (329,152 / 333,159 DEM rows) but
+  no longer rendered — un-ticking it brings back what was the workbook's
+  dominant render cost on Tableau Public.
 - **Colour never landed as specified.** No colour encoding on any boxplot
   sheet, no palette element anywhere, zero occurrences of the Dashboards
   1–2 scarp-class hexes. Both the spec's "one hue per measure" and the

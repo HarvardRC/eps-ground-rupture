@@ -1,5 +1,7 @@
 # Glossary
 
+<p class="cite-open-row"><button class="cite-open" type="button">How to cite</button></p>
+
 The paper this site accompanies is written for specialists. This page is the
 opposite: it assumes you know nothing about faults, and defines the terms and
 abbreviations used across this site in plain language. Nothing here is needed
@@ -293,7 +295,9 @@ outside these categories.
   displacement hazard analyses" — a public compilation of surface-rupture
   observations across many historical earthquakes.[^sure] It is the source
   of the fault-normal-component and scarp-height panels on the
-  [per-event boxplots](dashboards/per-event-boxplots.md). Note the database
+  [per-event boxplots](dashboards/per-event-boxplots.md), and its
+  measurements appear as reference lines on the
+  [distributions](dashboards/distributions.md) histograms. Note the database
   records no earthquake magnitude of its own; the magnitudes on those panels
   come from a lookup curated inside this project, sourced from the SURE 2.0
   data descriptor (Nurminen et al. 2022).
@@ -347,6 +351,18 @@ This is the part that makes the dashboards click.
 
 ## Statistics terms
 
+**Mean and standard deviation (σ)** { #mean-sd }
+: The **mean** is the average of the measurements; the **standard
+  deviation** is how far a typical measurement sits from it. The mean ± σ
+  band on the [distributions](dashboards/distributions.md) summary panel
+  spans one standard deviation either side of the mean.
+
+**Histogram** { #histogram }
+: Counts of measurements falling into equal-width bins, drawn as bars —
+  the upper panel of the [distributions](dashboards/distributions.md)
+  dashboard, with ¼ m, 1 m and 5° bins for scarp height, deformation zone
+  width and scarp dip.
+
 **Median, quartile, interquartile range (IQR)** { #iqr }
 : Sort the measurements. The **median** is the middle one. The **quartiles**
   are the values a quarter and three-quarters of the way along, and the
@@ -387,7 +403,15 @@ This is the part that makes the dashboards click.
   quantity grows as slip accumulates.
 - **[Per-event boxplots](dashboards/per-event-boxplots.md)** — how much real
   measurements vary within a single earthquake.
+- **[Slip regression](dashboards/slip-regression.md)** — the slip-to-uplift
+  law per fault dip, run backwards on Kern County.
+- **[Distributions](dashboards/distributions.md)** — the spread of each
+  output across all simulations, and which input shifts it.
 - **[Data](data.md)** — where all four datasets come from.
+
+<p class="cite-open-row"><button class="cite-open" type="button">How to cite</button></p>
+
+--8<-- "includes/cite-root.md"
 
 [^abstract]: Chiama et al. (2025), abstract — see [The paper](paper.md).
 [^scope]: Chiama et al. (2025), introduction: the motivation is the impact of

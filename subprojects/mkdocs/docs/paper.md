@@ -1,5 +1,7 @@
 # The paper
 
+<p class="cite-open-row"><button class="cite-open" type="button">How to cite</button></p>
+
 ## Citation
 
 > Chiama, K., Bednarz, W., Moss, R., Plesch, A., and Shaw, J. H. (2025).
@@ -110,6 +112,10 @@ the project's deployment notes (`subprojects/mkdocs/DEPLOY.md` in the repository
 - **[Model vs reality](dashboards/model-vs-reality.md)** — the interactive
   form of Figure 13's scatter panels.
 - **[Data](data.md)** — the datasets behind every figure.
+
+<p class="cite-open-row"><button class="cite-open" type="button">How to cite</button></p>
+
+--8<-- "includes/cite-root.md"
 
 [^families]: `notes/chart-families.md` in the source repository — the
     figure-by-figure inventory this table is derived from.

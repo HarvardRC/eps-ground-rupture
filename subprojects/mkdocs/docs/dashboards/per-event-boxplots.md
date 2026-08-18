@@ -5,6 +5,8 @@ hide:
 
 # Per-event boxplots
 
+<p class="cite-open-row"><button class="cite-open" type="button">How to cite</button></p>
+
 **The question:** how variable are the field measurements *within* each
 earthquake — and does the model's range cover them?
 
@@ -51,7 +53,7 @@ measure, on a shared axis, for the two quantities the paper compares:
     toolbar="bottom" hide-tabs></tableau-viz>
 </div>
 
-[Open full-size on Tableau Public](https://public.tableau.com/app/profile/michael.bouzinier/viz/per-event-box-plots-public/Per-EventBoxplotsModelvsField){ .embed-fallback }
+[Open full-size on Tableau Public](https://public.tableau.com/app/profile/michael.bouzinier/viz/per-event-box-plots-public/Per-EventBoxplotsModelvsField){ .embed-fallback } <button class="cite-open" type="button">How to cite</button>
 
 ### Why the width axis is logarithmic
 
@@ -106,7 +108,7 @@ so you can narrow the 23 events to a comparable subset.
     toolbar="bottom" hide-tabs></tableau-viz>
 </div>
 
-[Open full-size on Tableau Public](https://public.tableau.com/app/profile/michael.bouzinier/viz/per-event-box-plots-public/Per-EventBoxplotsVSSURE){ .embed-fallback }
+[Open full-size on Tableau Public](https://public.tableau.com/app/profile/michael.bouzinier/viz/per-event-box-plots-public/Per-EventBoxplotsVSSURE){ .embed-fallback } <button class="cite-open" type="button">How to cite</button>
 
 !!! info "How each panel is filtered, and where the magnitudes come from"
     The FDHI panels keep only measurements the compilation marks as
@@ -139,6 +141,10 @@ DEM experiment set — all described on the [Data](../data.md) page.
   measured displacement.
 - **[Data](../data.md)** — where the FDHI and SURE measurements come from.
 
+<p class="cite-open-row"><button class="cite-open" type="button">How to cite</button></p>
+
+--8<-- "includes/cite-sub.md"
+
 [^families]: `notes/chart-families.md` in the source repository.
 [^spec]: `notes/dashboard-3-build-spec.md` in the source repository, which
     records the per-sheet filters and populations, the axis decisions, and
@@ -146,7 +152,7 @@ DEM experiment set — all described on the [Data](../data.md) page.
 [^limit]: Chiama et al. (2025), section comparing DEM results with the FDHI
     dataset.
 [^dzwrange]: Chiama et al. (2025): "The DZW has a wide range across all the
-    experiments (0–40.76 m)." The committed export reaches ~45.8 m, from a
+    experiments (0–40.76 m)." The shipped export reaches ~45.8 m, from a
     handful of heterogeneous rows at very low slip — the regime the paper
     excludes as high-uncertainty.
 [^assumption]: Chiama et al. (2025), which assumes measured vertical

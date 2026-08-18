@@ -29,7 +29,7 @@ fails the run rather than publishing a damaged site. The workflow grants
 MkDocs can push a built site straight to the `gh-pages` branch:
 
 ```bash
-source /opt/venv/eps-ground-rapture/bin/activate   # or your venv
+source /opt/python/venvs/eps-ground-rapture/bin/activate   # or your venv
 cd subprojects/mkdocs
 mkdocs gh-deploy --strict
 ```
@@ -48,7 +48,8 @@ Both are the author team's call, and both are in the review email:
 - **The byline.** The site currently credits Kristen Chiama, Andreas Plesch
   and John H. Shaw. Whether to add William Bednarz and Robb Moss (the
   paper's other two authors) and Michael Bouzinier is marked `TODO(michael)`
-  in `mkdocs.yml` and `docs/index.md`.
+  in `mkdocs.yml`; `docs/index.md` ("Site authors") points here for the
+  candidate list.
 - **Figure reuse.** The paper is not open access, so no figures from it are
   reproduced; four placeholders in `docs/paper.md` mark where Figures 1, 2,
   5 and 7 would sit. Publishing with the placeholders is fine — they name

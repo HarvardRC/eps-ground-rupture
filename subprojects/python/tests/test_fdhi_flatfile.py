@@ -8,7 +8,7 @@ extract, so a silent divergence between the two FDHI sources fails loudly.
 
 import pytest
 
-from eps_ground_rapture import io, prep
+from eps_ground_rupture import io, prep
 
 flatfile = io.find_fdhi_flatfile()
 

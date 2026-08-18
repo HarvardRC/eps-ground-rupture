@@ -30,7 +30,9 @@ All tabular products are **DuckDB SQL views over the tidy Parquet**
 file (`dashboards/duckdb/eps.duckdb`, gitignored, rebuilt by `egr-build`):
 
 - normalization views (`unified_observations`, `sure_enriched`, per-source
-  projections), and
+  projections, and `historic_events` — Dashboard 5's per-measurement
+  reference values, present only when the optional `fdhi_measurements`
+  Parquet exists), and
 - analytical views (`dem_regression`, `dem_regression_lines`,
   `kern_inferred_slip`) using DuckDB's `regr_slope`/`regr_intercept`/`regr_r2`.
 
@@ -68,6 +70,8 @@ parked AWS lane would need have Athena/Trino twins in the same module
 ## References
 
 - `subprojects/python/src/eps_ground_rupture/views.py`
-- `subprojects/python/tests/test_regression_views.py`
+- `subprojects/python/tests/test_regression_views.py`,
+  `subprojects/python/tests/test_historic_events.py`
 - `dashboards/duckdb/README.md`
-- `notes/dashboard-4-build-spec.md` — the pinned coefficient table
+- `notes/dashboard-4-build-spec.md` — the pinned coefficient table;
+  `notes/dashboard-5-build-spec.md` — the `historic_events` populations

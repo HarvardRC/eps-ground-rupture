@@ -5,6 +5,8 @@ hide:
 
 # Response curves
 
+<p class="cite-open-row"><button class="cite-open" type="button">How to cite</button></p>
+
 **The question:** how do the measured surface characteristics change as
 slip accumulates, and which conditions change that relationship?
 
@@ -62,7 +64,7 @@ depth and sediment strength**.[^abstract]
     toolbar="bottom" hide-tabs></tableau-viz>
 </div>
 
-[Open full-size on Tableau Public](https://public.tableau.com/app/profile/michael.bouzinier/viz/dem-response-curve-public/DEMResponseCurves){ .embed-fallback }
+[Open full-size on Tableau Public](https://public.tableau.com/app/profile/michael.bouzinier/viz/dem-response-curve-public/DEMResponseCurves){ .embed-fallback } <button class="cite-open" type="button">How to cite</button>
 
 ## Where this comes from
 
@@ -85,6 +87,10 @@ The underlying data is the DEM experiment set described on the
   fitted per dip, then inverted to infer slip from a field measurement.
 - **[Glossary](../glossary.md#how-the-quantities-relate)** — why each curve's
   slope lands so close to sin(fault dip).
+
+<p class="cite-open-row"><button class="cite-open" type="button">How to cite</button></p>
+
+--8<-- "includes/cite-sub.md"
 
 [^abstract]: Chiama et al. (2025), abstract — the measured characteristics
     are scarp height, uplift, deformation zone width and scarp dip.

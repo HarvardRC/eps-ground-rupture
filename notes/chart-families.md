@@ -26,7 +26,7 @@ markers.
 - nb2: cells 3, 7, 8, 10, 11, 23, 24.
 - `FDHI-SURE-DEM_SCATTER.py` (adds 3D-DEM cases; the most recent version).
 
-**Status: built** — Dashboard 1 in `dashboards/tableau/dem-overview.twb`
+**Status: built** — Dashboard 1 in `dashboards/tableau/dem-model-vs-reality.twb`
 (scatter + event map + coverage matrix).
 
 ## Family 2 — DEM response curves: driver → response scatter
@@ -116,8 +116,8 @@ The only family that needs analytical pre-compute — see the
 
 Paper Figs. 1–5, 7: photographs of surface ruptures, scarp-morphology
 schematics, particle-mechanics diagrams, DEM simulation snapshots.
-Not data charts — candidates for **static-image embedding** on
-dashboards as explanatory context (see Roadmap).
+Not data charts — candidates for **static-image embedding** on the
+companion site (`paper.md`, rights pending — see Roadmap #6).
 
 ## Cross-reference: families ↔ legacy roadmap themes
 
@@ -126,9 +126,9 @@ The Roadmap originally used themes A–E; this taxonomy refines them:
 | Family | Old theme | Roadmap status |
 |--------|-----------|----------------|
 | 1. Model vs reality scatter | A | ✅ Dashboard 1 built |
-| 2. Driver→response curves | B (+D facets) | priority 2 |
-| 3. Faceted distributions | C/D | lower priority |
-| 4. Mean ± σ summary | — (new) | lower priority |
-| 5. Per-event boxplots | C (implicit) | priority 3 |
-| 6. Regression + inference | E | priority 4 |
-| Illustrations | — (new) | lowest priority |
+| 2. Driver→response curves | B (+D facets) | ✅ Dashboard 2 built |
+| 3. Faceted distributions | C/D | ✅ Dashboard 5 built |
+| 4. Mean ± σ summary | — (new) | ✅ Dashboard 5 built |
+| 5. Per-event boxplots | C (implicit) | ✅ Dashboard 3 built |
+| 6. Regression + inference | E | ✅ Dashboard 4 built |
+| Illustrations | — (new) | parked (rights; site, not dashboards) |

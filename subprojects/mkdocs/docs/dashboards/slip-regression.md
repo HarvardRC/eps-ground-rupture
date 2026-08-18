@@ -5,6 +5,8 @@ hide:
 
 # Slip regression
 
+<p class="cite-open-row"><button class="cite-open" type="button">How to cite</button></p>
+
 **The question:** what law links slip on the fault to the vertical
 displacement it produces at the surface — and, run backwards, what slip
 would explain a displacement measured in the field?
@@ -73,7 +75,7 @@ slip, consistent with independent published estimates.[^kern]
     toolbar="bottom" hide-tabs></tableau-viz>
 </div>
 
-[Open full-size on Tableau Public](https://public.tableau.com/app/profile/michael.bouzinier/viz/dem-slip-regression-public/SlipRegressionKernInference){ .embed-fallback }
+[Open full-size on Tableau Public](https://public.tableau.com/app/profile/michael.bouzinier/viz/dem-slip-regression-public/SlipRegressionKernInference){ .embed-fallback } <button class="cite-open" type="button">How to cite</button>
 
 ## What the printed figure cannot do
 
@@ -119,6 +121,10 @@ pin.[^fits] Those exports are listed on the [Data](../data.md) page.
   compares with field measurements overall.
 - **[Glossary](../glossary.md#how-the-quantities-relate)** — the
   slip-to-uplift relationship in plain language.
+
+<p class="cite-open-row"><button class="cite-open" type="button">How to cite</button></p>
+
+--8<-- "includes/cite-sub.md"
 
 [^fits]: Coefficients, counts and ranges computed from the shipped DEM and
     Kern data by the project's own `dem_regression`,

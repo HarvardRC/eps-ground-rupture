@@ -69,10 +69,10 @@ dist/                        build outputs (gitignored)
   python/                    the wheel
 dashboards/
   duckdb/eps.duckdb          the view definitions clients connect to (gitignored)
-  tableau/                   the six .twb workbooks + README
+  tableau/                   the seven .twb workbooks + README (index + publish procedure)
   sql/                       generated DDL (gitignored; parked AWS lane)
     athena.sql                 external tables over s3://.../<table>/
-    athena-views.sql           Athena/Trino twins of five DuckDB views
+    athena-views.sql           Athena/Trino twins of six DuckDB views
     spark-thrift.sql           USING parquet LOCATION 'file:///.../<table>/'
   sheets/                    Google Sheets push targets (targets.yaml + README; dormant)
   superset/                  retired (ADR-0004); README kept for its connector strings
@@ -101,8 +101,10 @@ subprojects/
       sheets.py              view -> Google Sheets (`egr-push-sheets`; dormant)
       cli.py                 the three console-script entry points
     tests/                   test_smoke, test_prep, test_raw_inputs,
-                             test_regression_views, test_csvexport, test_sheets
+                             test_regression_views, test_historic_events,
+                             test_csvexport, test_sheets, test_fdhi_flatfile
   mkdocs/                    the companion site (ADR-0008)
+    build.gradle.kts         mkdocsServe / mkdocsBuild wrappers (same venv)
     mkdocs.yml, docs/, DEPLOY.md, EMBEDS.md
 ```
 
@@ -124,7 +126,7 @@ export.export_tidy
         ▼
 data/processed/<table>/data.parquet        the tidy analytical store
         │
-        ├──► views.build_duckdb_views ──► dashboards/duckdb/eps.duckdb   (11 views)
+        ├──► views.build_duckdb_views ──► dashboards/duckdb/eps.duckdb   (12 views)
         │             │
         │             └──► csvexport ──► dist/csv/<view>.csv ──► Tableau Public
         │                                                        └──► embedded in the site
@@ -152,7 +154,7 @@ that door open.
 
 The DDL branch is generated on every run but consumed by nothing right now:
 `athena.sql` and `spark-thrift.sql` are reference scripts, `athena-views.sql`
-carries Trino twins of five views, and `deploy/terraform/tables.json` is the
+carries Trino twins of six views, and `deploy/terraform/tables.json` is the
 committed Glue schema. See [`adr/dead-ends.md`](adr/dead-ends.md).
 
 ### Fail-fast on raw inputs
@@ -169,7 +171,8 @@ yields an `fdhi_cleaned` of a different shape and no `fdhi_measurements`,
 so a build from it would leave the Parquet, the DDL and the Terraform
 schema describing different things. `io.load_fdhi` still exists but nothing
 in the pipeline calls it — it survives only as the reference
-`tests/test_prep.py` checks the cleaning chain against.
+`tests/test_prep.py` and `tests/test_fdhi_flatfile.py` check the cleaning
+chain against.
 
 `egr-build` also warns when a processed table was not rebuilt this run —
 its Parquet lingers and still backs a view.
@@ -201,7 +204,8 @@ One DuckDB view → `dist/csv/<view>.csv`. This is the publication step.
 poetry run egr-csv --view unified_observations
 ```
 
-Eleven views are wired up as Gradle tasks; `csvExportAll` refreshes all of
+Twelve views are wired up as Gradle tasks (`csvViews` in
+`subprojects/python/build.gradle.kts`); `csvExportAll` refreshes all of
 them, which is what you want after any `egr-build`, since the workbooks
 read several files each. Note that a bare `csvExportAll` exports from
 whatever views the *last* `egr-build` left in `eps.duckdb` — on a machine
@@ -247,23 +251,24 @@ rather than letting Poetry place one. `subprojects/python/poetry.toml` sets
 `virtualenvs.create = false`, so Poetry installs into whatever venv is
 **active** — and without one it targets the system Python and fails.
 
-On this machine, venvs live under **`/opt/venv/<name>`**:
+The convention (and the Gradle default, ADR-0001) is
+**`/opt/python/venvs/<name>`**:
 
 ```bash
-python3.13 -m venv /opt/venv/eps-ground-rapture
+python3.13 -m venv /opt/python/venvs/eps-ground-rapture
 # Python 3.13 because pyarrow 18 has no 3.14 wheel — see ADR-0002.
-source /opt/venv/eps-ground-rapture/bin/activate
+source /opt/python/venvs/eps-ground-rapture/bin/activate
 cd subprojects/python && poetry install
 ```
 
 If Poetry is missing: `brew install poetry` (or `pipx install poetry`).
 
-To use a different location, set `EGR_VENV=/path/to/venv` or pass
-`-Ppython.venv=/path/to/venv`. To make it stick for both the terminal and
-IDEA-launched Gradle, put `python.venv=/path/to/venv` in
-`~/.gradle/gradle.properties` — which is what this machine does, because
-`subprojects/python/build.gradle.kts` still defaults to the older
-`/opt/python/venvs/<name>` convention.
+If your venvs live elsewhere (some machines keep them under
+`/opt/venv/<name>` — on the laptop that is a symlink to the same place),
+set `EGR_VENV=/path/to/venv` or pass `-Ppython.venv=/path/to/venv`. To make
+it stick for both the terminal and IDEA-launched Gradle, put
+`python.venv=/path/to/venv` in `~/.gradle/gradle.properties`. Check which
+path actually exists before trusting either spelling.
 
 IntelliJ IDEA needs one manual step after every Gradle sync (the Python
 Module SDK resets to the project JDK — a JetBrains limitation). Details in
@@ -271,24 +276,36 @@ Module SDK resets to the project JDK — a JetBrains limitation). Details in
 
 ## What runs today
 
-Verified 2026-08-05:
+Verified 2026-08-18:
 
 - `poetry install` — clean on Python 3.13.7 / Poetry 2.4.1.
-- `poetry run pytest` — **102 passed** in ~7 s: `test_csvexport` 7,
+- `poetry run pytest` — **115 collected, 113 passed, 2 failed** in ~6 s:
+  `test_csvexport` 7, `test_fdhi_flatfile` 2, `test_historic_events` 10,
   `test_prep` 20, `test_raw_inputs` 15, `test_regression_views` 17,
-  `test_sheets` 21, `test_smoke` 22. Coverage spans the FDHI cleaning
+  `test_sheets` 21, `test_smoke` 23. Coverage spans the FDHI cleaning
   chains, the required-input checks, Parquet export, DDL generation, the
-  DuckDB views, CSV export and the Sheets targets.
+  DuckDB views (incl. the regression and historic-events views), CSV
+  export and the Sheets targets. The two failures are open items in
+  `TODO.md` → Data pipeline: the `test_smoke` optional-`fdhi_measurements`
+  fixture predates the `historic_events` view and lacks the columns it
+  reads, and `test_fdhi_flatfile` expects Bohol among the reverse-style
+  FDHI events, which the current cleaning chain does not yield. (Until
+  2026-08-18 `test_fdhi_flatfile.py` still imported the pre-rename package
+  name, so the whole suite died at collection.)
 
-  Two limits worth knowing. The view tests build from **synthetic fixture
-  frames**, not from `data/raw/`, so they pin *behaviour* — shapes, filters,
-  sentinel handling, the regression algebra — and not the row counts this
-  repo's real inputs happen to produce. And `kern_combined_geo` has no
-  assertions at all: it is executed as a side effect of `build_duckdb_views`
-  but nothing checks its columns or its constants. The Dashboard 4
-  coefficients are pinned with `pytest.approx(..., abs=0.001)`, so despite
-  being written to four decimals they are enforced to three.
-- `./gradlew :subprojects:python:pytest` — same 102 via the orchestrator
+  Two limits worth knowing. `test_smoke`'s view tests build from
+  **synthetic fixture frames** and pin *behaviour* — shapes, filters,
+  sentinel handling; `test_regression_views` and `test_historic_events`
+  instead rebuild the views from the real `data/processed/` Parquet into a
+  temp DuckDB file and pin the coefficients and row counts the shipped
+  inputs produce (per-dip n, FDHI 2,392 / SURE 203 / Kern 21), skipping
+  when the Parquet is absent — so a re-clean of the raw data moves those
+  pins on purpose. And `kern_combined_geo` has no assertions at all: it is
+  executed as a side effect of `build_duckdb_views` but nothing checks its
+  columns or its constants. The Dashboard 4 coefficients are pinned with
+  `pytest.approx(..., abs=0.001)`, so despite being written to four
+  decimals they are enforced to three.
+- `./gradlew :subprojects:python:pytest` — same suite via the orchestrator
   (Gradle 8.10.2 wrapper; nothing in the build pins a JDK toolchain).
 - `poetry run egr-build` — requires all four raw inputs, exits 2 naming any
   that are missing.
@@ -324,28 +341,34 @@ That work belongs in Tableau, so it has deliberately not been ported.
 - **Kern County has no cleaning routine.** `io.load_kern_combined` is a
   thin `read_csv`; the derived work happens downstream in the
   `kern_combined_geo` and `kern_inferred_slip` views.
-- **Dashboard 5** (faceted distributions + mean ± σ, chart families 3 and
-  4) is the next build. `notes/Roadmap.md` has the order.
+- **All five dashboards are built** (Dashboard 5, 2026-08-15). What is
+  left is polish and the open questions in
+  `notes/dashboard-5-build-spec.md`; build-order item #6 (static images)
+  is parked on the figure-rights question. `notes/Roadmap.md` has the
+  statuses.
 - **Published dashboards are slow.** Candidate levers are recorded in
-  `TODO.md`; the biggest single one is that Dashboard 3's two DEM boxplot
-  sheets render ~330k disaggregated marks each.
+  `TODO.md`; the biggest single one — Dashboard 3's two DEM boxplot sheets
+  drawing ~330k disaggregated marks each — was pulled 2026-08-16
+  (underlying marks hidden); nothing has been measured since.
 - **AWS deployment via Terraform** is parked and never applied to the
   account. `TODO.md` → Deployment records the revival triggers.
-- **Notebook 2** (`2Ddem 2025 Paper Revisions …`) has not been ported. Most
-  of its filtering is by `Set` and `Cohesion`, both already columns in the
-  DEM table, so the dashboards may not need extra Python prep.
+- **Notebook 2** (`2Ddem 2025 Paper Revisions …`) is no longer a gap: its
+  non-plotting logic lives in `views.py` (the per-dip fits and Kern
+  back-projection, the `historic_events` reference lines) and every figure
+  cell maps onto a built dashboard (`notes/chart-families.md`). Its `Set` /
+  `Cohesion` filtering needed no Python prep — both are DEM columns.
 
 ## Quickstart
 
 ```bash
-git clone git@github.com:HarvardRC/eps-ground-rupture.git
-cd eps-ground-rupture
+git clone git@github.com:HarvardRC/eps-ground-rupture.git eps-ground-rapture
+cd eps-ground-rapture   # the folder keeps the old spelling — see the last paragraph
 
 # Put raw CSVs in data/raw/ — see data/README.md for the expected file list.
 cp /path/to/DEM_dataset.csv data/raw/
 
-# One-time: create the venv (machine convention: /opt/venv/<name>).
-python3.13 -m venv /opt/venv/eps-ground-rapture
+# One-time: create the venv (convention: /opt/python/venvs/<name>).
+python3.13 -m venv /opt/python/venvs/eps-ground-rapture
 # Or keep it elsewhere: EGR_VENV=/your/path, -Ppython.venv=/your/path, or
 # python.venv=/your/path in ~/.gradle/gradle.properties.
 
@@ -356,7 +379,7 @@ python3.13 -m venv /opt/venv/eps-ground-rapture
 ./gradlew :subprojects:python:csvExportAll
 
 # Or directly via Poetry (activate the venv first):
-source /opt/venv/eps-ground-rapture/bin/activate
+source /opt/python/venvs/eps-ground-rapture/bin/activate
 cd subprojects/python
 poetry install && poetry run pytest && poetry run egr-build
 
@@ -370,4 +393,4 @@ poetry install && poetry run pytest && poetry run egr-build
 
 Existing checkouts keep the folder name `eps-ground-rapture`: the Tableau
 workbooks store absolute CSV paths, so renaming it would force a connection
-repair across four workbooks (`notes/multi-machine.md`).
+repair across the five `-public` workbooks (`notes/multi-machine.md`).

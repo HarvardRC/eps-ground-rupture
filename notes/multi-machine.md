@@ -40,9 +40,7 @@ laptop's Finder/dialog defaults to `~/harvard/github/...`, navigate via
 1. `git pull`.
 2. Regenerate the gitignored artifacts:
    `./gradlew :subprojects:python:egrBuild` then the `egr-csv` exports
-   (dist/csv does not travel via git). Alternative when the toolchain
-   is inconvenient: download the CSV set from the GitHub Release
-   (see notes on data hosting), same files.
+   (dist/csv does not travel via git).
 3. First Tableau open per workbook: **File → Open** (never the app
    start-page recents), then **Data → each source → Refresh** —
    extracts are per-machine caches (temp/Documents hyper paths never
@@ -108,7 +106,7 @@ Mac.
 The GitHub repo was renamed to fix the rapture/rupture typo. The **local
 directory keeps the old name** on both machines — the canonical path
 `~/harvard/projects/github/eps-ground-rapture` is baked into the Tableau
-workbooks' CSV connections, and renaming it would force a four-workbook
+workbooks' CSV connections, and renaming it would force a five-workbook
 repair. Consequences:
 
 - Remote update, once per machine:

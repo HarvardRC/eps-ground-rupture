@@ -28,7 +28,7 @@ families plus non-chart illustrations. Summary:
 (The earlier A–E "theme" taxonomy is superseded by the families; the
 mapping is at the bottom of `chart-families.md`.)
 
-## Build order (priorities set 2026-06-10; statuses updated 2026-08-05)
+## Build order (priorities set 2026-06-10; statuses updated 2026-08-18)
 
 1. ~~**Dashboard 1 — Model vs reality** (family 1)~~ — **built &
    published**: dual-axis DZW × Scarp_Height scatter, Event Map,
@@ -36,20 +36,25 @@ mapping is at the bottom of `chart-families.md`.)
    Cloud & Historic Overlays", "Viable Combinations") in
    `dashboards/tableau/dem-model-vs-reality.twb` (renamed from
    `dem-overview.twb`), plus a `-public` twin
-   (`dem-model-vs-reality-public.twb`) on Tableau Public fed from a
+   (`dem-model-vs-reality-public.twb`, plus an 800×1200 `…web` variant
+   for the site) on Tableau Public fed from a
    CSV export of `unified_observations`.
    Remaining polish (from the workbook review; not re-audited since the
    cosmetic-edit / palette commits — re-check which are still open):
    - Unify event color/shape encodings between the scatter and the map.
-   - Trend line: per-color or remove (currently one pooled OLS line).
-   - Map-only non-null `latitude` filter (perf: stop querying 333k rows for 79 points).
+   - ~~Trend line: per-color or remove~~ — removed from the `-public`
+     twin (2026-08-17); the desktop `.twb` still has the pooled OLS line.
+   - ~~Map-only non-null `latitude` filter~~ — already a worksheet filter
+     on the Event Map sheet in both workbooks (since 2026-06-09); promote
+     to a datasource/context filter only if the query cost is measured.
    - Title zone width; exhaustive `Point Color` CASE; `'0 none'` coverage bucket.
 2. ~~**Dashboard 2 — DEM response curves** (family 2)~~ — **built &
    published** (built 2026-06-17, on Tableau Public 2026-06-25):
    "DEM Response Curves" dashboard in
-   `dashboards/tableau/dem-response-curve.twb` — `Driver` /
-   `Driver Value` parameters switch the x-axis (`Slip` / `Magnitude`)
-   against `Scarp_Height`, `DZW`, `Scarp_Dip` or `Us - Ud`; `-public`
+   `dashboards/tableau/dem-response-curve.twb` — `Driver` / `Response` /
+   `Condition By` parameters switch the x-axis (`Slip` / `Magnitude`),
+   y-axis (`Scarp_Height`, `DZW`, `Scarp_Dip` or `Us - Ud`) and hue
+   (`Driver Value` / `Response Value` / `Condition` calcs); `-public`
    twin (`dem-response-curve-public.twb`, plus an 800×1000 `…web`
    variant) fed from the **local** CSV export of the `dem` view
    (`dist/csv/dem.csv` — the early Drive-CSV handoff is retired).
@@ -76,8 +81,8 @@ mapping is at the bottom of `chart-families.md`.)
    that **slide between fit lines** via the `Kern Dip (measured: 30°)` parameter (renamed 2026-08-16)
    (20–70°, default 30°); dip checkbox filter and hover highlight. Fits
    computed in the pipeline, not the workbook (data-side work #2). Spec:
-   `notes/dashboard-4-build-spec.md` (click-by-click walkthrough
-   alongside in `notes/2026-08-04/`).
+   `notes/dashboard-4-build-spec.md` (the click-by-click walkthrough
+   in `notes/2026-08-04/` was retired 2026-08-15).
 5. ~~**Dashboard 5 — Distributions & summary stats** (families 3 + 4)~~ —
    **built & published** (2026-08-15): "Distributions & Summary (web)"
    (800×1200, the only dashboard — a landscape twin was tried and
@@ -130,25 +135,30 @@ re-ordered to match the build order:
    filters, row kept when either measure survives; 2,616 rows pinned by
    `tests/test_historic_events.py`. Optional-table semantics (needs the
    raw-flatfile lane), Athena twin alongside.
-4. *(optional)* **`dem_with_bands` view** — adds a `fault_dip_band`
-   column (`20–30`, `30–40`, …) for cleaner small-multiples. Or do this
-   as a calculated field in Tableau and skip the view.
+4. ~~*(optional)* **`dem_with_bands` view**~~ — skipped (2026-08-15):
+   the `fault_dip_band` column (`20–30`, `30–40`, …) is the `Fault_Dip
+   Band` calculated field in `dem-distributions-public.twb` instead
+   (defined, not yet on a shelf); no view needed.
 
 ## Tableau-side scaffolding
 
 - **Calculated fields**:
   - `Source / Event` and `Event` — exist; **consolidate to one** (they
     currently carry conflicting color/shape palettes; see workbook review).
-  - `Fault_Dip Band` — buckets the integer dip into ranges for facets.
-  - `Scarp_Class Family` — strips the `_Collapse` suffix to collapse
-    `Monoclinal` / `Monoclinal Collapse` into one group when desired.
+  - `Fault_Dip Band` — exists (Dashboard 5, unused so far); buckets the
+    integer dip into ranges for facets.
+  - `Scarp_Class Family` — exists (Dashboard 5, unused so far); strips
+    the ` Collapse` suffix to collapse `Monoclinal` / `Monoclinal
+    Collapse` into one group when desired — not yet offered in `Hue By`
+    (see design-review 2026-08-16).
 - **Parameters**:
   - `Color By` — exists; make its CASE exhaustive and consider adding
     `Cohesion` / `DEM Set` members.
   - `Row By` / `Col By` — exist (drive the Combinations matrix); reuse
     the same pattern for Dashboard 2's response-curve grid.
   - ~~New for Dashboard 2: an `X Driver` parameter~~ — built as the
-    `Driver` / `Driver Value` parameters in `dem-response-curve.twb`.
+    `Driver` parameter (+ the `Driver Value` calc) in
+    `dem-response-curve.twb`.
 - **Color palettes**: align to the legacy figure where readable:
   - Monoclinal: `#009ffa`; Pressure Ridge: `#f47820`; Simple: `#ed2024`;
     each `_Collapse` variant a darker shade of its parent.
@@ -181,8 +191,9 @@ re-ordered to match the build order:
   revisit triggers in `TODO.md` → Deployment.
 - **Companion site (2026-08)**: MkDocs Material on GitHub Pages
   (ADR-0008, ADR-0009) embeds the published dashboards, so each
-  workbook carries a vertically-laid `…web` dashboard variant at
-  ~800 px width (ADR-0007). Site source: `subprojects/mkdocs/`.
+  workbook carries (or simply is) a vertically-laid ~800 px-wide
+  dashboard for the embed — a `…web` variant where a landscape original
+  exists (ADR-0007). Site source: `subprojects/mkdocs/`.
 
 ## Open questions
 
@@ -191,12 +202,14 @@ re-ordered to match the build order:
   desktop + `-public` twins (`dem-model-vs-reality`,
   `dem-response-curve`); the August families are **public-only**
   workbooks authored against the CSV exports directly
-  (`per-event-box-plots-public`, `dem-slip-regression-public`).
+  (`per-event-box-plots-public`, `dem-slip-regression-public`,
+  `dem-distributions-public`).
   Cross-dashboard filter actions would need tabs merged back into one
   workbook; revisit only if that need materializes.
-- [ ] **3D DEM data**: `combinedCases123_v2.csv` and `combinedCase4_v2.csv`
-  referenced by the prior owner's script aren't in `data/raw/` yet.
-  Without them, Dashboard 1 covers the 2D-DEM slice only. Tracked in
+- [ ] **3D DEM data**: `combinedCases123_v2.csv` (in `data/raw/` since
+  2026-08-05, not yet ingested) and `combinedCase4_v2.csv` (still
+  missing), both referenced by the prior owner's script. Until they're
+  ingested, Dashboard 1 covers the 2D-DEM slice only. Tracked in
   `TODO.md`.
 - [x] **Magnitude in `unified_observations`**: done (2026-07-31) — the
   view carries event `magnitude` (FDHI per measurement, Kern pinned,
@@ -215,6 +228,8 @@ re-ordered to match the build order:
   (public-only; spec: `dashboard-3-build-spec.md`).
 - `dashboards/tableau/dem-slip-regression-public.twb` — Dashboard 4
   (public-only; spec: `dashboard-4-build-spec.md`).
+- `dashboards/tableau/dem-distributions-public.twb` — Dashboard 5
+  (public-only; spec: `dashboard-5-build-spec.md`).
 - `subprojects/mkdocs/` — the companion site the dashboards embed into.
 - `dashboards/duckdb/eps.duckdb` — DuckDB views file (pipeline-side;
   desktop Tableau can still connect to it directly).

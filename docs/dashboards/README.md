@@ -26,6 +26,9 @@ Also here:
 
 - [tableau-editing-notes.md](tableau-editing-notes.md) — traps that apply
   to every workbook. Read it before your first `.twb` edit.
+- [visual-identity.md](visual-identity.md) — the one design system every
+  workbook and site page conforms to: scarp-class palette, black field
+  overlays, ordered dip ramps, axis titles, web-variant layout, site.
 
 Workbook-level index (files, published slugs, publish procedure):
 [`dashboards/tableau/README.md`](../../dashboards/tableau/README.md).

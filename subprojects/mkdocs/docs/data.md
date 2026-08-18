@@ -1,5 +1,7 @@
 # Data
 
+<p class="cite-open-row"><button class="cite-open" type="button">How to cite</button></p>
+
 Four datasets sit behind the dashboards: one produced by simulation, three
 compiled from field observations of real earthquakes.
 
@@ -31,9 +33,11 @@ DOIs [10.17603/ds2-gfsj-pp60](https://doi.org/10.17603/ds2-gfsj-pp60) and
 [10.17603/ds2-xpq0-gw80](https://doi.org/10.17603/ds2-xpq0-gw80).[^abstract]
 
 This is the cloud in [Model vs reality](dashboards/model-vs-reality.md), the
-whole subject of [Response curves](dashboards/response-curves.md), and the
-context distribution in
-[Per-event boxplots](dashboards/per-event-boxplots.md).
+whole subject of [Response curves](dashboards/response-curves.md), the
+histograms in [Distributions](dashboards/distributions.md), the context
+distribution in [Per-event boxplots](dashboards/per-event-boxplots.md), and
+the population the [slip regression](dashboards/slip-regression.md) fits are
+computed over.
 
 ## FDHI flatfile
 
@@ -47,9 +51,10 @@ against.[^abstract]
 [10.25346/S6/Y4F9LJ](https://doi.org/10.25346/S6/Y4F9LJ).
 
 The project cleans this flatfile in-pipeline rather than relying on a
-pre-filtered extract. That yields two tables for two different jobs: a
-4,121-row measurement population across 25 events, which backs the per-event
-boxplots, and a much smaller scatter-overlay subset that backs the
+pre-filtered extract. That yields two tables: a 4,121-row measurement
+population across 25 events, which backs the per-event boxplots and supplies
+the FDHI reference lines on the [distributions](dashboards/distributions.md)
+histograms, and a much smaller scatter-overlay subset that backs the
 model-vs-reality view.[^spec]
 
 ## SURE database
@@ -61,7 +66,9 @@ location, strike-slip / fault-normal / vertical displacement components and
 their uncertainties, scarp height, and event metadata.[^datasets]
 
 It supplies the fault-normal-component and scarp-height panels in the
-per-event boxplots. Note that the release carries no event magnitude; the
+per-event boxplots, and its measurements stand as reference lines on the
+[distributions](dashboards/distributions.md) histograms.
+Note that the release carries no event magnitude; the
 magnitudes shown on those panels come from a lookup curated inside this
 project, with every value sourced from the SURE 2.0 data descriptor
 (Nurminen et al. 2022).[^datasets]
@@ -98,16 +105,20 @@ tables, views and schemas, a second exports the CSVs — and the pipeline
 fails fast if any raw input is missing rather than producing a partial set
 of artifacts.
 
-Most exports are simply a table made readable. Three are different: they
+Most exports are simply a table made readable. Four are different. Three
 carry results the pipeline *computed*, so that the
 [slip regression](dashboards/slip-regression.md) dashboard displays numbers
-the project's tests pin rather than recomputing them in the browser.
+the project's tests pin rather than recomputing them in the browser; the
+fourth is *assembled* from the three field datasets for the
+[distributions](dashboards/distributions.md) reference lines, its
+populations likewise pinned by tests.
 
 | Export | What it holds |
 |---|---|
 | `dem_regression.csv` | One row per fault dip: the fitted slope, intercept and r² of vertical displacement against slip. |
 | `dem_regression_lines.csv` | Two endpoints per dip, so the fitted line can be drawn as a line rather than re-fitted. |
 | `kern_inferred_slip.csv` | Each Kern County vertical displacement [back-projected](glossary.md#back-projection) through every dip's fit. |
+| `historic_events.csv` | One row per field measurement — the FDHI flatfile, SURE and Kern County unioned, each row keeping whichever of deformation-zone width or scarp height it carries — drawn as the reference lines on the [distributions](dashboards/distributions.md) histograms. |
 
 !!! info "Raw data is not redistributed here"
     The raw inputs are not committed to the repository — they come from the
@@ -119,9 +130,10 @@ the project's tests pin rather than recomputing them in the browser.
 These dashboards are a convenience layer. If you use the data in your own
 work, please cite the underlying publications and archives rather than this
 site — the dashboards only repackage them, and the papers are the citable
-record.
+record. Any DOI issued for this site or its source code identifies the
+*software* that builds these views; it does not replace the citations below.
 
-**The study itself:**
+**Please cite the study itself as:**
 
 > Chiama, K., Bednarz, W., Moss, R., Plesch, A., and Shaw, J. H. (2025).
 > "Quantifying relationships between fault parameters and rupture
@@ -168,6 +180,10 @@ et al. (2019).[^sure]
 - **[Model vs reality](dashboards/model-vs-reality.md)** — these datasets on
   one plot.
 - **[The paper](paper.md)** — which figure each dashboard replaces.
+
+<p class="cite-open-row"><button class="cite-open" type="button">How to cite</button></p>
+
+--8<-- "includes/cite-root.md"
 
 [^abstract]: Chiama et al. (2025), abstract — see [The paper](paper.md).
 [^spec]: `notes/dashboard-3-build-spec.md` in the source repository.
