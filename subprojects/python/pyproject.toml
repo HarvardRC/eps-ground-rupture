@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "eps-ground-rupture"
-version = "0.1.0"
-description = "Data pipelines for 2D DEM earthquake-rupture analysis, producing tidy datasets for Tableau and Apache Superset dashboards."
+version = "0.2.0"
+description = "Data pipeline for 2D DEM earthquake-rupture analysis: tidy Parquet, DuckDB views pinned by tests, and the CSV exports behind the published Tableau dashboards."
 authors = ["Michael Bouzinier <michael.bouzinier@forome.org>"]
 license = "Apache-2.0"
 readme = "README.md"

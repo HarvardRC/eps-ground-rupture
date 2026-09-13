@@ -23,7 +23,7 @@ families plus non-chart illustrations. Summary:
 | 4. Mean ± σ summary | Typical values and spreads per scarp class at a glance? | ✅ built (Dashboard 5) |
 | 5. Per-event boxplots | How variable are field measurements within each event? | ✅ built (Dashboard 3) |
 | 6. Regression + inference | What slip would produce an observed displacement? | ✅ built (Dashboard 4) |
-| Illustrations (static images) | Context: photos, schematics, model snapshots | **unblocked 2026-08-20** — reuse granted, six figures to embed (build order #6) |
+| Illustrations (static images) | Context: photos, schematics, model snapshots | ✅ on the site 2026-08-26 (Figs. 1–5, 7; build order #6) |
 
 (The earlier A–E "theme" taxonomy is superseded by the families; the
 mapping is at the bottom of `chart-families.md`.)
@@ -88,7 +88,7 @@ mapping is at the bottom of `chart-families.md`.)
      **default view on Tableau Public moved to
      `Per-EventBoxplotsModelvsField`** (was `…VSSUREweb`) — kept
      deliberately, since the toggle lives there; embeds unaffected.
-     Deploys with the pending dev→main PR.
+     Deployed with PR #11 (merged 2026-08-27).
 4. ~~**Dashboard 4 — Regression & inference** (family 6)~~ — **built &
    published** (2026-08-04): "Slip Regression & Kern Inference"
    (800×850) in `dem-slip-regression-public.twb` (**public-only**
@@ -109,21 +109,46 @@ mapping is at the bottom of `chart-families.md`.)
    needles (LOD-sized, data-driven), plus the Fig-8 mean ± σ
    reconstruction (candidate populations pinned in
    `notes/dashboard-5-build-spec.md`). Spec: `dashboard-5-build-spec.md`.
-   - **Open (unblocked 2026-08-20): validate the Fig-8 reconstruction
-     against Kristen's original code.** She found and sent it — two parts,
-     which "make the required dataframes, process the averages and stdev
+   - **Fig-8 validation — code read 2026-09-10; sheet rebuild pending.**
+     Kristen's two notebooks (sent 2026-08-26, now in `legacy/` as
+     `DEM_slip_averages_figure - part {1,2}.ipynb`, with her rendered
+     `Homogeneous_Heterogeneous_Averages_ScarpClass_FDHI.pdf`) settle O2:
+     Figure 8 is **mean ± sample σ per 0.05 m slip increment** per scarp
+     class — `s < Slip <= s + 0.05` on a 0.05 grid, `statistics.stdev`,
+     NaNs dropped per measure — with a per-class polynomial fit over the
+     bin means (degree 2 for scarp height and Us − Ud, 3–5 for DZW and
+     scarp dip). **Neither candidate A nor B**: the pooled per-class
+     summary the published sheet shows is a different statistic. The
+     `dem_slip_bin_stats` view (13th view; `dist/csv/dem_slip_bin_stats.csv`,
+     555 rows) reproduces the notebook to 1e-9 (`tests/test_dem_slip_bin_stats.py`).
+     **Shipped 2026-09-13** (rev 1.2): the `Mean ± σ vs slip` sheet joins
+     the pooled panel on an 800×1400 dashboard, both retitled to name what
+     they summarise. Two departures, both flagged for the author team: the notebook trims
+     each class to a hand-picked starting `s`, and reads
+     `Convert_Scarp_Dip` from an older table vintage
+     (`4_05_24_homogeneous_heterogeneous.csv`) that `DEM_dataset.csv`
+     lacks — we use `Scarp_Dip`. Remaining: Michael rebuilds the sheet
+     as mean-vs-slip with ±σ envelopes (`internal/PLAN.md`), then the
+     site caveat changes from "reconstruction" to "per the original
+     code". The earlier text below is kept for the record. She wrote:
+     the two parts "make the required dataframes, process the averages and stdev
      per increment of slip, and then group the data into additional
      subgroups", with Figure 8 itself in the final subsection of part 2.
-     Her phrase *per increment of slip* points at the all-stages
-     population (candidate A, the current default) rather than final-state
-     per trial, but that is an inference from the description and the code
-     decides it. Read it, match the population and binning, then either
+     Her phrase *per increment of slip* pointed at the all-stages
+     population (candidate A, the shipped default) rather than final-state
+     per trial, but that was an inference from the description and the code
+     decided it. Read it, match the population and binning, then either
      drop or sharpen the "this is a reconstruction" caveat on the
      Distributions page. Figure 8 itself (and Fig. 15, whose Kern needles
      D5 follows) sit in the local `legacy/` folder as the visual check.
-6. **Static-image embedding** — **unblocked 2026-08-20; now the largest
-   open piece of site work.** (Was lowest priority while rights were
-   unknown.)
+6. ~~**Static-image embedding**~~ — **done 2026-08-26**: the six
+   illustrations are on `figures.md` with the Sage-form citation and a
+   figures-specific reuse notice, linked from the crosswalk on `paper.md`;
+   the site's open-access framing was narrowed to the typeset article.
+   Open remainder: confirm the third-party photographs inside Figs. 1–2
+   with Kristen (`DEPLOY.md`); Andreas's light-adaptation idea stays
+   deferred. The plan as it stood on 2026-08-20 is kept below.
+   (Was lowest priority while rights were unknown.)
    - **Rights: granted, with conditions.** Kristen established from Sage's
      Green Open Access policy that figures from the **Accepted Manuscript**
      may be posted on any website; Andreas confirmed the reading. She sent
@@ -253,13 +278,13 @@ belongs in the same plan.
   `subprojects/mkdocs/EMBEDS.md`. This is what turned the DOI question from
   a "no" into a "yes" — Kristen's hesitation was precisely that people would cite the
   dashboards instead of the papers.
-- **Add the SRL paper to the citation list** — Kristen, 2026-08-20: "maybe
+- ~~**Add the SRL paper to the citation list**~~ — **done 2026-09-10**:
+  Chiama, Plesch & Shaw (2025), *SRL* 96(6), 3473–3489, DOI
+  10.1785/0220250173 (verified against the PDF and Crossref), in
+  `cite.md`, the Data page and README, marked as related work — not a
+  source for anything currently on the site. Kristen, 2026-08-20: "maybe
   also list the SRL paper as additional information for now until we decide
-  whether or not to post the 3D Case 1–3 models." Needs the exact reference
-  (SRL vol. 96, issue 6, p. 3473, 2025 — full author list and DOI still to
-  be taken from her PDF; the SSA site blocks automated fetching). Goes in
-  `cite.md` and the Data page's citation list, marked as related work rather
-  than as a source for anything currently on the site.
+  whether or not to post the 3D Case 1–3 models."
 - **DOI for the code and site — approved in principle, route not final.**
   Kristen: "I think it would be valuable to add a doi to cite this code so
   users have full access for reproducibility and to set up their own

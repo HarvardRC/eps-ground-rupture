@@ -165,6 +165,8 @@ val csvViews = listOf(
     // Like fdhi_measurements, needs the raw-flatfile lane: where the view is
     // absent the task exits 2 naming the available views (views.require_view).
     "historic_events",
+    // Dashboard 5 — Fig. 8 mean ± σ per scarp class per 0.05 m slip bin.
+    "dem_slip_bin_stats",
 )
 
 val csvExportTasks = csvViews.map { view ->

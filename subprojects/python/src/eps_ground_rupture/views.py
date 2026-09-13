@@ -20,6 +20,8 @@ this file via the DuckDB JDBC driver and sees these logical tables:
 * `historic_events` — field measurements (FDHI flatfile / SURE / Kern),
   one row per measurement, for Fig-15-style reference lines on the
   Dashboard-5 histograms (present only alongside `fdhi_measurements`)
+* `dem_slip_bin_stats` — paper Fig. 8: mean ± sample σ of the four scarp
+  measures per scarp class per 0.05 m slip increment (bins with n ≥ 2).
 
 The unified view is what makes the cross-source DZW-vs-Scarp-Height
 scatter natural in Tableau: every row has `source`, `dzw`,
@@ -344,6 +346,76 @@ def build_duckdb_views(
         )
 
         # ------------------------------------------------------------------
+        # Dashboard 5 — Fig. 8: mean ± σ per scarp class per slip increment
+        # ------------------------------------------------------------------
+        # The paper's Figure 8 is NOT a per-class summary: Kristen's notebook
+        # (legacy/"DEM_slip_averages_figure - part 1.ipynb", cell 4) bins
+        # every model stage by slip — rows with `s < Slip <= s + 0.05` for
+        # `s` on a 0.05 m grid — and takes the mean and *sample* standard
+        # deviation of scarp height, `Us - Ud`, DZW and scarp dip per scarp
+        # class per bin (NaNs dropped per measure; `statistics.stdev`, so a
+        # bin needs at least two rows). Part 2 then plots mean vs slip with
+        # ±σ envelopes and a polynomial fit per class — degree 2 for scarp
+        # height and Us - Ud, 3-5 for DZW and scarp dip, hand-picked per
+        # series. This view is that table; the fits stay Tableau-side
+        # (trend lines are fine for a per-class curve the reader toggles),
+        # which also means a single trend-line setting cannot reproduce
+        # the paper's per-series degrees exactly.
+        #
+        # Bin edge: right-closed, so `slip_bin` is the notebook's `s` — the
+        # LOWER edge — and a stage at exactly 0.10 m lands in the 0.05 bin.
+        # Slip values are not on an exact 0.05 grid (e.g. 0.0524, 5.0135), so
+        # the bins genuinely aggregate. Plain CEIL(Slip / 0.05) - 1: on every
+        # exact grid point k*0.05 the IEEE quotient never exceeds k, so no
+        # rounding guard is needed, and a guard would move a stage sitting a
+        # hair above an edge into the lower bin where the notebook's raw
+        # `Slip > s` keeps it in the upper one. No classed stage in the data
+        # lies within 1e-6 of an edge, so this is about fidelity, not output.
+        #
+        # The n >= 2 gate is on ROWS; the notebook's statistics.stdev needs
+        # two NON-NULL values per measure and would raise otherwise. Where a
+        # bin has >= 2 rows but < 2 values for one measure, this view emits
+        # sd = NULL for that measure instead. No such bin exists in the data
+        # (minimum non-null count per measure per bin is 2).
+        #
+        # Not reproduced from the notebook: (a) it starts each class at a
+        # hand-picked `s` (0.25 / 0.40 / 0.25 / 0.25 / 0.65 / 1.85) — we emit
+        # every bin with n >= 2 and leave trimming to the workbook; (b) it
+        # reads `Convert_Scarp_Dip`, a column of an older table vintage that
+        # `DEM_dataset.csv` lacks — we use `Scarp_Dip` (open question for
+        # the author team; see internal/PLAN.md).
+        con.execute(
+            f"""
+            CREATE OR REPLACE VIEW dem_slip_bin_stats AS
+              WITH binned AS (
+                SELECT "Scarp_Class"  AS scarp_class,
+                       ROUND((CEIL("Slip" / 0.05) - 1) * 0.05, 2) AS slip_bin,
+                       "Scarp_Height" AS scarp_height,
+                       "Us - Ud"      AS us_ud,
+                       "DZW"          AS dzw,
+                       "Scarp_Dip"    AS scarp_dip
+                FROM read_parquet({_sql_literal(parquet_files['dem'])})
+                WHERE "Scarp_Class" IS NOT NULL AND "Slip" > 0
+              )
+              SELECT scarp_class,
+                     slip_bin,
+                     COUNT(*)                  AS n,
+                     AVG(scarp_height)         AS mean_scarp_height,
+                     STDDEV_SAMP(scarp_height) AS sd_scarp_height,
+                     AVG(us_ud)                AS mean_us_ud,
+                     STDDEV_SAMP(us_ud)        AS sd_us_ud,
+                     AVG(dzw)                  AS mean_dzw,
+                     STDDEV_SAMP(dzw)          AS sd_dzw,
+                     AVG(scarp_dip)            AS mean_scarp_dip,
+                     STDDEV_SAMP(scarp_dip)    AS sd_scarp_dip
+              FROM binned
+              GROUP BY 1, 2
+              HAVING COUNT(*) >= 2
+              ORDER BY 1, 2
+            """
+        )
+
+        # ------------------------------------------------------------------
         # Dashboard 5 — historic reference values (paper Fig. 15 flavor)
         # ------------------------------------------------------------------
         # One row per FIELD MEASUREMENT, not per event: nb2 draws its
@@ -565,4 +637,41 @@ def athena_historic_events_view_sql() -> str:
         "       IF(dzw > 0, dzw), IF(vertical > 0, vertical),\n"
         f"       CAST({KERN_MAGNITUDE} AS double)\n"
         "FROM kern_combined WHERE dzw > 0 OR vertical > 0;\n"
+    )
+
+
+def athena_dem_slip_bin_stats_view_sql() -> str:
+    """Athena (Trino) twin of the DuckDB `dem_slip_bin_stats` view.
+
+    Same binning (`s < slip <= s + 0.05`, `slip_bin` = the lower edge) and
+    the same sample standard deviation — Trino spells it `stddev_samp` too
+    and `ceiling` for `CEIL`. Against the sanitized column names, so
+    `Us - Ud` is `us_ud`.
+    """
+    return (
+        "-- Paper Fig. 8: mean and sample SD of the four scarp measures per\n"
+        "-- scarp class per 0.05 m slip increment (right-closed bins; slip_bin\n"
+        "-- is the lower edge). Bins with fewer than two stages are dropped\n"
+        "-- (statistics.stdev in the source notebook needs two values).\n"
+        "CREATE OR REPLACE VIEW dem_slip_bin_stats AS\n"
+        "SELECT scarp_class,\n"
+        "       slip_bin,\n"
+        "       COUNT(*)                  AS n,\n"
+        "       AVG(scarp_height)         AS mean_scarp_height,\n"
+        "       stddev_samp(scarp_height) AS sd_scarp_height,\n"
+        "       AVG(us_ud)                AS mean_us_ud,\n"
+        "       stddev_samp(us_ud)        AS sd_us_ud,\n"
+        "       AVG(dzw)                  AS mean_dzw,\n"
+        "       stddev_samp(dzw)          AS sd_dzw,\n"
+        "       AVG(scarp_dip)            AS mean_scarp_dip,\n"
+        "       stddev_samp(scarp_dip)    AS sd_scarp_dip\n"
+        "FROM (\n"
+        "  SELECT scarp_class,\n"
+        "         ROUND((ceiling(slip / 0.05) - 1) * 0.05, 2) AS slip_bin,\n"
+        "         scarp_height, us_ud, dzw, scarp_dip\n"
+        "  FROM dem\n"
+        "  WHERE scarp_class IS NOT NULL AND slip > 0\n"
+        ") b\n"
+        "GROUP BY scarp_class, slip_bin\n"
+        "HAVING COUNT(*) >= 2;\n"
     )

@@ -294,3 +294,8 @@ _to_delete/
 # Tableau "Save As" companion folders (local extract cache) — never committed
 dashboards/tableau/*.twb Files/
 dashboards/tableau/*.twbx
+
+# Session-local planning documents for Claude Code / future sessions.
+# Never committed: they carry working-state, drafts to the author team, and
+# machine-specific paths. The live one is internal/PLAN.md.
+/internal/

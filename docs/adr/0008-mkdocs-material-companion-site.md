@@ -20,6 +20,14 @@ citation and reproduce no typeset figures unless rights are granted
 verifiable — quotes checked against the paper, numbers pinned by pipeline
 tests ([ADR-0003](0003-duckdb-as-the-analytical-engine.md)).
 
+> **Amendment 2026-09-10.** Both pending items above were settled on
+> 2026-08-20: the byline is Kristen Chiama, Andreas Plesch and John H.
+> Shaw, and reuse of the six illustrations from the Accepted Manuscript
+> was granted under Sage's Green-OA terms; they went live 2026-08-26. The
+> article itself remains not open access. Details in
+> `subprojects/mkdocs/DEPLOY.md`. The context is left as written — it
+> records the constraints the decision was made under.
+
 ## Decision
 
 **MkDocs with the Material theme**, in `subprojects/mkdocs/`:

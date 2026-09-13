@@ -52,17 +52,29 @@ def test_clean_fdhi_reproduces_the_shipped_extract(raw):
 
 def test_fdhi_measurements_is_a_real_boxplot_population(raw):
     """The per-event base must be far richer than the 19-row scatter extract
-    and cover the events the notebook's boxplot cells drew (incl. Bohol,
-    which the extract lacks entirely)."""
+    and cover the events the notebook's boxplot cells drew — including
+    Bohol, which the extract lacks entirely.
+
+    Bohol is a *scarp-height-only* event: every one of its 122 flatfile rows
+    carries the -999 sentinel for `fzw_central_meters` and
+    `vs_central_meters`, and 121 carry a positive `sh_central_meters`.
+    nb2 agrees — its Bohol overlay is built from the scarp-height subset
+    (`df_FDHIsh_Bohol`, cell 22; the FZW one comes out empty) — so Bohol
+    must appear in the SH population and cannot appear in the FZW one.
+    Asserting the latter was the bug this test carried from 2026-08-15 to
+    2026-09-10."""
     base = prep.fdhi_measurements(raw)
     shipped = io.load_fdhi()
     assert len(base) > len(shipped) * 5
 
     fzw = base[(base["fzw_central_meters"] > 0)
                & (base["fzw_central_meters"] < prep.FDHI_FZW_MAX_METERS)]
-    events = set(fzw["eq_name"])
-    assert {"Wenchuan", "Kashmir", "Kern"} <= events
-    assert "Bohol" in events
+    assert {"Wenchuan", "Kashmir", "Kern"} <= set(fzw["eq_name"])
+    assert "Bohol" not in set(fzw["eq_name"])
+
+    sh = base[base["sh_central_meters"] > 0]
+    assert "Bohol" in set(sh["eq_name"])
+    assert (sh["eq_name"] == "Bohol").sum() == 121
 
     # Scarp-height boxplots become possible at all: the extract has zero
     # positive sh_central values, the base must have plenty.

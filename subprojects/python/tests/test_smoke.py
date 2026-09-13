@@ -1,5 +1,6 @@
 """Smoke tests: package imports, paths resolve, IO + export + DDL + views all work."""
 
+import statistics as st
 from pathlib import Path
 
 import duckdb
@@ -164,9 +165,16 @@ def test_athena_ddl_uses_sanitized_names_and_index_access(tmp_path: Path):
 def _views_fixture_frames() -> dict[str, pd.DataFrame]:
     # Slip / VD_HW are what the dem_regression views fit; they are part of the
     # real dem table, so the fixture carries them or those views fail to bind.
-    dem = pd.DataFrame({"DZW": [1.0], "Scarp_Height": [0.5], "Scarp_Class": ["Simple"],
-                        "Fault_Dip": [30], "Cohesion": ["R1"], "Set": ["Homogeneous"],
-                        "Slip": [2.0], "VD_HW": [1.0]})
+    # Us - Ud / Scarp_Dip are what dem_slip_bin_stats summarises; two stages
+    # in ONE right-closed 0.05 m bin — (2.00, 2.05], so 2.01 and 2.03, not
+    # 2.0, which belongs to (1.95, 2.00] — so its `n >= 2` gate lets a row
+    # through and test_build_duckdb_views_creates_unified_view can assert it.
+    dem = pd.DataFrame({"DZW": [1.0, 1.2], "Scarp_Height": [0.5, 0.6],
+                        "Scarp_Class": ["Simple", "Simple"],
+                        "Fault_Dip": [30, 30], "Cohesion": ["R1", "R1"],
+                        "Set": ["Homogeneous", "Homogeneous"],
+                        "Slip": [2.01, 2.03], "VD_HW": [1.0, 1.01],
+                        "Us - Ud": [0.1, 0.12], "Scarp_Dip": [40.0, 41.0]})
     # NB: the second FDHI row has valid measures but the -999
     # missing-magnitude sentinel — the unified view must null it.
     fdhi = pd.DataFrame({"fzw_central_meters": [10.0, 4.0],
@@ -213,9 +221,19 @@ def test_build_duckdb_views_creates_unified_view(tmp_path: Path):
         mags = dict(con.execute(
             "SELECT coalesce(eq_name, source), magnitude FROM unified_observations"
         ).fetchall())
+        # The Fig-8 view: both fixture stages sit in the (2.00, 2.05] bin.
+        slip_bins = con.execute(
+            "SELECT scarp_class, slip_bin, n, mean_scarp_height, sd_scarp_height "
+            "FROM dem_slip_bin_stats"
+        ).fetchall()
     finally:
         con.close()
-    assert rows == [("DEM", 1), ("FDHI", 2), ("Kern", 1), ("SURE", 2)]
+    assert rows == [("DEM", 2), ("FDHI", 2), ("Kern", 1), ("SURE", 2)]
+    assert len(slip_bins) == 1
+    cls, edge, n, mean_sh, sd_sh = slip_bins[0]
+    assert (cls, edge, n) == ("Simple", 2.0, 2)
+    assert mean_sh == pytest.approx(0.55)
+    assert sd_sh == pytest.approx(st.stdev([0.5, 0.6]))
     assert geo["DEM"] is None
     assert geo["FDHI"] == 31.0
     assert geo["SURE"] == -19.8  # MIN over the two SURE fixture rows
@@ -265,8 +283,12 @@ def test_build_duckdb_views_optional_fdhi_measurements(tmp_path: Path):
         processed_dir=processed_dir, duckdb_path=tmp_path / "a.duckdb")
     assert "fdhi_measurements" not in view_names(without)
 
+    # historic_events (2026-08-15) reads fzw/vs/magnitude from this table,
+    # so the fixture must carry them or the view build fails to bind.
     export.export_tidy(
-        pd.DataFrame({"eq_name": ["Wenchuan"], "sh_central_meters": [1.0]}),
+        pd.DataFrame({"eq_name": ["Wenchuan"], "sh_central_meters": [1.0],
+                      "fzw_central_meters": [12.0], "vs_central_meters": [2.0],
+                      "magnitude": [7.9]}),
         "fdhi_measurements", out_dir=processed_dir)
     with_it = views.build_duckdb_views(
         processed_dir=processed_dir, duckdb_path=tmp_path / "b.duckdb")

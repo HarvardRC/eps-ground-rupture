@@ -21,6 +21,14 @@ The full list, with DOIs, is under
 Any DOI issued for this site or its source code identifies the
 *software* and the website, and does not replace the citations above.
 
+Related work, for the wider project's **3D** models — not a source for
+anything shown here:
+
+> Chiama, K., Plesch, A., and Shaw, J. H. (2025). "Along-Strike Variability of
+> Surface Deformation on Thrust and Reverse Fault Ruptures: Insights from 3D
+> Distinct Element Method Models." *Seismological Research Letters* 96(6),
+> 3473–3489. DOI: [10.1785/0220250173](https://doi.org/10.1785/0220250173)
+
 </div>
 
 <noscript>

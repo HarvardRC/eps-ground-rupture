@@ -126,7 +126,7 @@ export.export_tidy
         ▼
 data/processed/<table>/data.parquet        the tidy analytical store
         │
-        ├──► views.build_duckdb_views ──► dashboards/duckdb/eps.duckdb   (12 views)
+        ├──► views.build_duckdb_views ──► dashboards/duckdb/eps.duckdb   (13 views)
         │             │
         │             └──► csvexport ──► dist/csv/<view>.csv ──► Tableau Public
         │                                                        └──► embedded in the site
@@ -204,7 +204,7 @@ One DuckDB view → `dist/csv/<view>.csv`. This is the publication step.
 poetry run egr-csv --view unified_observations
 ```
 
-Twelve views are wired up as Gradle tasks (`csvViews` in
+Thirteen views are wired up as Gradle tasks (`csvViews` in
 `subprojects/python/build.gradle.kts`); `csvExportAll` refreshes all of
 them, which is what you want after any `egr-build`, since the workbooks
 read several files each. Note that a bare `csvExportAll` exports from
@@ -341,11 +341,12 @@ That work belongs in Tableau, so it has deliberately not been ported.
 - **Kern County has no cleaning routine.** `io.load_kern_combined` is a
   thin `read_csv`; the derived work happens downstream in the
   `kern_combined_geo` and `kern_inferred_slip` views.
-- **All five dashboards are built** (Dashboard 5, 2026-08-15). What is
-  left is polish and the open questions in
-  `notes/dashboard-5-build-spec.md`; build-order item #6 (static images)
-  is parked on the figure-rights question. `notes/Roadmap.md` has the
-  statuses.
+- **All five dashboards are built** (Dashboard 5, 2026-08-15) and the six
+  paper illustrations are on the site (2026-08-26). What is left is the
+  Dashboard 5 Fig-8 rebuild (the `dem_slip_bin_stats` view exists; the
+  Tableau sheet still shows the pooled per-class summary) and the polish
+  in `notes/design-review-2026-08-16.md`. `notes/Roadmap.md` has the
+  statuses; `internal/PLAN.md` (local, untracked) the working plan.
 - **Published dashboards are slow.** Candidate levers are recorded in
   `TODO.md`; the biggest single one — Dashboard 3's two DEM boxplot sheets
   drawing ~330k disaggregated marks each — was pulled 2026-08-16

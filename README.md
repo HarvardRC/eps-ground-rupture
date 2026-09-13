@@ -9,7 +9,13 @@ and a companion web site.
 - **The paper**: Chiama et al. (2025), *Earthquake Spectra* **41**(5),
   3977–4014, DOI
   [10.1177/87552930251346434](https://doi.org/10.1177/87552930251346434)
-  — not open access; no paper content is reproduced in this repo.
+  — not open access. Six of its figures are shown on the site from the
+  authors' accepted manuscript under the publisher's sharing terms (see
+  Licensing below); nothing from the typeset version is reproduced.
+- **Related work** (the 3D models; not a source for these dashboards):
+  Chiama, Plesch & Shaw (2025), *Seismological Research Letters* **96**(6),
+  3473–3489, DOI
+  [10.1785/0220250173](https://doi.org/10.1785/0220250173)
 
 The legacy material — two Jupyter notebooks and the accompanying paper —
 lives under `legacy/` as local reference artifacts (gitignored). This repo
@@ -129,7 +135,7 @@ Then:
   Gradle tool surface, setup, known gaps
 - `docs/adr/` — active decisions + [dead-ends.md](docs/adr/dead-ends.md)
 - `docs/datasets.md` — the input datasets (DEM, FDHI, SURE, Kern) and the
-  twelve derived views
+  thirteen derived views
 - `docs/dashboards/` — per-dashboard developer docs: data contracts,
   calculated fields, how to edit a workbook safely; `tableau-editing-notes.md`
   collects the `.twb` traps that apply to every workbook

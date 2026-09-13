@@ -24,7 +24,7 @@ acceptance counts lived at `notes/2026-08-01/dashboard-3-tableau-public-build.md
 | View | Size | Role |
 |------|------|------|
 | `fdhi_measurements` | 4,121 rows × 136 cols, **25 events** | Boxplot backbone: `fzw_central_meters`, `sh_central_meters`, `vs_central_meters` per `eq_name`; per-measurement `magnitude` (sentinels already NULLed in the view). `*_low/_high_meters` triplets available for whisker sanity checks. Row-level filters (Principal, positivity, fzw<50) are **deliberately left to the workbook** — see the `prep.fdhi_measurements` docstring. |
-| `sure_enriched` | 1,402 rows × 76 cols | SURE `FNC` and `SH` per event; event `magnitude` lookup-joined (this view supersedes the Roadmap's earlier "via `unified_observations`" wording — unified's SURE slice is only 56 rows). Two event names carry a trailing NBSP (`Coalinga (Nuñez)`, `Tennant Creek`); Coalinga's magnitude is NULL pending the `SURE_EVENT_MAGNITUDES` confirm/None review. |
+| `sure_enriched` | 1,402 rows × 76 cols | SURE `FNC` and `SH` per event; event `magnitude` lookup-joined (this view supersedes the Roadmap's earlier "via `unified_observations`" wording — unified's SURE slice is only 56 rows). Two event names carry a trailing NBSP (`Coalinga (Nuñez)`, `Tennant Creek`); every SURE magnitude is sourced from Nurminen et al. (2022) since 2026-08-06 (Coalinga = 5.4). |
 | `dem` | 346,834 rows | Context distribution (histogram / reference band) alongside the event boxplots, per the Fig.-13 / nb2-cell-25 layout. |
 
 Explicitly **not** the source: `fdhi_cleaned` (19 rows — that's the
@@ -132,5 +132,6 @@ XML review, and verification.
   the walkthrough). **Re-resolved 2026-08-20 in the author review: yes — the
   13-row window becomes the default, with the full range behind the
   `Show widths > 50 m` toggle.** See worksheet #1 above.
-- [ ] Whether Dashboard 3 shares a workbook with future #5
-  (distributions) or stays standalone (current convention: standalone).
+- [x] ~~Whether Dashboard 3 shares a workbook with future #5
+  (distributions) or stays standalone~~ — standalone; Dashboard 5 shipped
+  2026-08-15 as its own public-only workbook.

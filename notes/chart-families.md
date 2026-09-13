@@ -116,8 +116,9 @@ The only family that needs analytical pre-compute — see the
 
 Paper Figs. 1–5, 7: photographs of surface ruptures, scarp-morphology
 schematics, particle-mechanics diagrams, DEM simulation snapshots.
-Not data charts — candidates for **static-image embedding** on the
-companion site (`paper.md`, rights pending — see Roadmap #6).
+Not data charts — embedded on the companion site since 2026-08-26
+(`figures.md`, accepted-manuscript originals under the publisher's
+sharing terms — see Roadmap #6 and `subprojects/mkdocs/DEPLOY.md`).
 
 ## Cross-reference: families ↔ legacy roadmap themes
 
@@ -131,4 +132,4 @@ The Roadmap originally used themes A–E; this taxonomy refines them:
 | 4. Mean ± σ summary | — (new) | ✅ Dashboard 5 built |
 | 5. Per-event boxplots | C (implicit) | ✅ Dashboard 3 built |
 | 6. Regression + inference | E | ✅ Dashboard 4 built |
-| Illustrations | — (new) | parked (rights; site, not dashboards) |
+| Illustrations | — (new) | ✅ on the site (Figs. 1–5, 7; 2026-08-26) |

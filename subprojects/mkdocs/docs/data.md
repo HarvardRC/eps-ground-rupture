@@ -155,8 +155,15 @@ DesignSafe-CI:
   DesignSafe-CI.
   DOI: [10.17603/ds2-gfsj-pp60](https://doi.org/10.17603/ds2-gfsj-pp60)
 
-**The wider project's 3D DEM models** (not part of these dashboards), also
-on DesignSafe-CI:
+**The wider project's 3D DEM models** (not part of these dashboards) are
+described in
+
+- Chiama, K., Plesch, A., and Shaw, J. H. (2025). "Along-Strike Variability of
+  Surface Deformation on Thrust and Reverse Fault Ruptures: Insights from 3D
+  Distinct Element Method Models." *Seismological Research Letters* 96(6),
+  3473–3489. DOI: [10.1785/0220250173](https://doi.org/10.1785/0220250173)
+
+and deposited on DesignSafe-CI:
 
 - Chiama, K., Plesch, A., and Shaw, J. H. (2025a). "Case 3 — Variable Fault
   Gouge in 3D DEM Models."

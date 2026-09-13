@@ -28,8 +28,10 @@ entirely.) The method models sediment as many interacting particles, so a
 fault zone emerges from the physics rather than being prescribed.
 
 **346,834 rows across 3,434 trials.** A row is one *model stage*, not one
-experiment: each trial is measured every 0.05 m of slip, so a single trial
-contributes dozens of rows as the rupture develops. Counting rows counts
+experiment: every trial has exactly **101 rows** — a `Slip = 0` stage and
+then one roughly every 0.05 m up to ~5 m. The `Slip` values are not on
+an exact grid (0.0524, 0.0525, … 5.0135), which matters wherever slip is
+binned. Counting rows counts
 stages; `COUNT(DISTINCT Trial)` counts experiments. 2,459 trials are
 Homogeneous, 975 Heterogeneous.
 
@@ -195,9 +197,9 @@ different front end) builds on the Parquet, not on the CSVs.
 
 ## Derived views
 
-`views.build_duckdb_views` creates **12 views** in
+`views.build_duckdb_views` creates **13 views** in
 `dashboards/duckdb/eps.duckdb`. Five are passthroughs over the Parquet
-above; the other seven are where the analysis lives.
+above; the other eight are where the analysis lives.
 
 | View | Rows | What it adds |
 |------|------|--------------|
@@ -212,6 +214,7 @@ above; the other seven are where the analysis lives.
 | `dem_regression` | 7 | one OLS fit of `VD_HW` on `Slip` per `Fault_Dip`: `n`, `slope`, `intercept`, `r2` |
 | `dem_regression_lines` | 14 | two endpoint rows per dip, spanning that dip's own `Slip` range |
 | `kern_inferred_slip` | 112 | each fit inverted — what slip would produce Kern's measured verticals — for all 7 dips × 16 non-null verticals |
+| `dem_slip_bin_stats` | 555 | paper Fig. 8: mean ± sample σ of scarp height, `Us - Ud`, DZW and scarp dip per scarp class per 0.05 m slip increment (`s < Slip <= s + 0.05`; bins with n ≥ 2). From Kristen's notebook, 2026-09-10 |
 | `historic_events` | 2,616 | `UNION ALL` of `fdhi_measurements`, `sure`, `kern_combined` onto `(source, eq_name, dzw, scarp_height, magnitude)` — one row per field measurement, the reference lines behind Dashboard 5; a row survives if **either** axis is `> 0` (unlike `unified_observations`, which needs both). Exists only alongside `fdhi_measurements`. By source: FDHI 2,392 / SURE 203 / Kern 21 |
 
 Row counts are as of 2026-08-18 with the current `data/raw/`; the
@@ -228,7 +231,7 @@ fixtures rather than the real inputs, so nothing catches a drift here.
 Re-run the counts rather than trusting this table.
 
 `egr-csv` exports any of these to `dist/csv/<view>.csv`;
-`./gradlew :subprojects:python:csvExportAll` does all twelve. Which
+`./gradlew :subprojects:python:csvExportAll` does all thirteen. Which
 dashboard reads which file is documented per family in
 [`docs/dashboards/`](dashboards/).
 

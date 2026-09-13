@@ -91,13 +91,13 @@ those exports.
 
 ## Open questions
 
-- [ ] Combine scatter + lines + stars in one sheet (multi-source
-  layering via dual axis) vs a layered dashboard of transparent
-  sheets — decide during the build; spec assumes one sheet with
-  blended secondary sources or a lines-over-scatter dual axis.
-- [ ] Expose the dip choice for Kern stars as a viewer parameter, or
-  pin to 30 for figure fidelity (default: pin 30, parameter later).
+- [x] ~~Combine scatter + lines + stars in one sheet vs a layered
+  dashboard~~ — one dual-axis sheet over a three-way CSV union
+  (`docs/dashboards/slip-regression.md`).
+- [x] ~~Expose the dip choice for Kern stars as a viewer parameter, or
+  pin to 30~~ — exposed, as `Kern Dip (measured: 30°)`, default 30;
+  Kristen's framing (2026-08-06): 30° is the directly measured dip.
 - [ ] Axis ranges: auto vs fixed to the paper's framing — check the
   typeset Fig. 14 before publish polish.
-- [ ] Optional secondary fit `Scarp_Height ~ DZW` (Roadmap mentions
-  it as optional) — defer unless Dashboard 5 wants it.
+- [x] ~~Optional secondary fit `Scarp_Height ~ DZW`~~ — never needed;
+  Dashboard 5 did not want it.
