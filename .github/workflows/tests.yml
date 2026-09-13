@@ -1,0 +1,53 @@
+# Runs the Python test suite. Separate from mkdocs.yml so the Pages
+# concurrency group and its deploy permissions stay untouched, and so a
+# docs-only push does not spin up pandas/pyarrow/duckdb.
+#
+# Tests that need the gitignored inputs or build artifacts (data/raw,
+# data/processed, dashboards/duckdb/eps.duckdb, dashboards/sql/*.sql) skip
+# when those are absent — 34 skips on a fresh clone — so this job exercises
+# exactly what a fresh clone can: the fixture-driven contracts.
+
+name: Tests
+
+on:
+  push:
+    branches: [main, 'dev-v.*']
+    paths:
+      - 'subprojects/python/**'
+      - '.github/workflows/tests.yml'
+  pull_request:
+    paths:
+      - 'subprojects/python/**'
+      - '.github/workflows/tests.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+
+      - name: Install Poetry
+        run: pipx install poetry
+
+      # Same venv-first dance as mkdocs.yml: poetry.toml sets
+      # virtualenvs.create = false, so Poetry installs into the ACTIVE venv
+      # and would otherwise fight the runner's root-owned system packages.
+      # --with dev brings pytest; --without docs skips the site toolchain.
+      - name: Install package and test dependencies
+        working-directory: subprojects/python
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          poetry install --with dev --without docs
+
+      - name: Run pytest
+        working-directory: subprojects/python
+        run: .venv/bin/python -m pytest -q -p no:cacheprovider

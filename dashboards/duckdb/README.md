@@ -14,7 +14,7 @@ Regeneration is fast because the views don't copy data.
 
 ## Views exposed
 
-**Currently 12** (10 when the optional FDHI flatfile is absent —
+**Currently 13** (11 when the optional FDHI flatfile is absent —
 `fdhi_measurements` and `historic_events` are skipped together). The
 authoritative list is
 `subprojects/python/src/eps_ground_rupture/views.py` — `build_duckdb_views`
@@ -40,6 +40,7 @@ Equation 2) and Dashboard 5's reference lines (Fig. 15):
 | `dem_regression` | One OLS fit of `VD_HW` on `Slip` per `Fault_Dip`: `n`, `slope`, `intercept`, `r2`. Note DuckDB's `regr_*` take **(y, x)** — y first. |
 | `dem_regression_lines` | Two endpoint rows per dip spanning that dip's own `Slip` range, so Tableau draws the fit fan from data instead of a native trend line. |
 | `kern_inferred_slip` | Each fit inverted — what slip would have produced Kern's measured verticals — for every dip, not just the notebook's 30°. |
+| `dem_slip_bin_stats` | Paper Fig. 8: mean ± sample σ of the four scarp measures per scarp class per 0.05 m slip increment (right-closed bins, `slip_bin` = lower edge, n ≥ 2). Reproduces the author's notebook; feeds the Distributions dashboard's rebuilt mean ± σ panel. |
 | `historic_events` | One row per **field measurement** (FDHI flatfile via `fdhi_measurements`, SURE, Kern): `source, eq_name, dzw, scarp_height, magnitude`. Each measure is nullable on its own — a row survives if *either* axis clears the `> 0` sentinel filter, unlike `unified_observations`, which demands both. Feeds the Distributions dashboard's reference lines; created only when the optional FDHI flatfile Parquet is present. |
 
 Source labels in `unified_observations.source`: `DEM`, `FDHI`, `SURE`, `Kern`.

@@ -70,20 +70,52 @@ on exactly this kind of distribution.[^families]
   progresses — both views are legitimate answers to slightly different
   questions.[^pins]
 
-The mean ± σ panel obeys the same controls, so the summary always
-describes exactly the population and measure on display.
+Both summary panels obey the `Measure` control, so they always describe
+the quantity on display. `Population` applies to the histogram and the
+pooled panel; the Figure-8 panel is computed across every model stage by
+definition, so it does not move with that control.
 
-!!! note "Two deliberate departures from the typeset figures"
-    The histograms here show **counts**, not the probability scale of
-    the paper's Figure 15, so tall and short classes keep their true
-    proportions. And the mean ± σ panel is a **reconstruction**: the
-    paper's Figure 8 has no surviving analysis code, so this page
-    computes means and sample standard deviations from the shipped
-    simulation data directly — over all model stages by default, with
-    the final-state alternative one parameter flip away.[^pins]
+On the Figure-8 panel, hovering a class brightens its three lines and
+clicking one isolates it; click the background to bring the others back.
 
-<div class="tableau-fit" data-width="800" data-height="1200" markdown="0">
-  <tableau-viz src="https://public.tableau.com/views/dem-distributions-public/DistributionsSummaryweb" width="800" height="1200"
+### Two ways of summarising, and why both are here
+
+The lower two panels answer different questions, and the paper's
+Figure 8 is the second of them.
+
+**Typical values per class** pools every model stage into one mean and
+one standard deviation per scarp class. It answers *what does a
+monoclinal scarp typically look like?* — useful, and what this page
+showed on its own until September 2026.
+
+**Mean ± σ as slip accumulates** is Figure 8. For each 0.05 m increment
+of slip it takes the mean and sample standard deviation across the model
+stages that fall in that increment, per class — so each class becomes a
+curve rather than a point. That is what lets the paper report a
+*near-linear relationship of mean scarp height and the amount of slip at
+depth*, deformation zone width growing as slip accumulates, and scarp dip
+barely responding at all. None of those are readable from a single
+pooled number: a monoclinal scarp averages 1.53 m across its whole life,
+but grows from close to zero to about 3.5 m as slip runs from 0 to 5 m.
+
+The recipe is the authors' own. Their Figure-8 analysis code was
+recovered in September 2026, and the pipeline reproduces its bins,
+its means and its sample standard deviations exactly.[^pins]
+
+!!! note "Deliberate departures from the typeset figures"
+    The histograms show **counts**, not the probability scale of the
+    paper's Figure 15, so tall and short classes keep their true
+    proportions.
+
+    On the Figure-8 panel, two smaller differences. The paper begins
+    each class at a hand-chosen amount of slip; this panel shows every
+    increment for which a standard deviation can be computed, so some
+    curves start earlier. And where the paper draws a fitted polynomial
+    through the means, this draws the binned means themselves — dense
+    enough, at up to a hundred points per class, to carry the same shape.
+
+<div class="tableau-fit" data-width="800" data-height="1400" markdown="0">
+  <tableau-viz src="https://public.tableau.com/views/dem-distributions-public/DistributionsSummaryweb" width="800" height="1400"
     toolbar="bottom" hide-tabs></tableau-viz>
 </div>
 
@@ -124,7 +156,7 @@ project's tests.[^pins]
 [^families]: `notes/chart-families.md` in the source repository maps
     family 3 to Figures 9–12 (histograms of one output, hue = one model
     parameter) and Figure 15 (the same with historic-event reference
-    lines), and family 4 to Figure 8 — for which no notebook code
+    lines), and family 4 to Figure 8, whose analysis code was recovered in September 2026 and is now reproduced in the pipeline (no notebook code
     exists in the handoff materials.
 [^events]: The reference-line export unions the FDHI flatfile, the SURE
     database and the Kern County compilation, one row per field

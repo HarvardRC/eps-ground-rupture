@@ -22,7 +22,14 @@ specs). Add new entries here rather than scattering them across files.
   automating — mirror the inputs on Zenodo, or script the UCLA Dataverse
   download — so a fresh clone can fetch them.
 
-### Two failing tests surfaced 2026-08-18
+### ~~Two failing tests surfaced 2026-08-18~~ — fixed 2026-09-10
+- Both were test defects, not pipeline bugs, and both are closed: the
+  Bohol assertion moved to the scarp-height population (its 122 flatfile
+  rows carry `-999` for `fzw`/`vs` and 121 positive `sh` values; nb2's own
+  Bohol subset is the scarp-height one), and the smoke fixture gained the three columns
+  `historic_events` binds. The suite went red on 2026-08-15 and nobody
+  saw it because CI never ran pytest; `.github/workflows/tests.yml` now
+  does. Original notes kept below for the record.
 - `tests/test_fdhi_flatfile.py` still imported the pre-rename package
   (`eps_ground_rapture`), so since 2026-08-05 the whole suite died at
   collection on any venv without a stale install lying around. Import
@@ -94,14 +101,16 @@ specs). Add new entries here rather than scattering them across files.
   (Dashboard 5, 2026-08-15). Dashboards 1 and 2 also keep a desktop
   Athena copy; 3–5 were built public-first. Per-workbook detail:
   `dashboards/tableau/README.md` and `docs/dashboards/`.
-- Next: build order #6 (static-image embedding) is parked on the
-  figure-rights question; remaining dashboard work is the polish left
-  open in `notes/design-review-2026-08-16.md` (Priority B hand edits)
-  and the open questions in `notes/dashboard-5-build-spec.md` (Fig-8
-  population, count-vs-probability, the width-axis criterion).
-- Superset YAML exports still absent. A *hosted* Superset presupposes a
-  shared SQL endpoint (the parked AWS item above); a local Superset
-  over DuckDB is possible without it.
+- ~~Rebuild Dashboard 5's mean ± σ sheet on `dem_slip_bin_stats`~~ — done
+  2026-09-13 (rev 1.2): the Fig-8 statistic ships as a third panel,
+  `Mean ± σ vs slip`, beside the pooled summary; both retitled, dashboard
+  grown to 800×1400 and the site embed with it.
+- Next: the polish left open in `notes/design-review-2026-08-16.md`
+  (Priority B) and the remaining D5 spec questions (histogram bin widths
+  vs nb1, count-vs-probability). Author questions are queued in
+  `internal/PLAN.md`.
+- ~~Superset YAML exports~~ — Superset was retired (ADR-0004); nothing to
+  export. Struck 2026-09-10.
 
 ### Dashboard responsiveness (2026-08-05)
 

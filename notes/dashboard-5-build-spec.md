@@ -126,9 +126,8 @@ published content).
 2. ~~Claude: `historic_events` view + export wiring + pinned test~~ done.
 3. ~~Michael: build + export; Claude verifies~~ done — pins exact.
 4. ~~Michael: Tableau walkthrough → publish~~ done — published
-   2026-08-15 19:27 EDT, rev 1.0, slug `DistributionsSummaryweb`.
-   (Default view landed on the `Distributions` worksheet — republish
-   with the dashboard tab active when convenient.)
+   2026-08-15 19:27 EDT, rev 1.0, slug `DistributionsSummaryweb`;
+   default view corrected to the dashboard in the 2026-08-17 republish.
 5. ~~Claude: site pages + embeds + docs table flips~~ done — awaiting
    Michael's strict build + review.
 6. Michael: review, commit (`MAB` + four spaces), PR → main; verify the
@@ -146,16 +145,34 @@ published content).
   **Bohol**, whose flatfile rows carry neither `fzw` nor `vs` central
   values — its notebook lines used a measure outside our two, so Bohol
   is deliberately absent here.
-- [ ] **O2** — Fig-8 population: candidate A vs B above (or something
-  else entirely). Await the original code; until then A is the shown default.
+- [x] **O2** — RESOLVED 2026-09-10 against Kristen's code
+  (`legacy/DEM_slip_averages_figure - part {1,2}.ipynb`): **something
+  else entirely.** Figure 8 is mean ± sample σ **per 0.05 m slip
+  increment** per scarp class (`s < Slip <= s + 0.05`, `statistics.stdev`,
+  NaNs dropped per measure), plotted as mean vs slip with ±σ envelopes
+  and a per-class polynomial fit (degree 2 for scarp height and Us − Ud;
+  3–5 for DZW and scarp dip, hand-picked per series). Neither A nor B.
+  Shipped as the
+  `dem_slip_bin_stats` view + CSV, pinned by
+  `tests/test_dem_slip_bin_stats.py` (reproduces the notebook to 1e-9).
+  **Shipped 2026-09-13** (rev 1.2) as the `Mean ± σ vs slip` sheet, added
+  alongside the pooled panel rather than replacing it — the two answer
+  different questions and are retitled to say so. Departures from the notebook, for the author
+  team: per-class start `s` (0.25/0.40/0.25/0.25/0.65/1.85) is not
+  reproduced — every bin with n ≥ 2 is emitted; `Convert_Scarp_Dip`
+  (older table vintage) is read as `Scarp_Dip`.
 - [ ] **O3** — DZW histogram x-axis: linear vs log. D3 precedent: full
   unrestricted range on a fixed log axis, documented deviation from the
-  paper's 50 m criterion — and the author review's answer (leaning 50 m default
-  with full-range opt-in) may flip both D3 and this. Build with the D3
-  convention; revisit together with A4.
-- [ ] **O4** — bin widths: parameterized `Bin Size` with per-measure
-  defaults (SH 0.25 m, DZW 1 m, dip 5°) until checked against the
-  typeset figures.
+  paper's 50 m criterion. A4 is now done (D3 defaults to the paper's
+  50 m window with a toggle, 2026-08-26) — revisit this one on the same
+  principle when the sheet is next opened.
+- [ ] **O4** — histogram bin widths: per-measure defaults (SH 0.25 m, DZW 1 m,
+  dip 5°). Checked 2026-09-10 against nb1 (`legacy/2D DEM - Figures for
+  2024 DEM Paper.ipynb`): the paper's histograms use `binwidth` 0.05
+  (Scarp_Height, cell 13), 0.5 (DZW, cell 16), 1 (scarp dip, cell 19),
+  0.025 (Us − Ud, cell 12) — the workbook is 5×, 2× and 5× coarser.
+  Decide whether to match or to expose a `Bin Width` parameter with the
+  paper's values as defaults; Tableau-side.
 - [ ] **O5** — events shown by default: nb2 cell 25's labelled set that
   our measures support — Kern County (Kern arm, = `df_KernNew`),
   Wenchuan, Kashmir, Killari (FDHI arm) — with the full event list one

@@ -8,9 +8,10 @@ Roadmap build order. Built public-first 2026-08-15; no desktop twin.
 One parameter-driven histogram of a chosen DEM output, split into
 **layered translucent** per-hue distributions (not stacked — nb2 draws
 these seaborn-layered at `alpha=0.5`), with historic field measurements
-overlaid as full-height needles; plus a mean ± σ summary per scarp
-class reconstructing Fig. 8, for which no notebook code exists. The
-science is on the site page
+overlaid as full-height needles; plus **two** summary panels — the
+pooled per-class mean ± σ, and the per-slip-increment curves that are
+the paper's Figure 8 (shipped 2026-09-13, rev 1.2). The science is on
+the site page
 ([`subprojects/mkdocs/docs/dashboards/distributions.md`](../../subprojects/mkdocs/docs/dashboards/distributions.md)).
 
 ## Artifacts
@@ -18,11 +19,11 @@ science is on the site page
 | | |
 |---|---|
 | Workbook | `dashboards/tableau/dem-distributions-public.twb` — public-first, **no desktop twin** |
-| Worksheets | `Distributions` (histogram + needles), `Mean ± σ by class` |
-| Dashboard | `Distributions & Summary (web)`, fixed 800×1200 — the only one (a landscape twin was tried and dropped; the six-row summary strip cannot fill a 900-px column) |
+| Worksheets | `Distributions` (histogram + needles), `Mean ± σ by class` (pooled, titled *Typical values per class (all stages pooled)*), `Mean ± σ vs slip` (Fig. 8, titled *Mean ± σ as slip accumulates (paper Fig. 8)*) |
+| Dashboard | `Distributions & Summary (web)`, fixed 800×1400 — three panels: histogram 33 %, pooled summary 20 %, Fig-8 46 % — the only one (a landscape twin was tried and dropped; the six-row summary strip cannot fill a 900-px column). Grew from 1200 on 2026-09-13 when the Fig-8 panel was added as a third sheet. |
 | Slug | `DistributionsSummaryweb` |
-| Embedded at | site `dashboards/distributions.md` at 800×1200; escape hatch points at itself |
-| Specs | `notes/dashboard-5-build-spec.md` (populations, palette, open questions), `notes/2026-08-15/dashboard-5-tableau-walkthrough.md` (click-by-click, while it lives) |
+| Embedded at | site `dashboards/distributions.md` at 800×1400; escape hatch points at itself |
+| Specs | `notes/dashboard-5-build-spec.md` (populations, palette, open questions) |
 
 ## Data contract
 
@@ -33,6 +34,12 @@ canonical path:
 |-----|-------|------|
 | `dist/csv/dem.csv` | 346,834 × 26 | `dem` — passthrough |
 | `dist/csv/historic_events.csv` | 2,616 × 5 | `historic_events` — one row per FIELD MEASUREMENT (not per event) |
+
+…plus a **separate data source** (not a union member — different grain):
+
+| CSV | Shape | View |
+|-----|-------|------|
+| `dist/csv/dem_slip_bin_stats.csv` | 555 × 11 | `dem_slip_bin_stats` — one row per scarp class per 0.05 m slip bin |
 
 The union **merges the case-variant column pairs** — historic `dzw` /
 `scarp_height` land inside dem's `DZW` / `Scarp_Height` — which is what
@@ -60,20 +67,62 @@ Pinned by `test_historic_events.py`:
 - `::test_view_is_skipped_without_the_flatfile_lane`,
   `::test_sure_arm_magnitudes_are_fully_sourced`, Athena-twin checks.
 
-Fig-8 reconstruction candidates (mean ± sample σ, both populations) are
-tabulated in the build spec; the sheet defaults to candidate A (all
-stages) with candidate B (final state per trial, 3,434 trials) on the
-`Population` parameter. Which one Fig. 8 actually used is open (spec O2)
-until the original code surfaces.
+### Fig. 8 — the statistic, now known (2026-09-10)
+
+Kristen's original code (`legacy/DEM_slip_averages_figure - part
+{1,2}.ipynb`) settles spec O2: Figure 8 is **mean ± sample σ per 0.05 m
+slip increment** per scarp class — rows with `s < Slip <= s + 0.05`,
+`statistics.stdev`, NaNs dropped per measure — drawn as mean vs slip
+with ±σ envelopes and a polynomial fit per class. The published sheet's
+pooled per-class mean ± σ (candidate A) is a different summary.
+
+The view for the real thing is **`dem_slip_bin_stats`** →
+`dist/csv/dem_slip_bin_stats.csv` (555 rows × 11: `scarp_class`,
+`slip_bin` = the bin's lower edge, `n`, and `mean_`/`sd_` for
+`scarp_height`, `us_ud`, `dzw`, `scarp_dip`). Bins per class: Monoclinal
+100, Monoclinal Collapse 96, Pressure Ridge 100, Pressure Ridge Collapse
+100, Simple 88, Simple Collapse 71. Pinned by
+`tests/test_dem_slip_bin_stats.py`, which re-runs the notebook cell in
+pandas and matches every bin to 1e-9.
+
+Two departures from the notebook, both for the author team: it trims
+each class to a hand-picked first `s` (0.25 / 0.40 / 0.25 / 0.25 /
+0.65 / 1.85) — the view emits every bin with n ≥ 2 and leaves trimming
+to the workbook — and it reads `Convert_Scarp_Dip` from an older table
+vintage (`4_05_24_homogeneous_heterogeneous.csv`); `DEM_dataset.csv` has
+only `Scarp_Dip`, which the view uses.
+
+**Shipped 2026-09-13** (rev 1.2) as the `Mean ± σ vs slip` worksheet. Its
+anatomy is under *Anatomy* below; the click-by-click that built it has been retired.
+
+Two departures from the notebook, both recorded for the author team: it
+trims each class to a hand-picked first `s` (0.25 / 0.40 / 0.25 / 0.25 /
+0.65 / 1.85) where the view emits every bin with n ≥ 2 — note `Simple`'s
+0.65 coincides exactly with where a sample SD first becomes computable,
+while the other four sit above our floor, so those look like deliberate
+crops; and it reads `Convert_Scarp_Dip` from an older table vintage, where
+`DEM_dataset.csv` has only `Scarp_Dip`.
+
+The notebook also fits a polynomial through the means, **degree varying by
+measure and by series** (2 for scarp height and `Us − Ud`; 3 for DZW
+parents; 4–5 for the DZW and scarp-dip collapse series). Tableau applies
+one degree per trend line across a colour encoding, so the shipped panel
+draws the binned means themselves and no fit — dense enough, at up to 100
+points per class, to carry the same shape.
 
 ## Anatomy
 
 ### Parameters
 
-`Measure` (Scarp Height | DZW | Scarp Dip), `Hue By` (Scarp Class |
-Density | Depth | Fault Dip | Sediment Strength | FS Depth | Unruptured
-Sed), `Population` (All steps | Final state per trial). No bin
+`Measure` (Scarp Height | `Us - Ud` | DZW | Scarp Dip), `Hue By` (Scarp
+Class | Density | Depth | Fault Dip | Sediment Strength | FS Depth |
+Unruptured Sed), `Population` (All steps | Final state per trial). No bin
 parameter — widths are baked per measure.
+
+`Measure` is **workbook-global**, so the calcs on `Fig8_Slip_Bins` read it
+even though it was created on the `dem` source. `Population` reaches the
+histogram and the pooled panel only — the Fig-8 statistic is defined over
+all stages.
 
 ### Calculated fields (verbatim)
 
@@ -121,14 +170,55 @@ light-gray fill). Filters: `Keep Row`, `Is DEM = True`, and
 `Scarp_Class` **excludes Null** (~13.7k early-stage rows carry neither
 class nor measures).
 
+### `Mean ± σ vs slip` sheet (paper Fig. 8)
+
+On the `Fig8_Slip_Bins` source. Columns `slip_bin` as a **continuous
+DIMENSION** — it arrives as `SUM(slip_bin)`, one useless mark, and only a
+dimension partitions along x. Rows is a **dual axis**: `Measure Values`
+(`AVG(Fig8 Lo)`, `AVG(Fig8 Hi)`) and `AVG(Fig8 Mean)`, synchronized,
+secondary header hidden. Mean card: Line, size 3.88, full opacity.
+Envelope card: Line, size 0.85, transparency 129/255 (≈ 50 %),
+`Measure Names` on **Detail** (on Color it would take the palette away
+from the classes). `scarp_class` on Color on both. 1,665 marks.
+
+Calculated fields (verbatim):
+
+```text
+Fig8 Mean   CASE [Measure] WHEN "Scarp Height" THEN [mean_scarp_height]
+            WHEN "Us - Ud" THEN [mean_us_ud] WHEN "DZW" THEN [mean_dzw]
+            WHEN "Scarp Dip" THEN [mean_scarp_dip] END
+Fig8 SD     same shape over the sd_* columns
+Fig8 Lo     [Fig8 Mean] - [Fig8 SD]
+Fig8 Hi     [Fig8 Mean] + [Fig8 SD]
+```
+
+**Interactivity.** `[Scarp Class Set]` (all six members) sits on the
+Filters shelf as *In*; a dashboard **Change Set Values** action on select
+rewrites its membership, so clicking a line isolates that class and
+clicking the background restores all six (*Removing all values from set
+will: Add all values to set*). A second action highlights on hover.
+Isolating rescales the y-axis, which is how you can tell the filter is
+real rather than a dim.
+
+> Set actions serialize as **`<edit-group-action>`**, not `<action>`, with
+> `add-or-remove-marks value='assign'` and
+> `selection-clear-set-option='show-all'`. Enumerating `<action>` elements
+> finds only the two `tsc:brush` highlights and misses this one entirely.
+
 ### Palette (hard-coded hexes — never Assign Palette)
 
 Verbatim from nb2's seaborn palette, alphabetical class order:
 Monoclinal `#009ffa`, Monoclinal Collapse `#3f67b1`, Pressure Ridge
 `#f47820`, Pressure Ridge Collapse `#af773e`, Simple `#ed2024`, Simple
 Collapse `#9f1d20`. Event needles black, per the event-overlay
-convention. Entered separately for `Hue Value` (sheet 1) and
-`Scarp_Class` (sheet 2) — color maps stick to the field.
+convention. Entered separately for `Hue Value` (histogram), `Scarp_Class`
+on the `dem` source (pooled panel) and `scarp_class` on `Fig8_Slip_Bins`
+(Fig-8 panel) — color maps stick to the field, so a new field means
+re-entering all six.
+
+The dashboard carries **no colour legend for the Fig-8 panel**; the
+pooled panel's legend serves both because the hexes match. Remove the
+pooled panel and the Fig-8 one loses its legend with it.
 
 ## How to edit safely
 

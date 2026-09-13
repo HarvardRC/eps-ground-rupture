@@ -10,6 +10,13 @@ gradlew.bat text eol=crlf
 *.bat       text eol=crlf
 *.cmd       text eol=crlf
 
+# The paper's figures are shown on the site under the publisher's
+# author-sharing terms (non-commercial, no derivatives) — a different
+# licence from the Apache-2.0 code. Keep them out of `git archive`, so a
+# GitHub release tarball (and the Zenodo record built from it) does not
+# redistribute them under the wrong terms. They stay tracked and deployed.
+subprojects/mkdocs/docs/images/fig-*  export-ignore
+
 # Binary artifacts — never line-end-munge.
 *.jar       binary
 *.parquet   binary
