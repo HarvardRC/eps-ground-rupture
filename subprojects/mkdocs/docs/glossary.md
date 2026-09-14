@@ -354,8 +354,10 @@ This is the part that makes the dashboards click.
 **Mean and standard deviation (σ)** { #mean-sd }
 : The **mean** is the average of the measurements; the **standard
   deviation** is how far a typical measurement sits from it. The mean ± σ
-  band on the [distributions](dashboards/distributions.md) summary panel
-  spans one standard deviation either side of the mean.
+  band on either [distributions](dashboards/distributions.md) summary
+  panel spans one standard deviation either side of the mean — pooled
+  over all model stages on the first, computed per 0.05 m slip increment
+  on the second.
 
 **Histogram** { #histogram }
 : Counts of measurements falling into equal-width bins, drawn as bars —

@@ -52,11 +52,11 @@ against — each one replaces a family of static figures.
 | [Fig. 5](figures.md#fig-5) | What exactly is measured on each modelled scarp? | — (schematic) | [View figure](figures.md#fig-5){ .figure-pop data-img="../images/fig-05-ml-model-measurements.jpg" data-title="Figure 5 — the quantities every dashboard plots" } |
 | [Fig. 7](figures.md#fig-7) | How much does the sediment layering change the result? | — (illustration) | [View figure](figures.md#fig-7){ .figure-pop data-img="../images/fig-07-homogeneous-vs-ctu.png" data-title="Figure 7 — why the layering matters" } |
 
-Two notes. Figure 8 is the only *data chart* in the paper with no
-corresponding code in either legacy notebook — it was produced
-elsewhere, so the [Distributions](dashboards/distributions.md) page
-*reconstructs* its mean ± σ summary from the shipped simulation data
-directly, and says so.[^families] Figure 14 is the one family that needed an analytical
+Two notes. Figure 8 is the only *data chart* in the paper whose analysis
+code sits outside the two legacy notebooks; the authors supplied it
+separately in September 2026, so the
+[Distributions](dashboards/distributions.md) page now reproduces its
+statistic rather than approximating it.[^families] Figure 14 is the one family that needed an analytical
 pre-compute step (per-dip linear fits, then inverting them to back-project
 the Kern County measurements) — which is why it stands as its own dashboard,
 with the fits computed and tested in the data pipeline rather than
@@ -71,7 +71,7 @@ recomputed in the browser.[^families]
     sets out what each view answers. And the
     [Distributions](dashboards/distributions.md) page plots counts rather
     than Figure 15's probability scale, and its mean ± σ panel is a
-    reconstruction of Figure 8 rather than a copy of it; both are explained
+    rendering of Figure 8 rather than a copy of it; both are explained
     on that page.
 
 ## Where to go next

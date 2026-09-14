@@ -14,8 +14,10 @@ both (the 2026-08 convention: authored directly against the CSV exports).
 **Visual anchors.** Figs. 9–12 (histograms of one output, hue = one model
 parameter; nb1 cells 11–20, nb2 14–16), Fig. 15 (the same as probability,
 with historic-event reference lines; nb2 cell 25), Fig. 8 (mean ± σ per
-scarp class — **no notebook code exists**; Kristen is searching for it. The
-reconstruction candidates below fill in until then).
+scarp class — its code sits outside both notebooks. Kristen supplied it
+2026-08-26 (now `legacy/DEM_slip_averages_figure - part {1,2}.ipynb`); it
+resolved O2 — the statistic is per 0.05 m slip increment, neither candidate
+below. They are kept as the record of what was considered).
 
 ## Populations and variables (ground truth)
 
@@ -99,7 +101,8 @@ Public-only workbook, proposal: `dashboards/tableau/dem-distributions-public.twb
 the D4 pattern — `Table Name` discriminates layers; the union should
 merge the case-variant column pairs (`DZW`/`dzw`, `Scarp_Height`/
 `scarp_height`) into single fields, which is exactly what the event
-overlay wants. Two sheets: parameter-driven faceted histogram
+overlay wants. Three sheets as shipped (two at first build; the Fig-8 panel
+added 2026-09-13): parameter-driven faceted histogram
 (`Measure` × `Hue By`, historic verticals overlaid) and the mean ± σ
 summary (AVG circle + `AVG±STDEV` band per class). Palette — the six
 canonical hexes, verbatim from nb2's seaborn palette (alphabetical class
@@ -107,7 +110,8 @@ order; pinned 2026-08-15): Monoclinal `#009ffa`, Monoclinal Collapse
 `#3f67b1`, Pressure Ridge `#f47820`, Pressure Ridge Collapse `#af773e`,
 Simple `#ed2024`, Simple Collapse `#9f1d20`; event overlays black
 (existing convention, hard-coded hexes — never Assign Palette). Web
-variant ~800×1200 + full-size landscape, per ADR-0007.
+variant 800×1400 (was 1200 before the Fig-8 panel), no landscape twin — one
+was tried and dropped. Per ADR-0007.
 
 ## Publication lane (Claude drafts, Michael reviews/commits)
 

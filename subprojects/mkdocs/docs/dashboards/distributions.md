@@ -15,13 +15,15 @@ Where [Model vs reality](model-vs-reality.md) scatters every simulated
 point and [Per-event boxplots](per-event-boxplots.md) summarises the field
 data, this page looks at the shape of the
 [distinct element method (DEM)](../glossary.md#dem) results themselves.
-The upper panel is a histogram of one measured quantity over every model
+The top panel is a histogram of one measured quantity over every model
 stage, split into translucent overlapping distributions — one per value of
 a chosen model parameter, each rising from zero so their shapes can be
-compared directly. The lower panel condenses the same data into a mean
-and a one-standard-deviation band for each
+compared directly. Beneath it sit two summaries of the same data, both
+as a mean and a one-standard-deviation band for each
 [scarp class](../glossary.md#scarp-classes) — the six shapes shown in
-[Figure 2](../figures.md#fig-2){ .figure-pop data-img="../../images/fig-02-scarp-classification.jpg" data-title="Figure 2 — the six scarp classes" }. What the three measures
+[Figure 2](../figures.md#fig-2){ .figure-pop data-img="../../images/fig-02-scarp-classification.jpg" data-title="Figure 2 — the six scarp classes" }: one pooling every model stage into a single
+value per class, one tracking how those values move as slip accumulates —
+the paper's Figure 8. What the three measures
 are, and where on a scarp each is taken, is
 [Figure 5](../figures.md#fig-5){ .figure-pop data-img="../../images/fig-05-ml-model-measurements.jpg" data-title="Figure 5 — the quantities every dashboard plots" }.
 
@@ -94,7 +96,9 @@ stages that fall in that increment, per class — so each class becomes a
 curve rather than a point. That is what lets the paper report a
 *near-linear relationship of mean scarp height and the amount of slip at
 depth*, deformation zone width growing as slip accumulates, and scarp dip
-barely responding at all. None of those are readable from a single
+showing only a *limited relationship with the slip at depth* — the paper's
+own phrase, and a weaker claim than the other two: for the collapse
+variants dip does move appreciably. None of those are readable from a single
 pooled number: a monoclinal scarp averages 1.53 m across its whole life,
 but grows from close to zero to about 3.5 m as slip runs from 0 to 5 m.
 
@@ -107,12 +111,16 @@ its means and its sample standard deviations exactly.[^pins]
     paper's Figure 15, so tall and short classes keep their true
     proportions.
 
-    On the Figure-8 panel, two smaller differences. The paper begins
+    On the Figure-8 panel, three smaller differences. The paper begins
     each class at a hand-chosen amount of slip; this panel shows every
     increment for which a standard deviation can be computed, so some
-    curves start earlier. And where the paper draws a fitted polynomial
+    curves start earlier. Where the paper draws a fitted polynomial
     through the means, this draws the binned means themselves — dense
     enough, at up to a hundred points per class, to carry the same shape.
+    And for scarp dip the authors' code reads a `Convert_Scarp_Dip`
+    column that the published dataset does not carry, so that one series
+    applies the same method to the dataset's `Scarp_Dip` instead — the
+    other three measures come from the same columns the authors used.
 
 <div class="tableau-fit" data-width="800" data-height="1400" markdown="0">
   <tableau-viz src="https://public.tableau.com/views/dem-distributions-public/DistributionsSummaryweb" width="800" height="1400"
@@ -156,8 +164,9 @@ project's tests.[^pins]
 [^families]: `notes/chart-families.md` in the source repository maps
     family 3 to Figures 9–12 (histograms of one output, hue = one model
     parameter) and Figure 15 (the same with historic-event reference
-    lines), and family 4 to Figure 8, whose analysis code was recovered in September 2026 and is now reproduced in the pipeline (no notebook code
-    exists in the handoff materials.
+    lines), and family 4 to Figure 8. Figure 8's analysis code sits
+    outside the two legacy notebooks; the authors supplied it separately
+    in September 2026, and the pipeline reproduces it.
 [^events]: The reference-line export unions the FDHI flatfile, the SURE
     database and the Kern County compilation, one row per field
     measurement, keeping whichever of the two measured quantities each

@@ -134,7 +134,7 @@ Notes:
 
 What each page embeds, and where its escape hatch points. Sizes are the
 dashboards' true fixed sizes, read from `<dashboard>/<size>` in the
-committed workbooks (last re-checked 2026-08-18) — never guessed.
+committed workbooks (last re-checked 2026-09-13) — never guessed.
 
 | Page | Embedded view | `data-width` × `data-height` | Escape hatch links to |
 |---|---|---|---|
