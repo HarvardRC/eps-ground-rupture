@@ -63,8 +63,20 @@ theme:
   # box. One scheme, no toggle.
   palette:
     scheme: default
-    primary: indigo
-    accent: indigo
+    # `custom` hands primary/accent to extra.css, where they come from the
+    # paper's own scarp-class palette instead of a Material preset — see the
+    # "Identity" block there. Ink for chrome; Monoclinal Collapse (#3f67b1)
+    # for links and controls, the one palette member that clears 4.5:1 on
+    # white (the 2026-08-16 review measured the others).
+    primary: custom
+    accent: custom
+
+  # Body sans plus a serif for headings. The site accompanies a journal
+  # article; Material's default Roboto reads like tool documentation.
+  # `font.text` governs body only — headings are switched in extra.css.
+  font:
+    text: Source Sans 3
+    code: Source Code Pro
 
 nav:
   - Home: index.md
