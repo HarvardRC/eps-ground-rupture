@@ -73,8 +73,10 @@ Averages with standard-deviation whiskers for each surface-deformation
 characteristic (scarp height, Us-Ud, DZW, scarp dip), organized by scarp
 class incl. collapse-modified variants.
 
-- Paper: **Fig. 8 only** — notably, *no code for it exists in either
-  notebook* (produced elsewhere).
+- Paper: **Fig. 8 only** — its code sits outside both notebooks
+  (produced elsewhere); the authors supplied it 2026-08-26 and it is
+  now in `legacy/DEM_slip_averages_figure - part {1,2}.ipynb`,
+  reproduced by the `dem_slip_bin_stats` view.
 
 Trivially expressible in Tableau (AVG marks + stdev whiskers /
 reference bands); a natural companion sheet to Family 3.
