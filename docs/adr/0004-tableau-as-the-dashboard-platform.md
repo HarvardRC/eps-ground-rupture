@@ -48,18 +48,19 @@ workbook and/or one `-public` twin per dashboard family.
   CSV, [ADR-0003](0003-duckdb-as-the-analytical-engine.md)/[0006](0006-csv-extracts-for-tableau-public.md)),
   so re-platforming the viz layer would lose workbooks, not data or
   analytics.
-- Authoring know-how is written down as it's learned: build specs and
-  click-by-click walkthroughs in `notes/`, traps in
-  `docs/dashboards/tableau-editing-notes.md` (per-dashboard developer
-  docs alongside it in `docs/dashboards/`), conventions in
-  [ADR-0007](0007-dashboard-design-conventions.md).
+- Authoring know-how is written down as it's learned: build specs in
+  `notes/`, traps in `docs/dashboards/tableau-editing-notes.md`,
+  conventions in [ADR-0007](0007-dashboard-design-conventions.md). The
+  click-by-click walkthroughs are written per build and then retired into
+  the per-dashboard developer docs in `docs/dashboards/`, which are what
+  a rebuild reads.
 
 ## References
 
 - `dashboards/tableau/` — the workbooks and their README
 - `notes/dashboard-3-build-spec.md`, `notes/dashboard-4-build-spec.md`,
-  `notes/dashboard-5-build-spec.md` (and the walkthrough in
-  `notes/2026-08-15/`)
+  `notes/dashboard-5-build-spec.md` (their dated walkthroughs are all
+  retired; see `docs/dashboards/`)
 - `docs/dashboards/` — per-dashboard developer docs and
   `tableau-editing-notes.md`
 - [Dead ends](dead-ends.md) — the Superset half of the original decision

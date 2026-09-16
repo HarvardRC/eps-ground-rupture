@@ -49,13 +49,13 @@ def _fdhi_measurements_parquet():
 @pytest.fixture(scope="module")
 def con(tmp_path_factory):
     processed = config.PROCESSED_DIR
-    missing = [t for t in views.REQUIRED_TABLES
-               if not (processed / t / "data.parquet").is_file()]
+    missing = [t for t in views.REQUIRED_TABLES if not (processed / t / "data.parquet").is_file()]
     if missing:
         pytest.skip(f"processed Parquet missing {missing}; run egr-build")
     if not _fdhi_measurements_parquet().is_file():
-        pytest.skip("fdhi_measurements Parquet missing; sync the raw FDHI "
-                    "flatfile and run egr-build")
+        pytest.skip(
+            "fdhi_measurements Parquet missing; sync the raw FDHI " "flatfile and run egr-build"
+        )
 
     db = views.build_duckdb_views(
         processed_dir=processed,
@@ -74,8 +74,7 @@ def con(tmp_path_factory):
 def test_historic_events_total_and_per_source_rows(con):
     total = con.execute("SELECT COUNT(*) FROM historic_events").fetchone()[0]
     assert total == sum(n for _, n in PINNED_SOURCE_ROWS)  # 2,616
-    got = dict(con.execute(
-        "SELECT source, COUNT(*) FROM historic_events GROUP BY 1").fetchall())
+    got = dict(con.execute("SELECT source, COUNT(*) FROM historic_events GROUP BY 1").fetchall())
     assert got == dict(PINNED_SOURCE_ROWS)
 
 
@@ -96,12 +95,15 @@ def test_every_row_carries_at_least_one_positive_measure(con):
 def test_fdhi_arm_carries_the_nb2_labelled_events(con, eq_name, rows, magnitude):
     got_rows, mags = con.execute(
         "SELECT COUNT(*), COUNT(DISTINCT magnitude) FROM historic_events "
-        "WHERE source = 'FDHI' AND eq_name = ?", [eq_name]).fetchone()
+        "WHERE source = 'FDHI' AND eq_name = ?",
+        [eq_name],
+    ).fetchone()
     assert got_rows == rows
     assert mags == 1
     got_mag = con.execute(
-        "SELECT DISTINCT magnitude FROM historic_events "
-        "WHERE source = 'FDHI' AND eq_name = ?", [eq_name]).fetchone()[0]
+        "SELECT DISTINCT magnitude FROM historic_events " "WHERE source = 'FDHI' AND eq_name = ?",
+        [eq_name],
+    ).fetchone()[0]
     assert got_mag == pytest.approx(magnitude)
 
 
@@ -115,9 +117,12 @@ def test_kern_arm_matches_the_hand_compiled_dataset(con):
     ).fetchone()
     assert (n, n_dzw, n_sh) == (21, 11, 16)
     assert labels == 1
-    assert con.execute(
-        "SELECT DISTINCT eq_name FROM historic_events WHERE source = 'Kern'"
-    ).fetchone()[0] == "Kern County (1952)"
+    assert (
+        con.execute(
+            "SELECT DISTINCT eq_name FROM historic_events WHERE source = 'Kern'"
+        ).fetchone()[0]
+        == "Kern County (1952)"
+    )
     assert mag == pytest.approx(views.KERN_MAGNITUDE)
 
 
@@ -125,8 +130,8 @@ def test_sure_arm_magnitudes_are_fully_sourced(con):
     """Every SURE event carries a Nurminen-sourced magnitude (config pin),
     so no SURE reference line can render unlabelled."""
     nulls = con.execute(
-        "SELECT COUNT(*) FROM historic_events "
-        "WHERE source = 'SURE' AND magnitude IS NULL").fetchone()[0]
+        "SELECT COUNT(*) FROM historic_events " "WHERE source = 'SURE' AND magnitude IS NULL"
+    ).fetchone()[0]
     assert nulls == 0
 
 
@@ -148,13 +153,15 @@ def test_view_is_skipped_without_the_flatfile_lane(tmp_path):
             pytest.skip(f"processed Parquet missing {t}; run egr-build")
         (slim / t).symlink_to(src, target_is_directory=True)
 
-    db = views.build_duckdb_views(
-        processed_dir=slim, duckdb_path=tmp_path / "slim.duckdb")
+    db = views.build_duckdb_views(processed_dir=slim, duckdb_path=tmp_path / "slim.duckdb")
     c = duckdb.connect(str(db), read_only=True)
     try:
-        names = {r[0].lower() for r in c.execute(
-            "SELECT table_name FROM information_schema.tables "
-            "WHERE table_schema = 'main'").fetchall()}
+        names = {
+            r[0].lower()
+            for r in c.execute(
+                "SELECT table_name FROM information_schema.tables " "WHERE table_schema = 'main'"
+            ).fetchall()
+        }
         assert "historic_events" not in names
         assert "fdhi_measurements" not in names
         with pytest.raises(ValueError, match="historic_events"):

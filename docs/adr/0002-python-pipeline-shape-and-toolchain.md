@@ -32,6 +32,11 @@ nothing else:
   serving pipeline, plotting convenience and site builds.
 - Python range **`>=3.11,<3.14`**, pinned dev envs on 3.13 (3.14 had no
   pyarrow wheel when set; raise the cap when wheels exist).
+- **ruff is both linter and formatter.** `black` was also declared until
+  2026-09-16; it was dropped because `ruff format` produced byte-identical
+  output on this codebase, so it was a second dependency buying nothing.
+  `./gradlew check` and the Tests workflow run `ruff check` and
+  `ruff format --check` alongside pytest, so formatting cannot drift again.
 - Tests are first-class: cleaning chains, exports and analytical views
   are pinned by pytest (see
   [ADR-0003](0003-duckdb-as-the-analytical-engine.md) for why pinned

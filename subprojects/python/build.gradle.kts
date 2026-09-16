@@ -78,6 +78,24 @@ val pytest by tasks.registering(Exec::class) {
     dependsOn(poetryInstall)
 }
 
+val ruffCheck by tasks.registering(Exec::class) {
+    group = "verification"
+    description = "Lint the Python sources with ruff (E, F, I, B, UP, SIM)."
+    workingDir = projectDir
+    useVenv()
+    commandLine(poetryBin, "run", "ruff", "check", "src", "tests")
+    dependsOn(poetryInstall)
+}
+
+val ruffFormatCheck by tasks.registering(Exec::class) {
+    group = "verification"
+    description = "Fail if the Python sources are not ruff-formatted. Run `ruff format src tests` to fix."
+    workingDir = projectDir
+    useVenv()
+    commandLine(poetryBin, "run", "ruff", "format", "--check", "src", "tests")
+    dependsOn(poetryInstall)
+}
+
 val egrBuild by tasks.registering(Exec::class) {
     group = "build"
     description = "Run the egr-build pipeline (Parquet outputs + DDL scripts). Requires every raw input in data/raw/, including the FDHI flatfile; exits 2 naming any that are missing."
@@ -240,7 +258,7 @@ tasks.named<Delete>("clean") {
 // Wire into Gradle lifecycle so `./gradlew check` and `./gradlew build`
 // from the root project trigger the Python tasks.
 tasks.named("check") {
-    dependsOn(pytest)
+    dependsOn(pytest, ruffCheck, ruffFormatCheck)
 }
 
 tasks.named("assemble") {

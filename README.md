@@ -69,8 +69,11 @@ dashboards/
   superset/            retired; README only (see dead-ends.md)
 deploy/
   terraform/           AWS data layer — parked; revival triggers in TODO.md
-notes/                 roadmap, chart inventory, dashboard build specs,
-                         multi-machine notes, dated working notes
+notes/                 roadmap, chart inventory, dashboard build specs
+                         (tracked — the site cites them as provenance);
+                         design reviews, multi-machine notes and dated
+                         working notes are local only (gitignored), so
+                         references to those read as context, not links
 resources/local/       local secrets, e.g. the Sheets service-account key
                          (gitignored; see .env.example)
 ai/                    initial scoping conversation (gitignored)

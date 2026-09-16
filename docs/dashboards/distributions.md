@@ -23,7 +23,7 @@ the site page
 | Dashboard | `Distributions & Summary (web)`, fixed 800×1400 — three panels: histogram 33 %, pooled summary 20 %, Fig-8 46 % — the only one (a landscape twin was tried and dropped; the six-row summary strip cannot fill a 900-px column). Grew from 1200 on 2026-09-13 when the Fig-8 panel was added as a third sheet. |
 | Slug | `DistributionsSummaryweb` |
 | Embedded at | site `dashboards/distributions.md` at 800×1400; escape hatch points at itself |
-| Specs | `notes/dashboard-5-build-spec.md` (populations, palette, open questions) |
+| Specs | `notes/dashboard-5-build-spec.md` (populations, palette, open questions); the dated 2026-08-15 Tableau walkthrough was retired 2026-09-16 — this page is the durable version |
 
 ## Data contract
 

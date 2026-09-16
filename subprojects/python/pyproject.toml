@@ -2,7 +2,20 @@
 name = "eps-ground-rupture"
 version = "0.2.0"
 description = "Data pipeline for 2D DEM earthquake-rupture analysis: tidy Parquet, DuckDB views pinned by tests, and the CSV exports behind the published Tableau dashboards."
-authors = ["Michael Bouzinier <michael.bouzinier@forome.org>"]
+# The paper's author team plus the person who built the pipeline and site,
+# in the order the paper and site byline use. This is what CITATION.cff and
+# .zenodo.json will be generated from.
+#
+# Open with the author team (2026-09-16): whether the software record should
+# name all four, or the three authors alone with Bouzinier as `maintainers`
+# instead. Deliberately no `maintainers` entry until they answer, so the file
+# states one arrangement rather than pre-empting the alternative.
+authors = [
+    "Kristen Chiama",
+    "Andreas Plesch",
+    "John H. Shaw",
+    "Michael Bouzinier <michael.bouzinier@forome.org>",
+]
 license = "Apache-2.0"
 readme = "README.md"
 packages = [{ include = "eps_ground_rupture", from = "src" }]
@@ -27,7 +40,6 @@ mkdocs-material = "^9.5"
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3"
 ruff = "^0.7"
-black = "^24.10"
 mypy = "^1.13"
 matplotlib = "^3.9"
 seaborn = "^0.13"
@@ -41,16 +53,15 @@ egr-csv = "eps_ground_rupture.cli:csv_main"
 requires = ["poetry-core>=1.8.0"]
 build-backend = "poetry.core.masonry.api"
 
+# One tool for lint *and* format. black was dropped 2026-09-16: on this
+# codebase `ruff format` and `black` produced byte-identical output, so the
+# second dependency bought nothing. `./gradlew check` runs both halves.
 [tool.ruff]
 line-length = 100
 target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM"]
-
-[tool.black]
-line-length = 100
-target-version = ["py311"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

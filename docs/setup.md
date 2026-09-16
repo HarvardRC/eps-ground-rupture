@@ -57,8 +57,11 @@ README.md, TODO.md, LICENSE, .gitignore, .gitattributes, .env.example
 .github/workflows/mkdocs.yml  builds + deploys the companion site (ADR-0009)
 ai/                          initial scoping conversation (gitignored, local only)
 legacy/                      original notebooks + 2025 paper PDF (gitignored, local only)
-notes/                       Roadmap.md, chart-families.md, dashboard-N-build-spec.md,
-                             multi-machine.md, dated working notes
+notes/                       Roadmap.md, chart-families.md, dashboard-N-build-spec.md
+                               — tracked; the published site cites them by name
+                             design-review-*.md, multi-machine.md, <date>/ task files
+                               — gitignored since 2026-09-16, local only. Other docs
+                               still cite them for context; they are not in a clone.
 data/
   raw/                       raw inputs (gitignored) — see data/README.md
   interim/                   intermediate cleaning artifacts (gitignored)

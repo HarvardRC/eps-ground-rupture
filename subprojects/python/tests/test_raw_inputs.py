@@ -42,8 +42,13 @@ def test_missing_raw_inputs_empty_when_all_present(tmp_path):
 
 def test_flatfile_glob_matches_any_vintage(tmp_path):
     raw = tmp_path / "raw"
-    _populate(raw, "DEM_dataset.csv", "SURE.csv", "Combine_BuwaldaFDHI_KernSDC.csv",
-              "02_FDHI_FLATFILE_MEASUREMENTS_20301231.csv")
+    _populate(
+        raw,
+        "DEM_dataset.csv",
+        "SURE.csv",
+        "Combine_BuwaldaFDHI_KernSDC.csv",
+        "02_FDHI_FLATFILE_MEASUREMENTS_20301231.csv",
+    )
     assert io.missing_raw_inputs(raw) == []
 
 
@@ -52,8 +57,13 @@ def test_the_precleaned_csv_does_not_satisfy_the_flatfile_requirement(tmp_path):
     pre-cleaned CSV yields a different schema and no `fdhi_measurements`,
     which would leave the generated artifacts disagreeing with each other."""
     raw = tmp_path / "raw"
-    _populate(raw, "DEM_dataset.csv", "SURE.csv", "Combine_BuwaldaFDHI_KernSDC.csv",
-              io.FDHI_PRECLEANED_NAME)
+    _populate(
+        raw,
+        "DEM_dataset.csv",
+        "SURE.csv",
+        "Combine_BuwaldaFDHI_KernSDC.csv",
+        io.FDHI_PRECLEANED_NAME,
+    )
     assert dict(io.missing_raw_inputs(raw)) == {
         io.FDHI_FLATFILE_GLOB: io.REQUIRED_RAW_INPUTS[io.FDHI_FLATFILE_GLOB]
     }
@@ -87,8 +97,11 @@ def test_a_directory_named_like_an_input_does_not_count(tmp_path):
 
 def test_newest_flatfile_vintage_wins(tmp_path):
     raw = tmp_path / "raw"
-    _populate(raw, "02_FDHI_FLATFILE_MEASUREMENTS_20220719.csv",
-              "02_FDHI_FLATFILE_MEASUREMENTS_20240101.csv")
+    _populate(
+        raw,
+        "02_FDHI_FLATFILE_MEASUREMENTS_20220719.csv",
+        "02_FDHI_FLATFILE_MEASUREMENTS_20240101.csv",
+    )
     assert io.find_fdhi_flatfile(raw).name == "02_FDHI_FLATFILE_MEASUREMENTS_20240101.csv"
 
 
@@ -101,7 +114,7 @@ def test_require_raw_inputs_message_names_files_and_provenance(tmp_path):
     for name in ALL_REQUIRED[:1] + (io.FDHI_FLATFILE_GLOB, "SURE.csv"):
         assert name in msg
     assert "10.25346/S6/Y4F9LJ" in msg  # where to get the flatfile
-    assert "data/README.md" in msg      # where the rest are documented
+    assert "data/README.md" in msg  # where the rest are documented
 
 
 def test_require_raw_inputs_silent_when_satisfied(tmp_path):

@@ -44,8 +44,7 @@ def con(tmp_path_factory):
     """Build the views fresh from the real Parquet, so these tests exercise
     `views.py` rather than a previously-built database."""
     processed = config.PROCESSED_DIR
-    missing = [t for t in views.REQUIRED_TABLES
-               if not (processed / t / "data.parquet").is_file()]
+    missing = [t for t in views.REQUIRED_TABLES if not (processed / t / "data.parquet").is_file()]
     if missing:
         pytest.skip(f"processed Parquet missing {missing}; run egr-build")
 
@@ -64,8 +63,7 @@ def con(tmp_path_factory):
 
 
 def test_dem_regression_has_exactly_the_seven_modelled_dips(con):
-    dips = [r[0] for r in con.execute(
-        "SELECT fault_dip FROM dem_regression ORDER BY 1").fetchall()]
+    dips = [r[0] for r in con.execute("SELECT fault_dip FROM dem_regression ORDER BY 1").fetchall()]
     assert dips == [d for d, _, _, _ in PINNED]
 
 
@@ -89,7 +87,8 @@ def test_dem_regression_coefficients(con, dip, n, slope, intercept):
 def test_dem_regression_lines_has_two_endpoints_per_dip(con):
     rows = con.execute(
         "SELECT fault_dip, COUNT(*), MIN(point_order), MAX(point_order) "
-        "FROM dem_regression_lines GROUP BY 1 ORDER BY 1").fetchall()
+        "FROM dem_regression_lines GROUP BY 1 ORDER BY 1"
+    ).fetchall()
     assert len(rows) == len(PINNED)
     assert con.execute("SELECT COUNT(*) FROM dem_regression_lines").fetchone()[0] == 14
     for _, count, lo, hi in rows:
@@ -134,13 +133,17 @@ def test_dem_regression_lines_span_each_dips_own_slip_range(con):
 
 def test_kern_inferred_slip_is_every_vertical_by_every_dip(con):
     n_vertical = con.execute(
-        'SELECT COUNT(*) FROM kern_combined WHERE "Vertical" IS NOT NULL').fetchone()[0]
+        'SELECT COUNT(*) FROM kern_combined WHERE "Vertical" IS NOT NULL'
+    ).fetchone()[0]
     assert n_vertical == 16
     assert con.execute("SELECT COUNT(*) FROM kern_inferred_slip").fetchone()[0] == 112
-    assert con.execute(
-        "SELECT COUNT(DISTINCT fault_dip) FROM kern_inferred_slip").fetchone()[0] == 7
-    assert con.execute(
-        "SELECT COUNT(*) FROM kern_inferred_slip WHERE vertical IS NULL").fetchone()[0] == 0
+    assert (
+        con.execute("SELECT COUNT(DISTINCT fault_dip) FROM kern_inferred_slip").fetchone()[0] == 7
+    )
+    assert (
+        con.execute("SELECT COUNT(*) FROM kern_inferred_slip WHERE vertical IS NULL").fetchone()[0]
+        == 0
+    )
 
 
 def test_kern_inferred_slip_range_at_dip_30(con):
@@ -148,7 +151,8 @@ def test_kern_inferred_slip_range_at_dip_30(con):
     the dip-30 fit."""
     lo, hi = con.execute(
         "SELECT MIN(inferred_slip), MAX(inferred_slip) "
-        "FROM kern_inferred_slip WHERE fault_dip = 30").fetchone()
+        "FROM kern_inferred_slip WHERE fault_dip = 30"
+    ).fetchone()
     assert lo == pytest.approx(0.162, abs=0.01)
     assert hi == pytest.approx(2.742, abs=0.01)
 
@@ -196,8 +200,7 @@ def test_athena_twins_use_the_sanitized_names_terraform_declares():
     names in tables.json — a typo would only surface at query time."""
     import json
 
-    tables = json.loads(
-        (config.REPO_ROOT / "deploy" / "terraform" / "tables.json").read_text())
+    tables = json.loads((config.REPO_ROOT / "deploy" / "terraform" / "tables.json").read_text())
     dem_cols = {c["name"] for c in tables["dem"]}
     kern_cols = {c["name"] for c in tables["kern_combined"]}
     assert {"fault_dip", "slip", "vd_hw"} <= dem_cols
@@ -209,6 +212,11 @@ def test_athena_views_script_carries_every_twin():
     if not path.is_file():
         pytest.skip("athena-views.sql not generated; run egr-build")
     sql = path.read_text()
-    for name in ("unified_observations", "sure_enriched", "dem_regression",
-                 "dem_regression_lines", "kern_inferred_slip"):
+    for name in (
+        "unified_observations",
+        "sure_enriched",
+        "dem_regression",
+        "dem_regression_lines",
+        "kern_inferred_slip",
+    ):
         assert f"CREATE OR REPLACE VIEW {name}" in sql

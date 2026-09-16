@@ -169,26 +169,44 @@ def _views_fixture_frames() -> dict[str, pd.DataFrame]:
     # in ONE right-closed 0.05 m bin — (2.00, 2.05], so 2.01 and 2.03, not
     # 2.0, which belongs to (1.95, 2.00] — so its `n >= 2` gate lets a row
     # through and test_build_duckdb_views_creates_unified_view can assert it.
-    dem = pd.DataFrame({"DZW": [1.0, 1.2], "Scarp_Height": [0.5, 0.6],
-                        "Scarp_Class": ["Simple", "Simple"],
-                        "Fault_Dip": [30, 30], "Cohesion": ["R1", "R1"],
-                        "Set": ["Homogeneous", "Homogeneous"],
-                        "Slip": [2.01, 2.03], "VD_HW": [1.0, 1.01],
-                        "Us - Ud": [0.1, 0.12], "Scarp_Dip": [40.0, 41.0]})
+    dem = pd.DataFrame(
+        {
+            "DZW": [1.0, 1.2],
+            "Scarp_Height": [0.5, 0.6],
+            "Scarp_Class": ["Simple", "Simple"],
+            "Fault_Dip": [30, 30],
+            "Cohesion": ["R1", "R1"],
+            "Set": ["Homogeneous", "Homogeneous"],
+            "Slip": [2.01, 2.03],
+            "VD_HW": [1.0, 1.01],
+            "Us - Ud": [0.1, 0.12],
+            "Scarp_Dip": [40.0, 41.0],
+        }
+    )
     # NB: the second FDHI row has valid measures but the -999
     # missing-magnitude sentinel — the unified view must null it.
-    fdhi = pd.DataFrame({"fzw_central_meters": [10.0, 4.0],
-                         "vs_central_meters": [2.0, 1.5],
-                         "eq_name": ["Wenchuan", "Landers"],
-                         "magnitude": [7.9, -999.0],
-                         "latitude_degrees": [31.0, 34.2],
-                         "longitude_degrees": [103.0, -116.4]})
+    fdhi = pd.DataFrame(
+        {
+            "fzw_central_meters": [10.0, 4.0],
+            "vs_central_meters": [2.0, 1.5],
+            "eq_name": ["Wenchuan", "Landers"],
+            "magnitude": [7.9, -999.0],
+            "latitude_degrees": [31.0, 34.2],
+            "longitude_degrees": [103.0, -116.4],
+        }
+    )
     # NB: the trailing NBSP on the second eq_name is deliberate — SURE.csv
     # really contains 'Tennant Creek\xa0', and the magnitude lookup must
     # normalize it.
-    sure = pd.DataFrame({"FNC": [5.0, 6.0], "SH": [1.0, 1.2],
-                         "eq_name": ["Chi-Chi", "Tennant Creek\xa0"],
-                         "Latitude": [23.8, -19.8], "Longitude": [120.8, 134.0]})
+    sure = pd.DataFrame(
+        {
+            "FNC": [5.0, 6.0],
+            "SH": [1.0, 1.2],
+            "eq_name": ["Chi-Chi", "Tennant Creek\xa0"],
+            "Latitude": [23.8, -19.8],
+            "Longitude": [120.8, 134.0],
+        }
+    )
     # "Location ID" is used by kern_inferred_slip.
     kern = pd.DataFrame({"DZW": [3.0], "Vertical": [0.3], "Location ID": ["K-1"]})
     return {"dem": dem, "fdhi_cleaned": fdhi, "sure": sure, "kern_combined": kern}
@@ -215,12 +233,16 @@ def test_build_duckdb_views_creates_unified_view(tmp_path: Path):
             "SELECT source, COUNT(*) AS n FROM unified_observations GROUP BY source ORDER BY source"
         ).fetchall()
         # Each source contributes the lat/lon we'd expect.
-        geo = dict(con.execute(
-            "SELECT source, MIN(latitude) FROM unified_observations GROUP BY source"
-        ).fetchall())
-        mags = dict(con.execute(
-            "SELECT coalesce(eq_name, source), magnitude FROM unified_observations"
-        ).fetchall())
+        geo = dict(
+            con.execute(
+                "SELECT source, MIN(latitude) FROM unified_observations GROUP BY source"
+            ).fetchall()
+        )
+        mags = dict(
+            con.execute(
+                "SELECT coalesce(eq_name, source), magnitude FROM unified_observations"
+            ).fetchall()
+        )
         # The Fig-8 view: both fixture stages sit in the (2.00, 2.05] bin.
         slip_bins = con.execute(
             "SELECT scarp_class, slip_bin, n, mean_scarp_height, sd_scarp_height "
@@ -255,8 +277,7 @@ def test_build_duckdb_views_handles_apostrophe_in_path(tmp_path: Path):
     for name, df in _views_fixture_frames().items():
         export.export_tidy(df, name, out_dir=processed_dir)
 
-    db = views.build_duckdb_views(
-        processed_dir=processed_dir, duckdb_path=tmp_path / "eps.duckdb")
+    db = views.build_duckdb_views(processed_dir=processed_dir, duckdb_path=tmp_path / "eps.duckdb")
     con = duckdb.connect(str(db), read_only=True)
     try:
         assert con.execute("SELECT COUNT(*) FROM unified_observations").fetchone()[0] > 0
@@ -273,25 +294,38 @@ def test_build_duckdb_views_optional_fdhi_measurements(tmp_path: Path):
     def view_names(db: Path) -> set[str]:
         con = duckdb.connect(str(db), read_only=True)
         try:
-            return {r[0] for r in con.execute(
-                "SELECT view_name FROM duckdb_views() WHERE NOT internal"
-            ).fetchall()}
+            return {
+                r[0]
+                for r in con.execute(
+                    "SELECT view_name FROM duckdb_views() WHERE NOT internal"
+                ).fetchall()
+            }
         finally:
             con.close()
 
     without = views.build_duckdb_views(
-        processed_dir=processed_dir, duckdb_path=tmp_path / "a.duckdb")
+        processed_dir=processed_dir, duckdb_path=tmp_path / "a.duckdb"
+    )
     assert "fdhi_measurements" not in view_names(without)
 
     # historic_events (2026-08-15) reads fzw/vs/magnitude from this table,
     # so the fixture must carry them or the view build fails to bind.
     export.export_tidy(
-        pd.DataFrame({"eq_name": ["Wenchuan"], "sh_central_meters": [1.0],
-                      "fzw_central_meters": [12.0], "vs_central_meters": [2.0],
-                      "magnitude": [7.9]}),
-        "fdhi_measurements", out_dir=processed_dir)
+        pd.DataFrame(
+            {
+                "eq_name": ["Wenchuan"],
+                "sh_central_meters": [1.0],
+                "fzw_central_meters": [12.0],
+                "vs_central_meters": [2.0],
+                "magnitude": [7.9],
+            }
+        ),
+        "fdhi_measurements",
+        out_dir=processed_dir,
+    )
     with_it = views.build_duckdb_views(
-        processed_dir=processed_dir, duckdb_path=tmp_path / "b.duckdb")
+        processed_dir=processed_dir, duckdb_path=tmp_path / "b.duckdb"
+    )
     assert "fdhi_measurements" in view_names(with_it)
     con = duckdb.connect(str(with_it), read_only=True)
     try:
@@ -322,17 +356,13 @@ def test_athena_unified_view_sql_shape():
 def test_sure_magnitude_case_escapes_apostrophes(monkeypatch):
     """An event name with an apostrophe (e.g. L'Aquila) must not break the
     generated SQL — the literal is escaped by doubling the quote."""
-    monkeypatch.setattr(
-        views, "SURE_EVENT_MAGNITUDES", {"L'Aquila": 6.3, "Chi-Chi": 7.6}
-    )
+    monkeypatch.setattr(views, "SURE_EVENT_MAGNITUDES", {"L'Aquila": 6.3, "Chi-Chi": 7.6})
     case = views._sure_magnitude_case("eq_name")
     assert "WHEN 'L''Aquila' THEN 6.3" in case
     # and the result is still parseable SQL
     con = duckdb.connect()
     try:
-        got = con.execute(
-            f"SELECT {case} FROM (SELECT 'L''Aquila' AS eq_name)"
-        ).fetchone()[0]
+        got = con.execute(f"SELECT {case} FROM (SELECT 'L''Aquila' AS eq_name)").fetchone()[0]
     finally:
         con.close()
     assert got == 6.3
@@ -373,13 +403,11 @@ def test_sure_enriched_view(tmp_path: Path):
     processed_dir = tmp_path / "processed"
     for name, df in _views_fixture_frames().items():
         export.export_tidy(df, name, out_dir=processed_dir)
-    db = views.build_duckdb_views(
-        processed_dir=processed_dir, duckdb_path=tmp_path / "eps.duckdb")
+    db = views.build_duckdb_views(processed_dir=processed_dir, duckdb_path=tmp_path / "eps.duckdb")
 
     con = duckdb.connect(str(db), read_only=True)
     try:
-        got = dict(con.execute(
-            "SELECT eq_name, magnitude FROM sure_enriched").fetchall())
+        got = dict(con.execute("SELECT eq_name, magnitude FROM sure_enriched").fetchall())
     finally:
         con.close()
     assert got == {"Chi-Chi": 7.6, "Tennant Creek\xa0": 6.6}

@@ -116,8 +116,12 @@ mapping is at the bottom of `chart-families.md`.)
      Figure 8 is **mean ± sample σ per 0.05 m slip increment** per scarp
      class — `s < Slip <= s + 0.05` on a 0.05 grid, `statistics.stdev`,
      NaNs dropped per measure — with a per-class polynomial fit over the
-     bin means (degree 2 for scarp height and Us − Ud, 3–5 for DZW and
-     scarp dip). **Neither candidate A nor B**: the pooled per-class
+     bin means. Degrees, read off the 72 `np.polyfit` calls in cell 12
+     (2026-09-16): **2 for scarp height and Us − Ud, all six classes**;
+     **DZW 3 for the three plain classes, 4/5/4 for the Collapse ones**;
+     **scarp dip 2 for the three plain classes, 5/4/4 for the Collapse
+     ones** — so the range is 2–5, not 3–5, and the degree only varies
+     between classes inside the Collapse panels. **Neither candidate A nor B**: the pooled per-class
      summary the published sheet shows is a different statistic. The
      `dem_slip_bin_stats` view (13th view; `dist/csv/dem_slip_bin_stats.csv`,
      555 rows) reproduces the notebook to 1e-9 (`tests/test_dem_slip_bin_stats.py`).

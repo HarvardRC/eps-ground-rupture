@@ -51,3 +51,15 @@ jobs:
       - name: Run pytest
         working-directory: subprojects/python
         run: .venv/bin/python -m pytest -q -p no:cacheprovider
+
+      # After pytest, not before: ruff takes about a second either way, and
+      # running it first would hide the test result behind a formatting nit
+      # and cost a second push to learn it. Both still fail the job.
+      # `./gradlew check` runs the same two commands locally.
+      - name: Lint (ruff)
+        working-directory: subprojects/python
+        run: .venv/bin/python -m ruff check src tests
+
+      - name: Check formatting (ruff format)
+        working-directory: subprojects/python
+        run: .venv/bin/python -m ruff format --check src tests
