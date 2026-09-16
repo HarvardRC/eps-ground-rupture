@@ -78,7 +78,9 @@ pooled panel; the Figure-8 panel is computed across every model stage by
 definition, so it does not move with that control.
 
 On the Figure-8 panel, hovering a class brightens its three lines and
-clicking one isolates it; click the background to bring the others back.
+clicking one isolates it — the y-axis rescales, which is how you can tell the
+other classes are filtered out rather than dimmed. **Click the same line a
+second time to bring all six back.**
 
 ### Two ways of summarising, and why both are here
 
