@@ -1,3 +1,7 @@
+/* Source Serif 4 for headings. Material loads `font.text` and `font.code`
+ * from mkdocs.yml but nothing else, so the heading face is fetched here. */
+@import url("https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap");
+
 /* Wider content column. The dashboards are 800–1200 px natively, so
  * Material's default 61rem grid squeezes them; 1400px gives the embeds room
  * and the scale-to-fit script then fills whatever is left. */
@@ -74,7 +78,7 @@
 }
 
 .figure-dialog__full {
-  color: var(--md-primary-fg-color);
+  color: var(--md-accent-fg-color);
 }
 
 .figure-dialog__close {
@@ -131,10 +135,24 @@
 }
 
 /* The home page's dashboard cards. Material's grid asks for 16rem (320px)
-   per card, which in our content column yields an unbalanced 2+2+1; 12rem
-   lets the five cards sit 3+2, and small screens still wrap to one. */
+   per card, which in our content column yields an unbalanced 2+2+1; three
+   across lets the five cards sit 3+2, and small screens still wrap to one.
+
+   The column count is stated outright rather than left to `auto-fit` with a
+   rem minimum: `rem` follows the reader's default font size, so a reader
+   browsing at 20px instead of 16px silently loses the third column. The
+   76.25em breakpoint is Material's own — it is where the second sidebar
+   appears and the content column stops growing. */
 .md-typeset .grid.cards {
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  grid-template-columns: 1fr;
+}
+
+@media screen and (min-width: 45em) {
+  .md-typeset .grid.cards { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media screen and (min-width: 76.25em) {
+  .md-typeset .grid.cards { grid-template-columns: repeat(3, 1fr); }
 }
 
 /* Scale-to-fit wrapper for the Tableau embeds.
@@ -224,9 +242,9 @@ a.embed-fallback {
   font-size: 0.7rem;
   line-height: 1.2;
   padding: 0.3em 0.75em;
-  color: var(--md-primary-fg-color);
+  color: var(--md-accent-fg-color);
   background: transparent;
-  border: 1px solid var(--md-primary-fg-color);
+  border: 1px solid var(--md-accent-fg-color);
   border-radius: 1em;
   cursor: pointer;
   white-space: nowrap;
@@ -239,8 +257,8 @@ a.embed-fallback {
 
 .cite-open:hover,
 .cite-open:focus-visible {
-  color: var(--md-primary-bg-color);
-  background: var(--md-primary-fg-color);
+  color: var(--md-accent-bg-color);
+  background: var(--md-accent-fg-color);
 }
 
 /* Sits on the escape-hatch line under an embed; the small offset keeps it
@@ -306,4 +324,166 @@ p.cite-open-row {
   color: var(--md-primary-bg-color);
   background: var(--md-primary-fg-color);
   border-color: var(--md-primary-fg-color);
+}
+
+
+/* ==========================================================================
+   Identity (2026-09-16)
+   --------------------------------------------------------------------------
+   The six scarp classes already govern every mark on every dashboard, but
+   until now the site's own chrome was Material's stock indigo — a colour that
+   means nothing here. These rules put the paper's palette into the frame:
+   a six-band rule under the header, a class dot beside each dashboard in the
+   sidebar, and the accent taken from the palette rather than a preset.
+
+   Deliberate limit, carried from notes/design-review-2026-08-16.md: the
+   palette is IDENTITY, never the sole carrier of meaning in chrome. #009ffa
+   and #f47820 fall below 3:1 on white and Simple/PR-Collapse are ΔE 2.9 apart
+   under deuteranopia, so links, buttons and focus rings all use #3f67b1
+   (Monoclinal Collapse), the one member that clears 4.5:1.
+   ========================================================================== */
+
+:root {
+  --egr-monoclinal:      #009ffa;
+  --egr-monoclinal-coll: #3f67b1;
+  --egr-pressure:        #f47820;
+  --egr-pressure-coll:   #af773e;
+  --egr-simple:          #ed2024;
+  --egr-simple-coll:     #9f1d20;
+  --egr-ink:             #1d2230;
+}
+
+/* `primary: custom` / `accent: custom` in mkdocs.yml defer to these. */
+[data-md-color-primary="custom"] {
+  --md-primary-fg-color:        var(--egr-ink);
+  --md-primary-fg-color--light: #2c3444;
+  --md-primary-fg-color--dark:  #141821;
+  --md-primary-bg-color:        #fff;
+  --md-primary-bg-color--light: rgba(255, 255, 255, .7);
+
+  /* Body links. Material derives this from the primary colour
+     (`--md-typeset-a-color: var(--md-primary-fg-color)`), which would make
+     every link the same near-black as the surrounding text. It has to be
+     redefined here rather than on `:root`: the theme sets it on
+     `[data-md-color-scheme=default]`, which lands on <body> and so beats
+     anything inherited from <html>. */
+  --md-typeset-a-color:         var(--egr-monoclinal-coll);
+}
+
+[data-md-color-accent="custom"] {
+  --md-accent-fg-color:             var(--egr-monoclinal-coll);
+  --md-accent-fg-color--transparent: rgba(63, 103, 177, .1);
+  --md-accent-bg-color:             #fff;
+  --md-accent-bg-color--light:      rgba(255, 255, 255, .7);
+}
+
+/* The spine: the six classes, in paper order, as a rule under the header.
+   A reader meets the encoding here, before any legend asks them to know it. */
+.md-header {
+  position: sticky;
+}
+
+.md-header::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: linear-gradient(
+    to right,
+    var(--egr-monoclinal)       0     16.67%,
+    var(--egr-monoclinal-coll)  16.67% 33.33%,
+    var(--egr-pressure)         33.33% 50%,
+    var(--egr-pressure-coll)    50%    66.67%,
+    var(--egr-simple)           66.67% 83.33%,
+    var(--egr-simple-coll)      83.33% 100%
+  );
+}
+
+/* Headings in the serif. The register the site is accompanying is a journal
+   article, not a tool's manual. Body copy stays in the sans. */
+.md-typeset h1,
+.md-typeset h2,
+.md-typeset h3,
+.md-typeset h4 {
+  font-family: "Source Serif 4", Georgia, "Times New Roman", serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.md-typeset h1 {
+  color: var(--md-default-fg-color);
+  line-height: 1.18;
+}
+
+/* A class dot beside each dashboard in the sidebar, matched to the hue that
+   dashboard carries in its own charts.
+
+   Two things make this fiddly. `.md-nav__link` is a flex container with
+   `justify-content: space-between`, so a `::before` on the link itself gets
+   pushed to the far edge instead of sitting next to its label; the dot has to
+   hang off the inner `.md-ellipsis` span, where it stays in the label's own
+   inline flow. And the nav hrefs are relative, so they differ from page to
+   page ("./" on the dashboard itself, "../slip-regression/" from a sibling,
+   "dashboards/slip-regression/" from home) — matching on href only works from
+   one page. Dashboards is the third top-level nav entry, which fixes the id
+   MkDocs generates for it, so the dots key off list position instead. */
+.md-nav[aria-labelledby="__nav_3_label"] > .md-nav__list
+  > .md-nav__item > .md-nav__link .md-ellipsis::before {
+  content: "";
+  display: inline-block;
+  width: .45em;
+  height: .45em;
+  margin-right: .55em;
+  border-radius: 50%;
+  vertical-align: middle;
+  background: var(--md-default-fg-color--lighter);
+}
+
+.md-nav[aria-labelledby="__nav_3_label"] > .md-nav__list
+  > .md-nav__item:nth-child(1) > .md-nav__link .md-ellipsis::before { background: var(--egr-monoclinal); }
+.md-nav[aria-labelledby="__nav_3_label"] > .md-nav__list
+  > .md-nav__item:nth-child(2) > .md-nav__link .md-ellipsis::before { background: var(--egr-pressure); }
+.md-nav[aria-labelledby="__nav_3_label"] > .md-nav__list
+  > .md-nav__item:nth-child(3) > .md-nav__link .md-ellipsis::before { background: var(--egr-monoclinal-coll); }
+.md-nav[aria-labelledby="__nav_3_label"] > .md-nav__list
+  > .md-nav__item:nth-child(4) > .md-nav__link .md-ellipsis::before { background: var(--egr-simple); }
+.md-nav[aria-labelledby="__nav_3_label"] > .md-nav__list
+  > .md-nav__item:nth-child(5) > .md-nav__link .md-ellipsis::before { background: var(--egr-pressure-coll); }
+
+/* The five dashboard cards on the home page. Material's 16rem minimum leaves
+   them two across in this column, which reads as a list with a hole in it;
+   12rem gets three across and keeps the fifth from stranding. Each card
+   carries its dashboard's class colour as a top rule — the same hue as its
+   sidebar dot and as its marks on the dashboard itself, so the three agree.
+   The rule is decoration on top of the link text, never the only thing
+   telling the cards apart. */
+.md-typeset .grid.cards > ul > li {
+  border-top: 0.15rem solid var(--md-default-fg-color--lighter);
+}
+
+.md-typeset .grid.cards > ul > li:nth-child(1) { border-top-color: var(--egr-monoclinal); }
+.md-typeset .grid.cards > ul > li:nth-child(2) { border-top-color: var(--egr-pressure); }
+.md-typeset .grid.cards > ul > li:nth-child(3) { border-top-color: var(--egr-monoclinal-coll); }
+.md-typeset .grid.cards > ul > li:nth-child(4) { border-top-color: var(--egr-simple); }
+.md-typeset .grid.cards > ul > li:nth-child(5) { border-top-color: var(--egr-pressure-coll); }
+
+/* A measure for running prose. The 1400px grid exists for the embeds (see the
+   top of this file); text set the full width of it is unreadable. Only direct
+   children are constrained, so `.tableau-fit`, tables and figures keep the
+   full column. */
+.md-typeset > p,
+.md-typeset > ul,
+.md-typeset > ol,
+.md-typeset > blockquote,
+.md-typeset > h1,
+.md-typeset > h2,
+.md-typeset > h3 {
+  max-width: 74ch;
+}
+
+.md-typeset > p {
+  line-height: 1.68;
+  text-wrap: pretty;
 }
