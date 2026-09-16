@@ -36,9 +36,7 @@ KERN_NAME = "Combine_BuwaldaFDHI_KernSDC.csv"
 #: the same constants, so the two cannot drift apart.
 REQUIRED_RAW_INPUTS: dict[str, str] = {
     DEM_NAME: "2D DEM trial measurements (from the project owner)",
-    FDHI_FLATFILE_GLOB: (
-        "raw FDHI flatfile — UCLA Dataverse, DOI 10.25346/S6/Y4F9LJ, file ABRP7B"
-    ),
+    FDHI_FLATFILE_GLOB: ("raw FDHI flatfile — UCLA Dataverse, DOI 10.25346/S6/Y4F9LJ, file ABRP7B"),
     SURE_NAME: "SURE database v2.0 (surface-rupture observations)",
     KERN_NAME: "combined Buwalda / FDHI / SDC Kern County dataset",
 }

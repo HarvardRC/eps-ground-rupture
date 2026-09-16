@@ -81,9 +81,9 @@ def require_view(con: duckdb.DuckDBPyConnection, view: str, source: object) -> N
     this they'd surface a raw DuckDB ``CatalogException`` instead.
     """
     available = sorted(
-        r[0] for r in con.execute(
-            "SELECT table_name FROM information_schema.tables "
-            "WHERE table_schema = 'main'"
+        r[0]
+        for r in con.execute(
+            "SELECT table_name FROM information_schema.tables " "WHERE table_schema = 'main'"
         ).fetchall()
     )
     # DuckDB resolves identifiers case-insensitively; don't be stricter.

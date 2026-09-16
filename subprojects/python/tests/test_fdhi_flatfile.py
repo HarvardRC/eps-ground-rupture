@@ -40,14 +40,11 @@ def test_clean_fdhi_reproduces_the_shipped_extract(raw):
         "prior owner used (20220719)"
     )
     assert (
-        derived["eq_name"].value_counts().to_dict()
-        == shipped["eq_name"].value_counts().to_dict()
+        derived["eq_name"].value_counts().to_dict() == shipped["eq_name"].value_counts().to_dict()
     )
     # Same measurement values, not just the same shape.
     for col in ("fzw_central_meters", "vs_central_meters"):
-        assert sorted(derived[col].tolist()) == pytest.approx(
-            sorted(shipped[col].tolist())
-        )
+        assert sorted(derived[col].tolist()) == pytest.approx(sorted(shipped[col].tolist()))
 
 
 def test_fdhi_measurements_is_a_real_boxplot_population(raw):
@@ -67,8 +64,9 @@ def test_fdhi_measurements_is_a_real_boxplot_population(raw):
     shipped = io.load_fdhi()
     assert len(base) > len(shipped) * 5
 
-    fzw = base[(base["fzw_central_meters"] > 0)
-               & (base["fzw_central_meters"] < prep.FDHI_FZW_MAX_METERS)]
+    fzw = base[
+        (base["fzw_central_meters"] > 0) & (base["fzw_central_meters"] < prep.FDHI_FZW_MAX_METERS)
+    ]
     assert {"Wenchuan", "Kashmir", "Kern"} <= set(fzw["eq_name"])
     assert "Bohol" not in set(fzw["eq_name"])
 

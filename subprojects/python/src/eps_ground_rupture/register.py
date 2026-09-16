@@ -198,11 +198,7 @@ def spark_ddl(table: Table, *, database: str | None = None) -> str:
     """
     qualified = f"`{database}`.`{table.name}`" if database else f"`{table.name}`"
     location = table.location.resolve().as_uri()  # file:///abs/path/...
-    return (
-        f"CREATE TABLE IF NOT EXISTS {qualified}\n"
-        f"USING parquet\n"
-        f"LOCATION '{location}';"
-    )
+    return f"CREATE TABLE IF NOT EXISTS {qualified}\n" f"USING parquet\n" f"LOCATION '{location}';"
 
 
 def athena_script(

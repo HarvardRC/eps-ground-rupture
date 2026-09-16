@@ -4,7 +4,10 @@
 > `notes/Roadmap.md` → Build order #5 / Data-side #3, the paper's figure
 > captions, and candidate statistics computed from the shipped `dem` data
 > (2026-08-15 rebuild). Working doc — update as decisions land.
-> Click-by-click companion: `notes/2026-08-15/dashboard-5-tableau-walkthrough.md`.
+> Click-by-click companion: step-by-step Tableau instructions lived at
+> `notes/2026-08-15/dashboard-5-tableau-walkthrough.md` (the dated note was
+> retired 2026-09-16 — the durable version is
+> `docs/dashboards/distributions.md`).
 
 **Questions.** Family 3: *what is the spread of each output, and which
 input parameter shifts it?* Family 4: *what are the typical values and

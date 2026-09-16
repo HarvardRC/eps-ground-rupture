@@ -299,3 +299,16 @@ dashboards/tableau/*.twbx
 # Never committed: they carry working-state, drafts to the author team, and
 # machine-specific paths. The live one is internal/PLAN.md.
 /internal/
+
+# Working notes, untracked from 2026-09-16 — the ones carrying internal
+# working-state, machine-specific paths, or task files for a single sitting.
+# Kept locally. The build specs, chart-families.md and Roadmap.md stay tracked
+# because the published site cites them by name as provenance ("in the source
+# repository", 13 footnotes across 7 pages).
+#
+# The preference is to untrack ALL of notes/ and rewrite those footnotes to
+# cite docs/dashboards/ and docs/adr/ instead; this narrower rule is the
+# interim. See internal/PLAN.md.
+/notes/design-review-2026-08-16.md
+/notes/multi-machine.md
+/notes/20[0-9][0-9]-[0-9][0-9]-[0-9][0-9]/

@@ -63,9 +63,7 @@ def test_view_to_csv_undefined_view(tmp_path):
         csvexport.view_to_csv("fdhi_measurements", tmp_path / "out.csv", duckdb_path=db)
     # exact + sorted: a prefix match would also be satisfied by the
     # helper table alone, and wouldn't pin the ordering.
-    assert (
-        "Available: unified_observations, unified_observations_t." in str(exc.value)
-    )
+    assert "Available: unified_observations, unified_observations_t." in str(exc.value)
 
 
 def test_view_to_csv_is_case_insensitive(tmp_path):
