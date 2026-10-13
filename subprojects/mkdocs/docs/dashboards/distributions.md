@@ -47,12 +47,15 @@ earthquake, so an event's internal spread is visible: the
 contributes eleven deformation-zone widths and sixteen vertical
 displacements, and every FDHI-flatfile and SURE event in the export —
 Kaikoura, Chi-Chi, Wenchuan, Kashmir and the rest — contributes each of
-its own measurements.[^events] Where the model's histogram and the
+its own measurements.[^events] On `Measure = DZW` the default view keeps
+only the widths that meet the paper's 50 m criterion, which withholds
+roughly two thirds of them — every Kaikoura width among them. The fourth
+control below restores the rest. Where the model's histogram and the
 field's needles overlap, the simulations bracket reality — the same
 conversation as the paper's Figure 15, which overlays Kern County lines
 on exactly this kind of distribution.[^families]
 
-## Three controls
+## Four controls
 
 - **Measure** switches the histogram between scarp height, Us − Ud,
   deformation zone width and scarp dip, re-binning as it goes (¼ m,
@@ -72,6 +75,16 @@ on exactly this kind of distribution.[^families]
   values run higher on final states, because scarps grow as a run
   progresses — both views are legitimate answers to slightly different
   questions.[^pins]
+- **Show widths > 50 m** applies — or lifts — the paper's 50 m ceiling on
+  field deformation-zone widths. It bites only on `Measure = DZW`, the one
+  measure where the two arms disagree about scale by a factor of thirty: the
+  model reaches 45.8 m, the field record 1,450 m. *Paper's criterion
+  (< 50 m)* is the default, because that is the comparison the paper makes;
+  the per-event boxplots page
+  [explains why the limit exists](per-event-boxplots.md#why-the-width-axis-is-logarithmic)
+  and quotes the authors on it. Choose *All field widths* and the axis
+  stretches to the full field range, compressing the model's entire
+  distribution into the leftmost few per cent of the panel.[^widths]
 
 Both summary panels obey the `Measure` control, so they always describe
 the quantity on display. `Population` applies to the histogram and the
@@ -186,3 +199,11 @@ project's tests.[^pins]
     model stages and final state per trial — are tabulated in
     `notes/dashboard-5-build-spec.md` in the source repository, computed
     from the shipped DEM data (346,834 stage rows; 3,434 trials).
+[^widths]: Of the 668 field rows carrying a deformation-zone width, 459 sit
+    at or above 50 m and are withheld by default — 448 of them from
+    Kaikoura, whose narrowest width is exactly 50.00 m, plus 8 from Kashmir
+    and 3 from the FDHI flatfile's Kern rows. The 209 that remain are 185
+    from SURE, 13 from the FDHI flatfile and all 11 Kern County widths, the
+    widest of them 30.5 m. No model row is ever affected: the shipped DEM
+    export's largest width is 45.81 m, so the ceiling only ever removes
+    field measurements.
