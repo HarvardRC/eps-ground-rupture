@@ -129,7 +129,16 @@ extra_javascript:
   - javascripts/figure-modal.js
 
 extra_css:
-  - stylesheets/extra.css
+  # The `?v=` is a cache buster and must be bumped whenever extra.css changes
+  # in a way readers must see. Material fingerprints its own CSS
+  # (main.<hash>.min.css); `extra_css` files keep a stable name, so a returning
+  # visitor's browser can go on painting the previous version from disk cache —
+  # and because a cache hit still reports HTTP 200, it looks like it loaded.
+  # This bit us on 2026-09-16: the design refresh was live and correct, and
+  # every browser that had seen the site before showed the old chrome until a
+  # hard reload. MkDocs passes the query through to the <link> and still writes
+  # the file, so nothing else changes.
+  - stylesheets/extra.css?v=20260916
 
 # The abbreviation definitions are an include, not a page.
 exclude_docs: |

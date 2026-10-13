@@ -3,7 +3,7 @@
  * A page links to a figure like any other link:
  *
  *     [Figure 2](../figures.md#fig-2){ .figure-pop
- *       data-img="../../images/fig-02-scarp-classification.jpg"
+ *       data-img="../../images/fig-05-ml-model-measurements.jpg"
  *       data-title="Figure 2 — the six scarp classes" }
  *
  * With JavaScript, clicking opens the image in a <dialog> so a reader

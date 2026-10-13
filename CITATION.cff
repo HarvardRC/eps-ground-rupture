@@ -1,0 +1,74 @@
+cff-version: 1.2.0
+title: >-
+  eps-ground-rupture — interactive companion to Chiama et al. (2025)
+message: >-
+  This record identifies the software and the companion website. If you use the
+  analyses or the data behind them, cite the paper under `preferred-citation`
+  as well — and, for the data itself, the archives it comes from (DesignSafe-CI
+  for the DEM experiments; the field compilations carry their own citations).
+type: software
+version: 0.2.0
+date-released: 2026-10-12
+license: Apache-2.0
+repository-code: https://github.com/HarvardRC/eps-ground-rupture
+url: https://harvardrc.github.io/eps-ground-rupture/
+abstract: >-
+  A reproducible pipeline and companion website for the 2D distinct element
+  method (DEM) surface-rupture analyses of Chiama et al. (2025). The pipeline
+  cleans the published model outputs and field compilations into tidy Parquet,
+  derives thirteen DuckDB views pinned by tests, and exports the CSV tables
+  behind five interactive Tableau Public dashboards. The site documents what
+  each dashboard answers, how every number is computed, and where each departs
+  from the printed figures.
+keywords:
+  - earthquake
+  - surface rupture
+  - distinct element method
+  - fault displacement hazard
+  - scarp morphology
+  - reproducible research
+authors:
+  - family-names: Chiama
+    given-names: Kristen
+    affiliation: Department of Earth and Planetary Sciences, Harvard University
+    orcid: https://orcid.org/0000-0002-0229-1177
+  - family-names: Plesch
+    given-names: Andreas
+    affiliation: Department of Earth and Planetary Sciences, Harvard University
+    orcid: https://orcid.org/0000-0002-3355-9199
+  - family-names: Shaw
+    given-names: John
+    name-particle: H.
+    affiliation: Department of Earth and Planetary Sciences, Harvard University
+    orcid: https://orcid.org/0000-0002-3971-3812
+  - family-names: Bouzinier
+    given-names: Michael
+    affiliation: Harvard University
+    orcid: https://orcid.org/0000-0002-3161-5601
+preferred-citation:
+  type: article
+  title: >-
+    Quantifying relationships between fault parameters and rupture
+    characteristics associated with thrust and reverse fault earthquakes
+  authors:
+    - family-names: Chiama
+      given-names: Kristen
+      orcid: https://orcid.org/0000-0002-0229-1177
+    - family-names: Bednarz
+      given-names: W.
+    - family-names: Moss
+      given-names: R.
+    - family-names: Plesch
+      given-names: Andreas
+      orcid: https://orcid.org/0000-0002-3355-9199
+    - family-names: Shaw
+      given-names: John
+      name-particle: H.
+      orcid: https://orcid.org/0000-0002-3971-3812
+  journal: Earthquake Spectra
+  volume: 41
+  issue: 5
+  start: 3977
+  end: 4014
+  year: 2025
+  doi: 10.1177/87552930251346434

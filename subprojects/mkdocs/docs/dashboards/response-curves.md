@@ -43,6 +43,66 @@ Three controls define the view:
   (homogeneous or layered sediment), [`Density`](../glossary.md#sediment-strength)
   or [`Sediment_Strength`](../glossary.md#sediment-strength).
 
+??? note "What each `Cohesion` value means"
+
+    `Cohesion` is the one control whose values are codes rather than
+    quantities, and the codes are the paper's own — Table 3 names them.
+
+    **The key, if you read nothing else:** the three letters in each strength
+    band are the *same* gradient built at the three sediment depths. A, F and K
+    are all "weak"; B, G and L all "moderate"; C, H and M all "strong". What
+    separates them is 3 m, 5 m or 10 m of sediment, and so how many 1 m layers
+    the gradient is spread over.
+
+    **Homogeneous** — one uniform material, top to bottom. The dashboard shows
+    cohesion in pascals:
+
+    | Shown as | Cohesion | Banded as |
+    |---|---|---|
+    | `1.00E+05` | 0.1 MPa | Weak |
+    | `5.00E+05` | 0.5 MPa | Weak |
+    | `1.00E+06` | 1.0 MPa | Moderate |
+    | `1.50E+06` | 1.5 MPa | Strong |
+    | `2.00E+06` | 2.0 MPa | Strong |
+
+    **Heterogeneous** — 1 m layers, strongest at the base, weakening upward.
+    Values run surface → base, in MPa:
+
+    | Code | Depth | Band | Layers, surface → base |
+    |---|---|---|---|
+    | `A` | 3 m | Weak | 0.1, 0.5, 1.0 |
+    | `B` | 3 m | Moderate | 0.5, 1.0, 1.5 |
+    | `C` | 3 m | Strong | 1.0, 1.5, 2.0 |
+    | `F` | 5 m | Weak | 0.1, 0.25, 0.5, 0.75, 1.0 |
+    | `G` | 5 m | Moderate | 0.5, 0.75, 1.0, 1.25, 1.5 |
+    | `H` | 5 m | Strong | 1.0, 1.25, 1.5, 1.75, 2.0 |
+    | `K` | 10 m | Weak | 0.1 … 1.0, in 0.1 steps |
+    | `L` | 10 m | Moderate | 0.6 … 1.5, in 0.1 steps |
+    | `M` | 10 m | Strong | 1.1 … 2.0, in 0.1 steps |
+
+    **Three special configurations**, each a suite of its own:
+
+    | Code | What it is |
+    |---|---|
+    | `Q` | **Cohesive top unit** — a 1 m crust bonded at 2.0 MPa over uniform 1.0 MPa sediment. The only code run at all three depths, which is why it carries three times the rows. [Figure 7](../figures.md#fig-7) shows what it does to a scarp. |
+    | `S` | **Alternating strong–weak** — layers alternating between 2.0 and 0.1 MPa, the extremes used anywhere in the study. A dense 10 m profile only, at fault dips 20°, 40° and 60°: nine experiments, the smallest suite here. |
+    | `R1`–`R10` | **Random** — ten realisations of a dense 10 m profile, each of the ten 1 m layers drawn from 0.1–2.0 MPa. `R1` is the one the paper draws, in [Figure 4](../figures.md#fig-4): 0.4, 0.7, 1.8, 1.7, 1.1, 0.3, 1.3, 1.5, 1.2, 1.9 MPa, surface → base. |
+
+    !!! warning "Still being confirmed with the authors"
+        Four details are not settled from the paper alone, and we would rather
+        say so than guess: the per-layer values for `R2`–`R10` (the paper defers
+        them to a supplement we do not hold); whether `S` is the authors' own
+        label, since that letter appears nowhere in the paper; how thick `S`'s
+        bands are and whether the column starts strong or weak at the surface;
+        and why the sequence skips D, E, I, J, N, O and P.
+
+    One thing worth knowing about the legend: **"Weak", "Moderate" and
+    "Strong" mean different things on either side of `Set`.** For homogeneous
+    runs they band a single cohesion value; for heterogeneous runs they name a
+    gradient that spans into the next band up — a heterogeneous "weak" column
+    reaches 1.0 MPa at its base, which is a homogeneous "moderate".
+
+
 Holding the driver fixed and re-colouring by each condition in turn is the
 fastest way to see which inputs separate the curves and which leave them
 overlapping. The paper reports that the parameters with most influence on

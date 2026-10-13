@@ -116,8 +116,13 @@ points per class, to carry the same shape.
 
 `Measure` (Scarp Height | `Us - Ud` | DZW | Scarp Dip), `Hue By` (Scarp
 Class | Density | Depth | Fault Dip | Sediment Strength | FS Depth |
-Unruptured Sed), `Population` (All steps | Final state per trial). No bin
-parameter — widths are baked per measure.
+Unruptured Sed), `Population` (All steps | Final state per trial),
+`Show widths > 50 m` (boolean; False = `Paper's criterion (< 50 m)`,
+True = `All field widths`; **default False**). No bin parameter — widths
+are baked per measure.
+
+`Show widths > 50 m` is D3's parameter, copied caption-for-caption so the
+same control reads the same way on both dashboards (2026-10-12).
 
 `Measure` is **workbook-global**, so the calcs on `Fig8_Slip_Bins` read it
 even though it was created on the `dem` source. `Population` reaches the
@@ -129,14 +134,18 @@ all stages.
 ```text
 Is DEM          [Table Name] = "dem.csv"
 Measure Value   CASE [Measure] WHEN "Scarp Height" THEN [Scarp_Height]
-                WHEN "DZW" THEN [DZW] WHEN "Scarp Dip" THEN [Scarp_Dip] END
+                WHEN "Us - Ud" THEN [Us - Ud] WHEN "DZW" THEN [DZW]
+                WHEN "Scarp Dip" THEN [Scarp_Dip] END
 Hue Value       CASE [Hue By] ... END        -- STRING; lives on Color
 Bin Width       CASE [Measure] WHEN "Scarp Height" THEN 0.25
-                WHEN "DZW" THEN 1.0 WHEN "Scarp Dip" THEN 5.0 END
+                WHEN "Us - Ud" THEN 0.05 WHEN "DZW" THEN 1.0
+                WHEN "Scarp Dip" THEN 5.0 END
 Bin             FLOOR([Measure Value] / [Bin Width]) * [Bin Width]
 Count DEM       SUM(IF [Is DEM] THEN 1 ELSE 0 END)
 Is Final State  { FIXED [Trial] : MAX([Slip]) } = [Slip]
 Keep Row        NOT [Is DEM] OR [Population] = "All steps" OR [Is Final State]
+Keep DZW Row    [Show widths > 50 m] OR [Measure] != "DZW"
+                OR ISNULL([Measure Value]) OR [Measure Value] < 50
 Needle Peak     { FIXED : MAX({ FIXED [Bin] :
                   SUM(IF [Is DEM] AND NOT ISNULL([Measure Value]) THEN 1 END) }) }
 Needle          MIN(IF NOT [Is DEM] THEN [Needle Peak] END)
@@ -160,6 +169,19 @@ histogram is the Figs.-9–12-faithful rendering. `Keep Row = True` filter
 **in context** — `Needle Peak` is a FIXED LOD and only context filters
 reach it; demote the filter and needle heights stop tracking
 `Population`.
+
+`Keep DZW Row = True` filter, **deliberately _not_ in context** — the
+opposite call from `Keep Row`, and for a reason that is arithmetical
+rather than stylistic. The DEM arm's largest DZW is 45.81 m, so no model
+row is ever ≥ 50 m, so the gate cannot change a single DEM bin count, so
+`Needle Peak` — which counts DEM rows only — is identical in both toggle
+states. Context would buy nothing and cost a second context temp table
+over 346 K rows on every parameter change. The `ISNULL([Measure Value])`
+clause keeps the gate from also dropping the ~13.7 K null-measure DEM
+rows and the 1,948 field rows with a height but no width, which would
+make the hidden nulls indicator move with the toggle for no reason; D3's
+`Keep FZW Row` needs no such clause because its sheet filters
+`FZW Positive = True` upstream.
 
 ### `Mean ± σ by class` sheet
 
@@ -231,6 +253,10 @@ Everything in
   created.** Symptom: the legend title grows a ", Measure Names"
   suffix. Drag it off.
 - **Keep `Keep Row` a context filter** (gray pill) on `Distributions`.
+- **Keep `Keep DZW Row` out of context** (blue pill) — see above. And in
+  its filter dialog never tick **All**: that rewrites it into a form that
+  keeps every row unconditionally, which looks identical while
+  `Measure != "DZW"` and silently restores the 1,450 m axis on DZW.
 - Eleven dem columns are hidden in the XML (`Us_x`, `Us_y`, the
   `DZW xmin/xmax` quartet, `Conversion_Factor`, `HD_HW`, `R^2 Value`,
   `Fault_Seed`, `VD_HW`). `Cohesion` and `Set` stay visible as future
@@ -249,8 +275,10 @@ Everything in
   of at most half a bin width — the price of per-measurement
   multiplicity from a single union. Exact-x alternatives (per-event
   reference lines) lose the within-event spread.
-- On `Measure = Scarp Dip` the needles vanish: the field arms carry no
-  comparable quantity. Correct, not a bug.
+- On `Measure = Scarp Dip` **and on `Us - Ud`** the needles vanish: the
+  field arms carry no comparable quantity — `historic_events.csv` is
+  `source, eq_name, dzw, scarp_height, magnitude` and nothing else.
+  Correct, not a bug.
 - The histogram shows **counts**, where the paper's Fig. 15 uses
   probability — a documented deviation, kept so class proportions stay
   visible.

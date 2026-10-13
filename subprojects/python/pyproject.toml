@@ -4,18 +4,17 @@ version = "0.2.0"
 description = "Data pipeline for 2D DEM earthquake-rupture analysis: tidy Parquet, DuckDB views pinned by tests, and the CSV exports behind the published Tableau dashboards."
 # The paper's author team plus the person who built the pipeline and site,
 # in the order the paper and site byline use. This is what CITATION.cff and
-# .zenodo.json will be generated from.
+# .zenodo.json are generated from.
 #
-# Open with the author team (2026-09-16): whether the software record should
-# name all four, or the three authors alone with Bouzinier as `maintainers`
-# instead. Deliberately no `maintainers` entry until they answer, so the file
-# states one arrangement rather than pre-empting the alternative.
+# Settled with the author team at the 2026-10-12 meeting: all four are named
+# as authors, with Bouzinier also the maintainer.
 authors = [
     "Kristen Chiama",
     "Andreas Plesch",
     "John H. Shaw",
     "Michael Bouzinier <michael.bouzinier@forome.org>",
 ]
+maintainers = ["Michael Bouzinier <michael.bouzinier@forome.org>"]
 license = "Apache-2.0"
 readme = "README.md"
 packages = [{ include = "eps_ground_rupture", from = "src" }]

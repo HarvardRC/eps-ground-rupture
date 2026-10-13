@@ -45,8 +45,8 @@ against — each one replaces a family of static figures.
 | Fig. 14 | What links slip to vertical displacement, and what slip would produce an observed displacement? | [Slip regression](dashboards/slip-regression.md) | Published |
 | Fig. 8 | What are typical values and spreads per scarp class? | [Distributions](dashboards/distributions.md) | Published |
 | Figs. 9–12, 15 | What is the spread of each output, and which input shifts it? | [Distributions](dashboards/distributions.md) | Published |
-| [Fig. 1](figures.md#fig-1) | What does surface rupture do to the built environment? | — (photographs) | [View figure](figures.md#fig-1){ .figure-pop data-img="../images/fig-01-chi-chi.jpg" data-title="Figure 1 — what surface rupture does" } |
-| [Fig. 2](figures.md#fig-2) | What do the six scarp classes look like, in the model and in the field? | — (illustration) | [View figure](figures.md#fig-2){ .figure-pop data-img="../images/fig-02-scarp-classification.jpg" data-title="Figure 2 — the six scarp classes" } |
+| [Fig. 1](figures.md#fig-1) | What does surface rupture do to the built environment? | — (photographs) | [Described](figures.md#fig-1) — not reproduced, pending permissions |
+| [Fig. 2](figures.md#fig-2) | What do the six scarp classes look like, in the model and in the field? | — (illustration) | [Described](figures.md#fig-2) — not reproduced, pending permissions |
 | [Fig. 3](figures.md#fig-3) | What is a distinct element simulation, mechanically? | — (schematic) | [View figure](figures.md#fig-3){ .figure-pop data-img="../images/fig-03-dem-model-schematic.png" data-title="Figure 3 — what a simulation actually is" } |
 | [Fig. 4](figures.md#fig-4) | What do the six sediment configurations look like? | — (illustration) | [View figure](figures.md#fig-4){ .figure-pop data-img="../images/fig-04-compare-dem-models.png" data-title="Figure 4 — the sediment configurations" } |
 | [Fig. 5](figures.md#fig-5) | What exactly is measured on each modelled scarp? | — (schematic) | [View figure](figures.md#fig-5){ .figure-pop data-img="../images/fig-05-ml-model-measurements.jpg" data-title="Figure 5 — the quantities every dashboard plots" } |
