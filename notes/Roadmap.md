@@ -318,9 +318,12 @@ belongs in the same plan.
 - **DOI route (2026-10-12, author team)**: **Zenodo, fed by a GitHub
   release** — not DesignSafe. Enabling the Zenodo GitHub app needs
   org-admin on HarvardRC.
-- **Software citation (2026-10-12, author team)**: all four named as
-  **authors** — Chiama, Plesch, Shaw, Bouzinier — with **Bouzinier also
-  the maintainer**. Recorded in `subprojects/python/pyproject.toml`,
+- **Software citation (2026-10-12, author team; order amended
+  2026-10-13)**: all four named as **authors** — Chiama, Plesch,
+  **Bouzinier, Shaw** — with **Bouzinier also the maintainer**. Shaw takes
+  the final position; Bouzinier's affiliation is **University Research
+  Computing, Harvard University**, matching the departmental form used for
+  the other three. Recorded in `subprojects/python/pyproject.toml`,
   `CITATION.cff` and `.zenodo.json`. The paper's own author list is
   different and unchanged; the software record is not the paper.
 - **Paper figures (2026-10-12)**: Figures 1 and 2 embed third-party

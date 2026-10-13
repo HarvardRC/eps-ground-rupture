@@ -7,12 +7,13 @@ description = "Data pipeline for 2D DEM earthquake-rupture analysis: tidy Parque
 # .zenodo.json are generated from.
 #
 # Settled with the author team at the 2026-10-12 meeting: all four are named
-# as authors, with Bouzinier also the maintainer.
+# as authors, with Bouzinier also the maintainer. Order amended 2026-10-13:
+# Shaw takes the final position, Bouzinier third.
 authors = [
     "Kristen Chiama",
     "Andreas Plesch",
-    "John H. Shaw",
     "Michael Bouzinier <michael.bouzinier@forome.org>",
+    "John H. Shaw",
 ]
 maintainers = ["Michael Bouzinier <michael.bouzinier@forome.org>"]
 license = "Apache-2.0"
