@@ -1,0 +1,58 @@
+{
+  "upload_type": "software",
+  "title": "eps-ground-rupture — interactive companion to Chiama et al. (2025)",
+  "version": "0.2.0",
+  "license": "Apache-2.0",
+  "access_right": "open",
+  "description": "<p>A reproducible pipeline and companion website for the 2D distinct element method (DEM) surface-rupture analyses of Chiama et al. (2025). The pipeline cleans the published model outputs and field compilations into tidy Parquet, derives thirteen DuckDB views pinned by tests, and exports the CSV tables behind five interactive Tableau Public dashboards. The site documents what each dashboard answers, how every number is computed, and where each departs from the printed figures.</p><p>This record identifies the <em>software and website</em>. It does not replace the citation for the paper, nor for the underlying data, which is deposited separately on DesignSafe-CI.</p><p><strong>Figures.</strong> The paper's illustrations are shown on the website under the publisher's author-sharing terms (non-commercial, no derivatives) and are deliberately excluded from this archive, which is Apache-2.0.</p>",
+  "creators": [
+    {
+      "name": "Chiama, Kristen",
+      "affiliation": "Department of Earth and Planetary Sciences, Harvard University",
+      "orcid": "0000-0002-0229-1177"
+    },
+    {
+      "name": "Plesch, Andreas",
+      "affiliation": "Department of Earth and Planetary Sciences, Harvard University",
+      "orcid": "0000-0002-3355-9199"
+    },
+    {
+      "name": "Shaw, John H.",
+      "affiliation": "Department of Earth and Planetary Sciences, Harvard University",
+      "orcid": "0000-0002-3971-3812"
+    },
+    {
+      "name": "Bouzinier, Michael",
+      "affiliation": "Harvard University",
+      "orcid": "0000-0002-3161-5601"
+    }
+  ],
+  "keywords": [
+    "earthquake",
+    "surface rupture",
+    "distinct element method",
+    "fault displacement hazard",
+    "scarp morphology",
+    "reproducible research"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "10.1177/87552930251346434",
+      "relation": "isSupplementTo",
+      "resource_type": "publication-article",
+      "scheme": "doi"
+    },
+    {
+      "identifier": "10.1785/0220250173",
+      "relation": "references",
+      "resource_type": "publication-article",
+      "scheme": "doi"
+    },
+    {
+      "identifier": "https://harvardrc.github.io/eps-ground-rupture/",
+      "relation": "isDocumentedBy",
+      "resource_type": "other",
+      "scheme": "url"
+    }
+  ]
+}
