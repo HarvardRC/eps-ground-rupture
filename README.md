@@ -9,9 +9,11 @@ and a companion web site.
 - **The paper**: Chiama et al. (2025), *Earthquake Spectra* **41**(5),
   3977–4014, DOI
   [10.1177/87552930251346434](https://doi.org/10.1177/87552930251346434)
-  — not open access. Six of its figures are shown on the site from the
+  — not open access. Four of its figures are shown on the site from the
   authors' accepted manuscript under the publisher's sharing terms (see
-  Licensing below); nothing from the typeset version is reproduced.
+  Licensing below); Figures 1 and 2 are described but withheld while the
+  research team confirms the terms for third-party photographs they
+  contain. Nothing from the typeset version is reproduced.
 - **Related work** (the 3D models; not a source for these dashboards):
   Chiama, Plesch & Shaw (2025), *Seismological Research Letters* **96**(6),
   3473–3489, DOI
