@@ -112,8 +112,11 @@ The same experiment through six sediment set-ups, each shown as strata
 heterogeneous weak, moderate, strong, randomly assigned strengths, and a
 cohesive unit over weaker material.
 
-The lettered codes — K, L, M, R1, Q — are the [DEM sets](glossary.md#set)
-in the data. So when you change `Condition By` to `Set` or
+The lettered codes — K, L, M, R1, Q — are `Cohesion` values in the data:
+the heterogeneous sediment configurations, named in the paper's Table 3.
+(`Set` is the coarser split, homogeneous against heterogeneous.) Each one is
+spelled out under
+[What each `Cohesion` value means](dashboards/response-curves.md). So when you change `Condition By` to `Set` or
 `Sediment_Strength` on **[Response curves](dashboards/response-curves.md)**,
 or colour the cloud by set on
 **[Model vs reality](dashboards/model-vs-reality.md)**, this figure is what
