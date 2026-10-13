@@ -9,6 +9,10 @@ are *of*: what the model is, what it measures, and what the measurements
 look like in a real earthquake. Each one below notes where it turns up in
 the interactive views.
 
+**Four of the six are shown.** Figures 1 and 2 are described but not
+reproduced while the research team confirms the terms for the third-party
+photographs they contain.
+
 !!! info "How these figures may be reused"
     They are reproduced from the accepted manuscript of:
 
@@ -25,13 +29,18 @@ the interactive views.
     code Apache-2.0 — see the
     [repository](https://github.com/HarvardRC/eps-ground-rupture#licensing).
     Photographs inside Figures 1 and 2 are credited on the figures to the
-    publications they came from, and belong to those authors.
+    publications they came from, and belong to those authors — which is why
+    those two are not reproduced here at present.
 
 ## Figure 1 — what surface rupture does { #fig-1 }
 
-![Two photographs of damage from the 1999 Chi-Chi earthquake: a collapsed
-river bridge with the rupture trace marked, and the Shih-Kang Dam broken by
-about 8 m of uplift.](images/fig-01-chi-chi.jpg){ .paper-figure loading=lazy }
+!!! note "Figure withheld for now"
+    This figure is not reproduced here at present. It contains photographs
+    belonging to other authors, credited on the figure to the publications
+    they came from, and the research team is confirming the terms on which
+    they may be shown. The description below stands, and the figure itself
+    is in the paper —
+    [DOI 10.1177/87552930251346434](https://doi.org/10.1177/87552930251346434).
 
 Coseismic thrust-fault displacement during the 1999 M 7.6 Chi-Chi
 earthquake in Taiwan: an offset river along the Chelungpu fault that
@@ -46,10 +55,13 @@ and dams have to be built across them.
 
 ## Figure 2 — the six scarp classes { #fig-2 }
 
-![Six panels, each pairing a DEM model cross-section with a field
-photograph of the same scarp type: monoclinal, monoclinal collapse,
-pressure ridge, pressure ridge collapse, simple and simple
-collapse.](images/fig-02-scarp-classification.jpg){ .paper-figure loading=lazy }
+!!! note "Figure withheld for now"
+    This figure is not reproduced here at present. It contains photographs
+    belonging to other authors, credited on the figure to the publications
+    they came from, and the research team is confirming the terms on which
+    they may be shown. The description below stands, and the figure itself
+    is in the paper —
+    [DOI 10.1177/87552930251346434](https://doi.org/10.1177/87552930251346434).
 
 Each panel pairs the model's own output — as particles, and as the contact
 bonds between them — with a photograph of the same morphology after a real

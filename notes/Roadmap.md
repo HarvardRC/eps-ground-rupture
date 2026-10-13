@@ -315,6 +315,43 @@ belongs in the same plan.
 
 ## Decisions made
 
+- **DOI route (2026-10-12, author team)**: **Zenodo, fed by a GitHub
+  release** — not DesignSafe. Enabling the Zenodo GitHub app needs
+  org-admin on HarvardRC.
+- **Software citation (2026-10-12, author team)**: all four named as
+  **authors** — Chiama, Plesch, Shaw, Bouzinier — with **Bouzinier also
+  the maintainer**. Recorded in `subprojects/python/pyproject.toml`,
+  `CITATION.cff` and `.zenodo.json`. The paper's own author list is
+  different and unchanged; the software record is not the paper.
+- **Paper figures (2026-10-12)**: Figures 1 and 2 embed third-party
+  photographs (Fu 2011, Chen 2001, Lee 2001, Li 2010, Nicol 2018, Armenia
+  IGS). **Withheld from the site** while the author team confirms the terms
+  — described in full on `figures.md`, with the `#fig-1` / `#fig-2` anchors
+  kept alive so cross-links still resolve, but not reproduced. Figures 3,
+  4, 5 and 7 are the authors' own schematics, carry no outside credits and
+  are unaffected.
+
+  The release and the Zenodo deposit were never at risk: `.gitattributes`
+  marks `subprojects/mkdocs/docs/images/fig-*` `export-ignore`, so no
+  figure reaches a `git archive` tarball (verified 2026-10-12 — zero
+  `fig-*` entries). The removal is about what the *site* publishes.
+
+  **Restoring them**, once permissions are cleared — both markers point at
+  `750af9e`, the last commit carrying them:
+
+      git checkout figures-pre-removal-v0.2.0 -- \
+        subprojects/mkdocs/docs/images/fig-01-chi-chi.jpg \
+        subprojects/mkdocs/docs/images/fig-02-scarp-classification.jpg
+
+  then revert the prose in `figures.md` (two withheld notes, the intro
+  count, the licence note), `paper.md` (two crosswalk rows), the three
+  dashboard pages (the `.figure-pop` modal attributes) and the
+  `figure-modal.js` doc comment. The branch
+  `archive/figures-2026-10-12` is the same point; prefer the **tag**, since
+  that branch is an ancestor of `dev-v.0.2.x` and so `git branch -d` would
+  delete it without complaint.
+- **3D lane (2026-10-12)**: **on hold.** Another topic takes priority once
+  the release lane is closed. See "Open questions".
 - **Engine (2026-06, historical)**: DuckDB via JDBC for the first pass.
   Superseded in practice — see "Engines in practice" below; DuckDB's
   live role is pipeline-side (views → CSV exports; ADR-0003, ADR-0006).

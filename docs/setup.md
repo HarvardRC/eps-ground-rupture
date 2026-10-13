@@ -279,22 +279,24 @@ Module SDK resets to the project JDK — a JetBrains limitation). Details in
 
 ## What runs today
 
-Verified 2026-08-18:
+Verified 2026-10-12:
 
 - `poetry install` — clean on Python 3.13.7 / Poetry 2.4.1.
-- `poetry run pytest` — **115 collected, 113 passed, 2 failed** in ~6 s:
-  `test_csvexport` 7, `test_fdhi_flatfile` 2, `test_historic_events` 10,
-  `test_prep` 20, `test_raw_inputs` 15, `test_regression_views` 17,
-  `test_sheets` 21, `test_smoke` 23. Coverage spans the FDHI cleaning
-  chains, the required-input checks, Parquet export, DDL generation, the
-  DuckDB views (incl. the regression and historic-events views), CSV
-  export and the Sheets targets. The two failures are open items in
-  `TODO.md` → Data pipeline: the `test_smoke` optional-`fdhi_measurements`
-  fixture predates the `historic_events` view and lacks the columns it
-  reads, and `test_fdhi_flatfile` expects Bohol among the reverse-style
-  FDHI events, which the current cleaning chain does not yield. (Until
-  2026-08-18 `test_fdhi_flatfile.py` still imported the pre-rename package
-  name, so the whole suite died at collection.)
+- `poetry run pytest` — **126 collected, 126 passed** in ~11 s:
+  `test_csvexport` 7, `test_dem_slip_bin_stats` 11, `test_fdhi_flatfile` 2,
+  `test_historic_events` 10, `test_prep` 20, `test_raw_inputs` 15,
+  `test_regression_views` 17, `test_sheets` 21, `test_smoke` 23. Coverage
+  spans the FDHI cleaning chains, the required-input checks, Parquet
+  export, DDL generation, the DuckDB views (incl. the regression,
+  historic-events and slip-bin-statistics views), CSV export and the
+  Sheets targets.
+
+  The suite went green on 2026-09-16, when the two long-standing failures
+  were fixed and `.github/workflows/tests.yml` began running it on every
+  push and pull request — before that it had been red for three weeks with
+  nothing watching. `./gradlew :subprojects:python:check` now also runs
+  `ruff check` and `ruff format --check`, so a formatting drift fails the
+  build too (ADR-0002).
 
   Two limits worth knowing. `test_smoke`'s view tests build from
   **synthetic fixture frames** and pin *behaviour* — shapes, filters,

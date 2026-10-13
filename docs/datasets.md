@@ -162,7 +162,11 @@ Wolf fault. **28 rows × 6 columns.** The filename encodes the merge:
   compilation. (Our earlier "Surface Displacement Catalog" guess was
   wrong.)
 
-It is **not a public dataset.** Obtained from the prior project owner.
+Provenance: the lead author digitised part of a 1955 scanned report held in
+an open-access Caltech archive — not all of it. On 2026-09-18 she confirmed
+these rows may be redistributed with the code and data. The compilation as a
+whole was obtained from the prior project owner and is not itself published
+anywhere; it is her digitisation, not a republication of a public dataset.
 
 Notes:
 
