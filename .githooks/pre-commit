@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+#
+# Refuse to commit while new files are sitting untracked.
+#
+# Why this exists: twice now a commit has captured the edits to existing
+# files and left the brand-new ones behind — once the three files behind the
+# "How to cite" modal, once the Figures page and its script. Both times the
+# result was a tree that cannot build: mkdocs.yml referenced a page that was
+# not there, and every link to it failed the strict build the deploy workflow
+# runs. The edits look complete in `git show`, which is what makes it easy to
+# miss.
+#
+# `git ls-files --others --exclude-standard` lists exactly the dangerous
+# case: files that are neither tracked nor ignored — that is, new files
+# nobody has decided about yet. Anything genuinely disposable belongs in
+# .gitignore, which this check honours.
+#
+# Install once per clone (it is not automatic — git does not run hooks from
+# a versioned directory unless told):
+#
+#     git config core.hooksPath .githooks
+#
+# Bypass for a single commit when you really do mean to leave something
+# behind:
+#
+#     git commit --no-verify
+#     EGR_ALLOW_UNTRACKED=1 git commit     # same effect, more explicit
+
+set -u
+
+[ "${EGR_ALLOW_UNTRACKED:-0}" = "1" ] && exit 0
+
+untracked=$(git ls-files --others --exclude-standard)
+[ -z "$untracked" ] && exit 0
+
+count=$(printf '%s\n' "$untracked" | grep -c .)
+
+echo
+echo "  ✋ Commit stopped: $count new file(s) are untracked."
+echo
+printf '%s\n' "$untracked" | sed 's/^/       /'
+echo
+echo "  These are neither tracked nor ignored, so this commit would leave"
+echo "  them behind — and a half-committed change usually will not build."
+echo
+echo "  Pick one:"
+echo "      git add <file>...        include them (usually what you want)"
+echo "      echo <file> >> .gitignore   if they are scratch"
+echo "      git commit --no-verify   commit anyway, deliberately"
+echo
+exit 1
