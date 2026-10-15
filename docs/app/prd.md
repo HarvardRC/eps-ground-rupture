@@ -1,1053 +1,2140 @@
-# Scenario Explorer — product requirements document
+# Ground Rupture Explorer — product requirements document
 
-- **Status**: Draft for review
-- **Date**: 2026-10-13
-- **Author**: Michael Bouzinier, with Claude
-- **Stage**: 1 of 3 — this PRD → the **product definition document
-  (PDD)** → the **high-level design document (HLDD)**, each reviewed
-  before the next is drafted. This document says *what* and *why*;
-  platform and architecture choices are deliberately absent (they belong
-  to the HLDD and an ADR — an architecture decision record, the repo's
-  numbered log of technology choices).
-- **Working title**: "Scenario Explorer." A name is an open question
-  ([OQ-1](#11-open-questions)); whatever wins must not promise a hazard
-  analysis the data cannot deliver (see [Language](#language)).
+<!-- toc -->
 
-## How to read this document
+- [Product summary](#product-summary)
+  * [Why it matters](#why-it-matters)
+- [1. Problem](#1-problem)
+  * [1.1 The engineering decision](#11-the-engineering-decision)
+  * [1.2 What engineers need to know](#12-what-engineers-need-to-know)
+    + [Model measurements and their use](#model-measurements-and-their-use)
+    + [Limits of the model outputs](#limits-of-the-model-outputs)
+  * [1.3 What exists today](#13-what-exists-today)
+    + [The research paper](#the-research-paper)
+    + [The DesignSafe data archive](#the-designsafe-data-archive)
+    + [The existing project website and dashboards](#the-existing-project-website-and-dashboards)
+  * [1.4 The gap](#14-the-gap)
+  * [1.5 Product opportunity](#15-product-opportunity)
+  * [1.6 Product boundary](#16-product-boundary)
+- [2. Product vision and scope](#2-product-vision-and-scope)
+  * [2.1 Product vision](#21-product-vision)
+  * [2.2 MVP and delivery priorities](#22-mvp-and-delivery-priorities)
+  * [2.3 Reuse-first principle](#23-reuse-first-principle)
+  * [2.4 Capability map](#24-capability-map)
+  * [2.5 Out of scope](#25-out-of-scope)
+- [3. Users and personas](#3-users-and-personas)
+  * [3.1 Primary persona: the practicing engineer](#31-primary-persona-the-practicing-engineer)
+  * [3.2 Secondary persona: the independent reviewer](#32-secondary-persona-the-independent-reviewer)
+  * [3.3 Secondary persona: the researcher](#33-secondary-persona-the-researcher)
+  * [3.4 Tertiary persona: the learner](#34-tertiary-persona-the-learner)
+  * [3.5 Stakeholder: Harvard Structural Geology & Earth Resources Group](#35-stakeholder-harvard-structural-geology--earth-resources-group)
+- [4. User stories](#4-user-stories)
+  * [US-1: Dam foundation scenario](#us-1-dam-foundation-scenario)
+  * [US-2: Pipeline crossing](#us-2-pipeline-crossing)
+  * [US-3: Design review](#us-3-design-review)
+  * [US-4: Interpreting observed deformation](#us-4-interpreting-observed-deformation)
+  * [US-5: Teaching surface-rupture morphology](#us-5-teaching-surface-rupture-morphology)
+- [5. Functional requirements](#5-functional-requirements)
+  * [5.1 Scenario inputs (C1, P1)](#51-scenario-inputs-c1-p1)
+    + [Scenario-input controls](#scenario-input-controls)
+    + [FR-S1. Fault dip](#fr-s1-fault-dip)
+    + [FR-S2. Sediment strength and structure](#fr-s2-sediment-strength-and-structure)
+    + [FR-S3. Sediment depth](#fr-s3-sediment-depth)
+    + [FR-S4. Sediment density](#fr-s4-sediment-density)
+    + [FR-S5. Displacement window](#fr-s5-displacement-window)
+    + [FR-S6. Population selection](#fr-s6-population-selection)
+    + [FR-S7. Scarp-type filter](#fr-s7-scarp-type-filter)
+    + [FR-S8. Default and reset state](#fr-s8-default-and-reset-state)
+  * [5.2 Results and field-data context (C2, C3, P1)](#52-results-and-field-data-context-c2-c3-p1)
+    + [FR-O1. Distribution views](#fr-o1-distribution-views)
+    + [FR-O2. Summary statistics](#fr-o2-summary-statistics)
+    + [FR-O3. Small or empty result sets](#fr-o3-small-or-empty-result-sets)
+    + [FR-O4. Scarp-dip data caveat](#fr-o4-scarp-dip-data-caveat)
+    + [FR-O5. Field-data context](#fr-o5-field-data-context)
+    + [FR-O6. Kern County worked example](#fr-o6-kern-county-worked-example)
+  * [5.3 Downloads and citation (C4, C5, P1)](#53-downloads-and-citation-c4-c5-p1)
+    + [FR-D1. Download matching simulation records and statistics](#fr-d1-download-matching-simulation-records-and-statistics)
+    + [FR-D2. Export chart images](#fr-d2-export-chart-images)
+    + [FR-D3. Link to the complete data archive and paper](#fr-d3-link-to-the-complete-data-archive-and-paper)
+    + [FR-D4. Offer representative scarp-type animations](#fr-d4-offer-representative-scarp-type-animations)
+  * [5.4 Sharing and inverse search (C6, C7, P2)](#54-sharing-and-inverse-search-c6-c7-p2)
+    + [FR-X1. Shareable scenario links](#fr-x1-shareable-scenario-links)
+    + [FR-X2. Inverse search](#fr-x2-inverse-search)
+  * [5.5 Education, animations, and contact (C9, C11, P2/P3)](#55-education-animations-and-contact-c9-c11-p2p3)
+    + [FR-E1. Morphology education](#fr-e1-morphology-education)
+    + [FR-E2. Explain how the measurements are made](#fr-e2-explain-how-the-measurements-are-made)
+    + [FR-E3. Contact and request page](#fr-e3-contact-and-request-page)
+  * [5.6 Shared display rules (C10 and cross-capability rules)](#56-shared-display-rules-c10-and-cross-capability-rules)
+    + [FR-G1. Slip and derived magnitude displays](#fr-g1-slip-and-derived-magnitude-displays)
+    + [FR-G2. Scarp-type colors and identification](#fr-g2-scarp-type-colors-and-identification)
+    + [FR-G3. Reader-facing labels and data-driven text](#fr-g3-reader-facing-labels-and-data-driven-text)
+    + [FR-G4. Citation, disclaimer, and version information](#fr-g4-citation-disclaimer-and-version-information)
+    + [FR-G5. Reuse of existing full-dataset dashboards (C8)](#fr-g5-reuse-of-existing-full-dataset-dashboards-c8)
+- [6. Data requirements](#6-data-requirements)
+  * [6.1 Data provenance and calculation integrity](#61-data-provenance-and-calculation-integrity)
+    + [DR-1. Controlled data source](#dr-1-controlled-data-source)
+    + [DR-2. Versioned exports](#dr-2-versioned-exports)
+  * [6.2 Population and measurement rules](#62-population-and-measurement-rules)
+    + [DR-3. One-state-per-trial population](#dr-3-one-state-per-trial-population)
+    + [DR-4. Measurement hygiene](#dr-4-measurement-hygiene)
+    + [DR-5. Field-data preparation](#dr-5-field-data-preparation)
+  * [6.3 Product-data delivery constraints](#63-product-data-delivery-constraints)
+    + [DR-6. Payload and interaction support](#dr-6-payload-and-interaction-support)
+    + [DR-7. Future 3D compatibility](#dr-7-future-3d-compatibility)
+- [7. Content requirements](#7-content-requirements)
+  * [7.1 Product language](#71-product-language)
+    + [CR-1. Describe the product accurately](#cr-1-describe-the-product-accurately)
+    + [CR-2. Avoid unsupported claims](#cr-2-avoid-unsupported-claims)
+    + [CR-3. Use terms consistently](#cr-3-use-terms-consistently)
+  * [7.2 Disclaimers and professional-use boundaries](#72-disclaimers-and-professional-use-boundaries)
+    + [CR-4. Standing disclaimer](#cr-4-standing-disclaimer)
+    + [CR-5. Statistics and design-value language](#cr-5-statistics-and-design-value-language)
+    + [CR-6. Field-data comparison language](#cr-6-field-data-comparison-language)
+  * [7.3 Reader guidance and supporting material](#73-reader-guidance-and-supporting-material)
+    + [CR-7. Glossary and plain-language support](#cr-7-glossary-and-plain-language-support)
+    + [CR-8. Reader-visible caveats](#cr-8-reader-visible-caveats)
+    + [CR-9. Citation and sourcing language](#cr-9-citation-and-sourcing-language)
+  * [7.4 Content governance](#74-content-governance)
+    + [CR-10. Scientific-content approval](#cr-10-scientific-content-approval)
+- [8. Non-functional requirements](#8-non-functional-requirements)
+  * [8.1 Access, hosting, and privacy](#81-access-hosting-and-privacy)
+    + [NFR-1. Free public access](#nfr-1-free-public-access)
+    + [NFR-2. Static-site hosting](#nfr-2-static-site-hosting)
+  * [8.2 Performance and supported environments](#82-performance-and-supported-environments)
+    + [NFR-3. Responsive interaction](#nfr-3-responsive-interaction)
+    + [NFR-4. Supported environments](#nfr-4-supported-environments)
+  * [8.3 Accessibility and resilience](#83-accessibility-and-resilience)
+    + [NFR-5. Accessibility](#nfr-5-accessibility)
+  * [8.4 Licensing and publication rights](#84-licensing-and-publication-rights)
+    + [NFR-6. Licensing](#nfr-6-licensing)
+  * [8.5 Quality and release process](#85-quality-and-release-process)
+    + [NFR-7. Build and data-quality gates](#nfr-7-build-and-data-quality-gates)
+    + [NFR-8. Architecture decision record](#nfr-8-architecture-decision-record)
+- [9. Dependencies and risks](#9-dependencies-and-risks)
+  * [9.1 Scientific and data dependencies](#91-scientific-and-data-dependencies)
+  * [9.2 Scope and product dependencies](#92-scope-and-product-dependencies)
+  * [9.3 Content and media dependencies](#93-content-and-media-dependencies)
+  * [9.4 Delivery and technical risks](#94-delivery-and-technical-risks)
+  * [9.5 Decisions required before detailed design](#95-decisions-required-before-detailed-design)
+- [Appendix A. Requirements index](#appendix-a-requirements-index)
 
-Requirements and decisions carry short identifiers. Each family is
-defined in one section and cited everywhere else; a citation that
-precedes its section (FR-S5 in §1, for example) is a forward reference,
-not an undefined term.
+<!-- tocstop -->
 
-| Id | Meaning | Defined in |
-|---|---|---|
-| C1–C11 | Capabilities: what the product does, each mapped to a mockup surface and an existing asset | [§2, Capability map](#capability-map) |
-| P1 / P2 / P3 | Build-order priority tiers; P1 is the proposed v0.3 slice | [§2, under the map](#capability-map) |
-| FR-S/O/D/X/E/G + n | Functional requirements, grouped by letter: **S**cenario inputs, **O**utputs, **D**ownloads, sharing/inverse search (**X**), **E**ducation, **G**eneral display rules | [§5](#5-functional-requirements) |
-| DR-1…7 | Data requirements | [§6](#6-data-requirements) |
-| NFR-1…8 | Non-functional requirements | [§8](#8-non-functional-requirements) |
-| SC-1…7 | Success criteria | [§10](#10-success-criteria) |
-| OQ-1…9 | Open questions, each with a named decider | [§11](#11-open-questions) |
+## Product summary
 
-Domain terms (fault, scarp, slip…) link to the site's
-[glossary](https://harvardrc.github.io/eps-ground-rupture/glossary/) at
-first use. Project-infrastructure terms (the pipeline, pinned exports,
-the strict build…) are glossed inline where they first appear; ids are
-hyperlinked where linking helps and plain elsewhere. A **bracket**
-throughout is a user-chosen min–max range on one input. The **mockup**
-cited throughout is the author team's GUI mockup, described with its
-five numbered goals in [§12](#12-source-material).
+**Ground Rupture Explorer** is a free web tool for engineers evaluating
+sites affected by thrust or reverse faults — faults along which one
+block of ground is pushed up and over the other, so a rupture can
+break and step the ground surface.
+
+It helps engineers explore modeled scarp height, deformation-zone width,
+and scarp geometry for a fault-rupture scenario.
+
+The tool lets an engineer define a plausible site scenario using two
+kinds of information:
+
+1. **Site conditions**, estimated from mapping and site investigation:
+   - **Fault dip** — the angle at which the fault plane slopes
+     underground.
+   - **Sediment strength** — how strongly the near-surface soil or
+     sediment resists deformation.
+   - **Sediment density** — whether the sediment is relatively loose,
+     medium, or dense.
+   - **Sediment depth** — the depth of sediment above bedrock.
+
+2. **A displacement scenario** for a possible future rupture:
+   - **Fault slip or surface displacement** — either the distance the
+     fault is assumed to move at depth, or the anticipated vertical
+     offset at the ground surface.
+
+The tool searches a published **simulation ensemble** — a large,
+systematically varied set of numerical model runs — and shows the range
+of simulated ground-rupture measurements that match those conditions.
+The main outputs are:
+
+- **Scarp height** — the vertical ground step that a structure may need
+  to accommodate.
+- **Deformation-zone width** — the width of disturbed ground that a
+  facility may need to avoid or cross with special design.
+- **Scarp dip** — the steepness of the scarp face, indicating whether
+  the simulated surface rupture is a sharp step or a broad slope.
+
+The tool reports distributions rather than a single answer. This
+reflects both uncertainty in the site description and variability within
+the simulations. It provides counts, percentiles, data downloads,
+citations, and warnings when selected conditions are poorly represented
+or fall outside the modeled range.
+
+**Ground Rupture Explorer** is a **screening and design-review aid**. It
+is not a probabilistic fault-displacement hazard analysis, a
+site-specific prediction, or a design-code tool. It does not estimate
+earthquake probabilities or return periods. Engineers remain
+responsible for interpreting results, selecting design values, and
+following applicable regulations and professional guidance.
+
+### Why it matters
+
+Today, engineers can access:
+
+- the research paper;
+- the raw simulation archive; and
+- several dashboards built around the researchers' original questions.
+
+However, they cannot easily ask the practical engineering question:
+
+> “Given the approximate conditions at my site, what range of
+> surface-rupture measurements do comparable simulations show?”
+
+**Ground Rupture Explorer** provides that missing query interface.
 
 ## 1. Problem
 
-### What exists today
+### 1.1 The engineering decision
 
-Three public artifacts carry this research, and this document refers to
-them throughout:
+A geotechnical or earthquake engineer may need to evaluate a dam
+foundation, pipeline, road, rail line, planned facility, or other asset
+crossed by a thrust or reverse fault.
 
-- **The paper** — Chiama et al. (2025), *Earthquake Spectra* 41(5),
-  3977–4014 (DOI
-  [10.1177/87552930251346434](https://doi.org/10.1177/87552930251346434)):
-  a 2D [distinct element method (DEM)](https://harvardrc.github.io/eps-ground-rupture/glossary/#dem) ensemble simulating a
-  [thrust or reverse fault](https://harvardrc.github.io/eps-ground-rupture/glossary/#thrust-reverse) — one where the ground
-  on one side is pushed up and over the other — rupturing through
-  sediment, driven by [*slip*](https://harvardrc.github.io/eps-ground-rupture/glossary/#slip): how far the two sides of the
-  fault slide past each other at depth. 3,434 experiments recorded at
-  101 [slip stages](https://harvardrc.github.io/eps-ground-rupture/glossary/#model-stage) each give 346,834 model states,
-  with each surface output successfully measured on roughly
-  330,000–333,000 of them ([open full
-  text](https://par.nsf.gov/servlets/purl/10644518) for readers
-  without journal access).
-- **The data deposits** — on DesignSafe, the natural-hazards
-  engineering data repository funded by the NSF (the US National
-  Science Foundation): project PRJ-4680 (DOIs
-  [10.17603/ds2-xpq0-gw80](https://doi.org/10.17603/ds2-xpq0-gw80)
-  [homogeneous](https://harvardrc.github.io/eps-ground-rupture/glossary/#set) — uniform sediment,
-  [10.17603/ds2-gfsj-pp60](https://doi.org/10.17603/ds2-gfsj-pp60)
-  heterogeneous — internally varied sediment): the archived model
-  outputs. DesignSafe hosts the files but offers no exploration GUI,
-  and the author team wants an external site to carry that function
-  and reference the deposit.
-- **The site** — <https://harvardrc.github.io/eps-ground-rupture/>, the
-  website maintained in this repository (built with MkDocs, a Python
-  static-site generator), which republishes the dataset as five
-  interactive dashboards on Tableau Public, Tableau's free
-  dashboard-hosting service:
-    - [Model vs reality][] — every simulated measurement as a cloud,
-      with measurements from real earthquakes scattered over it: does
-      the model cover reality?
-    - [Response curves][] — how each surface measurement grows as slip
-      accumulates, and which conditions change that relationship; home
-      of the optional axis that relabels slip as an equivalent
-      [earthquake magnitude](https://harvardrc.github.io/eps-ground-rupture/glossary/#magnitude), with its warning that the
-      relabeling is not a measurement.
-    - [Per-event boxplots][] — the variability of field measurements
-      within each real earthquake, against the model's range (the
-      [boxplot vocabulary](https://harvardrc.github.io/eps-ground-rupture/glossary/#iqr) is in the glossary).
-    - [Slip regression][] — the fitted law linking slip on the fault
-      to vertical displacement at the surface; run backwards, it
-      estimates the slip behind a measured offset.
-    - [Distributions & summary statistics][] — the spread of each
-      output across all simulations, which input shifts it, and
-      typical values for each [scarp](https://harvardrc.github.io/eps-ground-rupture/glossary/#scarp) type (the model sorts
-      surface breaks into [six classes](https://harvardrc.github.io/eps-ground-rupture/glossary/#scarp-classes)).
+The engineer must support one or more of three decisions:
 
-Below, "the site" and "the dashboards" are names for these.
+- **Avoid the rupture zone** — Can the facility, or its critical
+  components, be located outside ground likely to be disturbed by
+  surface rupture? If so, how much clearance may be needed?
 
-### Who arrives, and what they are deciding
+- **Accommodate** — If a crossing cannot be avoided, how much ground
+  offset must the design tolerate? Over what distance will the ground
+  deform, and will the deformation be concentrated in a sharp break or
+  spread across a broad slope?
 
-A geotechnical engineer — the specialist in soil, rock, and
-foundations — is handed a site that a thrust or reverse fault crosses
-(a dam foundation, a pipeline or road alignment, a planned facility)
-and must put a defensible answer into a siting or design report. The
-report turns on three decisions:
+- **Investigate further** — Is the available information sufficiently
+  constrained to support a design decision, or is the range of
+  plausible ground offsets and deformation widths wide enough to
+  justify further mapping, trenching (digging an exploratory trench
+  across the fault to examine past ruptures), drilling, or testing?
 
-- **Avoid** — can the footprint (or its critical components) be
-  placed clear of the ground that will break, and how much clearance
-  does that take?
-- **Accommodate** — where crossing is unavoidable, how much ground
-  offset, spread over what distance and arriving in what shape, must
-  the design survive?
-- **Investigate further** — is current knowledge of the ground enough
-  to commit a design, or do the plausible outcomes vary so widely that
-  more drilling or trenching (exploratory excavation across the fault)
-  must come first?
+In this document, **avoidance** means keeping a facility or its
+critical components outside the main rupture zone and associated
+disturbed ground.
 
-A site investigation gives the engineer three inputs, each
-approximate: how steeply the [fault dips](https://harvardrc.github.io/eps-ground-rupture/glossary/#fault-dip), what the
-near-surface sediments are (their strength, their density, and how
-deep they run before bedrock), and how much displacement the fault
-could produce — estimated as slip on the fault at depth or as offset
-at the surface, two related but different numbers. These are the same
-kinds of parameters the ensemble varies, over its modeled ranges (dips
-20–70°, sediment 3–10 m deep, slip to ~5 m); when a site's bracket
-falls partly outside those ranges, the product must say so rather than
-silently clip — a rule the
-functional requirements enforce
-([FR-S5](#scenario-inputs-c1--p1), the displacement-window requirement
-whose assist converts a surface offset to slip and flags out-of-range
-values).
+Site investigation rarely provides exact input values. An engineer may
+know, for example, that the fault dip is approximately 30–40°, that the
+near-surface sediments are relatively strong, and that a future rupture
+could produce up to a specified amount of displacement. The product
+must therefore support ranges and categories, rather than require a
+single precise description of the site.
 
-### What they need, and how they will use it
+### 1.2 What engineers need to know
 
-To feed those three decisions, the engineer needs the ensemble's three
-headline surface-outcome measurements under their site's conditions —
-each for a specific use:
+#### Model measurements and their use
 
-- **[Scarp height](https://harvardrc.github.io/eps-ground-rupture/glossary/#scarp-height)** — the *accommodate* number. Where rupture reaches
-  the surface, one side of the ground rides up over the other and
-  leaves a step: the scarp. Scarp height is that step's size — the
-  vertical component of the offset anything crossing the rupture must
-  survive (at these fault dips the accompanying horizontal shortening
-  is comparable, and it is not an ensemble output, so the product
-  delivers the vertical piece only). It is the differential crest
-  movement a dam must ride out where a fault crosses it — the number
-  behind defensive allowances such as extra freeboard (spare crest
-  height above the water line) against crest disruption, and wide
-  filter zones (graded sand-and-gravel layers that keep seepage from
-  washing out a cracked core) against offset-induced cracking —
-  the step that breaks a road or rail grade, the rise of one end of a
-  foundation relative to the other.
-- **[Deformation zone width (DZW)](https://harvardrc.github.io/eps-ground-rupture/glossary/#dzw)** — the *avoid* number. The break is
-  not a knife line: around the step lies a band of warped, cracked,
-  bulged ground, and DZW is that band's full width — the stretch of
-  ground a footprint must clear to stand beyond the disturbance. It
-  spans the disturbed ground from its first sign on the uplifted side
-  across to the scarp's base on the other — a width, not a setback (a
-  required building-free distance measured out from the fault trace —
-  the line where the fault meets the surface). Setback practice is
-  built on widths of this kind: New Zealand's
-  [Fault Avoidance Zones](https://gis.gns.cri.nz/server/rest/services/Active_Faults/NZActiveFaultDatasets/MapServer/7/iteminfo)
-  wrap the mapped deformation zone plus a buffer, California's
-  [Alquist-Priolo zones](https://www.conservation.ca.gov/cgs/alquist-priolo)
-  trigger the fault investigation from which a setback is then set,
-  and for a lifeline — a pipeline, road, or utility line — that
-  cannot avoid crossing, DZW sets the length over which the special
-  crossing design must run (longer for an oblique crossing). One
-  scope line belongs here: the ensemble's DZW is the width of the
-  [principal rupture](https://harvardrc.github.io/eps-ground-rupture/glossary/#principal-rupture) band. Real events can also
-  break on scattered strands (separate, roughly parallel breaks of the
-  same fault) far outside it — [field compilations](https://harvardrc.github.io/eps-ground-rupture/glossary/#the-field-counterparts)
-  record widths to 1,450 m where the model tops out near 46 m — so
-  the avoid decision pairs this number with fault-trace mapping; the
-  product supplies the principal band only.
-- **[Scarp dip](https://harvardrc.github.io/eps-ground-rupture/glossary/#scarp-dip)** — the steepness of the scarp face itself (not the
-  fault's dip at depth); the shape qualifier on both numbers above.
-  The same offset can arrive at the surface as a near-vertical step
-  or as a long, gentle ramp, and the demand on a structure differs in
-  kind: a steep scarp delivers the offset as a discrete break through
-  whatever crosses it, while a gentle one delivers the same offset as
-  tilt and curvature spread over distance — which a structure may be
-  able to tolerate or
-  regrade. Scarp dip says which kind of demand to design for, and
-  whether the field expression will be an obvious step or subtle
-  warping.
+To support avoidance, accommodation, and further-investigation
+decisions, engineers need information about three aspects of modeled
+surface rupture:
 
-And they need each **as a distribution, not a single number**, for two
-reasons the ensemble was built to expose:
+| Model measurement | Decision it supports | Meaning for the engineer |
+|---|---|---|
+| **Scarp height** | Accommodate | The vertical size of the ground step. It indicates the vertical offset that a structure crossing the rupture may need to tolerate. |
+| **Deformation-zone width (DZW)** | Avoid the rupture zone; accommodate | The width of the main modeled strip of ground disturbed by rupture. It helps indicate how much ground a facility may need to avoid, or how long a specially designed crossing section may need to be. |
+| **Scarp dip** | Accommodate | The steepness of the visible slope formed by the rupture. It helps distinguish a concentrated, step-like break from deformation spread across a broader and gentler slope. |
 
-1. *The inputs are ranges.* "Dip about 30–40°, strong sediments, up
-   to 3 m of offset at the surface" is what an investigation yields.
-   The honest question is: across every modeled condition consistent
-   with that bracket, what outcomes occurred? — with the displacement
-   window bounding which model stages count. Whether that means every
-   stage inside the window or only each trial's last stage inside it —
-   and where the window's lower bound sits, not just its cap — changes
-   the percentiles (scarps grow as slip accumulates, so pooling every
-   early stage pulls them down). The product must label that
-   population choice; [FR-S6](#scenario-inputs-c1--p1) defines the two
-   populations.
-2. *Identical descriptions do not produce identical scarps.* Within
-   the ensemble's heterogeneous arm (its layered-sediment branch,
-   [`Set`](https://harvardrc.github.io/eps-ground-rupture/glossary/#set)), ten random layer realizations of
-   one nominal profile — same depth, same density, metre-scale layer
-   strengths drawn from the same range — produced different surface
-   outcomes: sites identical in every descriptor a site report would
-   quote, differing only in a layer sequence no investigation pins
-   down along the full length of a crossing. A site characterized to
-   class level still carries a spread.
+The product reports each measured quantity as a **distribution**, not
+as a single value. This is necessary for two reasons:
 
-Practice consumes distributions through percentiles — the median as
-the typical case, the 84th as the conventional conservative fractile
-(a percentile written as a fraction) in deterministic practice (design
-to fixed scenario values rather than to occurrence probabilities;
-cited in [Source material](#12-source-material)). The product reports
-these as fractiles of the filtered ensemble, quotable with provenance;
-choosing a design value from them stays with the engineer of record —
-the licensed engineer who signs and is legally responsible for the
-design ([Non-goals](#non-goals)). The spread itself is also a decision
-input: outcomes running from negligible to severe under one bracket
-argue for narrowing the inputs (more investigation) before committing
-a design; a tight spread lets the design proceed.
+1. **The site description is uncertain.** Engineers normally work with
+   plausible ranges rather than exact values. For example, a fault dip
+   may be estimated as 30–40° rather than known precisely.
 
-### The gap
+2. **Similar modeled conditions can produce different measured
+   values.** In particular, different arrangements of sediment layers
+   can produce different surface-rupture patterns even when the broad
+   site description is the same.
 
-None of the three artifacts delivers that today:
+The distribution therefore shows the range of values measured in the
+simulations that match the selected scenario. The median describes a
+typical modeled value; the 84th percentile provides a
+commonly used higher fractile (a percentile used as a review reference)
+in deterministic engineering review — design checks built on selected
+scenarios rather than on probabilities. The tool does not select a
+design value. That remains the responsibility of the engineer of
+record, the licensed professional responsible for the design.
 
-- the **paper** is static — its figures answer the authors' questions
-  at the authors' chosen cuts;
-- the **deposits** are raw archives — answering "given my site…" means
-  downloading them and writing one's own filtering and statistics;
-- the **dashboards** answer the *paper's* questions (which parameter
-  shifts which distribution; how the model compares to field
-  compilations). None answers the *engineer's* — "given my site, what
-  did the ensemble do?" — because none lets an engineer set a
-  conjunctive (all filters applied together, AND-combined),
-  engineering-vocabulary bracket and then read percentiles of — or
-  download — exactly that bracketed subset.
-  [Distributions & summary statistics][] comes closest and shows the
-  shape of what is missing: it colors by one parameter at a time and
-  cannot hold dip, sediment strength, and a displacement window fixed
-  together.
+#### Limits of the model outputs
 
-### How the engineer answers this today
+The outputs describe the modeled surface expression of rupture, but they
+do not describe every possible effect of a real earthquake.
 
-The as-is workflow, compressed from the governing guidance (each
-artifact linked; US practice, with New Zealand as the notable
-alternative regime):
+- **Scarp height** represents vertical surface offset. The product does
+  not display an accompanying horizontal-shortening measurement.
 
-1. **Screening.** Does a mapped active fault touch the project? In
-   California, the state's
-   [EQ Zapp](https://www.conservation.ca.gov/cgs/geohazards/eq-zapp)
-   zone map answers it — inside an
-   [Alquist-Priolo zone](https://www.conservation.ca.gov/cgs/alquist-priolo)
-   a fault investigation is mandatory before a permit. Elsewhere, the
-   [Quaternary Fault and Fold Database](https://www.usgs.gov/programs/earthquake-hazards/faults)
-   of the USGS, the US Geological Survey.
-2. **Desk study.** The fault's public record: that database entry
-   (slip rate as one of four bins, a dip *direction* but no dip
-   angle), geologic maps, lidar, prior consultant reports. For thrust
-   and reverse faults the record is thinner than for strike-slip
-   faults (the sideways-sliding kind, like the San Andreas) — the
-   trace often hides as a fold or warp rather than a clean break.
-3. **Site investigation.** A licensed geologist maps the ground, digs
-   trenches across the suspected trace, and logs the sediments with
-   borings and cone soundings (probes pushed into the ground to profile
-   its strength); the California Geological Survey's
-   [Special Publication 42](https://www.conservation.ca.gov/cgs/publications/sp42)
-   is the practice guide. A trench shows what *past*
-   ruptures did at that exact spot; extrapolating to the next event is
-   judgment.
-4. **Scenario definition.** Fault dimensions become a design magnitude
-   and displacement through empirical scaling relations —
-   [Wells & Coppersmith (1994)](https://central.scec.org/node/3035),
-   and for reverse faults
-   [Moss & Ross (2011)](https://authors.library.caltech.edu/94907).
-   Here the slip-at-depth vs. offset-at-the-surface distinction first
-   bites, and practice has no standard conversion between the two —
-   the gap FR-S5's assist fills with the ensemble's own regression.
-5. **Hazard quantification.** Routine projects stop at a judged
-   deterministic number. Critical facilities run a **PFDHA** —
-   probabilistic fault displacement hazard analysis
-   ([Youngs et al. 2003](https://pubs.usgs.gov/publication/70025970)),
-   today via the free
-   [FDHI (Fault Displacement Hazard Initiative) model suite](https://www.risksciences.ucla.edu/nhr3/fdhi/models)
-   and its [fdhpy web tool](https://asarmy.github.io/fdhpy-webtool).
-   These return displacement *amplitude* against occurrence — never
-   what the rupture looks like, and conditioned on nothing
-   geotechnical.
-6. **Deformation-zone geometry — the central judgment.** How wide is
-   the disturbed band, how high the step, sharp break or broad warp,
-   split how across the fault? Today's sources: thrust case-history
-   tables ([Boncio et al. 2018](https://nhess.copernicus.org/articles/18/241/2018/),
-   eleven earthquakes, proposing 840 m as a precautionary zone width
-   for basic studies), the
-   [FDHI field database](https://www.risksciences.ucla.edu/girs-reports/2021/08),
-   New Zealand's mapped
-   [Fault Avoidance Zones](https://gis.gns.cri.nz/server/rest/services/Active_Faults/NZActiveFaultDatasets/MapServer/7/iteminfo),
-   figures read out of journal papers — prominently
-   [Chiama et al. (2023)](https://par.nsf.gov/biblio/10514401) and the
-   2025 ensemble paper itself — or a senior colleague's judgment.
-   **This is the step the product serves.** No queryable reference
-   exists, and two competent engineers can defend materially different
-   widths from the same thin evidence.
-7. **Engineering response.** Occupied buildings: avoid (the setback).
-   Pipelines that must cross: strain-based design per the US guideline
-   lineage of ASCE (the American Society of Civil Engineers), ALA (the
-   American Lifelines Alliance), and PRCI (the Pipeline Research
-   Council International). Dams: the seismic-hazard guideline of FERC,
-   the US federal hydropower regulator (its Engineering Guidelines
-   Chapter 13), frames the hazard, and the defensive design itself
-   follows ICOLD, the international large-dams commission. Each
-   response needs the offset's *shape and width*, not just its size —
-   the three quantities above.
-8. **Report and review.** A licensed professional signs the numbers;
-   a reviewer tests them against the same scarce evidence base the
-   author used. A citable, queryable reference changes both sides of
-   that exchange.
+- **Deformation-zone width** is the width of the main modeled strip of
+  ground disturbed by rupture. It may include the scarp itself and
+  nearby bending, cracking, or uplift. Field compilations of real
+  earthquakes rank measurements as **principal** (on the main rupture
+  trace) or **distributed** (away from it); the modeled strip
+  corresponds to the principal, main-trace band. Real earthquakes can
+  also produce separate cracks or deformation zones farther from the
+  main rupture; the model does not represent all of those effects.
 
-**Notable alternative workflows.** (a) *Prescriptive avoidance only* —
-zoning plus setback, no displacement number at all; the cheap default
-for ordinary buildings, where ensemble-type evidence would enter
-upstream, when the zones are drawn. (b) *Full PFDHA* — for critical
-facilities; it consumes rather than competes with this dataset
-(amplitude from the empirical models, morphology from the ensemble).
-(c) *Bespoke numerical modeling* — commission a one-off simulation of
-the site (engines and costs below); the ensemble is this workflow
-industrialized — thousands of such models, pre-computed and queryable.
-(d) *Judgment and precedent* — the fallback layer inside all of the
-above, and the workflow the scenario page most directly upgrades.
+- **Scarp dip** is the steepness of the visible slope formed by the
+  rupture. It is not the same as **fault dip**, which is the angle at
+  which the fault plane slopes below ground.
 
-### Adjacent products, and why the gap persists
+Users must combine the model results with site-specific mapping of where
+the fault reaches the ground surface, and with other geological evidence,
+when evaluating the full area that may be affected.
 
-A landscape scan (2026-10-13, extended web search) found **no direct
-competitor**: no tool, free or commercial, conditions surface-rupture
-outcomes on geotechnical variables or outputs scarp height,
-deformation-zone width, or scarp class.
+### 1.3 What exists today
 
-- **Free, adjacent, different question.** The
-  [fdhpy web tool](https://asarmy.github.io/fdhpy-webtool) and
-  [package](https://github.com/asarmy/fdhpy) (MIT-licensed) and the
-  [FDHI reference implementations](https://www.risksciences.ucla.edu/nhr3/products/fdhi)
-  (Python, Excel) return displacement amplitude from magnitude, style,
-  and position along the rupture — no sediment, no dip, no morphology.
-  The fdhpy web tool — free, static, client-side, republishing
-  published models — is also the delivery-pattern precedent this
-  product follows.
-- **Hazard portals ship shaking, not rupture.** The
-  [USGS Earthquake Hazard Toolbox](https://earthquake.usgs.gov/nshmp/),
-  the applications of [OpenSHA](https://opensha.org/Applications) (the
-  open-source seismic-hazard platform), and the
-  [web app of New Zealand's National Seismic Hazard Model (NSHM)](https://nshm.gns.cri.nz/)
-  — by GNS Science, NZ's geoscience agency — carry no
-  fault-displacement product at all.
-- **Raw data without a tool.** The
-  [FDHI field database](https://www.risksciences.ucla.edu/girs-reports/2021/08)
-  (75 earthquakes, >40,000 measurements — none with recorded
-  subsurface sediment properties) and the
-  [SURE (SUrface Ruptures due to Earthquakes) database](https://zenodo.org/records/6326856):
-  the empirical feedstock, analysis left to the reader.
-- **Adjacent consumer, not rival.**
-  [OpenSRA](https://peer.berkeley.edu/opensra-home1) (free; built by
-  PEER, the Pacific Earthquake Engineering Research center, for the
-  California Energy Commission) assesses gas-network seismic risk by
-  *consuming* fault-displacement models — a potential consumer of this
-  product's outputs.
-- **The bespoke tier** — today's only route to a geotechnically
-  conditioned answer — prices as a consulting engagement. The posted
-  software alone:
-  [PLAXIS](https://www.bentley.com/en/products/plaxis-3d/) $4,450 (2D)
-  to $22,000 (3D suite) per seat-year (Bentley's posted prices,
-  checked 2026-10-13); Abaqus ≈ $17,200/year lease
-  ([reseller-posted](https://www.goengineer.com/guide-to-buying-abaqus-fea);
-  the vendor itself quotes only); and Itasca's
-  [PFC](https://itascasoftware.com/products/pfc/) — the very code the
-  ensemble ran on (the paper names PFC2D v7) — posts no public price
-  at all. Add specialist weeks per site. The paper reports roughly
-  20,000 CPU-hours and ~27 TB of model output
-  ([open full text](https://par.nsf.gov/servlets/purl/10644518)); the
-  barrier is less the compute than the 3,434 calibrated experiments
-  and the measurement pipeline behind them — specialist effort no
-  single siting project buys.
+The research is already publicly available through three complementary
+resources:
 
-So "are competitors too expensive?" splits cleanly: the free tools are
-free but answer a different question; the only route that answers
-*this* question is a bespoke study, and its cost is precisely the
-problem the product removes at screening level.
+| Resource | What it provides | Primary audience and use |
+|---|---|---|
+| **Research paper** | The published scientific analysis of the simulation ensemble, its methods, and its findings. | Readers who need to understand or evaluate the research. |
+| **DesignSafe data archive** | The underlying model outputs and supporting data files. | Researchers or advanced users who can download, process, and analyze the data themselves. |
+| **Project website and dashboards** | Public explanations of the research and interactive Tableau dashboards showing selected views of the data. | Engineers, researchers, students, and other visitors exploring the published results. |
 
-**Why has no one built it?** The evidenced reasons, strongest first:
+#### The research paper
 
-1. *The enabling data is new.* A physics ensemble dense enough to
-   condition on geotechnical variables reached a public archive only
-   in 2024–2025 — the suite grew from 45 experiments
-   ([the 2023 study](https://par.nsf.gov/biblio/10514401)) to 3,434.
-   Until months before this project, there was nothing to serve.
-2. *Codified practice structurally cannot get there from field data.*
-   The FDHI compilation records remote-sensing terrain metrics and a
-   mapped surficial-unit class (bedrock vs. alluvium) — not measured
-   sediment strength, density, or depth — so the empirical models
-   built on it take magnitude and position, never ground conditions. The research
-   community itself lists integrating physics models with geotechnical
-   properties as an open challenge
-   ([QuakeCoRE white paper, 2024](https://www.naturalhazards.govt.nz/assets/Publications-Resources/QuakeCoRE-FDHA.pdf)).
-3. *The paying demand is a buyers' club that funds open tools.* The
-   FDHI program was sponsored by PG&E, Caltrans, California
-   High-Speed Rail, SoCalGas, LADWP, and the California Energy
-   Commission; the same pattern produced OpenSRA. Demand exists, but
-   it routes through research sponsorship rather than product
-   purchases — which suggests no commercial opening, and is why this
-   lane suits a free academic site.
-4. *The compliance workflow runs through licensed professionals*, with
-   avoidance the default remedy. A tool that looked like it recommends
-   design values would fight the standard of care instead of serving
-   it — the [Non-goals](#non-goals) and [§7's language rules](#language)
-   exist for exactly this reason.
-5. *Academic incentives end at the dataset DOI.* Archives fund
-   deposits, not interfaces; the fdhpy web tool, this product's
-   nearest neighbor in form, is itself a volunteer-scale static page.
+Chiama et al. (2025) reports a two-dimensional distinct element method
+(DEM) simulation ensemble of thrust and reverse fault rupture through
+sediment. The ensemble contains 3,434 simulation trials, each recorded
+at 101 stages as fault slip accumulates.
 
-One honest caveat cuts the other way: physics-based
-fault-displacement tooling is where the field says it is heading
-([Eos' 25-year retrospective](https://eos.org/editors-vox/when-the-earth-moves-25-years-of-probabilistic-fault-displacement-hazards));
-the IAEA has already published a PFDHA benchmark
-([TECDOC-2092](https://www.iaea.org/node/224310)), and integrations
-into OpenQuake, the open-source hazard engine, are underway — so the
-first-mover window is real but perishable.
+In this document, a **simulation record** means one recorded stage of
+one simulation trial — 3,434 trials × 101 stages = 346,834 records.
+Which records a result uses is governed by the population selection
+(FR-S6).
 
-**Positioning.** The reference point practitioners will reach for is
-that same [FDHI](https://harvardrc.github.io/eps-ground-rupture/glossary/#the-datasets)
-model suite and web tool. As the scan above shows, the two condition
-on disjoint variables — FDHI on the earthquake (style, magnitude,
-position along the rupture), this ensemble on the ground. That
-complementarity is the product's reason to exist, and the product
-should say so in FDHI's own vocabulary (principal vs. distributed
-displacement).
+Across the ensemble, the simulations vary fault dip and near-surface
+sediment conditions. They measure several features of the resulting
+surface deformation, including scarp height, deformation-zone width, and
+scarp dip.
 
-## 2. Product vision and scope strategy
+The paper establishes the scientific basis for the product, but it is a
+static publication. Its figures answer the authors' research questions
+at selected parameter combinations; they do not allow a reader to define
+and inspect a new site scenario.
 
-The author team's GUI mockup (see [Source material](#12-source-material))
-draws a four-tab site: a full-dataset explorer, an "Advanced Search," an
-educational [morphologies](https://harvardrc.github.io/eps-ground-rupture/glossary/#scarp-classes) (scarp-shape classes) page,
-and a contact page. The owner's direction
-(2026-10-13): overlap with the existing dashboards is intended — **reuse
-the dashboards, or evolve the current site into a fully functional
-app**, rather than building a second, parallel property.
+#### The DesignSafe data archive
 
-So the product is the existing site, grown until it serves the mockup's
-vision. The one genuinely new capability — and the core of this PRD — is
-the **scenario page**: the single-page destination of the author team's
-request, realizing the mockup's Advanced Search. Everything else maps
-onto existing assets, gets reused, or follows later.
+The simulation outputs are archived in two DesignSafe deposits:
+one for homogeneous sediment and one for heterogeneous sediment.
+DesignSafe provides long-term access to the research data, but it is an
+archive rather than an engineering query tool.
 
-One reframing is stated here rather than buried: the request's own
-shorthand for the deliverable is *hazard assessment*. The dataset
-carries no earthquake occurrence rates, so nothing built on it can be a
-hazard analysis in the practice sense; the product delivers what
-engineers reach for under that shorthand — conditional distributions of
-surface outcomes under a bracketed scenario — and labels itself
-accordingly ([Language](#language)). Throughout this document, **"the
-app"** means this new interactive scenario capability, wherever
-[OQ-2](#11-open-questions) places its entry point.
+A user who wants to answer a scenario-specific question must download
+the files, understand the data structure and variable names, apply the
+required filters, handle missing measurements, and calculate statistics
+independently.
 
-### Non-goals
+#### The existing project website and dashboards
 
-- No probabilistic fault displacement hazard analysis: no occurrence
-  rates, return periods (average years between events of a given
-  size), or exceedance statements (the chance a value is surpassed).
-- No design-value recommendations; percentile selection stays with the
-  engineer of record.
-- No user-data upload or overlay; researchers compare offline via the
-  subset download ([FR-D1](#downloads-and-citation-c4-c5--p1)).
-- No accounts, no tracking, no re-hosting of the raw archives.
-- No 3D-arm ingestion while that lane is on hold
-  ([DR-7](#6-data-requirements) keeps the door open).
-- No native re-implementation of the published dashboards without a
-  named gap ([FR-G5](#displays-shared-across-capabilities)).
+The existing project website republishes and explains the research. It
+also provides five Tableau Public dashboards:
 
-### Capability map
+- **Model vs. reality** compares the simulated measurements with field
+  measurements from real earthquakes.
+- **Response curves** show how surface measurements change as fault slip
+  accumulates.
+- **Per-event boxplots** compare field-measurement variability within
+  individual earthquakes with the modeled range.
+- **Slip regression** shows the fitted relationship between fault slip
+  at depth and vertical surface displacement.
+- **Distributions and summary statistics** shows how individual model
+  parameters affect the distribution of each output.
 
-| # | Capability | Mockup surface | Existing asset | New build | Priority |
+These dashboards remain valuable and should be reused where they meet a
+user need. They were designed to communicate the paper's findings,
+however, rather than to answer an engineer's combined, site-specific
+question.
+
+### 1.4 The gap
+
+The paper, data archive, and existing dashboards provide valuable access
+to the research, but none answers the engineer's central question
+directly:
+
+> “Given the approximate conditions at my site, what range of
+> surface-rupture measurements do comparable simulations show?”
+
+Answering that question requires the engineer to consider several site
+conditions together. For example, the engineer may need results for
+simulations with:
+
+- fault dip between 30° and 40°;
+- strong, dense sediment;
+- sediment depth of 5–10 m; and
+- a specified range of fault slip or anticipated surface offset.
+
+The relevant result is the subset of simulations that matches all of
+those conditions at once.
+
+The current dashboards do not support that kind of combined query. For
+example, the distributions dashboard can show how one input parameter
+affects an output distribution, but it cannot filter simultaneously by
+fault dip, sediment properties, and a displacement range, then calculate
+statistics for the resulting subset.
+
+The raw archive could support such an analysis, but only after a user
+downloads the data, understands its structure and variable names,
+handles missing measurements, applies the filters, and calculates the
+statistics independently. The paper cannot support it because its figures
+are fixed at the parameter combinations selected by the authors.
+
+As a result, an engineer who needs a site-scenario-specific view of the
+ensemble must currently perform a custom data analysis or rely on
+professional judgment and precedent.
+
+### 1.5 Product opportunity
+
+**Ground Rupture Explorer** will provide the missing scenario-query
+capability. It will allow users to define a scenario using ranges and
+categories, view distributions of measurements from the matching
+simulations, and download the exact data subset and summary statistics
+behind the view.
+
+### 1.6 Product boundary
+
+Ground Rupture Explorer provides conditional results from a simulation
+ensemble. It helps users examine simulated surface-rupture measurements
+under a selected range of site conditions and displacement assumptions.
+
+It does not:
+
+- estimate how often an earthquake or surface rupture will occur;
+- calculate annual probabilities, return periods, or probabilities of
+  exceedance;
+- perform a probabilistic fault-displacement hazard analysis (PFDHA);
+- predict displacement or deformation at a specific site;
+- recommend a design value, setback, or engineering solution;
+- replace site investigation, fault mapping, applicable regulations, or
+  the judgment of a qualified professional.
+
+The product is intended to complement, rather than replace, other parts
+of an engineering evaluation. For example, an engineer may use
+fault-mapping and site-investigation evidence to define plausible input
+ranges; use an external hazard or displacement analysis to develop a
+future-displacement scenario; and use Ground Rupture Explorer to examine
+the modeled surface expression associated with that scenario.
+
+The final interpretation of the results, including any design decision,
+remains the responsibility of the engineer of record.
+
+## 2. Product vision and scope
+
+### 2.1 Product vision
+
+**Ground Rupture Explorer** will extend the existing project website into
+a more useful reference tool for engineers, researchers, and students.
+
+Its central new capability is a **scenario page**. On that page, an
+engineer can describe a plausible fault-rupture scenario using ranges
+and categories for site conditions and displacement, then examine the
+matching simulated surface-rupture measurements.
+
+In this document, **simulated surface-rupture measurements** means
+values measured from each simulation, including scarp height,
+deformation-zone width, and scarp dip.
+
+The scenario page is the product's primary contribution. It answers the
+question that the paper, archive, and existing dashboards cannot answer
+directly:
+
+> For conditions similar to my site and displacement scenario, what
+> values of scarp height, deformation-zone width, and scarp dip were
+> produced across the matching computer simulations?
+
+The product will remain part of the existing project website rather than
+become a separate research-data property. Existing dashboards, glossary
+content, citation material, field-data context, and links to the
+DesignSafe archive will be reused where they already meet a user need.
+
+The scenario page may also show measurements from past earthquakes for
+context, but it keeps those field measurements distinct from the results
+produced by the computer simulations.
+
+### 2.2 MVP and delivery priorities
+
+The proposed **minimum viable product (MVP)** is P1, targeted as v0.3.
+It must support the complete core workflow: an engineer defines a
+plausible scenario, examines the matching simulated surface-rupture
+measurements, understands the result's limits, and downloads the
+underlying simulation subset with provenance.
+
+P2 and P3 add useful capabilities, but they must not delay the MVP
+unless scientific or usability review identifies a dependency.
+
+Measurable success criteria and acceptance walkthroughs for the MVP
+are defined in the product design document (PDD), derived from US-1
+through US-3 and the requirements below.
+
+- **P1 / MVP (v0.3):** scenario inputs; distributions and statistics for
+  scarp height, deformation-zone width, and scarp dip; optional
+  real-earthquake measurement context; downloadable simulation subsets
+  and summary statistics; citations; and links to the paper and full
+  data archive.
+
+- **P2:** shareable scenario URLs, inverse search, plot exports,
+  animations and morphology education, the derived-magnitude display
+  aid (C10), and only those additional exploration features that
+  address a documented gap in the existing dashboards (C8).
+
+- **P3:** contact and request features.
+
+### 2.3 Reuse-first principle
+
+The project already provides five public Tableau dashboards. They remain
+the default way to present questions that they already answer well.
+
+**Ground Rupture Explorer** will add a native capability only where the
+existing site does not meet a defined user need. Its central new
+capability is the combined scenario query: selecting several site
+conditions together and viewing the corresponding simulated
+surface-rupture measurements.
+
+The product will reuse existing project assets where appropriate,
+including:
+
+- the project website and its navigation;
+- the glossary and explanatory content;
+- the citation and disclaimer material;
+- links to the DesignSafe data archive;
+- the published dashboards; and
+- field measurements from past earthquakes, where they provide useful
+  context and can be shown with their source-specific limitations.
+
+The product will not reimplement an existing dashboard merely to create
+a visually consistent interface. A new native display must address a
+documented user need that the existing dashboards cannot meet.
+
+The technical choice for each existing dashboard or new product surface
+— for example, linking to it, embedding it, or building a native
+replacement — belongs to the high-level design document (HLDD) and the
+associated architecture decision record (ADR). This PRD defines the
+user capabilities and scope, not their technical implementation.
+
+### 2.4 Capability map
+
+The following map connects each planned capability to the mockup,
+relevant existing assets, proposed new work, and delivery priority. P1
+is the proposed MVP; P2 and P3 are later priorities.
+
+The mockup is the author-provided concept deck “DEM website GUI”
+(PowerPoint), kept with the project's local working materials. It is a
+design input rather than a committed specification; the PDD's page
+designs supersede it. “NZ NSHM” below is the New Zealand National
+Seismic Hazard Model web tool, a comparable public hazard-exploration
+product.
+
+| ID | Capability | Mockup area | Existing assets to reuse | New work | Priority |
 |---|---|---|---|---|---|
-| C1 | Scenario inputs: bracket fault dip, sediment properties, displacement; filter in engineering vocabulary | Tab 2 "Search by DEM Model Parameters" | None ([Distributions][] hues by one parameter at a time; no parameter filters, no ranges, no conjunctive bracketing) | The scenario page | P1 |
-| C2 | Distribution outputs with counts and percentiles for SH (scarp height), DZW, scarp dip | Tab 2 results panel | [Distributions][] histograms (no percentiles, no conjunctive filter) | Yes | P1 |
-| C3 | Field-measurement context on the filtered view ("your scenario vs. real events") | Slides 6–7 worked example (arrows pointing at [Kern County 1952](https://harvardrc.github.io/eps-ground-rupture/glossary/#kern-county-1952) values) | [Distributions][] needles (thin reference lines marking individual field measurements); [Per-event boxplots][]; `historic_events` (a field-measurement table from the repo's data pipeline, §6) | Reuse pattern | P1 |
-| C4 | Download the filtered subset, its summary statistics, and plot images, with citation attached; the download flow offers a representative scarp-type animation (mockup goal 5, FR-D4) | Tab 2 "Download Selected Data"; mockup goals 2 and 5 | None | Yes | P1 (plot images and animation P2) |
-| C5 | Link out to the full dataset (DesignSafe PRJ-4680) and the paper | Tab 1 "Download the full DEM dataset" | Site cite apparatus (the standard How-to-cite buttons and citation includes) | Link, not re-hosting | P1 |
-| C6 | Shareable scenario state (URL that reproduces the view) | — (precedent: the [GNS NZ NSHM app](https://nshm.gns.cri.nz/)'s shareable state) | None | Yes | P2 |
-| C7 | Inverse search: given observed surface deformation, find matching scenarios | Tab 2 "Search by Surface Deformation Characteristics" | The [back-projection](https://harvardrc.github.io/eps-ground-rupture/glossary/#back-projection) on [Slip regression][] is the method precedent | Yes | P2 |
-| C8 | Full-dataset exploration: scatter/histogram/PDF (probability-density curve), color-by, zoom-select for mean/σ of a region | Tab 1 | [Model vs reality][], [Response curves][], and [Distributions][] cover most modes | Reuse the dashboards' coverage first; native build only for a named gap (FR-G5). The link/embed/native split per surface is the HLDD's platform decision | P2 |
-| C9 | Morphology education with model/photo pairs and per-class animations | Tab 3 | Glossary scarp-class entries; the site's figures page (Figs 3–7, the scarp classes); author-supplied animations (3 mp4 + 1 gif in the mockup file) | Yes — photos release-gated (usable in development, shipped only once permissions clear); its animation library also serves C4's goal-5 affordance | P2 |
-| C10 | Slip ↔ magnitude duality on displays | Tab 1/2 axis toggles; mockup goal 4 | The derived axis on [Response curves][] (`6.94 + 1.14·log₁₀(slip)`) with its warning | Reuse formula + warning | P2 |
-| C11 | Contact / request-a-format page | Tab 4 | Repo links in site footer | Small | P3 |
+| **C1** | **Define a scenario** using fault dip, sediment properties, and a displacement range. | Advanced Search: “Search by DEM Model Parameters” | None. The current distributions dashboard can show one parameter at a time but cannot apply several scenario conditions together. | Scenario-input controls and combined filtering. | P1 |
+| **C2** | **View simulated surface-rupture measurements** for the selected scenario: scarp height, deformation-zone width, and scarp dip. | Advanced Search results panel | Existing distributions dashboard provides histogram patterns. | Filtered distributions, cumulative views, counts, and summary statistics. | P1 |
+| **C3** | **Compare the selected simulation results with measurements from past earthquakes.** | Worked example in mockup slides 6–7 | Existing field-data displays and the project's field-measurement export. | Optional field-data overlay on scenario results, with clear source and comparability caveats. | P1 |
+| **C4** | **Download the matching simulation records and their summary statistics**, with citations and scenario provenance. | “Download Selected Data” | None. | Download flow and provenance package. Plot-image export and scenario-linked animations follow in P2. | P1 |
+| **C5** | **Link to the complete research dataset and paper.** | “Download the full DEM dataset” | Existing citation material and How-to-cite components. | Links to the DesignSafe archive and paper; no re-hosting of the raw archive. | P1 |
+| **C6** | **Share a scenario** through a link that reproduces the selected settings and results. | Not explicitly shown; comparable to the NZ NSHM web tool. | None. | Scenario state encoded in the URL. | P2 |
+| **C7** | **Search in reverse:** start with observed surface deformation and find simulation conditions that produced similar measurements. | Advanced Search: “Search by Surface Deformation Characteristics” | The existing slip-regression dashboard provides a method precedent. | Inverse-query interface and explanatory safeguards. | P2 |
+| **C8** | **Explore the full dataset** through scatterplots, histograms, density views, color-by controls, and selection tools. | Full-dataset explorer | The existing Tableau dashboards already cover most of these uses. | Reuse existing dashboards first. Build a native display only for a documented unmet need. | P2 |
+| **C9** | **Learn about scarp morphologies** through descriptions, model snapshots, photographs where permitted, and animations. | Morphologies tab | Existing glossary and figures; author-supplied media are a pending deliverable (R-13). | Morphology page and animation library; public use of third-party photographs remains permission-dependent. | P2 |
+| **C10** | **View slip and derived magnitude together** where appropriate. | Full-dataset and Advanced Search views | Existing response-curves dashboard formula and warning. | Reuse the derived display and its warning; magnitude remains a display aid, not an input, unless separately approved. | P2 |
+| **C11** | **Contact or request materials** such as data formats or animations. | Contact tab | Existing project and repository links. | Small contact/request page. | P3 |
 
-"Priority" means build order within this product lane, not importance to
-the author team; P1 is the **proposed** v0.3 slice, pending OQ-3.
+### 2.5 Out of scope
 
-## 3. Users
+Ground Rupture Explorer is intentionally limited to exploring results from
+the published simulation ensemble. The following are outside the scope of
+this product:
 
-- **Primary — practicing geotechnical and earthquake engineers** doing
-  siting, crossing design, or design review near mapped thrust/reverse
-  faults. They know fault dip, sediment class, and displacement estimates;
-  they do not know this dataset's column names. They quote medians and
-  84th percentiles, and they put numbers into reports — so they need
-  counts, percentiles, downloads, and something citable.
-- **Secondary — reviewers and regulators** (e.g., checking a consultant's
-  bracketing against the same ensemble) and **researchers** comparing
-  their own models or compilations — served by the subset download
-  (FR-D1) and the existing dashboards; an own-data overlay is a
-  non-goal.
-- **Tertiary — students and the interested public**, served by the
-  educational capability (C9) and the existing glossary; and the **author
-  team**, for whom the product is outreach and a reproducibility surface
-  for the DesignSafe deposit.
+- **Earthquake occurrence and probability analysis.** The product will
+  not estimate earthquake rates, annual probabilities, return periods,
+  or probabilities that a displacement value will be exceeded. It is not
+  a PFDHA.
+
+- **Site-specific prediction.** The product will not predict the
+  displacement, deformation-zone width, or scarp shape that will occur
+  at a particular site in a future earthquake.
+
+- **Design recommendations.** The product will not recommend a design
+  displacement, setback, clearance distance, or engineering solution.
+  Selecting and defending such values remains the responsibility of the
+  engineer of record.
+
+- **Replacement of site investigation.** The product will not replace
+  geological mapping, trenching, drilling, geophysical investigation, or
+  other site-specific work needed to locate and characterize a fault.
+
+- **User data upload or overlay.** Users will not upload their own
+  measurements or project data to the site. Researchers and other users
+  can compare their data offline using the downloaded simulation subset.
+
+- **Accounts, tracking, or private workspaces.** The product will be
+  free to use without login, user accounts, or product-specific visitor
+  tracking.
+
+- **Re-hosting the full raw archive.** The product will link to the
+  DesignSafe deposits and the research paper, but it will not duplicate
+  the complete raw simulation archive.
+
+- **Immediate support for the on-hold 3D simulation arm.** The first
+  release covers the published 2D simulation ensemble. However, new data
+  exports and product concepts must not make future 3D support
+  unnecessarily difficult.
+
+- **Rebuilding all existing dashboards.** The product will reuse the
+  existing dashboards unless a specific, documented user need requires a
+  new native display.
+
+## 3. Users and personas
+
+### 3.1 Primary persona: the practicing engineer
+
+A geotechnical or earthquake engineer is evaluating a dam, pipeline, road,
+rail line, foundation, planned facility, or other asset affected by a
+thrust or reverse fault.
+
+**What they are trying to do**
+
+Support an avoidance, accommodation, or further-investigation decision
+for a specific project site.
+
+**What they know**
+
+They may have approximate site information from mapping and
+investigation, such as fault dip, sediment conditions, sediment depth,
+and a plausible future-displacement scenario. They understand
+engineering concepts such as percentiles and deterministic design
+scenarios.
+
+**What they do not have**
+
+They do not have exact values for all site conditions. They may not know
+the simulation dataset's internal variable names, data structure, or
+measurement methods. They may have an anticipated surface offset rather
+than the fault-slip input used by the simulations.
+
+**What they need from the product**
+
+- A way to define a scenario using engineering terms, ranges, and
+  categories.
+- Simulated values of scarp height, deformation-zone width, and scarp
+  dip for matching computer simulations.
+- Counts, distributions, and percentiles, with prominent warnings for
+  sparse results, missing measurements, or conditions outside the
+  modeled range.
+- A downloadable, citable subset for use in a report or design review.
+
+**What the product must not imply**
+
+The results are not a site-specific prediction, a probability-based
+hazard result, or a recommended design value.
+
+### 3.2 Secondary persona: the independent reviewer
+
+A reviewer, regulator, owner’s engineer, or peer reviewer is evaluating
+an analysis prepared by another engineer.
+
+**What they are trying to do**
+
+Reproduce the stated scenario, test whether the selected inputs are
+reasonable, and determine how a reported value relates to the matching
+simulation results.
+
+**What they need from the product**
+
+- Clear display of the selected scenario and resulting sample size.
+- Reproducible scenario settings, eventually through a shareable URL.
+- Transparent statistics, data versions, citations, and downloads.
+- Clear explanations of what the model represents and does not
+  represent.
+
+### 3.3 Secondary persona: the researcher
+
+A researcher is comparing the published ensemble with another model,
+field compilation, or analysis.
+
+**What they are trying to do**
+
+Identify and download a well-defined subset of simulation records for
+offline analysis.
+
+**What they need from the product**
+
+- Precise filtering by modeled parameters and measurements.
+- Complete scenario and data provenance in downloads.
+- Links to the paper and original DesignSafe archive.
+- Clear distinction between simulation results and field measurements.
+
+The product does not support uploading or overlaying the researcher's own
+data. Such comparisons take place offline.
+
+### 3.4 Tertiary persona: the learner
+
+A student or interested non-specialist is trying to understand how
+thrust and reverse fault rupture appears at the ground surface.
+
+**What they need from the product**
+
+- Plain-language explanations and glossary links.
+- Visual examples of scarp types and surface deformation.
+- Accessible charts and educational animations.
+
+The scenario page is not primarily designed for this persona; the
+planned morphology and glossary content serve this need.
+
+### 3.5 Stakeholder: Harvard Structural Geology & Earth Resources Group
+
+The **Structural Geology & Earth Resources Group** in Harvard
+University's Department of Earth and Planetary Sciences is the research
+group behind the published simulation ensemble and associated data
+deposits. In this document, it is referred to as the **Harvard Structural
+Geology & Earth Resources Group** or, where no ambiguity is possible,
+the **research group**.
+
+The research group is not a typical end user, but it is a key
+stakeholder.
+
+It needs the product to present the published work accurately, preserve
+its scientific limitations and provenance, increase access to the
+DesignSafe data deposits, and avoid claims that the research cannot
+support.
 
 ## 4. User stories
 
-1. *The dam vignette (the author team's own).* An engineer developing a
-   dam that crosses a fault has investigated it: dip roughly 30–40°,
-   strong sediments, up to ~3 m of displacement **at the surface**. They
-   bracket dip to {30°, 40°}, set strength to Strong (uniform and
-   layered — both `Set` arms — labeled), and enter 3 m as an
-   anticipated vertical
-   surface offset through the FR-S5 assist — which converts it per dip
-   and tells them plainly that at 30° the converted slip (≈ 6 m) exceeds
-   the modeled range, so that arm of the bracket is only partially
-   covered. They read the resulting SH, DZW, and scarp-dip
-   distributions — count, median, 84th percentile — then download the
-   subset for the design report.
-2. *Pipeline crossing.* An engineer sizing a fault-crossing segment needs
-   the plausible width of the deformed zone to set the special-design
-   length, under loose shallow sediments and a steep fault. DZW's
-   distribution, not its mean, drives the decision.
-3. *Design review.* A reviewer re-enters a consultant's stated bracket
-   and checks whether the reported "expected scarp height" sits at the
-   median, the 84th, or outside the ensemble entirely.
-4. *Paleoseismic reading — reconstructing past earthquakes from
-   geologic evidence (inverse, P2).* A geologist measured a 2 m scarp
-   over a fault of unknown dip and asks which modeled combinations of
-   dip, sediment, and slip produce scarps near 2 m.
-5. *Teaching.* An instructor sets a steep 70° fault and flips strength
-   from Strong to Weak: [Simple](https://harvardrc.github.io/eps-ground-rupture/glossary/#simple) scarps holding steep faces
-   give way to gentle [monoclinal](https://harvardrc.github.io/eps-ground-rupture/glossary/#monoclinal) slopes, because weak
-   sediment slumps to its angle of repose (the steepest slope loose
-   material can hold) instead of holding a face — with an animation per
-   class. (At 20–30°, the same control shows
-   [pressure ridges](https://harvardrc.github.io/eps-ground-rupture/glossary/#pressure-ridge) dominating and the
-   [collapse variants](https://harvardrc.github.io/eps-ground-rupture/glossary/#collapse) receding as the sediment
-   column — the soil stack above bedrock — weakens.)
+User stories are illustrative narratives. Normative behavior is defined
+by the functional requirements; where a story shows one candidate
+behavior for a decision the PDD owns (for example, US-1's per-dip
+conversion), the PDD's recorded decision governs.
+
+### US-1: Dam foundation scenario
+
+**Persona:** Practicing engineer
+
+**Situation:** An engineer is evaluating a dam whose foundation crosses a
+thrust or reverse fault. Site investigation suggests a fault dip of
+approximately 30–40°, strong sediment conditions, and a possible vertical
+surface offset of up to 3 m.
+
+**Need:** The engineer needs to define those conditions as a scenario,
+including both uniform and layered strong-sediment cases. The
+engineer has an anticipated surface offset rather than fault slip at
+depth.
+
+**Expected result:** The product converts the anticipated surface offset
+to the corresponding fault-slip range for each selected fault dip. It
+clearly warns that the conversion for a 30° dip exceeds the modeled
+slip range, so that part of the scenario is only partly represented by
+the simulations.
+
+The engineer can then view the number of matching simulations and the
+distributions, median, and 84th percentile for scarp height,
+deformation-zone width, and scarp dip. The engineer can download the
+matching simulation records and summary statistics for use in a design
+report.
+
+### US-2: Pipeline crossing
+
+**Persona:** Practicing engineer
+
+**Situation:** An engineer is designing a pipeline crossing where the
+pipeline cannot avoid a thrust or reverse fault. The site has relatively
+loose, shallow sediment and a steeply dipping fault.
+
+**Need:** The engineer needs to understand the plausible width of the
+main disturbed ground zone in order to determine the length of pipeline
+that may require special crossing design.
+
+**Expected result:** The engineer can define the site conditions and
+view the distribution of deformation-zone width, including the sample
+size, median, 84th percentile, and full modeled range. The result makes
+clear that the width represents the main modeled rupture zone, not every
+possible separate deformation strand in a real earthquake.
+
+### US-3: Design review
+
+**Persona:** Independent reviewer
+
+**Situation:** A reviewer is assessing a consultant's report. The report
+states a fault-rupture scenario and gives an “expected” scarp height.
+
+**Need:** The reviewer needs to reproduce the stated scenario and
+determine how the consultant's reported value relates to the matching
+simulation results.
+
+**Expected result:** The reviewer can enter the stated scenario,
+inspect the number and distribution of matching simulations, and
+determine whether the reported value is near the median, near the 84th
+percentile, elsewhere within the simulated range, or outside it.
+
+The reviewer can download the matching subset and statistics with the
+scenario settings, data version, and citations recorded in the download.
+
+### US-4: Interpreting observed deformation
+
+**Persona:** Researcher or engineering geologist
+
+**Priority:** P2
+
+**Situation:** A geologist has measured an approximately 2 m scarp at a
+site, but the fault dip and near-surface sediment conditions are not well
+known.
+
+**Need:** The geologist wants to identify simulation conditions that
+produced surface deformation similar to the observation.
+
+**Expected result:** The product allows the user to specify an observed
+range of scarp height, deformation-zone width, or scarp dip and view the
+distribution of fault dip, sediment conditions, and fault slip among
+matching simulations.
+
+The product describes the result as **simulation conditions consistent
+with the observation**. It does not present the result as an inference
+or estimate of the actual site's subsurface conditions.
+
+### US-5: Teaching surface-rupture morphology
+
+**Persona:** Instructor or learner
+
+**Priority:** P2
+
+**Situation:** An instructor is explaining how fault dip and sediment
+strength affect the shape of surface rupture.
+
+**Need:** The instructor wants to compare representative scarp types and
+show how their form changes under different modeled conditions.
+
+**Expected result:** The product provides plain-language descriptions,
+model snapshots, and representative animations for the scarp classes.
+For example, the instructor can show that strong sediment on a steep
+fault can produce a steep, simple scarp, while weaker sediment may
+produce a broader monoclinal slope as material deforms and slumps.
 
 ## 5. Functional requirements
 
-### Scenario inputs (C1) — P1
+This section defines what Ground Rupture Explorer must do. Requirements
+are grouped by user task:
 
-- **FR-S1.** Fault dip: range control over the seven modeled dips
-  {20, 30, 40, 45, 50, 60, 70}°, selecting the modeled values inside the
-  user's bracket and showing which values were caught (a 30–40° bracket
-  catches exactly {30°, 40°}). Continuous-looking sliders that imply
-  unmodeled dips exist are not acceptable.
-- **FR-S2.** [Sediment strength](https://harvardrc.github.io/eps-ground-rupture/glossary/#sediment-strength): the primary
-  control uses the dataset's own engineer-facing bands — Weak /
-  Moderate / Strong — plus the three heterogeneous structures (Random
-  Heterogeneous, Cohesive Top Unit, Alternating Strong–Weak). The
-  control must respect the documented trap that Weak/Moderate/Strong
-  mean different things for homogeneous vs. heterogeneous columns, and
-  must expose the uniform-vs-layered choice ([`Set`](https://harvardrc.github.io/eps-ground-rupture/glossary/#set)) rather
-  than silently pooling it. Fine-grained [cohesion](https://harvardrc.github.io/eps-ground-rupture/glossary/#cohesion)
-  configurations (26 values: five uniform strengths 0.1–2.0 MPa —
-  megapascals, the strength unit — plus the twenty-one lettered layer
-  profiles) are an advanced refinement, not the primary control.
-- **FR-S3.** Sediment depth above bedrock: {3, 5, 10} m, multi-select or
-  bracket.
-- **FR-S4.** Sediment density: {Dense, Medium, Loose}, multi-select.
-- **FR-S5.** Displacement window: a min/max bracket on **slip at depth**
-  (the ensemble's driven variable, 0–~5 m in ~0.05 m stages), labeled as
-  such. Because engineers often hold a *surface* number instead, the
-  control must offer an assist that converts an anticipated vertical
-  surface offset to slip through the ensemble's own per-dip regression
-  (test-pinned — locked by automated tests so values cannot drift —
-  slopes 0.3436 at 20° to 0.9445 at 70°, [r²](https://harvardrc.github.io/eps-ground-rupture/glossary/#r2) > 0.997; the
-  published back-projection method), stating the conversion and its
-  assumption (scarp height ≈ vertical displacement; closest for simple
-  and monoclinal scarps, biased for pressure ridges). The assist shows
-  the conversion per selected dip — one regression per dip — and
-  prominently flags any conversion that exceeds the modeled 0–~5 m slip
-  range rather than silently clipping it: partial coverage of a bracket
-  is stated, never hidden. (The author team's own dam vignette exercises
-  this: 3 m of surface offset at 30° converts past the modeled range.)
-  Exact multi-dip window semantics (per-dip windows vs. a common
-  envelope) is specified in the PDD, not improvised. The two entry modes
-  must never be conflated in labeling ([Language](#language)).
-- **FR-S6.** Population: an explicit, always-visible choice between
-  **all model stages in the slip window** (the paper's histogram
-  convention; answers "anywhere along the way to my displacement") and
-  **final state per [trial](https://harvardrc.github.io/eps-ground-rupture/glossary/#model-stage)** (one row per experiment —
-  a trial is one complete simulation run; answers "end states of full
-  runs"), with one-line explanations. Default: all stages in
-  window, matching the "up to X m" phrasing of the primary user story.
-  Mixing populations silently is prohibited. Under an active slip
-  window, the per-trial population means *the last stage inside the
-  window, per trial* ("one state per trial, at the top of your
-  window"); true final states (each trial's ~5 m end) are the no-window
-  case. The UI never intersects final states with a lower slip cap —
-  that set is empty by construction, since every trial runs to ~5 m.
-- **FR-S7.** Scarp class: optional filter over the six classes, default
-  all, presented as "filter by resulting scarp type" — it is an outcome
-  of the model, not a site input, and the UI must say so.
-- **FR-S8.** Every control defaults to "everything": the empty scenario
-  shows the full ensemble, and a "reset" returns to it.
+- **FR-S** — scenario inputs;
+- **FR-O** — results and field-data context;
+- **FR-D** — downloads and citation;
+- **FR-X** — sharing and inverse search;
+- **FR-E** — education, animations, and contact; and
+- **FR-G** — display rules shared across capabilities.
 
-### Outputs (C2, C3) — P1
+P1 requirements define the proposed MVP. P2 and P3 requirements are
+later priorities unless they are required to make the MVP scientifically
+credible, understandable, or usable.
 
-- **FR-O1.** For each of scarp height, deformation zone width, and scarp
-  dip: a distribution view — histogram, plus a cumulative view for
-  percentile reading — of the filtered population, with **N always
-  visible**. These two are the P1 result modes; the
-  mockup's density (pdf), color-by, and scatter modes are deliberately
-  deferred to C8 and the PDD. [Us − Ud (additional uplift)](https://harvardrc.github.io/eps-ground-rupture/glossary/#us-ud)
-  is a worthwhile fourth panel for the expert audience (P2 default,
-  pending OQ-6).
-- **FR-O2.** Summary statistics per panel: median and 84th percentile
-  named explicitly (deterministic-practice convention), plus 16th,
-  min/max of the filtered set, mean and standard deviation (the mockup's
-  readouts), and the count of excluded null measurements (model states
-  where the automated measuring failed, left empty in the data). Design-value
-  language is prohibited — selecting a design percentile is the
-  engineer-of-record's call, and the product must say so where statistics
-  are shown.
-- **FR-O3.** Small-population honesty: when a bracket yields few
-  measurements (threshold set in the PDD), the UI must warn prominently
-  rather than draw a confident-looking distribution; zero-result states
-  must explain which constraint emptied the set.
-- **FR-O4.** Scarp-dip outputs carry the provisional-data caveat (the
-  authoritative `Convert_Scarp_Dip` correction has not reached the
-  dataset; error concentrated in the Simple classes) until the upstream
-  fix lands. The caveat placement is load-bearing, not a footnote.
-- **FR-O5.** Field context: on request (and in the worked example), the
-  filtered model distribution can be overlaid with the field
-  compilations' measurements (the 2,616-row per-measurement export —
-  one row per individual field measurement: FDHI, [SURE](https://harvardrc.github.io/eps-ground-rupture/glossary/#sure),
-  Kern County 1952), drawn in the site's established "field data
-  is black" convention, labeled "analogous, not identical" (field
-  [vertical separation](https://harvardrc.github.io/eps-ground-rupture/glossary/#vertical-separation) ≈ scarp height; the
-  width analogue differs per arm — FDHI's [FZW](https://harvardrc.github.io/eps-ground-rupture/glossary/#fzw), Kern's DZW,
-  and SURE's [fault-normal displacement component](https://harvardrc.github.io/eps-ground-rupture/glossary/#fnc)), and never
-  assigned scarp classes. Field widths default to the paper's < 50 m
-  criterion with the established toggle for the full range — framed, as
-  the site frames it, as distributed multi-strand deformation the model
-  deliberately does not represent.
-- **FR-O6.** A worked example reproducing the author team's own: 1952
-  M 7.36 Kern County, pressure ridge on a fault with a measured 30° dip,
-  field widths drawn from the pinned per-measurement export against the
-  matching bracket's model distribution — never hand-typed. The export
-  carries Kern widths in two arms: rows from the FDHI flatfile (the
-  compilation's single flat data table) — 11, 15, and 30.5 m
-  under the 50 m criterion, the trio the author team's mockup quotes —
-  and the hand-compiled Buwalda digitization (widths read off John
-  Buwalda's 1950s field maps; eleven values, 0.30–30.48 m, no
-  "principal" marker). Which arm the example features,
-  and the pinned definition of a principal-width subset, is OQ-9.
+In this document, **must** binds within whichever release delivers the
+requirement's capability — the priority says when that is; **should**
+marks an expected capability that may be dropped for a documented
+reason; **may** is genuinely optional. Product-design decisions
+deferred below are recorded in the PDD; technical-platform decisions
+belong to the HLDD.
 
-### Downloads and citation (C4, C5) — P1
+Unless otherwise stated, a requirement applies to the scenario page.
 
-- **FR-D1.** Download the filtered subset (rows with the scenario's
-  parameters and the displayed measures) and the summary-statistics
-  table, in a format a report can ingest (CSV at minimum). Every
-  download embeds provenance: paper citation, DesignSafe DOIs, software
-  version, data-export version, scenario parameters, and retrieval date.
-- **FR-D2.** Plot export (image) with the same provenance stamped on or
-  alongside it (P2).
-- **FR-D3.** The full raw dataset is **linked, never re-hosted**: the
-  "full dataset" affordance points at DesignSafe PRJ-4680, and the page
-  carries the site's standard How-to-cite apparatus with the
-  cite-the-paper-not-the-site framing.
-- **FR-D4.** The download flow offers a representative animation of the
-  scenario's dominant scarp class(es) — the mockup's goal 5, a
-  results-coupled affordance — drawing on the same per-class animation
-  assets as FR-E1 (P2).
+### 5.1 Scenario inputs (C1, P1)
 
-### Sharing and inverse search — P2
+#### Scenario-input controls
 
-- **FR-X1.** (C6) The complete scenario state round-trips through the
-  URL, so a link reproduces the view — the mechanism engineers use to
-  put a reproducible state in a report or an email.
-- **FR-X2.** (C7) Inverse search: bracket an *observed* quantity (scarp
-  height, DZW, scarp dip) and see the distribution of model parameters
-  (dip, strength, depth, slip) among matching states, presented as
-  "scenarios consistent with the observation," never as an inference of
-  the real site's parameters. The mockup's inverse column also lists
-  anticipated magnitude and offset; those enter through the forward
-  controls (and OQ-5 for magnitude) — a recorded narrowing, not an
-  omission.
+| Input | User selects | Key rule |
+|---|---|---|
+| Fault dip | One or more of the seven modeled dip values: 20°, 30°, 40°, 45°, 50°, 60°, and 70°. | The interface must not imply that unmodeled intermediate dip values are available. |
+| Sediment strength and structure | Engineer-facing strength categories and the choice between uniform and layered sediment cases. | The interface must make the distinction between uniform and layered cases visible; it must not pool them silently. |
+| Sediment depth | One or more modeled depths: 3 m, 5 m, and 10 m. | Select only modeled values. |
+| Sediment density | Dense, medium, or loose. | Select only modeled values. |
+| Displacement window | Minimum and maximum fault slip at depth. | The product may assist users who instead have an anticipated vertical surface offset, but it must label the two quantities distinctly. |
+| Population | All model stages within the slip window, or one state per simulation trial. | The selected population must always be visible and must never be mixed silently. |
+| Scarp class | Optional filter by resulting modeled scarp type. | Present it as a filter on simulation output, not a site condition. |
+| Reset | Return all controls to their full-ensemble state. | An empty scenario represents the full ensemble. |
 
-### Education, animations, contact (C9, C11) — P2/P3
+The scenario page must let users define a plausible site scenario using
+the modeled input values and ranges described below.
 
-- **FR-E1.** (P2) A morphologies surface pairing each of the six scarp
-  classes with its model snapshot, description (reusing glossary
-  content), and a representative animation (the author team supplied
-  three animations and one gif with the mockup; per-class coverage is a
-  dependency). Real-event photographs may be used **in development**;
-  shipping them publicly is gated on the standing third-party-permission
-  question, exactly as Figures 1–2 are handled today.
-- **FR-E2.** (P2) "How the measurements are made" explainer
-  (computer-vision measurement of each simulated scarp), reusing the
-  site's existing framing and the paper's Figure 5 reference; the
-  mockup also plans animated measurement-process media — an
-  author-supplied asset (§9).
-- **FR-E3.** (P3) A contact/request affordance naming the author team's
-  channel for data-format and animation requests (mockup tab 4), with
-  links to the author team's DEM and ML model-code repositories (URLs
-  pending — a §9 dependency) alongside the links to this repository
-  that the site already carries.
+#### FR-S1. Fault dip
 
-### Displays shared across capabilities
+The product must let users select one or more of the seven fault-dip
+values represented in the simulation ensemble:
 
-- **FR-G1.** (C10) Anywhere slip is an axis, the derived
-  moment-magnitude relabeling (`6.94 + 1.14·log₁₀(slip)`) may be offered
-  as a secondary axis or toggle **with the site's existing warning**
-  (prefer slip; the mapping is a monotone relabeling, not an independent
-  variable). An "anticipated magnitude" *input* is out of scope until the
-  author team blesses a conversion (OQ-5).
-- **FR-G2.** Scarp classes use the six canonical colors with
-  parents-before-collapse legend order (each parent class listed just
-  before its collapse variant), never color as the only identity
-  (known color-vision-deficiency collisions; legend + tooltip identity
-  required; the "class family" fold-in — merging each collapse variant
-  into its parent — is the sanctioned mitigation).
-- **FR-G3.** Axis and control labels are physical quantities with units
-  ("Scarp Height (m)"), never column names; all labels and annotations
-  derive from data or parameters — frozen text that a control can
-  contradict is a defect.
-- **FR-G4.** The page carries the site's citation apparatus (How-to-cite
-  buttons and includes), the disclaimer block
-  ([§7](#7-content-requirements)), and a visible version stamp (software
-  version, data-export date).
-- **FR-G5.** (C8) Full-dataset exploration reuses the published
-  dashboards; a native panel requires a named gap recorded in the PDD.
-  The reuse mechanism per surface — link, embed, or native — is the
-  HLDD's platform decision.
+> 20°, 30°, 40°, 45°, 50°, 60°, and 70°.
+
+Users may select values individually or enter a range. When a range is
+entered, the product must show which modeled values it includes. For
+example, a range of 30–40° includes 30° and 40° only.
+
+The interface must not use a continuous slider or other control that
+implies simulations exist for unmodeled intermediate values.
+
+#### FR-S2. Sediment strength and structure
+
+The product must let users select sediment conditions using
+engineer-facing categories rather than internal dataset codes.
+
+The primary control must offer:
+
+- **Weak**, **Moderate**, and **Strong** sediment categories; and
+- the three modeled layered-sediment structures:
+    - Random Heterogeneous;
+    - Cohesive Top Unit; and
+    - Alternating Strong–Weak.
+
+Each simulation carries exactly one of these six strength labels, in a
+single dimension. Weak, Moderate, and Strong occur in both the uniform
+and layered arms — selecting one of them without also fixing the
+uniform-versus-layered choice spans both arms — while the three named
+structures occur only in the layered arm.
+
+The interface must make the distinction between **uniform** and
+**layered** sediment cases visible. It must not silently combine them.
+
+The meaning of Weak, Moderate, and Strong differs between the uniform
+and layered simulation cases. The product must present and document
+these categories in a way that does not imply they are directly
+interchangeable.
+
+The dataset's detailed cohesion configurations, including five uniform
+strength values and letter-coded layered profiles, are an advanced
+refinement. They are not required as the primary P1 control.
+
+#### FR-S3. Sediment depth
+
+The product must let users select one or more modeled sediment depths
+above bedrock:
+
+> 3 m, 5 m, and 10 m.
+
+The interface may provide individual selection or a range-style control,
+but it must select only these modeled values.
+
+#### FR-S4. Sediment density
+
+The product must let users select one or more modeled sediment-density
+categories:
+
+> Dense, Medium, and Loose.
+
+#### FR-S5. Displacement window
+
+The primary displacement input must be a minimum-to-maximum range of
+**fault slip at depth**, because fault slip is the variable controlled in
+the simulations.
+
+The product must label this input clearly as fault slip at depth and
+show its modeled range: approximately 0–5 m, recorded in approximately
+0.05 m stages.
+
+Because engineers may instead have an anticipated **vertical surface
+offset**, the product must provide an optional conversion assist. The
+assist must:
+
+- convert the anticipated surface offset to fault slip using the
+  ensemble's tested, dip-specific regression (the back-projection
+  relationship in the project glossary);
+- show the conversion separately for each selected fault dip;
+- state that the conversion assumes scarp height is approximately equal
+  to vertical surface displacement;
+- state that this approximation is closest for Simple and Monoclinal
+  scarps, while Pressure Ridge scarps stand higher than the fault's
+  vertical displacement, so the conversion tends to overstate slip
+  where they dominate; and
+- prominently warn when a converted slip value lies outside the modeled
+  slip range.
+
+The product must never silently clip an out-of-range conversion. If part
+of a selected scenario falls outside the modeled range, the product must
+state that coverage is partial.
+
+The interface must keep the two entry modes distinct:
+
+- **fault slip at depth** is the simulation input; and
+- **anticipated vertical surface offset** is a user-provided value that
+  the assist converts for the purpose of querying the simulations.
+
+The window is inclusive at both endpoints. When the user enters fault
+slip directly, one window applies to all selected dips. When the
+conversion assist is used with several selected dips, the exact
+behavior — whether the product applies a separate converted window for
+each dip or one common window — must be defined in the PDD.
+
+#### FR-S6. Population selection
+
+The product must always display which simulation population it uses for
+the results. The user must choose between:
+
+- **All model stages in the slip window** — includes every recorded
+  simulation stage within the selected slip range. This answers:
+  “What measurements were recorded at any stage within this slip
+  range?”
+
+- **One state per simulation trial** — includes one record (one stage)
+  from each simulation trial. When a slip window is active, this is the
+  last stage within that window for each trial. This answers:
+  “What measurements were recorded at the upper end of my selected
+  slip range?”
+
+The default must be **All model stages in the slip window**, because it
+matches the common engineering phrasing “up to X m of displacement.”
+
+The product must not silently combine or switch between these
+populations.
+
+If no slip window is active, the one-state-per-trial option must use the
+actual final state of each trial. The product must not attempt to
+intersect final states with a capped slip window, because the final state
+of each trial occurs at approximately 5 m of slip.
+
+#### FR-S7. Scarp-type filter
+
+The product must provide an optional filter for the six modeled scarp
+types. The default is all scarp types.
+
+The interface must label this control as a filter on the **resulting
+modeled scarp type**, not as a site condition or input known before
+rupture occurs.
+
+The six modeled scarp types are Monoclinal, Pressure Ridge, and Simple,
+together with a collapse variant of each. A Monoclinal scarp is a
+smooth ramp or flexure; a Pressure Ridge is a mound of material pushed
+up ahead of the fault; a Simple scarp is a clean, steep step. A
+collapse variant represents a case in which the steep scarp face has
+slumped or crumbled.
+
+#### FR-S8. Default and reset state
+
+All scenario controls must default to the full ensemble. An empty
+scenario therefore shows results for all available simulation records,
+subject to the selected population and measurement-availability rules.
+
+The product must provide a reset action that returns every scenario
+control to this default state.
+
+### 5.2 Results and field-data context (C2, C3, P1)
+
+The scenario page must show the simulated surface-rupture measurements
+that match the selected scenario and population.
+
+#### FR-O1. Distribution views
+
+For each of the following measurements, the product must provide a
+distribution view of the matching simulation records:
+
+- scarp height;
+- deformation-zone width; and
+- scarp dip.
+
+Each measurement must include, subject to the minimum-count rules in
+FR-O3:
+
+- a histogram;
+- a cumulative distribution view that supports percentile reading; and
+- the number of matching records (**N**), displayed prominently.
+
+For P1, these are the required result views. Probability-density curves,
+scatterplots, color-by controls, and other exploratory views belong to
+the later full-dataset exploration capability (C8).
+
+A fourth measurement, additional uplift (Us − Ud) — surface uplift beyond what
+the fault's own vertical throw provides — may be added in P2. It is
+not part of the proposed MVP unless the prioritization recorded in
+R-10 is resolved otherwise.
+
+#### FR-O2. Summary statistics
+
+For each measurement, the product must display:
+
+- count of valid measurements;
+- median;
+- 84th percentile;
+- 16th percentile;
+- minimum and maximum;
+- mean; and
+- standard deviation.
+
+The product must also display the number of excluded null measurements:
+simulation records for which the automated measurement was unavailable.
+
+The statistics must be described as statistics of the matching
+simulation records. The product must not describe any percentile as a
+recommended design value. Selection of a design value remains the
+responsibility of the engineer of record.
+
+#### FR-O3. Small or empty result sets
+
+The product must warn users prominently when a scenario produces too few
+valid measurements to support a meaningful distribution display. The
+minimum count that triggers this warning must be defined in the PDD.
+
+If a scenario produces no matching records, the product must explain
+why. At a minimum, when relaxing a single selected condition would
+produce matches, the product must name that condition; the rule for
+diagnosing combinations of conditions is defined in the PDD.
+
+The product must not render a distribution chart from fewer valid
+measurements than a PDD-defined chart minimum, which may be lower than
+the warning threshold. Every small, empty, or partly out-of-range
+result must be accompanied by the warning and the matching-record
+count. Below the chart minimum, this rule overrides FR-O1's chart
+requirement; the statistics table remains.
+
+#### FR-O4. Scarp-dip data caveat
+
+Scarp-dip results must carry a prominent provisional-data notice until
+the research group provides the authoritative `Convert_Scarp_Dip`
+correction.
+
+The notice must explain that the current scarp-dip values are subject to
+a known correction, with the largest error concentrated in the Simple
+scarp types.
+
+This caveat is required wherever scarp-dip results are displayed or
+downloaded. It must be visible to users, not hidden in technical
+documentation or a footnote.
+
+#### FR-O5. Field-data context
+
+The product must allow users to overlay selected measurements from past
+earthquakes on the distribution of matching simulation results.
+
+Field measurements are optional context, not part of the filtered
+simulation population. The interface must keep them visually and
+conceptually distinct from the computer-simulation results.
+
+The field-data display must:
+
+- use the site's established convention that field data is shown in
+  black;
+- label the comparison **“analogous, not identical”**;
+- identify the source of each field measurement; and
+- explain that the field and simulated measurements are comparable
+  approximations, not always identical quantities.
+
+For scarp height, field vertical separation is the relevant analogue,
+and the analogue can differ by source; the PDD must map each source's
+analogue explicitly and define the default overlay set. Field sources
+provide no scarp-dip analogue; where scarp dip is displayed, the
+interface must say the overlay is unavailable rather than show nothing
+silently. For width, the field comparison differs by source:
+
+- FDHI (the Fault Displacement Hazard Initiative compilation) provides
+  fault-zone width (FZW);
+- the Kern County data provides deformation-zone width; and
+- SURE (a worldwide database of surface ruptures) provides a
+  fault-normal displacement component rather than a directly
+  equivalent deformation-zone width; where it is shown, the product
+  must label it as a limited comparison rather than a width
+  measurement.
+
+The product must not assign modeled scarp types to field measurements.
+
+Field-width displays must default to the paper's less-than-50-metre
+criterion. Users may switch to the full field-width range, with an
+explanation that larger widths may include distributed, multi-strand
+deformation that the model does not represent.
+
+#### FR-O6. Kern County worked example
+
+The product must include a worked example based on the 1952 Kern County
+earthquake.
+
+The example must show:
+
+- a 30° fault dip;
+- the Pressure Ridge scarp type;
+- the relevant filtered simulation distribution for deformation-zone
+  width; and
+- field-width measurements drawn from the project's versioned
+  per-measurement field export (one row per field measurement).
+
+The example must not use manually entered field values. Its displayed
+measurements must be traceable to the versioned export.
+
+The current field-data export contains two possible Kern County data
+groups:
+
+- an FDHI group containing widths of 11 m, 15 m, and 30.5 m under the
+  less-than-50-metre criterion; and
+- a hand-compiled Kern County compilation that merges the Buwalda &
+  St. Amand (1955) survey, the FDHI Kern entries, and the event's
+  surface-deformation characteristics: eleven widths from 0.30 m to
+  30.48 m, without a principal-rupture marker (the field compilations'
+  rank separating main-trace from distributed measurements).
+
+The two groups overlap rather than being independent alternatives: the
+compilation already incorporates FDHI's Kern entries (its 15.24 m and
+30.48 m are FDHI's 15 m and 30.5 m — 50 ft and 100 ft), and it carries
+no per-row source column from which a pure Buwalda subset could be
+rebuilt.
+
+The research group must decide which group the example uses and, if
+needed, define the rule for identifying a principal-width subset before
+the example is finalized. The authors' own published figure filters
+this panel by scarp family and a slip cap; the example's exact filter
+is part of that decision.
+
+### 5.3 Downloads and citation (C4, C5, P1)
+
+Downloads must allow engineers, reviewers, and researchers to reproduce
+the displayed result, cite the underlying research, and use the selected
+simulation records in reports or offline analysis.
+
+#### FR-D1. Download matching simulation records and statistics
+
+The product must let users download:
+
+- the simulation records that match the selected scenario and population;
+  and
+- a summary-statistics table (the FR-O2 statistics set) for the
+  displayed measurements.
+
+CSV is the minimum required download format.
+
+Each download must include sufficient provenance to reproduce and cite
+the result. At a minimum, it must record:
+
+- the citation for the research paper;
+- the DesignSafe DOI or DOIs for the source data;
+- the software version;
+- the version and date of the data export used by the product;
+- the selected scenario settings;
+- the selected population;
+- the date on which the download was generated; and
+- any applicable data caveats, including the provisional scarp-dip
+  notice.
+
+The download must contain the matching **simulation records** and their
+derived statistics. It must not silently include field measurements shown
+as chart context. Field measurements remain separately sourced and cited.
+
+#### FR-D2. Export chart images
+
+The product should allow users to export chart images for use in reports
+or review material. This is a P2 capability.
+
+An exported image must include, or be accompanied by, enough information
+to identify:
+
+- the selected scenario;
+- the displayed measurement;
+- the selected population;
+- the number of matching records;
+- the software and data-export versions; and
+- the citation or a clear reference to the accompanying citation
+  information.
+
+The final format and presentation of chart provenance are defined in the
+PDD.
+
+#### FR-D3. Link to the complete data archive and paper
+
+The product must link users to:
+
+- the full raw dataset in the DesignSafe archive; and
+- the research paper.
+
+The product must not re-host the complete raw simulation archive.
+
+The page must include the project's standard citation material,
+including the established instruction to cite the research paper rather
+than the website when citing the scientific work.
+
+#### FR-D4. Offer representative scarp-type animations
+
+The download flow should offer representative animations for the dominant
+modeled scarp type or types in the selected scenario. This is a P2
+capability.
+
+Every simulation record except each trial's zero-slip initial stage
+carries a scarp-type label. The dominant type is the most frequent
+label among the matching simulation records that carry one; records
+without a classification are excluded from the frequency count.
+
+The purpose is to offer an animation that illustrates the most typical
+modeled surface-rupture form under the selected conditions. For example,
+if most matching records are classified as Pressure Ridge, the download
+flow should offer the Pressure Ridge animation rather than an undifferentiated
+menu of all scarp-type animations.
+
+When no single type is sufficiently more frequent than the others, the
+product may offer animations for more than one dominant type. The rule
+for how many types qualify as dominant, and any minimum frequency
+threshold, must be defined in the PDD.
+
+The animations must use the same scarp-type media library planned for
+the morphology education surface. The product must present an animation
+as an illustrative example of a scarp type, not as a visualization of
+the user's specific site or of an individual matching simulation record.
+
+### 5.4 Sharing and inverse search (C6, C7, P2)
+
+These capabilities improve reproducibility and support users who begin
+with an observed surface feature rather than a fully defined site
+scenario. They are not required for the P1 MVP.
+
+#### FR-X1. Shareable scenario links
+
+The product must support a shareable URL that opens Ground Rupture
+Explorer with a user's scenario settings and selected view restored.
+
+A shareable URL is not a link to a static saved report or a read-only
+view. It is a reproducible starting point for an interactive Ground
+Rupture Explorer session. A person who opens the link may change any available
+scenario setting, result view, or field-data display and continue
+exploring without restriction.
+
+The URL must preserve all settings needed to restore the shared starting
+state, including:
+
+- selected fault-dip values;
+- selected sediment conditions;
+- the displacement window and its entry mode;
+- the selected simulation population;
+- any scarp-type filter;
+- selected measurement or result view; and
+- field-data display settings, where applicable.
+
+The product must calculate results using the software version and
+data-export version currently published when the link is opened. It does
+not need to preserve a static historical copy of the results.
+
+Because a later software or data update may change the result associated
+with the same settings, the page and all downloads must display the
+current software version and data-export version. The PDD must define
+how the product notifies users when a shared link was created under an
+older version, if creation-version information is included in the URL.
+
+#### FR-X2. Inverse search
+
+The product must allow users to begin with an observed range of one or
+more surface-rupture measurements and identify simulation records that
+produced similar measurements.
+
+Users may specify a range for:
+
+- scarp height;
+- deformation-zone width; and/or
+- scarp dip.
+
+For the matching simulations, the product must show the distribution of
+the modeled input conditions, including fault dip, sediment strength,
+sediment density, sediment depth, and fault slip.
+
+The product must describe these results as:
+
+> **Simulation conditions consistent with the selected observation**
+
+It must not describe them as inferred, estimated, or predicted
+properties of the user's actual site. Similar surface measurements can
+be produced by different combinations of modeled conditions, and the
+simulation ensemble does not contain enough information to uniquely
+identify real site conditions.
+
+Users may apply the forward scenario controls to narrow an inverse
+search. For example, a user may begin with an observed scarp-height
+range, then restrict the matching simulations to a known sediment depth
+or fault-dip range.
+
+Magnitude is not an inverse-search input. If the product displays a
+derived magnitude scale, it remains a labeled display aid subject to the
+rules in FR-G1.
+
+### 5.5 Education, animations, and contact (C9, C11, P2/P3)
+
+These capabilities support learning, outreach, and requests for related
+research materials. They are not required for the P1 MVP.
+
+#### FR-E1. Morphology education
+
+The product must provide a morphology-education page describing the six
+modeled scarp types:
+
+- Monoclinal;
+- Monoclinal Collapse;
+- Pressure Ridge;
+- Pressure Ridge Collapse;
+- Simple; and
+- Simple Collapse.
+
+For each type, the page must provide:
+
+- a plain-language description;
+- a representative model snapshot;
+- glossary links or equivalent explanations; and
+- a representative animation, where an appropriate asset is available.
+
+The page may also use photographs from real earthquakes to provide field
+context. However, third-party photographs may be used in public releases
+only after the required permissions have been confirmed. They may be
+used during internal development and review where permitted.
+
+The same animation library must support the representative-animation
+feature in FR-D4.
+
+#### FR-E2. Explain how the measurements are made
+
+The product must explain how the research group measured surface-rupture
+features in the computer simulations. This explanation supports the
+education capability (C9) and is a P2 capability.
+
+The explanation must describe, in reader-facing language, that an
+automated image-analysis or computer-vision process measured features
+such as scarp height, deformation-zone width, and scarp dip from the
+simulated ground surface.
+
+The explanation must reuse existing project content and reference the
+relevant figure in the research paper where appropriate. It may include
+author-supplied animated media showing the measurement process.
+
+The explanation must make clear that these measurements are derived from
+computer simulations. They are not direct measurements from a user's
+site or predictions for a future earthquake.
+
+#### FR-E3. Contact and request page
+
+The product should provide a contact or request page where users can ask
+the research group about:
+
+- data formats;
+- animation materials;
+- related research resources; or
+- other appropriate project questions.
+
+This is a P3 capability.
+
+The page must include:
+
+- the research group's preferred contact channel;
+- links to the project's existing website and repository resources; and
+- links to the research group's DEM and machine-learning model-code
+  repositories, once the research group provides the approved URLs.
+
+### 5.6 Shared display rules (C10 and cross-capability rules)
+
+The following requirements apply across Ground Rupture Explorer wherever
+the relevant information or controls appear.
+
+#### FR-G1. Slip and derived magnitude displays
+
+Where fault slip is displayed on an axis, the product may also show the
+project's derived moment-magnitude scale as a secondary axis or optional
+toggle.
+
+The product must make clear that:
+
+- fault slip is the primary modeled quantity;
+- the magnitude scale is a monotonic relabeling derived from fault slip;
+  and
+- the magnitude scale is not an independently modeled variable or a
+  direct estimate of the magnitude of a future earthquake at the user's
+  site.
+
+The product must retain the project's existing warning to prefer slip
+when interpreting results.
+
+Users must not enter anticipated earthquake magnitude as a scenario
+input unless the research group approves a conversion method, its
+uncertainty statement, and its intended use.
+
+#### FR-G2. Scarp-type colors and identification
+
+Where scarp types are shown, the product must use the project's canonical
+scarp-class palette and ordering, defined below. The palette preserves
+the colors used in the research paper's figures so that readers can
+recognize the same scarp class in the paper, the published dashboards,
+and this product.
+
+These colors are a research-group decision, recorded in the project's
+dashboard-design conventions (ADR-0007). The product must reproduce
+them exactly. Any proposal to change a color belongs to the research
+group, not to product design or implementation.
+
+The canonical palette and order are:
+
+| Order | Scarp type | Color |
+|---:|---|---|
+| 1 | Monoclinal | `#009ffa` |
+| 2 | Monoclinal Collapse | `#3f67b1` |
+| 3 | Pressure Ridge | `#f47820` |
+| 4 | Pressure Ridge Collapse | `#af773e` |
+| 5 | Simple | `#ed2024` |
+| 6 | Simple Collapse | `#9f1d20` |
+
+Each collapse variant uses a darker shade of its corresponding base
+type. This order — each base type immediately followed by its collapse
+variant — is required wherever scarp types appear, including legends,
+stacked charts, tables, and lists.
+
+Records without a scarp classification must never use a scarp-class
+color. The PDD must define whether they are excluded from a given display
+or shown in neutral gray after the six classified scarp types.
+
+Field measurements must retain the black convention required by FR-O5.
+They must never use a scarp-class color.
+
+Color must not be the only way to identify a scarp type. Every
+color-coded display must also provide text identification through a
+legend, label, tooltip, table, or equivalent accessible mechanism.
+
+This is a required accessibility safeguard, not merely good practice.
+The palette is retained for fidelity to the research figures despite
+known color-vision limitations. For example, Simple (`#ed2024`) and
+Pressure Ridge Collapse (`#af773e`) are not reliably distinguishable
+under some forms of red-green color-vision deficiency, and the two
+Pressure Ridge shades can be difficult to distinguish even for viewers
+with typical color vision.
+
+Where a simpler presentation is needed, the product may offer a
+**scarp-family** view that combines each collapse variant with its base
+type. This view uses the three base-type colors. It still must not rely
+on color alone for identification.
+
+The PDD must define where the scarp-family view is available, how it is
+labeled, and the presentation details already established in the
+published dashboards, such as fill opacity and overlay conventions.
+
+#### FR-G3. Reader-facing labels and data-driven text
+
+The product must use reader-facing labels for physical quantities and
+controls. Labels must include units where applicable.
+
+For example:
+
+- **Scarp height (m)**, not an internal column name;
+- **Fault slip at depth (m)**, not a dataset field name; and
+- **Deformation-zone width (m)**, not an abbreviated internal code
+  without explanation.
+
+Labels, annotations, selected-value summaries, and explanatory text that
+depends on user settings must be generated from the current data and
+scenario state. The interface must not contain fixed text that can
+contradict the user's selections.
+
+#### FR-G4. Citation, disclaimer, and version information
+
+The product must display:
+
+- the project's standard citation material;
+- the research-tool disclaimer;
+- the current software version; and
+- the version and date of the data export used for the displayed result.
+
+The disclaimer's required content and placement rules are defined
+once, in CR-4.
+
+The product must present the scarp-dip provisional-data notice and the
+selected-population explanation wherever relevant. These are
+reader-facing requirements, not hidden technical notes.
+
+#### FR-G5. Reuse of existing full-dataset dashboards (C8)
+
+The product must reuse the existing published dashboards for
+full-dataset exploration unless a documented user need cannot be met by
+those dashboards.
+
+A native replacement or additional native exploration panel requires a
+named gap and rationale in the PDD.
+
+For each dashboard or related product surface, the high-level design
+must decide whether the appropriate implementation is:
+
+- a link to the existing dashboard;
+- an embedded dashboard;
+- a native display; or
+- a hybrid approach.
+
+That implementation decision must be recorded in the high-level design
+and associated architecture decision record. This PRD defines the user
+need and reuse-first rule, not the technical platform choice.
 
 ## 6. Data requirements
 
-- **DR-1.** Every number the app displays derives from **the
-  pipeline** — the repo's local data build (raw deposit →
-  Parquet/DuckDB layer → purpose-built, versioned exports); any
-  statistic derived at interaction time (filtered counts, percentiles of
-  a user's bracket) is computed from those pinned inputs by code that is
-  itself tested against pipeline-computed golden-scenario values
-  (trusted reference outputs the front end must reproduce) — the
-  established discipline (derived numbers live in `views.py`, the
-  pipeline module defining every derived view, and its tests — never in
-  untested front-end code alone). Whether a given number ships
-  precomputed or derives from row-level data, and in what format, is the
-  HLDD's call. The 73 MB `dem.csv` (the full flat export feeding
-  Tableau) is a Tableau concession and explicitly not the foundation
-  for a new front end; the 97 KB `dem_slip_bin_stats` export
-  (pre-aggregated statistics) is the size-precedent for
-  pre-aggregation.
-- **DR-2.** The **final-state-per-trial rule exists only inside a
-  Tableau workbook today** (the formula
-  `{FIXED [Trial]: MAX([Slip])} = [Slip]` — keep each trial's
-  maximum-slip row),
-  with no pipeline view and no test. Before the app ships anything
-  population-labeled, that rule becomes a view with a pinned test
-  (3,434 rows, zero ties — verified against the shipped export
-  2026-10-13).
-- **DR-3.** Measurement hygiene is decided once, in the pipeline, and
-  documented on the page: the policy for null measures (13,675–16,647
-  rows depending on measure), for the small negative populations
-  (1,232 negative scarp-height rows, none below −0.182 m; 30 negative
-  scarp-dip rows, none below −12.53°), and for low-slip stages whose
-  measurement reliability the authors have flagged (per-class
-  minimum-slip crops — cutoffs dropping unreliable low-slip rows —
-  exist in their recovered analysis code, held
-  privately with the other author materials; scope of that gate is
-  OQ-4).
-- **DR-4.** Field-event names are normalized before any event-labeled
-  display (the per-measurement export carries spelling twins such as
-  Chi-Chi/ChiChi — the 1999 Taiwan earthquake — and trailing
-  non-breaking spaces).
-- **DR-5.** Payload budget: the scenario page's initial data load stays
-  small enough for a fast first paint on an ordinary connection — the
-  PDD sets the number; the PRD's bar is "no 73 MB downloads, no visible
-  loading phase on repeat visits."
-- **DR-6.** Every export the app consumes is versioned and stamped, so a
-  downloaded result names the data vintage it came from (the FDHI
-  project's own update history is the cautionary precedent).
-- **DR-7.** Nothing in the app's data model may hard-bake 2D-only
-  assumptions in ways that make the on-hold 3D arm expensive later
-  (standing guidance from the lead author, 2026-08-20) — carrying a
-  source/case dimension in new exports is the cheap insurance.
+The product must use controlled, versioned data exports derived from the
+project's established data pipeline. It must preserve the distinction
+between:
+
+- **simulation records** produced by the computer-model ensemble;
+- **derived statistics** calculated from those records;
+- **field measurements** recorded after past earthquakes; and
+- **reader-facing exports** prepared for the product.
+
+### 6.1 Data provenance and calculation integrity
+
+#### DR-1. Controlled data source
+
+Every number displayed by Ground Rupture Explorer must derive from the
+project's data pipeline or from a versioned export produced by that
+pipeline.
+
+The pipeline transforms the archived research data into controlled,
+purpose-built exports for publication and product use. The product must not
+treat the existing flat `dem.csv` export as its primary data source
+merely because it was prepared for Tableau. That file is a Tableau
+compatibility export, not the intended foundation for a new interactive
+product.
+
+Statistics calculated when a user changes a scenario — including
+filtered counts, percentiles, means, and standard deviations — must be
+tested against pipeline-computed reference results for defined
+scenarios.
+
+No reader-visible number may depend solely on untested front-end logic.
+
+The HLDD must determine whether the product uses precomputed
+aggregations, compact row-level data, or a combination of both. That
+decision must preserve the ability to filter by several scenario
+conditions together.
+
+#### DR-2. Versioned exports
+
+Every export consumed by the product must have an identifiable version
+and export date.
+
+Downloads and displayed results must identify the data-export version
+from which they were produced. This allows users to determine the data
+vintage behind a result and supports reproducibility when exports are
+updated.
+
+The product's data-preparation process must support committed,
+versioned app artifacts because continuous integration cannot rebuild the
+full local data pipeline from its raw inputs.
+
+### 6.2 Population and measurement rules
+
+#### DR-3. One-state-per-trial population
+
+The one-state-per-trial population required by FR-S6 must be implemented
+as a tested pipeline view before the product uses it.
+
+When a slip window is active, the view must retain one record per
+simulation trial: the record at the highest slip value within the
+selected window.
+
+When no slip window is active, the view must retain the actual final
+state of each trial.
+
+The current Tableau-only calculation for this rule must not be the sole
+definition used by the product. The pipeline implementation must be
+tested against the published data export, including the expected count
+of 3,434 trials and the absence of ties at each trial's maximum slip.
+
+#### DR-4. Measurement hygiene
+
+The data pipeline must define and document a consistent policy for:
+
+- null measurements, where the automated measurement process did not
+  produce a value;
+- small negative values of scarp height or scarp dip; and
+- low-slip records for which the research group has identified possible
+  measurement-reliability limitations.
+
+The product must apply this policy consistently in displays, statistics,
+and downloads. It must explain any exclusions or caveats in reader-facing
+language where they affect interpretation.
+
+The research group must decide whether the per-scarp-type low-slip
+start values recovered from the paper's figures — hand-chosen plotting
+thresholds, not validated reliability cutoffs — are:
+
+- applied automatically;
+- offered as a visible user control; or
+- documented without filtering the displayed population.
+
+The PDD must not make this decision implicitly.
+
+#### DR-5. Field-data preparation
+
+Field-event names must be normalized in the data pipeline before they
+appear in event-labeled displays or downloads.
+
+Normalization must correct known variations such as spelling variants,
+inconsistent punctuation, and invisible trailing characters. The
+pipeline must retain source-specific identifiers and provenance so that
+field measurements remain traceable to their original datasets.
+
+### 6.3 Product-data delivery constraints
+
+#### DR-6. Payload and interaction support
+
+The scenario page must use data exports small enough to support the
+performance requirements in NFR-3.
+
+The initial page load must not require downloading the existing 73 MB
+flat simulation export or another comparably large payload. The product
+must avoid a visible, prolonged loading phase on repeat visits.
+
+The PDD must define the numeric initial-payload budget. The HLDD must
+define the export format, caching approach, and any precomputation needed
+to meet that budget without preventing the combined scenario filtering
+required by the MVP.
+
+#### DR-7. Future 3D compatibility
+
+The first release uses the published 2D simulation ensemble only.
+However, new product data models and exports must not hard-code
+assumptions that would make later inclusion of the research group's
+on-hold 3D simulation arm unnecessarily difficult.
+
+Where practical, new exports must carry a source, model-family, or case
+dimension that can distinguish 2D and future 3D records without changing
+the meaning of existing fields.
 
 ## 7. Content requirements
 
-### Language
+Ground Rupture Explorer must use language that is useful to engineers
+without claiming more certainty, applicability, or authority than the
+research supports. The product's language is English, and all
+quantities are metric.
 
-The product speaks the practitioner's language without overclaiming:
+### 7.1 Product language
 
-- **Use**: "conditional distributions, given surface rupture under the
-  scenario you specified"; "range of model outcomes from a distinct
-  element method (DEM) simulation ensemble" (spell out DEM — engineers
-  read it as *digital elevation model*); "median and 84th percentile";
-  "screening-level information to inform site investigation and design
-  review"; "principal (primary) displacement" when relating the model's
-  scarp measurements to FDHI vocabulary; "bracketing your uncertainty"
-  for input ranges vs. the distribution's spread for the ensemble's
-  variability.
-- **Avoid**: "hazard assessment" / "fault displacement hazard" as the
-  product's claim (a hazard result ties displacement to earthquake
-  occurrence rates; this dataset has none — §2 states how the request's
-  framing is honored without the claim); "forecast" / "quantitative
-  forecasts" (the mockup's own intro copy uses it; flagged for the
-  vocabulary sign-off, [SC-5](#10-success-criteria)); "annual
-  probability," "return period";
-  "design displacement"; "predicted displacement at your site"; any
-  regulatory-compliance implication ("complies with Alquist-Priolo");
-  "safe."
+#### CR-1. Describe the product accurately
 
-### Disclaimers
+The product must describe its results as conditional results from a
+computer-simulation ensemble.
 
-A standing block, assembled per the research-tool norms (USGS wording
-as the pattern; the FDHI web tool's zero-disclaimer gap is the
-anti-pattern): (1) research-grade, subject to revision; (2) no warranty,
-no liability; (3) the scope sentence — no earthquake rates, no return
-periods, not a site-specific prediction, not a PFDHA, results are
-ensemble outcomes for analogous modeled conditions; (4) direction to
-qualified professionals and governing guidance (site-specific geologic
-investigation where regulation requires it, e.g. Alquist-Priolo zoning;
-FERC Chapter 13 for dams).
+Preferred wording includes:
 
-### Register and apparatus
+- “conditional distributions of simulated surface-rupture measurements”;
+- “results from computer simulations matching the selected scenario”;
+- “modeled scarp height, deformation-zone width, and scarp dip”;
+- “screening-level information for site investigation and design review”;
+- “bracketing uncertainty in the site conditions”; and
+- “the range of results produced by matching simulations.”
 
-Reader-facing prose follows the site's conventions: plain language with
-glossary links on first use (the glossary's anchors for scarp-height,
-dzw, scarp-dip, fault-dip, slip, cohesion, sediment-strength, set,
-back-projection, and the scarp classes already exist), honest caveats
-in admonitions (the site's styled note/warning boxes), sourcing
-discipline (claims about the science cite the paper; claims about
-preparation cite the project's own documents), and
-the cite-the-paper-not-the-site framing that secured the author team's
-DOI consent. The scarp-dip provisional notice and the
-populations-are-a-choice explanation are reader-facing content, not
-developer trivia.
+The product must distinguish clearly between:
+
+- **site-condition uncertainty** — uncertainty or variation in the
+  inputs selected by the user; and
+- **variation in the simulations** — the spread of measurements among
+  simulations that match those inputs.
+
+#### CR-2. Avoid unsupported claims
+
+The product must not describe itself or its results using language that
+implies probability-based hazard analysis, site-specific prediction,
+regulatory approval, or a design recommendation.
+
+Avoid terms such as:
+
+- “hazard assessment” or “fault-displacement hazard,” when describing
+  the product itself;
+- “forecast” or “quantitative forecast”;
+- “annual probability”;
+- “return period”;
+- “design displacement”;
+- “predicted displacement at your site”;
+- “safe”; or
+- language implying compliance with a regulation or standard.
+
+The product may explain these concepts when needed to distinguish its
+scope from other methods, such as PFDHA.
+
+#### CR-3. Use terms consistently
+
+The product must use the following distinctions consistently:
+
+| Use this term | Meaning |
+|---|---|
+| **Fault slip at depth** | The displacement applied to the fault in the computer simulations. |
+| **Anticipated vertical surface offset** | A user-provided scenario value that may be converted to fault slip at depth for the purpose of querying the simulations. |
+| **Simulated surface-rupture measurement** | A value measured from a computer simulation, such as scarp height, deformation-zone width, or scarp dip. |
+| **Field measurement** | A measurement recorded after a real, past earthquake. |
+| **Modeled scarp type** | A classification assigned to a simulation result; it is an output of the simulation, not a site input. |
+| **Main modeled rupture zone** | The strip of disturbed ground that deformation-zone width measures. Field compilations rank field measurements as *principal* (main-trace) or *distributed*; the modeled zone corresponds to the principal band. |
+| **Deformation-zone width** | The width of the main modeled strip of disturbed ground. It does not represent every separate deformation strand that may occur in a real earthquake. |
+
+The product must spell out **distinct element method (DEM)** at first use
+in reader-facing content. It must not assume that readers interpret DEM
+correctly, because many engineers use the abbreviation for “digital
+elevation model.”
+
+Two synonym pairs are fixed. **Scarp type** is this document's and the
+product's term for what the dataset, dashboards, and paper call *scarp
+class*; the terms are interchangeable, and reader-facing content says
+“scarp type.” **Uniform** and **layered** sediment correspond to the
+data archive's *homogeneous* and *heterogeneous* deposits; the archive
+terms appear only when referring to the deposits themselves.
+
+### 7.2 Disclaimers and professional-use boundaries
+
+#### CR-4. Standing disclaimer
+
+The scenario page and other relevant product surfaces must display a
+reader-visible disclaimer. The disclaimer must state that:
+
+1. the product is a research tool and may be revised;
+2. the product is provided without warranty, subject to the project's
+   stated liability limitations;
+3. the product does not provide earthquake occurrence rates, annual
+   probabilities, return periods, probability-of-exceedance results,
+   site-specific predictions, or a probabilistic fault-displacement
+   hazard analysis; and
+4. results must be interpreted by qualified professionals using
+   appropriate site investigation, applicable regulations, and relevant
+   engineering guidance.
+
+The disclaimer must be easy to find from the scenario page. A short
+version may appear near the results, provided that it links or expands
+to the complete statement.
+
+#### CR-5. Statistics and design-value language
+
+Where the product displays percentiles or other summary statistics, it
+must state that they describe the matching simulation records.
+
+The product may explain that the median is a typical result in the
+matching simulations and that the 84th percentile is a commonly used
+higher fractile in deterministic engineering practice.
+
+The product must not state or imply that any statistic is the correct,
+required, or recommended design value. Selection of a design value
+remains the responsibility of the engineer of record.
+
+#### CR-6. Field-data comparison language
+
+Where field measurements from past earthquakes are displayed alongside
+simulation results, the product must label them as:
+
+> **Analogous, not identical**
+
+The product must explain that field measurements and simulated
+measurements can represent related but non-identical quantities. It must
+also identify the relevant field-data source and preserve the distinction
+between field measurements and computer-simulation results.
+
+### 7.3 Reader guidance and supporting material
+
+#### CR-7. Glossary and plain-language support
+
+Reader-facing content must use plain language where possible and link
+specialist terms to the project glossary when they first appear.
+
+Priority glossary terms include:
+
+- scarp height;
+- deformation-zone width;
+- scarp dip;
+- fault dip;
+- fault slip;
+- sediment strength;
+- cohesion;
+- scarp type;
+- back-projection;
+- probabilistic fault-displacement hazard analysis (PFDHA); and
+- distinct element method.
+
+Where the glossary does not yet define a necessary term, the product must
+either provide a short in-context explanation or add a glossary entry
+before relying on the term.
+
+#### CR-8. Reader-visible caveats
+
+Important scientific limitations must appear where they affect
+interpretation. They must not be relegated only to technical
+documentation or a general disclaimer.
+
+At a minimum, the product must present:
+
+- the provisional-data notice for scarp dip;
+- the explanation of the selected simulation population;
+- warnings for small, empty, or partly out-of-range result sets;
+- the limitation that deformation-zone width represents the main modeled
+  rupture zone rather than every possible distributed rupture strand;
+  and
+- the warning that a slip-to-magnitude display is a derived relabeling,
+  not an independently modeled magnitude or a site-specific estimate.
+
+#### CR-9. Citation and sourcing language
+
+Scientific claims about the simulation ensemble must cite the research
+paper. Claims about the data archive must cite the relevant DesignSafe
+deposit. Claims about the product's data preparation or software
+behavior must cite the project's own versioned documentation where
+appropriate.
+
+The product must retain the established instruction to cite the research
+paper, rather than the website alone, when users cite the scientific
+work.
+
+### 7.4 Content governance
+
+#### CR-10. Scientific-content approval
+
+Reader-facing scientific statements — including the texts required by
+CR-4 through CR-8, the morphology descriptions, and the worked
+example's framing — must be approved by the research group before a
+public release that introduces or changes them.
 
 ## 8. Non-functional requirements
 
-- **NFR-1.** Free to view, no login, no user accounts, no tracking
-  beyond what the host already provides.
-- **NFR-2.** Deliverable within the project's hosting reality: a public
-  static site deployed from `main` (GitHub Pages; no server-side
-  compute). Anything needing a backend is out of scope for this lane.
-- **NFR-3.** Interaction latency: bracket changes repaint without
-  perceptible wait. The PDD sets the numeric budgets (p95
-  filter-to-repaint; initial payload, with DR-5) that
-  [SC-7](#10-success-criteria) verifies; the anti-pattern to avoid is
-  the nearest-neighbor tool's first load — tens of seconds while an
-  in-browser Python runtime downloads (§1's landscape scan).
-- **NFR-4.** Accessibility: keyboard-operable controls, visible focus,
-  text alternatives for charts (at minimum the statistics table carries
-  the same information), and the palette rules of FR-G2. JS-off
-  visitors get honest fallback content (the site's existing convention),
-  not a blank panel.
-- **NFR-5.** Responsive down to the site's existing mobile behavior; the
-  scenario page remains usable on a laptop in the field office
-  (no hover-only affordances for essential information). Supported
-  environments: evergreen browsers, roughly the last two years; no
-  legacy-browser support. The PDD fixes the exact baseline.
-- **NFR-6.** Licensing stays three-way and explicit: app code
-  Apache-2.0, page prose CC BY 4.0, any paper figures under the
-  publisher's author-sharing terms (non-commercial, no derivatives,
-  full citation, accepted-manuscript originals only) — with the
-  development-vs-release gate for third-party photographs.
-- **NFR-7.** Quality gates match the repo's: the strict site build
-  (the build that fails on any warning, broken link included) stays
-  green; derived numbers are pinned by tests; reader-visible asset
-  changes respect the cache-busting convention (renaming an asset
-  reference on change so stale browser caches cannot serve the old
-  one).
-- **NFR-8.** The platform decision itself (native page vs. embedded
-  dashboards vs. hybrid; any new toolchain) is recorded as an ADR,
-  because it extends or supersedes the standing "Tableau is the
-  dashboard platform" and "no Python UI frameworks" decisions.
+### 8.1 Access, hosting, and privacy
+
+#### NFR-1. Free public access
+
+Ground Rupture Explorer must be free to use. It must not require a login,
+user account, subscription, or payment.
+
+The product must not add product-specific visitor tracking. It may remain
+subject to the analytics or logging already provided by its public host.
+
+#### NFR-2. Static-site hosting
+
+The product must be deployable as part of the project's public static
+website, published from the repository's `main` branch through GitHub
+Pages.
+
+The MVP must not require server-side computation, a database service, or
+a private backend. Scenario filtering and statistics must therefore be
+implemented using published client-side data and code, within the
+performance requirements below.
+
+The product shares the existing site's URL space, navigation, build, and
+deployment process.
+
+### 8.2 Performance and supported environments
+
+#### NFR-3. Responsive interaction
+
+Changes to scenario controls must update the displayed results without a
+perceptible delay during normal use.
+
+The product must avoid large initial downloads and prolonged visible
+loading phases, especially on repeat visits. It must not require users
+to download a browser-based Python runtime or a comparably heavy
+execution environment before they can use the scenario page.
+
+The PDD must define numeric performance budgets for:
+
+- initial data payload;
+- first meaningful render; and
+- 95th-percentile time from a scenario change to updated results.
+
+The product must meet those budgets under the test conditions defined in
+the PDD.
+
+#### NFR-4. Supported environments
+
+The scenario page must work in current evergreen browsers, using a
+defined baseline of approximately the most recent two years of browser
+versions.
+
+The product is not required to support legacy browsers.
+
+It must remain usable on small screens and on a laptop in a
+field-office setting. Essential information and controls must not rely
+on hover alone.
+
+The PDD must define the exact supported-browser baseline and the
+supported mobile baseline.
+
+### 8.3 Accessibility and resilience
+
+#### NFR-5. Accessibility
+
+The product must provide:
+
+- keyboard-operable controls;
+- visible keyboard focus;
+- text alternatives for charts;
+- an accessible statistics table containing the information needed to
+  interpret each chart;
+- text identification in addition to color, as required by FR-G2; and
+- labels, units, and warnings that can be understood without relying
+  solely on visual layout.
+
+The PDD must name the accessibility conformance target this list
+serves.
+
+If the scenario page's data export fails to load, or does not match the
+page's expected version, the page must say so plainly; it must not
+render empty or stale results as if they were valid.
+
+Visitors who use the site without JavaScript must receive honest fallback
+content. The page must explain that the interactive scenario page
+requires JavaScript and provide access to relevant non-interactive
+content, such as the paper, data archive, dashboards, glossary, and
+limitations. It must not present a blank or misleading page.
+
+### 8.4 Licensing and publication rights
+
+#### NFR-6. Licensing
+
+The product must preserve the project's existing licensing model:
+
+- application code under Apache-2.0;
+- page prose under CC BY 4.0; and
+- research-paper figures used under the publisher's applicable
+  author-sharing terms, including any restrictions on commercial use,
+  modification, and required attribution.
+
+Third-party photographs and other externally owned media must not be
+included in a public release until the required permissions are
+confirmed.
+
+### 8.5 Quality and release process
+
+#### NFR-7. Build and data-quality gates
+
+The project's strict site build must remain green. The build must fail on
+warnings or broken links according to the repository's existing quality
+rules.
+
+Reader-visible derived values must be tested against controlled
+reference results from the data pipeline, as required by DR-1.
+
+Changes to reader-visible assets must follow the project's
+cache-busting convention — changing an asset's address when its content
+changes — so that users do not receive stale files from browser or CDN
+caches after a release.
+
+The existing dashboards, citation material, navigation, and deployment
+process must remain functional after each release.
+
+#### NFR-8. Architecture decision record
+
+The technical platform decision for Ground Rupture Explorer must be
+recorded in an ADR.
+
+The ADR must document whether the scenario page and related surfaces use
+a native implementation, embedded dashboards, links to existing
+dashboards, or a hybrid approach. It must also record any new toolchain
+introduced into the repository and how that decision relates to the
+project's existing architecture decisions.
 
 ## 9. Dependencies and risks
 
-| Dependency / risk | Holder | Bears on |
-|---|---|---|
-| `Convert_Scarp_Dip` correction (rule or column) | Lead author | FR-O4; scarp-dip credibility app-wide |
-| Cohesion letter-code answers — FR-S2's lettered layer profiles (per-layer values for R2–R10; whether `S` is the authors' label; its geometry; the letter gaps) | Lead author | FR-S2's advanced refinement and its documentation |
-| Low-slip measurement-reliability gate: scope and thresholds | Lead author | DR-3; any bracket that includes small displacements |
-| Third-party photo permissions (Figures 1–2 and the morphology montage) | Author team | FR-E1 release gate |
-| Slip→magnitude input conversion blessing | Author team | FR-G1 / [OQ-5](#11-open-questions) |
-| Per-class animation assets beyond the three supplied; animated measurement-process media | Author team | FR-E1, FR-E2, FR-D4 completeness |
-| Author-team model-code repository URLs (DEM and ML) for the contact surface | Author team | FR-E3 |
-| Reconciling the mockup's Kern widths with the shipped compilation's two arms | Lead author | FR-O6, SC-2, OQ-9 |
-| Payload-size vs. filter-freedom tension (pre-aggregation cannot serve arbitrary conjunctive brackets; row-level data must be shipped compactly) | HLDD | DR-1, DR-5, NFR-3 |
-| CI cannot run the data pipeline (raw inputs are local-only), so app data must be committed artifacts refreshed by the owner | Build design | DR-1, DR-6 |
-| Single Pages site per repo: the app shares the site's URL space and deploy gate (the one GitHub Pages job that publishes everything) | Build design | NFR-2 |
-| Scope creep toward re-implementing the five dashboards natively | Product owner | FR-G5's reuse-first rule |
-| The site glossary lacks entries for PFDHA, Alquist-Priolo, and Fault Avoidance Zones — terms §1 now leans on (external links carry the definitions meanwhile) — and spells FDHI "…Hazards Initiative" where UCLA's own usage is "…Hazard Initiative" | Site content | §1 readability; [Register and apparatus](#register-and-apparatus) |
+The following dependencies and risks could affect scope, scientific
+credibility, delivery, or release timing.
 
-## 10. Success criteria
+### 9.1 Scientific and data dependencies
 
-1. **SC-1.** The dam vignette runs end-to-end in under two minutes, unaided, by
-   each of three first-time engineer testers: bracket {30°, 40°},
-   strength Strong (uniform and layered `Set` arms, labeled), 3 m
-   entered as
-   an **anticipated surface offset** through the FR-S5 assist — which
-   visibly flags that the 30° arm's converted slip exceeds the modeled
-   range — then read N, median, and 84th percentile for all three
-   quantities and download the subset.
-2. **SC-2.** The Kern worked example reproduces: the 30°/pressure-ridge bracket
-   shows the export's Kern field widths — e.g. the FDHI arm's 11, 15,
-   and 30.5 m — inside the model distribution's span, drawn from the
-   pinned export rather than hand-typed (OQ-9 settles which arm the
-   example features).
-3. **SC-3.** Every number the page shows derives from pinned pipeline data, and
-   any statistic computed in the front end is covered by tests against
-   pipeline-computed golden-scenario values — no number rests on
-   untested front-end code alone.
-4. **SC-4.** The page carries the citation apparatus, the four-ingredient
-   disclaimer, the scarp-dip caveat, and the population label — verified
-   by the site's strict build and by review.
-5. **SC-5.** The author team recognizes the mockup's intent in the shipped page
-   (their five goals each map to a shipped or explicitly deferred
-   capability) and signs off on the vocabulary.
-6. **SC-6.** No regression to the existing site: dashboards, cite apparatus, and
-   deploy stay intact — verified by the strict site build (links, nav,
-   apparatus), the Pages deploy job staying green, and an embed
-   smoke-check of the five dashboards.
-7. **SC-7.** The PDD's performance budgets are met (initial payload, p95
-   filter-to-repaint), and the dam vignette is completable keyboard-only
-   with the statistics table carrying the charts' information.
+| ID | Dependency or risk | Impact | Owner / decision-maker | Planned response |
+|---|---|---|---|---|
+| **R-1** | Authoritative `Convert_Scarp_Dip` correction is not yet available. | Scarp-dip results remain provisional; this affects a primary MVP output. | Harvard Structural Geology & Earth Resources Group | Show the reader-visible caveat required by FR-O4 until the corrected rule or data column is available. |
+| **R-2** | The meaning and values of the letter-coded cohesion profiles are not fully documented. | Limits the advanced sediment-strength refinement described in FR-S2. | Harvard Structural Geology & Earth Resources Group | Do not make letter-coded profiles a primary MVP control. Add them only after the group provides definitions, geometry, and approved labels. |
+| **R-3** | The appropriate treatment of unreliable low-slip measurements is unresolved. | Could affect scenario results at small displacement values. | Harvard Structural Geology & Earth Resources Group | Record the decision in the PDD: apply the per-scarp-type cutoffs automatically, expose them as a control, or document the limitation without filtering. |
+| **R-4** | The Kern County worked example has two possible field-data groups with different meanings. | The example could be misleading if it mixes or mislabels field-width data. | Harvard Structural Geology & Earth Resources Group | Before release, select the source group for the example and define any rule used to identify principal-rupture widths. |
+| **R-5** | The field measurements shown for context are analogous to, but not always identical with, the simulation measurements. | Users may overinterpret an overlay as a direct like-for-like comparison. | Product owner, with research-group review | Preserve source-specific labels, use the required “Analogous, not identical” language, and keep field measurements visually distinct from simulations. |
+| **R-6** | The simulation ensemble represents 2D models only; a 3D research arm is on hold. | A 2D-only data design could make later 3D support expensive. | Product owner and architect, with research-group guidance | Meet DR-7 by carrying a model-family or source dimension in new data exports where practical. |
 
-## 11. Open questions
+### 9.2 Scope and product dependencies
 
-- **OQ-1.** Product name. "Scenario Explorer" is the working title;
-  the mockup's own header ("Thrust & Reverse Fault Ground Rupture
-  Characteristics") is a candidate source. Decision: owner + author team.
-- **OQ-2.** Does the scenario page live at a site URL (evolving the
-  site's nav) or present as a distinct "app" entry point that
-  the site links? (The request's single-page framing vs. the
-  one-Pages-site reality; purely a presentation decision — hosting is
-  shared either way.)
-- **OQ-3.** v0.3 slice: is C1–C5 (the P1 column) the agreed build target
-  for `dev-v.0.3.x`, with C6–C11 following? Decision: owner.
-- **OQ-4.** Low-slip gate: apply the authors' per-class reliability
-  crops to the scenario page's populations, expose them as a visible
-  toggle, or document-only? Needs the lead author's scope answer; the
-  PDD must not pick silently.
-- **OQ-5.** Magnitude as an *input* ("anticipated earthquake
-  magnitude," per the mockup): which conversion, whose blessing, and
-  with what stated uncertainty? Until answered, magnitude appears only
-  as the derived display relabeling with its warning (FR-G1).
-- **OQ-6.** Us − Ud as a fourth output panel: include at P1 for the
-  expert audience, or defer? FR-O1 carries P2 as the default pending
-  this decision. (Field data has no comparable quantity, so it is
-  model-only either way.)
-- **OQ-7.** Does the inverse search (C7) belong in the first public
-  release at all, or after the forward page has author-team sign-off?
-- **OQ-8.** Animations: are the three supplied files (plus gif) the
-  intended per-class set, or does the team want all six classes covered
-  before FR-E1 ships?
-- **OQ-9.** Kern worked-example widths: the mockup slide quotes 11, 15,
-  and 30.5 m as principal deformation-zone widths. The FDHI arm of the
-  per-measurement export carries exactly that trio under the 50 m
-  criterion; the hand-compiled Buwalda arm holds eleven widths
-  0.30–30.48 m (9.14, 15.24 and 30.48 among them) with no principal
-  marker. Which arm the worked example features — and the pinned
-  definition of a principal-width subset — needs the lead author.
+| ID | Dependency or risk | Impact | Owner / decision-maker | Planned response |
+|---|---|---|---|---|
+| **R-7** | The proposed P1 scope may expand toward rebuilding the five existing dashboards. | MVP delivery could be delayed by work that does not address the core scenario-query gap. | Product owner | Apply the reuse-first principle in §2.3 and FR-G5. A native replacement requires a documented unmet user need. |
+| **R-8** | The research group has not approved a magnitude-to-slip conversion for use as an input. | “Anticipated earthquake magnitude” cannot be offered as a scenario input. | Harvard Structural Geology & Earth Resources Group | Limit magnitude to the existing derived display aid and warning until an approved conversion and uncertainty statement are available. |
+| **R-9** | Inverse search may be scientifically useful but could be misunderstood as site-parameter inference. | Could create an unsupported product claim or distract from the MVP. | Product owner, with research-group review | Keep inverse search as P2. If implemented, use the safeguards in FR-X2 and describe results only as simulation conditions consistent with an observation. |
+| **R-10** | The fourth output, additional uplift (Us − Ud), has not been prioritized. | Scope uncertainty in the results page. | Product owner, with research-group input | Treat it as P2 unless a decision promotes it to the MVP. |
+| **R-11** | The public entry point for the product — a primary site page or a distinct app entry — is not settled; the name is decided (Ground Rupture Explorer). | May affect navigation, documentation, and user expectations. | Product owner and research group | Resolve the entry point before detailed design. |
 
-## 12. Source material
+### 9.3 Content and media dependencies
 
-- **The author team's request** (2026-10-13, via the owner): paraphrased
-  throughout; the dam vignette in [user story 1](#4-user-stories) keeps
-  its substance. The verbatim text is retained privately (gitignored
-  `internal/`), per the project's correspondence rule.
-- **The author team's GUI mockup** — `DEM website GUI.pptx`, 9 slides,
-  48 MB, local gitignored artifact (`legacy/mockup/`; it exists in no
-  clone, which is why this PRD distills rather than cites it). Contents:
-  a DesignSafe-styled four-tab site (full-dataset explorer with
-  scatter/histogram/PDF modes and slip↔magnitude toggles; an Advanced
-  Search with forward and inverse directions, mean/σ readouts, subset
-  download, and per-class animations; a morphologies explainer with
-  model/photo pairs; contact). Five stated goals: real-time
-  visualization; subset search + download; scatter↔distribution
-  flipping; slip-and-magnitude comparison; a scarp-type animation with
-  downloads (served by FR-D4; the C9 education surface carries the
-  animation library). Worked example: Kern County 1952 against a
-  filtered DZW distribution.
-- **Verified dataset facts** (shipped exports, checked 2026-10-13
-  against `dist/csv/`, the pipeline's local CSV output folder —
-  gitignored, regenerated locally via `egr-build`, the repo's
-  export-rebuild command — and the pipeline's tests): all counts,
-  ranges, and domain values quoted in this document.
-- **External practice**, cited for the conventions this PRD adopts:
-  PFDHA's definition (Youngs et al. 2003,
-  [USGS pub 70025970](https://pubs.usgs.gov/publication/70025970));
-  84th-percentile deterministic practice for fault crossings
-  ([Melissianos & Vamvatsikos, EURODYN 2020](https://www.lambdalab.ntua.gr/docs/conferences/Melissianos-Vamvatsikos_prEURODYN2020_SimplifiedEstimationOfDesignFaultDisplacementForBuriedPipelinesAtFaultCrossin.pdf);
-  the same group's journal treatment is
-  [Melissianos et al. 2023, *Bull. Earthq. Eng.*](https://doi.org/10.1007/s10518-023-01813-9));
-  FERC Engineering Guidelines Chapter 13 (2018); Bulletins 72/112 of
-  ICOLD, the International Commission on Large Dams,
-  via [Water Power Magazine's review](https://www.waterpowermagazine.com/analysis/dam-design-the-effects-of-active-faults/);
-  [California Alquist-Priolo zoning](https://www.conservation.ca.gov/cgs/alquist-priolo);
-  the [active-fault guideline of NZ's Ministry for the Environment (MfE)](https://environment.govt.nz/publications/planning-for-development-of-land-on-or-close-to-active-faults-a-guideline-to-assist-resource-management-planners-in-new-zealand/)
-  and the [GNS Fault Avoidance Zones dataset](https://gis.gns.cri.nz/server/rest/services/Active_Faults/NZActiveFaultDatasets/MapServer/7/iteminfo);
-  the [FDHI model suite](https://risksciences.ucla.edu/nhr3/fdhi/models)
-  and [its web tool](https://asarmy.github.io/fdhpy-webtool);
-  the [USGS Earthquake Hazard Toolbox](https://earthquake.usgs.gov/nshmp/);
-  the [GNS NZ NSHM web app](https://www.gns.cri.nz/data-and-resources/national-seismic-hazard-model/);
-  [OpenSHA applications](https://opensha.org/Applications);
-  USGS research-software disclaimer wording
-  ([GHSC legal page](https://ghsc.code-pages.usgs.gov/lhp/ocelote/resources/legal.html)).
-- **As-is practice and the product landscape**, behind §1's workflow
-  and scan (all links checked 2026-10-13):
-  [CGS EQ Zapp](https://www.conservation.ca.gov/cgs/geohazards/eq-zapp)
-  and [CGS Special Publication 42](https://www.conservation.ca.gov/cgs/publications/sp42);
-  the [USGS Quaternary Fault and Fold Database](https://www.usgs.gov/programs/earthquake-hazards/faults);
-  scaling relations ([Wells & Coppersmith 1994](https://central.scec.org/node/3035),
-  [Moss & Ross 2011](https://authors.library.caltech.edu/94907));
-  [Boncio et al. 2018](https://nhess.copernicus.org/articles/18/241/2018/);
-  the [FDHI database report](https://www.risksciences.ucla.edu/girs-reports/2021/08)
-  and [reference implementations](https://www.risksciences.ucla.edu/nhr3/products/fdhi)
-  with the [fdhpy package](https://github.com/asarmy/fdhpy);
-  the [SURE database](https://zenodo.org/records/6326856);
-  [OpenSRA](https://peer.berkeley.edu/opensra-home1);
-  the [open full text of Chiama et al. (2025)](https://par.nsf.gov/servlets/purl/10644518)
-  and [the 2023 companion study](https://par.nsf.gov/biblio/10514401);
-  the [QuakeCoRE fault-displacement white paper](https://www.naturalhazards.govt.nz/assets/Publications-Resources/QuakeCoRE-FDHA.pdf);
-  [Eos' 25-year PFDHA retrospective](https://eos.org/editors-vox/when-the-earth-moves-25-years-of-probabilistic-fault-displacement-hazards);
-  the [IAEA PFDHA benchmark (TECDOC-2092)](https://www.iaea.org/node/224310);
-  vendor pricing as posted —
-  [PLAXIS](https://www.bentley.com/en/products/plaxis-3d/),
-  [Abaqus via reseller](https://www.goengineer.com/guide-to-buying-abaqus-fea),
-  [Itasca PFC, no public price](https://itascasoftware.com/products/pfc/).
+| ID | Dependency or risk | Impact | Owner / decision-maker | Planned response |
+|---|---|---|---|---|
+| **R-12** | Public permission for third-party earthquake photographs is unresolved. | The morphology page cannot publicly include those photographs until rights are confirmed. | Harvard Structural Geology & Earth Resources Group | Keep photographs out of public releases until permission is documented. Model snapshots and approved media can ship independently. |
+| **R-13** | The supplied animations do not necessarily cover all six scarp types. | The morphology page and scenario-linked animation feature may be incomplete. | Harvard Structural Geology & Earth Resources Group | Decide whether all six types are required before FR-E1 and FR-D4 ship. Do not imply complete coverage when only some animations exist. |
+| **R-14** | Animated media explaining the measurement process may not be available. | Limits the richness of FR-E2 but not the core explanation. | Harvard Structural Geology & Earth Resources Group | Ship a text-and-figure explanation first; add approved animation later if supplied. |
+| **R-15** | Approved URLs for the research group's DEM and machine-learning code repositories are pending. | The P3 contact page cannot include complete repository links. | Harvard Structural Geology & Earth Resources Group | Treat the links as optional until approved URLs are supplied. |
 
-## 13. What happens next
+### 9.4 Delivery and technical risks
 
-On approval of this PRD: the **product definition document** (same
-directory), deriving exact control domains, defaults, states, copy, and
-acceptance criteria from the requirements above — still platform-silent.
-After its review: the **high-level design document** plus ADR-0010 for
-the platform decision. Only then detailed design and an implementation
-plan.
+| ID | Dependency or risk | Impact | Owner / decision-maker | Planned response |
+|---|---|---|---|---|
+| **R-16** | Combined scenario filtering requires enough detail to support arbitrary filters, but the static site has a strict payload budget. | A large client-side data payload could make the product slow or unusable. | Architect / HLDD | Evaluate compact row-level exports, precomputation, caching, and hybrid data structures. Meet DR-6 and NFR-3 without weakening required filtering. |
+| **R-17** | Continuous integration cannot rebuild the full pipeline because raw inputs are local-only. | App data could become stale or untraceable if refreshes are informal. | Product owner and build-design owner | Commit versioned app-ready data artifacts and document the owner-controlled refresh process. Show export versions in the product and downloads. |
+| **R-18** | The scenario page shares a single GitHub Pages site, URL space, build, and deploy job with the existing website. | A failure in the new product could disrupt the published site or dashboards. | Product owner and architect | Preserve strict build and deployment gates; test navigation, dashboard links or embeds, citation material, and the full Pages deployment before release. |
+| **R-19** | The static-site constraint prohibits server-side computation. | Some implementation approaches may be infeasible or perform poorly. | Architect / HLDD | Record the platform decision in an ADR and validate the proposed client-side approach against the MVP performance budget early. |
 
-<!-- Live dashboard pages, in the site's nav order. -->
-[Model vs reality]: https://harvardrc.github.io/eps-ground-rupture/dashboards/model-vs-reality/
-[Response curves]: https://harvardrc.github.io/eps-ground-rupture/dashboards/response-curves/
-[Per-event boxplots]: https://harvardrc.github.io/eps-ground-rupture/dashboards/per-event-boxplots/
-[Slip regression]: https://harvardrc.github.io/eps-ground-rupture/dashboards/slip-regression/
-[Distributions & summary statistics]: https://harvardrc.github.io/eps-ground-rupture/dashboards/distributions/
-[Distributions]: https://harvardrc.github.io/eps-ground-rupture/dashboards/distributions/
+### 9.5 Decisions required before detailed design
+
+The following decisions must be resolved, or explicitly deferred with a
+documented interim rule, before the PDD is complete. Product-design
+decisions that the body of this document defers to the PDD — among
+them the small-result warning threshold, chart floor, and empty-result
+diagnosis rule (FR-O3), the chart-export provenance format (FR-D2),
+the shared-link version notice (FR-X1), the unclassified-record
+display and scarp-family details (FR-G2), the field-overlay default
+set and per-source analogue map (FR-O5), the accessibility conformance
+target (NFR-5), the exact browser and mobile baseline (NFR-4), and the
+success criteria (§2.2) — are tracked in the PDD's decision register
+rather than repeated here.
+
+| # | Decision | Owner | Status (2026-10-15) |
+|---|---|---|---|
+| 1 | Whether P1 is the agreed MVP and release target. | Product owner | Decided: yes. |
+| 2 | The product name and site entry point. | Product owner and research group | Name decided: Ground Rupture Explorer. Entry point open (R-11). |
+| 3 | Multi-dip behavior of the surface-offset-to-slip assist. | Product owner, with research-group review | Deferred to the PDD with an interim proposal (owner decision, 2026-10-15). |
+| 4 | The low-slip measurement-reliability policy. | Research group | Open; interim rule: document the limitation without filtering (R-3). |
+| 5 | The scarp-dip correction status and release treatment. | Research group | Open; interim rule: provisional-data notice per FR-O4 (R-1). |
+| 6 | The Kern County field-data group and principal-width definition. | Research group | Open; the worked example is not finalized until decided (R-4). |
+| 7 | The definition of dominant scarp type for animation recommendations. | Product owner | Deferred to the PDD with an interim proposal (owner decision, 2026-10-15). |
+| 8 | The scope of animation coverage required for public release. | Research group | Open (R-13). |
+| 9 | The numeric performance and payload budgets. | Product owner | Deferred to the PDD with proposed budgets (owner decision, 2026-10-15). |
+| 10 | The project's liability-limitation text referenced by CR-4. | Product owner | Open: must be authored or sourced before release. |
+
+## Appendix A. Requirements index
+
+This appendix is a non-normative index. The section text of each
+requirement is authoritative; this table restates nothing and only
+locates. Titles are the requirements' own headings. Functional
+requirements take their priority from their section or an inline
+statement; shared display rules (FR-G) and the data, content, and
+non-functional requirements bind whenever the feature they govern
+ships, so they carry no priority of their own (—).
+
+| ID | Requirement | Priority | Capability | Section |
+|---|---|---|---|---|
+| [FR-S1](#fr-s1-fault-dip) | Fault dip | P1 | C1 | §5.1 |
+| [FR-S2](#fr-s2-sediment-strength-and-structure) | Sediment strength and structure | P1 | C1 | §5.1 |
+| [FR-S3](#fr-s3-sediment-depth) | Sediment depth | P1 | C1 | §5.1 |
+| [FR-S4](#fr-s4-sediment-density) | Sediment density | P1 | C1 | §5.1 |
+| [FR-S5](#fr-s5-displacement-window) | Displacement window | P1 | C1 | §5.1 |
+| [FR-S6](#fr-s6-population-selection) | Population selection | P1 | C1 | §5.1 |
+| [FR-S7](#fr-s7-scarp-type-filter) | Scarp-type filter | P1 | C1 | §5.1 |
+| [FR-S8](#fr-s8-default-and-reset-state) | Default and reset state | P1 | C1 | §5.1 |
+| [FR-O1](#fr-o1-distribution-views) | Distribution views | P1 | C2 | §5.2 |
+| [FR-O2](#fr-o2-summary-statistics) | Summary statistics | P1 | C2 | §5.2 |
+| [FR-O3](#fr-o3-small-or-empty-result-sets) | Small or empty result sets | P1 | C2 | §5.2 |
+| [FR-O4](#fr-o4-scarp-dip-data-caveat) | Scarp-dip data caveat | P1 | C2 | §5.2 |
+| [FR-O5](#fr-o5-field-data-context) | Field-data context | P1 | C3 | §5.2 |
+| [FR-O6](#fr-o6-kern-county-worked-example) | Kern County worked example | P1 | C3 | §5.2 |
+| [FR-D1](#fr-d1-download-matching-simulation-records-and-statistics) | Download matching simulation records and statistics | P1 | C4 | §5.3 |
+| [FR-D2](#fr-d2-export-chart-images) | Export chart images | P2 | C4 | §5.3 |
+| [FR-D3](#fr-d3-link-to-the-complete-data-archive-and-paper) | Link to the complete data archive and paper | P1 | C5 | §5.3 |
+| [FR-D4](#fr-d4-offer-representative-scarp-type-animations) | Offer representative scarp-type animations | P2 | C4, C9 | §5.3 |
+| [FR-X1](#fr-x1-shareable-scenario-links) | Shareable scenario links | P2 | C6 | §5.4 |
+| [FR-X2](#fr-x2-inverse-search) | Inverse search | P2 | C7 | §5.4 |
+| [FR-E1](#fr-e1-morphology-education) | Morphology education | P2 | C9 | §5.5 |
+| [FR-E2](#fr-e2-explain-how-the-measurements-are-made) | Explain how the measurements are made | P2 | C9 | §5.5 |
+| [FR-E3](#fr-e3-contact-and-request-page) | Contact and request page | P3 | C11 | §5.5 |
+| [FR-G1](#fr-g1-slip-and-derived-magnitude-displays) | Slip and derived magnitude displays | — | C10 | §5.6 |
+| [FR-G2](#fr-g2-scarp-type-colors-and-identification) | Scarp-type colors and identification | — | — | §5.6 |
+| [FR-G3](#fr-g3-reader-facing-labels-and-data-driven-text) | Reader-facing labels and data-driven text | — | — | §5.6 |
+| [FR-G4](#fr-g4-citation-disclaimer-and-version-information) | Citation, disclaimer, and version information | — | — | §5.6 |
+| [FR-G5](#fr-g5-reuse-of-existing-full-dataset-dashboards-c8) | Reuse of existing full-dataset dashboards (C8) | — | C8 | §5.6 |
+| [DR-1](#dr-1-controlled-data-source) | Controlled data source | — | — | §6.1 |
+| [DR-2](#dr-2-versioned-exports) | Versioned exports | — | — | §6.1 |
+| [DR-3](#dr-3-one-state-per-trial-population) | One-state-per-trial population | — | — | §6.2 |
+| [DR-4](#dr-4-measurement-hygiene) | Measurement hygiene | — | — | §6.2 |
+| [DR-5](#dr-5-field-data-preparation) | Field-data preparation | — | — | §6.2 |
+| [DR-6](#dr-6-payload-and-interaction-support) | Payload and interaction support | — | — | §6.3 |
+| [DR-7](#dr-7-future-3d-compatibility) | Future 3D compatibility | — | — | §6.3 |
+| [CR-1](#cr-1-describe-the-product-accurately) | Describe the product accurately | — | — | §7.1 |
+| [CR-2](#cr-2-avoid-unsupported-claims) | Avoid unsupported claims | — | — | §7.1 |
+| [CR-3](#cr-3-use-terms-consistently) | Use terms consistently | — | — | §7.1 |
+| [CR-4](#cr-4-standing-disclaimer) | Standing disclaimer | — | — | §7.2 |
+| [CR-5](#cr-5-statistics-and-design-value-language) | Statistics and design-value language | — | — | §7.2 |
+| [CR-6](#cr-6-field-data-comparison-language) | Field-data comparison language | — | — | §7.2 |
+| [CR-7](#cr-7-glossary-and-plain-language-support) | Glossary and plain-language support | — | — | §7.3 |
+| [CR-8](#cr-8-reader-visible-caveats) | Reader-visible caveats | — | — | §7.3 |
+| [CR-9](#cr-9-citation-and-sourcing-language) | Citation and sourcing language | — | — | §7.3 |
+| [CR-10](#cr-10-scientific-content-approval) | Scientific-content approval | — | — | §7.4 |
+| [NFR-1](#nfr-1-free-public-access) | Free public access | — | — | §8.1 |
+| [NFR-2](#nfr-2-static-site-hosting) | Static-site hosting | — | — | §8.1 |
+| [NFR-3](#nfr-3-responsive-interaction) | Responsive interaction | — | — | §8.2 |
+| [NFR-4](#nfr-4-supported-environments) | Supported environments | — | — | §8.2 |
+| [NFR-5](#nfr-5-accessibility) | Accessibility | — | — | §8.3 |
+| [NFR-6](#nfr-6-licensing) | Licensing | — | — | §8.4 |
+| [NFR-7](#nfr-7-build-and-data-quality-gates) | Build and data-quality gates | — | — | §8.5 |
+| [NFR-8](#nfr-8-architecture-decision-record) | Architecture decision record | — | — | §8.5 |
