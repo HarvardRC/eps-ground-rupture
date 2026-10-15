@@ -1067,3 +1067,290 @@ The animations must use the same scarp-type media library planned for
 the morphology education surface. The product must present an animation
 as an illustrative example of a scarp type, not as a visualization of
 the user's specific site or of an individual matching simulation record.
+
+### 5.4 Sharing and inverse search (C6, C7, P2)
+
+These capabilities improve reproducibility and support users who begin
+with an observed surface feature rather than a fully defined site
+scenario. They are not required for the P1 MVP.
+
+#### FR-X1. Shareable scenario links
+
+The product must support a shareable URL that opens Ground Rupture
+Explorer with a user's scenario settings and selected view restored.
+
+A shareable URL is not a link to a static saved report or a read-only
+view. It is a reproducible starting point for an interactive Scenario
+Explorer session. A person who opens the link may change any available
+scenario setting, result view, or field-data display and continue
+exploring without restriction.
+
+The URL must preserve all settings needed to restore the shared starting
+state, including:
+
+- selected fault-dip values;
+- selected sediment conditions;
+- the displacement window and its entry mode;
+- the selected simulation population;
+- any scarp-type filter;
+- selected measurement or result view; and
+- field-data display settings, where applicable.
+
+The product must calculate results using the software version and
+data-export version currently published when the link is opened. It does
+not need to preserve a static historical copy of the results.
+
+Because a later software or data update may change the result associated
+with the same settings, the page and all downloads must display the
+current software version and data-export version. The PDD must define
+how the product notifies users when a shared link was created under an
+older version, if creation-version information is included in the URL.
+
+#### FR-X2. Inverse search
+
+The product must allow users to begin with an observed range of one or
+more surface-rupture measurements and identify simulation records that
+produced similar measurements.
+
+Users may specify a range for:
+
+- scarp height;
+- deformation-zone width; and/or
+- scarp dip.
+
+For the matching simulations, the product must show the distribution of
+the modeled input conditions, including fault dip, sediment strength,
+sediment density, sediment depth, and fault slip.
+
+The product must describe these results as:
+
+> **Simulation conditions consistent with the selected observation**
+
+It must not describe them as inferred, estimated, or predicted
+properties of the user's actual site. Similar surface measurements can
+be produced by different combinations of modeled conditions, and the
+simulation ensemble does not contain enough information to uniquely
+identify real site conditions.
+
+Users may apply the forward scenario controls to narrow an inverse
+search. For example, a user may begin with an observed scarp-height
+range, then restrict the matching simulations to a known sediment depth
+or fault-dip range.
+
+Magnitude is not an inverse-search input. If the product displays a
+derived magnitude scale, it remains a labeled display aid subject to the
+rules in FR-G1.
+
+### 5.5 Education, animations, and contact (C9, C11, P2/P3)
+
+These capabilities support learning, outreach, and requests for related
+research materials. They are not required for the P1 MVP.
+
+#### FR-E1. Morphology education
+
+The product must provide a morphology-education page describing the six
+modeled scarp types:
+
+- Monoclinal;
+- Pressure Ridge;
+- Simple;
+- Monoclinal Collapse;
+- Pressure Ridge Collapse; and
+- Simple Collapse.
+
+For each type, the page must provide:
+
+- a plain-language description;
+- a representative model snapshot;
+- glossary links or equivalent explanations; and
+- a representative animation, where an appropriate asset is available.
+
+The page may also use photographs from real earthquakes to provide field
+context. However, third-party photographs may be used in public releases
+only after the required permissions have been confirmed. They may be
+used during internal development and review where permitted.
+
+The same animation library must support the representative-animation
+feature in FR-D4.
+
+#### FR-E2. Explain how the measurements are made
+
+The product must explain how the research group measured surface-rupture
+features in the computer simulations.
+
+The explanation must describe, in reader-facing language, that an
+automated image-analysis or computer-vision process measured features
+such as scarp height, deformation-zone width, and scarp dip from the
+simulated ground surface.
+
+The explanation must reuse existing project content and reference the
+relevant figure in the research paper where appropriate. It may include
+author-supplied animated media showing the measurement process.
+
+The explanation must make clear that these measurements are derived from
+computer simulations. They are not direct measurements from a user's
+site or predictions for a future earthquake.
+
+#### FR-E3. Contact and request page
+
+The product should provide a contact or request page where users can ask
+the research group about:
+
+- data formats;
+- animation materials;
+- related research resources; or
+- other appropriate project questions.
+
+This is a P3 capability.
+
+The page must include:
+
+- the research group's preferred contact channel;
+- links to the project's existing website and repository resources; and
+- links to the research group's DEM and machine-learning model-code
+  repositories, once the research group provides the approved URLs.
+
+### 5.6 Shared display rules
+
+The following requirements apply across Ground Rupture Explorer wherever
+the relevant information or controls appear.
+
+#### FR-G1. Slip and derived magnitude displays
+
+Where fault slip is displayed on an axis, the product may also show the
+project's derived moment-magnitude scale as a secondary axis or optional
+toggle.
+
+The product must make clear that:
+
+- fault slip is the primary modeled quantity;
+- the magnitude scale is a monotonic relabeling derived from fault slip;
+  and
+- the magnitude scale is not an independently modeled variable or a
+  direct estimate of the magnitude of a future earthquake at the user's
+  site.
+
+The product must retain the project's existing warning to prefer slip
+when interpreting results.
+
+Users must not enter anticipated earthquake magnitude as a scenario
+input unless the research group approves a conversion method, its
+uncertainty statement, and its intended use.
+
+#### FR-G2. Scarp-type colors and identification
+
+Where scarp types are shown, the product must use the project's canonical
+scarp-class palette and ordering, defined below. The palette preserves
+the colors used in the research paper's figures so that readers can
+recognize the same scarp class in the paper, the published dashboards,
+and this product.
+
+These colors are a research-group decision, recorded in the project's
+dashboard-design conventions (ADR-0007). The product must reproduce
+them exactly. Any proposal to change a color belongs to the research
+group, not to product design or implementation.
+
+The canonical palette and order are:
+
+| Order | Scarp type | Color |
+|---:|---|---|
+| 1 | Monoclinal | `#009ffa` |
+| 2 | Monoclinal Collapse | `#3f67b1` |
+| 3 | Pressure Ridge | `#f47820` |
+| 4 | Pressure Ridge Collapse | `#af773e` |
+| 5 | Simple | `#ed2024` |
+| 6 | Simple Collapse | `#9f1d20` |
+
+Each collapse variant uses a darker shade of its corresponding base
+type. This order — each base type immediately followed by its collapse
+variant — is required wherever scarp types appear, including legends,
+stacked charts, tables, and lists.
+
+Records without a scarp classification must never use a scarp-class
+color. The PDD must define whether they are excluded from a given display
+or shown in neutral gray after the six classified scarp types.
+
+Field measurements must retain the black convention required by FR-O5.
+They must never use a scarp-class color.
+
+Color must not be the only way to identify a scarp type. Every
+color-coded display must also provide text identification through a
+legend, label, tooltip, table, or equivalent accessible mechanism.
+
+This is a required accessibility safeguard, not merely good practice.
+The palette is retained for fidelity to the research figures despite
+known color-vision limitations. For example, Simple (`#ed2024`) and
+Pressure Ridge Collapse (`#af773e`) are not reliably distinguishable
+under some forms of red-green color-vision deficiency, and the two
+Pressure Ridge shades can be difficult to distinguish even for viewers
+with typical color vision.
+
+Where a simpler presentation is needed, the product may offer a
+**scarp-family** view that combines each collapse variant with its base
+type. This view uses the three base-type colors. It still must not rely
+on color alone for identification.
+
+The PDD must define where the scarp-family view is available, how it is
+labeled, and the presentation details already established in the
+published dashboards, such as fill opacity and overlay conventions.
+
+#### FR-G3. Reader-facing labels and data-driven text
+
+The product must use reader-facing labels for physical quantities and
+controls. Labels must include units where applicable.
+
+For example:
+
+- **Scarp height (m)**, not an internal column name;
+- **Fault slip at depth (m)**, not a dataset field name; and
+- **Deformation-zone width (m)**, not an abbreviated internal code
+  without explanation.
+
+Labels, annotations, selected-value summaries, and explanatory text that
+depends on user settings must be generated from the current data and
+scenario state. The interface must not contain fixed text that can
+contradict the user's selections.
+
+#### FR-G4. Citation, disclaimer, and version information
+
+The product must display:
+
+- the project's standard citation material;
+- the research-tool disclaimer;
+- the current software version; and
+- the version and date of the data export used for the displayed result.
+
+The disclaimer must state clearly that the product:
+
+- is research-grade and may be revised;
+- is provided without warranty and subject to the project's stated
+  liability limitations;
+- does not provide earthquake occurrence rates, return periods,
+  probability-based hazard results, or site-specific predictions; and
+- should be used with qualified professional judgment and applicable
+  site-investigation and regulatory guidance.
+
+The product must present the scarp-dip provisional-data notice and the
+selected-population explanation wherever relevant. These are
+reader-facing requirements, not hidden technical notes.
+
+#### FR-G5. Reuse of existing full-dataset dashboards
+
+The product must reuse the existing published dashboards for
+full-dataset exploration unless a documented user need cannot be met by
+those dashboards.
+
+A native replacement or additional native exploration panel requires a
+named gap and rationale in the PDD.
+
+For each dashboard or related product surface, the high-level design
+must decide whether the appropriate implementation is:
+
+- a link to the existing dashboard;
+- an embedded dashboard;
+- a native display; or
+- a hybrid approach.
+
+That implementation decision must be recorded in the high-level design
+and associated architecture decision record. This PRD defines the user
+need and reuse-first rule, not the technical platform choice.
