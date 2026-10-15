@@ -1152,10 +1152,10 @@ The product must provide a morphology-education page describing the six
 modeled scarp types:
 
 - Monoclinal;
-- Pressure Ridge;
-- Simple;
 - Monoclinal Collapse;
-- Pressure Ridge Collapse; and
+- Pressure Ridge;
+- Pressure Ridge Collapse;
+- Simple; and
 - Simple Collapse.
 
 For each type, the page must provide:
@@ -1354,3 +1354,493 @@ must decide whether the appropriate implementation is:
 That implementation decision must be recorded in the high-level design
 and associated architecture decision record. This PRD defines the user
 need and reuse-first rule, not the technical platform choice.
+
+## 6. Data requirements
+
+The product must use controlled, versioned data exports derived from the
+project's established data pipeline. It must preserve the distinction
+between:
+
+- **simulation records** produced by the computer-model ensemble;
+- **derived statistics** calculated from those records;
+- **field measurements** recorded after past earthquakes; and
+- **reader-facing exports** prepared for the product.
+
+### 6.1 Data provenance and calculation integrity
+
+#### DR-1. Controlled data source
+
+Every number displayed by Ground Rupture Explorer must derive from the
+project's data pipeline or from a versioned export produced by that
+pipeline.
+
+The pipeline transforms the archived research data into controlled,
+purpose-built exports for publication and product use. The app must not
+treat the existing flat `dem.csv` export as its primary data source
+merely because it was prepared for Tableau. That file is a Tableau
+compatibility export, not the intended foundation for a new interactive
+product.
+
+Statistics calculated when a user changes a scenario — including
+filtered counts, percentiles, means, and standard deviations — must be
+tested against pipeline-computed reference results for defined
+scenarios.
+
+No reader-visible number may depend solely on untested front-end logic.
+
+The HLDD must determine whether the product uses precomputed
+aggregations, compact row-level data, or a combination of both. That
+decision must preserve the ability to filter by several scenario
+conditions together.
+
+#### DR-2. Versioned exports
+
+Every export consumed by the product must have an identifiable version
+and export date.
+
+Downloads and displayed results must identify the data-export version
+from which they were produced. This allows users to determine the data
+vintage behind a result and supports reproducibility when exports are
+updated.
+
+The product's data-preparation process must support committed,
+versioned app artifacts because continuous integration cannot rebuild the
+full local data pipeline from its raw inputs.
+
+### 6.2 Population and measurement rules
+
+#### DR-3. One-state-per-trial population
+
+The one-state-per-trial population required by FR-S6 must be implemented
+as a tested pipeline view before the product uses it.
+
+When a slip window is active, the view must retain one record per
+simulation trial: the record at the highest slip value within the
+selected window.
+
+When no slip window is active, the view must retain the actual final
+state of each trial.
+
+The current Tableau-only calculation for this rule must not be the sole
+definition used by the product. The pipeline implementation must be
+tested against the published data export, including the expected count
+of 3,434 trials and the absence of ties at each trial's maximum slip.
+
+#### DR-4. Measurement hygiene
+
+The data pipeline must define and document a consistent policy for:
+
+- null measurements, where the automated measurement process did not
+  produce a value;
+- small negative values of scarp height or scarp dip; and
+- low-slip records for which the research group has identified possible
+  measurement-reliability limitations.
+
+The product must apply this policy consistently in displays, statistics,
+and downloads. It must explain any exclusions or caveats in reader-facing
+language where they affect interpretation.
+
+The research group must decide whether the recovered per-scarp-type
+low-slip reliability cutoffs are:
+
+- applied automatically;
+- offered as a visible user control; or
+- documented without filtering the displayed population.
+
+The PDD must not make this decision implicitly.
+
+#### DR-5. Field-data preparation
+
+Field-event names must be normalized in the data pipeline before they
+appear in event-labeled displays or downloads.
+
+Normalization must correct known variations such as spelling variants,
+inconsistent punctuation, and invisible trailing characters. The
+pipeline must retain source-specific identifiers and provenance so that
+field measurements remain traceable to their original datasets.
+
+### 6.3 Product-data delivery constraints
+
+#### DR-6. Payload and interaction support
+
+The scenario page must use data exports small enough to support the
+performance requirements in NFR-3.
+
+The initial page load must not require downloading the existing 73 MB
+flat simulation export or another comparably large payload. The product
+must avoid a visible, prolonged loading phase on repeat visits.
+
+The PDD must define the numeric initial-payload budget. The HLDD must
+define the export format, caching approach, and any precomputation needed
+to meet that budget without preventing the combined scenario filtering
+required by the MVP.
+
+#### DR-7. Future 3D compatibility
+
+The first release uses the published 2D simulation ensemble only.
+However, new product data models and exports must not hard-code
+assumptions that would make later inclusion of the research group's
+on-hold 3D simulation arm unnecessarily difficult.
+
+Where practical, new exports must carry a source, model-family, or case
+dimension that can distinguish 2D and future 3D records without changing
+the meaning of existing fields.
+
+## 7. Content requirements
+
+Ground Rupture Explorer must use language that is useful to engineers
+without claiming more certainty, applicability, or authority than the
+research supports.
+
+### 7.1 Product language
+
+#### CR-1. Describe the product accurately
+
+The product must describe its results as conditional results from a
+computer-simulation ensemble.
+
+Preferred wording includes:
+
+- “conditional distributions of simulated surface-rupture measurements”;
+- “results from computer simulations matching the selected scenario”;
+- “modeled scarp height, deformation-zone width, and scarp dip”;
+- “screening-level information for site investigation and design review”;
+- “bracketing uncertainty in the site conditions”; and
+- “the range of results produced by matching simulations.”
+
+The product must distinguish clearly between:
+
+- **site-condition uncertainty** — uncertainty or variation in the
+  inputs selected by the user; and
+- **variation in the simulations** — the spread of measurements among
+  simulations that match those inputs.
+
+#### CR-2. Avoid unsupported claims
+
+The product must not describe itself or its results using language that
+implies probability-based hazard analysis, site-specific prediction,
+regulatory approval, or a design recommendation.
+
+Avoid terms such as:
+
+- “hazard assessment” or “fault-displacement hazard,” when describing
+  the product itself;
+- “forecast” or “quantitative forecast”;
+- “annual probability”;
+- “return period”;
+- “design displacement”;
+- “predicted displacement at your site”;
+- “safe”; or
+- language implying compliance with a regulation or standard.
+
+The product may explain these concepts when needed to distinguish its
+scope from other methods, such as probabilistic fault-displacement
+hazard analysis (PFDHA).
+
+#### CR-3. Use terms consistently
+
+The product must use the following distinctions consistently:
+
+| Use this term | Meaning |
+|---|---|
+| **Fault slip at depth** | The displacement applied to the fault in the computer simulations. |
+| **Anticipated vertical surface offset** | A user-provided scenario value that may be converted to fault slip at depth for the purpose of querying the simulations. |
+| **Simulated surface-rupture measurement** | A value measured from a computer simulation, such as scarp height, deformation-zone width, or scarp dip. |
+| **Field measurement** | A measurement recorded after a real, past earthquake. |
+| **Modeled scarp type** | A classification assigned to a simulation result; it is an outcome of the simulation, not a site input. |
+| **Principal rupture band** | The main modeled strip of ground disturbed by rupture. |
+| **Deformation-zone width** | The width of the main modeled strip of disturbed ground. It does not represent every separate deformation strand that may occur in a real earthquake. |
+
+The product must spell out **distinct element method (DEM)** at first use
+in reader-facing content. It must not assume that readers interpret DEM
+correctly, because many engineers use the abbreviation for “digital
+elevation model.”
+
+### 7.2 Disclaimers and professional-use boundaries
+
+#### CR-4. Standing disclaimer
+
+The scenario page and other relevant product surfaces must display a
+reader-visible disclaimer. The disclaimer must state that:
+
+1. the product is a research tool and may be revised;
+2. the product is provided without warranty, subject to the project's
+   stated liability limitations;
+3. the product does not provide earthquake occurrence rates, annual
+   probabilities, return periods, probability-of-exceedance results,
+   site-specific predictions, or a probabilistic fault-displacement
+   hazard analysis; and
+4. results must be interpreted by qualified professionals using
+   appropriate site investigation, applicable regulations, and relevant
+   engineering guidance.
+
+The disclaimer must be easy to find from the scenario page. A short
+version may appear near the results, provided that it links or expands
+to the complete statement.
+
+#### CR-5. Statistics and design-value language
+
+Where the product displays percentiles or other summary statistics, it
+must state that they describe the matching simulation records.
+
+The product may explain that the median is a typical result in the
+matching simulations and that the 84th percentile is a commonly used
+higher fractile in deterministic engineering practice.
+
+The product must not state or imply that any statistic is the correct,
+required, or recommended design value. Selection of a design value
+remains the responsibility of the engineer of record.
+
+#### CR-6. Field-data comparison language
+
+Where field measurements from past earthquakes are displayed alongside
+simulation results, the product must label them as:
+
+> **Analogous, not identical**
+
+The product must explain that field measurements and simulated
+measurements can represent related but non-identical quantities. It must
+also identify the relevant field-data source and preserve the distinction
+between field measurements and computer-simulation results.
+
+### 7.3 Reader guidance and supporting material
+
+#### CR-7. Glossary and plain-language support
+
+Reader-facing content must use plain language where possible and link
+specialist terms to the project glossary when they first appear.
+
+Priority glossary terms include:
+
+- scarp height;
+- deformation-zone width;
+- scarp dip;
+- fault dip;
+- fault slip;
+- sediment strength;
+- cohesion;
+- scarp type;
+- back-projection; and
+- distinct element method.
+
+Where the glossary does not yet define a necessary term, the product must
+either provide a short in-context explanation or add a glossary entry
+before relying on the term.
+
+#### CR-8. Reader-visible caveats
+
+Important scientific limitations must appear where they affect
+interpretation. They must not be relegated only to technical
+documentation or a general disclaimer.
+
+At a minimum, the product must present:
+
+- the provisional-data notice for scarp dip;
+- the explanation of the selected simulation population;
+- warnings for small, empty, or partly out-of-range result sets;
+- the limitation that deformation-zone width represents the main modeled
+  rupture zone rather than every possible distributed rupture strand;
+  and
+- the warning that a slip-to-magnitude display is a derived relabeling,
+  not an independently modeled magnitude or a site-specific estimate.
+
+#### CR-9. Citation and sourcing language
+
+Scientific claims about the simulation ensemble must cite the research
+paper. Claims about the data archive must cite the relevant DesignSafe
+deposit. Claims about the product's data preparation or software
+behavior must cite the project's own versioned documentation where
+appropriate.
+
+The product must retain the established instruction to cite the research
+paper, rather than the website alone, when users cite the scientific
+work.
+
+## 8. Non-functional requirements
+
+### 8.1 Access, hosting, and privacy
+
+#### NFR-1. Free public access
+
+Ground Rupture Explorer must be free to use. It must not require a login,
+user account, subscription, or payment.
+
+The product must not add product-specific visitor tracking. It may remain
+subject to the analytics or logging already provided by its public host.
+
+#### NFR-2. Static-site hosting
+
+The product must be deployable as part of the project's public static
+website, published from the repository's `main` branch through GitHub
+Pages.
+
+The MVP must not require server-side computation, a database service, or
+a private backend. Scenario filtering and statistics must therefore be
+implemented using published client-side data and code, within the
+performance requirements below.
+
+The product shares the existing site's URL space, navigation, build, and
+deployment process.
+
+### 8.2 Performance and supported environments
+
+#### NFR-3. Responsive interaction
+
+Changes to scenario controls must update the displayed results without a
+perceptible delay during normal use.
+
+The product must avoid large initial downloads and prolonged visible
+loading phases, especially on repeat visits. It must not require users
+to download a browser-based Python runtime or a comparably heavy
+execution environment before they can use the scenario page.
+
+The PDD must define numeric performance budgets for:
+
+- initial data payload;
+- first meaningful render; and
+- 95th-percentile time from a scenario change to updated results.
+
+The product must meet those budgets under the test conditions defined in
+the PDD.
+
+#### NFR-4. Supported environments
+
+The scenario page must work in current evergreen browsers, using a
+defined baseline of approximately the most recent two years of browser
+versions.
+
+The product is not required to support legacy browsers.
+
+It must remain usable on the project's supported mobile layouts and on a
+laptop in a field-office setting. Essential information and controls must
+not rely on hover alone.
+
+The PDD must define the exact supported-browser baseline.
+
+### 8.3 Accessibility and resilience
+
+#### NFR-5. Accessibility
+
+The product must provide:
+
+- keyboard-operable controls;
+- visible keyboard focus;
+- text alternatives for charts;
+- an accessible statistics table containing the information needed to
+  interpret each chart;
+- text identification in addition to color, as required by FR-G2; and
+- labels, units, and warnings that can be understood without relying
+  solely on visual layout.
+
+Visitors who use the site without JavaScript must receive honest fallback
+content. The page must explain that the interactive scenario explorer
+requires JavaScript and provide access to relevant non-interactive
+content, such as the paper, data archive, dashboards, glossary, and
+limitations. It must not present a blank or misleading page.
+
+### 8.4 Licensing and publication rights
+
+#### NFR-6. Licensing
+
+The product must preserve the project's existing licensing model:
+
+- application code under Apache-2.0;
+- page prose under CC BY 4.0; and
+- research-paper figures used under the publisher's applicable
+  author-sharing terms, including any restrictions on commercial use,
+  modification, and required attribution.
+
+Third-party photographs and other externally owned media must not be
+included in a public release until the required permissions are
+confirmed.
+
+### 8.5 Quality and release process
+
+#### NFR-7. Build and data-quality gates
+
+The project's strict site build must remain green. The build must fail on
+warnings or broken links according to the repository's existing quality
+rules.
+
+Reader-visible derived values must be tested against controlled
+reference results from the data pipeline, as required by DR-1.
+
+Changes to reader-visible assets must follow the project's cache-busting
+convention so that users do not receive stale files from browser or CDN
+caches after a release.
+
+The existing dashboards, citation material, navigation, and deployment
+process must remain functional after each release.
+
+#### NFR-8. Architecture decision record
+
+The technical platform decision for Ground Rupture Explorer must be
+recorded in an architecture decision record (ADR).
+
+The ADR must document whether the scenario page and related surfaces use
+a native implementation, embedded dashboards, links to existing
+dashboards, or a hybrid approach. It must also record any new toolchain
+introduced into the repository and how that decision relates to the
+project's existing architecture decisions.
+
+## 9. Dependencies and risks
+
+The following dependencies and risks could affect scope, scientific
+credibility, delivery, or release timing.
+
+### 9.1 Scientific and data dependencies
+
+| ID | Dependency or risk | Impact | Owner / decision-maker | Planned response |
+|---|---|---|---|---|
+| **R-1** | Authoritative `Convert_Scarp_Dip` correction is not yet available. | Scarp-dip results remain provisional; this affects a primary MVP output. | Harvard Structural Geology & Earth Resources Group | Show the reader-visible caveat required by FR-O4 until the corrected rule or data column is available. |
+| **R-2** | The meaning and values of the letter-coded cohesion profiles are not fully documented. | Limits the advanced sediment-strength refinement described in FR-S2. | Harvard Structural Geology & Earth Resources Group | Do not make letter-coded profiles a primary MVP control. Add them only after the group provides definitions, geometry, and approved labels. |
+| **R-3** | The appropriate treatment of unreliable low-slip measurements is unresolved. | Could affect scenario results at small displacement values. | Harvard Structural Geology & Earth Resources Group | Record the decision in the PDD: apply the per-scarp-type cutoffs automatically, expose them as a control, or document the limitation without filtering. |
+| **R-4** | The Kern County worked example has two possible field-data groups with different meanings. | The example could be misleading if it mixes or mislabels field-width data. | Harvard Structural Geology & Earth Resources Group | Before release, select the source group for the example and define any rule used to identify principal-rupture widths. |
+| **R-5** | The field measurements shown for context are analogous to, but not always identical with, the simulation measurements. | Users may overinterpret an overlay as a direct like-for-like comparison. | Product owner, with research-group review | Preserve source-specific labels, use the required “Analogous, not identical” language, and keep field measurements visually distinct from simulations. |
+| **R-6** | The simulation ensemble represents 2D models only; a 3D research arm is on hold. | A 2D-only data design could make later 3D support expensive. | Product owner and architect, with research-group guidance | Meet DR-7 by carrying a model-family or source dimension in new data exports where practical. |
+
+### 9.2 Scope and product dependencies
+
+| ID | Dependency or risk | Impact | Owner / decision-maker | Planned response |
+|---|---|---|---|---|
+| **R-7** | The proposed P1 scope may expand toward rebuilding the five existing dashboards. | MVP delivery could be delayed by work that does not address the core scenario-query gap. | Product owner | Apply the reuse-first principle in §2.3 and FR-G5. A native replacement requires a documented unmet user need. |
+| **R-8** | The research group has not approved a magnitude-to-slip conversion for use as an input. | “Anticipated earthquake magnitude” cannot be offered as a scenario input. | Harvard Structural Geology & Earth Resources Group | Limit magnitude to the existing derived display aid and warning until an approved conversion and uncertainty statement are available. |
+| **R-9** | Inverse search may be scientifically useful but could be misunderstood as site-parameter inference. | Could create an unsupported product claim or distract from the MVP. | Product owner, with research-group review | Keep inverse search as P2. If implemented, use the safeguards in FR-X2 and describe results only as simulation conditions consistent with an observation. |
+| **R-10** | The fourth output, additional uplift (Us − Ud), has not been prioritized. | Scope uncertainty in the results page. | Product owner, with research-group input | Treat it as P2 unless a decision promotes it to the MVP. |
+| **R-11** | The name and public entry point for the product are not fully settled. | May affect navigation, documentation, and user expectations. | Product owner and research group | Resolve the product name and whether the scenario page is a primary site page or a distinct app entry point before detailed design. |
+
+### 9.3 Content and media dependencies
+
+| ID | Dependency or risk | Impact | Owner / decision-maker | Planned response |
+|---|---|---|---|---|
+| **R-12** | Public permission for third-party earthquake photographs is unresolved. | The morphology page cannot publicly include those photographs until rights are confirmed. | Harvard Structural Geology & Earth Resources Group | Keep photographs out of public releases until permission is documented. Model snapshots and approved media can ship independently. |
+| **R-13** | The supplied animations do not necessarily cover all six scarp types. | The morphology page and scenario-linked animation feature may be incomplete. | Harvard Structural Geology & Earth Resources Group | Decide whether all six types are required before FR-E1 and FR-D4 ship. Do not imply complete coverage when only some animations exist. |
+| **R-14** | Animated media explaining the measurement process may not be available. | Limits the richness of FR-E2 but not the core explanation. | Harvard Structural Geology & Earth Resources Group | Ship a text-and-figure explanation first; add approved animation later if supplied. |
+| **R-15** | Approved URLs for the research group's DEM and machine-learning code repositories are pending. | The P3 contact page cannot include complete repository links. | Harvard Structural Geology & Earth Resources Group | Treat the links as optional until approved URLs are supplied. |
+
+### 9.4 Delivery and technical risks
+
+| ID | Dependency or risk | Impact | Owner / decision-maker | Planned response |
+|---|---|---|---|---|
+| **R-16** | Combined scenario filtering requires enough detail to support arbitrary filters, but the static site has a strict payload budget. | A large client-side data payload could make the product slow or unusable. | Architect / HLDD | Evaluate compact row-level exports, precomputation, caching, and hybrid data structures. Meet DR-6 and NFR-3 without weakening required filtering. |
+| **R-17** | Continuous integration cannot rebuild the full pipeline because raw inputs are local-only. | App data could become stale or untraceable if refreshes are informal. | Product owner and build-design owner | Commit versioned app-ready data artifacts and document the owner-controlled refresh process. Show export versions in the product and downloads. |
+| **R-18** | The scenario page shares a single GitHub Pages site, URL space, build, and deploy job with the existing website. | A failure in the new product could disrupt the published site or dashboards. | Product owner and architect | Preserve strict build and deployment gates; test navigation, dashboard links or embeds, citation material, and the full Pages deployment before release. |
+| **R-19** | The static-site constraint prohibits server-side computation. | Some implementation approaches may be infeasible or perform poorly. | Architect / HLDD | Record the platform decision in an ADR and validate the proposed client-side approach against the MVP performance budget early. |
+
+### 9.5 Decisions required before detailed design
+
+The following decisions must be resolved, or explicitly deferred with a
+documented interim rule, before the PDD is complete:
+
+1. Whether P1 is the agreed MVP and release target.  (Yes)
+2. The product name and site entry point.  (Name is defined, URL is 
+   deferred)
+3. The multi-dip behavior of the surface-offset-to-slip assist.
+4. The low-slip measurement-reliability policy.
+5. The scarp-dip correction status and release treatment.
+6. The Kern County field-data group and principal-width definition.
+7. The definition of dominant scarp type for animation recommendations.
+8. The scope of animation coverage required for public release.
+9. The numeric performance and payload budgets.
+
+I would defer 3-9.
