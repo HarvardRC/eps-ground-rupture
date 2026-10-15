@@ -1,15 +1,15 @@
-# Ground Rupture Explorer — product design document
+# Ground Rupture Explorer — product definition document
 
 **Status:** first draft for owner review (2026-10-15).
 
-This product design document (PDD) is the second of the project's
-staged design documents (PRD → PDD → HLDD). It has two parts:
+This product definition document (PDD) is the second of the project's
+staged documents (PRD → PDD → HLDD). It has two parts:
 
 - **Part I — Requirements.** The product requirements document (PRD),
   included by reference: `docs/app/prd.md`. The PRD defines what must
   be true. Nothing in it is restated here; each section below cites
   the requirement IDs it serves.
-- **Part II — Product design** (this document). What the product *is*:
+- **Part II — Product definition** (this document). What the product *is*:
   its pages, controls, states, words, and numbers — still renderable
   by any technology. How it is built belongs to the high-level design
   document (HLDD); chapter 11 lists what this document deliberately
@@ -36,9 +36,9 @@ named in the last column carry the detail.
 | D-3 | Multi-dip behavior of the offset-to-slip assist. | FR-S5, §9.5-3 | Owner, research-group review | Proposed | Per-dip converted windows; §3.6. |
 | D-4 | Low-slip measurement-reliability policy. | DR-4, R-3, §9.5-4 | Research group | Interim | Document, do not filter; caveat in §4.6 and §5.9. |
 | D-5 | Scarp-dip correction status at release. | FR-O4, R-1, §9.5-5 | Research group | Interim | Provisional-data notice everywhere scarp dip appears; text in §5.4. |
-| D-6 | Kern County field-data group and principal-width rule. | FR-O6, R-4, §9.5-6 | Research group | Open | Walkthrough designed with the data slot pending; §4.7. |
+| D-6 | Kern County field-data group and principal-width rule. | FR-O6, R-4, §9.5-6 | Research group | Open | Walkthrough specified with the data slot pending; §4.7. |
 | D-7 | Dominant-scarp-type rule for animation offers. | FR-D4, §9.5-7 | Product owner | Proposed | Most-frequent anchor, 10-point companion gap, 30 % floor; §6.4. |
-| D-8 | Animation coverage required for public release. | FR-E1, R-13, §9.5-8 | Research group | Open | Page design degrades per-type; §8.2. |
+| D-8 | Animation coverage required for public release. | FR-E1, R-13, §9.5-8 | Research group | Open | Page layout degrades per-type; §8.2. |
 | D-9 | Numeric performance and payload budgets. | NFR-3, DR-6, §9.5-9 | Product owner | Proposed | Budgets and test conditions; §9.1. |
 | D-10 | Liability-limitation text referenced by CR-4. | FR-G4/CR-4, §9.5-10 | Product owner | Open | Placeholder marked in §5.1; must be authored or sourced before release. |
 | D-11 | Small-result warning threshold, chart floor, and empty-result diagnosis rule. | FR-O3 | Product owner | Proposed | Warn below 30 valid; suppress chart below 10; single-condition diagnosis; §4.5. |
@@ -50,7 +50,7 @@ named in the last column carry the detail.
 | D-17 | Accessibility conformance target. | NFR-5 | Product owner | Proposed | WCAG 2.2 AA for new pages; §9.3. |
 | D-18 | Field-overlay default set and per-source analogue map. | FR-O5 | Owner, research-group review | Proposed | §4.4. |
 | D-19 | Native full-dataset exploration panel in v0.3. | FR-G5, C8 | Product owner | Proposed | None — no documented gap; the five dashboards serve C8; recorded gap process in §2.4. |
-| D-20 | Us − Ud as a fourth displayed measurement. | FR-O1, R-10 | Owner + research group | Open | Out of the MVP; the results design reserves the slot; §4.1. |
+| D-20 | Us − Ud as a fourth displayed measurement. | FR-O1, R-10 | Owner + research group | Open | Out of the MVP; the results page reserves the slot; §4.1. |
 | D-21 | Success criteria and acceptance walkthroughs. | §2.2 | Product owner | Proposed | §10. |
 
 ---
@@ -701,4 +701,4 @@ structures, caching, and refresh mechanics; the toolchain and
 repository layout; and how the §9.1 budgets are met. Owned by the
 research group: every row of the register marked Open with a
 research-group owner. Owned by the PRD: all requirements — this
-document adds design, never new obligations.
+document adds definition, never new obligations.

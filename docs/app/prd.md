@@ -466,7 +466,7 @@ P2 and P3 add useful capabilities, but they must not delay the MVP
 unless scientific or usability review identifies a dependency.
 
 Measurable success criteria and acceptance walkthroughs for the MVP
-are defined in the product design document (PDD), derived from US-1
+are defined in the product definition document (PDD), derived from US-1
 through US-3 and the requirements below.
 
 - **P1 / MVP (v0.3):** scenario inputs; distributions and statistics for
@@ -522,8 +522,8 @@ is the proposed MVP; P2 and P3 are later priorities.
 
 The mockup is the author-provided concept deck “DEM website GUI”
 (PowerPoint), kept with the project's local working materials. It is a
-design input rather than a committed specification; the PDD's page
-designs supersede it. “NZ NSHM” below is the New Zealand National
+concept input rather than a committed specification; the PDD's page
+definitions supersede it. “NZ NSHM” below is the New Zealand National
 Seismic Hazard Model web tool, a comparable public hazard-exploration
 product.
 
@@ -829,7 +829,7 @@ credible, understandable, or usable.
 In this document, **must** binds within whichever release delivers the
 requirement's capability — the priority says when that is; **should**
 marks an expected capability that may be dropped for a documented
-reason; **may** is genuinely optional. Product-design decisions
+reason; **may** is genuinely optional. Product-definition decisions
 deferred below are recorded in the PDD; technical-platform decisions
 belong to the HLDD.
 
@@ -1447,7 +1447,7 @@ and this product.
 These colors are a research-group decision, recorded in the project's
 dashboard-design conventions (ADR-0007). The product must reproduce
 them exactly. Any proposal to change a color belongs to the research
-group, not to product design or implementation.
+group, not to product definition or implementation.
 
 The canonical palette and order are:
 
@@ -2049,7 +2049,7 @@ credibility, delivery, or release timing.
 ### 9.5 Decisions required before detailed design
 
 The following decisions must be resolved, or explicitly deferred with a
-documented interim rule, before the PDD is complete. Product-design
+documented interim rule, before the PDD is complete. Product-definition
 decisions that the body of this document defers to the PDD — among
 them the small-result warning threshold, chart floor, and empty-result
 diagnosis rule (FR-O3), the chart-export provenance format (FR-D2),
