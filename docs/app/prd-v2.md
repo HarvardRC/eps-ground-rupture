@@ -828,6 +828,10 @@ The interface must label this control as a filter on the **resulting
 modeled scarp type**, not as a site condition or input known before
 rupture occurs.
 
+The six modeled scarp types are Monoclinal, Pressure Ridge, and Simple,
+together with a collapse variant of each. A collapse variant represents a
+case in which the steep scarp face has slumped or crumbled.
+
 #### FR-S8. Default and reset state
 
 All scenario controls must default to the full ensemble. An empty
@@ -973,4 +977,93 @@ The research group must decide which group the example uses and, if
 needed, define the rule for identifying a principal-width subset before
 the example is finalized.
 
+### 5.3 Downloads and citation (C4, C5, P1)
 
+Downloads must allow engineers, reviewers, and researchers to reproduce
+the displayed result, cite the underlying research, and use the selected
+simulation records in reports or offline analysis.
+
+#### FR-D1. Download matching simulation records and statistics
+
+The product must let users download:
+
+- the simulation records that match the selected scenario and population;
+  and
+- a summary-statistics table for the displayed measurements.
+
+CSV is the minimum required download format.
+
+Each download must include sufficient provenance to reproduce and cite
+the result. At a minimum, it must record:
+
+- the citation for the research paper;
+- the DesignSafe DOI or DOIs for the source data;
+- the software version;
+- the version and date of the data export used by the product;
+- the selected scenario settings;
+- the selected population;
+- the date on which the download was generated; and
+- any applicable data caveats, including the provisional scarp-dip
+  notice.
+
+The download must contain the matching **simulation records** and their
+derived statistics. It must not silently include field measurements shown
+as chart context. Field measurements remain separately sourced and cited.
+
+#### FR-D2. Export chart images
+
+The product should allow users to export chart images for use in reports
+or review material. This is a P2 capability.
+
+An exported image must include, or be accompanied by, enough information
+to identify:
+
+- the selected scenario;
+- the displayed measurement;
+- the selected population;
+- the number of matching records;
+- the software and data-export versions; and
+- the citation or a clear reference to the accompanying citation
+  information.
+
+The final format and presentation of chart provenance are defined in the
+PDD.
+
+#### FR-D3. Link to the complete data archive and paper
+
+The product must link users to:
+
+- the full raw dataset in the DesignSafe archive; and
+- the research paper.
+
+The product must not re-host the complete raw simulation archive.
+
+The page must include the project's standard citation material,
+including the established instruction to cite the research paper rather
+than the website when citing the scientific work.
+
+#### FR-D4. Offer representative scarp-type animations
+
+The download flow should offer representative animations for the dominant
+modeled scarp type or types in the selected scenario. This is a P2
+capability.
+
+Every simulation record has a scarp-type label. The dominant type is the
+most frequent scarp-type label among the simulation records that match
+the selected scenario and population.
+
+The purpose is to offer an animation that illustrates the most typical
+modeled surface-rupture form under the selected conditions. For example,
+if most matching records are classified as Pressure Ridge, the download
+flow should offer the Pressure Ridge animation rather than an undifferentiated
+menu of all scarp-type animations.
+
+When no single type is sufficiently more frequent than the others, the
+product may offer animations for more than one dominant type. The rule
+for how many types qualify as dominant, and any minimum frequency
+threshold, must be defined in the PDD.
+
+The animations must use the same scarp-type media library planned for
+the morphology education surface. The product must present an animation
+as an illustrative example of a scarp type, not as a visualization of
+the user's specific site or of an individual matching simulation record.
