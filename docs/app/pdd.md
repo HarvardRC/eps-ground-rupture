@@ -5,10 +5,78 @@
 This product definition document (PDD) is the second of the project's
 staged documents (PRD → PDD → HLDD). It has two parts:
 
+<!-- toc -->
+
+- [1. Decision register](#1-decision-register)
+- [2. Product structure and navigation](#2-product-structure-and-navigation)
+  * [2.1 Page inventory](#21-page-inventory)
+  * [2.2 Entry point (D-2, Proposed)](#22-entry-point-d-2-proposed)
+  * [2.3 User journeys](#23-user-journeys)
+  * [2.4 Future native panels (D-19)](#24-future-native-panels-d-19)
+- [3. Scenario page: inputs](#3-scenario-page-inputs)
+  * [3.1 Fault dip (FR-S1)](#31-fault-dip-fr-s1)
+  * [3.2 Sediment strength and structure (FR-S2)](#32-sediment-strength-and-structure-fr-s2)
+  * [3.3 Sediment depth (FR-S3) and density (FR-S4)](#33-sediment-depth-fr-s3-and-density-fr-s4)
+  * [3.4 Displacement window (FR-S5)](#34-displacement-window-fr-s5)
+  * [3.5 Offset-entry mode and conversion assist (FR-S5)](#35-offset-entry-mode-and-conversion-assist-fr-s5)
+  * [3.6 Multi-dip conversion rule (D-3, Proposed)](#36-multi-dip-conversion-rule-d-3-proposed)
+  * [3.7 Population, scarp filter, family view, reset](#37-population-scarp-filter-family-view-reset)
+  * [3.8 Inverse mode (FR-X2, P2)](#38-inverse-mode-fr-x2-p2)
+- [4. Scenario page: results](#4-scenario-page-results)
+  * [4.1 Measurement views (FR-O1)](#41-measurement-views-fr-o1)
+  * [4.2 Statistics table (FR-O2)](#42-statistics-table-fr-o2)
+  * [4.3 Unclassified records (D-12, Proposed)](#43-unclassified-records-d-12-proposed)
+  * [4.4 Field overlay (FR-O5, D-18 Proposed)](#44-field-overlay-fr-o5-d-18-proposed)
+  * [4.5 Small, empty, and partial results (FR-O3, D-11 Proposed)](#45-small-empty-and-partial-results-fr-o3-d-11-proposed)
+  * [4.6 Low-slip caveat (D-4, Interim)](#46-low-slip-caveat-d-4-interim)
+  * [4.7 Kern County worked example (FR-O6, D-6 Open)](#47-kern-county-worked-example-fr-o6-d-6-open)
+  * [4.8 Inverse-mode results (FR-X2, P2)](#48-inverse-mode-results-fr-x2-p2)
+- [5. Copy deck](#5-copy-deck)
+  * [5.1 Standing disclaimer (CR-4; D-10 Open)](#51-standing-disclaimer-cr-4-d-10-open)
+  * [5.2 Short disclaimer](#52-short-disclaimer)
+  * [5.3 Population explainer (FR-S6)](#53-population-explainer-fr-s6)
+  * [5.4 Scarp-dip provisional notice (FR-O4, D-5)](#54-scarp-dip-provisional-notice-fr-o4-d-5)
+  * [5.5 Statistics framing (CR-5)](#55-statistics-framing-cr-5)
+  * [5.6 Conversion assist (FR-S5, D-3)](#56-conversion-assist-fr-s5-d-3)
+  * [5.7 Field-overlay framing (CR-6, FR-O5)](#57-field-overlay-framing-cr-6-fr-o5)
+  * [5.8 Small and empty results (FR-O3, D-11)](#58-small-and-empty-results-fr-o3-d-11)
+  * [5.9 Low-slip caveat (D-4, Interim)](#59-low-slip-caveat-d-4-interim)
+  * [5.10 Inverse-search framing (FR-X2)](#510-inverse-search-framing-fr-x2)
+  * [5.11 Labels, units, and glossary links (FR-G3, CR-3, CR-7)](#511-labels-units-and-glossary-links-fr-g3-cr-3-cr-7)
+  * [5.12 Morphology descriptions (FR-E1; research-group review required)](#512-morphology-descriptions-fr-e1-research-group-review-required)
+  * [5.13 Measurement explanation (FR-E2)](#513-measurement-explanation-fr-e2)
+- [6. Downloads, citation, and provenance](#6-downloads-citation-and-provenance)
+  * [6.1 Download package (FR-D1)](#61-download-package-fr-d1)
+  * [6.2 File naming](#62-file-naming)
+  * [6.3 Chart export (FR-D2, P2; D-14 Proposed)](#63-chart-export-fr-d2-p2-d-14-proposed)
+  * [6.4 Animation offer and dominance (FR-D4, P2; D-7 Proposed)](#64-animation-offer-and-dominance-fr-d4-p2-d-7-proposed)
+- [7. Sharing and versioning](#7-sharing-and-versioning)
+  * [7.1 Shared links](#71-shared-links)
+  * [7.2 Version display and notice (D-15, Proposed)](#72-version-display-and-notice-d-15-proposed)
+- [8. Education and media surfaces](#8-education-and-media-surfaces)
+  * [8.1 Morphology page (FR-E1)](#81-morphology-page-fr-e1)
+  * [8.2 Animation library (D-8, Open)](#82-animation-library-d-8-open)
+  * [8.3 How the measurements are made (FR-E2)](#83-how-the-measurements-are-made-fr-e2)
+  * [8.4 Contact and requests (FR-E3, P3)](#84-contact-and-requests-fr-e3-p3)
+- [9. Product quality bars](#9-product-quality-bars)
+  * [9.1 Performance budgets (D-9, Proposed)](#91-performance-budgets-d-9-proposed)
+  * [9.2 Browser and mobile baseline (D-16, Proposed)](#92-browser-and-mobile-baseline-d-16-proposed)
+  * [9.3 Accessibility target (D-17, Proposed)](#93-accessibility-target-d-17-proposed)
+  * [9.4 Releases](#94-releases)
+- [10. Acceptance and success](#10-acceptance-and-success)
+  * [10.1 Success criteria](#101-success-criteria)
+  * [10.2 Golden scenarios](#102-golden-scenarios)
+  * [10.3 Acceptance walkthroughs](#103-acceptance-walkthroughs)
+- [11. Explicitly not in this document](#11-explicitly-not-in-this-document)
+
+<!-- tocstop -->
+
 - **Part I — Requirements.** The product requirements document (PRD),
   included by reference: `docs/app/prd.md`. The PRD defines what must
-  be true. Nothing in it is restated here; each section below cites
-  the requirement IDs it serves.
+  be true. The PRD remains authoritative for product requirements.
+  This PDD does not change those requirements; it defines the pages,
+  controls, states, copy, defaults, and acceptance behavior needed
+  to satisfy them.
 - **Part II — Product definition** (this document). What the product *is*:
   its pages, controls, states, words, and numbers — still renderable
   by any technology. How it is built belongs to the high-level design
@@ -37,12 +105,12 @@ named in the last column carry the detail.
 | D-4 | Low-slip measurement-reliability policy. | DR-4, R-3, §9.5-4 | Research group | Interim | Document, do not filter; caveat in §4.6 and §5.9. |
 | D-5 | Scarp-dip correction status at release. | FR-O4, R-1, §9.5-5 | Research group | Interim | Provisional-data notice everywhere scarp dip appears; text in §5.4. |
 | D-6 | Kern County field-data group and principal-width rule. | FR-O6, R-4, §9.5-6 | Research group | Open | Walkthrough specified with the data slot pending; §4.7. |
-| D-7 | Dominant-scarp-type rule for animation offers. | FR-D4, §9.5-7 | Product owner | Proposed | Most-frequent anchor, 10-point companion gap, 30 % floor; §6.4. |
+| D-7 | Dominant-scarp-type rule for animation offers. | FR-D4, §9.5-7 | Product owner | Proposed | Most-frequent anchor, 10-point companion gap, 30 % floor — all over classified records; zero-classified suppresses the offer; §6.4. |
 | D-8 | Animation coverage required for public release. | FR-E1, R-13, §9.5-8 | Research group | Open | Page layout degrades per-type; §8.2. |
 | D-9 | Numeric performance and payload budgets. | NFR-3, DR-6, §9.5-9 | Product owner | Proposed | Budgets and test conditions; §9.1. |
 | D-10 | Liability-limitation text referenced by CR-4. | FR-G4/CR-4, §9.5-10 | Product owner | Open | Placeholder marked in §5.1; must be authored or sourced before release. |
-| D-11 | Small-result warning threshold, chart floor, and empty-result diagnosis rule. | FR-O3 | Product owner | Proposed | Warn below 30 valid; suppress chart below 10; single-condition diagnosis; §4.5. |
-| D-12 | Unclassified-record display. | FR-G2 | Product owner | Proposed | Excluded from class-colored charts; counted in the table; §4.3. |
+| D-11 | Small-result warning threshold, chart floor, and empty-result diagnosis rule. | FR-O3 | Product owner | Proposed | Warn below 30 valid; suppress chart below 10; single-condition diagnosis; no-match state distinct from no-valid-measurement state; §4.5. |
+| D-12 | Unclassified records: population and display semantics. | FR-G2, FR-S7 | Product owner | Proposed | "All scarp types" applies no filter — unclassified records stay in the matching population (GS-0's 346,834); excluded from class-colored charts and class counts; §3.7, §4.3. |
 | D-13 | Scarp-family view availability and label. | FR-G2 | Product owner | Proposed | Toggle "Group collapse variants"; §3.7. |
 | D-14 | Chart-export provenance format. | FR-D2 (P2) | Product owner | Proposed | Caption strip + sidecar text; §6.3. |
 | D-15 | Shared-link version notice. | FR-X1 (P2) | Product owner | Proposed | v0.3 URLs carry no version stamp; notice rule for later; §7.2. |
@@ -52,6 +120,7 @@ named in the last column carry the detail.
 | D-19 | Native full-dataset exploration panel in v0.3. | FR-G5, C8 | Product owner | Proposed | None — no documented gap; the five dashboards serve C8; recorded gap process in §2.4. |
 | D-20 | Us − Ud as a fourth displayed measurement. | FR-O1, R-10 | Owner + research group | Open | Out of the MVP; the results page reserves the slot; §4.1. |
 | D-21 | Success criteria and acceptance walkthroughs. | §2.2 | Product owner | Proposed | §10. |
+| D-22 | Default displacement-window state. | FR-S5, FR-S6, FR-S8 | Product owner | Proposed | No active window by default ("slip: any"); GS-0 and GS-7 pin it; §3.4. |
 
 ---
 
@@ -117,7 +186,17 @@ above the results at all times (FR-G3: generated from state, never
 frozen text), e.g.:
 
 > Dip 30° or 40° · Strong (uniform) · depth 5 or 10 m · any density ·
-> slip 0–3 m · all stages in window · all scarp types · N = …
+> slip 0–3 m · all stages in window · all scarp types (no filter) ·
+> matching records: …
+
+The summary's count is the number of simulation records that match
+the active inputs under the active population — the population size,
+before any per-measurement validity split. It is deliberately not
+labeled "N": each §4.1 measurement panel shows its own
+valid-measurement count N, which can differ by measurement because a
+record can yield one valid measurement and not another; the statistics
+table (§4.2) reconciles the two for every panel (matching records =
+valid count + excluded-null count).
 
 ### 3.1 Fault dip (FR-S1)
 
@@ -128,12 +207,17 @@ only") before applying. No continuous slider.
 
 ### 3.2 Sediment strength and structure (FR-S2)
 
-One dimension, six mutually exclusive labels, presented in two visible
-groups so uniform and layered are never pooled silently:
+A two-arm multi-select control presents sediment conditions separately
+for uniform and layered cases.
 
 - **Uniform:** Weak · Moderate · Strong
 - **Layered:** Weak · Moderate · Strong · Random Heterogeneous ·
   Cohesive Top Unit · Alternating Strong–Weak
+
+The dataset uses six distinct strength-label names, but Weak, Moderate,
+and Strong can occur in both uniform and layered cases. The selectable
+state is therefore the combination of sediment arm and label, not the
+label alone.
 
 The control is a two-arm multi-select: picking "Strong" in the uniform
 arm and nothing in the layered arm selects uniform-Strong only;
@@ -153,9 +237,24 @@ multi-select over Dense, Medium, Loose (all by default).
 
 Primary mode: **Fault slip at depth (m)** — a min–max pair over the
 modeled range (approximately 0–5 m), inclusive at both ends, with the
-range and recording step (~0.05 m) stated beside the control. Entering
-only a maximum sets the window to 0–max, matching the "up to X m"
-phrasing FR-S6's default rationale cites.
+export's actual recorded range and recording step (~0.05 m) stated
+beside the control. Entering only a maximum sets the window to 0–max,
+matching the "up to X m" phrasing FR-S6's default rationale cites.
+
+**Default: no active window (D-22, Proposed).** The default and reset
+state leaves the window inactive — the scenario summary reads "slip:
+any" — and matches every recorded stage (GS-0's 346,834). A window
+becomes active only when the user sets an endpoint or enters offset
+mode (whose converted windows are always active). An entered window
+applies literally: the recorded final states sit slightly above 5 m
+(≈5.013 m in the current export), so a hand-typed 0–5 m window
+excludes them. The control's maximum selectable value is therefore
+the export's actual recorded maximum slip (≈5.0135 m currently,
+data-version dependent) — entering it captures the final states —
+while FR-S5's "approximately 0–5 m" stays as the descriptive label
+beside the control. With no active window, one state per trial uses each trial's
+actual final recorded state, never an intersection with any window
+(FR-S6).
 
 ### 3.5 Offset-entry mode and conversion assist (FR-S5)
 
@@ -165,6 +264,11 @@ In offset mode the assist panel shows, for each selected dip, the
 converted slip window, the regression used (the glossary's
 back-projection relationship), and an in-range / partly-out-of-range /
 out-of-range flag per dip. Copy in §5.6.
+
+Offset-entry mode accepts an anticipated maximum vertical surface offset.
+It represents an offset range from 0 m to the entered maximum. For
+each selected dip, the product converts both endpoints into that
+dip's fault-slip window.
 
 ### 3.6 Multi-dip conversion rule (D-3, Proposed)
 
@@ -183,21 +287,39 @@ one window applies to all dips.
 - **Population (FR-S6):** a two-option switch, "All model stages in
   the slip window" (default) / "One state per simulation trial," with
   the explainer of §5.3 one tap away. The active population is named
-  in the scenario summary, always.
+  in the scenario summary, always; with no active window (§3.4) the
+  all-stages token reads "all recorded stages", since there is no
+  window to cite. For one state per trial, the
+  per-trial state is selected from the slip window alone — or, with
+  no active window, it is the trial's final recorded state (§3.4,
+  FR-S6) — and every other condition, including the scarp-type
+  filter, then applies to the selected states.
 - **Scarp-type filter (FR-S7):** multi-select over the six types in
   canonical order and colors (FR-G2); default all; labeled "Resulting
-  scarp type (a model output, not a site input)."
+  scarp type (a model output, not a site input)." With all six
+  selected (the default), the control applies **no scarp-type
+  filter**: unclassified records stay in the matching population
+  (§4.3). Deselecting any type restricts matches to records labeled
+  with a selected type, which excludes unclassified records. The
+  summary's token for the default state is "all scarp types (no
+  filter)".
 - **Scarp-family view (D-13, Proposed):** a display toggle labeled
   **"Group collapse variants"** available wherever scarp types color a
   chart (scenario results and the morphology page). On, it folds each
   collapse variant into its base type, colors with the three base
-  hues, and retains text identification (FR-G2). Default off. The
+  hues, and retains text identification (FR-G2). Default off. On the
+  scenario page the toggle is available only while all six types are
+  selected; a partial scarp-type filter disables it ("Family grouping
+  needs all six types") so a fold can never silently mix filtered and
+  unfiltered variants. The
   remaining presentation details FR-G2 defers — fill opacity over
   white, overlay conventions — are adopted by citation from the
   dashboards' established visual-identity rules (ADR-0007 and the
   visual-identity note).
-- **Reset (FR-S8):** one action restoring every control above to the
-  full-ensemble default, including entry mode and population.
+- **Reset (FR-S8):** one action restoring every scenario control
+  (§3.1–§3.8) to the full-ensemble default — entry mode, population,
+  the window to its inactive state (§3.4) and, when inverse mode
+  ships, the inverse-mode switch.
 
 ### 3.8 Inverse mode (FR-X2, P2)
 
@@ -226,6 +348,12 @@ scarp dip — each offering:
 - **N**, the matching valid-measurement count, displayed at the panel
   head at all times.
 
+FR-O1's prominently displayed record count is served twice over: the
+always-visible scenario summary carries the matching-record count
+(§3), and the panel head's N is the valid-measurement count among
+those records — FR-O2's valid count. The two differ exactly by the
+panel's excluded-null count (§4.2).
+
 Default measurement on load: scarp height; the other panels are one
 action away (tabs or stacked sections — final arrangement is visual
 design, not a product decision). The deformation-zone-width panel
@@ -238,8 +366,9 @@ MVP).
 
 ### 4.2 Statistics table (FR-O2)
 
-One table per measurement, always rendered (it is also the accessible
-alternative required by NFR-5): valid count; excluded null count;
+One table per measurement, rendered in every state with matching
+records (§4.5; it is also the accessible alternative required by
+NFR-5): valid count; excluded null count;
 median; 16th and 84th percentiles; minimum; maximum; mean; standard
 deviation. Headed by the statistics framing line of §5.5 (statistics
 of matching simulation records, never a recommended design value).
@@ -247,11 +376,23 @@ of matching simulation records, never a recommended design value).
 ### 4.3 Unclassified records (D-12, Proposed)
 
 Records without a scarp-type label — each trial's zero-slip initial
-stage — are excluded from scarp-type-colored displays and from the
-scarp-type filter's counts. When any are inside the matching window,
-the statistics table adds one line: "Unclassified records excluded
-from scarp-type views: X (zero-slip initial stages)." If a future
-view draws them, they render neutral gray, listed last (FR-G2).
+stage, 3,434 in all — are ordinary members of the matching
+population: the default "all scarp types" selection applies no
+scarp-type filter (§3.7), so they count toward the matching records
+and are included in downloads (§6.1). The default empty scenario
+therefore matches the full 346,834-record ensemble (GS-0). In the
+archive the zero-slip stages carry no valid scarp-height,
+deformation-zone-width, or scarp-dip measurement, so they never enter
+measurement statistics; they appear only in the matching-record count
+and in each panel's excluded-null count (§4.2).
+
+They are excluded from scarp-type breakdowns, class-colored displays,
+the scarp-type filter's counts, and dominance (§6.4); deselecting any
+type excludes them from the matching population (§3.7). When any are
+in the matching population, the statistics table adds one line:
+"Unclassified records excluded from scarp-type views: X (zero-slip
+initial stages)." If a future view draws them, they render neutral
+gray, listed last (FR-G2).
 
 ### 4.4 Field overlay (FR-O5, D-18 Proposed)
 
@@ -281,22 +422,42 @@ earthquakes)." On:
 - **N < 30 valid** for a displayed measurement: a prominent warning
   (§5.8) accompanies the panel.
 - **N < 10 valid:** the distribution chart is suppressed; the
-  statistics table and the warning remain.
-- **N = 0:** the panel is replaced by the empty-state explainer. The
-  product computes the single-condition diagnostic FR-O3 requires:
-  for each selected condition in turn, it tests whether relaxing that
-  condition alone yields matches, and names those that do ("Relaxing
-  sediment depth alone would produce matches."). Diagnosing
-  combinations beyond single conditions is out of scope for v0.3 and
-  recorded here as the PDD-defined rule.
+  statistics table and the applicable §5.8 notice (the suppression
+  notice, per the precedence rule below) remain.
+- **No matching records:** the results area is replaced by the
+  empty-state explainer. The product computes the single-condition
+  diagnostic FR-O3 requires: for each selected condition in turn, it
+  tests whether relaxing that condition alone yields matches, and
+  names those that do ("Relaxing sediment depth alone would produce
+  matches."). Diagnosing combinations beyond single conditions is out
+  of scope for v0.3 and recorded here as the PDD-defined rule.
+- **Matching records, but no valid measurement** in the displayed
+  panel (reachable: a slip window topping out below the first
+  recorded nonzero stage — first stages sit at ≈0.052–0.057 m, so a
+  0–0.04 m window qualifies — matches only zero-slip stages, §4.3):
+  the
+  panel shows the no-valid-measurement notice of §5.8 — never the
+  no-match explainer, because records do match — and the statistics
+  table renders with valid count 0 and the excluded-null count.
 - **Partial coverage** (an out-of-range converted window, FR-S5): the
   per-dip flag of §3.5 plus a results-level note (§5.6); never a
   silent clip.
 
+FR-O3 also requires the matching-record count to accompany every
+small, empty, or partly covered result; the always-visible scenario
+summary's matching-record count (§3) satisfies this everywhere.
+Exactly one §5.8 result notice shows at a time: zero valid with
+matching records shows the no-valid-measurement notice; 1–9 valid
+shows the suppression notice; 10–29 valid shows the small-result
+warning.
+
 ### 4.6 Low-slip caveat (D-4, Interim)
 
-No automatic filtering. When the active window includes slip below
-0.5 m, the results carry the low-slip caveat of §5.9. The threshold
+No automatic filtering. When an active window includes slip below
+0.5 m, the results carry the low-slip caveat of §5.9. The no-window
+default state (§3.4) does not fire the caveat: §5.9's copy presupposes
+a user-chosen window, and whether the full-ensemble view needs its own
+notice joins the open R-3 questions. The threshold
 and treatment are the research group's open decision (R-3); 0.5 m is
 an interim display trigger only. It covers the Monoclinal- and
 Pressure-Ridge-family plotting start values recovered from the paper
@@ -322,8 +483,14 @@ it.
 For the matching simulations: distribution panels for fault dip,
 sediment strength arm and label, sediment density, sediment depth,
 and fault slip — the same chart grammar as §4.1, headed by the
-consistent-with-observation framing (§5.10). No map from conditions
-back to "your site" is ever drawn.
+consistent-with-observation framing (§5.10). Each condition panel's
+N is the matching-record count itself: condition values are never
+null, so the excluded-null count is always zero and the two counts of
+§3 coincide. The §4.5 tiers apply with that N. The accessible
+alternative for condition charts is a per-value count-and-share
+table — FR-O2's statistic set applies to measurements, not
+conditions. No map from conditions back to "your site" is ever
+drawn.
 
 ---
 
@@ -359,10 +526,13 @@ results (§5.2):
 
 > **All model stages in the slip window** counts every recorded stage
 > of every matching simulation inside your slip range — the
-> measurements recorded at any stage within the range. **One state per
+> measurements recorded at any stage within the range; with no slip
+> window set, it counts every recorded stage. **One state per
 > trial** counts only the last stage inside the window for each
-> simulation — the measurements at the upper end of your range. The
-> two answer different questions and are never mixed.
+> simulation — the measurements at the upper end of your range. With
+> no slip window set, one state per trial is each simulation's final
+> recorded state (approximately 5 m of slip). The two populations
+> answer different questions and are never mixed.
 
 ### 5.4 Scarp-dip provisional notice (FR-O4, D-5)
 
@@ -416,8 +586,13 @@ in its default view, overlay on or off:
 > Only {N} valid measurements match this scenario — too few for a
 > reliable distribution. Interpret with caution.
 
-> Fewer than 10 valid measurements match — showing the statistics
-> table only.
+> Fewer than 10 valid measurements match — too few for a reliable
+> distribution. Showing the statistics table only; interpret with
+> caution.
+
+> {X} simulation records match this scenario, but none has a valid
+> {measurement} value — no distribution can be computed. The records
+> appear in the excluded count of the statistics table.
 
 > No simulations match this scenario. Relaxing any one of
 > {condition(s)} alone would produce matches.
@@ -498,38 +673,52 @@ records (CSV at minimum) and the summary-statistics table (the FR-O2
 set per displayed measurement), plus a provenance text carrying, in
 this order: paper citation; DesignSafe DOIs; software version;
 data-export version and date; the full scenario settings in the
-scenario summary's wording; the population; the generation date; and
-every active caveat (scarp-dip provisional notice, low-slip caveat,
-partial-coverage note). Field measurements are never silently
-included; when the overlay is on, the download offers them as a
-separately named, separately cited file.
+scenario summary's wording; the population; the matching-record count
+and each displayed measurement's valid-measurement N; the generation
+date; and every active caveat (scarp-dip provisional notice, low-slip
+caveat, partial-coverage note).
+
+Field measurements shown in the overlay are not included in the scenario
+download. The overlay identifies the source and provides links or
+citations for obtaining the field data separately.
 
 ### 6.2 File naming
 
 Human-sortable and self-describing:
 `ground-rupture-explorer_{scenario-slug}_{population}_{data-version}_
-{date}` — the slug built from the scenario summary. Exact slug rules
-are presentation detail left to implementation.
+{date}` — the slug built from the scenario summary's settings
+portion, excluding the matching-record count and the population
+(which has its own token). Exact slug rules are presentation detail
+left to implementation.
 
 ### 6.3 Chart export (FR-D2, P2; D-14 Proposed)
 
 An exported chart image carries a rendered caption strip: product
 name; the displayed measurement and its unit; the one-line scenario
-summary; population; N; software and data-export versions; and "Cite:
-Chiama et al. (2025)" with the pointer to the full citation. The
+summary (which always names the population, §3.7); the count line
+"N = {valid} valid measurements of {matching} matching records
+({excluded} excluded null)"; software and data-export versions; and
+"Cite: Chiama et al. (2025)" with the pointer to the full citation.
+The
 export action pairs the image with the §6.1 provenance text.
 
 ### 6.4 Animation offer and dominance (FR-D4, P2; D-7 Proposed)
 
 Dominance is computed over classified matching records only (PRD
-FR-D4). Rule: the **dominant type** is the most frequent scarp type
-among classified matching records; the offer lists it together with
-any other type whose share is within 10 percentage points of it (ties
-included), up to three types in descending share, each with its share
-shown ("Pressure Ridge — 72 % of matching records"). When the most
-frequent type's share is below 30 %, or fewer than 20 classified
-records match, no type is treated as dominant and the offer shows the
-full six-type menu instead. Animations come from the morphology
+FR-D4): every share, including the 30 % floor, uses the
+classified-record denominator, and the reader-facing copy names it
+("Pressure Ridge — 72 % of classified matching records"). Rule: the
+**dominant type** is the most frequent scarp type among classified
+matching records; the offer lists it together with any other type
+whose share is within 10 percentage points of it (ties included), up
+to three types in descending share; a tie at the three-type cap is
+resolved by canonical order (FR-G2). When the most frequent type's
+share is below 30 %, or fewer than 20 classified records match, no
+type is treated as dominant and the offer shows the full six-type
+menu instead; when zero classified records match, the offer is
+suppressed entirely (no scarp formed in the matching records).
+Dominance and offers ignore the family-view toggle and always name
+the six types (§3.7). Animations come from the morphology
 library (§8.2) and are introduced with: "An illustrative example of
 this scarp type — not a visualization of your scenario."
 
@@ -628,8 +817,10 @@ usable at 360 px width, no hover-dependent essentials (NFR-4).
 
 WCAG 2.2 AA is the conformance target for the product's new pages;
 the NFR-5 list is the project-specific floor on top of it. The
-statistics table is the canonical text alternative for every chart;
-chart colors follow FR-G2, including its never-color-alone rule.
+statistics table is the canonical text alternative for every
+measurement chart; inverse-mode condition charts use §4.8's per-value
+count-and-share table. Chart colors follow FR-G2, including its
+never-color-alone rule.
 
 ### 9.4 Releases
 
@@ -650,8 +841,9 @@ Serves: §2.2 (deferral), US-1–US-5, DR-1, NFR-7.
 - **SC-1 (core workflow):** a practicing engineer new to the product
   completes US-1 end to end — scenario, conversion, results,
   download — without assistance or documentation.
-- **SC-2 (reproducibility):** a reviewer reproduces N and every FR-O2
-  statistic of a shared scenario exactly, from the download alone.
+- **SC-2 (download reproducibility):** A reviewer can use a downloaded
+  result package to identify the scenario settings, data-export version,
+  matching-record count, and every FR-O2 statistic used in the result.
 - **SC-3 (correctness):** displayed statistics equal the pipeline's
   reference results for every golden scenario (§10.2), exactly.
 - **SC-4 (performance):** the §9.1 budgets hold under the stated
@@ -668,6 +860,13 @@ Serves: §2.2 (deferral), US-1–US-5, DR-1, NFR-7.
 - **SC-7 (scientific sign-off):** the research group has approved the
   reader-facing texts of §5 (CR-10).
 
+> The pipeline's statistical definitions and full-precision reference
+values are authoritative. Product tests must reproduce reference values
+within a defined numerical tolerance appropriate to the calculation.
+Values shown to users are rounded consistently to the PDD-defined
+display precision; displayed values must match the correspondingly
+rounded pipeline reference values.
+
 ### 10.2 Golden scenarios
 
 Acceptance anchors, each pinned in the data pipeline's reference
@@ -676,12 +875,14 @@ numbers.
 
 | ID | Scenario | What it proves |
 |---|---|---|
-| GS-0 | Empty scenario, default population | Full-ensemble counts: 346,834 records; per-measurement valid and excluded-null counts match the reference. |
+| GS-0 | Empty scenario (no active slip window), default population | Full-ensemble counts: 346,834 matching records including the 3,434 unclassified zero-slip stages ("all scarp types" = no filter, §4.3); per-measurement valid and excluded-null counts match the reference. |
 | GS-1 | US-1: dips {30°, 40°}, Strong (uniform and layered), offset mode 3 m | Per-dip conversion (D-3): 30° flagged beyond the modeled range, 40° in range; counts and statistics match the reference. |
 | GS-2 | Moderate strength (both arms), dip 20°, depth 3 m, Dense, one state per trial | Warning tier: 18 valid measurements — the small-result warning fires while the chart still renders. |
 | GS-3 | Kern preset (after D-6) | The worked example reproduces the research group's chosen field group and filter. |
 | GS-4 | Alternating Strong–Weak + depth 3 m | Empty result: the diagnostic names both sediment strength and sediment depth — relaxing either alone yields matches. |
 | GS-5 | Alternating Strong–Weak, one state per trial | Suppression tier: 9 valid measurements — the chart is suppressed and the statistics table remains. |
+| GS-6 | Slip window 0–0.04 m, all other controls default | Count-vs-validity split (§4.5): 3,434 matching records — the zero-slip stages — with zero valid measurements in every panel; the no-valid-measurement notice appears, never the no-match diagnostic; statistics tables show valid 0, excluded-null 3,434. |
+| GS-7 | One state per simulation trial, no active slip window | FR-S6's no-window rule: 3,434 matching records — each trial's actual final recorded state (slip ≈ 5.013 m), never an intersection with any window; per-measurement valid counts match the reference. |
 
 ### 10.3 Acceptance walkthroughs
 
