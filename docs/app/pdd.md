@@ -121,6 +121,7 @@ named in the last column carry the detail.
 | D-20 | Us − Ud as a fourth displayed measurement. | FR-O1, R-10 | Owner + research group | Open | Out of the MVP; the results page reserves the slot; §4.1. |
 | D-21 | Success criteria and acceptance walkthroughs. | §2.2 | Product owner | Proposed | §10. |
 | D-22 | Default displacement-window state. | FR-S5, FR-S6, FR-S8 | Product owner | Proposed | No active window by default ("slip: any"); GS-0 and GS-7 pin it; §3.4. |
+| D-23 | Reader-facing display precision per quantity. | FR-O2, §10.1 note | Product owner | Proposed | Scarp height and slip 0.01 m; width 0.1 m; scarp dip 1° (D-5 provisionality); counts exact; shares whole percent; §4.2. |
 
 ---
 
@@ -370,8 +371,13 @@ One table per measurement, rendered in every state with matching
 records (§4.5; it is also the accessible alternative required by
 NFR-5): valid count; excluded null count;
 median; 16th and 84th percentiles; minimum; maximum; mean; standard
-deviation. Headed by the statistics framing line of §5.5 (statistics
-of matching simulation records, never a recommended design value).
+deviation. Displayed values round to the D-23 precisions — scarp
+height and fault slip 0.01 m; deformation-zone width 0.1 m; scarp
+dip 1° (provisional data, D-5); counts exact; shares whole
+percentages — and the §10.1 note binds each displayed value to the
+correspondingly rounded pipeline reference. Headed by the statistics
+framing line of §5.5 (statistics of matching simulation records,
+never a recommended design value).
 
 ### 4.3 Unclassified records (D-12, Proposed)
 
@@ -895,7 +901,7 @@ result" paragraph plus the relevant SC rows.
 
 ## 11. Explicitly not in this document
 
-Owned by the HLDD and its ADR (PRD §2.3, FR-G5, DR-1/DR-6, NFR-2,
+Owned by the HLDD and its ADRs (PRD §2.3, FR-G5, DR-1/DR-6, NFR-2,
 NFR-8): the technical platform; per-surface link/embed/native/hybrid
 implementation choices; data formats, row-level vs precomputed
 structures, caching, and refresh mechanics; the toolchain and

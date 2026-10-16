@@ -5,7 +5,9 @@ today**: what we chose, what we rejected, and why. Format: lightweight MADR
 (Context → Decision → Alternatives → Consequences).
 
 ADRs are immutable going forward — a changed decision gets a new ADR and a
-`Superseded by ADR-NNNN` note on the old one.
+`Superseded by ADR-NNNN` note on the old one. An ADR may enter the index as
+**Proposed** while under review and may be amended until it is accepted;
+immutability starts at **Accepted**.
 
 **History note.** The original set (ADR-0001…0014, May–June 2026) described
 a SQL-engine-first architecture that the pivot to Tableau Public made
@@ -27,11 +29,17 @@ old number to its fate. The originals remain in git history.
 | [0007](0007-dashboard-design-conventions.md)          | Dashboard design conventions (palette, web variants, interactivity) | Accepted |
 | [0008](0008-mkdocs-material-companion-site.md)        | MkDocs Material for the companion site       | Accepted |
 | [0009](0009-github-pages-hosting.md)                  | GitHub Pages (via Actions) as site hosting   | Accepted |
+| [0010](0010-native-client-side-scenario-app.md)       | Ground Rupture Explorer: native client-side app; surface map | Proposed |
+| [0011](0011-webapp-toolchain.md)                      | Webapp toolchain — TypeScript + esbuild, no framework, SVG charts | Proposed |
+| [0012](0012-product-data-exports.md)                  | Purpose-built product exports feed the scenario app | Proposed |
+| [0013](0013-row-level-scenario-artifact.md)           | Row-level, trial-major columnar scenario artifact | Proposed |
+| [0014](0014-committed-content-hashed-artifacts.md)    | Product artifacts committed, content-hashed, pre-compressed | Proposed |
+| [0015](0015-golden-scenario-parity.md)                | Golden-scenario references; pipeline↔client parity harness | Proposed |
 | [—](dead-ends.md)                                     | **Dead ends** — the retired 2026-05/06 architecture, as one story | Retrospective |
 
 ## Adding a new ADR
 
-1. Pick the next number (`0010` is next).
+1. Pick the next number (`0016` is next).
 2. Filename: `NNNN-short-kebab-title.md`.
 3. Copy the structure of an existing ADR (or use MADR's template).
 4. Add a row to this index.
