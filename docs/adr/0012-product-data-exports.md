@@ -10,7 +10,8 @@ DR-1 names the pipeline the single computational source of truth and
 rules out `dem.csv` as the product's primary data source — the 73 MB
 Tableau-compatibility export whose shape serves the workbook lane
 ([ADR-0006](0006-csv-extracts-for-tableau-public.md)), not a browser —
-and DR-6 forbids making readers download it.
+and DR-6 rules out an initial page load that requires downloading it
+or any comparably large payload.
 The product needs compact, product-shaped, versioned data; the field
 compilations need the PDD §4.4 analogue mapping and DR-5 name
 normalization; media need per-item provenance and a release gate

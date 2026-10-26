@@ -14,8 +14,9 @@ drift unless something pins them together, and DR-1 says the pipeline
 is the single computational source of truth. SC-3 sets the bar:
 displayed statistics equal the correspondingly rounded pipeline
 references exactly, and the parity tests compare full-precision
-values within the PDD §10.1 tolerance. CI cannot run the pipeline
-(R-17), so the references must themselves be committed artifacts.
+values within the per-calculation tolerance that PDD §10.1 requires.
+CI cannot run the pipeline (R-17), so the references must themselves
+be committed artifacts.
 
 ## Decision
 
@@ -37,8 +38,9 @@ values within the PDD §10.1 tolerance. CI cannot run the pipeline
 - Three consumers: pipeline pytest contracts pin the product views;
   the **webapp parity job** (in `tests.yml`) replays every golden
   scenario through the client query engine, headlessly in Node against
-  the committed artifacts, and compares within the tolerance; and the
-  acceptance walkthroughs (PDD §10.3) read the same numbers.
+  the committed artifacts, and compares full-precision values within
+  the tolerance and values rounded to display precision exactly; and
+  the acceptance walkthroughs (PDD §10.3) read the same numbers.
 - The DR-3 one-state view (the last stage inside the window, per
   trial) is implemented and tested **pipeline-first** — 3,434 trials,
   no max-slip ties, both verified against the current export — so the

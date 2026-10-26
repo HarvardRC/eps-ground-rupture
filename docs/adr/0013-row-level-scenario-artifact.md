@@ -16,7 +16,10 @@ that do not compose from partial aggregates. The ensemble's geometry
 is verified and regular: 3,434 trials × exactly 101 recorded stages =
 346,834 records, with every site condition constant within a trial.
 The budgets: data payload ≤ 4 MB compressed; scenario change ≤ 200 ms
-at the 95th percentile (PDD §9.1).
+at the 95th percentile (PDD §9.1). Keeping enough record-level detail
+for arbitrary filters within the 4 MB payload budget is the tension R-16
+names, and DR-6 requires the export format to meet that budget without
+preventing the combined filtering.
 
 ## Decision
 
@@ -83,6 +86,6 @@ full-ensemble size.
 
 - `docs/app/hldd.md` §5.2–§5.3, §7.1 — the design detail and the
   measured sizes
-- `docs/app/pdd.md` §3 (two-count model), §10.1 (tolerance note)
+- `docs/app/pdd.md` §3 (two-count model), §10.1 (closing note on tolerance)
 - `subprojects/python/src/eps_ground_rupture/config.py`
   (`SCARP_CLASS_PALETTE`)

@@ -16,7 +16,7 @@ only, and the PRD records a backend as infeasible for this host
 (NFR-2, R-19). NFR-3 rules out a browser-side Python runtime or any
 comparably heavy environment. FR-G5 requires a per-surface
 implementation decision — link, embed, native, or hybrid — recorded
-in the HLD and an ADR, with the published dashboards reused unless a
+in the HLDD and an ADR, with the published dashboards reused unless a
 documented gap names what they cannot do. NFR-8 requires this platform
 decision, including the per-surface choice, to be recorded in an ADR:
 this is that record, and [ADR-0011](0011-webapp-toolchain.md) records
