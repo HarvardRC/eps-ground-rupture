@@ -7,7 +7,7 @@
 ## Context
 
 DR-1 names the pipeline the single computational source of truth and
-rules out `dem.csv` as the product's data source — the 73 MB
+rules out `dem.csv` as the product's primary data source — the 73 MB
 Tableau-compatibility export whose shape serves the workbook lane
 ([ADR-0006](0006-csv-extracts-for-tableau-public.md)), not a browser —
 and DR-6 forbids making readers download it.

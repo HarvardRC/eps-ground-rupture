@@ -17,7 +17,10 @@ only, and the PRD records a backend as infeasible for this host
 comparably heavy environment. FR-G5 requires a per-surface
 implementation decision — link, embed, native, or hybrid — recorded
 in the HLD and an ADR, with the published dashboards reused unless a
-documented gap names what they cannot do.
+documented gap names what they cannot do. NFR-8 requires this platform
+decision, including the per-surface choice, to be recorded in an ADR:
+this is that record, and [ADR-0011](0011-webapp-toolchain.md) records
+the new toolchain.
 
 ## Decision
 
@@ -88,7 +91,8 @@ Two policies ride with the platform choice:
 ## References
 
 - `docs/app/hldd.md` §4.1–§4.2, §6, §6.1 — the design detail
-- `docs/app/prd.md` §1.4–1.5, §9.4 (R-19); `docs/app/pdd.md` §7.1
+- `docs/app/prd.md` §1.4–1.5, §8.5 (NFR-8), §9.4 (R-19);
+  `docs/app/pdd.md` §7.1
 - [ADR-0004](0004-tableau-as-the-dashboard-platform.md),
   [ADR-0005](0005-tableau-public-as-the-publication-channel.md) — the
   dashboards this product links to rather than replaces

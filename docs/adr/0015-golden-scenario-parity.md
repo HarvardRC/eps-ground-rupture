@@ -27,6 +27,13 @@ values within the PDD §10.1 tolerance. CI cannot run the pipeline
   precision, and writes them as a **versioned reference artifact**
   paired to the scenario artifact
   ([ADR-0012](0012-product-data-exports.md)).
+- **Exported data and calculations are verified separately**, so a
+  failure points to its cause: the export task decodes the artifact it
+  has just written and compares every record and value with the
+  pipeline view it came from before writing the manifest, whose
+  checksums CI then verifies against the committed files
+  ([ADR-0014](0014-committed-content-hashed-artifacts.md)); the golden
+  scenarios verify the calculations.
 - Three consumers: pipeline pytest contracts pin the product views;
   the **webapp parity job** (in `tests.yml`) replays every golden
   scenario through the client query engine, headlessly in Node against
