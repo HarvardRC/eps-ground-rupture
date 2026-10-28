@@ -32,11 +32,11 @@ task that writes **five product artifacts**:
 | Field export | One row per field measurement: source compilation, event, the measurement with its source-specific analogue kind (PDD §4.4), units, the sub-50 m criterion flag, labeled-event-set membership, provenance |
 | Regression export | Per-dip conversion slopes with provenance ([ADR-0015](0015-golden-scenario-parity.md)) |
 | Reference results | Golden-scenario numbers at full precision (ADR-0015) |
-| Media index | Animation/photo inventory: scarp type illustrated, attribution, permission status, caption |
+| Media index (P2) | Animation/photo inventory: scarp type illustrated, attribution, permission status, caption |
 
 - The field export is normalized **in the pipeline** (the sources are
-  already in the export lane: `fdhi_cleaned.csv`, `kern_combined.csv`,
-  `sure_enriched.csv`, `historic_events.csv`); the Kern data group and
+  views already in the dashboard lane: `fdhi_cleaned`, `kern_combined`,
+  `sure_enriched`, `historic_events`); the Kern data group and
   principal-width questions stay open with the research group (PDD
   D-6), and the export carries the slot either way.
 - The media index makes availability and permissions **data
@@ -45,7 +45,9 @@ task that writes **five product artifacts**:
   working tree during development, excluded from release until
   permissions are documented) both read from it. The research group
   supplies the animations and photographs (PDD D-8); the owner gates
-  the release.
+  the release. The index is a **P2 export**: every surface that reads
+  it (the morphology and measurement pages, the animation offers) is
+  P2, so the MVP (v0.3) ships the other four artifacts.
 - A data refresh is a product release (PDD §9.4): the export task
   writes the artifacts, manifest, and references together so they can
   never diverge ([ADR-0014](0014-committed-content-hashed-artifacts.md)).
@@ -68,7 +70,8 @@ task that writes **five product artifacts**:
 
 - The pipeline grows product views and tests exactly as the dashboard
   lane did; the `egr-csv` pattern extends rather than changes.
-- Five committed artifacts, delivered per ADR-0014.
+- Five committed artifacts (four from the MVP, the media index from
+  P2), delivered and licensed per ADR-0014.
 - The app never parses research-shaped data: every product file is
   purpose-shaped and small, except the scenario artifact, which is
   purpose-shaped and measured (ADR-0013).

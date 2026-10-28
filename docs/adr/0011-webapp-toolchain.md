@@ -35,16 +35,24 @@ A new Gradle subproject, **`subprojects/webapp`**:
 - **Charts are hand-rolled SVG.** Exactly two chart kinds exist —
   histogram and empirical cumulative curve (PDD §4.1) — plus overlay
   marks.
-- **Build output** (one JS bundle, one stylesheet) is emitted into the
-  site tree with content-hashed filenames
-  ([ADR-0014](0014-committed-content-hashed-artifacts.md)) and loads
-  only on the scenario page; the site's `extra_javascript` pattern for
-  site-wide scripts is untouched, and the scenario page does not load
-  the site-wide Tableau Embedding API module it has no use for (the
+- **Build output** (one JS bundle, one stylesheet) is **built in CI,
+  never committed**: a webapp job in `.github/workflows/mkdocs.yml`,
+  separate from the MkDocs job, runs the Gradle-wrapped esbuild build
+  and hands the result to the MkDocs job, which places it in the site
+  tree with content-hashed filenames
+  ([ADR-0014](0014-committed-content-hashed-artifacts.md)) before the
+  strict build. Locally the same Gradle task writes it there for
+  `mkdocs serve`, into a gitignored path. It loads only on the
+  scenario page; the site's `extra_javascript` pattern for site-wide
+  scripts is untouched, and the scenario page does not load the
+  site-wide Tableau Embedding API module it has no use for (the
   exclusion mechanics are DDD material).
 - `.github/workflows/mkdocs.yml` path filters widen to
-  `subprojects/webapp/**`; `tests.yml` gains the webapp test job,
-  including the parity harness (ADR-0015).
+  `subprojects/webapp/**`. `tests.yml` gains the webapp test job,
+  including the parity harness (ADR-0015); its path filters keep
+  `subprojects/python/**` and add `subprojects/webapp/**` and the
+  committed data directory, so a data refresh or a webapp-only change
+  runs the checksum check and the parity harness.
 
 ## Alternatives considered
 
@@ -61,12 +69,22 @@ A new Gradle subproject, **`subprojects/webapp`**:
 - **A separate repository** — rejected with the platform choice
   ([ADR-0010](0010-native-client-side-scenario-app.md)); the
   multi-project build exists for exactly this case (ADR-0001).
+- **Committing the built bundle, kept current by a pre-commit hook** —
+  the fallback if a CI build proved impractical. It puts generated code
+  into review diffs and history, and a bundle built on a contributor's
+  machine can drift from its source; building in CI from committed
+  source keeps one source of truth.
 
 ## Consequences
 
 - One more pinned toolchain (Node + esbuild) to maintain,
   Gradle-wrapped like the others — the new-toolchain record NFR-8
-  asks for.
+  asks for. The deploy workflow gains a Node setup and a build job, so
+  no site deploy can happen without a successful bundle build. That job
+  extends the deploy workflow of
+  [ADR-0009](0009-github-pages-hosting.md), and the site build gains a
+  second toolchain (Node) beside the Poetry docs group of
+  [ADR-0008](0008-mkdocs-material-companion-site.md).
 - Contributors to the webapp need TypeScript; the pipeline remains
   Python-only.
 - Hand-rolled SVG keeps the bundle small and the accessibility

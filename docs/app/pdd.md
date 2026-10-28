@@ -107,13 +107,13 @@ named in the last column carry the detail.
 | D-6 | Kern County field-data group and principal-width rule. | FR-O6, R-4, §9.5-6 | Research group | Open | Walkthrough specified with the data slot pending; §4.7. |
 | D-7 | Dominant-scarp-type rule for animation offers. | FR-D4, §9.5-7 | Product owner | Proposed | Most-frequent anchor, 10-point companion gap, 30 % floor — all over classified records; zero-classified suppresses the offer; §6.4. |
 | D-8 | Animation coverage required for public release. | FR-E1, R-13, §9.5-8 | Research group | Open | Page layout degrades per-type; §8.2. |
-| D-9 | Numeric performance and payload budgets. | NFR-3, DR-6, §9.5-9 | Product owner | Proposed | Budgets and test conditions; §9.1. |
+| D-9 | Numeric performance and payload budgets. | NFR-3, DR-6, §9.5-9 | Product owner | Proposed | Budgets, test conditions, and the first-meaningful-render end point; §9.1. |
 | D-10 | Liability-limitation text referenced by CR-4. | FR-G4/CR-4, §9.5-10 | Product owner | Open | Placeholder marked in §5.1; must be authored or sourced before release. |
 | D-11 | Small-result warning threshold, chart floor, and empty-result diagnosis rule. | FR-O3 | Product owner | Proposed | Warn below 30 valid; suppress chart below 10; single-condition diagnosis; no-match state distinct from no-valid-measurement state; §4.5. |
 | D-12 | Unclassified records: population and display semantics. | FR-G2, FR-S7 | Product owner | Proposed | "All scarp types" applies no filter — unclassified records stay in the matching population (GS-0's 346,834); excluded from class-colored charts and class counts; §3.7, §4.3. |
 | D-13 | Scarp-family view availability and label. | FR-G2 | Product owner | Proposed | Toggle "Group collapse variants"; §3.7. |
 | D-14 | Chart-export provenance format. | FR-D2 (P2) | Product owner | Proposed | Caption strip + sidecar text; §6.3. |
-| D-15 | Shared-link version notice. | FR-X1 (P2) | Product owner | Proposed | v0.3 URLs carry no version stamp; notice rule for later; §7.2. |
+| D-15 | Shared-link version notice. | FR-X1 (P2) | Product owner | Proposed | URLs carry no version stamp when links first ship (P2); notice rule for later; §7.2. |
 | D-16 | Browser and mobile baseline. | NFR-4 | Product owner | Proposed | Evergreen 24-month window; 360 px floor; §9.2. |
 | D-17 | Accessibility conformance target. | NFR-5 | Product owner | Proposed | WCAG 2.2 AA for new pages; §9.3. |
 | D-18 | Field-overlay default set and per-source analogue map. | FR-O5 | Owner, research-group review | Proposed | §4.4. |
@@ -161,7 +161,7 @@ existing site.
 |---|---|
 | US-1 dam scenario | Scenario page → inputs (§3) → conversion assist (§3.6) → results (§4) → download (§6.1) |
 | US-2 pipeline width | Scenario page → inputs → deformation-zone width view (§4.1) → field overlay (§4.4) |
-| US-3 review | Shared link or manual re-entry (§7) → results → download with provenance (§6.1–6.2) |
+| US-3 review | Manual re-entry of the stated scenario (§3), or from P2 a shared link (§7) → results → download with provenance (§6.1–6.2) |
 | US-4 inverse search (P2) | Scenario page, inverse mode (§3.8) → condition distributions (§4.8) |
 | US-5 teaching (P2) | Morphology page (§8.1) → animations (§8.2) → scenario page preset links |
 
@@ -746,13 +746,13 @@ results with the currently published software and data versions.
 
 ### 7.2 Version display and notice (D-15, Proposed)
 
-v0.3 links carry no version stamp. The page footer and every download
-always name the current software version and data-export version, so
-two people comparing a shared link across releases can see why
-results differ. If a later release adds a version stamp to links, a
-notice appears when the stamp differs from the current versions
-("Created under software X / data Y; showing current Z / W.");
-nothing is recomputed against old versions.
+Links carry no version stamp when they first ship (P2). The page
+footer and every download always name the current software version
+and data-export version, so two people comparing a shared link across
+releases can see why results differ. If a later release adds a
+version stamp to links, a notice appears when the stamp differs from
+the current versions ("Created under software X / data Y; showing
+current Z / W."); nothing is recomputed against old versions.
 
 ---
 
@@ -807,6 +807,15 @@ Reference conditions: a mid-range laptop (2020 or later), cold cache,
 | First meaningful render (scenario page, cold cache) | ≤ 2.0 s |
 | Repeat visit render (warm cache) | ≤ 1.0 s |
 | Scenario change → updated results, 95th percentile | ≤ 200 ms |
+
+**First meaningful render** is the point at which the results for the
+scenario the page opens with are on screen: for the measurement shown
+on load, its statistics table and its chart in the view the panel
+opens with (§4.1–§4.2). Where §4.5 suppresses the chart or finds no
+valid measurement, its notice stands in for the chart beside the
+table; with no matching records, the empty-state explainer replaces
+both. A heading, the controls, or a loading indicator alone does not
+count. The repeat-visit budget uses the same end point.
 
 The budgets bind the product; how they are met (format, caching,
 precomputation) is the HLDD's problem (DR-6). No browser-based Python

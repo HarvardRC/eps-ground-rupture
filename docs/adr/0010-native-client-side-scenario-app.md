@@ -50,7 +50,8 @@ product surface exactly one home, with nothing duplicated:
 Two policies ride with the platform choice:
 
 - **Shared-link state lives in URL query parameters** (the PDD §7.1
-  restore list; versionless in v0.3 per PDD D-15). With no server
+  restore list; a P2 capability, versionless when links first ship per
+  PDD D-15). With no server
   there is nowhere else durable; results are always recomputed from
   state, never stored in the URL (FR-X1).
 - **Failure honesty (NFR-5):** the page's Markdown body carries real

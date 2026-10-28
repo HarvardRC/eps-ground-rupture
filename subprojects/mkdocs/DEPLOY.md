@@ -130,3 +130,11 @@ the policy for her own material rather than for the photographs inside it.
 If a source objects, Figures 1 and 2 can be removed without touching
 anything else — the other four carry the explanatory weight, and Figure 5 is
 the one the site genuinely depends on.
+
+**Superseded (2026-10-12): Figures 1 and 2 are withheld.** While the
+research team confirms the terms for the third-party photographs, the
+figures page (`docs/figures.md`) describes both figures but no longer
+reproduces them; their `#fig-1` and `#fig-2` anchors stay live, so
+cross-links still resolve. Figures 3, 4, 5 and 7 are unaffected. How to
+restore the two figures is recorded in `notes/Roadmap.md` under
+*Decisions made*.
