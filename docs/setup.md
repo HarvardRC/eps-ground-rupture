@@ -346,8 +346,10 @@ That work belongs in Tableau, so it has deliberately not been ported.
 - **Kern County has no cleaning routine.** `io.load_kern_combined` is a
   thin `read_csv`; the derived work happens downstream in the
   `kern_combined_geo` and `kern_inferred_slip` views.
-- **All five dashboards are built** (Dashboard 5, 2026-08-15) and the six
-  paper illustrations are on the site (2026-08-26). What is left is the
+- **All five dashboards are built** (Dashboard 5, 2026-08-15) and the
+  paper illustrations are on the site (2026-08-26; Figs. 1–2 withheld
+  2026-10-12 while the photo terms are confirmed — `notes/Roadmap.md`,
+  "Decisions made"). What is left is the
   Dashboard 5 Fig-8 rebuild (the `dem_slip_bin_stats` view exists; the
   Tableau sheet still shows the pooled per-class summary) and the polish
   in `notes/design-review-2026-08-16.md`. `notes/Roadmap.md` has the

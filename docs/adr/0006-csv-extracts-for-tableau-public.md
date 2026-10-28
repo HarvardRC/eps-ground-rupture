@@ -19,6 +19,16 @@ weeks earlier. See
 [Dead ends](dead-ends.md#the-premise-breaks-june) for the irony,
 gracefully absorbed.)
 
+> **Amendment 2026-10-27.** The exports stay uncommitted build
+> artifacts, but the author review of 2026-08-20 decided the plotting
+> CSVs also ship with each GitHub release, attached as release assets,
+> so the data has an addressable, citable home beside Tableau. Details,
+> and the open Zenodo-deposit mechanic, in `notes/Roadmap.md` under
+> "Decisions made" ("Release data"). The webapp's committed exports are
+> a separate lane
+> ([ADR-0012](0012-product-data-exports.md),
+> [ADR-0014](0014-committed-content-hashed-artifacts.md)).
+
 ## Decision
 
 **`egr-csv` exports every published table and view from DuckDB to

@@ -23,7 +23,7 @@ families plus non-chart illustrations. Summary:
 | 4. Mean ± σ summary | Typical values and spreads per scarp class at a glance? | ✅ built (Dashboard 5) |
 | 5. Per-event boxplots | How variable are field measurements within each event? | ✅ built (Dashboard 3) |
 | 6. Regression + inference | What slip would produce an observed displacement? | ✅ built (Dashboard 4) |
-| Illustrations (static images) | Context: photos, schematics, model snapshots | ✅ on the site 2026-08-26 (Figs. 1–5, 7; build order #6) |
+| Illustrations (static images) | Context: photos, schematics, model snapshots | ✅ on the site 2026-08-26; Figs. 1–2 withheld 2026-10-12 (build order #6) |
 
 (The earlier A–E "theme" taxonomy is superseded by the families; the
 mapping is at the bottom of `chart-families.md`.)
@@ -146,12 +146,14 @@ mapping is at the bottom of `chart-families.md`.)
      Distributions page. Figure 8 itself (and Fig. 15, whose Kern needles
      D5 follows) sit in the local `legacy/` folder as the visual check.
 6. ~~**Static-image embedding**~~ — **done 2026-08-26**: the six
-   illustrations are on `figures.md` with the Sage-form citation and a
+   illustrations went on `figures.md` with the Sage-form citation and a
    figures-specific reuse notice, linked from the crosswalk on `paper.md`;
    the site's open-access framing was narrowed to the typeset article.
-   Open remainder: confirm the third-party photographs inside Figs. 1–2
-   with Kristen (`DEPLOY.md`); Andreas's light-adaptation idea stays
-   deferred. The plan as it stood on 2026-08-20 is kept below.
+   **Amended 2026-10-12**: Figures 1–2 embed third-party photographs and
+   are withheld while the author team confirms the terms — the page
+   describes them and keeps their anchors; Figs. 3–5, 7 stay up. State
+   and restore recipe under "Decisions made". Andreas's light-adaptation
+   idea stays deferred. The plan as it stood on 2026-08-20 is kept below.
    (Was lowest priority while rights were unknown.)
    - **Rights: granted, with conditions.** Kristen established from Sage's
      Green Open Access policy that figures from the **Accepted Manuscript**
@@ -289,10 +291,11 @@ belongs in the same plan.
   source for anything currently on the site. Kristen, 2026-08-20: "maybe
   also list the SRL paper as additional information for now until we decide
   whether or not to post the 3D Case 1–3 models."
-- **DOI for the code and site — approved in principle, route not final.**
+- **DOI for the code and site — approved in principle; route decided
+  2026-10-12: Zenodo, fed by a GitHub release (see "Decisions made").**
   Kristen: "I think it would be valuable to add a doi to cite this code so
   users have full access for reproducibility and to set up their own
-  interpretations." Two routes on the table:
+  interpretations." The two routes that were on the table:
   - **Zenodo** — Andreas's stated preference ("if RC can manage the
     setup"), and Michael's; mints a DOI from a GitHub release, which suits
     a repo that already builds the site and the data. Gives a concept DOI
@@ -301,17 +304,23 @@ belongs in the same plan.
     Kristen flags it is "really slow to push an update or new version now
     due to the large volumes of data we posted previously". She offered to
     follow up on either route.
-  Practical prerequisites either way: **there are no releases and no tags
-  yet**, so the first release is the trigger — decide its contents and
-  version before cutting it. Worth adding a `CITATION.cff` at the repo root
-  (GitHub renders it, Zenodo reads it) so the citation metadata is
-  machine-readable and matches the site's modal.
-- **Hosting the processed tables** (Andreas's answer) — he agrees "the
-  plotting data should be hosted in a more addressable space in addition to
-  Tableau", all options acceptable, **Zenodo preferred**. Raw modelling data
-  stays on DesignSafe. This dovetails with the standing `TODO.md` item about
-  automating raw-input fetching ("mirror the inputs on Zenodo, or script the
-  UCLA Dataverse download") — one decision could close both.
+  Practical prerequisites: tags v0.2.0–v0.2.2 exist, but **there is no
+  GitHub release yet**, so the first release is the trigger — decide its
+  contents and version before cutting it. `CITATION.cff` and `.zenodo.json`
+  are at the repo root since the software-citation decision of 2026-10-12
+  (GitHub renders the first, Zenodo reads both).
+- **Hosting the processed tables — decided in substance 2026-08-20 (see
+  "Decisions made", Release data: the plotting CSVs ship in the GitHub
+  release).** Andreas's answer stands: he agrees "the plotting data should
+  be hosted in a more addressable space in addition to Tableau", all
+  options acceptable, **Zenodo preferred**. Raw modelling data stays on
+  DesignSafe. What remains open is the deposit step that gets the released
+  CSVs into Zenodo itself (the GitHub integration archives only the source
+  archive) — the preferred answer is a Zenodo dataset record, decided with
+  the first release. The standing `TODO.md` item about automating raw-input
+  fetching ("mirror the inputs on Zenodo, or script the UCLA Dataverse
+  download") stays open and separate; raw data staying on DesignSafe pulls
+  toward the scripted-download option.
 
 ## Decisions made
 
@@ -387,6 +396,25 @@ belongs in the same plan.
   ("might have been cleaned from the dataset… could also just be a typo,
   let's leave it for now"). Still pending: the 3D decision (with John, by
   ~08-28) and a Zoom pass over the plots (she is free next week).
+- **Release data (2026-08-20, author review; recorded 2026-10-27)**: the
+  dashboards' plotting data — the exported CSVs — ships in the GitHub
+  release that Zenodo archives, giving the data an addressable, citable
+  home beside Tableau (Andreas's ask, supported by Kristen for
+  reproducibility). The raw modelling inputs (FDHI, DEM, SURE) stay on
+  DesignSafe and are cited by DOI. A release therefore carries the code,
+  the plotting CSVs and `CITATION.cff`, and Zenodo mints the DOI from it;
+  no release has been cut yet. The 3D tables are excluded for now: Cases
+  1–3 are held pending Kristen and John's decision, and Case 4 is
+  excluded as unpublished. One mechanic is open: the Zenodo GitHub
+  integration archives only the tag's source archive — release assets
+  are not picked up (zenodo/zenodo#1235) — and the plotting CSVs are not
+  in the repository (`dist/csv/` is gitignored, ADR-0006), so CSVs
+  attached as release assets reach GitHub but not the Zenodo record.
+  Meeting the intent needs a deposit step of its own, most naturally the
+  Zenodo **dataset record** already preferred under "Hosting the
+  processed tables" — decide with the first release. The webapp's
+  committed application exports follow the same release-asset pattern
+  (ADR-0012/0014; `docs/app/hldd.md` §5.4, §10).
 - **Companion site (2026-08)**: MkDocs Material on GitHub Pages
   (ADR-0008, ADR-0009) embeds the published dashboards, so each
   workbook carries (or simply is) a vertically-laid ~800 px-wide
@@ -416,6 +444,10 @@ belongs in the same plan.
   work yet, and avoid choices that would make adding the 3D arm expensive
   later. Her answer is expected ~2026-08-28 and also governs whether the
   SRL paper becomes a source rather than related work.
+  **2026-10-27 — still held.** Per the author review (recorded under
+  "Decisions made", Release data): Cases 1–3 stay held pending Kristen
+  and John's decision, and Case 4 is excluded as unpublished; the 3D
+  lane itself is on hold (2026-10-12, "Decisions made").
 - [x] **Magnitude in `unified_observations`**: done (2026-07-31) — the
   view carries event `magnitude` (FDHI per measurement, Kern pinned,
   SURE via `config.SURE_EVENT_MAGNITUDES`), enabling magnitude filters

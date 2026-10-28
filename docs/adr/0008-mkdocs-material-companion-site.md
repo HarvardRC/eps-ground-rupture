@@ -28,6 +28,11 @@ tests ([ADR-0003](0003-duckdb-as-the-analytical-engine.md)).
 > `subprojects/mkdocs/DEPLOY.md`. The context is left as written — it
 > records the constraints the decision was made under.
 
+> **Amendment 2026-10-27.** Figures 1 and 2 have been withheld from the
+> site since 2026-10-12, while the author team confirms the terms for the
+> third-party photographs inside them; Figures 3, 4, 5 and 7 remain live.
+> Details in `subprojects/mkdocs/DEPLOY.md`.
+
 ## Decision
 
 **MkDocs with the Material theme**, in `subprojects/mkdocs/`:

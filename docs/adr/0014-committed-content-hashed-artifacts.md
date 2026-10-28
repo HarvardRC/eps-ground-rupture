@@ -64,9 +64,14 @@ is not data: CI builds it from committed source
   are, so a GitHub release's source archive, and the Zenodo software
   record built from it, never carries the data. When the owner tags a
   release, the release carries the exports as a separate data asset
-  under those terms. Open (HLDD §10): confirming each source's terms;
-  whether the asset also feeds a Zenodo data record; and the matching
-  README and `LICENSE-docs` wording.
+  under those terms — the distribution route the author review set for
+  the pipeline's data on 2026-08-20, which also ships the dashboards'
+  plotting CSVs with each release (`notes/Roadmap.md`, Decisions made).
+  Open (HLDD §10): confirming each source's terms; the deposit step
+  that gets the released data into Zenodo itself (the GitHub
+  integration archives only the source archive — a Zenodo dataset
+  record is the Roadmap's preference); and the matching README and
+  `LICENSE-docs` wording.
 - At 3D scale, one artifact **per model family**: the manifest pins
   multiple files, and the default page fetches only the 2D family
   ([ADR-0013](0013-row-level-scenario-artifact.md), DR-7).

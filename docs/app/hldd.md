@@ -754,13 +754,18 @@ DDD). Rules:
   running the parity tests or the page from such an archive needs the
   release's data asset. When the owner tags a GitHub release, the
   release carries the exports as that separate data asset, under their
-  terms. Open ([§10](#10-risks-and-open-dependencies)): confirming each
-  source's terms, and whether the asset also feeds a Zenodo data record,
-  the preference recorded in `notes/Roadmap.md` for hosting the
-  processed tables. The README and `LICENSE-docs`, which say today
-  that the input datasets are not redistributed here, must then
-  distinguish the raw inputs (still not redistributed) from the derived
-  exports.
+  terms — the distribution route the author review set for the
+  pipeline's data on 2026-08-20, which also ships the dashboards'
+  plotting CSVs with each release (`notes/Roadmap.md`, Decisions
+  made). Open ([§10](#10-risks-and-open-dependencies)): confirming
+  each source's terms, and the deposit step that gets the released
+  data into Zenodo itself — the Zenodo GitHub integration archives
+  only the source archive, which omits the data, so the Zenodo dataset
+  record that `notes/Roadmap.md` prefers for hosting the processed
+  tables needs a deposit of its own. The README and `LICENSE-docs`,
+  which say today that the input datasets are not redistributed here,
+  must then distinguish the raw inputs (still not redistributed) from
+  the derived exports.
 
 ### 5.5 Field-data export (ADR-0012)
 
@@ -1148,10 +1153,12 @@ references together
 [§5.6](#56-reference-results-and-verification-adr-0015)) → commit → PR
 (validation builds, the application bundle included) → merge to `main`
 → CI builds the application bundle, then the site → Pages deploy. When
-the owner tags a GitHub release, as for the existing releases, the
-release carries the current exports as its data asset
-([§5.4](#54-committed-versioned-artifacts-adr-0014)); whether attaching
-them is manual or a release workflow is DDD detail. A data refresh and
+the owner tags a GitHub release, the release carries the current
+exports as its data asset, beside the dashboards' plotting CSVs the
+2026-08-20 author review ships with each release
+([§5.4](#54-committed-versioned-artifacts-adr-0014);
+`notes/Roadmap.md`, Decisions made); whether attaching them is manual
+or a release workflow is DDD detail. A data refresh and
 a software release both bump a displayed version
 ([PDD §9.4](pdd.md#94-releases) Releases); rollback is a git revert,
 which the committed-artifact model makes complete by construction.
@@ -1173,7 +1180,7 @@ remains the master list.
 | [R-19](prd.md#94-delivery-and-technical-risks) static-site feasibility | Settled by design: all scenario-time computation runs client-side, with no backend ([§4.1](#41-native-client-side-application-adr-0010)); the budgets are expected to hold with margin ([§7.1](#71-budget-arithmetic)) | The same spike as for [R-16](prd.md#94-delivery-and-technical-risks) — architect |
 | New toolchain (Node/esbuild) maintenance | Accepted, pinned, Gradle-wrapped, and run in CI, which builds the bundle ([§4.3](#43-language-toolchain-and-repository-shape-adr-0011)) | Recorded in [ADR-0011](../adr/0011-webapp-toolchain.md) per [NFR-8](prd.md#nfr-8-architecture-decision-record) (Architecture decision record) — owner |
 | Repository growth from committed data | Bounded ≈ 1 MB per refresh, replace-not-accumulate ([§5.4](#54-committed-versioned-artifacts-adr-0014)) | Revisit only if refresh cadence changes — owner |
-| Terms and distribution of the derived data ([NFR-6](prd.md#nfr-6-licensing) Licensing) | Open: the committed exports redistribute data derived from the input datasets, which the README and `LICENSE-docs` say today are not redistributed here; the design keeps that data out of the Apache-2.0 source archive and attaches it to each GitHub release as a separate asset ([§5.4](#54-committed-versioned-artifacts-adr-0014)) | Confirm each source's terms: the DesignSafe simulation deposits, the FDHI flatfile, and SURE 2.0; for the Kern County compilation, redistribution is already cleared ([`docs/datasets.md`](../datasets.md)) and only the licence wording is open. Decide whether the release asset also feeds a Zenodo data record. Then word the data asset's licence, the README (which also calls the unpublished Kern compilation published), `LICENSE-docs`, the site footer, and `.zenodo.json` before the exports are first pushed, since the repository is public — owner, with the research group |
+| Terms and distribution of the derived data ([NFR-6](prd.md#nfr-6-licensing) Licensing) | Open: the committed exports redistribute data derived from the input datasets, which the README and `LICENSE-docs` say today are not redistributed here; the design keeps that data out of the Apache-2.0 source archive and attaches it to each GitHub release as a separate asset ([§5.4](#54-committed-versioned-artifacts-adr-0014)) | Confirm each source's terms: the DesignSafe simulation deposits, the FDHI flatfile, and SURE 2.0; for the Kern County compilation, redistribution is already cleared ([`docs/datasets.md`](../datasets.md)) and only the licence wording is open. Distribution is decided — the 2026-08-20 author review ships the pipeline's data with each GitHub release (`notes/Roadmap.md`, Decisions made) — but the Zenodo GitHub integration archives only the source archive, so decide the deposit step that gets the data into Zenodo (the dataset record the Roadmap prefers), with the first release. Then word the data asset's licence, the README (which also calls the unpublished Kern compilation published), `LICENSE-docs`, the site footer, and `.zenodo.json` before the exports are first pushed, since the repository is public — owner, with the research group |
 | [PDD D-6](pdd.md#1-decision-register) Kern group; [PDD D-8](pdd.md#1-decision-register) animation coverage; [PDD D-10](pdd.md#1-decision-register) liability text; [R-1/R-2/R-3](prd.md#91-scientific-and-data-dependencies) scientific inputs; [R-12](prd.md#93-content-and-media-dependencies) photo permissions; [R-15](prd.md#93-content-and-media-dependencies) repo URLs | Carried as data/content slots; none blocks the architecture | [PDD register](pdd.md#1-decision-register) owners (research group / owner) |
 | 3D arm ([DR-7](prd.md#dr-7-future-3d-compatibility) Future 3D compatibility) | Model-family dimension reserved in the trial table ([§5.2](#52-simulation-data-organization-adr-0013)); at 3D scale one artifact per model family (the manifest pins multiple files; the default page fetches the 2D family alone) | Recorded in [ADR-0013](../adr/0013-row-level-scenario-artifact.md) and [ADR-0014](../adr/0014-committed-content-hashed-artifacts.md); nothing needed now |
 
