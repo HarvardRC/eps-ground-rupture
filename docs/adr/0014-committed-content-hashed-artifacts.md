@@ -39,10 +39,11 @@ bundle is built in CI and never committed
 ([ADR-0011 — Webapp toolchain — TypeScript + esbuild, no framework,
 SVG charts](0011-webapp-toolchain.md)).
 
-> **Amendment 2026-10-29 (owner review of HLDD §5).** HLDD §5.4 adds
-> operating rules this record did not state: the uploaded files are
-> verified against the generated checksums before the pointer
-> manifest may reference them; past vintages are retained, and a
+> **Amendment 2026-10-29 (owner review of HLDD §5).**
+> [HLDD §5.4](../app/hldd.md#54-pinned-versioned-artifacts-adr-0014)
+> adds operating rules this record did not state: the uploaded files
+> are verified against the generated checksums before the updated
+> pointer manifest is committed; past vintages are retained, and a
 > vintage that retained repository versions depend on is never
 > deleted as routine cleanup; a pointer revert restores a previous
 > vintage only while its assets remain available and the application
@@ -52,8 +53,9 @@ SVG charts](0011-webapp-toolchain.md)).
 > release assets and the copies already published with the site —
 > deleting assets alone does not withdraw data the site serves — and
 > documents the reason and the historical builds that can no longer
-> be reproduced. Read the "Rollback and withdrawal" bullet below with
-> these rules.
+> be reproduced. Read the "Rollback and withdrawal" bullet, the
+> rollback line under Consequences, and the withdrawal comparison
+> under Alternatives with these rules.
 
 ## Decision
 

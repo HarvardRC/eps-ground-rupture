@@ -271,6 +271,15 @@ It represents an offset range from 0 m to the entered maximum. For
 each selected dip, the product converts both endpoints into that
 dip's fault-slip window.
 
+An entry that is not a non-negative number is rejected: the field
+explains the rejection with the §5.6 copy, leaves the previous results
+unchanged, and never silently corrects the entry. The retained results
+visibly belong to the last valid scenario — the rejected value never
+appears in the active-scenario summary or in download provenance.
+Valid entries that convert partly or entirely outside the modeled
+range are not rejected for that reason: the conversion is shown with
+the per-dip coverage flags above.
+
 ### 3.6 Multi-dip conversion rule (D-3, Proposed)
 
 With several dips selected in offset mode, the product applies a
@@ -570,6 +579,12 @@ Per-dip out-of-range line:
 > {Dip}°: converted slip ≈ {Y} m — beyond the modeled range
 > (approximately 0–5 m). Coverage for this dip is partial; matching
 > simulations exist only up to the modeled maximum (≈5 m of slip).
+
+Rejected-entry line:
+
+> Enter the anticipated vertical surface offset (m) as a non-negative
+> number — for example, 3 or 0.5. The value typed could not be read as
+> one; the results still show the last valid scenario.
 
 ### 5.7 Field-overlay framing (CR-6, FR-O5)
 

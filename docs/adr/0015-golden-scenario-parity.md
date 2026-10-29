@@ -33,21 +33,29 @@ reference numbers must themselves be pinned artifacts that CI fetches
 and verifies without running the pipeline.
 
 > **Amendment 2026-10-29 (owner review of HLDD §5).** Three
-> refinements, detailed in HLDD §5.6–§5.7:
+> refinements, detailed in
+> [HLDD §5.6](../app/hldd.md#56-reference-results-and-verification-adr-0015)
+> and [§5.7](../app/hldd.md#57-conversion-coefficients-adr-0015):
 > (1) the reference artifact also records each golden scenario's
-> selection — the identities of the selected records, or an exact
-> signature of that selection — and the parity job requires
-> selections, classifications, and counts to match exactly, so
-> agreement means the same records, not merely the same totals;
+> selection — the identities of the selected records with their
+> scarp-type classes, or an exact signature covering both — and, for
+> offset-mode scenarios such as GS-1, each dip's converted slip window
+> and range flag; the parity job requires selections, scarp-type
+> classes, counts, and range flags to match exactly, so agreement
+> means the same records, not merely the same totals;
 > (2) the regression export carries the approved relationship's
 > coefficients — slope and intercept — rather than the slope alone
-> (ADR-0012, amendment of the same date);
-> (3) "constants" below means research-derived values and
+> ([ADR-0012](0012-product-data-exports.md), amendment of the same
+> date);
+> (3) "Every number the reader sees", "constants", and "Nothing
+> displayed is hardcoded" below do not extend to product settings
+> decided in the PDD — such as the small-result warning threshold and
+> chart floor of [PDD D-11](../app/pdd.md#1-decision-register) (the
+> floor is quoted in the suppression notice) and display precision —
+> which follow the PDD and are represented in application
+> configuration (DDD). "Constants" means research-derived values and
 > research-group conventions — coefficients, the scarp-class palette
-> and order, physical ranges, stage spacing. Product settings decided
-> in the PDD, such as small-result warning thresholds and display
-> precision, follow the PDD and are represented in application
-> configuration (DDD).
+> and order, physical ranges, storage metadata, stage spacing.
 
 ## Decision
 

@@ -1947,7 +1947,8 @@ The PDD must name the accessibility conformance target this list
 serves.
 
 If the scenario page's data export fails to load, or does not match the
-page's expected version, the page must say so plainly; it must not
+page's expected version, or the application fails during startup,
+calculation, or rendering, the page must say so plainly; it must not
 render empty or stale results as if they were valid.
 
 Visitors who use the site without JavaScript must receive honest fallback

@@ -55,14 +55,26 @@ filtering.
 > the artifact manifest count toward the selected representation's
 > total, which the DDD reports. HLDD §5.2 carries the full wording.
 
-> **Amendment 2026-10-29 (owner review of HLDD §5).** Within each
+> **Amendment 2026-10-29 (owner review of HLDD §5).** (1) Within each
 > trial's contiguous run, stages are stored in ascending slip order,
 > with no slip value repeated within a trial (verified in the current
 > export: 3,434 trials, no within-trial slip ties), and the export
-> task's validation checks this ordering. It makes the "last stage
-> within the window" wording of FR-S6 equivalent to DR-3's rule — the
-> record at the highest slip value within the selected window. HLDD
-> §5.2 and §5.6.
+> task's validation checks this ordering. This makes the "last stage
+> within that window" wording of
+> [FR-S6 — Population selection](../app/prd.md#fr-s6-population-selection)
+> equivalent to the rule of
+> [DR-3 — One-state-per-trial population](../app/prd.md#dr-3-one-state-per-trial-population):
+> the record at the highest slip value within the selected window.
+> (2) The artifact manifest also carries simulation-stage spacing
+> information, distinct from each column's storage scale, and the
+> content-hashed filenames of the vintage's other browser-loaded
+> exports. (3) "The regression slopes" in the Decision reads "the
+> regression coefficients — slope and intercept"
+> ([ADR-0012](0012-product-data-exports.md), amendment of the same
+> date). (4) Erratum: the scarp-dip grid holds 102,295 values (102,294
+> steps of 0.001°), not 102,295 steps. Details in
+> [HLDD §5.2](../app/hldd.md#52-simulation-data-organization-adr-0013)
+> and [§5.6](../app/hldd.md#56-reference-results-and-verification-adr-0015).
 
 ## Decision
 

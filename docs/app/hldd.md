@@ -236,7 +236,8 @@ statistics table is the canonical text alternative for every
 measurement chart.
 
 If the data fails to load, or does not match the version the page
-expects, the page must say so plainly; it must not render empty or
+expects, or the application fails during startup, calculation, or
+rendering, the page must say so plainly; it must not render empty or
 stale results as if they were valid. Visitors without JavaScript must
 receive honest fallback content that explains that the interactive page
 requires JavaScript, never a blank or misleading page.
@@ -255,16 +256,18 @@ The pipeline's simulation and field-measurement inputs, stored in
 
 Continuous integration (CI) runs the tests, builds the application and
 the site, and deploys them, using the committed repository contents
-and the release-asset data they pin (§5.4). It cannot run the
-pipeline, so it cannot regenerate the application data. Its test workflow, `.github/workflows/tests.yml`,
-skips every test that needs those inputs or the uncommitted files built
-from them (`data/processed/` and the DuckDB file); those tests run only
-locally.
+and the release-asset data they pin
+([§5.4](#54-pinned-versioned-artifacts-adr-0014)). It cannot run the
+pipeline, so it cannot regenerate the application data. Its test
+workflow, `.github/workflows/tests.yml`, skips every test that needs
+those inputs or the uncommitted files built from them
+(`data/processed/` and the DuckDB file); those tests run only locally.
 
 The project owner must therefore run the pipeline locally and publish
 the application data files, the exports listed in §5.1, each with its
 export version and export date: a data vintage is uploaded as release
-assets and pinned by a committed pointer manifest (§5.4). The site
+assets and pinned by a committed pointer manifest
+([§5.4](#54-pinned-versioned-artifacts-adr-0014)). The site
 build fetches those files, verifies them against the pointer
 manifest's checksums, and copies them unchanged; it does not run the
 pipeline.
@@ -274,6 +277,7 @@ References:
 - [DR-2 — Versioned exports](prd.md#dr-2-versioned-exports).
 - [R-17 — Continuous integration cannot rebuild the full pipeline because raw inputs are local-only](prd.md#94-delivery-and-technical-risks).
 - [§5.1 — Application data exports](#51-application-data-exports-adr-0012).
+- [§5.4 — Pinned, versioned artifacts](#54-pinned-versioned-artifacts-adr-0014).
 
 ### Separate application data exports
 
@@ -420,8 +424,10 @@ The pipeline is extended to produce the exports listed in
 
 The project owner generates these exports locally and publishes them
 as the assets of a data release, pinned from the repository by a
-committed pointer manifest (§5.4). Each export has an identifiable version and
-export date, and filenames change when their contents change. Before a
+committed pointer manifest
+([§5.4](#54-pinned-versioned-artifacts-adr-0014)). Each export has an
+identifiable version and export date, and filenames change when their
+contents change. Before a
 vintage is published, the export task decodes the simulation records
 it has just written and compares them with the pipeline's data; CI
 later fetches the pinned files and checks them against the checksums
@@ -429,8 +435,9 @@ that the export task records. CI cannot run the pipeline, so it cannot
 regenerate these exports.
 
 The **site build** fetches the pinned data files, verifies their
-checksums, and includes them without recalculating their contents. A separate CI job compiles the TypeScript
-application and hands the result to the MkDocs build; the compiled
+checksums, and includes them without recalculating their contents. A
+separate CI job compiles the TypeScript application and hands the
+result to the MkDocs build; the compiled
 application is never committed
 ([§4.3](#43-language-toolchain-and-repository-structure-adr-0011)).
 Pull-request (PR) checks run the tests and the strict MkDocs build, and
@@ -813,7 +820,7 @@ permissions; it does not require a research-data query.
 | **Scenario artifact** | Individual simulation records, organized to avoid repeating trial-level site conditions, together with its artifact manifest — the metadata describing how to read them ([§5.2](#52-simulation-data-organization-adr-0013)). | Browser application. | Approximately 3.1–3.8 MB before compression for the stage arrays alone; the trial table, dictionaries, and artifact manifest add to the total (size accounting: §5.2). |
 | **Field export** | Measurements from past earthquakes, with normalized event names, source-specific measurement definitions, and provenance. | Browser field overlays and the Kern County worked example. | Tens of kilobytes. |
 | **Regression export** | Per-dip coefficients for converting anticipated vertical surface offset into fault slip at depth. | Browser conversion assist. | Less than 1 KB. |
-| **Reference results** | Expected selections (record identities or an exact comparison signature), counts, and statistics for the eight golden scenarios, GS-0–GS-7, at full calculation precision. | Automated comparison tests and acceptance checks; not required by the browser during normal use. | Tens of kilobytes. |
+| **Reference results** | Expected selections (record identities with their scarp-type classes, or an exact comparison signature covering both, such as a checksum of them; [§5.6](#56-reference-results-and-verification-adr-0015)), offset-mode converted windows and range flags, counts, and statistics for the eight golden scenarios, GS-0–GS-7, at full calculation precision. | Automated comparison tests and acceptance checks; not required by the browser during normal use. | Tens of kilobytes. |
 | **Media index (P2)** | Available animations and photographs, including scarp type, attribution, captions, and permission status. The index does not contain the media files themselves. | Educational pages and scenario-linked animation offers. | Less than 10 KB. |
 
 The size figures are planning estimates unless supported by measurements
@@ -877,7 +884,8 @@ reads directly with no parsing step.
   16-bit integer: its grid holds 102,295 distinct values (102,294
   steps of 0.001°), more than 16 bits can hold. The candidate
   encodings are a wider scaled integer, or a dictionary containing
-  each distinct recorded value once with a 16-bit index per record. The DDD selects the encoding, under
+  each distinct recorded value once with a 16-bit index per record.
+  The DDD selects the encoding, under
   [PDD SC-3](pdd.md#101-success-criteria) (correctness) and the
   closing note of [PDD §10.1](pdd.md#101-success-criteria) (Success
   criteria); it must preserve the pipeline-approved recorded precision
@@ -908,8 +916,10 @@ reads directly with no parsing step.
   ([FR-G2](prd.md#fr-g2-scarp-type-colors-and-identification)
   Scarp-type colors and identification); the null-sentinel
   definitions; checksums (short fingerprints of each file's bytes,
-  recomputed later to confirm the file is unchanged); and the version
-  of the paired reference results. The DDD specifies the exact fields.
+  recomputed later to confirm the file is unchanged); the
+  content-hashed filenames of the vintage's other browser-loaded
+  exports; and the version of the paired reference results. The DDD
+  specifies the exact fields.
 
 Nulls are stored as sentinels, never dropped rows: the two-count model
 ([PDD §3](pdd.md#3-scenario-page-inputs) Scenario page: inputs) and
@@ -919,8 +929,8 @@ need to count what is missing. The small negative measurements (1,232
 scarp heights, 30 scarp dips) are carried as-is; their treatment is
 the pipeline's documented measurement-hygiene policy
 ([DR-4](prd.md#dr-4-measurement-hygiene) Measurement hygiene), which
-the DDD cites rather than re-decides. Exact field encodings, scales, endianness, and byte
-layout are DDD material.
+the DDD cites rather than re-decides. Exact field encodings, scales,
+endianness, and byte layout are DDD material.
 
 The fixed 101-stage layout is a property of the current 2D export, not
 a permanent assumption for every model family. A future model family
@@ -936,6 +946,10 @@ References:
 - [DR-4 — Measurement hygiene](prd.md#dr-4-measurement-hygiene).
 - [DR-7 — Future 3D compatibility](prd.md#dr-7-future-3d-compatibility).
 - [FR-G2 — Scarp-type colors and identification](prd.md#fr-g2-scarp-type-colors-and-identification).
+- [FR-O2 — Summary statistics](prd.md#fr-o2-summary-statistics).
+- [PDD §1 — Decision register](pdd.md#1-decision-register): D-23
+  (Reader-facing display precision per quantity).
+- [PDD §3 — Scenario page: inputs](pdd.md#3-scenario-page-inputs).
 - [PDD §3.2 — Sediment strength and structure](pdd.md#32-sediment-strength-and-structure-fr-s2).
 - [PDD §3.4 — Displacement window](pdd.md#34-displacement-window-fr-s5).
 - [PDD §10.1 — Success criteria](pdd.md#101-success-criteria).
@@ -1003,11 +1017,14 @@ equivalent selection algorithm. Empty-result explanations may require
 additional filtering passes to test the effect of relaxing individual
 conditions.
 
-The feasibility measurements must verify that the complete update —
-filtering, statistics, diagnostics where applicable, and rendering —
-meets the PDD's 200 ms interaction target at the 95th percentile.
-Record-level delivery does not prevent later optimizations, provided
-they preserve the defined results.
+The estimate in [§7.1](#71-budget-arithmetic), a scan of a few
+milliseconds and a percentile sort of tens of milliseconds, puts the
+calculation well inside the PDD's 200 ms interaction target at the
+95th percentile. The feasibility measurements must verify that the
+complete update — filtering, statistics, diagnostics where applicable,
+and rendering — meets that target. Record-level delivery does not
+prevent later optimizations, provided they preserve the defined
+results.
 
 References:
 
@@ -1039,7 +1056,9 @@ tag**; together, the tag and its prerelease are the vintage's **data
 release**. A vintage contains the outputs of
 [§5.1](#51-application-data-exports-adr-0012): the scenario artifact
 with its artifact manifest, the field export, the regression export,
-the reference results, and from P2 the media index. A small committed
+the reference results, and, from
+[P2](prd.md#22-mvp-and-delivery-priorities) (the second delivery
+priority, after the MVP), the media index. A small committed
 pointer manifest identifies the exact files that tests and site builds
 must retrieve.
 
@@ -1052,7 +1071,7 @@ code that produces it.
 
 | Manifest | Location | Contents and purpose | Consumer |
 |---|---|---|---|
-| **Artifact manifest** | A file in the data vintage. | Describes the simulation data: versions and dates, counts, ranges, storage information, stage spacing, label dictionaries, null sentinels, and checksums (full field list: [§5.2](#52-simulation-data-organization-adr-0013); defined by [ADR-0013](../adr/0013-row-level-scenario-artifact.md)). | Browser application. |
+| **Artifact manifest** | A file in the data vintage. | Describes the simulation data and names the other browser-loaded export files: versions and export date, counts, ranges, storage information, stage spacing, label dictionaries, null sentinels, checksums, and filenames (full field list: [§5.2](#52-simulation-data-organization-adr-0013); defined by [ADR-0013](../adr/0013-row-level-scenario-artifact.md)). | Browser application. |
 | **Pointer manifest** | Committed to the repository. | Identifies the data tag, content-hashed filenames, checksums, export version, and export date. | CI and local build tasks. |
 
 One export-task run prepares the data files, reference results, and both
@@ -1070,8 +1089,9 @@ The refresh process extends the existing Gradle commands, including
 
 1. Generate the application exports and reference results locally.
 2. Run export-integrity and reference-result checks. The task decodes
-   the files it has just written using the storage scales it already
-   holds; the manifests are written only after these checks pass
+   the files it has just written using the decoding information it
+   holds in memory (storage scales and offsets, dictionaries, null
+   sentinels); the manifests are written only after these checks pass
    ([§5.6](#56-reference-results-and-verification-adr-0015)).
 3. Produce the artifact manifest, content-hashed filenames, and pointer
    manifest.
@@ -1079,8 +1099,8 @@ The refresh process extends the existing Gradle commands, including
 5. Verify that the uploaded files match the generated checksums.
 6. Commit the updated pointer manifest and submit it for review.
 
-The pointer manifest must not be updated to reference a vintage whose
-upload or verification is incomplete.
+The updated pointer manifest must not be committed (step 6) until the
+vintage's upload and verification are complete.
 
 The DDD defines the task names, upload mechanism, and exact manifest
 schemas.
@@ -1088,8 +1108,8 @@ schemas.
 #### Retrieving and publishing the pinned files
 
 CI retrieves only the vintage identified by the committed pointer
-manifest. It must not select the latest available release or substitute
-another vintage.
+manifest. It must not select the newest available data release or
+substitute another vintage.
 
 Before using a file, the build verifies its checksum against the pointer
 manifest. A missing file or checksum mismatch fails the build.
@@ -1103,7 +1123,7 @@ The page identifies the artifact manifest by its content-hashed
 filename, which the site build pins into the page, as it does the
 bundle's ([§4.3](#43-language-toolchain-and-repository-structure-adr-0011));
 the mechanism is DDD detail. That manifest describes the simulation
-data the application must load.
+data and names the other export files the application loads.
 
 #### Content-hashed filenames and caching
 
@@ -1175,7 +1195,8 @@ Rebuilding or testing from that archive requires access to the vintage
 identified by its pointer manifest.
 
 The release process must preserve the distribution arrangement recorded
-in `notes/Roadmap.md`: each tagged software release ships the
+in [`notes/Roadmap.md`](../../notes/Roadmap.md#decisions-made): each
+tagged software release ships the
 dashboards' plotting CSVs, and the current application exports ride
 beside them as the release's data asset
 ([§9](#9-testing-and-release-architecture)).
@@ -1202,6 +1223,7 @@ References:
 - [PDD §9.4 — Releases](pdd.md#94-releases).
 - [§4.3 — Language, toolchain, and repository
   structure](#43-language-toolchain-and-repository-structure-adr-0011).
+- [§5.1 — Application data exports](#51-application-data-exports-adr-0012).
 - [§5.2 — Simulation data organization](#52-simulation-data-organization-adr-0013).
 - [§5.6 — Reference results and verification](#56-reference-results-and-verification-adr-0015).
 - [§7.3 — Delivery and caching](#73-delivery-and-caching).
@@ -1258,8 +1280,10 @@ Each exported record includes:
 - the simulated measurement with which it may be compared;
 - whether the relevant field-width measurement meets the paper's
   less-than-50-metre criterion;
-- membership in the default labeled event set defined in
-  [PDD §4.4](pdd.md#44-field-overlay-fr-o5-d-18-proposed); and
+- membership in the project's established labeled event set, which
+  [PDD §4.4](pdd.md#44-field-overlay-fr-o5-d-18-proposed) makes the
+  overlay's default (the DDD names the pipeline source of its
+  membership); and
 - available provenance and source references.
 
 A criterion that does not apply to a measurement must be distinguishable
@@ -1304,26 +1328,32 @@ sides must share.
 
 #### Verify the exported records
 
-After writing the scenario artifact, the export task decodes it and
-compares every record with the pipeline view from which it was
-generated.
+After writing the scenario artifact's data files, and before either
+manifest is written ([§5.4](#54-pinned-versioned-artifacts-adr-0014),
+step 2), the export task decodes them using the decoding information
+it holds in memory (storage scales and offsets, dictionaries, null
+sentinels) and compares every record with the pipeline view from
+which it was generated.
 
 The comparison checks:
 
 - trial and stage identifiers;
 - site conditions and scarp-type labels;
-- recorded measurement values; and
-- missing measurements.
+- recorded measurement values;
+- missing measurements; and
+- ascending, non-repeating slip order within each trial's run
+  ([§5.2](#52-simulation-data-organization-adr-0013)).
 
 The check must confirm that encoding and decoding preserve the
 pipeline-approved recorded precision. An export that fails this check
 must not be published.
 
-The pointer manifest records checksums for the verified files,
-including the artifact manifest. CI uses these checksums to confirm
-that the files it retrieves are the same files verified during export.
-Checksums establish file integrity; they do not independently establish
-scientific or computational correctness.
+The pointer manifest records checksums for every vintage file,
+including the artifact manifest written after the checks. CI uses
+these checksums to confirm that it retrieves exactly
+the files the export task produced. Checksums establish file
+integrity; they do not independently establish scientific or
+computational correctness.
 
 #### Generate independent reference results
 
@@ -1337,11 +1367,14 @@ from verification of the export format.
 
 For each scenario, the reference results include:
 
-- the identities of the selected simulation records, or an exact
-  comparison signature identifying that selection (for example, a
-  checksum computed from the selected record identifiers);
+- the identities of the selected simulation records with their
+  scarp-type classes, or an exact comparison signature covering both
+  (for example, a checksum computed from the selected record
+  identifiers and classes);
 - the matching-record count;
-- each measurement's valid and excluded-null counts; and
+- each measurement's valid and excluded-null counts;
+- for offset-mode scenarios such as GS-1, each selected dip's
+  converted slip window and its range flag; and
 - the complete summary-statistics set required by
   [FR-O2](prd.md#fr-o2-summary-statistics) (Summary statistics).
 
@@ -1356,9 +1389,11 @@ evaluate every golden scenario through the application's query engine.
 
 The comparison rules are:
 
-- selected records, classifications, and counts must match exactly;
-- calculated statistics must agree with the pipeline references within
-  the per-calculation numerical tolerances specified in the DDD; and
+- selected records, their scarp-type classes, counts, and range flags
+  must match exactly;
+- calculated statistics and converted slip windows must agree with the
+  pipeline references within the per-calculation numerical tolerances
+  specified in the DDD; and
 - reader-facing values must match exactly after both results are
   rounded using the PDD's display-precision rules
   ([PDD D-23](pdd.md#1-decision-register) Reader-facing display
@@ -1382,12 +1417,15 @@ selection must produce 3,434 records: one per trial, with no ties at each
 trial's maximum slip.
 
 Windowed and filtered selections must be tested separately. For each
-eligible trial, the selected state is the record at the highest slip
-value within the applicable slip window
+trial matching the site conditions, the selected state is the record
+at the highest slip value within the selected window
 ([DR-3](prd.md#dr-3-one-state-per-trial-population)
-One-state-per-trial population); with stages stored in ascending slip
-order ([§5.2](#52-simulation-data-organization-adr-0013)), that is the
-last stored stage inside the window. A trial with no stage inside that
+One-state-per-trial population) — in offset mode, the window converted
+for the trial's own dip
+([PDD §3.6](pdd.md#36-multi-dip-conversion-rule-d-3-proposed)); with
+stages stored in ascending slip order
+([§5.2](#52-simulation-data-organization-adr-0013)), that is the last
+stored stage inside the window. A trial with no stage inside that
 window contributes no record.
 
 The application's population selection must agree with the pipeline's
@@ -1484,162 +1522,345 @@ References:
 
 ## 6. Application architecture
 
-Source requirements:
+This section defines the application's major components, their
+responsibilities, and how they exchange information. The DDD specifies
+their interfaces and module structure.
+
+### Source requirements
 
 | Reference | Subject |
 |---|---|
-| [FR-S1–S8](prd.md#51-scenario-inputs-c1-p1) | Scenario inputs. |
-| [FR-O1–O6](prd.md#52-results-and-field-data-context-c2-c3-p1) | Results and field-data context. |
-| [FR-D1–D4](prd.md#53-downloads-and-citation-c4-c5-p1) | Downloads and citation. |
+| [FR-S1–S8](prd.md#51-scenario-inputs-c1-p1) | Scenario inputs and population selection. |
+| [FR-O1–O6](prd.md#52-results-and-field-data-context-c2-c3-p1) | Results, warnings, field comparisons, and the worked example. |
+| [FR-D1–D4](prd.md#53-downloads-and-citation-c4-c5-p1) | Downloads, citation, and provenance. |
 | [FR-X1–X2](prd.md#54-sharing-and-inverse-search-c6-c7-p2) | Sharing and inverse search. |
 | [FR-G1–G5](prd.md#56-shared-display-rules-c10-and-cross-capability-rules) | Shared display rules. |
-| [PDD §3–§7](pdd.md#3-scenario-page-inputs) | Scenario page inputs and results, copy deck, downloads, and sharing. |
+| [PDD §3–§7](pdd.md#3-scenario-page-inputs) | Scenario controls, results, reader-facing text, downloads, and sharing. |
 
-The application is six components. Each gets a short contract here and
-a chapter in the DDD:
+The design has six components. They are logical responsibilities, not
+necessarily six code modules.
 
-- **State and URL codec
-  ([ADR-0010](../adr/0010-native-client-side-scenario-app.md)).** One
-  scenario-state object is the single source of truth: controls write
-  it, everything else reads it. The **URL codec** — the encoder that
-  writes the scenario into a link's query parameters and reads it back
-  — arrives with shareable links in
-  [P2](prd.md#22-mvp-and-delivery-priorities) (the second delivery
-  priority, after the MVP). It serializes exactly the restore list of
-  [PDD §7.1](pdd.md#71-shared-links) (Shared links) — every scenario
-  setting, the selected measurement and view, and the field-overlay
-  state — and restores it on load. Links carry no version stamp when
-  they first ship ([PDD D-15](pdd.md#1-decision-register) Shared-link
-  version notice), and results are always recomputed with the
-  currently published software and data, never stored in the URL
-  ([FR-X1](prd.md#fr-x1-shareable-scenario-links) Shareable scenario
-  links).
-- **Query engine.** Pure functions — the same inputs always produce
-  the same results, touching nothing else — from (artifact, scenario
-  state) to results. The steps, in order: the per-trial condition
-  mask → the window and population selection (the
-  state-from-window-alone rule, and no window means final states, as
-  set by
-  [PDD §3.7](pdd.md#37-population-scarp-filter-family-view-reset)
-  Population, scarp filter, family view, reset, and
-  [DR-3](prd.md#dr-3-one-state-per-trial-population)
-  One-state-per-trial population) → the scarp-type filter, applied to
-  the selected states ([FR-S7](prd.md#fr-s7-scarp-type-filter)
-  Scarp-type filter) → the matching-record count and the per-panel
-  valid/null split, which give the counts of the two-count model
-  ([PDD §3](pdd.md#3-scenario-page-inputs) Scenario page: inputs) →
-  the [FR-O2](prd.md#fr-o2-summary-statistics) statistics and chart
-  data — the sequence of
-  [§5.3](#53-records-rather-than-precomputed-summaries-adr-0013).
-  Because the engine is pure and synchronous — each result is computed
-  in one uninterrupted step — the parity harness
-  ([§5.6](#56-reference-results-and-verification-adr-0015)) can drive
-  it headlessly, in tests with no browser or page involved.
-- **View layer.** The input rail, the scenario summary, the
-  measurement panels, and the notices. Each panel pairs its SVG
-  histogram and cumulative curve with the always-rendered statistics
-  table — a real HTML table, the accessibility backbone of
-  [PDD §9.3](pdd.md#93-accessibility-target-d-17-proposed)
-  (Accessibility target). The notice rules of
-  [PDD §4.5](pdd.md#45-small-empty-and-partial-results-fr-o3-d-11-proposed)
-  (Small, empty, and partial results) decide which notice shows when,
-  and which takes precedence: the no-match diagnostic, the
-  no-valid-measurement notice, and the warning and suppression tiers.
-  Colors and order come from the canonical palette
-  ([FR-G2](prd.md#fr-g2-scarp-type-colors-and-identification)
-  Scarp-type colors and identification): the pipeline's `config.py`
-  `SCARP_CLASS_PALETTE` is the recorded source, re-emitted through the
-  artifact-manifest dictionaries, so the app has no hand-copied hex
-  values.
-- **Downloads.** The browser itself generates the downloads, through
-  its built-in file interfaces (Blob and File) — no server: the
-  matching-records CSV, the statistics table, and the provenance text
-  of [PDD §6.1](pdd.md#61-download-package-fr-d1) (Download package),
-  including the matching-record count, per-measurement valid counts,
-  versions, and active caveats. Chart export
-  ([P2](prd.md#22-mvp-and-delivery-priorities)) pairs a rendered
-  caption strip with the same provenance text
-  ([PDD §6.3](pdd.md#63-chart-export-fr-d2-p2-d-14-proposed)).
-- **Field overlay.** Renders the field export
-  ([§5.5](#55-field-data-export-adr-0012)) as per-source black mark
-  series, with the analogue labels and the criterion toggle of
-  [PDD §4.4](pdd.md#44-field-overlay-fr-o5-d-18-proposed). The Kern
-  County preset
-  ([PDD §4.7](pdd.md#47-kern-county-worked-example-fr-o6-d-6-open)
-  Kern County worked example) is a stored scenario state plus
-  walkthrough copy, inert until
-  [PDD D-6](pdd.md#1-decision-register) (Kern County field-data group
-  and principal-width rule) resolves.
-- **Education surfaces.** Static pages — morphology and measurements
-  in [P2](prd.md#22-mvp-and-delivery-priorities), contact in
-  [P3](prd.md#22-mvp-and-delivery-priorities) (the third delivery
-  priority) — built from the content of
-  [PDD §8](pdd.md#8-education-and-media-surfaces) (Education and media
-  surfaces), with media slots filled from the media index
-  ([§6.2](#62-media-architecture-adr-0012)). The morphology page
-  carries, as a page-local script, the family toggle of
-  [PDD D-13](pdd.md#1-decision-register) (Scarp-family view
-  availability and label), specified in
-  [PDD §3.7](pdd.md#37-population-scarp-filter-family-view-reset) and
-  [PDD §8.1](pdd.md#81-morphology-page-fr-e1). The scenario page links
-  into these pages and into the glossary anchors
-  ([PDD §5.11](pdd.md#511-labels-units-and-glossary-links-fr-g3-cr-3-cr-7)
-  Labels, units, and glossary links).
+#### Scenario state and shared-link encoding
+
+A single scenario-state object records the user's current settings.
+Controls update this state; calculations and displays use it. Components
+must not maintain conflicting copies of the same scenario setting.
+
+The state includes both calculation settings, such as sediment
+selections, and display settings, such as the active measurement panel.
+Changing a display-only setting need not repeat unrelated calculations.
+
+In P2, a **URL codec** encodes these settings into a link's query
+parameters and restores them when the link is opened. It preserves the
+complete restore list defined in PDD §7.1, including the selected
+measurement, view, and field-overlay settings.
+
+When shared links first ship, they carry no creation-version stamp,
+following PDD D-15. Opening a link restores settings and recalculates
+results using the currently published application and data. The URL
+does not contain calculated results or identify a saved report.
+
+References:
+
+- [ADR-0010 — Native client-side scenario application](../adr/0010-native-client-side-scenario-app.md).
+- [FR-X1 — Shareable scenario links](prd.md#fr-x1-shareable-scenario-links).
+- [PDD §7.1 — Shared links](pdd.md#71-shared-links).
+- [PDD decision register — D-15, shared-link version notice](pdd.md#1-decision-register).
+
+#### Query engine
+
+The query engine receives decoded simulation data and scenario settings.
+It returns selected-record information, counts, statistics, chart data,
+and diagnostic results without reading or changing the page.
+
+Its calculations are pure: the same data and settings produce the same
+results, without changing the input data or relying on hidden page
+state. This allows tests to exercise the engine without a browser
+interface.
+
+The calculation sequence is:
+
+1. Select trials matching the site conditions.
+2. Apply the displacement window and population-selection rule.
+3. Apply the resulting-scarp-type filter to the selected stages.
+4. Count matching records.
+5. Separate valid and missing measurements for each output.
+6. Calculate the required statistics and chart data.
+7. Produce any small-result or empty-result diagnostic information.
+
+Population selection precedes the scarp-type filter. In the
+one-state-per-trial population, the engine selects the last stage
+inside the applicable slip window, then tests its scarp type. It must
+not search backward for an earlier stage merely because that stage
+matches the scarp-type filter.
+
+When no slip window is active:
+
+- the all-stages population includes all eligible recorded stages; and
+- the one-state-per-trial population includes each eligible trial's
+  actual final stage.
+
+The engine remains independent of its execution location. The DDD
+defines scheduling and any background execution needed to meet the
+interaction budget. The same calculation code must be usable by the
+pipeline comparison tests.
+
+References:
+
+- [FR-S6 — Population selection](prd.md#fr-s6-population-selection).
+- [FR-S7 — Scarp-type filter](prd.md#fr-s7-scarp-type-filter).
+- [FR-O2 — Summary statistics](prd.md#fr-o2-summary-statistics).
+- [DR-3 — One-state-per-trial population](prd.md#dr-3-one-state-per-trial-population).
+- [§5.3 — Records rather than precomputed summaries](#53-records-rather-than-precomputed-summaries-adr-0013).
+- [§5.6 — Reference results and verification](#56-reference-results-and-verification-adr-0015).
+
+#### View layer
+
+The view layer presents:
+
+- scenario controls;
+- the active-scenario summary;
+- measurement charts and statistics tables;
+- conversion information; and
+- warnings, explanations, and error states.
+
+It renders the query engine's results rather than maintaining a separate
+implementation of filtering or statistics.
+
+Each measurement panel provides its statistics as a real HTML table.
+Charts supplement that table and follow the PDD's chart-suppression
+rules for small result sets.
+
+The view layer distinguishes:
+
+- no matching simulation records;
+- matching records but no valid measurement for the displayed quantity;
+- a small valid-measurement population;
+- insufficient measurements to draw a chart; and
+- partial coverage of the requested displacement range.
+
+These conditions are not all mutually exclusive. The DDD specifies their
+presentation and precedence according to the PDD, without suppressing
+applicable scientific caveats.
+
+Scarp-type colors and ordering come from the artifact manifest, which
+carries the canonical values maintained by the pipeline. The application
+does not keep a manually copied palette.
+
+References:
+
+- [PDD §4.5 — Small, empty, and partial results](pdd.md#45-small-empty-and-partial-results-fr-o3-d-11-proposed).
+- [PDD §9.3 — Accessibility target](pdd.md#93-accessibility-target-d-17-proposed).
+- [FR-G2 — Scarp-type colors and identification](prd.md#fr-g2-scarp-type-colors-and-identification).
+- [§5.7 — Pipeline-supplied values](#57-conversion-coefficients-adr-0015).
+
+#### Downloads
+
+The download component generates files in the browser from the current
+scenario and its calculated results. It does not send records to a
+server for file generation.
+
+The download package includes the matching-records CSV, summary
+statistics, and provenance defined by the PDD. The package records the
+matching-record count, per-measurement valid counts, software and data
+versions, and applicable caveats.
+
+Downloads must describe one consistent scenario state. If the user
+changes settings during preparation, the package must not mix the old
+scenario's records with the new scenario's labels or statistics.
+
+In P2, chart export combines the chart with its provenance caption and
+the accompanying provenance text.
+
+References:
+
+- [PDD §6.1 — Download package](pdd.md#61-download-package-fr-d1).
+- [PDD §6.3 — Chart export](pdd.md#63-chart-export-fr-d2-p2-d-14-proposed).
+
+#### Field overlay
+
+The field-overlay component displays the field export as separate,
+source-labeled series of black marks. It preserves the source-specific
+measurement names, comparison limitations, and width-selection controls
+defined in the PDD.
+
+Field measurements do not enter the simulation statistics or alter the
+matching simulation population.
+
+The Kern County worked example consists of a predefined scenario state,
+a selected field-data group, and walkthrough text. It is enabled for
+public use only after the research group resolves D-6 and approves the
+example.
+
+References:
+
+- [§5.5 — Field-data export](#55-field-data-export-adr-0012).
+- [PDD §4.4 — Field overlay](pdd.md#44-field-overlay-fr-o5-d-18-proposed).
+- [PDD §4.7 — Kern County worked example](pdd.md#47-kern-county-worked-example-fr-o6-d-6-open).
+- [PDD decision register — D-6, Kern County selection](pdd.md#1-decision-register).
+
+#### Education surfaces
+
+The morphology and measurement-explanation pages arrive in P2; the
+contact page arrives in P3. They are ordinary site pages rather than
+parts of the scenario calculation engine.
+
+The morphology page uses a small page-local script for the
+“Group collapse variants” control. Media availability, attribution,
+captions, and permission status come from the media index.
+
+The scenario page links to these pages and the relevant glossary
+entries. They do not need to load the simulation data or query engine.
+
+References:
+
+- [PDD §8 — Education and media surfaces](pdd.md#8-education-and-media-surfaces).
+- [PDD §3.7 — Scarp-family grouping control](pdd.md#37-population-scarp-filter-family-view-reset).
+- [PDD §5.11 — Labels, units, and glossary links](pdd.md#511-labels-units-and-glossary-links-fr-g3-cr-3-cr-7).
+- [§6.2 — Media architecture](#62-media-architecture-adr-0012).
 
 ### 6.1 Failure honesty (ADR-0010)
 
-Three explicit failure modes, all required by the resilience clauses of
-[NFR-5](prd.md#nfr-5-accessibility) (Accessibility):
+A visitor can meet four kinds of trouble. The application answers each
+honestly — never a blank page, never a silently wrong result — and
+never presents one kind as another: unavailable results are not "no
+matching records" ([NFR-5](prd.md#nfr-5-accessibility) Accessibility),
+and a startup failure is not the user having disabled JavaScript. The
+first two kinds are expected product states: the application is
+working and explains the result. The last two mean the browser lacks
+what the application needs, or the application itself fails.
 
-- **No JavaScript:** the scenario page's Markdown body carries real
-  fallback content — that the interactive page requires JavaScript,
-  what the tool is, links to the paper, archive, dashboards, glossary,
-  and limitations — shown whenever the app does not mount (start up
-  and attach to the page); never a blank or misleading page.
-- **Artifact load failure:** the app states plainly that the data
-  could not be loaded and links to the fallback content; it never
-  renders empty results as if they were valid.
-- **Version mismatch:** the page refuses to compute when the fetched
-  artifact manifest's version differs from the one pinned at build
-  time, and says
-  so; the content-hashed addressing
-  ([§5.4](#54-pinned-versioned-artifacts-adr-0014)) makes this state
-  practically unreachable, which is the point.
+#### Invalid or out-of-range input
+
+The constrained controls — multi-selects, predefined categories, a
+bounded window control — make most invalid actions impossible. The
+free entry is offset mode
+([PDD §3.5](pdd.md#35-offset-entry-mode-and-conversion-assist-fr-s5)
+Offset-entry mode and conversion assist): switching modes never
+silently converts a typed value, and for each selected dip the assist
+shows the converted slip window and an in-range, partly-out-of-range,
+or out-of-range flag. Invalid entries are rejected; valid entries that
+convert partly or entirely outside the modeled range are accepted and
+flagged, not rejected — the flags report the coverage limitation. On a
+rejection the previous results stay visible but belong, visibly, to
+the last valid scenario: the rejected value never reaches the
+active-scenario summary or download provenance
+([PDD §3.5](pdd.md#35-offset-entry-mode-and-conversion-assist-fr-s5)).
+
+#### No data for the selected scenario
+
+A valid scenario can match no records, or match records that hold no
+valid values for a measurement. These are results, not failures. The
+notice rules of
+[PDD §4.5](pdd.md#45-small-empty-and-partial-results-fr-o3-d-11-proposed)
+(Small, empty, and partial results) present them with their counts —
+the no-match diagnostic, the no-valid-measurement notice, and the
+warning and suppression tiers
+([FR-O3](prd.md#fr-o3-small-or-empty-result-sets) Small or empty
+result sets); the view layer ([§6](#6-application-architecture))
+carries the machinery. An empty result is explained, never rendered as
+a blank chart, and never conflated with a loading failure.
+
+#### Unavailable browser capabilities
+
+The scenario page contains explanatory content in its Markdown source:
+what the tool does, its limitations, and links to the paper, archive,
+dashboards, and glossary.
+
+This content remains available wherever the application does not
+start. With JavaScript disabled, the page explains that the
+interactive controls require it; a browser lacking a capability the
+application requires leaves the same content standing. The supported
+set is the
+[PDD §9.2](pdd.md#92-browser-and-mobile-baseline-d-16-proposed)
+baseline; a browser being outside it is not by itself treated as proof
+that the application cannot run.
+
+The application replaces or hides its fallback presentation only after
+the corresponding interactive content is ready.
+
+#### Internal failure
+
+If required files cannot be retrieved, decoded, or validated, the
+application states that results are unavailable. It must not present an
+empty distribution or stale statistics as a valid result.
+
+The application verifies that the loaded artifact manifest identifies
+the data version pinned into the site build and a format supported by
+the application. A mismatch or unsupported format stops calculation
+and produces an explicit error. Content-hashed filenames reduce the
+likelihood of loading the wrong files, but do not replace validation.
+
+Unexpected failures during application startup, calculation, or
+rendering also produce an explicit unavailable-results state
+([NFR-5](prd.md#nfr-5-accessibility) Accessibility: results are never
+rendered empty or stale as if they were valid). A startup failure must
+not be misrepresented as the user having disabled JavaScript. If
+previously displayed results remain visible, they are identified as
+belonging to the last successfully calculated scenario, and downloads
+must not combine current settings with previous results
+([PDD §6.1](pdd.md#61-download-package-fr-d1) Download package).
+
+The DDD defines the checks for every category above and connects each
+state to the approved reader-facing messages.
+
+References:
+
+- [ADR-0010 — Ground Rupture Explorer is a native client-side
+  application](../adr/0010-native-client-side-scenario-app.md).
+- [NFR-5 — Accessibility](prd.md#nfr-5-accessibility).
+- [FR-O3 — Small or empty result sets](prd.md#fr-o3-small-or-empty-result-sets).
+- [FR-S5 — Displacement window](prd.md#fr-s5-displacement-window).
+- [PDD §3.5 — Offset-entry mode and conversion assist](pdd.md#35-offset-entry-mode-and-conversion-assist-fr-s5).
+- [PDD §4.5 — Small, empty, and partial results](pdd.md#45-small-empty-and-partial-results-fr-o3-d-11-proposed).
+- [PDD §6.1 — Download package](pdd.md#61-download-package-fr-d1).
+- [PDD §9.2 — Browser and mobile baseline](pdd.md#92-browser-and-mobile-baseline-d-16-proposed).
+- [§5.4 — Pinned, versioned artifacts](#54-pinned-versioned-artifacts-adr-0014).
+- [§6 — Application architecture](#6-application-architecture).
 
 ### 6.2 Media architecture (ADR-0012)
 
-Animations and photographs are ordinary site assets with one
-pipeline-exported **media index** — pinned like the other exports
-([§5.4](#54-pinned-versioned-artifacts-adr-0014)) — which arrives in
-[P2](prd.md#22-mvp-and-delivery-priorities) (the second delivery
-priority, after the MVP) with the pages and animation offers that use
-it. Per item, the index records the scarp type it illustrates, the
-source attribution, the permission status, and the caption; the
-research group supplies the items
-([PDD D-8](pdd.md#1-decision-register) Animation coverage required for
-public release).
+Animations and photographs are site assets described by one media index,
+introduced in P2. The index is generated and pinned through the export
+and publication process described in §5.4.
 
-The morphology page
-([FR-E1](prd.md#fr-e1-morphology-education) Morphology education) and
-the
-[PDD §6.4](pdd.md#64-animation-offer-and-dominance-fr-d4-p2-d-7-proposed)
-animation offers render only from the index. Two states are therefore
-data conditions, not code branches:
+For each item, it records:
 
-- **"Animation not yet available"**
-  ([PDD §8.2](pdd.md#82-animation-library-d-8-open) Animation
-  library) — the supplied animations do not necessarily cover all six
-  scarp types, and animated media explaining the measurement process
-  may not be available
-  ([R-13, R-14](prd.md#93-content-and-media-dependencies)).
-- **The photo release gate** ([NFR-6](prd.md#nfr-6-licensing)
-  Licensing; [R-12](prd.md#93-content-and-media-dependencies): public
-  permission for third-party earthquake photographs is unresolved) —
-  third-party photos may sit in the working tree during
-  development but are excluded from release until permissions are
-  documented.
+- the media file's location;
+- its purpose and, where applicable, scarp type;
+- source attribution;
+- permission status; and
+- caption.
 
----
+The index supports both scarp-type illustrations and media explaining
+the measurement process. A measurement-process animation need not be
+assigned a scarp type.
+
+The morphology page and scenario-linked animation offers use the same
+index. Where no approved animation exists for a scarp type, the page
+shows “Animation not yet available” rather than implying complete
+coverage.
+
+Publication permissions are enforced during the site build, not merely
+when rendering a page. Unapproved media must be kept outside the
+published site source or explicitly excluded from the publication
+output. The release check verifies that such files are absent from the
+published site.
+
+Development copies of third-party photographs may be used only where
+permitted. Their presence in the working tree does not authorize public
+distribution.
+
+References:
+
+- [ADR-0012 — Application data exports](../adr/0012-product-data-exports.md).
+- [FR-E1 — Morphology education](prd.md#fr-e1-morphology-education).
+- [NFR-6 — Licensing](prd.md#nfr-6-licensing).
+- [PDD §6.4 — Animation offers](pdd.md#64-animation-offer-and-dominance-fr-d4-p2-d-7-proposed).
+- [PDD §8.2 — Animation library](pdd.md#82-animation-library-d-8-open).
+- [PDD decision register — D-8, animation coverage](pdd.md#1-decision-register).
+- [R-12–R-14 — Media permissions and availability](prd.md#93-content-and-media-dependencies).
+- [§5.4 — Pinned, versioned artifacts](#54-pinned-versioned-artifacts-adr-0014).
 
 ## 7. Meeting the quality bars
 
@@ -1846,8 +2067,9 @@ data-dependent checks → the export task writes the artifacts, both
 manifests, and the references together
 ([§5.4](#54-pinned-versioned-artifacts-adr-0014),
 [§5.6](#56-reference-results-and-verification-adr-0015)) → upload the
-vintage's assets to its data tag → commit the updated pointer
-manifest → PR
+vintage's assets to its data release → verify the uploaded assets
+against the generated checksums → commit the updated pointer manifest
+→ PR
 (validation fetches and verifies the vintage and builds, the
 application bundle included) → merge to `main` → CI builds the
 application bundle, fetches and verifies the data, then builds the
@@ -1855,11 +2077,14 @@ site → Pages deploy. When the owner tags a GitHub release, the release
 carries the current exports as its data asset, beside the dashboards'
 plotting CSVs the 2026-08-20 author review ships with each release
 ([§5.4](#54-pinned-versioned-artifacts-adr-0014);
-`notes/Roadmap.md`, Decisions made); whether attaching them is manual
-or a release workflow is DDD detail. A data refresh and
+[`notes/Roadmap.md`](../../notes/Roadmap.md#decisions-made), Decisions
+made); whether attaching them is manual or a release workflow is DDD
+detail. A data refresh and
 a software release both bump a displayed version
 ([PDD §9.4](pdd.md#94-releases) Releases); rollback is a git revert of
-the pointer, complete while past vintages' assets are retained.
+the pointer, complete while past vintages' assets are retained and the
+application version supports their format
+([§5.4](#54-pinned-versioned-artifacts-adr-0014)).
 Sequencing and effort belong to the implementation plan, not here.
 
 ---
@@ -1878,7 +2103,7 @@ remains the master list.
 | [R-19](prd.md#94-delivery-and-technical-risks) static-site feasibility | Settled by design: all scenario-time computation runs client-side, with no backend ([§4.1](#41-native-client-side-application-adr-0010)); the budgets are expected to hold with margin ([§7.1](#71-budget-arithmetic)) | The same spike as for [R-16](prd.md#94-delivery-and-technical-risks) — architect |
 | New toolchain (Node/esbuild) maintenance | Accepted, pinned, Gradle-wrapped, and run in CI, which builds the bundle ([§4.3](#43-language-toolchain-and-repository-structure-adr-0011)) | Recorded in [ADR-0011](../adr/0011-webapp-toolchain.md) per [NFR-8](prd.md#nfr-8-architecture-decision-record) (Architecture decision record) — owner |
 | Deploys depend on a release-asset fetch | The committed pointer manifest's checksums pin content exactly: a failed or tampered fetch fails the build visibly, never deploys silently; assets live on the platform already hosting the repository, Actions, and Pages ([§5.4](#54-pinned-versioned-artifacts-adr-0014)) | Retain past vintages' assets so rollback stays a git revert — owner |
-| Terms and distribution of the derived data ([NFR-6](prd.md#nfr-6-licensing) Licensing) | Open: the published exports redistribute data derived from the input datasets, which the README and `LICENSE-docs` say today are not redistributed here; the design keeps that data out of the repository and the Apache-2.0 source archive entirely, and attaches it to each GitHub release as a separate asset ([§5.4](#54-pinned-versioned-artifacts-adr-0014)) | Confirm each source's terms: the DesignSafe simulation deposits, the FDHI flatfile, and SURE 2.0; for the Kern County compilation, redistribution is already cleared ([`docs/datasets.md`](../datasets.md)) and only the licence wording is open. Distribution is decided — the 2026-08-20 author review ships the pipeline's data with each GitHub release (`notes/Roadmap.md`, Decisions made) — but the Zenodo GitHub integration archives only the source archive, so decide the deposit step that gets the data into Zenodo (the dataset record the Roadmap prefers), with the first release. Then word the data asset's licence, the README (which also calls the unpublished Kern compilation published), `LICENSE-docs`, the site footer, and `.zenodo.json` before the first data vintage is uploaded, since release assets on a public repository are public — owner, with the research group |
+| Terms and distribution of the derived data ([NFR-6](prd.md#nfr-6-licensing) Licensing) | Open: the published exports redistribute data derived from the input datasets, which the README and `LICENSE-docs` say today are not redistributed here; the design keeps that data out of the repository and the Apache-2.0 source archive entirely, and attaches it to each GitHub release as a separate asset ([§5.4](#54-pinned-versioned-artifacts-adr-0014)) | Confirm each source's terms: the DesignSafe simulation deposits, the FDHI flatfile, and SURE 2.0; for the Kern County compilation, redistribution is already cleared ([`docs/datasets.md`](../datasets.md)) and only the licence wording is open. Distribution is decided — the 2026-08-20 author review ships the pipeline's data with each GitHub release ([`notes/Roadmap.md`](../../notes/Roadmap.md#decisions-made), Decisions made) — but the Zenodo GitHub integration archives only the source archive, so decide the deposit step that gets the data into Zenodo (the dataset record the Roadmap prefers), with the first release. Then word the data asset's licence, the README (which also calls the unpublished Kern compilation published), `LICENSE-docs`, the site footer, and `.zenodo.json` before the first data vintage is uploaded, since release assets on a public repository are public — owner, with the research group |
 | [PDD D-6](pdd.md#1-decision-register) Kern group; [PDD D-8](pdd.md#1-decision-register) animation coverage; [PDD D-10](pdd.md#1-decision-register) liability text; [R-1/R-2/R-3](prd.md#91-scientific-and-data-dependencies) scientific inputs; [R-12](prd.md#93-content-and-media-dependencies) photo permissions; [R-15](prd.md#93-content-and-media-dependencies) repo URLs | Carried as data/content slots; none blocks the architecture | [PDD register](pdd.md#1-decision-register) owners (research group / owner) |
 | 3D arm ([DR-7](prd.md#dr-7-future-3d-compatibility) Future 3D compatibility) | Model-family dimension reserved in the trial table ([§5.2](#52-simulation-data-organization-adr-0013)); at 3D scale one artifact per model family (the artifact manifest pins multiple files; the default page fetches the 2D family alone) | Recorded in [ADR-0013](../adr/0013-row-level-scenario-artifact.md) and [ADR-0014](../adr/0014-committed-content-hashed-artifacts.md); nothing needed now |
 

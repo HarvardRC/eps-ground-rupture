@@ -55,7 +55,10 @@ Each product surface also has needs of its own:
 > are unchanged.
 
 > **Amendment 2026-10-29 (owner review of HLDD §5).** Three schema
-> refinements, detailed in HLDD §5.1, §5.5, and §5.7:
+> refinements, detailed in
+> [HLDD §5.1](../app/hldd.md#51-application-data-exports-adr-0012),
+> [§5.5](../app/hldd.md#55-field-data-export-adr-0012), and
+> [§5.7](../app/hldd.md#57-conversion-coefficients-adr-0015):
 > (1) the regression export carries the approved relationship's
 > coefficients — slope *and* intercept — with the equation's
 > direction, units, and provenance, not the slope alone: the approved
@@ -68,8 +71,12 @@ Each product surface also has needs of its own:
 > (3) the DuckDB views shape the four research-data exports; the media
 > index is project-maintained metadata, written by the export task
 > without a view.
-> The reference results also record each golden scenario's selected
-> records (ADR-0015, amendment of the same date).
+> The reference results also record each golden scenario's selection
+> — the selected records' identities with their scarp-type classes, or
+> an exact signature covering both — and, for offset-mode scenarios,
+> the converted windows and range flags
+> ([ADR-0015](0015-golden-scenario-parity.md), amendment of the same
+> date).
 
 ## Decision
 
