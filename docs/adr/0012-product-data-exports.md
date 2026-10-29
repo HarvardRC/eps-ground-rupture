@@ -54,6 +54,23 @@ Each product surface also has needs of its own:
 > pinned from git". The artifacts, their shapes, and the export task
 > are unchanged.
 
+> **Amendment 2026-10-29 (owner review of HLDD §5).** Three schema
+> refinements, detailed in HLDD §5.1, §5.5, and §5.7:
+> (1) the regression export carries the approved relationship's
+> coefficients — slope *and* intercept — with the equation's
+> direction, units, and provenance, not the slope alone: the approved
+> back-projection is `slip = (vertical − intercept) / slope`, and the
+> pinned fits have non-zero intercepts (−0.0051 at 30°, −0.0071 at
+> 40°; `test_regression_views.py`);
+> (2) the sub-50 m criterion flag distinguishes three states — meets,
+> fails, and not applicable — so a measurement the criterion does not
+> concern is never read as failing it;
+> (3) the DuckDB views shape the four research-data exports; the media
+> index is project-maintained metadata, written by the export task
+> without a view.
+> The reference results also record each golden scenario's selected
+> records (ADR-0015, amendment of the same date).
+
 ## Decision
 
 **The pipeline gains five new outputs, written for the product.** They
@@ -65,7 +82,7 @@ a new export task writes it out as the five files below.
 
 | Artifact | Content |
 |---|---|
-| Scenario artifact | The complete simulation dataset, packed for the browser: every record of the ensemble (3,434 trials × 101 slip stages) in one binary file, plus a JSON manifest that describes it — counts, value ranges, labels, checksums. The packing is [ADR-0013 — Row-level, trial-major columnar scenario artifact](0013-row-level-scenario-artifact.md) |
+| Scenario artifact | The complete simulation dataset, packed for the browser: every record of the ensemble (3,434 trials × 101 slip stages) in one binary file, plus its artifact manifest — a JSON file describing it: counts, value ranges, labels, checksums. The packing is [ADR-0013 — Row-level, trial-major columnar scenario artifact](0013-row-level-scenario-artifact.md) |
 | Field export | One row per measurement taken **in the field at a real earthquake** (the FDHI, SURE, and Kern County compilations): source compilation, event, the measurement with its source-specific analogue kind ([PDD §4.4](../app/pdd.md#44-field-overlay-fr-o5-d-18-proposed)) — which simulated quantity it stands in for — units, the sub-50 m criterion flag, labeled-event-set membership, provenance |
 | Regression export | The conversion slope for each fault dip, used by the offset-to-slip assist, with provenance ([ADR-0015 — Golden-scenario references and a pipeline↔client parity harness](0015-golden-scenario-parity.md)) |
 | Reference results | The correct answers for the eight **golden scenarios** — fixed, named test scenarios whose results the pipeline computes at full precision, so the app's own calculations can be checked against them (ADR-0015) |
@@ -96,8 +113,8 @@ a new export task writes it out as the five files below.
   P2 — so the MVP (v0.3) ships the other four artifacts.
 - A data refresh is a product release
   ([PDD §9.4 — Releases](../app/pdd.md#94-releases)): the export task
-  writes the artifacts, manifest, and reference results together, so
-  they can never disagree
+  writes the artifacts, both manifests, and the reference results
+  together, so they can never disagree
   ([ADR-0014 — Product artifacts in release assets, pinned by a
   committed manifest](0014-committed-content-hashed-artifacts.md)).
 
@@ -128,8 +145,8 @@ a new export task writes it out as the five files below.
 
 ## References
 
-- [HLDD §5.1 — Application data exports, not `dem.csv`
-  (ADR-0012)](../app/hldd.md#51-application-data-exports-not-demcsv-adr-0012),
+- [HLDD §5.1 — Application data exports
+  (ADR-0012)](../app/hldd.md#51-application-data-exports-adr-0012),
   [HLDD §5.5 — Field-data
   export (ADR-0012)](../app/hldd.md#55-field-data-export-adr-0012),
   and [HLDD §6.2 — Media architecture

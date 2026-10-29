@@ -42,14 +42,36 @@ support](../app/prd.md#dr-6-payload-and-interaction-support) requires
 the export format to meet the budget without preventing the combined
 filtering.
 
+> **Amendment 2026-10-28 (review adopted by the owner).** The scarp-dip
+> encoding options below are tightened: the selected encoding must
+> preserve the pipeline's recorded precision for filtering, statistics,
+> and downloads — rounding for display (PDD D-23) is a separate
+> operation that never reduces stored precision — so the
+> "display-justified coarser scale" option is withdrawn, and the named
+> candidates are a wider scaled integer or a dictionary with a 16-bit
+> per-record index (float32 is no longer named: a binary float suggests
+> exact decimal storage, which it does not guarantee). The size figures
+> below are measurements of candidate layouts; dictionary tables and
+> the artifact manifest count toward the selected representation's
+> total, which the DDD reports. HLDD §5.2 carries the full wording.
+
+> **Amendment 2026-10-29 (owner review of HLDD §5).** Within each
+> trial's contiguous run, stages are stored in ascending slip order,
+> with no slip value repeated within a trial (verified in the current
+> export: 3,434 trials, no within-trial slip ties), and the export
+> task's validation checks this ordering. It makes the "last stage
+> within the window" wording of FR-S6 equivalent to DR-3's rule — the
+> record at the highest slip value within the selected window. HLDD
+> §5.2 and §5.6.
+
 ## Decision
 
 The scenario artifact ships **every record, organized for fast
 scanning**; the client computes every count and statistic from it
 ([ADR-0010 — Ground Rupture Explorer is a native client-side
 application](0010-native-client-side-scenario-app.md)). Only scalar
-side-values are precomputed (the regression slopes and the manifest's
-ranges). The title's three terms carry the design:
+side-values are precomputed (the regression slopes and the artifact
+manifest's ranges). The title's three terms carry the design:
 
 - **Row-level** — individual records, not summaries.
 - **Trial-major** — records are grouped by trial: each trial's 101
@@ -83,7 +105,8 @@ The concrete layout:
   parity rule. At 9–11 bytes per record, the stage arrays run
   ≈ 3.12–3.82 MB raw beside the ≈ 21 KB trial table — inside the 4 MB
   budget even uncompressed — and measure ≈ 0.84–1.07 MB gzipped.
-- **JSON manifest** — the artifact's table of contents: export version
+- **Artifact manifest** (a JSON file) — the artifact's table of
+  contents: export version
   and date; record and trial counts; each column's minimum, maximum,
   and recording step; the label dictionaries in canonical order,
   including the scarp-class palette re-emitted from `config.py`

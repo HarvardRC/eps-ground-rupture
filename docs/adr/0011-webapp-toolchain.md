@@ -26,8 +26,14 @@ wrapped (Poetry via
 > review: product data is no longer committed — release assets hold
 > it, pinned by a committed manifest. In the decision below, the
 > `tests.yml` path filter on "the committed data directory" becomes
-> the data manifest, and the parity harness fetches the pinned
+> the pointer manifest, and the parity harness fetches the pinned
 > vintage before running. The toolchain decision is unchanged.
+
+> **Amendment 2026-10-28 (2).** The decision below says "Node and
+> package versions pinned by lockfile"; precisely, the Node.js version
+> is pinned in the Gradle build configuration and package versions by
+> the committed lockfile — a lockfile does not pin the runtime. HLDD
+> §4.3 states it correctly.
 
 ## Decision
 

@@ -32,6 +32,23 @@ raw inputs are local-only
 reference numbers must themselves be pinned artifacts that CI fetches
 and verifies without running the pipeline.
 
+> **Amendment 2026-10-29 (owner review of HLDD §5).** Three
+> refinements, detailed in HLDD §5.6–§5.7:
+> (1) the reference artifact also records each golden scenario's
+> selection — the identities of the selected records, or an exact
+> signature of that selection — and the parity job requires
+> selections, classifications, and counts to match exactly, so
+> agreement means the same records, not merely the same totals;
+> (2) the regression export carries the approved relationship's
+> coefficients — slope and intercept — rather than the slope alone
+> (ADR-0012, amendment of the same date);
+> (3) "constants" below means research-derived values and
+> research-group conventions — coefficients, the scarp-class palette
+> and order, physical ranges, stage spacing. Product settings decided
+> in the PDD, such as small-result warning thresholds and display
+> precision, follow the PDD and are represented in application
+> configuration (DDD).
+
 ## Decision
 
 **Every number the reader sees traces back to the pipeline, and tests
@@ -58,8 +75,8 @@ own answers, so the two implementations cannot drift apart unnoticed.
   failure points at its cause. The export task re-reads the artifact it has
   just written and compares every record and value with the pipeline
   view it came from — catching packing mistakes at the source — before
-  writing the manifest; CI then verifies the committed manifest's
-  checksums against the fetched files
+  writing the artifact manifest; CI then verifies the committed
+  pointer manifest's checksums against the fetched files
   ([ADR-0014 — Product artifacts in release assets, pinned by a
   committed manifest](0014-committed-content-hashed-artifacts.md)). The
   golden scenarios verify the calculations.
@@ -90,11 +107,11 @@ own answers, so the two implementations cannot drift apart unnoticed.
   [PDD §5.6 — Conversion assist (FR-S5,
   D-3)](../app/pdd.md#56-conversion-assist-fr-s5-d-3) can cite it.
   The scarp-class palette and its canonical order reach the app only
-  through the manifest, re-emitted from `config.py`'s
+  through the artifact manifest, re-emitted from `config.py`'s
   `SCARP_CLASS_PALETTE`
   ([FR-G2 — Scarp-type colors and
   identification](../app/prd.md#fr-g2-scarp-type-colors-and-identification)).
-  Ranges and steps come from the manifest
+  Ranges and steps come from the artifact manifest
   ([ADR-0013 — Row-level, trial-major columnar scenario
   artifact](0013-row-level-scenario-artifact.md)).
 

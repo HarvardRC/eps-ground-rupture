@@ -10,7 +10,7 @@ staged documents (PRD → PDD → HLDD). It has two parts:
 - [1. Decision register](#1-decision-register)
 - [2. Product structure and navigation](#2-product-structure-and-navigation)
   * [2.1 Page inventory](#21-page-inventory)
-  * [2.2 Entry point (D-2, Proposed)](#22-entry-point-d-2-proposed)
+  * [2.2 Entry point (D-2, Decided 2026-10-28)](#22-entry-point-d-2-decided-2026-10-28)
   * [2.3 User journeys](#23-user-journeys)
   * [2.4 Future native panels (D-19)](#24-future-native-panels-d-19)
 - [3. Scenario page: inputs](#3-scenario-page-inputs)
@@ -100,7 +100,7 @@ named in the last column carry the detail.
 | ID | Decision | Source (PRD) | Owner | Status | Resolution / proposal |
 |---|---|---|---|---|---|
 | D-1 | P1 is the MVP and release target (v0.3). | §2.2, §9.5-1 | Product owner | Decided (2026-10-15) | Yes. |
-| D-2 | Site entry point (the name is decided: Ground Rupture Explorer, 2026-10-15). | §9.5-2, R-11 | Owner + research group | Proposed | §2.2. |
+| D-2 | Site entry point (the name is decided: Ground Rupture Explorer, 2026-10-15). | §9.5-2, R-11 | Owner + research group | Decided (2026-10-28) | §2.2; decided by the product owner alone, taking responsibility. |
 | D-3 | Multi-dip behavior of the offset-to-slip assist. | FR-S5, §9.5-3 | Owner, research-group review | Proposed | Per-dip converted windows; §3.6. |
 | D-4 | Low-slip measurement-reliability policy. | DR-4, R-3, §9.5-4 | Research group | Interim | Document, do not filter; caveat in §4.6 and §5.9. |
 | D-5 | Scarp-dip correction status at release. | FR-O4, R-1, §9.5-5 | Research group | Interim | Provisional-data notice everywhere scarp dip appears; text in §5.4. |
@@ -145,7 +145,7 @@ The existing dashboards, glossary, data, and citation pages remain the
 site's reference layer; the scenario page links into them rather than
 duplicating them (FR-G5, D-19).
 
-### 2.2 Entry point (D-2, Proposed)
+### 2.2 Entry point (D-2, Decided 2026-10-28)
 
 The scenario page joins the existing site navigation as a top-level
 entry named **Scenario explorer**, placed after Dashboards. The page

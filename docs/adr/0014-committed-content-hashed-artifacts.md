@@ -39,16 +39,38 @@ bundle is built in CI and never committed
 ([ADR-0011 — Webapp toolchain — TypeScript + esbuild, no framework,
 SVG charts](0011-webapp-toolchain.md)).
 
+> **Amendment 2026-10-29 (owner review of HLDD §5).** HLDD §5.4 adds
+> operating rules this record did not state: the uploaded files are
+> verified against the generated checksums before the pointer
+> manifest may reference them; past vintages are retained, and a
+> vintage that retained repository versions depend on is never
+> deleted as routine cleanup; a pointer revert restores a previous
+> vintage only while its assets remain available and the application
+> version supports its format, and a rollback that changes both code
+> and data must restore a compatible combination of both; and
+> withdrawal is an exceptional procedure that reaches both the
+> release assets and the copies already published with the site —
+> deleting assets alone does not withdraw data the site serves — and
+> documents the reason and the historical builds that can no longer
+> be reproduced. Read the "Rollback and withdrawal" bullet below with
+> these rules.
+
 ## Decision
 
 **The product's data lives in GitHub release assets; the repository
 commits only a pointer to it.** Each data vintage is uploaded once, as
 the assets of a lightweight prerelease **data tag** named by the
-export version, and a small committed **data manifest** pins it: the
+export version, and a small committed **pointer manifest** pins it: the
 tag, each artifact's content-hashed filename, its checksum, and the
-export version and date. CI fetches the pinned vintage, verifies every
-checksum against the committed manifest, and bakes the files into the
-site, which serves them as its own static files — the page downloads
+export version and date. The pointer manifest is distinct from the
+**artifact manifest** of
+[ADR-0013 — Row-level, trial-major columnar scenario
+artifact](0013-row-level-scenario-artifact.md), which travels with the
+vintage as the artifact's table of contents and is read by the page;
+one export-task run writes both, and the pointer manifest's checksums
+cover every vintage file, the artifact manifest included. CI fetches
+the pinned vintage, verifies every checksum against the committed
+pointer manifest, and bakes the files into the site, which serves them as its own static files — the page downloads
 nothing from a release at run time. The application bundle is likewise
 never committed: CI builds it from committed source (ADR-0011).
 
@@ -58,22 +80,23 @@ never committed: CI builds it from committed source (ADR-0011).
   directory beside the scenario page (exact path in the DDD). Each
   filename contains a **content hash** — a short fingerprint of the
   file's bytes — so a changed file always gets a new name; the page
-  finds the current files through the manifest, pinned at build time.
+  finds the current files through the artifact manifest, whose
+  content-hashed name the build pins into the page.
   A file whose name changes with its content can never be served
   stale, and may be cached as hard as the browser likes. This is the
   strengthening of the site's `?v=` convention.
 - **Fetch and verify.** The site build and the `tests.yml` jobs
   download the pinned vintage and verify every checksum against the
-  committed manifest before using it
+  committed pointer manifest before using it
   ([NFR-7 — Build and data-quality
   gates](../app/prd.md#nfr-7-build-and-data-quality-gates)). A
   mismatch fails the build, so a replaced or tampered asset cannot
   deploy.
 - **How a refresh works.** One Gradle task exports, hashes, and writes
-  the artifact, the manifest, and the reference results in one run, so
-  the artifact and the values that pin it cannot diverge; the same
+  the artifact, both manifests, and the reference results in one run,
+  so the artifact and the values that pin it cannot diverge; the same
   lane uploads the vintage's assets to its data tag, and the owner
-  commits the updated manifest — one commit per refresh. Past vintages
+  commits the updated pointer manifest — one commit per refresh. Past vintages
   remain available as the assets of their tags; the deployed site
   carries exactly one. Refreshes are rare, deliberate product releases
   ([PDD §9.4 — Releases](../app/pdd.md#94-releases)).
@@ -92,7 +115,7 @@ never committed: CI builds it from committed source (ADR-0011).
   Shipping the compressed file makes the download size a property of
   the artifact itself, not of the host.
 - **No raw (uncompressed) twin is uploaded beside it** (proposed):
-  the compressed file is checksummed in the manifest and parity-tested
+  the compressed file is checksummed in both manifests and parity-tested
   in CI ([ADR-0015 — Golden-scenario references and a pipeline↔client
   parity harness](0015-golden-scenario-parity.md)), and the Gradle
   lane regenerates it locally from the archive; a raw twin would
@@ -118,8 +141,9 @@ never committed: CI builds it from committed source (ADR-0011).
   released data into Zenodo itself (the GitHub integration archives
   only the source archive — a Zenodo dataset record is the Roadmap's
   preference); and the matching README and `LICENSE-docs` wording.
-- **At 3D scale, one artifact per model family**: the manifest pins
-  multiple files, and the default page fetches only the 2D family
+- **At 3D scale, one artifact per model family**: the artifact
+  manifest pins multiple files, and the default page fetches only the
+  2D family
   ([ADR-0013 — Row-level, trial-major columnar scenario
   artifact](0013-row-level-scenario-artifact.md),
   [DR-7 — Future 3D
@@ -152,13 +176,15 @@ never committed: CI builds it from committed source (ADR-0011).
 ## Consequences
 
 - The repository carries no generated data: a vintage is ≈ 1 MB of
-  release assets, pinned by a few hundred bytes of committed manifest.
+  release assets, pinned by a few hundred bytes of committed pointer
+  manifest.
 - Site deploys and PR validation gain a fetch-and-verify step. A
   checksum mismatch stops the deploy; availability rides on GitHub
   releases — the platform that already hosts the repository, Actions,
   and Pages.
 - Every deployed vintage is pinned by a commit: provenance follows
-  from the manifest's checksums, and rollback is a git revert while
+  from the pointer manifest's checksums, and rollback is a git revert
+  while
   past vintages' assets are retained.
 - The browser performs one extra step — a DecompressionStream inflate,
   ≈ 10 ms — and then reads the typed arrays directly, with no parse
