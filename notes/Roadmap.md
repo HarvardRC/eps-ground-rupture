@@ -413,8 +413,11 @@ belongs in the same plan.
   Meeting the intent needs a deposit step of its own, most naturally the
   Zenodo **dataset record** already preferred under "Hosting the
   processed tables" — decide with the first release. The webapp's
-  committed application exports follow the same release-asset pattern
-  (ADR-0012/0014; `docs/app/hldd.md` §5.4, §10).
+  application exports live in release assets themselves, pinned from
+  the repository by a committed manifest (ADR-0014, reworked
+  2026-10-28; ADR-0012; `docs/app/hldd.md` §5.4, §10), and each
+  software release attaches the current exports as its data asset
+  beside the plotting CSVs.
 - **Companion site (2026-08)**: MkDocs Material on GitHub Pages
   (ADR-0008, ADR-0009) embeds the published dashboards, so each
   workbook carries (or simply is) a vertically-laid ~800 px-wide

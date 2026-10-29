@@ -1,7 +1,7 @@
 # ADR-0011: Webapp toolchain — TypeScript + esbuild, no framework, SVG charts
 
-- **Status**: Proposed
-- **Date**: 2026-10-15 (drafted with the HLDD, `docs/app/hldd.md`)
+- **Status**: Accepted
+- **Date**: 2026-10-15 (drafted with the HLDD, `docs/app/hldd.md`); accepted 2026-10-28 on the owner's delegation of the toolchain choice
 - **Deciders**: Michael Bouzinier (project owner)
 
 ## Context
@@ -22,13 +22,22 @@ contract (PDD §9.3). The repository is a Gradle multi-project build
 wrapped (Poetry via
 [ADR-0002](0002-python-pipeline-shape-and-toolchain.md)).
 
+> **Amendment 2026-10-28.** ADR-0014 was reworked at the owner's
+> review: product data is no longer committed — release assets hold
+> it, pinned by a committed manifest. In the decision below, the
+> `tests.yml` path filter on "the committed data directory" becomes
+> the data manifest, and the parity harness fetches the pinned
+> vintage before running. The toolchain decision is unchanged.
+
 ## Decision
 
 A new Gradle subproject, **`subprojects/webapp`**:
 
 - **TypeScript in strict mode**, compiled and bundled by **esbuild**;
   Node and package versions pinned by lockfile; the whole lane wrapped
-  in Gradle tasks like the other toolchains.
+  in Gradle tasks like the other toolchains. esbuild strips types
+  without checking them, so the webapp test job runs the TypeScript
+  compiler as its own check (`tsc --noEmit`).
 - **No application framework.** The page is one view hierarchy with
   modest state (PDD §3–§4); the budgets and the WCAG target are easier
   to meet, and to audit, without a framework's runtime.

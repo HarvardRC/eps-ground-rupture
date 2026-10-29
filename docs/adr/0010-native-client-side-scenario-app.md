@@ -1,7 +1,7 @@
 # ADR-0010: Ground Rupture Explorer is a native client-side application
 
-- **Status**: Proposed
-- **Date**: 2026-10-15 (drafted with the HLDD, `docs/app/hldd.md`)
+- **Status**: Accepted
+- **Date**: 2026-10-15 (drafted with the HLDD, `docs/app/hldd.md`); accepted 2026-10-28
 - **Deciders**: Michael Bouzinier (project owner)
 
 ## Context
@@ -21,6 +21,13 @@ documented gap names what they cannot do. NFR-8 requires this platform
 decision, including the per-surface choice, to be recorded in an ADR:
 this is that record, and [ADR-0011](0011-webapp-toolchain.md) records
 the new toolchain.
+
+> **Amendment 2026-10-28.** ADR-0014 was reworked at the owner's
+> review: product data is no longer committed — release assets hold
+> it, pinned by a committed manifest that CI fetches and verifies.
+> Where this record says "committed data" or "committed data
+> artifact", read "versioned data pinned from git". The platform
+> decision is unchanged.
 
 ## Decision
 

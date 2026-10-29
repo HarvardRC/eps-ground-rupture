@@ -1595,9 +1595,9 @@ from which they were produced. This allows users to determine the data
 vintage behind a result and supports reproducibility when exports are
 updated.
 
-The product's data-preparation process must support committed,
-versioned app artifacts because continuous integration cannot rebuild the
-full local data pipeline from its raw inputs.
+The product's data-preparation process must produce versioned app
+artifacts that the repository pins, because continuous integration
+cannot rebuild the full local data pipeline from its raw inputs.
 
 ### 6.2 Population and measurement rules
 
@@ -2042,7 +2042,7 @@ credibility, delivery, or release timing.
 | ID | Dependency or risk | Impact | Owner / decision-maker | Planned response |
 |---|---|---|---|---|
 | **R-16** | Combined scenario filtering requires enough detail to support arbitrary filters, but the static site has a strict payload budget. | A large client-side data payload could make the product slow or unusable. | Architect / HLDD | Evaluate compact row-level exports, precomputation, caching, and hybrid data structures. Meet DR-6 and NFR-3 without weakening required filtering. |
-| **R-17** | Continuous integration cannot rebuild the full pipeline because raw inputs are local-only. | App data could become stale or untraceable if refreshes are informal. | Product owner and build-design owner | Commit versioned app-ready data artifacts and document the owner-controlled refresh process. Show export versions in the product and downloads. |
+| **R-17** | Continuous integration cannot rebuild the full pipeline because raw inputs are local-only. | App data could become stale or untraceable if refreshes are informal. | Product owner and build-design owner | Publish versioned app-ready data artifacts, pinned from the repository, and document the owner-controlled refresh process. Show export versions in the product and downloads. |
 | **R-18** | The scenario page shares a single GitHub Pages site, URL space, build, and deploy job with the existing website. | A failure in the new product could disrupt the published site or dashboards. | Product owner and architect | Preserve strict build and deployment gates; test navigation, dashboard links or embeds, citation material, and the full Pages deployment before release. |
 | **R-19** | The static-site constraint prohibits server-side computation. | Some implementation approaches may be infeasible or perform poorly. | Architect / HLDD | Record the platform decision in an ADR and validate the proposed client-side approach against the MVP performance budget early. |
 

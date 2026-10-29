@@ -29,12 +29,12 @@ old number to its fate. The originals remain in git history.
 | [0007](0007-dashboard-design-conventions.md)          | Dashboard design conventions (palette, web variants, interactivity) | Accepted |
 | [0008](0008-mkdocs-material-companion-site.md)        | MkDocs Material for the companion site       | Accepted |
 | [0009](0009-github-pages-hosting.md)                  | GitHub Pages (via Actions) as site hosting   | Accepted |
-| [0010](0010-native-client-side-scenario-app.md)       | Ground Rupture Explorer: native client-side app; surface map | Proposed |
-| [0011](0011-webapp-toolchain.md)                      | Webapp toolchain — TypeScript + esbuild, no framework, SVG charts | Proposed |
-| [0012](0012-product-data-exports.md)                  | Purpose-built product exports feed the scenario app | Proposed |
-| [0013](0013-row-level-scenario-artifact.md)           | Row-level, trial-major columnar scenario artifact | Proposed |
-| [0014](0014-committed-content-hashed-artifacts.md)    | Product artifacts committed, content-hashed, pre-compressed | Proposed |
-| [0015](0015-golden-scenario-parity.md)                | Golden-scenario references; pipeline↔client parity harness | Proposed |
+| [0010](0010-native-client-side-scenario-app.md)       | Ground Rupture Explorer: native client-side app; surface map | Accepted |
+| [0011](0011-webapp-toolchain.md)                      | Webapp toolchain — TypeScript + esbuild, no framework, SVG charts | Accepted |
+| [0012](0012-product-data-exports.md)                  | Purpose-built product exports feed the scenario app | Accepted |
+| [0013](0013-row-level-scenario-artifact.md)           | Row-level, trial-major columnar scenario artifact | Accepted |
+| [0014](0014-committed-content-hashed-artifacts.md)    | Product artifacts in release assets, pinned by a committed manifest | Accepted |
+| [0015](0015-golden-scenario-parity.md)                | Golden-scenario references; pipeline↔client parity harness | Accepted |
 | [—](dead-ends.md)                                     | **Dead ends** — the retired 2026-05/06 architecture, as one story | Retrospective |
 
 ## Adding a new ADR

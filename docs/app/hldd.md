@@ -27,7 +27,7 @@
   * [5.1 Application data exports, not `dem.csv` (ADR-0012)](#51-application-data-exports-not-demcsv-adr-0012)
   * [5.2 Simulation data organization (ADR-0013)](#52-simulation-data-organization-adr-0013)
   * [5.3 Records rather than precomputed summaries (ADR-0013)](#53-records-rather-than-precomputed-summaries-adr-0013)
-  * [5.4 Committed, versioned artifacts (ADR-0014)](#54-committed-versioned-artifacts-adr-0014)
+  * [5.4 Pinned, versioned artifacts (ADR-0014)](#54-pinned-versioned-artifacts-adr-0014)
   * [5.5 Field-data export (ADR-0012)](#55-field-data-export-adr-0012)
   * [5.6 Reference results and verification (ADR-0015)](#56-reference-results-and-verification-adr-0015)
   * [5.7 Conversion coefficients (ADR-0015)](#57-conversion-coefficients-adr-0015)
@@ -66,12 +66,12 @@ code, files, tools, and repository paths where they clarify an
 architectural decision. Such implementation references belong here and
 in the detailed design, not in the PRD or PDD.
 
-The HLDD is followed by the **detailed design document** (DDD: exact 
-formats and schemas, algorithms, module and file structure, test 
+The HLDD is followed by the **detailed design document** (DDD: exact
+formats and schemas, algorithms, module and file structure, test
 inventories) and the **implementation plan** (sequencing, milestones,
-effort). The implementation plan serves as an execution brief for a 
-coding agent: it defines ordered tasks, constraints, and acceptance 
-checks in enough detail that the agent can implement them without 
+effort). The implementation plan serves as an execution brief for a
+coding agent: it defines ordered tasks, constraints, and acceptance
+checks in enough detail that the agent can implement them without
 making unresolved product, architecture, or design decisions.
 
 [Chapter 12](#12-explicitly-not-in-this-document) lists the boundary in full.
@@ -82,9 +82,10 @@ fit together into a coherent design; it does not replace the ADRs as
 the authoritative decision records.
 
 The six architecture decisions supporting this draft are recorded in
-[ADR-0010–ADR-0015](../adr/README.md), each with status **Proposed**.
-[Chapter 1](#1-architecture-decisions) provides their index. Approval of
-this HLDD includes accepting or amending those proposals.
+[ADR-0010–ADR-0015](../adr/README.md), each entering review with status
+**Proposed**. [Chapter 1](#1-architecture-decisions) provides their
+index. Approval of this HLDD includes accepting or amending those
+proposals; the [ADR index](../adr/README.md) tracks each acceptance.
 
 The DDD and IP take accepted architectural decisions as constraints
 rather than reopening them. If detailed design or implementation reveals
@@ -101,10 +102,9 @@ This design is based on six proposed architecture decisions, recorded in
 each decision covers and points to the corresponding explanation in this
 document.
 
-The ADRs are the authoritative decision records. Their status remains
-**Proposed** during review of this HLDD. At the end of the review,
-approved decisions are marked **Accepted**, incorporating any amendments
-agreed during review.
+The ADRs are the authoritative decision records. Each enters review
+with status **Proposed** and is marked **Accepted** as the owner
+approves it, incorporating any amendments agreed during review.
 
 | ADR | Decision | Explanation in this document |
 |---|---|---|
@@ -112,7 +112,7 @@ agreed during review.
 | [ADR-0011](../adr/0011-webapp-toolchain.md) | **Language and build tools.** Use TypeScript and esbuild, without an application framework. Draw charts using SVG. Add a Gradle subproject to build and test the application. CI builds the application bundle; it is never committed. | [§4.3 Language, toolchain, and repository shape](#43-language-toolchain-and-repository-shape-adr-0011), [§9 Testing and release architecture](#9-testing-and-release-architecture) |
 | [ADR-0012](../adr/0012-product-data-exports.md) | **Data supplied by the pipeline.** Export simulation records, field measurements, conversion coefficients, reference results for testing, and a media index for the later education pages and animation offers. The application does not load the existing Tableau-oriented `dem.csv` file. | [§5.1 Application data exports, not `dem.csv`](#51-application-data-exports-not-demcsv-adr-0012), [§5.5 Field-data export](#55-field-data-export-adr-0012), [§6.2 Media architecture](#62-media-architecture-adr-0012) |
 | [ADR-0013](../adr/0013-row-level-scenario-artifact.md) | **Simulation-data organization and calculation.** The browser receives the individual recorded stages of the simulations, not just precomputed counts or summary statistics. Site conditions are stored once per simulation trial; measurements are stored for each recorded stage, grouped by measurement rather than by record. When a user changes the scenario, the browser selects the matching records and calculates their counts, percentiles, and other statistics. | [§5.2 Simulation data organization](#52-simulation-data-organization-adr-0013), [§5.3 Records rather than precomputed summaries](#53-records-rather-than-precomputed-summaries-adr-0013), [§7.1 Budget arithmetic](#71-budget-arithmetic) |
-| [ADR-0014](../adr/0014-committed-content-hashed-artifacts.md) | **Data publication and versioning.** Commit the application data files to the repository. Publish compressed simulation data and use filenames that change when file content changes. Deploy only the current data version; retain earlier versions in Git history. Derived data keeps its source terms: it stays out of the release source archive and is attached to each release as a data asset. | [§5.4 Committed, versioned artifacts](#54-committed-versioned-artifacts-adr-0014), [§7.3 Delivery and caching](#73-delivery-and-caching) |
+| [ADR-0014](../adr/0014-committed-content-hashed-artifacts.md) | **Data publication and versioning.** Store the application data files as GitHub release assets; commit only a manifest that pins them by checksum. Publish compressed simulation data and use filenames that change when file content changes. Deploy only the pinned data vintage; retain earlier vintages as release assets. Derived data keeps its source terms: it never enters the repository, and each release carries it as a data asset. | [§5.4 Pinned, versioned artifacts](#54-pinned-versioned-artifacts-adr-0014), [§7.3 Delivery and caching](#73-delivery-and-caching) |
 | [ADR-0015](../adr/0015-golden-scenario-parity.md) | **Data and calculation verification.** Verify two things separately: that the exported application data preserves the pipeline's approved records and values, and that the application's filtering and statistics reproduce independently calculated pipeline results for predefined test scenarios. The pipeline also supplies the surface-offset-to-slip conversion coefficients, so the application does not maintain a separate copy of those numbers. | [§5.6 Reference results and verification](#56-reference-results-and-verification-adr-0015), [§5.7 Conversion coefficients](#57-conversion-coefficients-adr-0015), [§9 Testing and release architecture](#9-testing-and-release-architecture) |
 
 ---
@@ -129,7 +129,7 @@ arrangements.
 |---|---|
 | [NFR-1–NFR-8](prd.md#8-non-functional-requirements) | Non-functional requirements: public access, hosting, performance, supported environments, accessibility, licensing, quality gates, and architecture decision records. |
 | [DR-1](prd.md#dr-1-controlled-data-source) | Controlled data sources and verification of calculated statistics. |
-| [DR-2](prd.md#dr-2-versioned-exports) | Versioned, dated data exports committed for use by the application and named in displayed results and downloads. |
+| [DR-2](prd.md#dr-2-versioned-exports) | Versioned, dated data exports published for the application's use and named in displayed results and downloads. |
 | [DR-6](prd.md#dr-6-payload-and-interaction-support) | Data-download size, and support for responsive, combined scenario filtering. |
 | [R-16–R-19](prd.md#94-delivery-and-technical-risks) | Delivery and technical risks: payload size versus combined filtering, locally generated data, shared-site deployment, and the prohibition on server-side computation. |
 | [PDD §9](pdd.md#9-product-quality-bars) | Performance budgets, browser and mobile support, accessibility target, and release-version rules. |
@@ -254,17 +254,19 @@ The pipeline's simulation and field-measurement inputs, stored in
 `data/raw/`, are not committed to the repository.
 
 Continuous integration (CI) runs the tests, builds the application and
-the site, and deploys them, using only the committed repository
-contents. It cannot run the pipeline, so it cannot regenerate the
-application data. Its test workflow, `.github/workflows/tests.yml`,
+the site, and deploys them, using the committed repository contents
+and the release-asset data they pin (§5.4). It cannot run the
+pipeline, so it cannot regenerate the application data. Its test workflow, `.github/workflows/tests.yml`,
 skips every test that needs those inputs or the uncommitted files built
 from them (`data/processed/` and the DuckDB file); those tests run only
 locally.
 
-The project owner must therefore run the pipeline locally and commit
+The project owner must therefore run the pipeline locally and publish
 the application data files, the exports listed in §5.1, each with its
-export version and export date. The site build copies those files
-unchanged; it does not run the pipeline.
+export version and export date: a data vintage is uploaded as release
+assets and pinned by a committed manifest (§5.4). The site build
+fetches those files, verifies them against the manifest's checksums,
+and copies them unchanged; it does not run the pipeline.
 
 References:
 
@@ -278,12 +280,13 @@ The pipeline's existing CSV exports supply the Tableau Public
 dashboards. They are written to `dist/csv/`, a gitignored local
 directory, and reach Tableau Public when the owner refreshes and
 republishes the workbooks. They are not inputs to the site build, and
-committing them would not be enough: they carry no export version or
-date.
+publishing them as a pinned vintage would not be enough: they carry no
+export version or date.
 
 The application must use separate exports prepared by the same pipeline
 for browser filtering, statistics, and downloads. Those exports must be
-committed; §5.4 places them beside the scenario page. Statistics
+versioned and pinned from the repository; §5.4 stores them as release
+assets and places them beside the scenario page at build time. Statistics
 calculated in the browser must be tested against pipeline-computed
 reference results for defined scenarios, and no reader-visible number
 may depend solely on untested front-end logic.
@@ -300,7 +303,7 @@ References:
 - [DR-6 — Payload and interaction support](prd.md#dr-6-payload-and-interaction-support).
 - [NFR-7 — Build and data-quality gates](prd.md#nfr-7-build-and-data-quality-gates).
 - [§5.1 — Application data exports, not `dem.csv`](#51-application-data-exports-not-demcsv-adr-0012).
-- [§5.4 — Committed, versioned artifacts](#54-committed-versioned-artifacts-adr-0014).
+- [§5.4 — Pinned, versioned artifacts](#54-pinned-versioned-artifacts-adr-0014).
 
 ### Licensing and media permissions
 
@@ -318,16 +321,18 @@ confirmed. A public release is the deployed site or a tagged GitHub
 release, whose source archive feeds the project's planned Zenodo record.
 
 The application data files derived from the input datasets keep those
-datasets' terms rather than the code's Apache-2.0. All application data
-files stay out of the Apache-2.0 source archive of every release, as
-the paper figures already do. How they are distributed is set in §5.4;
+datasets' terms rather than the code's Apache-2.0. They never enter
+the repository, so the Apache-2.0 source archive of a release cannot
+carry them; the paper figures, committed but marked `export-ignore`,
+are kept out of that archive on the same licensing grounds. How the
+data is stored and distributed is set in §5.4;
 confirming each source's terms is an open dependency (§10).
 
 References:
 
 - [NFR-6 — Licensing](prd.md#nfr-6-licensing).
 - [README — Licensing](../../README.md#licensing).
-- [§5.4 — Committed, versioned artifacts](#54-committed-versioned-artifacts-adr-0014).
+- [§5.4 — Pinned, versioned artifacts](#54-pinned-versioned-artifacts-adr-0014).
 - [§10 — Risks and open dependencies](#10-risks-and-open-dependencies).
 
 ---
@@ -337,8 +342,9 @@ References:
 Ground Rupture Explorer has two separate operating flows:
 
 1. **Data preparation and publication:** the project owner runs the
-   pipeline locally, commits the exported application data, and publishes
-   the site through the existing build and deployment process.
+   pipeline locally, publishes the exported application data as a
+   pinned release-asset vintage, and publishes the site through the
+   existing build and deployment process.
 2. **Interactive use:** a visitor's browser loads the published
    application and data, then filters records, calculates statistics,
    and displays results without contacting a computation service.
@@ -352,7 +358,7 @@ pages are static site pages
 | Reference | Subject |
 |---|---|
 | [DR-1](prd.md#dr-1-controlled-data-source) | Controlled data sources and verification of calculated statistics. |
-| [DR-2](prd.md#dr-2-versioned-exports) | Versioned application data committed to the repository. |
+| [DR-2](prd.md#dr-2-versioned-exports) | Versioned application data pinned from the repository. |
 | [NFR-2](prd.md#nfr-2-static-site-hosting) | Static-site hosting without server-side computation. |
 | [NFR-7](prd.md#nfr-7-build-and-data-quality-gates) | Build validation, numerical tests, and release safeguards. |
 | [PDD §2](pdd.md#2-product-structure-and-navigation) | Product pages and integration with the existing site. |
@@ -373,7 +379,7 @@ Local Python data pipeline
       │
       │ Prepare application data, including reference results
       ▼
-Versioned exports committed to the repository
+Versioned exports in release assets, pinned from the repository
       │
       │ Pull request: tests, application build,
       │ and strict site-build validation
@@ -408,17 +414,18 @@ The pipeline is extended to produce the exports listed in
   priority, after the MVP), together with the pages and animation
   offers that use it.
 
-The project owner generates these exports locally and commits them to
-the repository. Each export has an identifiable version and export
-date, and filenames change when their contents change. Before the files
-are committed, the export task decodes the simulation records it has
-just written and compares them with the pipeline's data; CI later
-checks the committed files against the checksums that the export task
-records. CI cannot run the pipeline, so it cannot regenerate these
-exports.
+The project owner generates these exports locally and publishes them
+as the assets of a data release, pinned from the repository by a
+committed manifest (§5.4). Each export has an identifiable version and
+export date, and filenames change when their contents change. Before a
+vintage is published, the export task decodes the simulation records
+it has just written and compares them with the pipeline's data; CI
+later fetches the pinned files and checks them against the checksums
+that the export task records. CI cannot run the pipeline, so it cannot
+regenerate these exports.
 
-The **site build** includes the committed data files without
-recalculating their contents. A separate CI job compiles the TypeScript
+The **site build** fetches the pinned data files, verifies their
+checksums, and includes them without recalculating their contents. A separate CI job compiles the TypeScript
 application and hands the result to the MkDocs build; the compiled
 application is never committed
 ([§4.3](#43-language-toolchain-and-repository-shape-adr-0011)).
@@ -584,11 +591,14 @@ multi-project build, code modules under `subprojects/`):
 - Path filters widen so that application and data changes run every
   check. The deploy workflow's filters (`.github/workflows/mkdocs.yml`:
   `subprojects/mkdocs/**` and the Poetry files) gain
-  `subprojects/webapp/**`. `tests.yml`, which gains the webapp's test
+  `subprojects/webapp/**` **and the data manifest**, so a data refresh
+  is validated on its PR and deployed on merge like any site change.
+  `tests.yml`, which gains the webapp's test
   job ([§9](#9-testing-and-release-architecture)), keeps
   `subprojects/python/**` and adds `subprojects/webapp/**` and the
-  committed data directory, so that a data refresh or a webapp-only
-  change runs the checksum check and the parity harness.
+  data manifest, so that a data refresh or a webapp-only change
+  fetches the pinned vintage and runs the checksum check and the
+  parity harness.
 
 ---
 
@@ -710,19 +720,25 @@ The architecture is row-level, with only scalar side-tables precomputed
   interaction budget at full-ensemble size
   ([§7.1](#71-budget-arithmetic)).
 
-### 5.4 Committed, versioned artifacts (ADR-0014)
+### 5.4 Pinned, versioned artifacts (ADR-0014)
 
 Because CI cannot rebuild the pipeline
 ([DR-2](prd.md#dr-2-versioned-exports) Versioned exports;
 [R-17](prd.md#94-delivery-and-technical-risks)), the five product
-artifacts are **committed to the repository**, in a dedicated data
-directory beside the scenario page in the site tree (exact path in the
+artifacts are produced by the owner's local export task. Generated
+data stays out of git (owner review, 2026-10-28): each data vintage is
+uploaded as the assets of a lightweight prerelease **data tag**, and a
+small committed **data manifest** pins it — the tag, each artifact's
+content-hashed filename, its checksum, and the export version and
+date. The site build fetches the pinned vintage and places it in a
+dedicated data directory beside the scenario page (exact path in the
 DDD). Rules:
 
 - Filenames carry a content hash; the page references them through the
-  manifest pinned at build time. A data refresh **replaces** the
-  artifacts in one commit — git history is the archive of past
-  vintages; the deployed site carries exactly one.
+  manifest pinned at build time. A data refresh uploads a new
+  vintage's assets and **replaces the pointer in one commit** — past
+  vintages remain as the assets of their tags; the deployed site
+  carries exactly one.
 - This is the site's existing cache-busting convention, strengthened:
   the site already busts `extra.css` with a `?v=` query (`mkdocs.yml`,
   incident of 2026-09-16) because stable-named assets go stale in
@@ -734,38 +750,46 @@ DDD). Rules:
 - The refresh flow extends the existing Gradle lane (`egrBuild`, the
   `csvExport*` tasks): one task exports, hashes, and writes the
   manifest and reference results together, so the artifact and its
-  pins can never diverge; the owner commits the result as usual.
-- The committed scenario file is the pre-compressed artifact the page
-  actually fetches ([§7.3](#73-delivery-and-caching)), so repository
-  growth is bounded at ≈ 1 MB per data refresh (the four text exports
-  add tens of KB);
-  [ADR-0014](../adr/0014-committed-content-hashed-artifacts.md) proposes
-  committing no raw copy beside it. Refreshes are rare, deliberate
-  events (a new export version is a product release,
+  pins can never diverge; the same lane uploads the vintage's assets,
+  and the owner commits the updated manifest as usual.
+- CI — the site build and the `tests.yml` jobs — **fetches the pinned
+  vintage and verifies every checksum against the committed manifest
+  before using it**; a mismatch fails the build, so a replaced or
+  tampered asset cannot deploy. Rollback is a revert of the pointer
+  commit, complete while past vintages' assets are retained;
+  withdrawing a vintage is deleting its assets, not rewriting public
+  history.
+- The vintage's scenario file is the pre-compressed artifact the page
+  actually fetches ([§7.3](#73-delivery-and-caching)); a vintage is
+  ≈ 1 MB of assets (the four text exports add tens of KB), pinned by a
+  few hundred bytes of committed manifest.
+  [ADR-0014](../adr/0014-committed-content-hashed-artifacts.md)
+  proposes uploading no raw copy beside it. Refreshes are rare,
+  deliberate events (a new export version is a product release,
   [PDD §9.4](pdd.md#94-releases)).
 - **Licensing and distribution.** The four data exports are derived
   data under their source datasets' terms (the README's Licensing
   section; [NFR-6](prd.md#nfr-6-licensing) Licensing limits Apache-2.0
   to application code). The P2 media index is the project's own
-  metadata, not derived data; its terms are set when it ships. The
-  data directory is marked `export-ignore` in `.gitattributes`, as the
-  paper figures already are, so a GitHub release's source archive, and
-  the Zenodo software record built from it, never carries the data;
-  running the parity tests or the page from such an archive needs the
-  release's data asset. When the owner tags a GitHub release, the
-  release carries the exports as that separate data asset, under their
-  terms — the distribution route the author review set for the
-  pipeline's data on 2026-08-20, which also ships the dashboards'
-  plotting CSVs with each release (`notes/Roadmap.md`, Decisions
-  made). Open ([§10](#10-risks-and-open-dependencies)): confirming
-  each source's terms, and the deposit step that gets the released
-  data into Zenodo itself — the Zenodo GitHub integration archives
-  only the source archive, which omits the data, so the Zenodo dataset
-  record that `notes/Roadmap.md` prefers for hosting the processed
-  tables needs a deposit of its own. The README and `LICENSE-docs`,
-  which say today that the input datasets are not redistributed here,
-  must then distinguish the raw inputs (still not redistributed) from
-  the derived exports.
+  metadata, not derived data; its terms are set when it ships.
+  Generated data is not in the repository, so a GitHub release's
+  source archive, and the Zenodo software record built from it, never
+  carries the data; running the parity tests or the page from such an
+  archive needs the pinned vintage's assets. When the owner tags a
+  GitHub release, the release carries the current exports as its data
+  asset, under their terms — the distribution route the author review
+  set for the pipeline's data on 2026-08-20, which also ships the
+  dashboards' plotting CSVs with each release (`notes/Roadmap.md`,
+  Decisions made). Open ([§10](#10-risks-and-open-dependencies)):
+  confirming each source's terms, now before the first data vintage is
+  uploaded, since assets on a public repository are public; and the
+  deposit step that gets the released data into Zenodo itself — the
+  Zenodo GitHub integration archives only the source archive, which
+  omits the data, so the Zenodo dataset record that `notes/Roadmap.md`
+  prefers for hosting the processed tables needs a deposit of its own.
+  The README and `LICENSE-docs`, which say today that the input
+  datasets are not redistributed here, must then distinguish the raw
+  inputs (still not redistributed) from the derived exports.
 
 ### 5.5 Field-data export (ADR-0012)
 
@@ -795,7 +819,7 @@ two things are verified separately, so that a failure points to its
 cause. First, the exported data: the export task decodes the scenario
 artifact it has just written and compares every record and value with
 the pipeline view it came from before writing the manifest, whose
-checksums then let CI confirm that the committed files are the ones it
+checksums then let CI confirm that the fetched files are the ones it
 verified. Second, the calculations: the pipeline computes the golden
 scenarios [PDD GS-0–GS-7](pdd.md#102-golden-scenarios) — counts,
 per-measurement valid and excluded-null counts, and the full statistic
@@ -943,13 +967,14 @@ Three explicit failure modes, all required by the resilience clauses of
 - **Version mismatch:** the page refuses to compute when the fetched
   manifest's version differs from the one pinned at build time, and says
   so; the content-hashed addressing
-  ([§5.4](#54-committed-versioned-artifacts-adr-0014)) makes this state
+  ([§5.4](#54-pinned-versioned-artifacts-adr-0014)) makes this state
   practically unreachable, which is the point.
 
 ### 6.2 Media architecture (ADR-0012)
 
-Animations and photographs are ordinary site assets with one committed
-**media index**, which arrives in
+Animations and photographs are ordinary site assets with one
+pipeline-exported **media index** — pinned like the other exports
+([§5.4](#54-pinned-versioned-artifacts-adr-0014)) — which arrives in
 [P2](prd.md#22-mvp-and-delivery-priorities) (the second delivery
 priority, after the MVP) with the pages and animation offers that use
 it: per item, the scarp type it
@@ -1014,7 +1039,7 @@ APIs, SVG); anything newer must clear the same bar in the DDD.
 Product assets (bundle, stylesheet, data artifacts) carry content hashes
 in their filenames and are referenced only through the build — the
 immutable strengthening of the site's `?v=` convention
-([§5.4](#54-committed-versioned-artifacts-adr-0014);
+([§5.4](#54-pinned-versioned-artifacts-adr-0014);
 [NFR-7](prd.md#nfr-7-build-and-data-quality-gates) Build and
 data-quality gates). Because a changed file gets a new name, browsers
 can keep these assets cached, so repeat visits fetch only the page shell
@@ -1028,15 +1053,17 @@ evergreen baseline): GitHub Pages does not promise transfer compression
 for binary media types, so pre-compression makes the measured ≈
 0.84–1.07 MB wire size a property of the artifact rather than of the
 host. Even served raw (≈ 3.1–3.8 MB) the artifact would stay inside the
-4 MB payload budget, but the committed, fetched file is the compressed
-one ([§5.4](#54-committed-versioned-artifacts-adr-0014)). The scenario
+4 MB payload budget, but the pinned, fetched file is the compressed
+one ([§5.4](#54-pinned-versioned-artifacts-adr-0014)). The scenario
 page itself stays a normal MkDocs page so Material's own asset
 fingerprinting, navigation, and search keep working. The existing
 dashboards, navigation, citation pages, and deploy process remain
 functional ([NFR-7](prd.md#nfr-7-build-and-data-quality-gates);
 [PDD SC-6](pdd.md#101-success-criteria) Site integrity): navigation
 gains only the product's entries ([§8](#8-site-integration)); the
-deploy workflow changes only by the webapp build job and the wider path
+deploy workflow changes only by the webapp build job, the data
+fetch-and-verify step
+([§5.4](#54-pinned-versioned-artifacts-adr-0014)), and the wider path
 filters of [§4.3](#43-language-toolchain-and-repository-shape-adr-0011);
 and the glossary gains only the additions of
 [PDD §5.11](pdd.md#511-labels-units-and-glossary-links-fr-g3-cr-3-cr-7)
@@ -1063,9 +1090,9 @@ Citation, disclaimer, and version information;
 - **Page and assets:** the scenario page is one Markdown page in
   `subprojects/mkdocs/docs/` carrying the no-JS fallback body and the
   app mount point; a dedicated assets directory beside it holds the
-  committed, export-ignored data directory
-  ([§5.4](#54-committed-versioned-artifacts-adr-0014)) and the bundle,
-  which CI builds and local builds write to a gitignored path
+  fetched data vintage
+  ([§5.4](#54-pinned-versioned-artifacts-adr-0014)) and the bundle,
+  which CI builds — local builds write both to gitignored paths
   ([§4.3](#43-language-toolchain-and-repository-shape-adr-0011)); final
   naming is in the DDD.
 - **Versions on display
@@ -1080,9 +1107,10 @@ Citation, disclaimer, and version information;
   and are stamped at build time, not fetched.
 - **Build gates:** the scenario page participates in the strict build
   like any page (broken internal links fail the build); the deploy
-  workflow's path filters widen to `subprojects/webapp/**` so webapp
-  changes build and validate the site exactly as mkdocs changes do
-  today, and `tests.yml`'s widen to the webapp and the committed data
+  workflow's path filters widen to `subprojects/webapp/**` and the
+  data manifest, so webapp and data changes build and validate the
+  site exactly as mkdocs changes do today, and `tests.yml`'s widen the
+  same way
   ([§4.3](#43-language-toolchain-and-repository-shape-adr-0011),
   [§9](#9-testing-and-release-architecture)).
 
@@ -1122,19 +1150,19 @@ Four layers, three of them CI-enforced:
    with it,
    [§4.3](#43-language-toolchain-and-repository-shape-adr-0011)): unit
    tests for the engine (and, from P2, the URL codec), a check that the
-   committed artifacts match the manifest's
+   fetched artifacts match the committed manifest's
    checksums and declared counts, plus the **parity harness** — every
    golden scenario ([PDD GS-0–GS-7](pdd.md#102-golden-scenarios))
-   replayed through the client engine against the committed reference
+   replayed through the client engine against the pinned reference
    results: full-precision values within the per-calculation tolerance
    required by the closing note of
    [PDD §10.1](pdd.md#101-success-criteria) (Success criteria), and
    values rounded to display precision equal to the rounded references
    exactly ([PDD SC-3](pdd.md#101-success-criteria)). Runs headlessly in
-   Node against the committed artifacts; no browser farm in the MVP.
+   Node against the fetched artifacts; no browser farm in the MVP.
 3. **Site validation**: the strict MkDocs build on every PR touching
-   `subprojects/mkdocs/**` or `subprojects/webapp/**`; deploy from
-   `main` only, unchanged
+   `subprojects/mkdocs/**`, `subprojects/webapp/**`, or the data
+   manifest; deploy from `main` only, unchanged
    ([ADR-0009](../adr/0009-github-pages-hosting.md) GitHub Pages (via
    Actions) as site hosting).
 4. **Acceptance walkthroughs**
@@ -1145,23 +1173,25 @@ Four layers, three of them CI-enforced:
    checks of [PDD SC-5](pdd.md#101-success-criteria) and
    [PDD SC-7](pdd.md#101-success-criteria) — human-run by design.
 
-**Release flow** (unchanged in authority — the owner commits): refresh
-exports locally through the Gradle lane, which also runs the
+**Release flow** (unchanged in authority — the owner publishes):
+refresh exports locally through the Gradle lane, which also runs the
 data-dependent checks → the export task writes artifacts, manifest, and
 references together
-([§5.4](#54-committed-versioned-artifacts-adr-0014),
-[§5.6](#56-reference-results-and-verification-adr-0015)) → commit → PR
-(validation builds, the application bundle included) → merge to `main`
-→ CI builds the application bundle, then the site → Pages deploy. When
-the owner tags a GitHub release, the release carries the current
-exports as its data asset, beside the dashboards' plotting CSVs the
-2026-08-20 author review ships with each release
-([§5.4](#54-committed-versioned-artifacts-adr-0014);
+([§5.4](#54-pinned-versioned-artifacts-adr-0014),
+[§5.6](#56-reference-results-and-verification-adr-0015)) → upload the
+vintage's assets to its data tag → commit the pointer manifest → PR
+(validation fetches and verifies the vintage and builds, the
+application bundle included) → merge to `main` → CI builds the
+application bundle, fetches and verifies the data, then builds the
+site → Pages deploy. When the owner tags a GitHub release, the release
+carries the current exports as its data asset, beside the dashboards'
+plotting CSVs the 2026-08-20 author review ships with each release
+([§5.4](#54-pinned-versioned-artifacts-adr-0014);
 `notes/Roadmap.md`, Decisions made); whether attaching them is manual
 or a release workflow is DDD detail. A data refresh and
 a software release both bump a displayed version
-([PDD §9.4](pdd.md#94-releases) Releases); rollback is a git revert,
-which the committed-artifact model makes complete by construction.
+([PDD §9.4](pdd.md#94-releases) Releases); rollback is a git revert of
+the pointer, complete while past vintages' assets are retained.
 Sequencing and effort belong to the implementation plan, not here.
 
 ---
@@ -1175,12 +1205,12 @@ remains the master list.
 | Risk / dependency | Position here | Mitigation / owner |
 |---|---|---|
 | [R-16](prd.md#94-delivery-and-technical-risks) combined filtering vs. payload budget | Settled by design: the row-level artifact keeps every filter combination available at a measured ≈ 0.84–1.07 MB on the wire, inside the 4 MB budget ([§5.2–§5.3](#52-simulation-data-organization-adr-0013), [§7.1](#71-budget-arithmetic)) | Early payload-and-timing spike on real hosting validates [§7.1](#71-budget-arithmetic)'s two flagged estimates (measured wire size and inflate cost of the pre-compressed artifact; full-ensemble percentile sort) — architect |
-| [R-17](prd.md#94-delivery-and-technical-risks) CI cannot rebuild the pipeline | Absorbed: committed artifacts; fixture-driven tests in CI; the data-dependent checks run locally in the export task ([§5.4](#54-committed-versioned-artifacts-adr-0014), [§9](#9-testing-and-release-architecture)) | Keep reference generation inside the export task — architect |
-| [R-18](prd.md#94-delivery-and-technical-risks) single-site blast radius ([PDD SC-6](pdd.md#101-success-criteria) Site integrity) | Contained: additive pages, no changes to existing assets, strict build + PR validation. One new coupling: every site deploy now needs a successful bundle build ([§4.3](#43-language-toolchain-and-repository-shape-adr-0011)), which PR validation exercises first | [§8](#8-site-integration), [§9](#9-testing-and-release-architecture) — owner's release lane |
+| [R-17](prd.md#94-delivery-and-technical-risks) CI cannot rebuild the pipeline | Absorbed: release-asset vintages pinned by a committed manifest, fetched and checksum-verified in CI; fixture-driven tests in CI; the data-dependent checks run locally in the export task ([§5.4](#54-pinned-versioned-artifacts-adr-0014), [§9](#9-testing-and-release-architecture)) | Keep reference generation inside the export task — architect ([DR-2](prd.md#dr-2-versioned-exports) and the [R-17](prd.md#94-delivery-and-technical-risks) planned response were aligned to the pinned-artifact model on 2026-10-28, owner-approved) |
+| [R-18](prd.md#94-delivery-and-technical-risks) single-site blast radius ([PDD SC-6](pdd.md#101-success-criteria) Site integrity) | Contained: additive pages, no changes to existing assets, strict build + PR validation. Two new couplings: every site deploy now needs a successful bundle build ([§4.3](#43-language-toolchain-and-repository-shape-adr-0011)) and the pinned-vintage fetch-and-verify ([§5.4](#54-pinned-versioned-artifacts-adr-0014); next row), both exercised by PR validation first | [§8](#8-site-integration), [§9](#9-testing-and-release-architecture) — owner's release lane |
 | [R-19](prd.md#94-delivery-and-technical-risks) static-site feasibility | Settled by design: all scenario-time computation runs client-side, with no backend ([§4.1](#41-native-client-side-application-adr-0010)); the budgets are expected to hold with margin ([§7.1](#71-budget-arithmetic)) | The same spike as for [R-16](prd.md#94-delivery-and-technical-risks) — architect |
 | New toolchain (Node/esbuild) maintenance | Accepted, pinned, Gradle-wrapped, and run in CI, which builds the bundle ([§4.3](#43-language-toolchain-and-repository-shape-adr-0011)) | Recorded in [ADR-0011](../adr/0011-webapp-toolchain.md) per [NFR-8](prd.md#nfr-8-architecture-decision-record) (Architecture decision record) — owner |
-| Repository growth from committed data | Bounded ≈ 1 MB per refresh, replace-not-accumulate ([§5.4](#54-committed-versioned-artifacts-adr-0014)) | Revisit only if refresh cadence changes — owner |
-| Terms and distribution of the derived data ([NFR-6](prd.md#nfr-6-licensing) Licensing) | Open: the committed exports redistribute data derived from the input datasets, which the README and `LICENSE-docs` say today are not redistributed here; the design keeps that data out of the Apache-2.0 source archive and attaches it to each GitHub release as a separate asset ([§5.4](#54-committed-versioned-artifacts-adr-0014)) | Confirm each source's terms: the DesignSafe simulation deposits, the FDHI flatfile, and SURE 2.0; for the Kern County compilation, redistribution is already cleared ([`docs/datasets.md`](../datasets.md)) and only the licence wording is open. Distribution is decided — the 2026-08-20 author review ships the pipeline's data with each GitHub release (`notes/Roadmap.md`, Decisions made) — but the Zenodo GitHub integration archives only the source archive, so decide the deposit step that gets the data into Zenodo (the dataset record the Roadmap prefers), with the first release. Then word the data asset's licence, the README (which also calls the unpublished Kern compilation published), `LICENSE-docs`, the site footer, and `.zenodo.json` before the exports are first pushed, since the repository is public — owner, with the research group |
+| Deploys depend on a release-asset fetch | The committed manifest's checksums pin content exactly: a failed or tampered fetch fails the build visibly, never deploys silently; assets live on the platform already hosting the repository, Actions, and Pages ([§5.4](#54-pinned-versioned-artifacts-adr-0014)) | Retain past vintages' assets so rollback stays a git revert — owner |
+| Terms and distribution of the derived data ([NFR-6](prd.md#nfr-6-licensing) Licensing) | Open: the published exports redistribute data derived from the input datasets, which the README and `LICENSE-docs` say today are not redistributed here; the design keeps that data out of the repository and the Apache-2.0 source archive entirely, and attaches it to each GitHub release as a separate asset ([§5.4](#54-pinned-versioned-artifacts-adr-0014)) | Confirm each source's terms: the DesignSafe simulation deposits, the FDHI flatfile, and SURE 2.0; for the Kern County compilation, redistribution is already cleared ([`docs/datasets.md`](../datasets.md)) and only the licence wording is open. Distribution is decided — the 2026-08-20 author review ships the pipeline's data with each GitHub release (`notes/Roadmap.md`, Decisions made) — but the Zenodo GitHub integration archives only the source archive, so decide the deposit step that gets the data into Zenodo (the dataset record the Roadmap prefers), with the first release. Then word the data asset's licence, the README (which also calls the unpublished Kern compilation published), `LICENSE-docs`, the site footer, and `.zenodo.json` before the first data vintage is uploaded, since release assets on a public repository are public — owner, with the research group |
 | [PDD D-6](pdd.md#1-decision-register) Kern group; [PDD D-8](pdd.md#1-decision-register) animation coverage; [PDD D-10](pdd.md#1-decision-register) liability text; [R-1/R-2/R-3](prd.md#91-scientific-and-data-dependencies) scientific inputs; [R-12](prd.md#93-content-and-media-dependencies) photo permissions; [R-15](prd.md#93-content-and-media-dependencies) repo URLs | Carried as data/content slots; none blocks the architecture | [PDD register](pdd.md#1-decision-register) owners (research group / owner) |
 | 3D arm ([DR-7](prd.md#dr-7-future-3d-compatibility) Future 3D compatibility) | Model-family dimension reserved in the trial table ([§5.2](#52-simulation-data-organization-adr-0013)); at 3D scale one artifact per model family (the manifest pins multiple files; the default page fetches the 2D family alone) | Recorded in [ADR-0013](../adr/0013-row-level-scenario-artifact.md) and [ADR-0014](../adr/0014-committed-content-hashed-artifacts.md); nothing needed now |
 
@@ -1190,9 +1220,9 @@ remains the master list.
 
 The six architecture decisions of [chapter 1](#1-architecture-decisions)
 are drafted as repository ADRs — the project's standing decision record
-(`docs/adr`, whose accepted records are
-[ADR-0001–0009](../adr/README.md)) — with status **Proposed**, alongside
-this document:
+([`docs/adr`](../adr/README.md), which indexes every record and its
+status) — alongside this document, each entering review as **Proposed**
+and marked **Accepted** as the owner approves it:
 
 - **[ADR-0010](../adr/0010-native-client-side-scenario-app.md)** — the
   native client-side application and the surface map of
@@ -1208,7 +1238,8 @@ this document:
   row-level, trial-major columnar scenario artifact and client-side
   computation;
 - **[ADR-0014](../adr/0014-committed-content-hashed-artifacts.md)** —
-  committed, content-hashed, pre-compressed delivery;
+  release-asset delivery pinned by a committed manifest,
+  content-hashed, pre-compressed;
 - **[ADR-0015](../adr/0015-golden-scenario-parity.md)** —
   golden-scenario references and the pipeline↔client parity harness.
 

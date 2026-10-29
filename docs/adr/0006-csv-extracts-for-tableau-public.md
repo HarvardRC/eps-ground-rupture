@@ -24,8 +24,9 @@ gracefully absorbed.)
 > CSVs also ship with each GitHub release, attached as release assets,
 > so the data has an addressable, citable home beside Tableau. Details,
 > and the open Zenodo-deposit mechanic, in `notes/Roadmap.md` under
-> "Decisions made" ("Release data"). The webapp's committed exports are
-> a separate lane
+> "Decisions made" ("Release data"). The webapp's exports — release
+> assets pinned by a committed manifest since the 2026-10-28 rework of
+> ADR-0014 — are a separate lane
 > ([ADR-0012](0012-product-data-exports.md),
 > [ADR-0014](0014-committed-content-hashed-artifacts.md)).
 
