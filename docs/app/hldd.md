@@ -34,15 +34,15 @@
 - [6. Application architecture](#6-application-architecture)
   * [6.1 Failure honesty (ADR-0010)](#61-failure-honesty-adr-0010)
   * [6.2 Media architecture (ADR-0012)](#62-media-architecture-adr-0012)
-- [7. Meeting the quality bars](#7-meeting-the-quality-bars)
-  * [7.1 Budget arithmetic](#71-budget-arithmetic)
-  * [7.2 Accessibility and environments](#72-accessibility-and-environments)
+- [7. Meeting the quality requirements](#7-meeting-the-quality-requirements)
+  * [7.1 Performance estimates and verification](#71-performance-estimates-and-verification)
+  * [7.2 Accessibility and supported environments](#72-accessibility-and-supported-environments)
   * [7.3 Delivery and caching](#73-delivery-and-caching)
 - [8. Site integration](#8-site-integration)
 - [9. Testing and release architecture](#9-testing-and-release-architecture)
 - [10. Risks and open dependencies](#10-risks-and-open-dependencies)
 - [11. Decision records](#11-decision-records)
-- [12. Explicitly not in this document](#12-explicitly-not-in-this-document)
+- [12. Scope of the following documents](#12-scope-of-the-following-documents)
 
 <!-- tocstop -->
 
@@ -72,9 +72,11 @@ inventories) and the **implementation plan** (sequencing, milestones,
 effort). The implementation plan serves as an execution brief for a
 coding agent: it defines ordered tasks, constraints, and acceptance
 checks in enough detail that the agent can implement them without
-making unresolved product, architecture, or design decisions.
+making unresolved product, scientific, architectural, or design
+decisions.
 
-[Chapter 12](#12-explicitly-not-in-this-document) lists the boundary in full.
+[Chapter 12](#12-scope-of-the-following-documents) lists the boundary
+in full.
 
 Architectural decisions are recorded in the [architecture decision
 record (ADR) directory](../adr). This HLDD explains how those decisions
@@ -82,10 +84,11 @@ fit together into a coherent design; it does not replace the ADRs as
 the authoritative decision records.
 
 The six architecture decisions supporting this draft are recorded in
-[ADR-0010–ADR-0015](../adr/README.md), each entering review with status
-**Proposed**. [Chapter 1](#1-architecture-decisions) provides their
-index. Approval of this HLDD includes accepting or amending those
-proposals; the [ADR index](../adr/README.md) tracks each acceptance.
+[ADR-0010–ADR-0015](../adr/README.md); each entered review as
+**Proposed** and is now **Accepted** (2026-10-28), incorporating the
+amendments agreed during review. [Chapter 1](#1-architecture-decisions)
+provides their index; the [ADR index](../adr/README.md) tracks each
+acceptance.
 
 The DDD and IP take accepted architectural decisions as constraints
 rather than reopening them. If detailed design or implementation reveals
@@ -97,10 +100,10 @@ proceeds.
 
 ## 1. Architecture decisions
 
-This design is based on six proposed architecture decisions, recorded in
-[ADR-0010–ADR-0015](../adr/README.md). The table below summarizes what
-each decision covers and points to the corresponding explanation in this
-document.
+This design is based on six accepted architecture decisions,
+recorded in [ADR-0010–ADR-0015](../adr/README.md). The table below
+summarizes what each decision covers and points to the corresponding
+explanation in this document.
 
 The ADRs are the authoritative decision records. Each enters review
 with status **Proposed** and is marked **Accepted** as the owner
@@ -111,7 +114,7 @@ approves it, incorporating any amendments agreed during review.
 | [ADR-0010](../adr/0010-native-client-side-scenario-app.md) | **Application platform and site integration.** Build the scenario page as a client-side application within the existing MkDocs site. Filtering and calculations run in the browser, without a backend or browser-based Python runtime. Reuse existing dashboards through links and use static pages for educational and contact content. | [§4.1 Native client-side application](#41-native-client-side-application-adr-0010), [§4.2 Surface map](#42-surface-map-adr-0010), [§6 Application architecture](#6-application-architecture), [§6.1 Failure honesty](#61-failure-honesty-adr-0010) |
 | [ADR-0011](../adr/0011-webapp-toolchain.md) | **Language and build tools.** Use TypeScript and esbuild, without an application framework. Draw charts using SVG. Add a Gradle subproject to build and test the application. CI builds the application bundle; it is never committed. | [§4.3 Language, toolchain, and repository structure](#43-language-toolchain-and-repository-structure-adr-0011), [§9 Testing and release architecture](#9-testing-and-release-architecture) |
 | [ADR-0012](../adr/0012-product-data-exports.md) | **Data supplied by the pipeline.** Export simulation records, field measurements, conversion coefficients, reference results for testing, and a media index for the later education pages and animation offers. The application does not load the existing Tableau-oriented `dem.csv` file. | [§5.1 Application data exports](#51-application-data-exports-adr-0012), [§5.5 Field-data export](#55-field-data-export-adr-0012), [§6.2 Media architecture](#62-media-architecture-adr-0012) |
-| [ADR-0013](../adr/0013-row-level-scenario-artifact.md) | **Simulation-data organization and calculation.** The browser receives the individual recorded stages of the simulations, not just precomputed counts or summary statistics. Site conditions are stored once per simulation trial; measurements are stored for each recorded stage, grouped by measurement rather than by record. When a user changes the scenario, the browser selects the matching records and calculates their counts, percentiles, and other statistics. | [§5.2 Simulation data organization](#52-simulation-data-organization-adr-0013), [§5.3 Records rather than precomputed summaries](#53-records-rather-than-precomputed-summaries-adr-0013), [§7.1 Budget arithmetic](#71-budget-arithmetic) |
+| [ADR-0013](../adr/0013-row-level-scenario-artifact.md) | **Simulation-data organization and calculation.** The browser receives the individual recorded stages of the simulations, not just precomputed counts or summary statistics. Site conditions are stored once per simulation trial; measurements are stored for each recorded stage, grouped by measurement rather than by record. When a user changes the scenario, the browser selects the matching records and calculates their counts, percentiles, and other statistics. | [§5.2 Simulation data organization](#52-simulation-data-organization-adr-0013), [§5.3 Records rather than precomputed summaries](#53-records-rather-than-precomputed-summaries-adr-0013), [§7.1 Performance estimates and verification](#71-performance-estimates-and-verification) |
 | [ADR-0014](../adr/0014-committed-content-hashed-artifacts.md) | **Data publication and versioning.** Store the application data files as GitHub release assets; commit only a pointer manifest that pins them by checksum. Publish compressed simulation data and use filenames that change when file content changes. Deploy only the pinned data vintage; retain earlier vintages as release assets. Derived data keeps its source terms: it never enters the repository, and each release carries it as a data asset. | [§5.4 Pinned, versioned artifacts](#54-pinned-versioned-artifacts-adr-0014), [§7.3 Delivery and caching](#73-delivery-and-caching) |
 | [ADR-0015](../adr/0015-golden-scenario-parity.md) | **Data and calculation verification.** Verify two things separately: that the exported application data preserves the pipeline's approved records and values, and that the application's filtering and statistics reproduce independently calculated pipeline results for predefined test scenarios. The pipeline also supplies the surface-offset-to-slip conversion coefficients, so the application does not maintain a separate copy of those numbers. | [§5.6 Reference results and verification](#56-reference-results-and-verification-adr-0015), [§5.7 Conversion coefficients](#57-conversion-coefficients-adr-0015), [§9 Testing and release architecture](#9-testing-and-release-architecture) |
 
@@ -553,7 +556,7 @@ References:
   Proposed)](pdd.md#91-performance-budgets-d-9-proposed).
 - [§5.2 — Simulation data organization](#52-simulation-data-organization-adr-0013).
 - [§5.6 — Reference results and verification](#56-reference-results-and-verification-adr-0015).
-- [§7.1 — Budget arithmetic](#71-budget-arithmetic).
+- [§7.1 — Performance estimates and verification](#71-performance-estimates-and-verification).
 
 ### 4.2 Surface map (ADR-0010)
 
@@ -763,7 +766,7 @@ References:
 - [FR-G2 — Scarp-type colors and identification](prd.md#fr-g2-scarp-type-colors-and-identification).
 - [NFR-8 — Architecture decision record](prd.md#nfr-8-architecture-decision-record).
 - [§5.4 — Pinned, versioned artifacts](#54-pinned-versioned-artifacts-adr-0014).
-- [§7.1 — Budget arithmetic](#71-budget-arithmetic).
+- [§7.1 — Performance estimates and verification](#71-performance-estimates-and-verification).
 - [§7.3 — Delivery and caching](#73-delivery-and-caching).
 - [§8 — Site integration](#8-site-integration).
 - [§9 — Testing and release architecture](#9-testing-and-release-architecture).
@@ -825,8 +828,8 @@ permissions; it does not require a research-data query.
 
 The size figures are planning estimates unless supported by measurements
 of a generated export. The DDD defines the exact filenames and schemas;
-the feasibility measurements — the payload-and-timing spike of
-[§10](#10-risks-and-open-dependencies) — establish their actual sizes.
+the feasibility measurements of
+[§10](#10-risks-and-open-dependencies) establish their actual sizes.
 
 The application does not fetch `dem.csv`, the existing 73 MB export
 prepared for Tableau. Instead, it uses the separate application exports
@@ -954,7 +957,7 @@ References:
 - [PDD §3.4 — Displacement window](pdd.md#34-displacement-window-fr-s5).
 - [PDD §10.1 — Success criteria](pdd.md#101-success-criteria).
 - [§5.6 — Reference results and verification](#56-reference-results-and-verification-adr-0015).
-- [§7.1 — Budget arithmetic](#71-budget-arithmetic).
+- [§7.1 — Performance estimates and verification](#71-performance-estimates-and-verification).
 
 ### 5.3 Records rather than precomputed summaries (ADR-0013)
 
@@ -990,7 +993,7 @@ Individual records are also required for the filtered-data download.
 
 The candidate encodings described in §5.2 indicate that the simulation
 records can fit within the 4 MB compressed payload budget
-([§7.1](#71-budget-arithmetic)).
+([§7.1](#71-performance-estimates-and-verification)).
 
 This removes the main reason to replace the records with precomputed
 summaries. The selected encoding's complete size must still be verified,
@@ -1017,10 +1020,10 @@ equivalent selection algorithm. Empty-result explanations may require
 additional filtering passes to test the effect of relaxing individual
 conditions.
 
-The estimate in [§7.1](#71-budget-arithmetic), a scan of a few
-milliseconds and a percentile sort of tens of milliseconds, puts the
-calculation well inside the PDD's 200 ms interaction target at the
-95th percentile. The feasibility measurements must verify that the
+The expected costs — a scan of a few milliseconds and a percentile
+sort of tens of milliseconds — put the calculation well inside the
+PDD's 200 ms interaction target at the 95th percentile. The
+feasibility measurements must verify that the
 complete update — filtering, statistics, diagnostics where applicable,
 and rendering — meets that target. Record-level delivery does not
 prevent later optimizations, provided they preserve the defined
@@ -1041,7 +1044,7 @@ References:
 - [PDD §9.1 — Performance budgets](pdd.md#91-performance-budgets-d-9-proposed).
 - [PDD §4.5 — Small, empty, and partial results](pdd.md#45-small-empty-and-partial-results-fr-o3-d-11-proposed).
 - [§5.2 — Simulation data organization](#52-simulation-data-organization-adr-0013).
-- [§7.1 — Budget arithmetic](#71-budget-arithmetic).
+- [§7.1 — Performance estimates and verification](#71-performance-estimates-and-verification).
 
 ### 5.4 Pinned, versioned artifacts (ADR-0014)
 
@@ -1862,312 +1865,904 @@ References:
 - [R-12–R-14 — Media permissions and availability](prd.md#93-content-and-media-dependencies).
 - [§5.4 — Pinned, versioned artifacts](#54-pinned-versioned-artifacts-adr-0014).
 
-## 7. Meeting the quality bars
+## 7. Meeting the quality requirements
 
-Source requirements:
+This section explains how the architecture is intended to meet the PDD's
+performance, accessibility, and environment requirements. Estimates
+support the design choice; measurements and acceptance checks establish
+whether the implementation meets the requirements.
+
+### Source requirements
 
 | Reference | Subject |
 |---|---|
-| [PDD §9](pdd.md#9-product-quality-bars) | Product quality bars. |
+| [PDD §9](pdd.md#9-product-quality-bars) | Product quality requirements and reference test conditions. |
 | [PDD D-9](pdd.md#1-decision-register) | Numeric performance and payload budgets. |
 | [PDD D-16](pdd.md#1-decision-register) | Browser and mobile baseline. |
 | [PDD D-17](pdd.md#1-decision-register) | Accessibility conformance target. |
 | [NFR-3](prd.md#nfr-3-responsive-interaction) | Responsive interaction. |
 | [NFR-4](prd.md#nfr-4-supported-environments) | Supported environments. |
-| [NFR-5](prd.md#nfr-5-accessibility) | Accessibility. |
+| [NFR-5](prd.md#nfr-5-accessibility) | Accessibility and resilience. |
 | [DR-6](prd.md#dr-6-payload-and-interaction-support) | Payload and interaction support. |
 
-### 7.1 Budget arithmetic
+### 7.1 Performance estimates and verification
 
-Each budget of
-[PDD §9.1](pdd.md#91-performance-budgets-d-9-proposed) (Performance
-budgets), the mechanism that meets it, and the expected result:
+The following table identifies each budget, the architectural approach
+intended to meet it, and the evidence still required.
 
-| Budget ([PDD §9.1](pdd.md#91-performance-budgets-d-9-proposed)) | Mechanism | Expected |
+| Budget | Architectural approach | Estimate and required verification |
 |---|---|---|
-| Payload ≤ 4 MB compressed | Scenario artifact ≈ 3.1–3.8 MB raw ([§5.2](#52-simulation-data-organization-adr-0013)); measured ≈ 0.84–1.07 MB on the wire for the candidate layouts, pre-compressed ([§7.3](#73-delivery-and-caching)); page shell ≈ 0.15 MB; app bundle tens of KB; field + reference + regression exports tens of KB | ≈ 1.0–1.25 MB — inside the budget with 3× margin |
-| Cold render ≤ 2.0 s at 10 Mbps | Measured wire: artifact ≈ 0.84–1.07 MB plus page shell ≈ 0.15 MB at 1.25 MB/s → ≈ 0.8–1.0 s transfer; inflate ≈ 10 ms; typed-array views need no parse step; first panel renders in tens of ms | ≈ 1.0–1.2 s including connection setup — met with ≥ 0.8 s margin; the [§10](#10-risks-and-open-dependencies) spike (a short, throwaway measurement exercise) confirms on real hosting |
-| Warm render ≤ 1.0 s | Content-hashed immutable assets cached hard ([§7.3](#73-delivery-and-caching)): repeat visits fetch nothing but the page shell | well under 1.0 s |
-| Interaction ≤ 200 ms at the 95th percentile | Mask 3,434 trials + stride scan 346,834 stages (single-digit ms in evergreen engines); dominant cost is sorting matched values for percentiles, bounded by a measurement's valid values across the full ensemble (~330k of 346,834 records) at tens of ms | met with margin; pre-sorted per-measurement indices remain a DDD option if measurement says otherwise |
+| Initial application data ≤ 4 MB compressed | Compact simulation records, pre-compressed before publication, with small metadata and coefficient files. | Candidate scenario encodings have measured compressed sizes of approximately 0.84–1.07 MB. Measure the complete selected export, including its metadata and supporting runtime data. |
+| First meaningful render ≤ 2.0 seconds with an empty cache at 10 Mbps | Load a small application bundle and compressed data; decode the data; calculate the initial scenario; render its first measurement panel and statistics. | Approximately 1.0–1.25 MB of total initial resources would require roughly 0.8–1.0 seconds of transfer at the nominal connection rate, excluding latency and processing. End-to-end compliance is not yet established. |
+| Repeat-visit render ≤ 1.0 second with a warm cache | Reuse previously downloaded application and data files where the browser cache permits. | Measure loading, decompression, initialization, calculation, and rendering on a repeat visit. Cached downloads do not eliminate these processing costs. |
+| Scenario change → updated results ≤ 200 ms at the 95th percentile | Filter compact arrays, calculate the selected statistics, and update only the affected displays. | Measure the complete update, including percentile calculation, diagnostics where applicable, and rendering. Include the full-ensemble scenario and other representative workloads. |
 
-### 7.2 Accessibility and environments
+#### What the payload measurement includes
 
-The WCAG 2.2 AA target — level AA of the Web Content Accessibility
-Guidelines
-([PDD §9.3](pdd.md#93-accessibility-target-d-17-proposed)) — shapes
-the architecture rather than decorating it: statistics tables are real
-HTML tables and always rendered with matching records; charts are SVG
-with text alternatives pointing at those tables; every control is a
-native form element or an ARIA pattern (the standard accessibility
-roles and attributes), with visible focus; and notices are live
-regions — regions a screen reader announces when they change. The
-24-month evergreen baseline and the 360 px viewport floor
-([PDD §9.2](pdd.md#92-browser-and-mobile-baseline-d-16-proposed))
-admit every platform interface this design uses (JavaScript at the
-ES2020 level or later, typed arrays, the URL and Blob interfaces,
-SVG); anything newer must clear the same bar in the DDD.
+The data budget includes all data required to produce the initial
+scenario result: the scenario artifact, artifact manifest, regression
+export, and any other data loaded initially.
+
+The end-to-end loading measurement also includes the page, application
+JavaScript, stylesheets, and other resources needed to display that
+result.
+
+Reference results are inputs to tests, not normal browser operation, and
+must not be downloaded by the page. Optional field data and media should
+not delay the initial simulation result.
+
+#### What the timing measurement includes
+
+First meaningful render means the initial scenario's first measurement
+chart and statistics are available for interpretation. A heading,
+loading indicator, or empty application shell does not satisfy it.
+
+Interaction timing starts with an accepted scenario change and ends
+when the corresponding results are visibly updated. If calculation is
+scheduled or moved to background execution, that delay remains part of
+the measured interval.
+
+The DDD defines the benchmark procedure, representative scenarios,
+repetition count, and measurement instrumentation under the PDD's
+reference conditions. The results must identify the tested browser,
+device, application version, and data vintage.
+
+If measurements fail a budget, the design must be optimized and measured
+again. The budget must not be treated as satisfied merely because the
+data size or one calculation step appears small enough.
+
+References:
+
+- [PDD §9.1 — Performance budgets](pdd.md#91-performance-budgets-d-9-proposed).
+- [§5.2 — Simulation data organization](#52-simulation-data-organization-adr-0013).
+- [§5.3 — Records rather than precomputed summaries](#53-records-rather-than-precomputed-summaries-adr-0013).
+- [§10 — Risks and open dependencies](#10-risks-and-open-dependencies).
+
+### 7.2 Accessibility and supported environments
+
+The accessibility target is WCAG 2.2 Level AA for the product's new
+pages. The following architectural provisions support that target;
+they do not replace accessibility testing.
+
+#### Controls and navigation
+
+Controls use native HTML elements where suitable. Custom controls must
+implement the relevant keyboard and accessibility behavior, not merely
+add ARIA roles or attributes.
+
+Focus must remain visible and predictable as controls, panels, and
+notices update. Essential information must not depend on hover or color
+alone.
+
+The layout must remain usable at the PDD's 360 CSS-pixel viewport
+baseline and under the resizing and reflow conditions required by the
+accessibility target.
+
+#### Charts and text alternatives
+
+Each measurement panel provides a real HTML statistics table, regardless
+of whether its chart is displayed.
+
+Charts also need a meaningful text alternative. The DDD must define how
+users obtain the distribution information needed to interpret the
+chart, including information not captured by summary statistics alone.
+This may use a concise description, an accessible distribution table,
+or another equivalent presentation.
+
+Scarp-type displays retain text identification alongside the canonical
+colors.
+
+#### Notices and result updates
+
+Important status changes must be available to assistive technology
+without requiring users to discover them visually.
+
+Live-region announcements must be selective. The application should
+announce a concise result status or important error rather than read
+every changing table cell or repeatedly announce unchanged caveats.
+
+The DDD defines announcement behavior and focus management for loading,
+successful updates, invalid inputs, empty results, and failures.
+
+#### Browser compatibility
+
+The implementation must support the browser and mobile versions defined
+in PDD §9.2.
+
+The DDD verifies the required APIs and build output against that
+baseline. A general language-level label such as “ES2020 or later” is
+not sufficient evidence that every API or generated script is supported.
+
+Accessibility and compatibility checks must exercise the rendered
+application, including keyboard interaction and representative
+assistive-technology use. Calculation tests alone do not establish
+compliance.
+
+References:
+
+- [PDD §9.2 — Browser and mobile baseline](pdd.md#92-browser-and-mobile-baseline-d-16-proposed).
+- [PDD §9.3 — Accessibility target](pdd.md#93-accessibility-target-d-17-proposed).
+- [NFR-5 — Accessibility](prd.md#nfr-5-accessibility).
+- [FR-G2 — Scarp-type colors and identification](prd.md#fr-g2-scarp-type-colors-and-identification).
 
 ### 7.3 Delivery and caching
 
-Product assets — the bundle, the stylesheet, and the data artifacts —
-carry content hashes in their filenames and are referenced only
-through the build: the immutable strengthening of the site's `?v=`
-convention ([§5.4](#54-pinned-versioned-artifacts-adr-0014);
-[NFR-7](prd.md#nfr-7-build-and-data-quality-gates) Build and
-data-quality gates). Because a changed file gets a new name, browsers
-can keep these assets cached, so repeat visits fetch only the page
-shell and avoid a prolonged loading phase
-([DR-6](prd.md#dr-6-payload-and-interaction-support) Payload and
-interaction support; [§7.1](#71-budget-arithmetic)).
+#### Content-hashed assets
 
-The scenario artifact ships **pre-compressed** and is inflated in the
-browser with the built-in DecompressionStream API (inside the
-[PDD §9.2](pdd.md#92-browser-and-mobile-baseline-d-16-proposed)
-evergreen baseline). GitHub Pages does not promise transfer
-compression for binary media types, so pre-compression makes the
-measured ≈ 0.84–1.07 MB wire size a property of the artifact rather
-than of the host. Even served raw (≈ 3.1–3.8 MB) the artifact would
-stay inside the 4 MB payload budget, but the pinned, fetched file is
-the compressed one
-([§5.4](#54-pinned-versioned-artifacts-adr-0014)).
+The application bundle, stylesheet, and data files have content-hashed
+filenames. A changed file receives a new address; an existing address
+must not be reused for different contents.
 
-The scenario page itself stays a normal MkDocs page, so Material's own
-asset fingerprinting (the theme's content-hashed filenames),
-navigation, and search keep working. The
-existing dashboards, navigation, citation pages, and deploy process
-remain functional
-([NFR-7](prd.md#nfr-7-build-and-data-quality-gates);
-[PDD SC-6](pdd.md#101-success-criteria) Site integrity): navigation
-gains only the product's entries ([§8](#8-site-integration)); the
-deploy workflow changes only by the webapp build job, the data
-fetch-and-verify step
-([§5.4](#54-pinned-versioned-artifacts-adr-0014)), and the wider path
-filters of
-[§4.3](#43-language-toolchain-and-repository-structure-adr-0011); and
-the glossary gains only the additions of
-[PDD §5.11](pdd.md#511-labels-units-and-glossary-links-fr-g3-cr-3-cr-7)
-(Labels, units, and glossary links).
+This allows cached files to remain associated with a specific version.
+It does not guarantee that the browser will retain them or avoid
+revalidation requests.
 
----
+The implementation must measure the response headers and actual cache
+behavior on the published site. Warm-cache performance must not depend
+on cache settings that the hosting arrangement cannot provide.
+
+#### Pre-compressed simulation data
+
+The scenario artifact is compressed before upload and publication. The
+browser retrieves that compressed file from the published site and
+decompresses it using the built-in DecompressionStream API.
+
+The DDD verifies support for the selected compression format throughout
+the supported browser baseline. It also specifies the file-serving and
+decoding arrangement so that HTTP content decoding and application
+decompression do not conflict.
+
+Pre-compression makes the stored download compact without relying on
+the host to compress the binary data during transfer. The final
+download size and decompression cost must be measured for the selected
+encoding.
+
+A repeat visit may still need to decompress and initialize cached data.
+Those costs remain part of the repeat-visit render budget.
+
+#### Existing-site integration
+
+The scenario page remains a MkDocs page and participates in the site's
+navigation, search, and strict build.
+
+The existing dashboards, citation material, and deployment must remain
+functional. The intended changes are:
+
+- new product pages and navigation entries;
+- the application build job;
+- retrieval and verification of the pinned data vintage;
+- workflow triggers covering application and manifest changes;
+- page-specific script loading and navigation-lifecycle integration;
+  and
+- the glossary additions required by the PDD.
+
+Site-regression checks must verify that these additions do not disrupt
+existing functionality.
+
+References:
+
+- [§4.3 — Language, toolchain, and repository structure](#43-language-toolchain-and-repository-structure-adr-0011).
+- [§5.4 — Pinned, versioned artifacts](#54-pinned-versioned-artifacts-adr-0014).
+- [§8 — Site integration](#8-site-integration).
+- [NFR-7 — Build and data-quality gates](prd.md#nfr-7-build-and-data-quality-gates).
+- [PDD §5.11 — Labels, units, and glossary links](pdd.md#511-labels-units-and-glossary-links-fr-g3-cr-3-cr-7).
 
 ## 8. Site integration
 
-Source requirements:
+Ground Rupture Explorer joins the existing site's navigation, page
+structure, build, and deployment process. It does not introduce a
+separate website or deployment channel.
+
+### Source requirements
 
 | Reference | Subject |
 |---|---|
-| [PDD §2](pdd.md#2-product-structure-and-navigation) | Product structure and navigation. The entry point is [PDD D-2](pdd.md#1-decision-register) (Site entry point), Decided 2026-10-28. |
-| [NFR-2](prd.md#nfr-2-static-site-hosting) | Static-site hosting. |
+| [PDD §2](pdd.md#2-product-structure-and-navigation) | Product structure and navigation. The site entry point is recorded in D-2, decided 2026-10-28. |
+| [NFR-2](prd.md#nfr-2-static-site-hosting) | Static-site hosting within the existing project website. |
 | [FR-G4](prd.md#fr-g4-citation-disclaimer-and-version-information) | Citation, disclaimer, and version information. |
-| [DR-2](prd.md#dr-2-versioned-exports) | Versioned exports. |
+| [DR-2](prd.md#dr-2-versioned-exports) | Identifiable versions for application data exports. |
+| [NFR-7](prd.md#nfr-7-build-and-data-quality-gates) | Build validation and preservation of existing site functionality. |
 
-- **Navigation:** a top-level "Scenario explorer" entry after Dashboards
-  in `subprojects/mkdocs/mkdocs.yml`
-  ([PDD §2.2](pdd.md#22-entry-point-d-2-decided-2026-10-28) Entry
-  point; [PDD D-2](pdd.md#1-decision-register), Decided 2026-10-28);
-  morphology
-  and measurement pages join the explanatory section; Contact joins
-  last.
-- **Page and assets:** the scenario page is one Markdown page in
-  `subprojects/mkdocs/docs/` carrying the no-JS fallback body and the
-  app mount point — the page element the application attaches to; a
-  dedicated assets directory beside it holds the
-  fetched data vintage
-  ([§5.4](#54-pinned-versioned-artifacts-adr-0014)) and the bundle,
-  which CI builds — local builds write both to gitignored paths
-  ([§4.3](#43-language-toolchain-and-repository-structure-adr-0011)); final
-  naming is in the DDD.
-- **Versions on display
-  ([FR-G4](prd.md#fr-g4-citation-disclaimer-and-version-information);
-  [DR-2](prd.md#dr-2-versioned-exports);
-  [PDD §7.2](pdd.md#72-version-display-and-notice-d-15-proposed) Version
-  display and notice):** the product footer and every download show the
-  software version (the product release version, stamped into the bundle
-  at build time) and the data-export version (read from the artifact
-  manifest).
-  The version-source mechanics — tag, constant, or build metadata — are
-  DDD detail; the HLDD fixes only that both values exist, are distinct,
-  and are stamped at build time, not fetched.
-- **Build gates:** the scenario page participates in the strict build
-  like any page (broken internal links fail the build); the deploy
-  workflow's path filters widen to `subprojects/webapp/**` and the
-  pointer manifest, so webapp and data changes build and validate the
-  site exactly as mkdocs changes do today, and `tests.yml`'s widen the
-  same way
-  ([§4.3](#43-language-toolchain-and-repository-structure-adr-0011),
-  [§9](#9-testing-and-release-architecture)).
+### Navigation
 
----
+A top-level **Scenario explorer** entry appears after Dashboards in
+`subprojects/mkdocs/mkdocs.yml`, following the entry-point decision
+recorded in PDD D-2.
+
+When their delivery priorities are reached:
+
+- the morphology and measurement-explanation pages join the site's
+  explanatory section in P2; and
+- Contact joins last in P3.
+
+References:
+
+- [PDD §2.2 — Entry point, decided 2026-10-28](pdd.md#22-entry-point-d-2-decided-2026-10-28).
+- [PDD decision register — D-2, site entry point](pdd.md#1-decision-register).
+
+### Scenario page and generated assets
+
+The scenario page is a Markdown page under
+`subprojects/mkdocs/docs/`. Its source contains:
+
+- explanatory and fallback content that remains available when the
+  application cannot run; and
+- an application mount point: the page element into which the
+  application renders its interactive interface.
+
+The build prepares a dedicated assets directory containing:
+
+- the generated application bundle and stylesheet; and
+- the data files retrieved and verified using the committed pointer
+  manifest.
+
+These generated and retrieved files are not committed to Git. Local
+builds prepare the same files in gitignored locations for
+`mkdocs serve`.
+
+The build supplies the page with the content-hashed asset references.
+The DDD defines the exact paths and the mechanism for inserting those
+references.
+
+Page-specific loading and integration with Material's instant navigation
+follow the lifecycle contract in §4.3.
+
+References:
+
+- [§4.3 — Language, toolchain, and repository structure](#43-language-toolchain-and-repository-structure-adr-0011).
+- [§5.4 — Pinned, versioned artifacts](#54-pinned-versioned-artifacts-adr-0014).
+- [§6.1 — Failure honesty](#61-failure-honesty-adr-0010).
+
+### Software and data versions
+
+The product footer and every download identify two distinct versions:
+
+- **Software version:** the product release version, recorded in the
+  application at build time.
+- **Data-export version:** the version of the data used to calculate
+  the displayed or downloaded result.
+
+The build records the expected data-export version from the committed
+pointer manifest. At runtime, the application reads the loaded
+data-export version from the artifact manifest and verifies that it
+matches the expected version.
+
+A mismatch stops calculation and produces the explicit failure state
+defined in §6.1. The application must not label a result with the
+expected version without verifying the data actually loaded.
+
+The build and browser must not select a software or data version by
+looking up the latest available release. The DDD defines the software
+version source and the mechanics for passing the expected data version
+into the application.
+
+References:
+
+- [FR-G4 — Citation, disclaimer, and version information](prd.md#fr-g4-citation-disclaimer-and-version-information).
+- [DR-2 — Versioned exports](prd.md#dr-2-versioned-exports).
+- [PDD §7.2 — Version display and notice](pdd.md#72-version-display-and-notice-d-15-proposed).
+- [§5.4 — Artifact and pointer manifests](#54-pinned-versioned-artifacts-adr-0014).
+- [§6.1 — Failure honesty](#61-failure-honesty-adr-0010).
+
+### Build and deployment checks
+
+The scenario page participates in the existing strict MkDocs build.
+Internal links and other site content remain subject to the repository's
+existing validation rules.
+
+Workflow triggers must cover application source, the pointer manifest,
+and the other build inputs identified in §4.3. In particular:
+
+- application changes trigger application tests and site validation;
+- pointer-manifest changes trigger retrieval and verification of the
+  selected data vintage, calculation-comparison tests, and site
+  validation; and
+- accepted changes deploy through the existing workflow after merging
+  to `main`.
+
+Validation must cover the assembled site, including the generated
+application assets and retrieved data files, rather than only the
+Markdown source.
+
+A failed application build or a failed data retrieval fails the site
+build, and a failed run must not replace the working published site.
+
+References:
+
+- [NFR-7 — Build and data-quality gates](prd.md#nfr-7-build-and-data-quality-gates).
+- [CI triggers and validation](#ci-triggers-and-validation).
+- [§9 — Testing and release architecture](#9-testing-and-release-architecture).
 
 ## 9. Testing and release architecture
 
-Source requirements:
+Verification covers the pipeline, exported files, application
+calculations, browser integration, and assembled site. Automated checks
+and human acceptance reviews have different responsibilities; neither
+replaces the other. The closing subsections give the release process:
+the data-refresh and deployment sequence, software-release data
+attachments, and rollback.
+
+### Source requirements
 
 | Reference | Subject |
 |---|---|
 | [NFR-7](prd.md#nfr-7-build-and-data-quality-gates) | Build and data-quality gates. |
-| [DR-1](prd.md#dr-1-controlled-data-source) | Controlled data source. |
-| [DR-3](prd.md#dr-3-one-state-per-trial-population) | One-state-per-trial population. |
-| [PDD SC-3](pdd.md#101-success-criteria) | Correctness. |
-| [PDD SC-6](pdd.md#101-success-criteria) | Site integrity. |
-| [R-17](prd.md#94-delivery-and-technical-risks) | Risk: continuous integration cannot rebuild the full pipeline because raw inputs are local-only. |
-| [R-18](prd.md#94-delivery-and-technical-risks) | Risk: the scenario page shares a single GitHub Pages site, URL space, build, and deploy job with the existing website. |
-| [PDD §10](pdd.md#10-acceptance-and-success) | Acceptance and success. |
+| [DR-1](prd.md#dr-1-controlled-data-source) | Controlled data sources and reference calculations. |
+| [DR-3](prd.md#dr-3-one-state-per-trial-population) | One-state-per-trial population selection. |
+| [DR-4](prd.md#dr-4-measurement-hygiene) | Missing, negative, and low-slip measurement policies. |
+| [DR-5](prd.md#dr-5-field-data-preparation) | Field-data normalization and provenance. |
+| [PDD SC-3](pdd.md#101-success-criteria) | Numerical correctness. |
+| [PDD SC-4](pdd.md#101-success-criteria) | Performance within the budgets under the reference conditions. |
+| [PDD SC-5](pdd.md#101-success-criteria) | Candor: caveats present in the default view of any result they apply to. |
+| [PDD SC-6](pdd.md#101-success-criteria) | Preservation of existing site functionality and deployment. |
+| [PDD SC-7](pdd.md#101-success-criteria) | Research-group approval of the reader-facing texts. |
+| [R-17](prd.md#94-delivery-and-technical-risks) | CI cannot regenerate the research data from local-only inputs. |
+| [R-18](prd.md#94-delivery-and-technical-risks) | The application shares the existing site's build and deployment. |
+| [PDD §10](pdd.md#10-acceptance-and-success) | Acceptance scenarios and success criteria. |
 
-Four layers, three of them CI-enforced:
+### Pipeline and export tests
 
-1. **Pipeline tests** (`subprojects/python/tests`, run by pytest, the
-   Python test runner): contracts for the new product views — the
-   geometry (3,434 × 101), the one-state view with no ties at maximum
-   slip ([DR-3](prd.md#dr-3-one-state-per-trial-population)), the null
-   policies ([DR-4](prd.md#dr-4-measurement-hygiene) Measurement
-   hygiene), the field normalization
-   ([DR-5](prd.md#dr-5-field-data-preparation) Field-data
-   preparation), the export round trip (decoding a written artifact
-   reproduces the view's records and values), and the golden-scenario
-   reference generator. The contracts that run on fixtures — small
-   committed sample datasets, like the existing suite's — run on a
-   fresh clone and in CI. The checks that need the real ensemble (the
-   geometry, the tie check, the round trip on the real export) skip in
-   CI, as today's data-dependent tests do, and run locally in the
-   export task at every refresh.
-2. **Webapp tests** (new job in `tests.yml`, whose path filters widen
-   with it,
-   [§4.3](#43-language-toolchain-and-repository-structure-adr-0011)): unit
-   tests for the engine (and, from P2, the URL codec), a check that the
-   fetched artifacts match the committed pointer manifest's
-   checksums and the artifact manifest's declared counts, plus the
-   **parity harness** — every
-   golden scenario ([PDD GS-0–GS-7](pdd.md#102-golden-scenarios))
-   replayed through the client engine against the pinned reference
-   results: full-precision values within the per-calculation tolerance
-   required by the closing note of
-   [PDD §10.1](pdd.md#101-success-criteria) (Success criteria), and
-   values rounded to display precision equal to the rounded references
-   exactly ([PDD SC-3](pdd.md#101-success-criteria)). Runs headlessly —
-   in Node, with no browser involved — against the fetched artifacts;
-   no browser farm (a pool of real browsers driven by test scripts) in
-   the MVP.
-3. **Site validation**: the strict MkDocs build on every PR touching
-   `subprojects/mkdocs/**`, `subprojects/webapp/**`, or the pointer
-   manifest; deploy from `main` only, unchanged
-   ([ADR-0009](../adr/0009-github-pages-hosting.md) GitHub Pages (via
-   Actions) as site hosting).
-4. **Acceptance walkthroughs**
-   ([PDD §10.3](pdd.md#103-acceptance-walkthroughs)): scripted demos of
-   [US-1–US-3](prd.md#4-user-stories) (User stories: Dam foundation
-   scenario, Pipeline crossing, Design review) against the golden
-   scenarios before release, plus the candor and scientific sign-off
-   checks of [PDD SC-5](pdd.md#101-success-criteria) and
-   [PDD SC-7](pdd.md#101-success-criteria) — human-run by design.
+Pipeline tests reside in `subprojects/python/tests` and run through
+pytest.
 
-**Release flow** (unchanged in authority — the owner publishes):
-refresh exports locally through the Gradle lane, which also runs the
-data-dependent checks → the export task writes the artifacts, both
-manifests, and the references together
-([§5.4](#54-pinned-versioned-artifacts-adr-0014),
-[§5.6](#56-reference-results-and-verification-adr-0015)) → upload the
-vintage's assets to its data release → verify the uploaded assets
-against the generated checksums → commit the updated pointer manifest
-→ PR
-(validation fetches and verifies the vintage and builds, the
-application bundle included) → merge to `main` → CI builds the
-application bundle, fetches and verifies the data, then builds the
-site → Pages deploy. When the owner tags a GitHub release, the release
-carries the current exports as its data asset, beside the dashboards'
-plotting CSVs the 2026-08-20 author review ships with each release
-([§5.4](#54-pinned-versioned-artifacts-adr-0014);
-[`notes/Roadmap.md`](../../notes/Roadmap.md#decisions-made), Decisions
-made); whether attaching them is manual or a release workflow is DDD
-detail. A data refresh and
-a software release both bump a displayed version
-([PDD §9.4](pdd.md#94-releases) Releases); rollback is a git revert of
-the pointer, complete while past vintages' assets are retained and the
-application version supports their format
+They verify:
+
+- product views and population-selection rules;
+- missing-value and other approved measurement policies;
+- field-name normalization and source preservation;
+- export encoding and decoding; and
+- generation of the golden-scenario reference results.
+
+Tests use two kinds of input:
+
+| Input | Where checks run | Purpose |
+|---|---|---|
+| Small committed fixtures | Local development and CI. | Exercise calculation rules, export formats, and edge cases without the raw research datasets. |
+| Full research datasets | The owner's local export process. | Verify the actual ensemble, exported values, and reference results before publication. |
+
+Every data refresh must pass the full-data checks before its files can
+be uploaded. These include the expected ensemble dimensions, absence
+of ties at each trial's maximum slip, and the complete export round
+trip described in
+[§5.6](#56-reference-results-and-verification-adr-0015).
+
+Required full-data checks must fail the export task if their inputs are
+missing or a check fails. The task must not treat a skipped check as
+successful verification.
+
+Checks that the published artifact alone supports — the structural
+validation defined under the webapp tests below — are repeated in CI.
+CI cannot independently repeat comparisons that require the local
+source views.
+
+References:
+
+- [§5.6 — Reference results and verification](#56-reference-results-and-verification-adr-0015).
+- [DR-3 — One-state-per-trial population](prd.md#dr-3-one-state-per-trial-population).
+- [DR-4 — Measurement hygiene](prd.md#dr-4-measurement-hygiene).
+- [DR-5 — Field-data preparation](prd.md#dr-5-field-data-preparation).
+- [PDD §10.2 — Golden scenarios](pdd.md#102-golden-scenarios).
+
+### Webapp tests — Node on CI
+
+A dedicated webapp job in `tests.yml` runs automated tests in Node,
+without a browser. The job fetches the files pinned by the committed
+pointer manifest and verifies their checksums before any test runs
 ([§5.4](#54-pinned-versioned-artifacts-adr-0014)).
-Sequencing and effort belong to the implementation plan, not here.
 
----
+#### Calculation parity
+
+The core Python implementation owns the scientific and statistical
+rules, including filtering semantics, population selection,
+measurement handling, conversion, and summary statistics. Python tests
+verify those rules.
+
+Webapp calculation tests — the **parity harness** of
+[ADR-0015](../adr/0015-golden-scenario-parity.md) — establish parity:
+the application must
+reproduce the independently calculated pipeline reference results.
+They do not define a separate set of expected scientific or statistical
+answers.
+
+The tests evaluate every golden scenario
+([PDD §10.2](pdd.md#102-golden-scenarios) Golden scenarios) using the
+pinned scenario artifact and reference-results export. Following the
+comparison rules of
+[§5.6](#56-reference-results-and-verification-adr-0015), they compare:
+
+- selected records, their scarp-type classes, counts, and range flags
+  exactly;
+- calculated statistics and converted slip windows within the defined
+  per-calculation tolerances; and
+- reader-facing values exactly after the prescribed display rounding.
+
+When a calculation edge case needs additional coverage, its expected
+behavior is established and tested in Python, then included in the
+reference cases exercised by the webapp.
+
+#### Application-specific tests
+
+Separate tests verify responsibilities that belong to the webapp rather
+than the scientific calculation code:
+
+- artifact decoding and **structural validation** — the decoded
+  artifact matches the artifact manifest's declared dimensions,
+  dictionaries, and null sentinels;
+- handling of mismatched versions or malformed data;
+- scenario-state validation — rejecting settings outside the permitted
+  values of the [§6](#6-application-architecture) scenario-state
+  model; and
+- URL encoding and restoration when sharing ships in
+  [P2](prd.md#22-mvp-and-delivery-priorities).
+
+These tests do not establish browser rendering, navigation, or
+accessibility correctness. Those are checked by the locally invoked
+browser tests and during release acceptance.
+
+References:
+
+- [ADR-0015 — Golden-scenario references and a pipeline↔client parity
+  harness](../adr/0015-golden-scenario-parity.md).
+- [§5.4 — Pinned, versioned artifacts](#54-pinned-versioned-artifacts-adr-0014).
+- [§5.6 — Reference results and verification](#56-reference-results-and-verification-adr-0015).
+- [PDD §10.1 — Success criteria](pdd.md#101-success-criteria).
+- [PDD §10.2 — Golden scenarios](pdd.md#102-golden-scenarios).
+
+### Browser tests — locally invoked release checks
+
+An explicitly invoked script runs automated browser tests against the
+locally assembled site. The tests execute on a developer machine, not
+in CI, and are required before release. The lane runs in one evergreen
+browser engine
+([ADR-0015](../adr/0015-golden-scenario-parity.md), second amendment
+of 2026-10-29).
+
+The script drives the browser, performs user actions, and checks the
+results. It must not depend on a person manually following a list of
+clicks.
+
+The tests verify that:
+
+- product pages render correctly, including controls, charts, tables,
+  notices, and fallback content;
+- direct visits and site navigation initialize the application
+  correctly, and the application replaces the fallback presentation
+  only once its interactive content is ready
+  ([§6.1](#61-failure-honesty-adr-0010));
+- leaving and returning to the scenario page does not duplicate
+  controls, event handlers, or result updates;
+- the scripted interactions of the DDD's test inventory each produce
+  the response the PDD defines for them — scenario changes,
+  offset-mode entry and its flags, notices, and downloads;
+- at least one golden scenario is evaluated end to end, and every
+  displayed value equals the display-rounded reference result exactly
+  ([PDD SC-3](pdd.md#101-success-criteria));
+- the same starting state and action sequence produce identical
+  scenario settings and displayed results on every run;
+- scenario summaries, charts, tables, and downloads describe the same
+  active scenario;
+- each [§6.1](#61-failure-honesty-adr-0010) state appears when its
+  condition holds — invalid or out-of-range input, no data for the
+  selected scenario, unavailable browser capabilities, and internal
+  failure — without being confused with one another;
+- the automatable accessibility checks pass; and
+- keyboard interaction and responsive layouts behave as
+  [PDD §9.2](pdd.md#92-browser-and-mobile-baseline-d-16-proposed),
+  [PDD §9.3](pdd.md#93-accessibility-target-d-17-proposed), and
+  [§7.2](#72-accessibility-and-supported-environments) specify.
+
+These tests verify browser integration and user-visible behavior.
+Calculation correctness is established by the Python tests and the
+parity harness; browser tests use those reference results for their
+numerical assertions.
+
+The script must report failed checks and return a nonzero exit status
+when any check fails. The DDD names the browser-testing tool, the test
+inventory, and the rendering assertions.
+
+References:
+
+- [ADR-0015 — Golden-scenario references and a pipeline↔client parity
+  harness](../adr/0015-golden-scenario-parity.md).
+- [§4.3 — Language, toolchain, and repository
+  structure](#43-language-toolchain-and-repository-structure-adr-0011).
+- [§6.1 — Failure honesty](#61-failure-honesty-adr-0010).
+- [§7.2 — Accessibility and supported
+  environments](#72-accessibility-and-supported-environments).
+- [PDD §10.2 — Golden scenarios](pdd.md#102-golden-scenarios).
+
+### Site validation
+
+The strict MkDocs build validates the assembled site, including generated
+application assets and retrieved data files.
+
+Workflow triggers cover all relevant inputs identified in
+[§4.3](#43-language-toolchain-and-repository-structure-adr-0011), not
+only Markdown changes. Application changes and pointer-manifest changes
+must run the applicable tests and site validation before merge.
+
+Site validation performs §6.2's media-permission release check: media
+without publication permission is absent from the publication output
+([§6.2](#62-media-architecture-adr-0012)).
+
+Deployment remains restricted to `main`, following
+[ADR-0009](../adr/0009-github-pages-hosting.md).
+
+References:
+
+- [ADR-0009 — GitHub Pages (via Actions) as site
+  hosting](../adr/0009-github-pages-hosting.md).
+- [§4.3 — Language, toolchain, and repository
+  structure](#43-language-toolchain-and-repository-structure-adr-0011).
+- [§6.2 — Media architecture](#62-media-architecture-adr-0012).
+- [§8 — Site integration](#8-site-integration).
+
+### Acceptance and release checks
+
+Before release, human reviewers execute the PDD's walkthroughs for
+[US-1](prd.md#us-1-dam-foundation-scenario) (Dam foundation scenario),
+[US-2](prd.md#us-2-pipeline-crossing) (Pipeline crossing), and
+[US-3](prd.md#us-3-design-review) (Design review) against the golden
+scenarios ([PDD §10.3](pdd.md#103-acceptance-walkthroughs) Acceptance
+walkthroughs).
+[US-4](prd.md#us-4-interpreting-observed-deformation) (Interpreting
+observed deformation) and
+[US-5](prd.md#us-5-teaching-surface-rupture-morphology) (Teaching
+surface-rupture morphology) join acceptance when their P2 capabilities
+ship.
+
+Acceptance also verifies:
+
+- every applicable caveat is present in the default view of any result
+  it applies to, never relegated to footnotes, and the population name
+  is always visible in the scenario summary with its explainer one
+  action away ([PDD SC-5](pdd.md#101-success-criteria) candor);
+- the existing dashboards, navigation, citation pages, and deployment
+  process are unaffected by the release
+  ([PDD SC-6](pdd.md#101-success-criteria) site integrity);
+- keyboard and accessibility behavior meet the defined target
+  ([PDD §9.3](pdd.md#93-accessibility-target-d-17-proposed));
+- performance meets the budgets under the defined reference conditions
+  ([PDD SC-4](pdd.md#101-success-criteria);
+  [§7.1](#71-performance-estimates-and-verification)); and
+- the research group has approved the reader-facing texts
+  ([PDD SC-7](pdd.md#101-success-criteria) scientific sign-off;
+  [PDD §5](pdd.md#5-copy-deck) Copy deck).
+
+The DDD defines test procedures and coverage. The implementation plan
+schedules the checks and assigns their execution.
+
+References:
+
+- [PDD §10.1 — Success criteria](pdd.md#101-success-criteria).
+- [PDD §10.3 — Acceptance walkthroughs](pdd.md#103-acceptance-walkthroughs).
+- [PRD §4 — User stories](prd.md#4-user-stories).
+- [§7 — Meeting the quality requirements](#7-meeting-the-quality-requirements).
+
+### Data refresh and deployment
+
+A data refresh follows this sequence:
+
+1. The owner runs the local export task and its required full-data checks.
+2. The task produces the data files, reference results, artifact
+   manifest, and pointer manifest.
+3. The owner uploads the verified files to the vintage's data release.
+4. The export task verifies that the uploaded files match the
+   generated checksums
+   ([§5.4](#54-pinned-versioned-artifacts-adr-0014)).
+5. The owner commits the updated pointer manifest and opens a pull
+   request.
+6. CI retrieves the pinned files, verifies their checksums, runs the
+   fixture-based pipeline tests, the parity harness, and the
+   application-specific tests, and validates the assembled site.
+7. Before the merge that releases the change, the owner runs the
+   browser tests against the locally assembled site and the acceptance
+   checks of this section — a data refresh changes the product, so
+   these release checks apply
+   ([PDD §9.4](pdd.md#94-releases) Releases).
+8. After approval and merge to `main`, CI builds the application,
+   retrieves and verifies the pinned data, builds the site, and deploys
+   it to GitHub Pages.
+
+A software-only change uses the currently pinned data vintage unless
+the change explicitly requires a new one. It does not regenerate or
+republish research data merely because application code changed.
+
+The displayed software version changes with a software release. The
+displayed data-export version changes with a data refresh, following
+[PDD §9.4](pdd.md#94-releases).
+
+References:
+
+- [§5.4 — Pinned, versioned artifacts](#54-pinned-versioned-artifacts-adr-0014).
+- [PDD §9.4 — Releases](pdd.md#94-releases).
+
+### Software-release data attachments
+
+When the owner publishes a software release, its data attachments must
+follow the distribution arrangement described in
+[§5.4](#54-pinned-versioned-artifacts-adr-0014) and
+[`notes/Roadmap.md`](../../notes/Roadmap.md#decisions-made), including
+the current application exports and the dashboard plotting CSVs.
+
+Attached application exports must be the same verified files identified
+by that release's committed pointer manifest, not newly generated or
+independently selected files.
+
+The DDD defines whether attachment is manual or automated. Permission
+and archival requirements remain governed by
+[§5.4](#54-pinned-versioned-artifacts-adr-0014).
+
+References:
+
+- [§5.4 — Pinned, versioned artifacts](#54-pinned-versioned-artifacts-adr-0014).
+- [`notes/Roadmap.md` — Decisions made](../../notes/Roadmap.md#decisions-made).
+
+### Rollback
+
+Rollback restores a known compatible combination of application code,
+pointer manifest, and retained data files.
+
+A data-only rollback may revert the pointer-manifest change if the
+application supports the earlier data format. A release that changes
+both application code and data may require reverting both.
+
+The normal verification and deployment checks also apply to rollback.
+It must not bypass checksum validation or silently substitute another
+vintage.
+
+References:
+
+- [§5.4 — Pinned, versioned artifacts](#54-pinned-versioned-artifacts-adr-0014).
 
 ## 10. Risks and open dependencies
 
-Architecture-level entries only; the register of
-[PRD §9](prd.md#9-dependencies-and-risks) (Dependencies and risks)
-remains the master list.
+This section records the architectural response to the risks identified
+in the PRD. It does not replace
+[PRD §9 — Dependencies and risks](prd.md#9-dependencies-and-risks).
 
-| Risk / dependency | Position here | Mitigation / owner |
+A mitigation described here is not evidence that a risk has been
+eliminated. Performance claims require measurements; release
+dependencies require completion or a documented interim rule.
+
+### Performance and delivery risks
+
+| Risk / dependency | Architectural response | Remaining action / owner |
 |---|---|---|
-| [R-16](prd.md#94-delivery-and-technical-risks) combined filtering vs. payload budget | Settled by design: the row-level artifact keeps every filter combination available at a measured ≈ 0.84–1.07 MB on the wire, inside the 4 MB budget ([§5.2–§5.3](#52-simulation-data-organization-adr-0013), [§7.1](#71-budget-arithmetic)) | Early payload-and-timing spike — a short, throwaway measurement exercise — on real hosting validates [§7.1](#71-budget-arithmetic)'s two flagged estimates (measured wire size and inflate cost of the pre-compressed artifact; full-ensemble percentile sort) — architect |
-| [R-17](prd.md#94-delivery-and-technical-risks) CI cannot rebuild the pipeline | Absorbed: release-asset vintages pinned by a committed pointer manifest, fetched and checksum-verified in CI; fixture-driven tests in CI; the data-dependent checks run locally in the export task ([§5.4](#54-pinned-versioned-artifacts-adr-0014), [§9](#9-testing-and-release-architecture)) | Keep reference generation inside the export task — architect ([DR-2](prd.md#dr-2-versioned-exports) and the [R-17](prd.md#94-delivery-and-technical-risks) planned response were aligned to the pinned-artifact model on 2026-10-28, owner-approved) |
-| [R-18](prd.md#94-delivery-and-technical-risks) single-site blast radius ([PDD SC-6](pdd.md#101-success-criteria) Site integrity) | Contained: additive pages, no changes to existing assets, strict build + PR validation. Two new couplings: every site deploy now needs a successful bundle build ([§4.3](#43-language-toolchain-and-repository-structure-adr-0011)) and the pinned-vintage fetch-and-verify ([§5.4](#54-pinned-versioned-artifacts-adr-0014); next row), both exercised by PR validation first | [§8](#8-site-integration), [§9](#9-testing-and-release-architecture) — owner's release lane |
-| [R-19](prd.md#94-delivery-and-technical-risks) static-site feasibility | Settled by design: all scenario-time computation runs client-side, with no backend ([§4.1](#41-native-client-side-application-adr-0010)); the budgets are expected to hold with margin ([§7.1](#71-budget-arithmetic)) | The same spike as for [R-16](prd.md#94-delivery-and-technical-risks) — architect |
-| New toolchain (Node/esbuild) maintenance | Accepted, pinned, Gradle-wrapped, and run in CI, which builds the bundle ([§4.3](#43-language-toolchain-and-repository-structure-adr-0011)) | Recorded in [ADR-0011](../adr/0011-webapp-toolchain.md) per [NFR-8](prd.md#nfr-8-architecture-decision-record) (Architecture decision record) — owner |
-| Deploys depend on a release-asset fetch | The committed pointer manifest's checksums pin content exactly: a failed or tampered fetch fails the build visibly, never deploys silently; assets live on the platform already hosting the repository, Actions, and Pages ([§5.4](#54-pinned-versioned-artifacts-adr-0014)) | Retain past vintages' assets so rollback stays a git revert — owner |
-| Terms and distribution of the derived data ([NFR-6](prd.md#nfr-6-licensing) Licensing) | Open: the published exports redistribute data derived from the input datasets, which the README and `LICENSE-docs` say today are not redistributed here; the design keeps that data out of the repository and the Apache-2.0 source archive entirely, and attaches it to each GitHub release as a separate asset ([§5.4](#54-pinned-versioned-artifacts-adr-0014)) | Confirm each source's terms: the DesignSafe simulation deposits, the FDHI flatfile, and SURE 2.0; for the Kern County compilation, redistribution is already cleared ([`docs/datasets.md`](../datasets.md)) and only the licence wording is open. Distribution is decided — the 2026-08-20 author review ships the pipeline's data with each GitHub release ([`notes/Roadmap.md`](../../notes/Roadmap.md#decisions-made), Decisions made) — but the Zenodo GitHub integration archives only the source archive, so decide the deposit step that gets the data into Zenodo (the dataset record the Roadmap prefers), with the first release. Then word the data asset's licence, the README (which also calls the unpublished Kern compilation published), `LICENSE-docs`, the site footer, and `.zenodo.json` before the first data vintage is uploaded, since release assets on a public repository are public — owner, with the research group |
-| [PDD D-6](pdd.md#1-decision-register) Kern group; [PDD D-8](pdd.md#1-decision-register) animation coverage; [PDD D-10](pdd.md#1-decision-register) liability text; [R-1/R-2/R-3](prd.md#91-scientific-and-data-dependencies) scientific inputs; [R-12](prd.md#93-content-and-media-dependencies) photo permissions; [R-15](prd.md#93-content-and-media-dependencies) repo URLs | Carried as data/content slots; none blocks the architecture | [PDD register](pdd.md#1-decision-register) owners (research group / owner) |
-| 3D arm ([DR-7](prd.md#dr-7-future-3d-compatibility) Future 3D compatibility) | Model-family dimension reserved in the trial table ([§5.2](#52-simulation-data-organization-adr-0013)); at 3D scale one artifact per model family (the artifact manifest pins multiple files; the default page fetches the 2D family alone) | Recorded in [ADR-0013](../adr/0013-row-level-scenario-artifact.md) and [ADR-0014](../adr/0014-committed-content-hashed-artifacts.md); nothing needed now |
+| [R-16](prd.md#94-delivery-and-technical-risks) — filtering freedom versus payload size | Deliver individual records in a compact representation rather than restrict the supported scenario combinations. Candidate encodings have measured compressed sizes of approximately 0.84–1.07 MB. | Measure the complete selected export and end-to-end loading and interaction performance under the PDD's reference conditions. Architectural feasibility remains provisional until these checks pass — owner. |
+| [R-17](prd.md#94-delivery-and-technical-risks) — CI cannot rebuild the research data | Generate and verify data locally. Store versioned exports as release assets, selected by a committed pointer manifest. CI retrieves and verifies those exact files. | Ensure every publication runs the required full-data checks and generates the reference results. CI cannot independently repeat source-data comparisons — owner. |
+| [R-18](prd.md#94-delivery-and-technical-risks) — changes can affect the existing site | Add product pages within the existing site and validate the assembled publication before deployment. Application builds and pinned-data retrieval become dependencies of the site build. | Run site-regression checks and locally invoked browser tests before release. A failed application build or data retrieval must fail deployment without replacing the working published site ([§8](#8-site-integration)) — owner. |
+| [R-19](prd.md#94-delivery-and-technical-risks) — static-site feasibility | Perform scenario filtering and calculations in the browser without a backend. | Confirm that this implementation meets the performance and browser requirements. The automated browser lane exercises one evergreen engine ([§9](#9-testing-and-release-architecture)); confirming the remaining engines and the mobile floor of the [PDD §9.2 — Browser and mobile baseline](pdd.md#92-browser-and-mobile-baseline-d-16-proposed) is part of this check. Backend independence is established by the design; acceptable performance is not yet established — owner. |
+| Node.js, TypeScript, and esbuild maintenance | Pin tool versions and dependencies, expose commands through Gradle, and run validation in CI. | Maintain the toolchain and review upgrades under [ADR-0011](../adr/0011-webapp-toolchain.md) — owner. |
+| Builds depend on retained release assets | Retrieve only the files identified by the committed pointer manifest and verify their checksums before use. | Retain the earlier vintages needed for historical builds and rollback. Define recovery and withdrawal procedures; restore compatible code and data together when necessary — owner. |
+
+The feasibility measurements must cover the complete sequence of
+operations defined in
+[§7.1](#71-performance-estimates-and-verification), not only
+decompression or percentile sorting in isolation.
+
+References:
+
+- [PRD §9 — Dependencies and risks](prd.md#9-dependencies-and-risks).
+- [§5.4 — Pinned, versioned artifacts](#54-pinned-versioned-artifacts-adr-0014).
+- [§7.1 — Performance estimates and verification](#71-performance-estimates-and-verification).
+- [§8 — Site integration](#8-site-integration).
+- [§9 — Testing and release architecture](#9-testing-and-release-architecture).
+
+### Data rights and archival distribution
+
+Permission to distribute the derived exports must be confirmed before
+their first public upload. Storing them outside Git, or attaching them
+separately from Apache-2.0 application code, does not itself establish
+permission to redistribute them.
+
+The owner, with the research group, must:
+
+- confirm the applicable terms for the DesignSafe simulation deposits,
+  FDHI, and SURE;
+- record the cleared redistribution position and final license wording
+  for the Kern County compilation;
+- define the notices and attribution accompanying each data vintage;
+- preserve the release-distribution arrangement recorded in
+  [`notes/Roadmap.md` — Decisions made](../../notes/Roadmap.md#decisions-made);
+- decide how the processed data will be deposited and preserved in
+  Zenodo, including its relationship to the software record; and
+- update the README, `LICENSE-docs`, site footer, and archival metadata
+  so they distinguish application code, raw inputs, and distributed
+  derived data accurately.
+
+As recorded in
+[`notes/Roadmap.md` — Decisions made](../../notes/Roadmap.md#decisions-made),
+the Zenodo GitHub integration archives only the tag's source archive;
+release assets are not picked up. Until a dataset record exists,
+published data vintages have no archival copy. The archival
+procedure must verify what files are actually preserved.
+
+References:
+
+- [NFR-6 — Licensing](prd.md#nfr-6-licensing).
+- [`docs/datasets.md` — Input datasets and derived views](../datasets.md).
+- [`notes/Roadmap.md` — Decisions made](../../notes/Roadmap.md#decisions-made).
+- [Licensing and archival distribution](#licensing-and-archival-distribution).
+
+### Scientific and content dependencies
+
+The following dependencies do not currently prevent selection of the
+architecture. They may nevertheless block a capability or public
+release until resolved or covered by a documented interim rule.
+
+| Dependency | Architectural response | Decision owner |
+|---|---|---|
+| [D-6](pdd.md#1-decision-register) — Kern County field-data group and principal-width rule | Preserve source distinctions and withhold the Kern County worked-example preset until the research group supplies its field-data group and principal-width rule; the walkthrough itself is already specified ([PDD §4.7 — Kern County worked example](pdd.md#47-kern-county-worked-example-fr-o6-d-6-open)). | Research group. |
+| [D-8](pdd.md#1-decision-register) — animation coverage required for public release | Represent availability explicitly in the media index; do not imply complete coverage. | Research group. |
+| [D-10](pdd.md#1-decision-register) — liability-limitation text referenced by [CR-4 — Standing disclaimer](prd.md#cr-4-standing-disclaimer) | Keep the release dependency explicit; no placeholder liability text may ship. | Product owner. |
+| [D-20](pdd.md#1-decision-register) — Us − Ud as a fourth displayed measurement | The stage arrays carry no uplift fields ([§5.2](#52-simulation-data-organization-adr-0013)); enabling the reserved fourth panel requires a pipeline export change and a new data vintage. The current artifact does not block the MVP. | Owner + research group. |
+| [R-1](prd.md#91-scientific-and-data-dependencies) — scarp-dip correction | Keep showing the recorded provisional-data notice ([FR-O4 — Scarp-dip data caveat](prd.md#fr-o4-scarp-dip-data-caveat)) until corrected data or rules are supplied. | Research group. |
+| [R-2](prd.md#91-scientific-and-data-dependencies) — detailed cohesion-profile definitions | Do not enable the affected advanced controls before definitions are approved. | Research group. |
+| [R-3](prd.md#91-scientific-and-data-dependencies) — low-slip measurement treatment | Apply the recorded interim policy without inventing a validity boundary. | Research group. |
+| [R-12](prd.md#93-content-and-media-dependencies) — photograph permissions | Exclude unapproved files from the published site, not merely from page rendering. | Research group supplies permission records; build enforces exclusion. |
+| [R-15](prd.md#93-content-and-media-dependencies) — repository URLs | Publish links only after approved URLs are supplied. | Research group. |
+
+References:
+
+- [PDD §1 — Decision register](pdd.md#1-decision-register).
+- [PRD §9.1 — Scientific and data dependencies](prd.md#91-scientific-and-data-dependencies).
+- [PRD §9.3 — Content and media dependencies](prd.md#93-content-and-media-dependencies).
+
+### Future 3D data
+
+The current artifact represents the published 2D ensemble. It carries a
+model-family identifier, and the decoding boundary must not make the
+current 101-stage layout a permanent requirement for all future data.
+
+The design does not yet prescribe the 3D format, loading strategy, or
+number of files. Those decisions require the future dataset's actual
+structure and size.
+
+References:
+
+- [DR-7 — Future 3D compatibility](prd.md#dr-7-future-3d-compatibility).
+- [§5.2 — Simulation data organization](#52-simulation-data-organization-adr-0013).
 
 ---
 
 ## 11. Decision records
 
-The six architecture decisions of [chapter 1](#1-architecture-decisions)
-are drafted as repository ADRs — the project's standing decision record
-([`docs/adr`](../adr/README.md), which indexes every record and its
-status) — alongside this document, each entering review as **Proposed**
-and marked **Accepted** as the owner approves it:
+The ADRs are the authoritative architecture decision records.
+[Chapter 1](#1-architecture-decisions) provides their index; this HLDD
+explains how the decisions fit together.
 
-- **[ADR-0010](../adr/0010-native-client-side-scenario-app.md)** — the
-  native client-side application and the surface map of
-  [FR-G5](prd.md#fr-g5-reuse-of-existing-full-dataset-dashboards-c8)
-  (Reuse of existing full-dataset dashboards), with URL-borne
-  shared-link state and failure honesty;
-- **[ADR-0011](../adr/0011-webapp-toolchain.md)** — the webapp
-  toolchain: TypeScript, esbuild, no framework, hand-rolled SVG charts,
-  `subprojects/webapp`;
-- **[ADR-0012](../adr/0012-product-data-exports.md)** — the five
-  purpose-built product exports;
-- **[ADR-0013](../adr/0013-row-level-scenario-artifact.md)** — the
-  row-level, trial-major columnar scenario artifact and client-side
-  computation;
-- **[ADR-0014](../adr/0014-committed-content-hashed-artifacts.md)** —
-  release-asset delivery pinned by a committed pointer manifest,
-  content-hashed, pre-compressed;
-- **[ADR-0015](../adr/0015-golden-scenario-parity.md)** —
-  golden-scenario references and the pipeline↔client parity harness.
+The six decisions supporting this design are:
 
-[NFR-8](prd.md#nfr-8-architecture-decision-record)'s requirement that
-the platform decision land in an ADR is met by
-[ADR-0010](../adr/0010-native-client-side-scenario-app.md) and
-[ADR-0011](../adr/0011-webapp-toolchain.md). Accepting the ADRs is part
-of this document's review; after acceptance, a changed decision gets a
-new, superseding ADR rather than an edit
-([`docs/adr/README.md`](../adr/README.md)).
+- **[ADR-0010](../adr/0010-native-client-side-scenario-app.md):**
+  the client-side application, implementation choices for product
+  surfaces, shared-link state in P2, and failure handling.
+- **[ADR-0011](../adr/0011-webapp-toolchain.md):**
+  TypeScript type checking, esbuild, framework-free implementation,
+  direct SVG chart rendering, and the Gradle webapp subproject.
+- **[ADR-0012](../adr/0012-product-data-exports.md):**
+  the scenario artifact, field export, regression export, reference
+  results, and P2 media index.
+- **[ADR-0013](../adr/0013-row-level-scenario-artifact.md):**
+  row-level, trial-major, columnar simulation data and browser-side
+  scenario calculations.
+- **[ADR-0014](../adr/0014-committed-content-hashed-artifacts.md):**
+  release-asset storage, the committed pointer manifest, verified
+  retrieval, and content-hashed, pre-compressed publication.
+- **[ADR-0015](../adr/0015-golden-scenario-parity.md):**
+  export-integrity checks, independently calculated Python reference
+  results, application calculation-parity tests, and the
+  pipeline-supplied offset-to-slip conversion coefficients.
 
-Separately, [ADR-0007](../adr/0007-dashboard-design-conventions.md)
-(Dashboard design conventions) still carries its stale "Kern County is
-red" clause (its decision 1 contradicts the later
-[visual-identity convention](../dashboards/visual-identity.md) and the
-built dashboards); the short superseding errata it needs is repo
-housekeeping, independent of this design.
+The six ADRs entered review as Proposed and are Accepted
+(2026-10-28), incorporating the amendments agreed during review. The
+status recorded in each ADR is authoritative.
+
+The ADRs and this HLDD must agree before approval is complete. After
+acceptance, architectural changes follow the repository's ADR process;
+the DDD and implementation plan do not silently override an accepted
+decision.
+
+The conflicting “Kern County is red” statement in
+[ADR-0007](../adr/0007-dashboard-design-conventions.md) must also be
+resolved through that process. Its correction must align the decision
+record with the accepted field-data color convention without reopening
+the palette decision.
+
+References:
+
+- [§1 — Architecture decisions](#1-architecture-decisions).
+- [Architecture Decision Records](../adr/README.md).
+- [NFR-8 — Architecture decision record](prd.md#nfr-8-architecture-decision-record).
+- [ADR-0007 — Dashboard design conventions](../adr/0007-dashboard-design-conventions.md).
+- [Visual identity — the one system all dashboards follow](../dashboards/visual-identity.md).
 
 ---
 
-## 12. Explicitly not in this document
+## 12. Scope of the following documents
 
-Owned by the **DDD** (next step): the artifact's exact binary layout,
-scales, and sentinels; the two manifests' and the exports' schemas,
-field by field;
-algorithm specifications (statistics, population selection, URL codec,
-binning); the webapp's module and file structure; the assets directory
-naming; version-stamp mechanics; the test-case inventory and tolerances
-per calculation; accessibility implementation specifics; error copy
-wiring into [PDD §5](pdd.md#5-copy-deck) (Copy deck).
+This HLDD establishes architectural decisions and responsibilities. It
+does not specify every implementation detail or schedule the work.
 
-Owned by the **implementation plan** (with the DDD): sequencing,
-milestones, effort, and the release calendar.
+### Detailed design document
 
-Owned by the **PRD and PDD**: every requirement and every product
-behavior — this document chooses how they are built, and adds no
-obligations of its own. Owned by the **research group**: every Open row
-it holds in the [PDD register](pdd.md#1-decision-register).
+The DDD specifies:
+
+- exact binary layouts, scales, dictionaries, and null representations;
+- artifact-manifest, pointer-manifest, and export schemas;
+- module interfaces and repository structure;
+- implementation algorithms for decoding, filtering, population
+  selection, statistics, offset-to-slip conversion, chart preparation,
+  and URL encoding;
+- the exact CI workflow paths and job dependencies;
+- asset paths and version-stamp mechanisms;
+- calculation tolerances and application parity-test cases;
+- the performance-benchmark procedure, representative scenarios,
+  repetition count, and measurement instrumentation of
+  [§7.1](#71-performance-estimates-and-verification), and the
+  measured-size reporting of
+  [§5.2](#52-simulation-data-organization-adr-0013);
+- the browser-testing tool, test inventory, scripts, coverage, and
+  rendering assertions;
+- accessibility and navigation-lifecycle implementation;
+- error-state presentation using the messages specified in the PDD; and
+- publication, retention, recovery, and withdrawal procedures.
+
+These specifications implement the rules already established by the
+product documents and core Python implementation. The DDD must not
+independently redefine scientific or statistical behavior.
+
+If detailed design reveals a missing product decision or a necessary
+architectural change, that decision must be resolved in the appropriate
+document or ADR before dependent work proceeds.
+
+### Implementation plan
+
+The implementation plan defines ordered tasks, dependencies,
+milestones, effort, acceptance checks, and the release sequence.
+
+It serves as the coding agent's execution brief. It must contain enough
+direction to implement the approved design without requiring the agent
+to resolve product, scientific, architectural, or design questions.
+
+### Authority retained elsewhere
+
+- **PRD:** product requirements and scope.
+- **PDD:** pages, controls, states, reader-facing text, and user-visible
+  behavior.
+- **ADRs:** accepted architectural decisions.
+- **Core Python implementation and its tests:** implementation and
+  verification of the approved scientific and statistical rules.
+- **Research group:** scientific approvals and unresolved decisions
+  assigned to it in the PDD register.
+
+The HLDD introduces architectural constraints needed to implement the
+product. It does not silently add user-facing capabilities or alter
+approved scientific behavior.
+
+References:
+
+- [Product requirements document](prd.md).
+- [Product definition document](pdd.md).
+- [PDD §1 — Decision register](pdd.md#1-decision-register).
+- [Architecture Decision Records](../adr/README.md).

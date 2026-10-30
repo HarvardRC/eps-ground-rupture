@@ -177,9 +177,9 @@ size.
   (ADR-0013)](../app/hldd.md#52-simulation-data-organization-adr-0013),
   [HLDD §5.3 — Records rather than precomputed summaries
   (ADR-0013)](../app/hldd.md#53-records-rather-than-precomputed-summaries-adr-0013),
-  and [HLDD §7.1 — Budget
-  arithmetic](../app/hldd.md#71-budget-arithmetic) — the design detail
-  and the measured sizes
+  and [HLDD §7.1 — Performance estimates and
+  verification](../app/hldd.md#71-performance-estimates-and-verification)
+  — the design detail and the measured sizes
 - [PDD §3 — Scenario page:
   inputs](../app/pdd.md#3-scenario-page-inputs) (the two-count model)
   and [PDD §10.1 — Success

@@ -57,6 +57,22 @@ and verifies without running the pipeline.
 > research-group conventions — coefficients, the scarp-class palette
 > and order, physical ranges, storage metadata, stage spacing.
 
+> **Amendment 2026-10-29 (2, owner review of HLDD §9).** The MVP adds
+> a **browser test lane**: automated checks in one evergreen browser
+> engine, run locally on request and required before a release,
+> against the locally built site. It covers what the headless parity
+> job cannot: the application mounts and replaces the no-JS fallback;
+> an end-to-end golden-scenario spot check in which displayed values
+> equal the display-rounded references exactly (SC-3); the failure
+> states of HLDD §6.1 (an unavailable artifact produces the
+> unavailable-results state, never empty or stale results); repeated
+> site navigation creates no duplicate controls, handlers, or results;
+> and the automatable accessibility checks. CI is unchanged in the
+> MVP — its correctness gate remains the Node parity harness — and
+> "a browser pass stays a post-MVP option" under Alternatives now
+> means promoting this lane to CI, not introducing browser testing.
+> The DDD names the tool and the test inventory.
+
 ## Decision
 
 **Every number the reader sees traces back to the pipeline, and tests
