@@ -1160,9 +1160,10 @@ obligation names a section, every section names its obligations.
 ## 9. Deferred and out of scope
 
 *Scope.* What this document deliberately does not do: no 3D data
-design or ingestion before the research group supplies the dataset
-and its owners decide (the artifact reserves the model-family
-dimension and keeps the per-family partition contingency open); P2
+design or ingestion before the dataset's owners decide — Cases 1–3
+are supplied but held, Case 4 is not supplied (the artifact reserves
+the model-family dimension and keeps the per-family partition
+contingency open); P2
 and P3 sections (media index,
 scenario-page P2 features, shared links, inverse mode, chart export,
 the later product pages) are specified, but their scheduling belongs
