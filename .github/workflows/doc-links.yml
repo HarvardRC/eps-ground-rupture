@@ -1,0 +1,32 @@
+# Checks relative links and heading anchors in the Markdown that GitHub
+# renders (docs/, the READMEs, notes/ — everything tracked outside the
+# MkDocs docs_dir). The strict site build never sees these files, so
+# without this job a renamed heading or a moved file breaks their links
+# silently. No paths filter: their links also point into subprojects/ and
+# dashboards/, so a rename anywhere can break them, and the job installs
+# nothing and runs in seconds. Kept separate from tests.yml, which
+# deliberately does not run on docs-only pushes.
+
+name: Doc links
+
+on:
+  push:
+    branches: [main, 'dev-v.*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+
+      - name: Check links and anchors
+        run: python .github/scripts/check_doc_links.py

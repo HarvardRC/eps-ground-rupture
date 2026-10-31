@@ -101,9 +101,12 @@ proceeds.
 ## 1. Architecture decisions
 
 This design is based on six accepted architecture decisions,
-recorded in [ADR-0010–ADR-0015](../adr/README.md). The table below
-summarizes what each decision covers and points to the corresponding
-explanation in this document.
+recorded in [ADR-0010–ADR-0015](../adr/README.md), and two proposed
+decisions: ADR-0016, on the performance reference environment, and
+ADR-0017, on an unadvertised prototype deployment before the public
+release. The
+table below summarizes what each decision covers and points to the
+corresponding explanation in this document.
 
 The ADRs are the authoritative decision records. Each enters review
 with status **Proposed** and is marked **Accepted** as the owner
@@ -117,6 +120,8 @@ approves it, incorporating any amendments agreed during review.
 | [ADR-0013](../adr/0013-row-level-scenario-artifact.md) | **Simulation-data organization and calculation.** The browser receives the individual recorded stages of the simulations, not just precomputed counts or summary statistics. Site conditions are stored once per simulation trial; measurements are stored for each recorded stage, grouped by measurement rather than by record. When a user changes the scenario, the browser selects the matching records and calculates their counts, percentiles, and other statistics. | [§5.2 Simulation data organization](#52-simulation-data-organization-adr-0013), [§5.3 Records rather than precomputed summaries](#53-records-rather-than-precomputed-summaries-adr-0013), [§7.1 Performance estimates and verification](#71-performance-estimates-and-verification) |
 | [ADR-0014](../adr/0014-committed-content-hashed-artifacts.md) | **Data publication and versioning.** Store the application data files as GitHub release assets; commit only a pointer manifest that pins them by checksum. Publish compressed simulation data and use filenames that change when file content changes. Deploy only the pinned data vintage; retain earlier vintages as release assets. Derived data keeps its source terms: it never enters the repository, and each release carries it as a data asset. | [§5.4 Pinned, versioned artifacts](#54-pinned-versioned-artifacts-adr-0014), [§7.3 Delivery and caching](#73-delivery-and-caching) |
 | [ADR-0015](../adr/0015-golden-scenario-parity.md) | **Data and calculation verification.** Verify two things separately: that the exported application data preserves the pipeline's approved records and values, and that the application's filtering and statistics reproduce independently calculated pipeline results for predefined test scenarios. The pipeline also supplies the surface-offset-to-slip conversion coefficients, so the application does not maintain a separate copy of those numbers. | [§5.6 Reference results and verification](#56-reference-results-and-verification-adr-0015), [§5.7 Conversion coefficients](#57-conversion-coefficients-adr-0015), [§9 Testing and release architecture](#9-testing-and-release-architecture) |
+| [ADR-0016](../adr/0016-performance-reference-environment.md) | **Performance reference environment (Proposed).** Measure the performance budgets on an AWS virtual machine of fixed specification, defined by a Terraform configuration in the repository: each measurement run creates it if it does not exist, runs against the locally built site, and destroys it when the run succeeds. Each time budget is judged at the 95th percentile of 30 measured runs. | [Performance budgets](#performance-budgets), [§7.1 Performance estimates and verification](#71-performance-estimates-and-verification) |
+| [ADR-0017](../adr/0017-unadvertised-prototype-before-public-release.md) | **Prototype before public release (Proposed).** Deploy the application first as an unadvertised prototype — no navigation entry, excluded from site search and the sitemap, marked as a prototype, under the current licensing assumed until confirmed — so the research group can review it; approvals, the D-10 text and confirmed data terms are required at activation and at the first software release, not at the prototype deployment. | [Licensing and media permissions](#licensing-and-media-permissions), [§9 Testing and release architecture](#9-testing-and-release-architecture) |
 
 ---
 
@@ -210,9 +215,16 @@ runtime or a comparably heavy execution environment.
 
 These budgets are acceptance targets, not claims that the proposed
 architecture has already met them. Measurements must establish
-compliance under the PDD's reference conditions: a mid-range laptop
-(2020 or later) on a 10 Mbps connection, with a cold cache for first
-visits and a warm cache for repeat visits.
+compliance under the PDD's reference conditions: a fixed reference
+environment standing in for a mid-range laptop (2020 or later), on a
+10 Mbps connection, with a cold cache for first visits and a warm
+cache for repeat visits, each time budget judged at the 95th
+percentile of 30 measured runs. The reference environment is an AWS
+virtual machine of fixed specification, defined by a Terraform
+configuration in the repository: each measurement run creates it if
+it does not exist, runs the measurements against the locally built
+site, and destroys it when the run succeeds. The DDD fixes the
+machine specification and the run procedure.
 
 References:
 
@@ -326,8 +338,13 @@ The product must preserve the project's licensing requirements:
 
 Third-party photographs and other externally owned media must not be
 included in a public release until the required permissions have been
-confirmed. A public release is the deployed site or a tagged GitHub
-release, whose source archive feeds the project's planned Zenodo record.
+confirmed. A public release is the activated site — the scenario page
+in the site's navigation — or a tagged GitHub release, whose source
+archive feeds the project's planned Zenodo record. An unadvertised
+prototype deployment for the research group's review is not a public
+release ([ADR-0017](../adr/0017-unadvertised-prototype-before-public-release.md),
+Proposed); it never carries a third-party photograph without documented
+permission.
 
 The application data files derived from the input datasets keep those
 datasets' terms rather than the code's Apache-2.0. They never enter
@@ -2615,7 +2632,7 @@ release until resolved or covered by a documented interim rule.
 |---|---|---|
 | [D-6](pdd.md#1-decision-register) — Kern County field-data group and principal-width rule | Preserve source distinctions and withhold the Kern County worked-example preset until the research group supplies its field-data group and principal-width rule; the walkthrough itself is already specified ([PDD §4.7 — Kern County worked example](pdd.md#47-kern-county-worked-example-fr-o6-d-6-open)). | Research group. |
 | [D-8](pdd.md#1-decision-register) — animation coverage required for public release | Represent availability explicitly in the media index; do not imply complete coverage. | Research group. |
-| [D-10](pdd.md#1-decision-register) — liability-limitation text referenced by [CR-4 — Standing disclaimer](prd.md#cr-4-standing-disclaimer) | Keep the release dependency explicit; no placeholder liability text may ship. | Product owner. |
+| [D-10](pdd.md#1-decision-register) — liability-limitation text referenced by [CR-4 — Standing disclaimer](prd.md#cr-4-standing-disclaimer) | Keep the release dependency explicit; no placeholder liability text may ship in a public release (the unadvertised prototype of [ADR-0017](../adr/0017-unadvertised-prototype-before-public-release.md) may show the pending slot). | Product owner. |
 | [D-20](pdd.md#1-decision-register) — Us − Ud as a fourth displayed measurement | The stage arrays carry no uplift fields ([§5.2](#52-simulation-data-organization-adr-0013)); enabling the reserved fourth panel requires a pipeline export change and a new data vintage. The current artifact does not block the MVP. | Owner + research group. |
 | [R-1](prd.md#91-scientific-and-data-dependencies) — scarp-dip correction | Keep showing the recorded provisional-data notice ([FR-O4 — Scarp-dip data caveat](prd.md#fr-o4-scarp-dip-data-caveat)) until corrected data or rules are supplied. | Research group. |
 | [R-2](prd.md#91-scientific-and-data-dependencies) — detailed cohesion-profile definitions | Do not enable the affected advanced controls before definitions are approved. | Research group. |

@@ -813,14 +813,19 @@ Serves: NFR-3, NFR-4, NFR-5, DR-6.
 
 ### 9.1 Performance budgets (D-9, Proposed)
 
-Reference conditions: a mid-range laptop (2020 or later), cold cache,
-10 Mbps connection; and the same laptop warm-cache for repeat visits.
+Reference conditions: a fixed reference environment standing in for
+a mid-range laptop (2020 or later) — a cloud virtual machine whose
+exact specification the
+[DDD](ddd.md#76-performance-and-compatibility-measurements) fixes, so
+every measurement is reproducible — with a cold cache and a 10 Mbps
+connection; and the same environment warm-cache for repeat visits.
+Each time budget is judged at the 95th percentile of 30 measured runs.
 
 | Budget | Target |
 |---|---|
 | Initial data payload for the scenario page | ≤ 4 MB compressed |
-| First meaningful render (scenario page, cold cache) | ≤ 2.0 s |
-| Repeat visit render (warm cache) | ≤ 1.0 s |
+| First meaningful render (scenario page, cold cache), 95th percentile | ≤ 2.0 s |
+| Repeat visit render (warm cache), 95th percentile | ≤ 1.0 s |
 | Scenario change → updated results, 95th percentile | ≤ 200 ms |
 
 **First meaningful render** is the point at which the results for the

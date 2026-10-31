@@ -322,6 +322,114 @@ belongs in the same plan.
   download") stays open and separate; raw data staying on DesignSafe pulls
   toward the scripted-download option.
 
+## Ground Rupture Explorer — owner actions (opened 2026-10-30)
+
+The owner's to-do list for the Ground Rupture Explorer, the scenario
+explorer that `docs/app/` specifies. The work runs in the two phases of
+[ADR-0017](../docs/adr/0017-unadvertised-prototype-before-public-release.md)
+(Proposed): **Phase 1** builds the application and deploys it, with
+its first data vintage, as an unlisted prototype at the site's final
+address for the research group to try; **Phase 2** records their
+approvals and decisions, activates the page and cuts the v0.3 release.
+Each bullet gives the action's ID, phase, what it is, the task it must
+precede, and its status. The record each action leaves and the check
+the tasks run on it are in
+[IP §4 — Owner and research-group actions](../docs/app/ip.md#4-owner-and-research-group-actions).
+The step-by-step walkthroughs are the owner's dated notes, local and
+not committed: `notes/2026-10-30/aws-terraform-walkthrough.md` for
+the AWS and Terraform steps and
+`notes/2026-10-30/owner-actions-walkthrough.md` for the owner
+actions. OA-15, a private scratch repository for the publication
+drills, is retired: the drills run against a stub `gh` instead.
+
+- ~~**OA-11 — Release immutability**~~ (Phase 1; before T-18, the
+  first data publication) — **done 2026-10-30**:
+  `gh api repos/HarvardRC/eps-ground-rupture/immutable-releases`
+  returns `{"enabled":true,"enforced_by_owner":false}`.
+- **OA-17 — Accept ADR-0017** (Phase 1; before T-18 and T-54, the
+  prototype deployment) — open. Set its status line, and its row in
+  `docs/adr/README.md`, to Accepted in a dated commit. Accepting it
+  includes one sweep commit of its other Proposed mentions, its
+  "(Proposed)" labels included, in the DDD, the IP, the HLDD, this file
+  and `docs/adr/README.md`, which the agent prepares on request.
+- **OA-1 — Data-terms record** (Phase 1, then Phase 2; before T-18,
+  then T-63) — open. Phase 1: commit `data/REDISTRIBUTION.md` stating
+  the assumed terms — code Apache-2.0, prose CC BY 4.0, derived data
+  exports CC BY 4.0 with per-source attribution — with this one line,
+  exactly, as `docs/app/ddd.md` §4.2 step 1 spells it out:
+  `Assumed YYYY-MM-DD: code Apache-2.0, prose CC BY 4.0, derived data exports CC BY 4.0 with per-source attribution — pending research-group confirmation`;
+  and add lines naming the file to `README.md` and `LICENSE-docs`.
+  Phase 2: once the research group confirms, replace that line by
+  `Confirmed: YYYY-MM-DD` (with OA-13).
+- **OA-10 — `main` ruleset** (Phase 1; after T-23 has run once, before
+  T-54) — open. Required checks `pytest`, `webapp-test`,
+  `webapp-bundle`, `build` and `links`; not strict; admins may bypass,
+  in the bypass mode Always allow; no linear-history rule, since pointer
+  and release-branch merges into `main` are merge commits.
+- **OA-9 — Owner-run tasks** (both phases) — open. Phase 1: run T-18
+  and merge T-54, then share the page's address with the research
+  group. Phase 2: run T-63 (release vintage), T-64 (rollback
+  rehearsal) and T-65 (the release).
+- **OA-8 — Photograph permissions** (either phase; before any
+  third-party photograph enters a deploy or the release archive) —
+  open; the MVP ships none (the media index is P2).
+- **OA-3 — Liability text** (Phase 2; before T-52 and T-55) — open.
+  Author or source the text of
+  [D-10](../docs/app/pdd.md#1-decision-register) (Liability-limitation
+  text referenced by CR-4) and land it in one dated commit, the first
+  on the release branch, replacing the PDD §5.1 placeholder in the PDD
+  and in `scenario.md`.
+- **OA-2 — Kern County decision** (Phase 2; research group; before
+  T-48, the Kern preset) — open:
+  [D-6](../docs/app/pdd.md#1-decision-register) (Kern County
+  field-data group and principal-width rule). If it is still open as
+  the release nears, decide whether v0.3 waits or the P1 scope is
+  amended.
+- **OA-14 — Field-overlay default set** (Phase 2; with the research
+  group; before T-55 and T-63) — open. Record per field source the
+  members of [D-18](../docs/app/pdd.md#1-decision-register)
+  (Field-overlay default set and per-source analogue map) as Decided
+  in a dated PDD commit.
+- **OA-13 — Final licensing texts** (Phase 2; with the research group;
+  before T-63) — open. The per-source terms and attributions for DEM,
+  FDHI, SURE and Kern County in `data/REDISTRIBUTION.md`, and the final
+  `README.md` and `LICENSE-docs` wording, replacing the Phase-1 texts.
+- **OA-12 — Accept ADR-0016** (Phase 2; before T-59, the reference
+  measurement environment) — open: the on-demand AWS VM of
+  [ADR-0016](../docs/adr/0016-performance-reference-environment.md).
+  Accepting it includes one sweep commit of its other Proposed
+  mentions, its "(Proposed)" labels included, in the DDD, the IP, the
+  HLDD, this file and `docs/adr/README.md`, which the agent prepares on
+  request.
+- **OA-16 — Reference image ID** (Phase 2; before T-59 completes) —
+  open. Read it with the profile that the Gradle property
+  `egr.perf.awsProfile` names (`egr-perf` in
+  `notes/2026-10-30/aws-terraform-walkthrough.md`) and give it to the
+  agent:
+  `aws ssm get-parameter --region us-east-1 --name /aws/service/canonical/ubuntu/server/24.04/stable/current/amd64/hvm/ebs-gp3/ami-id --query Parameter.Value --output text --profile <profile>`.
+- **OA-4 — Text approval** (Phase 2; research group; after T-55's
+  activation commit, before T-65's release merge) — open. Commit the
+  dated record `docs/app/approvals/sc7-YYYY-MM-DD.md` of
+  [SC-7](../docs/app/pdd.md#101-success-criteria) (scientific
+  sign-off).
+- **OA-5 — Release-time checks** (Phase 2; T-61's budget evidence and
+  T-65) — open. Run the browser lane, the reference measurement on the
+  AWS VM, the manual engine and mobile pass, and the walkthroughs with
+  human reviewers, a product-naive engineer among them. The measurement
+  needs `egr.perf.awsProfile` in `~/.gradle/gradle.properties`, naming a
+  profile allowed the EC2 and SSM actions that `docs/app/ddd.md` §7.6
+  lists, all in `us-east-1` — the ready policy is Phase A3 of
+  `notes/2026-10-30/aws-terraform-walkthrough.md`; a run that completes
+  destroys its VM, pass or miss, and a failed run keeps it until
+  `webappMeasureDestroy`.
+- **OA-6 — Zenodo** (Phase 2; before T-65) — open. Enable the Zenodo
+  GitHub app (needs HarvardRC org-admin) and decide the dataset-record
+  deposit; commit `docs/app/approvals/zenodo-YYYY-MM-DD.md` (see
+  "Publication, citation and hosting").
+- **OA-7 — First release** (Phase 2; before T-65) — open. Decide its
+  version and contents; tags v0.2.0–v0.2.2 exist, no GitHub release
+  yet.
+
 ## Decisions made
 
 - **DOI route (2026-10-12, author team)**: **Zenodo, fed by a GitHub

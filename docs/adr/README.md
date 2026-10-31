@@ -35,11 +35,13 @@ old number to its fate. The originals remain in git history.
 | [0013](0013-row-level-scenario-artifact.md)           | Row-level, trial-major columnar scenario artifact | Accepted |
 | [0014](0014-committed-content-hashed-artifacts.md)    | Product artifacts in release assets, pinned by a committed manifest | Accepted |
 | [0015](0015-golden-scenario-parity.md)                | Golden-scenario references; pipeline↔client parity harness | Accepted |
+| [0016](0016-performance-reference-environment.md)     | Performance reference environment — an on-demand AWS VM defined by Terraform | Proposed |
+| [0017](0017-unadvertised-prototype-before-public-release.md) | An unadvertised prototype deployment precedes the public release | Proposed |
 | [—](dead-ends.md)                                     | **Dead ends** — the retired 2026-05/06 architecture, as one story | Retrospective |
 
 ## Adding a new ADR
 
-1. Pick the next number (`0016` is next).
+1. Pick the next number (`0018` is next).
 2. Filename: `NNNN-short-kebab-title.md`.
 3. Copy the structure of an existing ADR (or use MADR's template).
 4. Add a row to this index.
