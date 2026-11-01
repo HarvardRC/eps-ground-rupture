@@ -1500,9 +1500,9 @@ prints no `github-pages`; the final run is green.
 | T-31 | Query engine: `query` — the trial mask over `(set, sediment_strength)` pairs, exact stored bounds, binary-searched stride-101 segments, the one-state-per-trial rule (both branches), the class filter and two-count model, the empty-result diagnostic — and `storedBounds`, a pure synchronous core; the §5.3 scheduler is T-46's. Completion records a decode-and-query timing spot check against the interaction budget ([PDD §9.1 — Performance budgets (D-9, Proposed)](pdd.md#91-performance-budgets-d-9-proposed)) — a diagnostic, not acceptance evidence. | T-30, T-34, T-36 | [DDD §5.3](ddd.md#53-query-engine), [§5.5](ddd.md#55-offset-to-slip-conversion-assist), [§5.1](ddd.md#51-modules-and-interfaces), [§7.4](ddd.md#74-application-tests), [§2](ddd.md#2-repository-structure-naming-and-toolchain) (Node.js outside Gradle), [§4.1](ddd.md#41-export-task-and-validation). | L | agent | Draftable |
 | T-32 | Statistics module: `validValues` and `summarize` — the [FR-O2 — Summary statistics](prd.md#fr-o2-summary-statistics) set by the operation-identical algorithms — `quantileLinear`, the [DD-5](ddd.md#1-ddd-decision-register) (Histogram bin rule) `histogram` and `histogramLog`, and the display formatters `displayRound` and `formatCount`; measurement hygiene stays the export's, never re-applied. | T-31, T-47 | [DDD §5.4](ddd.md#54-statistics), [§5.12](ddd.md#512-charts), [§5.8](ddd.md#58-view-layer), [§5.2](ddd.md#52-artifact-loading-and-decoding), [§5.13](ddd.md#513-application-configuration), [§3.6](ddd.md#36-reference-results), [§7.3](ddd.md#73-pipeline-and-export-tests), [§7.4](ddd.md#74-application-tests). | L | agent | Draftable |
 | T-33 | Conversion assist: `convertWindows` back-projecting the single offset maximum per given dip into `PerDipWindows`, and `rangeFlag` in stored space. | T-30, T-31 | [DDD §5.5](ddd.md#55-offset-to-slip-conversion-assist), [§3.5](ddd.md#35-regression-export), [§5.3](ddd.md#53-query-engine). | S | agent | Draftable |
-| T-34 | Scenario state: the `Scenario` (accepted values only) and `DisplayState` types, `defaultScenario`, pure reducers, and Reset; `parse.ts` — grammar G, the free-entry validation table, and `storedBoundsFromDecimal`; `scenario-json.ts` — the [DD-11](ddd.md#1-ddd-decision-register) (Canonical scenario serialization) functions; the reserved URL parameter names (the P2 codec stays parked). | T-30 | [DDD §5.6](ddd.md#56-scenario-state-and-url-encoding), [§5.7](ddd.md#57-scenario-controls), [§5.3](ddd.md#53-query-engine), [§5.10](ddd.md#510-failure-states). | L | agent | Draftable |
+| T-34 | Scenario state: the `Scenario` (accepted values only) and `DisplayState` types, `defaultScenario`, pure reducers, and Reset; `parse.ts` — grammar G, the free-entry validation table, and `storedBoundsFromDecimal`; `scenario-json.ts` — the [DD-11](ddd.md#1-ddd-decision-register) (Canonical scenario serialization) functions; pure reload-recovery serialization and validation; the reserved URL parameter names (the P2 codec stays parked). | T-30 | [DDD §5.6](ddd.md#56-scenario-state-and-url-encoding), [§5.7](ddd.md#57-scenario-controls), [§5.3](ddd.md#53-query-engine), [§5.10](ddd.md#510-failure-states). | L | agent | Draftable |
 | T-35 | Node parity harness: fetch and checksum-verify the vintage T-18 published; the pairing and transcription checks; replay of the golden scenarios, the `boundary_cases`, and the `synthetic` cases through the real modules; exact, tolerance, and display comparisons per the parity rules ([GS-3](pdd.md#102-golden-scenarios) (Kern preset (after D-6)) after [D-6](pdd.md#1-decision-register) (Kern County field-data group and principal-width rule)). | T-30–T-34, T-36, T-47, T-13, T-18 | [DDD §7.2](ddd.md#72-calculation-parity-tests), [§7.1](ddd.md#71-numerical-tolerances), [§3.6](ddd.md#36-reference-results), [§5.3](ddd.md#53-query-engine), [§5.13](ddd.md#513-application-configuration), [§2](ddd.md#2-repository-structure-naming-and-toolchain). | L | agent | Draftable |
-| T-36 | Application unit tests: the code-built fixture artifact `test/fixtures.ts` and the Node contracts of `decode/` and `state/` — malformed files, schema versions, data-version mismatch, structural validation, the DD-10 tables, state handling, free-entry validation, and canonical serialization. Node-level application contracts only; rendered behavior belongs to the browser lane. | T-30, T-34 | [DDD §7.4](ddd.md#74-application-tests), [§5.2](ddd.md#52-artifact-loading-and-decoding), [§5.6](ddd.md#56-scenario-state-and-url-encoding), [§5.7](ddd.md#57-scenario-controls), [§5.9](ddd.md#59-downloads), [§5.10](ddd.md#510-failure-states), [§3.1](ddd.md#31-scenario-artifact-binary-layout), [§3.2](ddd.md#32-artifact-manifest), [§3.3](ddd.md#33-pointer-manifest), [§3.4](ddd.md#34-field-data-export), [§3.5](ddd.md#35-regression-export), [§3.6](ddd.md#36-reference-results). | L | agent | Draftable |
+| T-36 | Application unit tests: the code-built fixture artifact `test/fixtures.ts` and the Node contracts of `decode/` and `state/` — malformed files, schema versions, data-version mismatch, structural validation, the DD-10 tables, state handling, free-entry validation, canonical serialization, and reload-recovery validation. Node-level application contracts only; rendered behavior belongs to the browser lane. | T-30, T-34 | [DDD §7.4](ddd.md#74-application-tests), [§5.2](ddd.md#52-artifact-loading-and-decoding), [§5.6](ddd.md#56-scenario-state-and-url-encoding), [§5.7](ddd.md#57-scenario-controls), [§5.9](ddd.md#59-downloads), [§5.10](ddd.md#510-failure-states), [§3.1](ddd.md#31-scenario-artifact-binary-layout), [§3.2](ddd.md#32-artifact-manifest), [§3.3](ddd.md#33-pointer-manifest), [§3.4](ddd.md#34-field-data-export), [§3.5](ddd.md#35-regression-export), [§3.6](ddd.md#36-reference-results). | L | agent | Draftable |
 | T-23 | Add the **Parity** step to the `webapp-test` job of `tests.yml` (T-20) and to the `webapp-bundle` job of `mkdocs.yml` (T-21), after T-22's drills ran without it. | T-20, T-21, T-22, T-35 | [DDD §6.3](ddd.md#63-ci-workflows), [§7.2](ddd.md#72-calculation-parity-tests), [§2](ddd.md#2-repository-structure-naming-and-toolchain). | S | agent | Draftable |
 | T-37 | Early feasibility diagnostic: one representative scenario end-to-end through decode, selection, and statistics, timed against the interaction budget as soon as T-30–T-32 exist. A diagnostic, not acceptance evidence ([R-19](prd.md#94-delivery-and-technical-risks)); acceptance is T-61's measurement of the assembled application in the reference environment of DDD §7.6. | T-30, T-31, T-32 | [DDD §7.6](ddd.md#76-performance-and-compatibility-measurements), [§5.3](ddd.md#53-query-engine), [§5.4](ddd.md#54-statistics), [§2](ddd.md#2-repository-structure-naming-and-toolchain) (Node.js outside Gradle); [PDD §9.1 — Performance budgets (D-9, Proposed)](pdd.md#91-performance-budgets-d-9-proposed). | S | agent | Draftable |
 
@@ -1845,6 +1845,15 @@ same key. (4) The reserved URL parameter names of the §5.6 table as
 exported constants; no module reads or writes URL state, and the value
 grammar stays deferred to P2.
 
+(5) `src/state/recovery.ts` — the pure `serializeRecovery`,
+`readRecovery`, and `restoreRecovery` contract of §5.6, including the
+five-key envelope, full eight-key display record, saved summary as
+plain explanatory text; `readRecovery` returns `record` or `invalid-record`,
+and `restoreRecovery` returns `ready` or `incompatible`.
+Validate the saved Scenario unchanged with the newly loaded manifest;
+never widen old selections or clip endpoints. This module touches no
+storage or browser API; T-46 supplies those effects and `settingsText`.
+
 **Done when:** `./gradlew :subprojects:webapp:tscCheck` and
 `./gradlew :subprojects:webapp:webappTest` exit 0;
 `grep -rn 'URLSearchParams' subprojects/webapp/src/state` prints
@@ -1853,7 +1862,7 @@ nothing; and, now that `src/state/` exists, T-30's import guard
 still prints nothing — `state/` imports `decode/`, never the reverse
 ([DDD §5.6](ddd.md#56-scenario-state-and-url-encoding)). The module's
 behavior closes with T-36 (`state.test.ts`, `parse.test.ts`,
-`scenario-json.test.ts`) and T-35 (rule `inputs-roundtrip` on every
+`scenario-json.test.ts`, `recovery.test.ts`) and T-35 (rule `inputs-roundtrip` on every
 reference `inputs`).
 
 #### T-35 — Node parity harness
@@ -1994,7 +2003,10 @@ bytes of §5.6, the round trips (including the accepted normalization
 boundary, whose serialized decimal also passes grammar G on re-edit),
 the rejected 17-character normalized value, the pair sets A and B
 serializing differently, and `ScenarioInputError` for an unknown key and an
-out-of-vocabulary value. Every test imports only browser-and-Node files,
+out-of-vocabulary value. (7) `test/recovery.test.ts`, the complete
+§7.4 row: envelope/display validation, accepted-state round trips,
+same/new-version restoration, and incompatible settings without partial
+application or silent adjustment. Every test imports only browser-and-Node files,
 touches no network, and holds no hand-maintained calculation expectation
 (the §7.4 pipeline-first rule); rendered behavior belongs to the browser
 lane (T-60).
@@ -2003,7 +2015,7 @@ lane (T-60).
 `./gradlew :subprojects:webapp:webappTest` exit 0, and
 `subprojects/webapp/build/test/` then holds `decode.test.js`,
 `fields.test.js`, `state.test.js`, `parse.test.js`, and
-`scenario-json.test.js`; `git ls-files subprojects/webapp/test` lists
+`scenario-json.test.js`, and `recovery.test.js`; `git ls-files subprojects/webapp/test` lists
 `fixtures.ts`; `find subprojects/webapp/test -name '*.bin'` prints
 nothing;
 `grep -cE '"(jsdom|happy-dom|linkedom)"' subprojects/webapp/package.json`
@@ -2117,7 +2129,8 @@ offset field is not judged and keeps its record none — and, when R1
 rejects at a switch, marks every non-BLANK slip field; Apply setting
 `checked` on the dip checkboxes alone; and Reset as §5.7 (Reset)
 describes it, ending in `sync(scenario)`, which skips the focused
-element's `value` and never writes a `<details>` `open`. Its listeners
+element's `value` and never writes a `<details>` `open`; validated reload
+recovery also calls `sync(scenario)`. Its listeners
 take the `Wiring` of [DDD §5.1](ddd.md#51-modules-and-interfaces)
 (Wiring) that T-41 declares in `src/views/dom/wiring.ts`: every
 `addEventListener` call gives `{ signal: wiring.signal }`; each
@@ -2497,7 +2510,8 @@ update action for Safari, while the fallback stands — no skeleton is
 built and no live region exists; and the unavailable state — `hidden`
 on `#gre-panels`; in `#gre-state` the fixed-here notice
 "Results are unavailable: {reason}. Reload the page to try again.",
-`{reason}` the row of the §5.10 table for the failure (each `LoadError`
+or its preserving-reload variant from §5.10 when that action is
+available; `{reason}` the row of the §5.10 table for the failure (each `LoadError`
 kind of T-30, the `'data-version'` row naming `{expected}` and
 `{loaded}`; a missing or empty `data-*` attribute of `#gre-app`; the
 regression-export request of an accepted offset-mode Scenario; any
@@ -2511,7 +2525,14 @@ the first commit, the same skeleton — the region model of
 empty and `hidden`, reading nothing from the vintage; and the error
 object written with `console.error`. The state is terminal for the
 mount and never phrased as "no matching records". (3) `copy.json` gains the §5.10 fixed-here entries: the
-capability notice, and the unavailable notice with its reasons. The
+capability notice, both unavailable-notice variants with their reasons,
+and every recovery message/action label of §5.10. Implement the single
+`#gre-recovery` presentation, the invalid/incompatible and blocked-storage
+decision states (no default result), and ordinary-startup storage warning.
+The region is distinct from scientific caveats; recovery actions remain
+enabled when scenario controls are disabled, and saved text is rendered
+only as text nodes. T-46 owns the listeners and resumption, including
+population of an already-committed minimal skeleton. The
 startup sequence's `try`/`catch`, the two `window` listeners of Error
 routing, the scheduler's guarded step, the lazy-load failure routing,
 the alert announcement, and the focus move to `#gre-state` are wired
@@ -2527,7 +2548,9 @@ pinned by `decode.test.ts` (T-36);
 presentations, pairwise distinct, the capability notice with the
 complete §5.10 text verbatim, fallback and `#gre-disclaimer` standing
 and no skeleton, and the
-lazy-load failures are covered by `failure-states.spec.ts` (T-60).
+lazy-load failures and every §5.10 recovery presentation are covered
+by `failure-states.spec.ts` (T-60), including explicit save/read/remove
+failures and the no-silent-default incompatible-settings branch.
 That spec also checks the static browser-policy and recovery paragraph
 with the application bundle request aborted while JavaScript is
 enabled (`<noscript>` absent), and with JavaScript disabled
@@ -2652,7 +2675,10 @@ with the startup sequence and rules of
 append them to `#gre-root` after the fallback body, register the guard
 with
 `document.addEventListener('click', guard, { capture: true, signal: a.ac.signal })`,
-and announce "Loading simulation data…"; add the two `window` listeners
+and announce "Loading simulation data…"; claim reload recovery once
+per document before any await (§5.6), with `src/recovery.ts` (browser
+only) implementing guarded storage consume/clear and save/read-back/reload;
+add the two `window` listeners
 of Error routing, acting only on this bundle's errors; then, inside one
 `try`/`catch`, the load — the three `data-*` attributes of `#gre-app`
 read from `tag.dataset` at this point, the vintage from
@@ -2661,13 +2687,19 @@ the vintage in the region model's order (`#gre-summary` first; T-40's
 `#gre-controls`; the results header with T-43's prototype notice
 `#gre-prototype` first while its entry exists, T-43's `#gre-caveats`,
 T-49's overlay switch `#gre-overlay`, and T-45's download button
-`#gre-download`; T-41's `#gre-panels`; `#gre-state`; the
+`#gre-download`; T-44's `#gre-recovery`; T-41's `#gre-panels`; `#gre-state`; the
 `#gre-versions` footer slot), each applier handed the mount's `Wiring`
 of [§5.1](ddd.md#51-modules-and-interfaces) (Wiring) —
 `{ signal: a.ac.signal, scheduler, status }`, `scheduler` this mount's
-(step 3) and `status` the `role="status"` region; the default
-Scenario's result computed as sequence 0; the commit
-`#gre-root.replaceChildren(skeleton, status, alert)`; then
+(step 3) and `status` the `role="status"` region; the initial
+Scenario's result computed as sequence 0 — default only when no valid
+recovery applies, otherwise the restored Scenario/display after validation
+against this vintage; restored offset mode awaits its matching regression
+export first, and restored overlay starts its field load only after the
+first result commit; commit through
+`#gre-root.replaceChildren(skeleton, status, alert)` only if a recovery
+decision has not already committed the skeleton, otherwise populate its
+stable containers in place; then
 `#gre-summary`'s border-box height written once to
 `--gre-summary-block` on `#gre-root`, before the initial focus and
 scroll
@@ -2676,10 +2708,15 @@ the rules binding `start`); a
 `ResizeObserver` attached to `#gre-summary` that writes its border-box
 height in CSS px to the custom property `--gre-summary-block` on
 `#gre-root` ([§5.7](ddd.md#57-scenario-controls), Layout and scenario
-summary); the initial focus and scroll; and
-`markAfterPaint('egr:first-result', 0, …)`; a failure enters T-44's
-unavailable state. The initial focus and scroll, after the first
-commit of results or of the unavailable state and the summary-height
+summary); initial focus and scroll only on the mount's first commit,
+otherwise §5.10's explicit-decision focus rule; and
+`markAfterPaint('egr:first-result', 0, …)`; a load failure enters T-44's
+unavailable state, retaining an incoming recovery record for explicit
+retry. Invalid/incompatible recovery or failed consumption instead enters
+§5.10's pre-result decision state. Its explicit actions resume startup
+within the same live mount, populating stable containers without a second
+root replacement and without briefly displaying a default result. The initial focus and scroll, after the first
+commit of results, unavailable state, or recovery decision and the summary-height
 write that follows either commit: the at-mount focus move
 of step (6) or, with a fragment in the URL, no focus move and, when
 `fragmentTarget(location.hash)` names an element outside `#gre-root`,
@@ -2688,7 +2725,8 @@ that element's `scrollIntoView()`; only after it does `start` set
 task, adds the missing- or empty-attribute branch of §5.10 step 2 and
 fills the `#gre-versions` footer from the two stamps. The two `window`
 listeners and the guard take `{ signal: a.ac.signal }`; every other
-listener is the appliers', added through their `Wiring`. After every
+listener is the appliers', added through their `Wiring`, except the
+recovery listeners owned here, which use the mount signal directly. After every
 `await`, timer, and frame the code returns when the signal is aborted;
 on the signal's `abort` event the scheduler stops and the summary's
 observer disconnects, while the panels' observers (T-41) and the last
@@ -2696,6 +2734,7 @@ download URL (T-45) follow the same signal. (3) The per-mount scheduler
 of
 [DDD §5.3](ddd.md#53-query-engine) (Scheduling), items 1–5,
 implementing T-41's `Scheduler` type with exactly its five operations
+(`current()` remains readable after stop for the preserving-reload action),
 — `current()`; `update(next)`, which returns the sequence number it
 stamped or null and is an accepted Scenario change when
 `next.scenario !== current().scenario`, so Reset's default Scenario
@@ -2723,7 +2762,7 @@ state then held, calling `markAfterPaint('egr:results-updated', s, …)`
 and handing the settled update to `announce`, both given
 `live = () => isLatest(s)`, `s` the result's sequence number, so that
 neither acts once a newer Scenario is accepted or the scheduler stops
-(§5.3 item 2); lazy exports requested on events only (the
+(§5.3 item 2); lazy exports requested on control events or restored startup only (the
 regression-export prefetch, its request for an accepted offset-mode
 Scenario, the field export when `update(next)` turns `overlay` on
 while its state is `absent` or `failed`),
@@ -2741,10 +2780,12 @@ internal-failure state; and the stop on abort and on the unavailable
 state, cancelling the pending frame. (4) `src/views/dom/marks.ts` —
 `markAfterPaint(name, seq, check, live)`, per
 [DDD §7.6](ddd.md#76-performance-and-compatibility-measurements)
-(Instrumentation). (5) The nine-row announcement inventory of §5.11,
+(Instrumentation). (5) The announcement inventory of §5.11,
 through `announce` of T-41's `src/a11y/announce.ts`: the first commit,
-of results or of the unavailable state, empties the status region
-without announcing anything; at most one announcement per settled
+of results, unavailable state, or recovery decision, empties the status region
+without an ordinary result announcement; the explicit exceptions are
+§5.10's recovery-success/storage-read-warning notices, while recovery
+errors use the alert region. At most one announcement per settled
 update and none for a display-only update, a `rerenderChart`
 re-render, or a settled update superseded before its write (§5.3
 item 2); a notice or caveat that §5.11's previous render (the last
@@ -2760,7 +2801,7 @@ fixed-here entries citing §5.11. (6) `src/a11y/focus.ts` — at mount,
 after the first commit and only while `location.hash` is empty,
 `focus({ preventScroll: true })` on the selected measurement's panel
 `<section>`, or on `#gre-state` when the first render shows the empty
-or a failure state, then that element's `scrollIntoView()`; afterwards,
+or a failure or recovery-decision state, then that element's `scrollIntoView()`; afterwards,
 `focus()` with `{ preventScroll: true }` only for slot replacement
 (rule 1: the element with the recorded `data-focus-key`, else the
 slot's focus fallback) and for hidden, disabled, or emptied focus
@@ -2778,6 +2819,16 @@ outlines, 24 × 24 CSS px targets, the class `gre-visually-hidden`,
 `.gre-table-scroll` with `overflow-x: auto`, and the single column below
 768 CSS px, usable at 360 CSS px with no page-level horizontal
 scrolling.
+
+The recovery listeners are owned here, registered with the mount signal
+and using only the §5.6 wrapper. At a preserving click, serialize
+`scheduler.current()` with the loaded manifest and T-40's `settingsText`;
+never snapshot a previous RenderInput. Preserve all accepted display
+settings, with the explicit logarithmic-scale availability notice of
+§5.10. Make no URL or history change and never reload automatically.
+Keep recovery actions current with the field state/overlay switch; do
+not duplicate them in the two legends. No capability probe requires
+storage permission, and no generic failure silently consumes a record.
 
 **Done when:** `./gradlew :subprojects:webapp:tscCheck` and
 `./gradlew :subprojects:webapp:webappTest` exit 0; in
@@ -2974,7 +3025,9 @@ the `RenderInput` (T-41) — the `FieldRow[]` that
 after version validation for the [§3.4](ddd.md#34-field-data-export) rows while
 the field export's state is `ready`, `'failed'` while it is `failed`,
 and null otherwise ([§5.3](ddd.md#53-query-engine) item 3) — each
-mechanic as the §5.8 bullets fix it:
+mechanic as the §5.8 bullets fix it; T-46 supplies the one global
+recovery action of §5.10, while this task keeps the field legends and
+ordinary off/on retry:
 the one results-header switch "Compare with field measurements (past
 earthquakes)", the `<input type="checkbox" id="gre-overlay">` inside its
 `<label>`, off by default, display state that Reset leaves alone; while
@@ -3715,6 +3768,17 @@ job; `subprojects/webapp/README.md` gives both invocations as §7.5
 (Invocation) writes them, the lane's and the `measure` diagnostic's.
 T-48's preset checks join the inventory when it ships.
 
+Include all DDD §7.5 **Reload recovery cases** in the existing
+`failure-states`, `navigation-lifecycle`, and `a11y` specs: old-tab data
+replacement for both lazy exports, click-time accepted state and pending
+offset recovery, same/new-version recalculation, every stored display
+setting, incompatibility without default results, explicit default-start,
+all storage operations failing independently, repeated load failure without
+an automatic loop, one-shot consumption across instant re-entry, and
+abort/focus/announcement behavior. Use coherent routed fixture vintages;
+compare recovered results with a fresh page using the same inputs and
+current vintage. Keep the existing 11 spec files.
+
 **Done when:** `./gradlew :subprojects:webapp:webappBrowserTest`
 exits 0 (it builds the preview tree through `mkdocsPreview` and
 installs the pinned Chromium through `playwrightInstall`), and
@@ -3751,10 +3815,12 @@ prints nothing.
 `egr:change-accepted` by the handler that accepts a scenario change
 ([DDD §5.7](ddd.md#57-scenario-controls); T-40), and
 `markAfterPaint(name, seq, check, live)` of `src/views/dom/marks.ts`,
-with `egr:first-result` after the first commit
+with `egr:first-result` after the first result commit
 ([DDD §5.10](ddd.md#510-failure-states), startup step 3) and
 `egr:results-updated` in the [DDD §5.3](ddd.md#53-query-engine)
-scheduler's frame callback, by T-46. (2) The `measure` specs, files
+scheduler's frame callback, by T-46. The visibility check uses the selected
+measurement; the first-result mark checks the initial selected measurement
+and its viewport intersection (§7.6). (2) The `measure` specs, files
 matching `*.measure.ts` in `subprojects/webapp/playwright/measure/`:
 the §7.6 network emulation; the cold and both warm variants with the
 per-repetition cache assertion; the load workloads and the three
@@ -4773,6 +4839,7 @@ the rows resolves to "not an IP obligation (stays with its source)".
 | PDD §4.1 | reader-selected cumulative-curve accuracy considered for P3; options and limits await a product decision and performance validation | §9, IP §5 | schedule | §9; IP §5 | parked |
 | PDD §4.7 | Kern preset ships only after D-6 (release sequencing) | IP §2 T-48, IP §3 sequence, IP §4 OA-2 | schedule+owner | T-48; OA-2 | owner-pending |
 | PDD §5.11 | glossary additions before launch | §6.4, IP §2 T-52 | text+schedule+release+owner | §6.4 (Glossary additions); T-52; §7.7 item 8; G-4; OA-4 | owner-pending |
+| PDD §7.3 | one-shot reload recovery preserves accepted settings, validates current data, reports changed versions and storage/incompatibility failures without silent loss | §5.6, §5.10, IP §2 T-34, IP §2 T-46 | text+test+schedule | §5.6; §5.10; subprojects/webapp/test/recovery.test.ts (T-36); subprojects/webapp/playwright/specs/failure-states.spec.ts (T-60); subprojects/webapp/playwright/specs/navigation-lifecycle.spec.ts (T-60); subprojects/webapp/playwright/specs/a11y.spec.ts (T-60); T-34; T-44; T-46 | planned |
 | PDD §8.1 | third-party photos removed or cleared before public release | IP §3 G-6, IP §4 OA-8 | test+release+owner | subprojects/mkdocs/hooks/site_checks.py arms (a), (b) (T-03); §7.7 item 9; §7.7 item 10; G-6; OA-8 | owner-pending |
 | PDD §10.1 SC-7 | SC-7 research-group sign-off gate | IP §3 G-4, IP §4 OA-4 | test+release+owner | .github/scripts/check_pdd_agreement.py::step 8 (T-47); §7.7 item 6 (SC-7 row); G-4; OA-4 | owner-pending |
 | PDD §10.3 | scripted acceptance walkthroughs before release | IP §2 T-62 | schedule+release+owner | T-62; §7.7 item 13; G-2; OA-5 | owner-pending |

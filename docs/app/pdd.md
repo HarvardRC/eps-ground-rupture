@@ -53,6 +53,7 @@ staged documents (PRD → PDD → HLDD). It has two parts:
 - [7. Sharing and versioning](#7-sharing-and-versioning)
   * [7.1 Shared links](#71-shared-links)
   * [7.2 Version display and notice (D-15, Proposed)](#72-version-display-and-notice-d-15-proposed)
+  * [7.3 Reload recovery (MVP)](#73-reload-recovery-mvp)
 - [8. Education and media surfaces](#8-education-and-media-surfaces)
   * [8.1 Morphology page (FR-E1)](#81-morphology-page-fr-e1)
   * [8.2 Animation library (D-8, Open)](#82-animation-library-d-8-open)
@@ -786,6 +787,35 @@ releases can see why results differ. If a later release adds a
 version stamp to links, a notice appears when the stamp differs from
 the current versions ("Created under software X / data Y; showing
 current Z / W."); nothing is recomputed against old versions.
+
+### 7.3 Reload recovery (MVP)
+
+An open scenario may still refer to files from an earlier data vintage.
+If field measurements or conversion coefficients cannot be loaded, the
+page offers **Reload and restore settings**. A load failure alone does
+not establish that the dataset changed. The deployed site continues to
+carry one vintage; recovery uses the version served after the reload.
+
+The action preserves the latest accepted scenario inputs and display
+settings in the current tab before reloading, including an accepted
+offset whose results are still waiting for coefficients. Uncommitted
+or rejected entry text and old calculated results are not restored.
+On reload, validate the saved settings against the newly loaded data
+before showing any scenario result; use the full saved selections and
+effective window endpoints without silently dropping or clipping them.
+Recompute all results, and state when the data version changed.
+The ordinary rule that disables logarithmic width display when it is
+unavailable still applies; recovery explicitly reports that adjustment.
+
+Incompatible or malformed saved settings require an explicit **Start a
+new scenario** choice before defaults are applied. Storage failures are
+reported clearly: a failed save does not reload; if saved settings
+cannot be read after reload, the page reports that failure and, if default
+results are produced, explicitly says it started with default settings.
+It never claims restoration or results that have not been shown. This recovery
+request is consumed once and is not replayed on later instant
+navigation. It is local reload recovery, independent of the P2 public
+shared-link codec.
 
 ---
 

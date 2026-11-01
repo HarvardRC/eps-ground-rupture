@@ -1052,7 +1052,7 @@ because `config.ts` and `copy.ts` import their JSON files;
 `"lib": ["ES2020"]`, so no DOM type exists, `"types": ["node"]`,
 `"include"` set to `src/**/*.ts` and `test/**/*.ts`, and `"exclude"`
 set to the browser-only files of the
-[§5.1](#51-modules-and-interfaces) module table: `src/main.ts`,
+[§5.1](#51-modules-and-interfaces) module table: `src/main.ts`, `src/recovery.ts`,
 `src/views/dom/**`, `src/overlay/field-overlay.ts`,
 `src/download/deliver.ts`, `src/a11y/**`, and any other file §5.1
 marks browser only. A pure file that uses a DOM identifier, directly
@@ -3319,7 +3319,7 @@ and only the browser lane executes it
 | `engine/` | `query(vintage, scenario, windows?: PerDipWindows) → Selection`, `storedBounds(lo, hi, scale) → [number, number]`, the `MeasurementCounts` type of each `Selection.perMeasurement` entry, and the `PerDipWindows` type, which `convert/` imports together with `storedBounds` ([§5.5](#55-offset-to-slip-conversion-assist)) — pure and synchronous ([ADR-0015](../adr/0015-golden-scenario-parity.md)): no DOM, no clock, no randomness, no I/O ([§5.3](#53-query-engine)). | browser and Node |
 | `stats/` | `validValues(vintage, selection, measurement) → ValidValues`; `summarize(values: ValidValues) → Stats \| null`, with `Stats.sd: number \| null` — the [FR-O2 — Summary statistics](prd.md#fr-o2-summary-statistics) set ([§5.4](#54-statistics)); `quantile.ts` — `quantileLinear(sorted, p) → number`; `histogram.ts` — `histogram(steps, classes, sorted, displayDecimals) → Histogram \| null`, the [DD-5](#1-ddd-decision-register) bin rule, and `histogramLog(steps: Int32Array, classes: Uint8Array, offerRatio: number) → HistogramLog \| null`, the width panel's logarithmic bins, null exactly when the logarithmic axis is not offered (valid = 0 included), its caller passing `logScaleOfferRatio()` of `config.ts` ([§5.13](#513-application-configuration)) as `offerRatio` — both of [§5.12](#512-charts), each result the camelCase form of its [§3.6](#36-reference-results) record (`histogram.<m>`; `histogram_log.dzw`, so `HistogramLog` is `{ firstEdge, bins, counts, belowCounts }`). | browser and Node |
 | `convert/` | `convertWindows(offsetMax: number, dips: readonly number[], coefficients) → PerDipWindows` and `rangeFlag(window, bounds) → RangeFlag` ([§5.5](#55-offset-to-slip-conversion-assist)). | browser and Node |
-| `state/` | the `Scenario` and `DisplayState` types, `defaultScenario(manifest)`, and pure reducers ([§5.6](#56-scenario-state-and-url-encoding)); `parse.ts` — grammar G and the free-entry validation of [§5.7](#57-scenario-controls), and `storedBoundsFromDecimal(min, max)` ([§5.3](#53-query-engine)); `scenario-json.ts` — `serializeScenario`, `parseScenario`, and `canonicalJson` ([DD-11](#1-ddd-decision-register), [§5.6](#56-scenario-state-and-url-encoding)). | browser and Node |
+| `state/` | the `Scenario` and `DisplayState` types, `defaultScenario(manifest)`, and pure reducers ([§5.6](#56-scenario-state-and-url-encoding)); `parse.ts` — grammar G and the free-entry validation of [§5.7](#57-scenario-controls), and `storedBoundsFromDecimal(min, max)` ([§5.3](#53-query-engine)); `recovery.ts` — `serializeRecovery`, `readRecovery`, and `restoreRecovery` (§5.6), all pure; `scenario-json.ts` — `serializeScenario`, `parseScenario`, and `canonicalJson` ([DD-11](#1-ddd-decision-register), [§5.6](#56-scenario-state-and-url-encoding)). | browser and Node |
 | `views/*.ts` | builders: `format.ts` — `displayRound(v, decimals)`, `formatCount(n)`; `svg.ts` — `SvgNode`, `serializeSvg`; `charts.ts` — `histogramSvg(spec, width)`, `ecdfSvg(spec, width)`, `ecdfSteps(sorted)`; `chart-text.ts` — `chartLabel(state)`, `binTableSpec(binsByGroup, groups, edges)`, `fieldTableSpec(rows, order)`, `segmentTitle`; `summary.ts` — `summaryText(state, counts)`, `settingsText(state)`, `populationText(state)`, `chartSummary(stats: Stats, counts: MeasurementCounts, measurement, cfg)`; `assist.ts` — `assistLines(input)`, the assist panel's lines ([§5.5](#55-offset-to-slip-conversion-assist)); `render-input.ts` — the `RenderInput` type ([§5.8](#58-view-layer)); `notices.ts` — `selectNotices(input, cfg)`; `stats-table.ts` — `statsRows(stats: Stats \| null, counts: MeasurementCounts, measurement, cfg)`; `scenario-controls.ts` — `controlModel(manifest, state)`, `dipRangeEcho(entry, dips)`; `copy.ts` with `copy.json`; `offer.ts` (P2) ([§5.7](#57-scenario-controls), [§5.8](#58-view-layer), [§5.12](#512-charts)). | browser and Node |
 | `views/dom/` | appliers: `svg.ts` — `toSvgElement`; `panels.ts`; `controls.ts`, with `commitField(id)` and `sync(scenario)`; `table.ts`; `notices.ts`; `glossary.ts` — `linkGlossary`, the first-use glossary linker; `export.ts` (P2); `marks.ts` — `markAfterPaint(name, seq, check, live)`; and `render.ts` — `render`, the render pass ([§5.8](#58-view-layer), [§5.12](#512-charts)); beside them `wiring.ts`, which declares the `Wiring` and `Scheduler` types (Wiring, below). | browser only |
 | `overlay/model.ts` | `overlayRows(rows, measurement, showAll)`, `overlayGroups(rows)`, `overlayNote(measurement)` ([§5.8](#58-view-layer)). | browser and Node |
@@ -3328,6 +3328,7 @@ and only the browser lane executes it
 | `download/deliver.ts` | reads the clock once and the last committed `RenderInput` through the scheduler's `lastRenderInput()`, and delivers the archive ([§5.9](#59-downloads)). | browser only |
 | `a11y/` | `announce.ts` — `announce(region, text, live?)` over the live regions — and `focus.ts` ([§5.11](#511-accessibility-supported-environments-and-navigation-lifecycle)). | browser only |
 | `config.ts` | the PDD-decided settings, read from `config.json` ([§5.13](#513-application-configuration)). | browser and Node |
+| `recovery.ts` | guarded session-storage claim, consume, clear, and save/read-back/reload operations of §5.6; document-wide one-shot claim. No pure `state/` file imports it. | browser only |
 | `main.ts` | mount and the navigation lifecycle — `onPageReady`, `start(a, tag)`, and the vintage cache's `vintageFor(tag)` ([§5.11](#511-accessibility-supported-environments-and-navigation-lifecycle)) — the guarded startup with its capability probe `missingCapabilities()` ([§5.10](#510-failure-states)), and the per-mount scheduler ([§5.3](#53-query-engine)). | browser only |
 
 **Event flow** is one direction. A control change makes at most one
@@ -3763,7 +3764,9 @@ export's state (item 3), and at most one pending animation frame.
 Other modules reach it only through the five operations of its
 `Scheduler` type ([§5.1](#51-modules-and-interfaces), Wiring):
 
-- `current()` returns the held `{ scenario, display }`;
+- `current()` returns the held `{ scenario, display }`, remaining
+  readable after a terminal stop so reload recovery can save the
+  latest accepted inputs rather than an older rendered result;
 - `update(next)` takes the next `{ scenario, display }`, makes
   item 3's requests for an accepted offset-mode Scenario and for
   `next.display.overlay` turning true, and returns the sequence
@@ -3792,8 +3795,8 @@ Other modules reach it only through the five operations of its
 The DOM applier `render` of `src/views/dom/render.ts` commits every
 frame's render ([§5.8](#58-view-layer)). The first render of a
 mount is the startup step of [§5.10](#510-failure-states), which
-computes the result of the mount's initial Scenario (the default, in
-the MVP) by the computation of item 2 as sequence number 0 and hands
+computes the result of the mount's initial Scenario (the default or
+the validated reload recovery of §5.10) by the computation of item 2 as sequence number 0 and hands
 it to the scheduler; the scheduler makes every later render:
 
 1. Control events never compute. An accepted Scenario change
@@ -3835,7 +3838,8 @@ it to the scheduler; the scheduler makes every later render:
    marked as painted and never announced (fixed here), and any later
    callback scheduled for a committed result is bound the same way.
 3. Lazy exports ([§5.2](#52-artifact-loading-and-decoding)) load
-   on events, never from a frame. The regression export is
+   on events or the explicit restored-startup path of §5.10, never from
+   a frame. The regression export is
    prefetched when the entry-mode radio selects offset mode, and
    requested — started, or joined while in flight — when an
    offset-mode Scenario is accepted before it has loaded; that
@@ -4274,16 +4278,16 @@ in offset mode (§5.5). Every set may be empty (§5.7).
 
 A Scenario member changes only through a reducer call that a control
 change of the §5.7 event map makes — a checkbox or radio change, an
-accepted field commit, Apply, or Reset — or, from P2, a link
-restore. Rejected entries, field text, caret, selection, and
+accepted field commit, Apply, or Reset — or validated reload
+recovery below; from P2, a link restore also joins. Rejected entries, field text, caret, selection, and
 `<details>` open state never reach it: they are editing state the
 browser owns, which the engine, the summary, downloads, and the
 codec never read. Reducers are pure — a state and an action in, a
 new state out, nothing mutated — and `defaultScenario(manifest)`
 builds the defaults above from the decoded artifact manifest's
 dictionaries, never from literals in components. How the controls
-show the accepted Scenario — `sync(scenario)` after Reset and a P2
-link restore only, Apply setting `checked` on the dip checkboxes
+show the accepted Scenario — `sync(scenario)` after Reset, reload
+recovery, and a P2 link restore only, Apply setting `checked` on the dip checkboxes
 alone so that a pending entry-mode choice survives — is §5.7's.
 
 **Display state.** `DisplayState` holds:
@@ -4405,6 +4409,97 @@ The serialization is the scenario's identity: the download's
 `JSON.parse(serializeScenario(s, manifest))`
 ([§5.9](#59-downloads)), and the parity harness replays every
 reference `inputs` through it ([§7.2](#72-calculation-parity-tests)).
+
+**Reload recovery (MVP).** [PDD §7.3](pdd.md#73-reload-recovery-mvp)
+permits an explicit reload while preserving accepted settings. The
+pure `src/state/recovery.ts` exports `serializeRecovery(scenario,
+display, manifest, summary) → string`, `readRecovery(text)`, and
+`restoreRecovery(record, manifest)`. The first returns `canonicalJson`
+of an object with exactly these keys:
+
+- `recoveryVersion`: integer 1;
+- `sourceExportVersion`: the loaded old manifest's `exportVersion`,
+  a non-empty string;
+- `scenario`: `JSON.parse(serializeScenario(scenario, manifest))`;
+- `display`: the display record specified below;
+- `summary`: `settingsText(scenario)` supplied by the caller, a
+  non-empty string displayed as plain text if restoration is blocked.
+  It is explanatory text only, never an input to parsing or calculation.
+
+The display record has exactly eight keys: `measurement` (one of the
+three measurement names), `view` (a map with exactly those three keys,
+values `'histogram'` or `'cumulative'`), `readoff` (the same keys, each
+null or an integer 0–100), `chartDataOpen` (the same keys, booleans),
+`showAll` (exactly `scarp_height` and `dzw`, booleans), and the three
+booleans `overlay`, `familyView`, and `logScale`. These are the accepted
+DisplayState values, not DOM field text. No result, manifest, coefficient,
+field row, editing state, or URL parameter is stored.
+
+`readRecovery` catches JSON syntax errors and returns either
+`{ kind: 'record', record }` or `{ kind: 'invalid-record' }`. It rejects
+missing/unknown envelope or display keys, a version other than integer
+1, empty source/summary strings, a null, array, or other non-object `scenario`, and any
+mistyped or out-of-vocabulary display value. `restoreRecovery` calls
+`parseScenario(record.scenario, manifest)` unchanged against the
+**newly loaded** manifest, even when the export versions match. It
+returns `{ kind: 'ready', scenario, display, sourceExportVersion,
+summary }`, or `{ kind: 'incompatible', path, summary }` on
+`ScenarioInputError`; unexpected programming errors still propagate.
+A true `familyView` also requires that the saved scenario select every
+current scarp class, otherwise return incompatible with path
+`display.familyView`. Do not expand an old explicit 'all' selection to
+new dictionary members, change saved effective window endpoints, sort
+invalid arrays, or apply only the compatible portion. A valid restored
+scenario yielding zero matches is the ordinary empty-result state.
+After calculation, the existing `histogramLog === null` rule may turn
+saved `logScale` off; §5.10 reports this explicitly. It changes no
+Scenario input.
+
+Storage and navigation belong to browser-only `src/recovery.ts`, never
+to `state/`. The key is `'gre.reload-recovery.v1:' + location.pathname`;
+`sessionStorage` provides the origin/tab scope. There is no expiry clock
+or persistent preference. The wrapper claims the document-global
+`Symbol.for('gre.recoveryClaimed')` before its first storage read; every
+later automatic call in that document returns none, including calls
+from another bundle instance on instant navigation. The claiming mount
+owns the raw text in memory; abort discards it without replay elsewhere.
+
+- At the first `start`, before any await, get the key. Null means no
+  recovery. Otherwise remove it and require `getItem(key) === null`
+  before applying anything; keep the raw text in mount memory while
+  loading data. A storage getter or initial read failure gives the explicit
+  storage-read warning of §5.10, not a fictitious 'no record'. Once text
+  has been read, a removal exception, a throwing verification read, or
+  a still-present key gives the blocked-storage state, with the
+  already-read text retained for an explicit retry.
+- On **Reload and restore settings**, take `scheduler.current()` at
+  click time, not `lastRenderInput()`, and serialize it with the loaded
+  manifest and `settingsText`. The accessor remains readable after
+  scheduler stop. Before a scheduler exists, a retained valid incoming
+  record supplies the exact raw text for retry. Clear only this key,
+  verify absence, write the text, and require an exact read-back before
+  calling `location.reload()` with no argument. All storage access is
+  guarded. A save/read-back failure attempts to remove the new key,
+  reports failure, and does not reload. A synchronous reload exception
+  also attempts removal and reports the distinct reload failure.
+- **Reload without restoring settings** clears and verifies absence of
+  this key before calling `location.reload()`. Failure to clear keeps
+  the page and reports failure; it never silently replays stale data.
+- For a known removal failure, **Retry recovery** first clears and
+  verifies the key, then resumes startup with the retained text;
+  **Start a new scenario** first clears it and resumes startup with
+  defaults. An invalid/incompatible record was already consumed, so
+  its **Start a new scenario** needs no storage access. These explicit
+  choices operate in the same live mount, never through automatic
+  reload. Do not repeatedly read storage or retry a load on a timer.
+
+A consumed valid record remains in memory if the vintage or required
+regression subsequently fails to load, so another explicit preserving
+reload can save it again. No restoration, default result, or success
+notice is committed before §5.10's startup decision. Storage is optional:
+when the initial read itself is impossible, ordinary startup may show
+default results only together with the visible and announced warning
+that saved settings could not be checked. It must not claim restoration.
 
 **URL encoding (P2).** The MVP reads and writes no URL state, and no
 MVP module parses or writes a query parameter. The P2 shared-link
@@ -4548,7 +4643,7 @@ The event map, implemented once in `controls.ts`:
 
 `sync(scenario)` in `controls.ts` writes `checked`, `value`,
 `disabled`, and `hidden` on the controls from the accepted Scenario
-after Reset and after a P2 link restore; it skips the `value` of
+after Reset, validated reload recovery, and a P2 link restore; it skips the `value` of
 `document.activeElement` and never writes a `<details>` `open`.
 Apply sets `checked` on the dip checkboxes alone, to the applied
 set, so a pending mode choice (R3) survives it. A render can land
@@ -5039,7 +5134,8 @@ order:
   `#gre-caveats`; the overlay switch, an
   `<input type="checkbox" id="gre-overlay">` inside its `<label>`;
   and the "Download this result" button,
-  `<button type="button" id="gre-download">`;
+  `<button type="button" id="gre-download">`; then the stable
+  `#gre-recovery` region of §5.10, empty unless recovery has content;
 - `#gre-panels` — the three panel sections below, each with its
   skeleton controls;
 - `#gre-state` (`tabindex="-1"`) — the empty-state explainer or the
@@ -5449,7 +5545,7 @@ defined where it is used:
 | [§5.7](#57-scenario-controls) | the dip-range label, echo, and Apply; the slip-field labels (the offset field reuses "Maximum (m)"), helper line, and rejection line; the entry-mode legend; the population explainer's summary; the dip and depth option formats; the arm helper text; the summary tokens and joiners |
 | [§5.8](#58-view-layer) (this section) | the prototype notice, until activation; the product footer; the N line; the view-switch labels and legend; the log-scale toggle label; the chart-data disclosure label; the statistics row labels and null mark; the condition names and their joiner; the height show-all label, limited-comparison form, and field-export line |
 | [§5.9](#59-downloads) | the provenance labels, citation and DOI texts, and empty-caveat line |
-| [§5.10](#510-failure-states) | the no-JS fallback body and its `<noscript>` sentence, in `scenario.md`'s `#gre-root` between copy markers citing §5.10, not in `copy.json`; the capability notice; the unavailable notice and its reasons |
+| [§5.10](#510-failure-states) | the no-JS fallback body and its `<noscript>` sentence, in `scenario.md`'s `#gre-root` between copy markers citing §5.10, not in `copy.json`; the capability notice; both unavailable-notice variants and their reasons; recovery messages, action labels, and saved-settings heading |
 | [§5.11](#511-accessibility-supported-environments-and-navigation-lifecycle) | the announcement templates; the chart label, caption, and chart-data table templates |
 | [§5.12](#512-charts) | the axis titles, pre-mark labels, read-off strings, segment title, the "below 0.1 m" label, and both info-note sentences |
 | [§5.14](#514-inverse-mode-p2) (P2) | the observed-range rejection line, condition name, and summary token |
@@ -5617,7 +5713,9 @@ Field overlay). Mechanics, each a citation of
   loaded. The simulation results are unaffected." in the height and
   width legends ([§5.10](#510-failure-states)) while `field` is
   `'failed'` and the overlay is on; the retry of
-  [§5.3](#53-query-engine) item 3 removes it.
+  [§5.3](#53-query-engine) item 3 removes it. The results header's
+  single `#gre-recovery` action is supplied by §5.10; the overlay
+  module neither stores settings nor starts a reload itself.
 
 The Kern County preset — "Worked example: Kern County (1952)" — is
 withheld: no preset entry renders while
@@ -6068,15 +6166,18 @@ in order, inside one `try`/`catch`:
    ([§5.2](#52-artifact-loading-and-decoding));
 3. the first engine run and first render: it builds the
    [§5.8](#58-view-layer) skeleton from the vintage, computes the
-   default Scenario's result as sequence number 0 and hands it to
-   the [§5.3](#53-query-engine) scheduler, and commits through
-   `#gre-root.replaceChildren(…)` — the fallback body is replaced
-   only now, "only after the corresponding interactive content is
-   ready" (HLDD §6.1) — then applies the initial focus and scroll of
+   initial Scenario's result (default or validated reload recovery,
+   as specified below) as sequence number 0 and hands it to
+   the [§5.3](#53-query-engine) scheduler. If no recovery decision has
+   committed a skeleton, commit through `#gre-root.replaceChildren(…)`
+   — the fallback body is replaced only now, "only after the corresponding
+   interactive content is ready" (HLDD §6.1). Otherwise populate the
+   existing skeleton in place, as specified below. On the mount's first
+   commit only, apply the initial focus and scroll of
    [§5.11](#511-accessibility-supported-environments-and-navigation-lifecycle)
    (with a fragment in the URL: no focus move, and a fragment target
    outside `#gre-root` scrolled back into view, since this commit put
-   the taller skeleton above it) and calls
+   the taller skeleton above it). After the first result commit, call
    `markAfterPaint('egr:first-result', 0, …)`
    ([§7.6](#76-performance-and-compatibility-measurements)).
 
@@ -6098,7 +6199,7 @@ Rules binding `start` and everything it schedules:
   disconnect, and the outstanding download object URL is revoked
   ([§5.9](#59-downloads)), from the signal's `abort` event;
 - after the first commit — step 3's, or that of the unavailable
-  state below — it writes `#gre-summary`'s border-box height to
+  state below, including a recovery decision — it writes `#gre-summary`'s border-box height to
   `--gre-summary-block` on `#gre-root`, makes the §5.11 at-mount
   focus move or fragment-entry scroll, then sets the test hooks
   `data-gre-mounted` and `data-gre-build` (the bundle's
@@ -6236,12 +6337,15 @@ counts as `'read'`. The state is one presentation, built by
 
 - `#gre-panels` is `hidden`, and `#gre-state` holds the fixed-here
   notice "Results are unavailable: {reason}. Reload the page to try
-  again.", announced through the alert region of
+  again."; when a preserving action is available below, use instead
+  "Results are unavailable: {reason}. Use Reload and restore settings
+  to retry with your accepted settings." Both variants are announced through the alert region of
   [§5.11](#511-accessibility-supported-environments-and-navigation-lifecycle);
 - `#gre-summary` is emptied and `#gre-caveats` keeps only the short
   disclaimer, since both otherwise describe results; every control
   in `#gre-controls`, the overlay switch `#gre-overlay`, and the
-  download button `#gre-download` get `disabled`;
+  download button `#gre-download` get `disabled`; recovery actions in
+  `#gre-recovery` remain enabled;
 - before the first commit, `notices.ts` commits that same skeleton
   through `#gre-root.replaceChildren(…)` with `#gre-controls` and
   `#gre-panels` empty and `hidden`: this path reads nothing from the
@@ -6300,10 +6404,99 @@ shown. A failed field-export load is not
 a results failure: the simulation results stay as rendered, the
 height and width legends carry the fixed-here line of
 [§5.8](#58-view-layer), the switch stays on, and switching it off
-and on again requests the export again. The line, and the marks that
+and on again requests the export again. The one `#gre-recovery`
+action also offers a preserving reload (below), without duplicating a
+button in each legend. The line, and the marks that
 replace it after a successful retry, are rendered from the
 scheduler's field-export state with no Scenario or display change
 ([§5.3](#53-query-engine) item 3).
+
+**Reload recovery presentation and startup.** This implements
+[PDD §7.3](pdd.md#73-reload-recovery-mvp) and the record/storage rules
+of §5.6. `main.ts` owns the recovery listeners, registered with the
+mount's `AbortSignal`; `notices.ts` renders their presentation. No applier imports
+`main.ts`, and the Scheduler retains its five operations.
+
+There is one stable `#gre-recovery` region in the results header,
+after `#gre-download`, separate from `#gre-caveats`. It contains a
+persistent recovery message, a read-only saved-settings summary when
+blocked, and the actions applicable below. Use text nodes, never HTML
+from a saved record. All strings below are fixed-here copy entries
+citing this section; version placeholders are the saved source stamp
+and the verified newly loaded manifest's `exportVersion`.
+
+| Situation | Message and actions |
+|---|---|
+| Field export failed while overlay is on, or the accepted offset Scenario's regression load failed | "Some required data could not be loaded. Reload to retry while keeping your accepted settings."; **Reload and restore settings**, **Reload without restoring settings**. Keep the existing field-legend or unavailable-results reason. Do not assert that a release occurred. |
+| A consumed valid recovery record's startup load or required regression fails | The same actions, using the retained record; the ordinary unavailable-state reason remains. |
+| Save or exact read-back fails | "Your browser could not save your settings. The page has not been reloaded. Reloading without restoration will reset your settings." Keep the retry and explicit non-restoring actions available; neither is automatic. |
+| `location.reload()` throws | "The page could not be reloaded. Your current settings are still on this page. Try again or reload using your browser." |
+| Initial storage read is impossible | "Saved reload settings could not be checked because browser storage is unavailable." When a default result commits, append "The page started with default settings." If startup fails before any result, keep only the first sentence beside the unavailable-state reason. Ordinary default startup is permitted only with this persistent notice and its one announcement. |
+| An initial known saved record cannot be removed or its removal verified | "Saved reload settings could not be cleared. They have not been applied, and the page has not been reloaded." **Retry recovery** and **Start a new scenario** retry clearing before either proceeds. |
+| Explicit discard fails on an already running page | "Saved reload settings could not be cleared. The page has not been reloaded; your current settings are unchanged." Keep its existing results and settings untouched. |
+| Invalid or unsupported recovery record | "Saved reload settings could not be read by this version of the application. No scenario has been applied."; **Start a new scenario**. |
+| Saved settings are incompatible with the loaded manifest | "Your saved settings cannot be used with data version {current}. No scenario has been applied. Start a new scenario to continue."; the saved `summary` under the label **Saved scenario settings**, and **Start a new scenario**. Log the incompatible path for diagnosis; do not expose schema keys as UI labels. |
+| Successful restore with the same export version | "Your settings were restored and results recalculated using data version {current}." |
+| Successful restore with a different export version | "Your settings were restored. Data version changed from {previous} to {current}; results have been recalculated using {current}." |
+| Saved logarithmic display is no longer available | Append "Logarithmic scale is unavailable for these results and has been turned off." to the successful-restore notice. |
+
+The single recovery action is offered at click time from the held
+Scenario/display, including after an unavailable-state stop; it is not
+frozen when a field request first fails. Turning the overlay off or a
+successful field retry removes that failure's actions, without removing
+an earlier successful-restoration notice. When the action is executing,
+disable its buttons until it reports failure or navigation starts.
+A non-restoring reload must clear the recovery key successfully first.
+Startup has no automatic reload, and a repeated load failure never
+loops. An internal failure unrelated to these loads retains its ordinary
+manual-reload instruction and has no new preserving action.
+
+Extend startup step 2: claim and consume storage synchronously before
+its first await. An invalid record or known removal failure enters the
+recovery decision state immediately. Otherwise load and validate the
+vintage normally, then call `restoreRecovery` if a valid record exists.
+An incompatible record enters the decision state without committing a
+default result. In that state `#gre-panels` and `#gre-controls` are
+hidden, `#gre-summary` is empty, the short disclaimer remains, and
+`#gre-state` contains the relevant message; actions and any saved
+summary are in `#gre-recovery`. There is no scheduler/result yet.
+Unlike the terminal internal-failure state, this live pre-result state
+permits the explicit choices above to resume startup in the same mount;
+only its root commit is the mount's first commit. Build that minimal
+skeleton without reading the vintage, as for pre-load failure. On
+resumption, populate the previously empty stable controls/panels and
+other slots; do not replace `#gre-root` or recreate the skeleton or live
+regions. The first actual result still has sequence 0 and receives the
+first-result mark. A failure after resumption still follows ordinary
+unavailable-state handling.
+
+For ready recovery, step 3 uses the restored Scenario and display as
+its initial state. If it is offset mode, await the current manifest's
+regression export with `loadRegression(url, manifest.exportVersion)`
+before computing sequence 0. Never show a temporary default or old
+result. Commit the skeleton/result, synchronize controls from the
+restored Scenario, and run initial focus/scroll only if this is the
+mount's first commit; otherwise use the explicit-decision focus rule
+below. Record the first-result mark. Only after that commit, if restored `overlay` is
+true, start its field load from the absent state; it remains nonblocking
+and uses the normal scheduler continuation. These are explicit startup
+exceptions to the control-event-only lazy-load rule. After an explicit
+**Start a new scenario**, use default Scenario and display, with no
+restored-version success claim; after either explicit decision action
+first produces a result, focus the selected panel, or `#gre-state` for
+an empty result, without scrolling: the action that held focus has
+disappeared (the existing hidden-control focus rule).
+
+Successful restoration and the initial storage-read warning remain
+visible in `#gre-recovery` for that mount and are announced once through
+`announce(status, text, live)` after their commit; `live` requires an
+unaborted mount and that presentation still current. These are the
+explicit exceptions to the normal unannounced first result. Recovery
+errors are announced once through the alert region, with initial blocked
+recovery focused like an unavailable first render. Storage-write errors
+keep focus on the action; removal of a focused recovery action uses the
+existing hidden-control focus rule. Recovery text is UI state, never
+scientific provenance or a substitute for the current version footer.
 
 **Invalid or out-of-range input.** The constrained controls make
 most invalid actions impossible (HLDD §6.1). The free entries follow
@@ -6325,8 +6518,9 @@ accepted entry can produce a non-finite converted window, on which
 `parseScenario` ([§5.6](#56-scenario-state-and-url-encoding)) cannot
 accept makes it throw `ScenarioInputError`, the typed invalid-input
 failure, whose `path` names the offending key or element (fixed
-here). In the MVP only the tests and the parity harness parse
-scenario objects; the P2 link restore will map the error to the
+here). In the MVP tests, parity, and reload recovery parse scenario
+objects; recovery maps this error to its incompatible-settings decision
+state above. The P2 link restore will map the error to the
 reader-facing rule that PDD §7.1 is to gain (§5.6).
 
 **No data for the selected scenario.** Expected product states, not
@@ -6451,7 +6645,8 @@ a fragment in the URL — `scenario/#gre-disclaimer`, reached from a
 product page's disclaimer link
 ([§6.4](#64-product-pages-beyond-the-scenario-page-p2p3)) — mount moves
 no focus. After the first commit, of results or of the
-[§5.10](#510-failure-states) unavailable state, when the fragment names
+[§5.10](#510-failure-states) unavailable or recovery-decision state,
+when the fragment names
 an element outside `#gre-root` (`fragmentTarget(location.hash)` of
 `main.ts`, Navigation lifecycle, below), `start` calls that element's
 `scrollIntoView()`, because the commit replaced the shorter fallback
@@ -6515,8 +6710,10 @@ and appends them to `#gre-root` after the fallback body, so they
 exist before any change they announce; the first render commits
 `root.replaceChildren(skeleton, status, alert)` with the same two
 elements, which are never re-created (fixed here). The first commit,
-of results or of the [§5.10](#510-failure-states) unavailable state,
-empties the status region without announcing anything, so "Loading
+of results or of the [§5.10](#510-failure-states) unavailable or recovery-decision
+state, empties the status region without announcing anything on ordinary
+startup; §5.10 explicitly adds a one-time recovery-success or
+storage-read-warning announcement, and recovery errors use the alert, so "Loading
 simulation data…" never outlasts the load.
 `announce(region, text, live?)` empties the region and writes `text`
 in a later task (`setTimeout(…, 0)`), so a just-inserted region is
@@ -6561,6 +6758,8 @@ Notices and result updates). The inventory — every quoted text is a
 | read-off committed | status | the read-off `<output>` text ([§5.12](#512-charts)); never emitted by a settled update |
 | field export unavailable | status | the [§5.8](#58-view-layer) field-export-unavailable line |
 | failure | alert | the unavailable-results notice ([§5.10](#510-failure-states)) |
+| reload recovery completion or initial storage-read warning | status | the §5.10 recovery message once after its commit; no additional generic "Results updated" announcement for restored sequence 0 |
+| recovery failure or blocked restoration | alert | the corresponding §5.10 recovery message, once per failed action or blocked decision |
 | missing capability | — | no region exists in this state, because `start()` never runs (Navigation lifecycle, below); the [§5.10](#510-failure-states) capability notice itself carries `role="alert"` |
 
 Statistics tables, charts, the chart-data tables, and the read-off
@@ -6921,7 +7120,7 @@ render, as the §5.10 startup sequence fixes them. Rules binding
   disconnects, and the last download's object URL
   ([§5.9](#59-downloads)) is revoked.
 - After the first commit — of results or of the §5.10 unavailable
-  state — write `#gre-summary`'s border-box height to
+  or recovery-decision state — write `#gre-summary`'s border-box height to
   `--gre-summary-block` on `#gre-root`, because the
   [§5.7](#57-scenario-controls) summary observer first reports only
   in the next rendering update; make the at-mount focus move or the
@@ -9973,7 +10172,7 @@ added, and `tscCheck` rejects a DOM identifier in a pure file or in
 `test/` ([§2](#2-repository-structure-naming-and-toolchain)). A
 check that needs a DOM belongs to [§7.5](#75-browser-test-lane): the
 DOM appliers under `src/views/dom/`, `src/overlay/field-overlay.ts`,
-`src/download/deliver.ts`, `src/a11y/`, and `src/main.ts` are covered
+`src/download/deliver.ts`, `src/a11y/`, `src/recovery.ts`, and `src/main.ts` are covered
 there only.
 
 **Pipeline-first rule.** Calculation semantics are covered the way
@@ -10025,6 +10224,7 @@ confuse.
 | `engine.test.ts` | [§5.3](#53-query-engine) implementation properties only: purity — identical output for identical input, the vintage's buffers unmodified — and binary-searched window segments equal to a linear scan for every window whose endpoints are fixture slip values or midpoints between them. Selection semantics — inclusive endpoints, the one-state rule, the no-window final state, the two-count model, the scarp-type filter, `(set, sediment_strength)` pairs, empty groups and stored-empty windows, the single-condition diagnostic — are `synthetic` reference cases replayed by [§7.2](#72-calculation-parity-tests) step 5; the dip-range filter of inverse mode joins the reference coverage of [§5.14](#514-inverse-mode-p2) with P2. |
 | `state.test.ts` | The [§5.6](#56-scenario-state-and-url-encoding) scenario-state model: `defaultScenario(manifest)` equals the manifest-derived defaults of the fixture manifest; `Scenario` holds accepted values only; reducers are pure; settings outside the permitted vocabulary are rejected (the "scenario-state validation" of [HLDD §9 — Testing and release architecture](hldd.md#9-testing-and-release-architecture), Application-specific tests); Reset restores every [§5.7](#57-scenario-controls) control to its default, family view off included, and leaves the overlay switch and the width panel's `logScale` as they were (display state, [§5.6](#56-scenario-state-and-url-encoding)); deselecting any scarp type turns family view off (§5.7). |
 | `parse.test.ts` | `src/state/parse.ts`, the free-entry validation of [§5.7](#57-scenario-controls): grammar G — canonical forms (`03.50` → `3.5`, `.5` → `0.5`, `3.` → `3`, `1,5` → `1.5`), BLANK, and INVALID (`-`, `-0`, `+3`, `1e3`, `3 m`, letters, inner spaces, `1,000.5`, a lone `.`, and the 17-character `1234567890.123456`, while the 16-character `1234567890.12345` is valid, each also with a leading and a trailing space); the normalization boundary — `.12345678901234` accepted as `0.12345678901234`, `.123456789012345` INVALID because its canonical form has 17 characters, and a 17-character raw input rejected even if normalization would shorten it; `storedBoundsFromDecimal(min, max)` by integer arithmetic — lower `0.00005` → 1, upper `5.01349` → 50134, upper `5.0135` → 50135, and 12-decimal strings; slip-window rejections — a maximum above `slip_window_bounds.max` compared as exact decimals, a lone minimum above it, a minimum above the maximum, a negative or unreadable entry; offset entries — `0` and `1000` accepted, `1000.0001` rejected (above the R2 bound, compared as exact decimals), INVALID and BLANK at commit rejected; the dip-assist grammar, `20.25° – 45.125°` (16 characters) readable and `20.125° – 45.125°` (17) unreadable; the read-off validity rule. |
+| `recovery.test.ts` | The pure §5.6 recovery envelope: round-trip accepted Scenario and every DisplayState member, including accepted offset input and overlay on; exact keys/version/type checks; invalid JSON, unknown versions, missing keys, and bad display maps return invalid-record; unchanged inputs pass through `parseScenario` against the new manifest; removed vocabulary, reordered canonical arrays, a reduced slip maximum, and incompatible family view return incompatible without partial restoration. Added dictionary members do not expand old explicit selections; saved effective endpoints and canonical decimal strings remain unchanged; same-version records are validated too; a changed coefficient file is not stored in or read from the record. No storage or DOM access in this test. |
 | `scenario-json.test.ts` | `src/state/scenario-json.ts` ([§5.6](#56-scenario-state-and-url-encoding); [DD-11](#1-ddd-decision-register)): `serializeScenario` of [GS-1](pdd.md#102-golden-scenarios) equals the §5.6 golden bytes; round trips for the default scenario, GS-1, A, B, a lone minimum, a lone maximum, and offset mode; the canonical-decimal cases (`03.50` → `3.5`, `0.000` → `0`); a scenario accepted from `.12345678901234` serializes with `0.12345678901234`, parses back to the same Scenario, and its displayed decimal passes grammar G again; `.123456789012345` is rejected at entry and its 17-character canonical form by `parseScenario`; A and B serialize differently; an unknown key or an out-of-vocabulary value makes `parseScenario` throw `ScenarioInputError`, whose `path` names the offending key or element ([§5.10](#510-failure-states)). |
 | `summary.test.ts` | `summaryText(state, counts)` ([§5.7](#57-scenario-controls)): the PDD tokens verbatim — `Strong (uniform)`, `Strong — uniform and layered`, `slip: any` for the inactive window, `all recorded stages` for the all-stages population without a window; `any sediment` for all nine pairs; A → `Weak (layered) or Strong (uniform)` and B → `Weak (uniform) or Strong (layered)`, as the §5.7 grammar spells them; 512 distinct tokens over all 512 sediment subsets; each checkbox group's empty-group token; the offset-mode window token. |
 | `histogram.test.ts` | `histogram()` and `histogramLog()` mechanics ([§5.12](#512-charts)) only. Linear: the cap loop ends with at most 60 bins; edges ascend; the counts sum to n; valid 0 returns null. Logarithmic, with `logScaleOfferRatio()` as `offerRatio`: every edge is twice the one before, the first being 100 · 2^k recording steps; each edge value from 100 to 100 · 2^20 lands in the bin that starts at it, and the value one step below it in the bin before (below 100, in `below_counts`); the counts and `below_counts` together sum to n; no positive value returns null. Both: identical inputs give identical output. Rules, edges, counts, and whether the log histogram is offered — among them the `synthetic.histograms` threshold pair, `maxpos_s = 100 · minpos_s` not offered and `maxpos_s = 100 · minpos_s + 1` offered — are checked against the references in [§7.2](#72-calculation-parity-tests) steps 3 and 5. |
@@ -10285,6 +10485,72 @@ eleven specs live in `subprojects/webapp/playwright/specs/`.
 `webappBrowserTest` gates item 4 of the release checklist of
 [§7.7](#77-site-validation-and-release-checklist); its JSON report
 and traces are attached to the release record.
+
+**Reload recovery cases** (MVP; §5.6/§5.10). These extend existing
+specs, not the browser-spec inventory. `failure-states.spec.ts` uses
+coherent old/new fixture vintages served by `page.route`: each HTML
+stamp matches its manifest, and each lazy envelope matches that
+manifest. Replace the old served vintage while keeping an old page
+open, and make its first old field/regression URL return 404. The
+new page's route serves the replacement vintage. No GitHub publication
+or real deployment is involved. Assert:
+
+- Field failure leaves simulation results visible and offers exactly
+  one preserving-reload button in `#gre-recovery`. Change a scenario
+  input after failure but before clicking; the restored Scenario is
+  the click-time one, with every accepted display setting restored
+  and overlay on. The field request is for the new manifest's URL,
+  starts after the first result, and a successful load restores marks.
+- For regression, accept an offset Scenario while coefficients are
+  withheld and the screen still shows the previous slip result; fail
+  that load, then recover. The stored and restored inputs are the
+  offset Scenario, not the last rendered slip Scenario. The restored
+  page requests current-vintage coefficients before any result, with
+  no default or old-result flash. Compare its result/download with a
+  fresh page independently set to those same inputs on the new vintage.
+- Same-vintage transient-failure recovery validates and recomputes too;
+  only a different verified export version shows the old/new notice.
+  In both cases success is visible and announced once. A restored
+  valid empty match is the normal empty result. Saved logScale whose
+  new result cannot offer logarithmic display is turned off with its
+  explicit notice, while Scenario inputs remain unchanged.
+- A removed vocabulary item, reduced slip maximum, or incompatible
+  family-view selection shows the saved summary and incompatible
+  decision with no result/defaults/download. **Start a new scenario**
+  explicitly produces defaults. Malformed JSON, wrong record version,
+  and bad display shape use the distinct invalid-record message.
+- Stub each storage operation independently. Getter/read failure on
+  ordinary startup still permits defaults only with the explicit visible
+  and announced read warning; after a committed control change the warning
+  remains truthful in the past tense. Exercise the same failure after a
+  successful preserving save, so it cannot claim restoration, and a
+  concurrent vintage-load failure, so it cannot claim defaults were shown. A write/read-back
+  failure or reload exception produces its exact message without
+  navigation. A known record's removal exception, throwing verification
+  read, or non-null read-back blocks restoration; explicit retry after clearing succeeds resumes,
+  and explicit default-start after clearing uses no saved settings.
+  Failed discard never reloads. No branch silently applies only part
+  of a packet, and no branch automatically retries or reloads.
+- Fail the new vintage or required regression load again. Keep the
+  consumed record available to another explicit preserving action;
+  never loop or silently show default results. A failed overlay load
+  after successful restoration remains the ordinary nonblocking field
+  failure with an explicit recovery action.
+
+`navigation-lifecycle.spec.ts` additionally records key accesses and
+verifies consumption/removal once, then leaves and returns through
+instant navigation: no packet re-read or restoration replay, including
+a changed bundle instance in the same document. Abort a restoring mount
+while its vintage/regression is pending; it must commit or announce
+nothing after abort. Resuming from a blocked decision preserves the
+same `#gre-root`, skeleton containers, and two live-region nodes.
+`a11y.spec.ts` exercises these states in both projects: buttons are
+keyboard-operable, storage errors keep action focus, initial blocked
+recovery focuses `#gre-state` under the usual fragment exception,
+explicit default/retry completion focuses the selected panel (or
+`#gre-state` for an empty result) without scrolling, and
+recovery messages are visible as well as announced. The ordinary
+loading-announcement timing finding remains a separate deferred item.
 
 References:
 
@@ -10804,7 +11070,7 @@ carry as `detail.seq` the [§5.3](#53-query-engine) sequence number
 of the Scenario whose change or result they mark:
 
 - `egr:first-result` — recorded by `markAfterPaint` after the first
-  commit, when the first-meaningful-render condition of
+  result commit, when the first-meaningful-render condition of
   [PDD §9.1 — Performance budgets (D-9, Proposed)](pdd.md#91-performance-budgets-d-9-proposed)
   holds: "the results for the scenario the page opens with are on
   screen: for the measurement shown on load, its statistics table and
@@ -10843,17 +11109,18 @@ committed result's sequence number; it posts a `MessageChannel`
 message and, in that message's task, records
 `performance.mark(name, { detail: { seq, visible: check() } })` if
 `live()` — §5.3 item 2's `isLatest(seq)` — is true, and nothing
-otherwise. For the first commit, which `src/main.ts` makes outside
+otherwise. For the first result commit, which `src/main.ts` makes outside
 the scheduler as sequence number 0, it first requests one animation
 frame and posts from there. Either way
 the mark lands in the first task after the rendering update — style,
 layout, paint — of the frame that contains the commit: an upper bound
 on main-thread paint, never earlier; compositor presentation cannot
 be observed in the page and is not claimed. `check()` returns true
-when the first panel's statistics `<table>` and chart `<svg>` — or
-the notice standing in for the chart, or `#gre-state` when no record
+when the selected measurement's statistics `<table>` and chart `<svg>`
+— or the notice standing in for its chart, or `#gre-state` when no record
 matches — are connected with a non-zero `getBoundingClientRect()`
-area; for `egr:first-result` they must also intersect the viewport. A
+area; for `egr:first-result` use the initial selected measurement and
+require them also to intersect the viewport. A
 repetition whose mark carries `detail.visible === false` fails. In a
 browser without `MessageChannel` or the User Timing Level 3 options
 object, `markAfterPaint` records nothing and never throws: the marks
@@ -10992,8 +11259,8 @@ for — is reviewed with any change to `src/`; calling a new runtime
 API without adding its row is a defect. At startup the
 [§5.10](#510-failure-states) capability probe feature-tests the
 rows without which no result can be loaded, shown, or downloaded —
-§5.10 names its tests and their order — and leaves out three
-surfaces, whose rows are documented availability only:
+§5.10 names its tests and their order — and leaves out the recovery APIs below plus three
+surfaces whose rows are documented availability only:
 `MessageChannel` and the User Timing Level 3 options object, which
 serve measurement alone, and the `signal` option of
 `addEventListener`, which has no type to test.
@@ -11012,6 +11279,8 @@ serve measurement alone, and the `signal` option of
 | `AbortController`, and `addEventListener` with the `signal` option | [§5.11](#511-accessibility-supported-environments-and-navigation-lifecycle) — every listener registers with the per-mount controller's signal. The `signal` option is a separate surface with an explicit row from MDN browser-compat-data (`api/EventTarget.json`, `addEventListener`, `signal` option), its versions recorded beside the row; §5.10 probes `AbortController`, never the option. |
 | `requestAnimationFrame` and `cancelAnimationFrame` | [§5.3](#53-query-engine) — the per-mount frame scheduler, cancelled on abort; `markAfterPaint`. |
 | `Element.replaceChildren` | [§5.8](#58-view-layer) — the first render and every replaced slot commit with it. `caniuse-lite` does not catalog it, so it carries an explicit row (supported from Chrome/Edge 86, Firefox 78, Safari 14 — ahead of every baseline window; source recorded beside the row, re-reviewed at every dataset upgrade). |
+| `sessionStorage` with `Storage.getItem`, `setItem`, and `removeItem` | Optional reload recovery (§5.6); explicit conservative support floors Chrome 4, Edge 12, Firefox 3.5, Safari/iOS 4, Android Chrome following Chrome. Evidence: MDN browser-compat-data [`Window.json`](https://github.com/mdn/browser-compat-data/blob/main/api/Window.json) (`sessionStorage`) and [`Storage.json`](https://github.com/mdn/browser-compat-data/blob/main/api/Storage.json). Availability does not grant storage access: every operation is guarded, and denial/quota failure is a recovery notice, never a missing-capability failure. |
+| `Location.reload()` without arguments | Explicit reload recovery (§5.6); explicit support floors Chrome 1, Edge 12, Firefox 1, Safari/iOS 1, Android Chrome following Chrome; MDN browser-compat-data [`Location.json`](https://github.com/mdn/browser-compat-data/blob/main/api/Location.json) (`reload`). Not probed at startup; no nonstandard cache-bypass argument. |
 | `MessageChannel` | `markAfterPaint` — the instrumentation above only; not probed (§5.10). |
 | `performance.mark` | The instrumentation above, the [§5.2](#52-artifact-loading-and-decoding) decode marks included; probed (§5.10), because the loader records those marks unconditionally. |
 | The User Timing Level 3 options object of `performance.mark` (`detail`, `startTime`) | The instrumentation above; a separate surface from `performance.mark` itself, with an explicit row from MDN browser-compat-data (`api/Performance.json`, `mark`, options parameter), its versions recorded beside the row; not probed (§5.10). |
@@ -11769,6 +12038,7 @@ deliberately keeps.
 | PDD §6.4 | animation-offer introduction copy | §5.8 | text+schedule | §5.8; IP §5 | parked |
 | PDD §7.1 | shared-link URL state inventory (P2) | §5.6 | text+schedule | §5.6; §1 DD-11; IP §5 | parked |
 | PDD §7.2 | shared-link version notice rule and copy (D-15) | §5.6, §6.2 | text+schedule | §5.6; §6.2; IP §5 | parked |
+| PDD §7.3 | one-shot reload recovery preserves accepted settings, validates current data, reports changed versions and storage/incompatibility failures without silent loss | §5.6, §5.10, IP §2 T-34, IP §2 T-46 | text+test+schedule | §5.6; §5.10; subprojects/webapp/test/recovery.test.ts (T-36); subprojects/webapp/playwright/specs/failure-states.spec.ts (T-60); subprojects/webapp/playwright/specs/navigation-lifecycle.spec.ts (T-60); subprojects/webapp/playwright/specs/a11y.spec.ts (T-60); T-34; T-44; T-46 | planned |
 | PDD §8.1 | morphology page composition | §6.4 | text+test+schedule | §6.4; subprojects/webapp/playwright/specs/render.spec.ts (T-60); subprojects/webapp/playwright/specs/navigation-lifecycle.spec.ts (T-60); IP §5 | parked |
 | PDD §8.1 | third-party photos removed or cleared before public release | IP §3 G-6, IP §4 OA-8 | test+release+owner | subprojects/mkdocs/hooks/site_checks.py arms (a), (b) (T-03); §7.7 item 9; §7.7 item 10; G-6; OA-8 | owner-pending |
 | PDD §8.2 | animation library entry fields and not-yet-available fallback copy | §3.7, §6.4 | text+schedule | §3.7; §6.4; IP §5 | parked |
