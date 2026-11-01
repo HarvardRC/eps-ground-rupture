@@ -3,12 +3,13 @@
 **Status:** first full draft, corrected after external review and
 again after the adversarial review of the document pair (both
 2026-10-30), and after the two external reviews of this plan (both
-2026-10-31). The task graph, gates, and every task body are drafted
+2026-10-31), then after the IP consistency review (2026-11-01).
+The task graph, gates, and every task body are drafted
 to the execution contract against the [DDD](ddd.md) and the other
 sources at this plan's own revision
 ([Execution contract](#execution-contract), rule 2). No
-task has been executed and none of the Done-when commands has run; of
-the owner actions, OA-11, enabling GitHub release immutability, and
+task has been completed in the project; isolated specification trials
+are recorded in the review ledger. Of the owner actions, OA-11, enabling GitHub release immutability, and
 OA-16, the reference image ID, are recorded as done, and OA-12 and
 OA-17, the acceptances of ADR-0016 and ADR-0017, were approved on
 2026-10-31, recorded by the owner's commit of the Accepted status
@@ -581,8 +582,10 @@ library only, implementing exactly the lint that the *Verification
 the matrix tables of `docs/app/ddd.md` (§8.1–§8.4) and
 `docs/app/ip.md` (§7.1–§7.4), with the entry forms and the Status
 precedence that [DDD §8](ddd.md#8-traceability) defines. It splits a
-row into its six cells at each unescaped `|` and a Check cell into
-entries at `;`, and it checks, each as that paragraph words it and no
+row into its six cells at each unescaped `|`, trims leading and trailing
+whitespace from each cell, and splits a Check cell into entries at `;`;
+row equality compares all six trimmed cells, preserving internal text.
+It checks, each as that paragraph words it and no
 narrower: every table header is exactly
 `| Source | Obligation | Home | Kind | Check | Status |`; every
 `+`-joined part of a Kind lies in the Kind set and every Status in the
@@ -609,18 +612,20 @@ seven files that paragraph names as in no inventory:
 `subprojects/mkdocs/hooks/site_checks.py`,
 `subprojects/webapp/test/parity.ts`, and
 `subprojects/python/tests/test_regression_views.py`; every name an
-export-rule entry cites is a rule that the cited step of
+export-rule entry cites (`rules` lists names separated by commas) is a
+rule that the cited step of
 [DDD §4.1](ddd.md#41-export-task-and-validation) defines — an item of
 that step opening with the name in backticks, alone or after `Rule`;
 every whole word matching `T-[0-9]{2}`, `OA-[0-9]+`, or `G-[0-9]+` in
 a Check cell is a task row of [§2](#2-task-graph), an owner action of
 [§4](#4-owner-and-research-group-actions), or a gate of
 [§3](#3-gates-and-release-sequence); no Check or Status cell carries
-the words `passed`, `verified`, `satisfied`, or `discharged`; and every
-IP §7 row is identical to the DDD §8 row with the same Source and
-Obligation. It exits non-zero on any failed check, naming the row; it
-hardcodes no row count, prints the number of rows whose Status is
-`gap`, and with `--release` also exits non-zero unless that number is
+the words `passed`, `verified`, `satisfied`, or `discharged`; and `(Source, Obligation)` is unique within each document
+(duplicate keys fail even if all six cells match), with every IP §7
+row identical to the DDD §8 row with that key. It exits non-zero on any
+failed check, naming the row; it hardcodes no row count and prints
+`gap rows: <n>`, counting only DDD §8 rows whose Status is `gap`, not
+the IP §7 mirrors. With `--release` it also exits non-zero unless n is
 0. Where this list and the DDD paragraph differ, the paragraph
 governs. (2) In `.github/workflows/doc-links.yml`, add to job `links`
 the step **Check traceability**, running
@@ -654,7 +659,11 @@ of the same kind — a renamed header cell, a Kind or a Status outside
 its closed set, a `T-99` citation, a `verified` Status, a `test` entry
 without its task list, a `planned` row given an `OA-4` entry, and an
 IP §7 row whose Check differs from its DDD twin — each make it exit
-non-zero naming the row; every mutation is a drill under rule 5 of the
+non-zero naming the row; duplicating an existing row within either
+document also fails; changing a DDD row and its IP mirror to Status
+`gap` prints exactly `gap rows: 1`, passes without `--release`, and
+fails with it; the saved originals are restored after each case.
+Every mutation is a drill under rule 5 of the
 [Execution contract](#execution-contract);
 `(cd subprojects/python && poetry run python -c "import yaml; s = yaml.safe_load(open('../../.github/workflows/doc-links.yml'))['jobs']['links']['steps']; n = [x['name'] for x in s if 'name' in x]; o = ['Check links and anchors', 'Check PDD agreement', 'Check traceability', 'Self-test doc scripts']; assert n == [k for k in o if k in n] and {'name': 'Check traceability', 'run': 'python .github/scripts/check_traceability.py'} in s, n")`
 exits 0 — the named steps of job `links` are those of the §6.3 order
@@ -971,18 +980,21 @@ and 8 each also holding a passing `test_other` that stays selected —
 and `test_manifest_matches_suite`. (6) Update the fresh-clone skip
 count in the header comment of `.github/workflows/tests.yml` (§7.3).
 
-**Done when:** in `subprojects/python`,
-`poetry run pytest tests/test_full_data_gate.py` exits 0; with the
+**Done when:** all commands run from the repository root unless a
+subshell explicitly changes directory:
+`(cd subprojects/python && poetry run pytest tests/test_full_data_gate.py)`
+exits 0; with the
 export inputs of [DDD §4.1](ddd.md#41-export-task-and-validation)
 step 1 and `data/raw/FDHI_Cleaned_Measurements.csv` present — the
 full-data run needs both (§7.3) — and a staged development vintage
-(`exportApp -Pdata.tag=data-v0-test`),
+(`./gradlew :subprojects:python:exportApp -Pdata.tag=data-v0-test`),
 `./gradlew :subprojects:python:pytestFullData` exits 0 — under the flag
 a skip, an xfail, or a required test without a successful call report
 fails the run, so exit 0 means zero skips and every manifest test run to
 success; in a checkout without the gitignored data, plain
-`poetry run pytest` exits 0 while
-`EGR_REQUIRE_FULL_DATA=1 poetry run pytest` exits non-zero with every
+`(cd subprojects/python && poetry run pytest)` exits 0 while
+`(cd subprojects/python && EGR_REQUIRE_FULL_DATA=1 poetry run pytest)`
+exits non-zero with every
 would-be skip reported under the prefix;
 `./gradlew check --dry-run | grep -c pytestFullData` prints 0;
 `grep -r EGR_REQUIRE_FULL_DATA .github/workflows/` prints nothing; and
@@ -1415,20 +1427,21 @@ exits 0, after which `test ! -e subprojects/mkdocs/site/scenario` and
 prints 1, and `subprojects/mkdocs/site-preview/assets/scenario/` holds
 exactly `data/`, one `app-<12 hex>.js`, and one `app-<12 hex>.css`,
 every pointer-listed file in `data/` matching its pointer SHA-256
-(`shasum -a 256`). Staging drills in `subprojects/mkdocs/`, each under
+(`shasum -a 256`). All commands and staging drills run from the
+repository root, each drill under
 rule 5 of the [Execution contract](#execution-contract): the stray files
-`docs/assets/scenario/data/stray-000000000000.bin` and
-`docs/assets/scenario/app-000000000000.js` are gone after the next
+`subprojects/mkdocs/docs/assets/scenario/data/stray-000000000000.bin` and
+`subprojects/mkdocs/docs/assets/scenario/app-000000000000.js` are gone after the next
 `./gradlew :subprojects:mkdocs:scenarioAssets`, which leaves the sorted
-listing of `docs/assets/scenario/data/` equal to the pointer's sorted
+listing of `subprojects/mkdocs/docs/assets/scenario/data/` equal to the pointer's sorted
 `files` keys; an immediate rerun reports `fetchVintage` and
 `scenarioAssets` UP-TO-DATE; a byte flipped in a staged data file is
 restored by the next run; a changed `version` in `CITATION.cff` makes
 the next `scenarioAssets` run execute instead of reporting UP-TO-DATE;
 one changed hex digit of a pointer SHA-256 makes `fetchVintage` fail
-naming that file; a scratch `docs/assets/other/keep.txt` survives
+naming that file; a scratch `subprojects/mkdocs/docs/assets/other/keep.txt` survives
 `./gradlew :subprojects:mkdocs:clean`, which removes
-`docs/assets/scenario/` and `docs/includes/scenario-head.html`, and
+`subprojects/mkdocs/docs/assets/scenario/` and `subprojects/mkdocs/docs/includes/scenario-head.html`, and
 `git check-ignore subprojects/mkdocs/docs/assets/other/keep.txt`
 exits 1. `grep -cxF '<entry>' .gitignore` prints 1 for each of the five
 §6.1 entries.
@@ -1554,9 +1567,17 @@ the mapped `manifest` in the `Vintage`, and record
 `performance.mark('egr:decode-end')`. (2)
 `loadVintage(manifestUrl, expected)`, the fetching wrapper whose
 `readFile(name)` fetches `new URL(name, manifestUrl)` with the global
-`fetch`; `loadRegression(url)` and `loadFieldExport(url)`, each behind
+`fetch`; `loadRegression(url, expectedExportVersion)` and
+`loadFieldExport(url, expectedExportVersion)`, each behind
 the same gzip guard, requiring `schema_version` 1 and mapping through
-`REGRESSION_FIELDS` or `FIELD_EXPORT_FIELDS`; and
+`REGRESSION_FIELDS` or `FIELD_EXPORT_FIELDS`, then checking the mapped
+envelope's `exportVersion` against the required string argument before
+returning anything. A mismatch rejects with kind `'data-version'`,
+`expected` the argument and `loaded` the envelope's version. The field
+loader then returns only `rows` (`FieldRow[]`); the regression loader
+returns the mapped `Regression`. Browser callers pass
+`vintage.manifest.exportVersion`, and the parity harness passes the
+pointer's `export_version`; and
 `parseReferences(bytes)` through `REFERENCE_FIELDS`, for the parity
 harness only. (3) Every rejection is the `LoadError` of
 [DDD §5.10](ddd.md#510-failure-states) (Internal failure) — `kind`
@@ -1619,7 +1640,10 @@ offset-mode bounds from the exported pure
 `[⌈lo / scale − 1e-9⌉, ⌊hi / scale + 1e-9⌋]`, `scale` being the
 manifest's `columns.slip.scale` and a −0 result returned as 0; the
 binary-searched segments, both one-state branches, the class filter, and
-the two-count model of §5.3; and the empty-result diagnostic, relaxing
+the two-count model of §5.3, exporting
+`MeasurementCounts = Readonly<{ valid: number; excludedNull: number }>`
+as the type of each `Selection.perMeasurement[measurement]` entry;
+and the empty-result diagnostic, relaxing
 one group at a time in §5.3's order and keys (`fault_dip`, `sediment`,
 `depth`, `density`, `window`, `scarp_class`), never the population. Pure
 and synchronous: no DOM, clock, randomness, or I/O. (2)
@@ -1795,7 +1819,10 @@ unchanged; and a scarp-filter change that leaves fewer than six classes
 setting `familyView` to false in the same update. (2)
 `src/state/parse.ts`, the free-entry validation of
 [DDD §5.7](ddd.md#57-scenario-controls): grammar G, its 16-character
-limit after trimming, and its canonical form; row R1 (both slip fields
+limit both after trimming and after canonicalization, and its canonical
+form — `.12345678901234` accepted as `0.12345678901234`, but
+`.123456789012345` rejected because its canonical form has 17
+characters; row R1 (both slip fields
 judged together and compared as exact decimals with `BigInt`: both
 BLANK give the inactive window, a lone BLANK minimum reads as `0` and
 a lone BLANK maximum as `String(slip_window_bounds.max)`, and the
@@ -1847,7 +1874,8 @@ missing file, a final status other than 200, a transport error, or a
 mismatch fails under rule `fetch`. (2) Load and pair: `decodeVintage` on
 the verified bytes with `expected` =
 `{ exportVersion: <the pointer's export_version>, schemaVersions: [1] }`;
-`loadRegression` through a `fetch` the harness installs for its own
+`loadRegression(url, pointer.export_version)` through a `fetch` the
+harness installs for its own
 process, answering `file:` URLs inside the verified directory with
 `new Response(<bytes>)` and rejecting every other URL; the reference
 file gunzipped with `node:zlib` and parsed by `parseReferences`; then
@@ -1941,7 +1969,10 @@ rejecting with its `LoadError` kind of
 for a truncated buffer, a count mismatch, and a `SchemaError`;
 `'schema-version'`; `'data-version'`, carrying `expected` and `loaded`;
 and `'retrieval'` for a non-2xx `fetch` stub of `loadFieldExport` or
-`loadRegression`. (3) `test/fields.test.ts`, the §7.4 row: the six DD-10
+`loadRegression`; for both lazy loaders, matching expected versions
+return the documented result and mismatching versions reject before
+returning it, carrying the expected argument and loaded envelope version.
+(3) `test/fields.test.ts`, the §7.4 row: the six DD-10
 tables total and injective over the closed field lists of
 [§3.2](ddd.md#32-artifact-manifest)–[§3.6](ddd.md#36-reference-results),
 no snake_case key left outside the data-keyed maps and the verbatim
@@ -1953,9 +1984,16 @@ derived defaults and Reset restoring every
 [§5.7](ddd.md#57-scenario-controls) control's default with family view
 off while the overlay switch and `logScale` stay. (5)
 `test/parse.test.ts`, the §7.4 row, among its cases the stored bounds
-`0.00005` → 1, `5.01349` → 50134, and `5.0135` → 50135. (6) `test/scenario-json.test.ts`, the §7.4 row: GS-1's golden
-bytes of §5.6, the round trips, the pair sets A and B serializing
-differently, and `ScenarioInputError` for an unknown key and an
+`0.00005` → 1, `5.01349` → 50134, and `5.0135` → 50135;
+`.12345678901234` normalizes to the accepted 16-character
+`0.12345678901234`, while `.123456789012345` is INVALID because
+normalization would make it 17 characters; raw inputs over 16
+characters remain INVALID even if normalization would shorten them.
+(6) `test/scenario-json.test.ts`, the §7.4 row: GS-1's golden
+bytes of §5.6, the round trips (including the accepted normalization
+boundary, whose serialized decimal also passes grammar G on re-edit),
+the rejected 17-character normalized value, the pair sets A and B
+serializing differently, and `ScenarioInputError` for an unknown key and an
 out-of-vocabulary value. Every test imports only browser-and-Node files,
 touches no network, and holds no hand-maintained calculation expectation
 (the §7.4 pipeline-first rule); rendered behavior belongs to the browser
@@ -2200,16 +2238,23 @@ each carrying its `segmentTitle` `<title>`; the
 label) family fold; the logarithmic rendering of §5.12 (Logarithmic
 scale) while `logScale` is on; and the step polyline of the pure
 `ecdfSteps(sorted)` in the same file (§5.12, Empirical cumulative curve:
-one rise per distinct value, at most 512 points, constant data centered
-on one display step) with the "Median" and "84th percentile" pre-marks
+one rise per retained distinct value, at most 512 points: keep all
+when m ≤ 512; otherwise keep the endpoints and each interior point
+whose cumulative count advances from the last retained point by more
+than n/511, using the exact integer comparison of §5.12. The maximum
+vertical simplification error is at most 1/511, strictly below 0.2
+percentage points; constant data are centered on one display step) with the "Median" and "84th percentile" pre-marks
 and the read-off marker at (`quantileLinear(sorted, q / 100)`, q / 100)
 from the full array, which need not lie on a step. The bins are T-32's
 `histogram` and `histogramLog` results: charts only draw. (5)
 `src/views/chart-text.ts` — `chartLabel(state)`,
 `binTableSpec(binsByGroup, groups, edges)`,
 `fieldTableSpec(rows, order)`, and `segmentTitle`, per the §5.11
-templates — and `chartSummary(stats, measurement, cfg)` in
-`src/views/summary.ts`, the caption sentence. (6)
+templates — and `chartSummary(stats, counts, measurement, cfg)` in
+`src/views/summary.ts`, the caption sentence, with non-null `Stats`
+and the same result's `selection.perMeasurement[measurement]` as
+`MeasurementCounts`; N is `counts.valid`, and the builder is called
+only when a chart is drawn. (6)
 `src/views/dom/panels.ts` — the three DD-4 panel `<section>`s in
 `#gre-panels`, ids `gre-scarp_height`, `gre-dzw`, and `gre-scarp_dip`,
 each holding the eight §5.8 panel contents in order, with the element
@@ -2219,7 +2264,12 @@ view"; on the width panel the "Logarithmic scale" checkbox
 `#gre-dzw-log`, shown exactly while the histogram view renders a chart
 and the result's `dzw` `histogramLog` is non-null, its `checked`
 mirroring `logScale`; in `.gre-chart`, the `<figure>` with the chart and
-`<figcaption id="{pid}-cap">`, then `<details id="{pid}-data">`, whose
+`<figcaption id="{pid}-cap">`: the `chartSummary` sentence in its first
+`<p>` and, only for a drawn cumulative chart, the verbatim PDD §4.1
+accuracy statement from `pdd4.1.cumulativeAccuracy` in a second `<p>`.
+This paragraph is shown even when no points were omitted and is part
+of the SVG's existing `aria-describedby` target. Then
+`<details id="{pid}-data">`, whose
 `<summary>`, carrying `data-focus-key="chart-data:{measurement}"`, reads
 "Chart data" and which, while open, holds the bin table — each
 chart-data `<table id="{tid}">` with its `<caption id="{tid}-cap">`
@@ -2266,8 +2316,14 @@ present — `charts.test.ts`: two independently built specs serialize
 identically through `serializeSvg` on a linear and on a logarithmic
 value axis, tick labels equal `displayRound` at the D-23 decimals, each
 segment's `<title>` equals `segmentTitle`, `ecdfSteps` gives tied values
-one point and keeps 511, 512, and 512 points at 511, 512, and 513
-distinct values (k = 256 dropped at 513), the constant-data rise
+one point and keeps 511, 512, and 257 points at 511, 512, and 513
+unit-weight distinct values (even indices retained at 513); the
+§7.4 heavy-tie fixture keeps the 45-value jump at 256, the 1022-value
+fixture omits threshold equality and keeps 342 points, and the
+1532-value fixture reaches the 512-point cap. Each fixture checks
+endpoints, exact cumulative counts, ascending retained values, the cap,
+and `0 ≤ 511 * (exactCount - drawnCount) ≤ n` at every original
+distinct value; the constant-data rise
 standing at the plot's horizontal center, and no table, list, or text
 alternative sits inside the `<svg>`; `chart-text.test.ts`: the canonical
 header order, the six-to-three family fold keeping row totals, group
@@ -2285,9 +2341,13 @@ at least 1;
 `grep -c 'gre-table-scroll' subprojects/webapp/src/views/dom/panels.ts`
 prints at least 1;
 `grep -cF 'Chart view' subprojects/webapp/src/views/copy.json` prints 1;
+the registry also contains `pdd4.1.cumulativeAccuracy`, sourced from
+`docs/app/pdd.md#41-measurement-views-fr-o1`, `part: 0`, with no slots;
 `python3 .github/scripts/check_pdd_agreement.py` exits 0; rendered
 panels, the log-scale drive, the resize drive, chart suppression, the
-chart alternatives, and the chart-data tables scrolling inside their
+chart alternatives, the cumulative accuracy paragraph's visibility and
+accessible-description inclusion (also after switching views, and absent
+for histogram or suppressed charts), and the chart-data tables scrolling inside their
 wrappers at 360 px are covered by `render.spec.ts`,
 `interactions.spec.ts`, `golden-scenario.spec.ts`, `a11y.spec.ts`, and
 `keyboard-responsive.spec.ts` (T-60).
@@ -2295,8 +2355,11 @@ wrappers at 360 px are covered by `render.spec.ts`,
 #### T-42 — Statistics table
 
 **Steps.** Per [DDD §5.8](ddd.md#58-view-layer) (Statistics tables): (1)
-`src/views/stats-table.ts` — `statsRows(stats, measurement, cfg)`: rows
-in the
+`src/views/stats-table.ts` — `statsRows(stats, counts, measurement, cfg)`,
+with `stats: Stats | null` and `counts: MeasurementCounts` from the same
+result's `selection.perMeasurement[measurement]`, supplied together by
+the render pass even when `stats` is null. The first two rows read
+`counts.valid` and `counts.excludedNull`; rows are in the
 [PDD §4.2 — Statistics table (FR-O2)](pdd.md#42-statistics-table-fr-o2)
 order, labeled "Valid count", "Excluded null count", "Median", "16th
 percentile", "84th percentile", "Minimum", "Maximum", "Mean", and
@@ -2309,7 +2372,9 @@ built from those rows, its `<caption>` the entry of
 and, while the matching population holds unclassified records, the
 `<tfoot>` line of
 [PDD §4.3 — Unclassified records (D-12, Proposed)](pdd.md#43-unclassified-records-d-12-proposed)
-with X the `formatCount` of the matched class-code-255 count; population
+with X the `formatCount` of `Selection.unclassified`, supplied
+separately to the table applier from the same `RenderInput`; it is the
+matched class-code-255 count, not `counts.excludedNull`. Population
 semantics stay the engine's. (3) `copy.json` gains the row labels and
 the null mark (§5.8 fixed-here entries) and the PDD §4.3 line. (4) The
 `statsRows` cases of `test/views-text.test.ts`
@@ -2320,7 +2385,11 @@ the null mark (§5.8 fixed-here entries) and the PDD §4.3 line. (4) The
 covering `statsRows` — rows in the PDD §4.2 order, values by
 `displayRound` at the D-23 decimals (−0.005 at two decimals rendering
 `-0.01` with the ASCII hyphen-minus, −0.004 rendering `0.00`), counts by
-`formatCount` (1234567 → `1,234,567`), and the unclassified line exactly
+`formatCount` (1234567 → `1,234,567`), with null statistics and
+`{ valid: 0, excludedNull: 1 }` versus `{ valid: 0, excludedNull: 2 }`
+giving distinct excluded counts and seven null marks; `chartSummary`
+with identical non-null statistics and different valid counts changes N;
+and the unclassified line exactly
 when unclassified records match;
 `python3 .github/scripts/check_pdd_agreement.py` exits 0; the parity of
 the displayed strings is T-35's (rule `display`), and the rendered table
@@ -2658,7 +2727,9 @@ neither acts once a newer Scenario is accepted or the scheduler stops
 regression-export prefetch, its request for an accepted offset-mode
 Scenario, the field export when `update(next)` turns `overlay` on
 while its state is `absent` or `failed`),
-each loaded export's `export_version` required to equal the vintage's
+passing `vintage.manifest.exportVersion` as the required second
+argument to both `loadFieldExport` and `loadRegression`; each loader
+validates its envelope version before its promise resolves
 ([§5.2](ddd.md#52-artifact-loading-and-decoding), Lazy exports),
 superseded continuations dropped, failures handled per §5.10 (Lazy-load
 failures), and the field export's state — `absent`, `loading`,
@@ -2898,8 +2969,9 @@ never pooled, carrying `limited_comparison`), and
 `overlayNote(measurement)` ("Field sources provide no comparable
 scarp-dip measurement." for `scarp_dip`, null otherwise). (2)
 `src/overlay/field-overlay.ts`, browser only, over the `field` rows of
-the `RenderInput` (T-41) — the `FieldRow[]` that `loadFieldExport`
-(T-30) yields for the [§3.4](ddd.md#34-field-data-export) rows while
+the `RenderInput` (T-41) — the `FieldRow[]` that
+`loadFieldExport(url, vintage.manifest.exportVersion)` (T-30) yields
+after version validation for the [§3.4](ddd.md#34-field-data-export) rows while
 the field export's state is `ready`, `'failed'` while it is `failed`,
 and null otherwise ([§5.3](ddd.md#53-query-engine) item 3) — each
 mechanic as the §5.8 bullets fix it:
@@ -4007,12 +4079,22 @@ Companion site push run on `<main sha>` — each in a new empty
 temporary directory with
 `gh run download <run id> --name webapp-dist --dir <that directory>`,
 then `shasum -a 256 app.js app.css` in it. After that deployment,
-item 5 (b):
+return to the repository root. Require
+`git status --porcelain=v1 --untracked-files=all` to print nothing and
+`git branch --show-current` to print `dev-v.0.3.x`; fast-forward that
+local release branch with `git merge --ff-only <main sha>`, then require
+`git rev-parse HEAD` to equal `<main sha>` and the clean-tree command
+still to print nothing. Keep `<release sha>` as the recorded pre-merge
+commit; do not redefine it from the new HEAD. From this clean checkout,
+run item 5 (b):
 `./gradlew :subprojects:webapp:webappMeasureReference -Pegr.perf.target=published`
 completes, its measure run exiting 0, so the header sets match, its
 report recording the same environment and `network` values, its cold and
 fresh-warm workloads reading `within_budget` true, and its `bundle`
-digests equal to both recorded pairs — a miss or a differing digest
+digests equal to both recorded pairs. Its downloaded report must also
+name the measured checkout exactly:
+`python3 -c 'import json,sys; r=json.load(open(sys.argv[1])); assert r["source_commit"] == sys.argv[2] and r["source_tree_clean"] is True' subprojects/webapp/build/perf/<run_id>/report.json <main sha>`
+exits 0. A miss, differing digest, wrong source commit, or dirty source
 stops the release at step (7).
 (5) Create the annotated tag on `<main sha>`, push it, and create
 the draft release with
@@ -4039,7 +4121,9 @@ workflow run of item 1, each report of item 5), and one row per
 the release commit, except the rows of items 2 and 3, which name the
 publication record's `tag_commit`, and the rows of items 5 (b) and
 10, which name `<main sha>`; the row of item 5 (b) reads `pass` only
-when the build identity of §7.7 holds — the two digest pairs of step
+when its report's `source_commit` equals `<main sha>` and
+`source_tree_clean` is true, the build identity of §7.7 holds — the two
+digest pairs of step
 (4) and its report's `bundle` digests equal — and its report's
 `software_version` and `data_version` equal the release commit's
 `CITATION.cff` version and its pointer's `export_version` —
@@ -4072,7 +4156,9 @@ and [DDD §7.6](ddd.md#76-performance-and-compatibility-measurements)
 answers a miss by optimizing and measuring again — the owner makes
 the corrective commit on the release branch once
 `git merge --ff-only origin/main` has brought it to `<main sha>`,
-and repeats steps (3)–(6) on it through a new release pull request,
+and records that corrective commit as the next attempt's
+`<release sha>`. It repeats steps (3)–(6) on that commit through a new
+release pull request,
 the OA-4 check included, so a change to a listed text, the vintage,
 or the bundle needs a new OA-4 record first. If GitHub refuses to
 reuse the software tag after its draft release is deleted, the
@@ -4093,7 +4179,9 @@ byte-identical to the pointer's and the immutability command printing
 prints the version the [OA-7](#4-owner-and-research-group-actions)
 record names;
 `git rev-parse '<software tag>^{commit}'` prints `<main sha>` and
-`git diff --quiet <release sha> <software tag>` exits 0; the G-2–G-5
+`git diff --quiet <release sha> <software tag>` exits 0; the item-5 (b)
+report names `<main sha>` in `source_commit` with `source_tree_clean`
+true; the G-2–G-5
 approval references resolve to dated records.
 
 ## 3. Gates and release sequence
@@ -4574,12 +4662,21 @@ sources. Each line names what unparks it.
   reading of observed ranges outside the recorded extent awaits the
   owner's decision
   ([DDD §5.14](ddd.md#514-inverse-mode-p2)).
-- Chart export ([D-14](pdd.md#1-decision-register)) — P2.
+- Chart export ([D-14](pdd.md#1-decision-register)) — P2. Its cumulative
+  images must include the PDD §4.1 accuracy statement in the rendered
+  caption strip; acceptance covers its inclusion and legibility.
 - Finer logarithmic bins that subdivide each decade by mantissa steps
   — a P2 option for the width panel's log-scale toggle, which ships in
   the MVP; it needs a [D-23](pdd.md#1-decision-register)
   (Reader-facing display precision per quantity) amendment
   ([DDD §5.12](ddd.md#512-charts)).
+- Reader-selected cumulative-curve accuracy — P3 consideration, per
+  the owner's 2026-11-01 direction in
+  [PDD §4.1](pdd.md#41-measurement-views-fr-o1). Unpark after a
+  product decision fixes the options and their limits and a DDD amendment
+  specifies them. Each implemented option must pass performance
+  acceptance before shipping. The MVP keeps
+  its fixed drawing bound and disclosure; no control is yet specified.
 - Contact page — P3; repository links wait for
   [R-15](prd.md#93-content-and-media-dependencies).
 - 3D lane — on hold per the Roadmap's 2026-10-12 decision; Cases 1–3
@@ -4673,6 +4770,7 @@ the rows resolves to "not an IP obligation (stays with its source)".
 | PDD §1 D-1 | MVP scope and release target v0.3 | IP §2 T-65 | schedule+owner | T-65; IP §5; OA-9 | owner-pending |
 | PDD §1 D-10 | liability-limitation text (D-10) authored before release | IP §3 G-5, IP §4 OA-3 | release+owner | §7.7 item 7; G-5; OA-3 | owner-pending |
 | PDD §2.1 surface table | surface priorities P1/P2/P3 (release sequencing) | IP §5 parked | text+schedule | §6.4; IP §5 | parked |
+| PDD §4.1 | reader-selected cumulative-curve accuracy considered for P3; options and limits await a product decision and performance validation | §9, IP §5 | schedule | §9; IP §5 | parked |
 | PDD §4.7 | Kern preset ships only after D-6 (release sequencing) | IP §2 T-48, IP §3 sequence, IP §4 OA-2 | schedule+owner | T-48; OA-2 | owner-pending |
 | PDD §5.11 | glossary additions before launch | §6.4, IP §2 T-52 | text+schedule+release+owner | §6.4 (Glossary additions); T-52; §7.7 item 8; G-4; OA-4 | owner-pending |
 | PDD §8.1 | third-party photos removed or cleared before public release | IP §3 G-6, IP §4 OA-8 | test+release+owner | subprojects/mkdocs/hooks/site_checks.py arms (a), (b) (T-03); §7.7 item 9; §7.7 item 10; G-6; OA-8 | owner-pending |

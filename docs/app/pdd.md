@@ -364,6 +364,24 @@ always-visible scenario summary carries the matching-record count
 those records — FR-O2's valid count. The two differ exactly by the
 panel's excluded-null count (§4.2).
 
+The cumulative curve may be simplified for display only if its
+vertical simplification error is guaranteed to be less than 0.2
+percentage points at every measurement value. This is an absolute
+cumulative-probability bound, not a relative percentage error.
+Statistics, pre-marked percentiles, and percentile read-offs use the
+full matching valid measurements. Every drawn cumulative chart carries
+this visible statement in its caption, also available to assistive
+technology:
+
+> The curve may be simplified for display. Simplification changes
+> cumulative percentages by less than 0.2 percentage points. Statistics
+> and percentile read-offs use all matching valid measurements.
+
+A reader choice of cumulative-curve accuracy is a P3 consideration
+(owner direction, 2026-11-01), not an MVP control. Whether to offer an
+exact curve, alternative error limits, or both remains to be decided
+when that work is opened, with performance verified for each option.
+
 Default measurement on load: scarp height; the other panels are one
 action away (tabs or stacked sections — final arrangement is visual
 design, not a product decision). The deformation-zone-width panel
@@ -720,8 +738,8 @@ summary (which always names the population, §3.7); the count line
 "N = {valid} valid measurements of {matching} matching records
 ({excluded} excluded null)"; software and data-export versions; and
 "Cite: Chiama et al. (2025)" with the pointer to the full citation.
-The
-export action pairs the image with the §6.1 provenance text.
+A cumulative-chart image also carries the §4.1 accuracy statement in
+that rendered strip. The export action pairs the image with the §6.1 provenance text.
 
 ### 6.4 Animation offer and dominance (FR-D4, P2; D-7 Proposed)
 

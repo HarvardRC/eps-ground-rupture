@@ -7,11 +7,12 @@ each finding. Review 2 asked for it: "Review records need a durable
 evidence location". The status lines of the DDD and of the
 implementation plan cite this file.
 
-**Scope.** Six reviews: three of 2026-10-30 — review 1 of the full
+**Scope.** Seven reviews: three of 2026-10-30 — review 1 of the full
 DDD draft, review 2 of the corrected DDD, and a review of
 [ADR-0016 — Performance reference environment — an on-demand AWS VM defined by Terraform](../adr/0016-performance-reference-environment.md)
 — two reviews of the implementation plan, both of 2026-10-31, and
 the repository-backed design review of 2026-10-31 with its
+correction pass of 2026-11-01, and the IP consistency review and
 correction pass of 2026-11-01.
 The review texts are model output from the owner's review agent, not
 statements of the research group or of any other person. Reviews 1
@@ -32,8 +33,10 @@ does not reproduce the review texts. It also records the correction
 passes' own verification rounds and the owner's rulings made during
 them.
 
-**Evidence.** Nothing the DDD specifies has been built, and none of
-the checks it specifies has run. A disposition is a change to the
+**Evidence.** No planned application code has been built in the
+project, and no planned application test or release check has run.
+The isolated T-04 implementation trials described below are diagnostics
+of the specification, not completion of that project task. A disposition is a change to the
 documents: the Where column names the sections that now carry it and
 the IP tasks that will implement it, not evidence that it holds.
 
@@ -97,7 +100,7 @@ checking the item against the text; one editor applied the edits.
 | **4** Finite offset input can produce nonfinite converted windows | Confirmed | Free-entry text is capped at 16 characters after trimming, and an offset maximum is accepted only up to 1000 m (fixed here), so with the smallest exported slope every converted window and stored bound is finite; `convertWindows` asserts finiteness, and `parseScenario` applies the same bound. Planned tests take 16 and 17 characters, 1000 and 1000.0001, a 1000 m conversion case, and a rejected entry in the browser lane. | [DDD §5.7](ddd.md#57-scenario-controls), [§5.5](ddd.md#55-offset-to-slip-conversion-assist), [§5.10](ddd.md#510-failure-states), [§7.4](ddd.md#74-application-tests); [IP T-33](ip.md#t-33--conversion-assist), [T-34](ip.md#t-34--scenario-state), [T-60](ip.md#t-60--browser-test-lane) |
 | **5** The scheduler's lazy-load completion does not clearly trigger a display-only render | Confirmed | The scheduler holds the field export's state (`absent`, `loading`, `ready`, `failed`). A change marks the height and width panels' legend and chart slots and requests a frame that re-renders them with Scenario and display state unchanged; a failed load is retried when the overlay is next switched on, and a successful retry removes the error line. The regression export reaches no slot except through a computed result. | [DDD §5.3](ddd.md#53-query-engine), [§5.8](ddd.md#58-view-layer), [§5.10](ddd.md#510-failure-states), [§7.5](ddd.md#75-browser-test-lane); [IP T-46](ip.md#t-46--accessibility-and-navigation-lifecycle), [T-49](ip.md#t-49--field-overlay) |
 | **6** Some frame callbacks are not bound to the result revision they measure or announce | Confirmed | Each delayed callback of a committed result — the post-paint mark and the announcement — carries its Scenario sequence number and does nothing once a newer Scenario is accepted; `egr:*` marks carry `detail.seq`, and the measurement suite pairs the two interaction marks by it. A planned rapid-change drive (two accepted changes before the first announcement give one announcement and one paired mark, for the second) and a planned unit test of the discard rule cover it. | [DDD §5.3](ddd.md#53-query-engine), [§5.11](ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle), [§7.6](ddd.md#76-performance-and-compatibility-measurements); [IP T-46](ip.md#t-46--accessibility-and-navigation-lifecycle), [T-61](ip.md#t-61--measurement-suite) |
-| **7** The ECDF remains underspecified relative to the execution contract | Confirmed | The curve is exact: a step at each distinct value to F = (count ≤ x) / n, drawn as a right-continuous path; above 512 distinct values, 512 points at `Math.round(j * (m - 1) / 511)`, with the maximum vertical error stated; a one-step domain for constant data; the read-off marker at (`quantileLinear(sorted, p)`, p), which may lie between steps. Planned tests run the pure `ecdfSteps` on duplicates, constant data, and m = 511, 512, and 513. | [DDD §5.12](ddd.md#512-charts), [§7.4](ddd.md#74-application-tests); [IP T-41](ip.md#t-41--measurement-panels-and-charts) |
+| **7** The ECDF remains underspecified relative to the execution contract | Confirmed | This review specified a step at each distinct value to F = (count ≤ x) / n, drawn as a right-continuous path; above 512 distinct values, 512 points at `Math.round(j * (m - 1) / 511)`, with the maximum vertical error stated; a one-step domain for constant data; the read-off marker at (`quantileLinear(sorted, p)`, p), which may lie between steps. Planned tests covered duplicates, constant data, and m = 511, 512, and 513. The thinning rule and marker-error statement were superseded by the accepted DF-1 correction of 2026-11-01. | [DDD §5.12](ddd.md#512-charts), [§7.4](ddd.md#74-application-tests); [IP T-41](ip.md#t-41--measurement-panels-and-charts) |
 | **8** The immutable-release withdrawal procedure conflicts with mandatory rollback readiness | Confirmed | Release checklist item 12 checks each release's owner-approved rollback target — an earlier software tag whose retained vintage passes the retention check, not necessarily the previous one, and never a withdrawn or affected vintage — or a recorded absence, `no rollback target: first release` for the first release. | [DDD §4.3](ddd.md#43-retention-rollback-recovery-and-withdrawal), [§7.7](ddd.md#77-site-validation-and-release-checklist); [IP T-64](ip.md#t-64--rollback-rehearsal-owner), [T-65](ip.md#t-65--v03-release-owner) |
 | **9** Release evidence needs exact correspondence between the tested, tagged, and deployed code | Confirmed | The bundle's full SHA-256 is the build identity: equal in the CI artifact of the tested release-branch head, in the artifact of the run that deployed the `main` commit, and in the served bundle that the published-site run hashes. The `main` commit's tree equals the tested head's (`git diff --quiet`), and the software tag names that commit; version labels alone never establish identity. | [DDD §7.7](ddd.md#77-site-validation-and-release-checklist), [§6.2](ddd.md#62-software-and-data-version-stamps), [§7.6](ddd.md#76-performance-and-compatibility-measurements); [IP T-65](ip.md#t-65--v03-release-owner) |
 | **10** A few specification claims still overstate their guarantees | Confirmed | Reworded: a hashed address never changes meaning, but an older cached page can name older assets until it revalidates; the reference VM is a configuration without burst credits, not identical processor time; `check` needs no research data, and no network once `npmCi` has installed the dependencies; slug injectivity is checked per token over its own vocabulary plus the delimiter rule, not by enumerating complete scenarios. | [DDD §6.2](ddd.md#62-software-and-data-version-stamps), [§7.6](ddd.md#76-performance-and-compatibility-measurements), [§2](ddd.md#2-repository-structure-naming-and-toolchain), [§5.9](ddd.md#59-downloads); [IP T-23](ip.md#t-23--wire-unit-tests-and-parity-into-testsyml) |
@@ -662,15 +665,16 @@ planned application or its test suite.
 
 The owner directed that the P1 finding be fixed, allowed a fresher
 browser requirement, and required explicit error messages. The owner
-deferred the P2 and P3 findings below; those labels are review
-priorities, not the product's delivery phases. Their specified
-behavior is unchanged by this correction pass.
+initially deferred the P2 and P3 findings below; those labels are
+review priorities, not the product's delivery phases. The later
+DF-1 decision below accepts a bounded ECDF correction; the other
+five findings remain deferred.
 
 | Finding | Disposition | Correction or deferred work | Where |
 |---|---|---|---|
 | **P1 — Compatibility gate cannot pass** | Corrected in design | The old dataset and 24-month window select Firefox 108 and Safari/iOS 16.2, below the required `DecompressionStream` minima. The support policy now uses 12 months, the dataset pin is `1.0.30001820`, and the release gate requires its newest browser release to be at most 30 days old. The inventory records a scoped Safari Streams partial-support exception backed by MDN's used-API evidence. Failure diagnostics name the API and tested browser. Runtime and ordinary static fallback copy state the browser policy and explicit update/reload steps, including iOS/iPadOS updates for Safari. | [PDD §9.2](pdd.md#92-browser-and-mobile-baseline-d-16-proposed); [HLDD §2](hldd.md#2-architectural-constraints), [§6.1](hldd.md#61-failure-honesty-adr-0010); [DDD §2](ddd.md#2-repository-structure-naming-and-toolchain), [§5.10](ddd.md#510-failure-states), [§7.5](ddd.md#75-browser-test-lane), [§7.6](ddd.md#76-performance-and-compatibility-measurements), [§7.7](ddd.md#77-site-validation-and-release-checklist); [IP T-01](ip.md#t-01--gradle-webapp-subproject), [T-03](ip.md#t-03--scenario-page-scaffold), [T-44](ip.md#t-44--failure-states), [T-61](ip.md#t-61--measurement-suite), [T-65](ip.md#t-65--v03-release-owner); [ADR-0014](../adr/0014-committed-content-hashed-artifacts.md) |
-| **P2 — ECDF thinning loses large tied jumps** | Deferred by owner | At slip 0–0.5 m, the specified curve understates the scarp-dip cumulative share by about 8 percentage points. Preserve large jumps or impose a probability-error bound. | [DDD §5.12](ddd.md#512-charts) |
-| **P2 — Deployment removes assets needed by open pages** | Deferred by owner | An ordinary refresh removes old hashes before an open tab's first lazy request. Specify retention for nonwithdrawn assets or recovery that preserves the scenario. | [DDD §5.2](ddd.md#52-artifact-loading-and-decoding), [§6.1](ddd.md#61-build-outputs-asset-paths-and-page-scaffold) |
+| **P2 — ECDF thinning loses large tied jumps** | Corrected in design after owner decision (2026-11-01) | The superseded rule understates the scarp-dip cumulative share by about 8 percentage points at slip 0–0.5 m. DF-1 replaces it with count-based thinning guaranteeing at most 100/511 ≈ 0.195695 percentage points of vertical simplification error, with a visible and accessible accuracy statement; statistics and percentile read-offs still use the full data. Reader-selected accuracy is a P3 consideration. | [PDD §4.1](pdd.md#41-measurement-views-fr-o1), [§6.3](pdd.md#63-chart-export-fr-d2-p2-d-14-proposed); [DDD §5.12](ddd.md#512-charts), [§7.4](ddd.md#74-application-tests); [IP T-41](ip.md#t-41--measurement-panels-and-charts), [§5](ip.md#5-parked-capabilities-p2p3) |
+| **P2 — Deployment removes assets needed by open pages** | Deferred by owner | A data-vintage refresh removes old hashes before an open tab's first lazy request; a code-only deployment with the same pointer retains those data filenames. Specify retention for nonwithdrawn assets or recovery that preserves the scenario. | [DDD §5.2](ddd.md#52-artifact-loading-and-decoding), [§6.1](ddd.md#61-build-outputs-asset-paths-and-page-scaffold) |
 | **P2 — Evidence-ledger revision exceptions omit traceability checks** | Deferred by owner | Extend the publication-commit exception to traceability evidence inherited from the pinned vintage. | [DDD §7.7](ddd.md#77-site-validation-and-release-checklist); [IP T-65](ip.md#t-65--v03-release-owner) |
 | **P2 — Deferred loading announcement can outlive a cached load** | Deferred by owner | Cancel or invalidate the loading timer when the first result or failure commits. | [DDD §5.11](ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle) |
 | **P3 — Stage-count validation and stride disagree** | Deferred by owner | Enforce 101 stages for schema 1 or derive the query stride from the measured count. Current full-data tests protect the shipped dataset. | [DDD §4.1](ddd.md#41-export-task-and-validation), [§5.3](ddd.md#53-query-engine) |
@@ -686,6 +690,104 @@ explicit API minima are below those versions. Planned checks now
 also cover the historical failing versions, rejected missing or
 partial evidence, and browser-update guidance when the application
 bundle cannot start. The application remains unbuilt.
+
+## IP consistency review and correction (2026-11-01)
+
+The owner requested a consistency and ambiguity check, followed by
+independent implementation trials outside the project. The review used
+commit `78e2d352d888366a51d124b592085c2108f91625` as its baseline. It
+found five inconsistencies in task contracts; the T-04 trials exposed
+one additional counting ambiguity. The owner then authorized these
+corrections. That IP correction left the older findings deferred,
+including the separate publication-evidence exception. The later
+DF-1 acceptance is recorded below.
+
+| Finding | Disposition | Correction | Where |
+|---|---|---|---|
+| **1 — Lazy field loader loses the version that its caller must validate** | Corrected in design | Both lazy loaders require `expectedExportVersion: string`, compare it with the mapped envelope before resolving, and reject a mismatch with `data-version`, `expected`, and `loaded`. Field rows retain their documented array shape. Browser callers pass the loaded manifest version; parity passes the pointer version. Both loaders have matching/mismatching-version acceptance cases. | [DDD §5.1](ddd.md#51-modules-and-interfaces), [§5.2](ddd.md#52-artifact-loading-and-decoding), [§5.8](ddd.md#58-view-layer), [§7.2](ddd.md#72-calculation-parity-tests), [§7.4](ddd.md#74-application-tests); [IP T-30](ip.md#t-30--loader-and-decoder), [T-35](ip.md#t-35--node-parity-harness), [T-36](ip.md#t-36--application-unit-tests), [T-46](ip.md#t-46--accessibility-and-navigation-lifecycle), [T-49](ip.md#t-49--field-overlay) |
+| **2 — Statistics builder has no input for counts** | Corrected in design | The engine exports `MeasurementCounts`; `statsRows` and `chartSummary` receive it explicitly from the same result as their statistics. Caption N is the valid count; the table footer receives `Selection.unclassified` separately. Acceptance cases keep statistics fixed while changing counts, including null statistics. | [DDD §5.1](ddd.md#51-modules-and-interfaces), [§5.3](ddd.md#53-query-engine), [§5.8](ddd.md#58-view-layer), [§5.11](ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle), [§7.4](ddd.md#74-application-tests); [IP T-31](ip.md#t-31--query-engine), [T-41](ip.md#t-41--measurement-panels-and-charts), [T-42](ip.md#t-42--statistics-table) |
+| **3 — Accepted decimals can fail after serialization or re-edit** | Corrected in design; owner selected the limit | Grammar G requires at most 16 characters both after trimming and after normalization. `.12345678901234` becomes the accepted `0.12345678901234`; `.123456789012345` is invalid because its normalized value has 17 characters. The parser and round-trip acceptance cases enforce both boundaries. | [DDD §5.6](ddd.md#56-scenario-state-and-url-encoding), [§5.7](ddd.md#57-scenario-controls), [§7.4](ddd.md#74-application-tests); [IP T-34](ip.md#t-34--scenario-state), [T-36](ip.md#t-36--application-unit-tests) |
+| **4 — Acceptance commands mix repository and subproject working directories** | Corrected in plan | T-14 starts at the repository root and scopes Poetry commands to subshells. T-21 keeps its staging drills at the root and gives staged files their full repository-relative paths. | [IP T-14](ip.md#t-14--required-full-data-checks), [T-21](ip.md#t-21--mkdocsyml-webapp-build-and-vintage-staging) |
+| **5 — Published measurement runs from the pre-merge HEAD** | Corrected in design and plan | Before item 5(b), fast-forward the clean local release branch to the verified deployed main commit, require HEAD to equal it, and retain the original release SHA separately. Accept the report only when its source commit is that main commit and its source tree is clean. Fix-forward records a new release SHA for the next attempt. | [DDD §7.7](ddd.md#77-site-validation-and-release-checklist); [IP T-65](ip.md#t-65--v03-release-owner) |
+| **6 — Mirrored gaps have two plausible counts** | Clarified in design and plan | Print `gap rows: <n>` counting DDD obligations only; IP mirrors add nothing. Keys `(Source, Obligation)` must be unique within each document; row equality compares six trimmed cells. Plural export-rule names are comma-separated. The acceptance drill requires one mirrored gap to print 1, pass ordinary lint, and fail release lint. | [DDD §8](ddd.md#8-traceability), [§8.4](ddd.md#84-from-the-adrs-and-the-adr-process); [IP T-04](ip.md#t-04--traceability-lint) |
+
+The first independent T-04 trials used Terra and Astra in separate
+scratch copies. Both agreed on the expected pass/fail outcomes of all
+32 shared cases, but reported a mirrored gap as 1 and 2 respectively;
+their source code differed. This was evidence of a specification
+ambiguity, not a requirement that independent implementations have
+identical source. No trial implementation was copied into the project.
+
+Verification of the corrections: two independent readers found no
+remaining contradiction within these six fixes. The revised sandbox
+checker passed all 10 focused cases, including duplicate keys, trimmed
+cell equality, and the mirrored-gap count; at that verification the
+matrices had 436 DDD rows, 36 matching IP mirrors, and no gaps or
+duplicate keys.
+All 4,760 repository-relative documentation links resolve, and all 20
+inline Python commands in the DDD/IP parse. A throwaway Git repository
+confirmed the release-branch fast-forward and its retry. A scratch
+model of grammar G passed 11 boundary cases and preserved canonical
+values through JSON and re-entry for all 8,586 accepted inputs among
+10,000 generated decimal strings. These are specification diagnostics;
+the production loaders, views, parser, and release tooling remain
+planned work.
+
+## Deferred-finding discussion (2026-11-01)
+
+The owner reopened discussion of the six deferred findings above and
+requested that they be recorded. The owner subsequently accepted DF-1
+with a clear reader-facing statement and asked that reader-selected
+accuracy be considered in P3. DF-1 is now corrected in the normative
+PDD/DDD/IP; DF-2–DF-6 remain proposals. The IDs refer to the six
+initially deferred rows of the repository-backed review, in their order.
+
+| ID and finding | Resolution or proposal | Decision and acceptance check |
+|---|---|---|
+| **DF-1 — ECDF thinning** | Keep the 512-point cap, but select by cumulative count. For m ≤ 512 keep all distinct-value points. Otherwise keep index 0; scan interior indices k in ascending order and retain k exactly when `511 * (c[k] - c[lastKept]) > n`; then retain m − 1. The drawn curve stays at or below the exact ECDF with a vertical shortfall at most 1/511, about 0.196 percentage points. Statistics and percentile read-offs continue to use the full data. The marker explanation now accounts for ties: a percentile can lie on a vertical jump, without the invalid unconditional claim of less than 1/n difference from F(x). | Accepted by owner and corrected in design (2026-11-01), including a visible and accessible cumulative-caption statement and the same disclosure in P2 chart exports. Reader-selected accuracy is recorded as a P3 consideration, with options and limits undecided. Assert monotonicity, endpoints, ≤512 retained points, the error bound over every original step, large tied jumps, and the existing 511/512/513 and constant-data boundaries. Homes: DDD §5.12/§7.4; IP T-41. |
+| **DF-2 — Open tabs across data updates** | Keep the single-vintage deployment and add an explicit reload action that preserves accepted scenario settings in a versioned, one-shot same-tab recovery record. Revalidate against the new manifest, announce a changed data version, and recompute results; unsupported settings or unavailable recovery storage must be reported explicitly. Preserve the accepted Scenario, including offset mode waiting for coefficients, rather than only the last successful RenderInput. | Choose whether seamless continuation on the old vintage is required. Recommended: explicit reload with settings recovery. Retaining older vintages instead requires a retention policy and amendments to ADR-0014 and withdrawal/staging procedures, and finite retention still needs a recovery path. Test both lazy exports across a vintage replacement, incompatible settings, and recovery-storage failure. Homes: DDD §§5.2/5.6/5.10/5.11/7.5; IP T-34/T-44/T-46/T-49/T-60. |
+| **DF-3 — Inherited publication evidence** | Assign revision by the concrete check. Export-validation rules, publication full-data checks, and export-only size evidence may name the pinned vintage publication's `tag_commit`, with the same vintage and checksum set identified. Fixture/CI/parity/application checks retain the software-release revision; published measurement/tag checks retain the deployed-main revision. | A narrow consistency repair. Add an explicit mapping and acceptance cases covering inherited export evidence, current application evidence, and rejection of evidence for a different vintage. Do not give every Python test or every size measurement a blanket publication exception. Homes: DDD §7.7; IP T-65. |
+| **DF-4 — Stale loading announcement** | Guard the deferred startup announcement with mount-local `initialPending`, initially true and set false before the first results or unavailable-state commit. Its existing `live` callback requires both an unaborted mount and `initialPending`. | A narrow lifecycle repair. Deterministic browser cases cover cached success, immediate failure, navigation away, and a genuinely slow initial load. Homes: DDD §5.11/§7.5; IP T-46/T-60. |
+| **DF-5 — Stage count and stride** | Treat 101 stages per trial as a schema-1 invariant. Measure and validate it in the exporter; reject a different manifest value in the decoder before constructing usable data. Keep total records and trials measured. | Recommended: enforce the existing fixed-stride contract. Supporting arbitrary stage counts would require a broader format/algorithm amendment. Test equal-length 100-stage and 102-stage ensembles as well as unequal trials. Homes: DDD §§3.1/3.2/4.1/5.2/7.3/7.4; IP T-11/T-12/T-16/T-30/T-36. |
+| **DF-6 — Missing exporter prerequisite** | Add `data/processed/fdhi_cleaned/data.parquet` to `inputs-present` and provenance: nine inputs, five processed plus four raw. Keep the shared view builder, which already requires this processed file; the ordinary build already produces it. | A narrow pipeline-contract repair. Missing this file must fail at `inputs-present`, naming it; complete input provenance must contain its hash. Homes: DDD §4.1; IP T-11/T-12/T-16. |
+
+A read-only calculation against the current raw DEM data reproduced
+DF-1: for scarp dip at slip 0–0.5 m, the superseded index-based rule's
+maximum vertical error is 7.99753 percentage points; the accepted
+count-based rule gives
+0.19082 points with 345 retained points. Across the full dataset, scarp
+dip has 35,854 distinct values, width 15,822, and height 3,095, so drawing
+every exact step would require 71,708, 31,644, and 6,190 vertices
+respectively. These are data and algorithm diagnostics, not browser
+performance measurements; the exact-curve option's rendering cost has
+not been measured.
+
+The owner explicitly rejected the old roughly 8-percentage-point
+error. The accepted limit is less than 0.2 percentage points of
+absolute vertical simplification error at every measurement value;
+it is not 0.2 percent relative error, a statistical uncertainty, or
+an allowance to approximate summary statistics. The exact algorithm
+has the tighter upper bound 100/511 percentage points. PDD §4.1
+owns the verbatim disclosure; DDD §5.11 places it in every drawn
+cumulative figure's caption and accessible description, and §5.12
+carries it into the P2 image-export caption strip.
+
+The correction's scratch verification used
+`data/raw/DEM_dataset.csv`, SHA-256
+`262f303b3498785eb1c67fa6e1ada90ee21487826683f76a057bd347e6e7b5fc`.
+Seven deterministic fixtures, 5,000 seeded weighted fixtures, and six
+actual-data cases checked the bound at every original distinct value,
+retained endpoints, exact cumulative counts, and the 512-point cap.
+All passed. The heavy-tie regression fixture makes the old rule miss
+45/557 (8.07899 percentage points), while the accepted rule misses
+at most 1/557 (0.179533 points). A threshold-equality case attains
+1/511 and a separate case reaches exactly 512 retained points.
+These diagnostics validate the specified algorithm; application and
+browser implementation remain planned work. An independent consistency
+read found no remaining contradiction in the algorithm, disclosure,
+export, configuration exclusion, or P3 record. All 4,769 relative
+documentation links resolve; scratch traceability lint accepts all 475
+rows (438 DDD obligations and 37 IP mirrors), with no gaps.
 
 ## References
 
