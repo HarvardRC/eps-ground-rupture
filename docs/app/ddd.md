@@ -4,10 +4,11 @@
 (2026-10-30) and again after the reviews of the implementation plan
 (2026-10-31), then after the IP consistency review (2026-11-01).
 Every section is drafted and normative; every register row is Proposed.
-No planned application code has been built in the project, and no
-planned application test or release check has run: every
-*Verification (planned):* line names a planned check. The external review findings and their
-dispositions are recorded in the review ledger,
+Nothing it specifies has been built in the project yet, and none of
+the checks it introduces has run there: every
+*Verification (planned):* line names a planned check. The external
+review findings and their dispositions, and the specification trials
+run outside the project, are recorded in the review ledger,
 [`docs/app/ddd-review.md`](ddd-review.md). The owner reviews the
 completed document together with the
 [implementation plan](ip.md).
@@ -3320,7 +3321,7 @@ and only the browser lane executes it
 | `stats/` | `validValues(vintage, selection, measurement) → ValidValues`; `summarize(values: ValidValues) → Stats \| null`, with `Stats.sd: number \| null` — the [FR-O2 — Summary statistics](prd.md#fr-o2-summary-statistics) set ([§5.4](#54-statistics)); `quantile.ts` — `quantileLinear(sorted, p) → number`; `histogram.ts` — `histogram(steps, classes, sorted, displayDecimals) → Histogram \| null`, the [DD-5](#1-ddd-decision-register) bin rule, and `histogramLog(steps: Int32Array, classes: Uint8Array, offerRatio: number) → HistogramLog \| null`, the width panel's logarithmic bins, null exactly when the logarithmic axis is not offered (valid = 0 included), its caller passing `logScaleOfferRatio()` of `config.ts` ([§5.13](#513-application-configuration)) as `offerRatio` — both of [§5.12](#512-charts), each result the camelCase form of its [§3.6](#36-reference-results) record (`histogram.<m>`; `histogram_log.dzw`, so `HistogramLog` is `{ firstEdge, bins, counts, belowCounts }`). | browser and Node |
 | `convert/` | `convertWindows(offsetMax: number, dips: readonly number[], coefficients) → PerDipWindows` and `rangeFlag(window, bounds) → RangeFlag` ([§5.5](#55-offset-to-slip-conversion-assist)). | browser and Node |
 | `state/` | the `Scenario` and `DisplayState` types, `defaultScenario(manifest)`, and pure reducers ([§5.6](#56-scenario-state-and-url-encoding)); `parse.ts` — grammar G and the free-entry validation of [§5.7](#57-scenario-controls), and `storedBoundsFromDecimal(min, max)` ([§5.3](#53-query-engine)); `recovery.ts` — `serializeRecovery`, `readRecovery`, and `restoreRecovery` (§5.6), all pure; `scenario-json.ts` — `serializeScenario`, `parseScenario`, and `canonicalJson` ([DD-11](#1-ddd-decision-register), [§5.6](#56-scenario-state-and-url-encoding)). | browser and Node |
-| `views/*.ts` | builders: `format.ts` — `displayRound(v, decimals)`, `formatCount(n)`; `svg.ts` — `SvgNode`, `serializeSvg`; `charts.ts` — `histogramSvg(spec, width)`, `ecdfSvg(spec, width)`, `ecdfSteps(sorted)`; `chart-text.ts` — `chartLabel(state)`, `binTableSpec(binsByGroup, groups, edges)`, `fieldTableSpec(rows, order)`, `segmentTitle`; `summary.ts` — `summaryText(state, counts)`, `settingsText(state)`, `populationText(state)`, `chartSummary(stats: Stats, counts: MeasurementCounts, measurement, cfg)`; `assist.ts` — `assistLines(input)`, the assist panel's lines ([§5.5](#55-offset-to-slip-conversion-assist)); `render-input.ts` — the `RenderInput` type ([§5.8](#58-view-layer)); `notices.ts` — `selectNotices(input, cfg)`; `stats-table.ts` — `statsRows(stats: Stats \| null, counts: MeasurementCounts, measurement, cfg)`; `scenario-controls.ts` — `controlModel(manifest, state)`, `dipRangeEcho(entry, dips)`; `copy.ts` with `copy.json`; `offer.ts` (P2) ([§5.7](#57-scenario-controls), [§5.8](#58-view-layer), [§5.12](#512-charts)). | browser and Node |
+| `views/*.ts` | builders: `format.ts` — `displayRound(v, decimals)`, `formatCount(n)`; `svg.ts` — `SvgNode`, `serializeSvg`; `charts.ts` — `histogramSvg(spec, width)`, `ecdfSvg(spec, width)`, `ecdfSteps(sorted)`; `chart-text.ts` — `chartLabel(state)`, `binTableSpec(binsByGroup, groups, edges)`, `fieldTableSpec(rows, order)`, `segmentTitle`; `summary.ts` — `summaryText(state, counts)`, `settingsText(state)`, `populationText(state)`, `chartSummary(stats: Stats, counts: MeasurementCounts, measurement, cfg)`; `assist.ts` — `assistLines(input)`, the assist panel's lines ([§5.5](#55-offset-to-slip-conversion-assist)); `render-input.ts` — the `RenderInput` type ([§5.8](#58-view-layer)); `notices.ts` — `selectNotices(input, cfg)`; `stats-table.ts` — `statsRows(stats: Stats \| null, counts: MeasurementCounts, measurement, cfg)` and `unclassifiedLine(unclassified: number) → string \| null`; `scenario-controls.ts` — `controlModel(manifest, state)`, `dipRangeEcho(entry, dips)`; `copy.ts` with `copy.json`; `offer.ts` (P2) ([§5.7](#57-scenario-controls), [§5.8](#58-view-layer), [§5.12](#512-charts)). | browser and Node |
 | `views/dom/` | appliers: `svg.ts` — `toSvgElement`; `panels.ts`; `controls.ts`, with `commitField(id)` and `sync(scenario)`; `table.ts`; `notices.ts`; `glossary.ts` — `linkGlossary`, the first-use glossary linker; `export.ts` (P2); `marks.ts` — `markAfterPaint(name, seq, check, live)`; and `render.ts` — `render`, the render pass ([§5.8](#58-view-layer), [§5.12](#512-charts)); beside them `wiring.ts`, which declares the `Wiring` and `Scheduler` types (Wiring, below). | browser only |
 | `overlay/model.ts` | `overlayRows(rows, measurement, showAll)`, `overlayGroups(rows)`, `overlayNote(measurement)` ([§5.8](#58-view-layer)). | browser and Node |
 | `overlay/field-overlay.ts` | the overlay marks over `decode/`'s `FieldRow[]` ([§5.8](#58-view-layer)). | browser only |
@@ -3501,19 +3502,20 @@ export for the overlay — at the requests the scheduler of
 [§5.3](#53-query-engine) makes. Each is the file its manifest
 `files` key (`regression_export`, `field_export`) names, resolved
 against `manifestUrl`: `loadRegression(url, expectedExportVersion)` and
-`loadFieldExport(url, expectedExportVersion)` decompress it behind the step-2 gzip guard,
-require `schema_version` 1, and map it through `REGRESSION_FIELDS`
-or `FIELD_EXPORT_FIELDS`, rejecting with `LoadError` as the steps
-above do. Each loader requires the mapped envelope's `exportVersion`
-to equal its required string argument `expectedExportVersion` before
-returning anything; a mismatch rejects with kind `'data-version'`,
-`expected` that argument and `loaded` the envelope's version.
-`loadFieldExport` then returns only the envelope's `rows` as
-`FieldRow[]`; `loadRegression` returns the mapped `Regression`.
-The scheduler passes `vintage.manifest.exportVersion`; the parity
-harness passes the pointer's `export_version`. No caller checks a
-version on `FieldRow[]`, and no metadata is attached to that array.
-The load promises are the
+`loadFieldExport(url, expectedExportVersion)` decompress it behind the
+step-2 gzip guard, require `schema_version` 1, and map it through
+`REGRESSION_FIELDS` or `FIELD_EXPORT_FIELDS`, rejecting with
+`LoadError` as the steps above do. Each loader requires the mapped
+envelope's `exportVersion` to equal its required string argument
+`expectedExportVersion` before returning anything; a mismatch rejects
+with kind `'data-version'`, `expected` that argument and `loaded` the
+envelope's version. `loadFieldExport` then returns only the
+envelope's `rows` as `FieldRow[]`; `loadRegression` returns the
+mapped `Regression`. The scheduler passes
+`vintage.manifest.exportVersion`; the parity harness passes the
+pointer's `export_version`. No caller checks a version on
+`FieldRow[]`, and no metadata is attached to that array. The load
+promises are the
 `regression` and `field` members of the vintage cache entry of
 [§5.11](#511-accessibility-supported-environments-and-navigation-lifecycle),
 under that section's rules: never aborted by a mount's disposal, and
@@ -3573,11 +3575,13 @@ order, fixed by schema version 1 and never read from
 
 *Verification (planned):* `decode.test.ts`
 ([§7.4](#74-application-tests)) feeds `decodeVintage` malformed,
-truncated, wrong-version, mis-tiled, and wrong-sentinel fixtures,
-each of which must reject with its `LoadError` kind
-([§5.10](#510-failure-states)) and never yield a partial decode;
-`fields.test.ts` checks that every table is total and injective over
-the closed field lists of
+truncated, wrong-version, mis-tiled, and wrong-sentinel fixtures, each
+of which must reject with its `LoadError` kind
+([§5.10](#510-failure-states)) and never yield a partial decode, and
+calls `loadFieldExport` and `loadRegression` with a matching and a
+different `expectedExportVersion`, the latter rejecting with kind
+`'data-version'`; `fields.test.ts` checks that every table is total and
+injective over the closed field lists of
 [§3.2](#32-artifact-manifest)–[§3.6](#36-reference-results) and the
 canonical scenario object, and that decoding each format's fixture
 leaves no snake_case key outside the data-keyed maps and the
@@ -3726,10 +3730,11 @@ their [DD-10](#1-ddd-decision-register) camelCase names.
 
 The engine exports `MeasurementCounts` as
 `Readonly<{ valid: number; excludedNull: number }>`; each
-`Selection.perMeasurement[measurement]` has that type. Display
-builders receive this record explicitly, separately from the
-`Stats | null` returned by `summarize`, so a null statistics result
-never loses the population's counts.
+`Selection.perMeasurement[measurement]` has that type. The display
+builders `statsRows` and `chartSummary` receive this record
+explicitly, separately from the `Stats | null` returned by
+`summarize`, so a null statistics result never loses a panel's valid
+and excluded-null counts.
 
 **Empty-result diagnostic.** When `matchingRecords` is 0, the engine
 relaxes, one at a time, each condition group whose Scenario value
@@ -4267,14 +4272,15 @@ because the free-entry validation of §5.7 rejects every other entry.
 In offset mode `offsetMax` is the canonical decimal of the single
 offset entry ([§5.5](#55-offset-to-slip-conversion-assist)), from 0
 to 1000 as exact decimals by the same validation (R2).
-A canonical decimal is grammar G's canonical form (§5.7), at most
-16 characters after normalization as well as before it: leading
-zeros reduced to one before the point, trailing fractional zeros and
-a bare point removed (`"03.50"` → `"3.5"`, `"0.000"` → `"0"`,
-`"5.0"` → `"5"`). No member holds a float; decimal strings are
-converted at the engine boundary — exactly, with integer arithmetic,
-in slip mode ([§5.3](#53-query-engine)) and by `Number(offsetMax)`
-in offset mode (§5.5). Every set may be empty (§5.7).
+A canonical decimal is grammar G's canonical form, as §5.7 defines it
+(`"03.50"` → `"3.5"`, `".5"` → `"0.5"`, `"0.000"` → `"0"`,
+`"5.0"` → `"5"`). Grammar G accepts a text only when it has at most 16
+characters both after trimming and in canonical form, so no canonical
+decimal it yields is longer than 16 characters. No member holds a float;
+decimal strings are converted at the engine boundary — exactly, with
+integer arithmetic, in slip mode ([§5.3](#53-query-engine)) and by
+`Number(offsetMax)` in offset mode (§5.5). Every set may be empty
+(§5.7).
 
 A Scenario member changes only through a reducer call that a control
 change of the §5.7 event map makes — a checkbox or radio change, an
@@ -4389,21 +4395,23 @@ serializes to exactly:
 [§5.10](#510-failure-states), `path` naming the offending key or
 element — on a missing or unknown key, a wrong JSON type, an
 out-of-vocabulary value, array elements out of canonical order or
-repeated, a decimal that is not canonical, or an inconsistent
-combination — `slip_window` or `offset_max` disagreeing with
-`entry_mode`, or a slip window or offset that breaks the §5.7 rules; a
+repeated, a non-canonical decimal or one that grammar G rejects (its two
+16-character limits included), or an inconsistent combination —
+`slip_window` or `offset_max` disagreeing with `entry_mode`, or a slip
+window or offset that breaks the §5.7 rules; a
 `SchemaError` from `mapRecord` becomes a `ScenarioInputError` for
 the same key. `src/state/scenario-json.ts` imports
 `SCENARIO_INPUT_FIELDS` and `mapRecord` from `src/decode/fields.ts`,
 and no file of `src/decode/` imports a file of `src/state/`. For
 every valid object `o` and the vintage's manifest `m`,
 `JSON.parse(serializeScenario(parseScenario(o, m), m))` deep-equals
-`o`. Conversely, for every Scenario accepted by the controls,
-`parseScenario(JSON.parse(serializeScenario(s, m)), m)` reconstructs
-that Scenario; its canonical decimal strings also pass grammar G
-when shown in a control and committed again. The 16-character cap
-applies to both raw and canonical text, so normalization cannot
-produce an accepted value that parsing or re-editing rejects.
+`o`. Conversely, for every Scenario `s` the controls accept,
+`parseScenario(JSON.parse(serializeScenario(s, m)), m)` deep-equals `s`,
+and grammar G reads each canonical decimal of `s`, shown in a control
+and committed again, back to that same decimal: grammar G caps both the
+trimmed text and its canonical form at 16 characters (§5.7), so no
+accepted entry yields a decimal that `parseScenario` or a later commit
+rejects.
 The serialization is the scenario's identity: the download's
 `scenario.json` carries it as the object
 `JSON.parse(serializeScenario(s, manifest))`
@@ -4560,7 +4568,10 @@ trips for the default, GS-1, a lone minimum, a lone maximum, offset
 mode, and the sediment selections {(Homogeneous, Strong),
 (Heterogeneous, Weak)} and {(Homogeneous, Weak), (Heterogeneous,
 Strong)} — which must serialize differently — the canonical-decimal
-cases, and the `ScenarioInputError` of an unknown key and of an
+cases, the 16-character limit (an offset maximum entered as
+`.12345678901234` round-trips as `0.12345678901234`, and
+`0.123456789012345` makes `parseScenario` throw `ScenarioInputError`),
+and the `ScenarioInputError` of an unknown key and of an
 out-of-vocabulary value; the fixture lane of
 `test_reference_results.py` ([§7.3](#73-pipeline-and-export-tests))
 checks that the generator's GS-1 `inputs` equal the same golden
@@ -4700,18 +4711,22 @@ grammar G (fixed here):
   `maxlength`, which would cut a pasted text short silently;
 - if the text holds no `.` and exactly one `,`, the `,` is the
   decimal point;
-- the text must match `^(\d+(\.\d*)?|\.\d+)$`; its
-  canonical form drops leading zeros (keeping one before the point),
-  trailing fractional zeros, and a trailing point — `03.50` → `3.5`,
-  `.5` → `0.5`, `3.` → `3`, `1,5` → `1.5`, `0.000` → `0`;
-- after that normalization, a canonical text longer than 16
-  characters is INVALID too. Thus `.12345678901234` becomes
-  `0.12345678901234` (16 characters) and is valid, while
-  `.123456789012345` becomes `0.123456789012345` (17) and is
-  invalid despite its 16-character raw text. This is the owner's
-  selected before-and-after limit (2026-11-01); it applies equally
-  to direct entry, canonical scenario parsing, and re-committing a
-  displayed value;
+- the text must match `^(\d+(\.\d*)?|\.\d+)$`. Its canonical form takes
+  the digits before the point (all digits when there is no point), drops
+  their leading zeros, and writes `0` when none remain; it then drops
+  the trailing zeros of the digits after the point and appends the point
+  and those digits only when some remain: `03.50` → `3.5`, `.5` → `0.5`,
+  `3.` → `3`, `1,5` → `1.5`, `0.000` → `0`, `007` → `7`;
+- a canonical form longer than 16 characters is INVALID too (fixed here
+  by the owner's ruling of 2026-11-01, so that every accepted decimal
+  survives serialization and re-entry). Only the supplied `0` makes a
+  canonical form longer than its trimmed text: `.12345678901234` gives
+  `0.12345678901234` (16 characters) and is valid, as is
+  `.123456789012340`, which gives the same; `.123456789012345` gives
+  `0.123456789012345` (17) and is INVALID although its trimmed text has
+  16 characters. The limit binds direct entry, `parseScenario`
+  ([§5.6](#56-scenario-state-and-url-encoding)), and the re-commit of a
+  displayed value alike;
 - everything else is INVALID: any sign (`-`, `-0`, `+3`), an
   exponent (`1e3`), a unit (`3 m`), letters, inner spaces, a second
   separator (`1,000.5`), and a lone `.`.
@@ -5259,14 +5274,15 @@ the read-off or the info note, then the statistics table.
 
 **Statistics tables.** `.gre-table` holds one real HTML `<table>`,
 built by `src/views/dom/table.ts` from
-`statsRows(stats, counts, measurement, cfg)` of `src/views/stats-table.ts`;
-`stats` is `Stats | null` and `counts` is the `MeasurementCounts`
-from the same result's `Selection.perMeasurement[measurement]`
-([§5.3](#53-query-engine)), including when `stats` is null.
-The first two rows read `counts.valid` and `counts.excludedNull`;
-the other seven read `stats`, showing the null mark below when it
-is null. The render pass supplies both from the same `RenderInput`.
-The table renders in every state with matching records and is the
+`statsRows(stats, counts, measurement, cfg)` of
+`src/views/stats-table.ts`; `stats` is `Stats | null` and `counts` is
+the `MeasurementCounts` from the same result's
+`Selection.perMeasurement[measurement]` ([§5.3](#53-query-engine)),
+including when `stats` is null. The first two rows read
+`counts.valid` and `counts.excludedNull`; the other seven read
+`stats`, showing the null mark below when `stats` is null. The render
+pass supplies both from the same `RenderInput`. The table renders in
+every state with matching records and is the
 canonical text alternative for the chart
 ([PDD §4.2 — Statistics table (FR-O2)](pdd.md#42-statistics-table-fr-o2);
 [PDD §9.3 — Accessibility target (D-17, Proposed)](pdd.md#93-accessibility-target-d-17-proposed),
@@ -5326,14 +5342,18 @@ When the matching population holds unclassified records, the
 table's `<tfoot>` adds the line of
 [PDD §4.3 — Unclassified records (D-12, Proposed)](pdd.md#43-unclassified-records-d-12-proposed)
 ("Unclassified records excluded from scarp-type views: X (zero-slip
-initial stages).") with X the `formatCount` of the engine's matched
-class-code-255 count, `Selection.unclassified`, supplied separately
-to the table applier from the same `RenderInput`; it is not
-`counts.excludedNull`. The reference carries the same count as
-`counts.unclassified` ([§3.6](#36-reference-results)), compared
-exactly. [D-12](pdd.md#1-decision-register)'s population semantics
-apply in the engine, not here. The `<tfoot>` gains the "How were
-these measured?" link,
+initial stages)."). The pure `unclassifiedLine(unclassified)` of
+`src/views/stats-table.ts` returns that line, with X
+`formatCount(unclassified)`, when `unclassified` is above 0, and null
+otherwise. The render pass passes it the engine's matched
+class-code-255 count, `Selection.unclassified`, from the same
+`RenderInput` and separately from `counts` — it is not
+`counts.excludedNull` — and the table applier places a non-null
+result in the `<tfoot>` unchanged. The reference carries the same
+count as `counts.unclassified` ([§3.6](#36-reference-results)),
+compared exactly. [D-12](pdd.md#1-decision-register)'s population
+semantics apply in the engine, not here. The `<tfoot>` gains the
+"How were these measured?" link,
 `<a href="../measurements/" data-focus-key="how-measured:{measurement}">`,
 in the release that ships the measurements page
 ([PDD §8.3 — How the measurements are made (FR-E2)](pdd.md#83-how-the-measurements-are-made-fr-e2),
@@ -5571,7 +5591,7 @@ a section that marks a further one fixed here adds it to the table.
 |---|---|
 | [§5.3](#53-query-engine) | the empty-result diagnostic's reading of "relaxing that condition alone": one condition group reset to its default, the population never relaxed, an offset-mode window relaxed to the inactive slip-mode window; the field export's four states, a retry showing neither the failure line nor marks while it loads; a committed result that a newer accepted Scenario supersedes before its announcement's write, never announced |
 | [§5.5](#55-offset-to-slip-conversion-assist) | the conversion coefficients shown to six decimals in the assist panel's provenance line |
-| [§5.7](#57-scenario-controls) | grammar G's readings — a lone comma as the decimal point, the canonical forms, the 16-character limit, R4's included; the 1000 m bound on the offset maximum; a lone slip endpoint read as a window from 0 or to the recorded maximum; Enter in the dip-range field activating Apply; no error for a never-committed blank offset field at the mode switch; the rejection mechanics, a switch's judgment of the retained texts included; the 768 CSS px breakpoint; the sticky summary below it |
+| [§5.7](#57-scenario-controls) | grammar G's readings — a lone comma as the decimal point, the canonical forms, the 16-character limit after trimming, R4's included, and on the canonical form; the 1000 m bound on the offset maximum; a lone slip endpoint read as a window from 0 or to the recorded maximum; Enter in the dip-range field activating Apply; no error for a never-committed blank offset field at the mode switch; the rejection mechanics, a switch's judgment of the retained texts included; the 768 CSS px breakpoint; the sticky summary below it |
 | [§5.8](#58-view-layer) (this section) | the prototype notice at the head of the results header while `copy.json` holds its entry, which the activation commit of §6.1 deletes; the histogram as each panel's opening view; the display-rounding tie rule and the comma thousands separator; the explainer's second sentence only with a non-empty diagnosed set; a partial scarp-type filter unchecking and disabling the family toggle; the 60 % fill opacity; the overlay source-link targets; `{Y}` of the per-dip line as the window's upper end; the DD-4 overlay reading (the switch stays enabled, the scarp-dip note in its legend) |
 | [§5.9](#59-downloads) | one ZIP archive per download; a header-only records file for an empty match; `model_family` left out of `records.csv`; the full-precision `statistics.csv` columns |
 | [§5.10](#510-failure-states) | the capability probe's order, which orders the notice's API list; the unavailable state terminal for the mount |
@@ -5628,8 +5648,8 @@ here — and black field marks. Dominance and offers ignore the toggle
 [§3.4](#34-field-data-export) rows that the
 [§5.3](#53-query-engine) scheduler requests through
 `loadFieldExport(url, vintage.manifest.exportVersion)` of `decode/` when
-the switch turns on ([§5.2](#52-artifact-loading-and-decoding)); the pure
-`src/overlay/model.ts` selects them through
+the switch turns on ([§5.2](#52-artifact-loading-and-decoding)); the
+pure `src/overlay/model.ts` selects them through
 `overlayRows(rows, measurement, showAll)`, `overlayGroups(rows)`,
 and `overlayNote(measurement)`. Field rows never reach the engine:
 they enter no statistic, no count, and no matching population
@@ -5773,11 +5793,11 @@ window whose `lo_s` is `t_s − 1`, not for one at `t_s`, for a
 converted window below `t_s`, and never for the inactive window;
 and a per-dip line, its `{Y}` from `windows`, for exactly the
 `partly_out` entries of `flags`. `views-text.test.ts` runs
-`displayRound` on the `synthetic.display_rounding` vectors and
-`statsRows` ([§7.4](#74-application-tests)). `render.spec.ts`
-asserts the info note's bin-rule sentence and the PDD emphasis of
-the population explainer and the overlay framing as `<strong>`
-elements, with no literal `**`; the browser lane drives the
+`displayRound` on the `synthetic.display_rounding` vectors,
+`statsRows`, and `unclassifiedLine` ([§7.4](#74-application-tests)).
+`render.spec.ts` asserts the info note's bin-rule sentence and the
+PDD emphasis of the population explainer and the overlay framing as
+`<strong>` elements, with no literal `**`; the browser lane drives the
 width-panel log-scale toggle from
 [GS-0](pdd.md#102-golden-scenarios) (Empty
 scenario (no active slip window), default population) — visible,
@@ -6868,12 +6888,13 @@ The pure generators of `src/views/chart-text.ts` and
   cumulative distribution of {N} valid measurements"; either one
   followed by ", with field measurements marked" while the panel
   draws field ticks.
-- The caption, `chartSummary(stats, counts, measurement, cfg)`: "{label}: {N}
-  valid measurements, median {median}, 16th–84th percentile range
-  {p16} to {p84}." — the three statistics as quantities. `counts`
-  is the same `MeasurementCounts` passed to `statsRows`, and N is
-  `counts.valid`, never inferred from `Stats`. This builder is
-  called only for a drawn chart, where `stats` is non-null. The panel
+- The caption, `chartSummary(stats, counts, measurement, cfg)`:
+  "{label}: {N} valid measurements, median {median}, 16th–84th
+  percentile range {p16} to {p84}." — the three statistics as
+  quantities. `counts` is the same `MeasurementCounts` passed to
+  `statsRows`, and N is `counts.valid`, never inferred from `Stats`.
+  This builder is called only for a drawn chart, where `stats` is
+  non-null. The panel
   applier appends the cumulative accuracy paragraph based on the
   current view; `chartSummary` itself continues to return only this
   statistics sentence.
@@ -7165,7 +7186,8 @@ with injected counts — canonical header order, the six-to-three
 family fold keeping row totals, group cells summing to each row's
 total, the field-row order, one distinct chart label per combination
 of chart kind and field ticks, and on the histogram also of family
-view and logarithmic scale. The browser lane
+view and logarithmic scale — and `views-text.test.ts` asserts the
+caption's N as `formatCount(counts.valid)`. The browser lane
 ([§7.5](#75-browser-test-lane)) asserts, in `a11y.spec.ts`, zero axe
 violations under the tags `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`,
 and `wcag22aa` with every chart-data disclosure closed and again
@@ -7966,7 +7988,11 @@ mechanics, with one grammar change (fixed here): the signed grammar
 is §5.7's grammar G preceded by at most one ASCII `-` (U+002D),
 because scarp height and scarp dip record negative values. Its
 canonical form is grammar G's, prefixed with `-` when the value is
-negative; a zero value carries no sign (`-0.0` becomes `0`).
+negative; a zero value carries no sign (`-0.0` becomes `0`). Grammar
+G's two 16-character limits, on the trimmed text and on its canonical
+form, count only the characters after that `-`: `-.12345678901234` is
+valid, and its canonical form `-0.12345678901234` reads back unchanged
+when committed again.
 Endpoints are inclusive. Only a maximum reads `physical_min`-to-maximum
 and only a minimum reads minimum-to-`physical_max` — the column's
 recorded extent from its [§3.2](#32-artifact-manifest) `columns`
@@ -9782,13 +9808,13 @@ sequence:
    `{ exportVersion: <the pointer's export_version>, schemaVersions: [1] }`,
    so decompression and structural validation run exactly as in the
    browser. Load the regression export with the real
-   `loadRegression(url, pointer.export_version)`, which rejects a version
-   mismatch before returning, through a `fetch` the harness installs for its own process, which
-   answers `file:` URLs inside the verified directory with
-   `new Response(<bytes>)` and rejects every other URL. Gunzip the
-   reference-results file with `node:zlib` and parse it with
-   `parseReferences` ([§5.1](#51-modules-and-interfaces)). Then
-   require the pairing in both directions —
+   `loadRegression(url, <the pointer's export_version>)` — which rejects
+   a version mismatch before returning — through a `fetch` the harness
+   installs for its own process, which answers `file:` URLs inside the
+   verified directory with `new Response(<bytes>)` and rejects every
+   other URL. Gunzip the reference-results file with `node:zlib` and
+   parse it with `parseReferences` ([§5.1](#51-modules-and-interfaces)).
+   Then require the pairing in both directions —
    `manifest.reference_results_version === references.reference_version`
    and `references.export_version === manifest.export_version` (rule
    `pairing`) — and require `displayDecimals(m)` of `src/config.ts`
@@ -10223,9 +10249,9 @@ confuse.
 | `fields.test.ts` | The [DD-10](#1-ddd-decision-register) tables of `src/decode/fields.ts` — `MANIFEST_FIELDS`, `POINTER_FIELDS`, `FIELD_EXPORT_FIELDS`, `REGRESSION_FIELDS`, `REFERENCE_FIELDS`, `SCENARIO_INPUT_FIELDS` — are total and injective over the closed field lists of [§3.2](#32-artifact-manifest)–[§3.6](#36-reference-results); every camelCase name equals `snakeToCamel` of its snake_case name; decoding each format's fixture leaves no snake_case key at any depth outside the data-keyed maps of the [§3](#3-data-formats) records-and-maps rule and the verbatim `provenance` and `inputs` objects ([§5.2](#52-artifact-loading-and-decoding)); `TRIAL_TABLE_COLUMNS`, `RECORDS_CSV_COLUMNS`, and `STATISTICS_CSV_COLUMNS` equal the orders [§3.1](#31-scenario-artifact-binary-layout) and [§5.9](#59-downloads) fix. The cross-language check is the [§7.2](#72-calculation-parity-tests) run: real pipeline files pass through `mapRecord` there, so a required key the pipeline does not write fails parity with `SchemaError`. |
 | `engine.test.ts` | [§5.3](#53-query-engine) implementation properties only: purity — identical output for identical input, the vintage's buffers unmodified — and binary-searched window segments equal to a linear scan for every window whose endpoints are fixture slip values or midpoints between them. Selection semantics — inclusive endpoints, the one-state rule, the no-window final state, the two-count model, the scarp-type filter, `(set, sediment_strength)` pairs, empty groups and stored-empty windows, the single-condition diagnostic — are `synthetic` reference cases replayed by [§7.2](#72-calculation-parity-tests) step 5; the dip-range filter of inverse mode joins the reference coverage of [§5.14](#514-inverse-mode-p2) with P2. |
 | `state.test.ts` | The [§5.6](#56-scenario-state-and-url-encoding) scenario-state model: `defaultScenario(manifest)` equals the manifest-derived defaults of the fixture manifest; `Scenario` holds accepted values only; reducers are pure; settings outside the permitted vocabulary are rejected (the "scenario-state validation" of [HLDD §9 — Testing and release architecture](hldd.md#9-testing-and-release-architecture), Application-specific tests); Reset restores every [§5.7](#57-scenario-controls) control to its default, family view off included, and leaves the overlay switch and the width panel's `logScale` as they were (display state, [§5.6](#56-scenario-state-and-url-encoding)); deselecting any scarp type turns family view off (§5.7). |
-| `parse.test.ts` | `src/state/parse.ts`, the free-entry validation of [§5.7](#57-scenario-controls): grammar G — canonical forms (`03.50` → `3.5`, `.5` → `0.5`, `3.` → `3`, `1,5` → `1.5`), BLANK, and INVALID (`-`, `-0`, `+3`, `1e3`, `3 m`, letters, inner spaces, `1,000.5`, a lone `.`, and the 17-character `1234567890.123456`, while the 16-character `1234567890.12345` is valid, each also with a leading and a trailing space); the normalization boundary — `.12345678901234` accepted as `0.12345678901234`, `.123456789012345` INVALID because its canonical form has 17 characters, and a 17-character raw input rejected even if normalization would shorten it; `storedBoundsFromDecimal(min, max)` by integer arithmetic — lower `0.00005` → 1, upper `5.01349` → 50134, upper `5.0135` → 50135, and 12-decimal strings; slip-window rejections — a maximum above `slip_window_bounds.max` compared as exact decimals, a lone minimum above it, a minimum above the maximum, a negative or unreadable entry; offset entries — `0` and `1000` accepted, `1000.0001` rejected (above the R2 bound, compared as exact decimals), INVALID and BLANK at commit rejected; the dip-assist grammar, `20.25° – 45.125°` (16 characters) readable and `20.125° – 45.125°` (17) unreadable; the read-off validity rule. |
+| `parse.test.ts` | `src/state/parse.ts`, the free-entry validation of [§5.7](#57-scenario-controls): grammar G — canonical forms (`03.50` → `3.5`, `.5` → `0.5`, `3.` → `3`, `1,5` → `1.5`), BLANK, and INVALID (`-`, `-0`, `+3`, `1e3`, `3 m`, letters, inner spaces, `1,000.5`, a lone `.`, and the 17-character `1234567890.123456`, while the 16-character `1234567890.12345` is valid, each also with a leading and a trailing space); the canonical-form limit — `.12345678901234` and `.123456789012340` accepted as `0.12345678901234`, `.123456789012345` and `,123456789012345` INVALID because their canonical form has 17 characters, and the 17-character `00.12345678901234` INVALID although its canonical form has 16; `storedBoundsFromDecimal(min, max)` by integer arithmetic — lower `0.00005` → 1, upper `5.01349` → 50134, upper `5.0135` → 50135, and 12-decimal strings; slip-window rejections — a maximum above `slip_window_bounds.max` compared as exact decimals, a lone minimum above it, a minimum above the maximum, a negative or unreadable entry; offset entries — `0` and `1000` accepted, `1000.0001` rejected (above the R2 bound, compared as exact decimals), INVALID and BLANK at commit rejected; the dip-assist grammar, `20.25° – 45.125°` (16 characters) readable and `20.125° – 45.125°` (17) unreadable; the read-off validity rule. |
 | `recovery.test.ts` | The pure §5.6 recovery envelope: round-trip accepted Scenario and every DisplayState member, including accepted offset input and overlay on; exact keys/version/type checks; invalid JSON, unknown versions, missing keys, and bad display maps return invalid-record; unchanged inputs pass through `parseScenario` against the new manifest; removed vocabulary, reordered canonical arrays, a reduced slip maximum, and incompatible family view return incompatible without partial restoration. Added dictionary members do not expand old explicit selections; saved effective endpoints and canonical decimal strings remain unchanged; same-version records are validated too; a changed coefficient file is not stored in or read from the record. No storage or DOM access in this test. |
-| `scenario-json.test.ts` | `src/state/scenario-json.ts` ([§5.6](#56-scenario-state-and-url-encoding); [DD-11](#1-ddd-decision-register)): `serializeScenario` of [GS-1](pdd.md#102-golden-scenarios) equals the §5.6 golden bytes; round trips for the default scenario, GS-1, A, B, a lone minimum, a lone maximum, and offset mode; the canonical-decimal cases (`03.50` → `3.5`, `0.000` → `0`); a scenario accepted from `.12345678901234` serializes with `0.12345678901234`, parses back to the same Scenario, and its displayed decimal passes grammar G again; `.123456789012345` is rejected at entry and its 17-character canonical form by `parseScenario`; A and B serialize differently; an unknown key or an out-of-vocabulary value makes `parseScenario` throw `ScenarioInputError`, whose `path` names the offending key or element ([§5.10](#510-failure-states)). |
+| `scenario-json.test.ts` | `src/state/scenario-json.ts` ([§5.6](#56-scenario-state-and-url-encoding); [DD-11](#1-ddd-decision-register)): `serializeScenario` of [GS-1](pdd.md#102-golden-scenarios) equals the §5.6 golden bytes; round trips for the default scenario, GS-1, A, B, a lone minimum, a lone maximum, and offset mode; the canonical-decimal cases (`03.50` → `3.5`, `0.000` → `0`); an offset-mode Scenario whose maximum was entered as `.12345678901234` serializes `offset_max` as `0.12345678901234`, `parseScenario` returns a Scenario deep-equal to it, and grammar G reads that decimal back unchanged; an otherwise valid offset-mode object whose `offset_max` is the 17-character `0.123456789012345` makes `parseScenario` throw `ScenarioInputError` whose `path` names `offset_max`; A and B serialize differently; an unknown key or an out-of-vocabulary value makes `parseScenario` throw `ScenarioInputError`, whose `path` names the offending key or element ([§5.10](#510-failure-states)). |
 | `summary.test.ts` | `summaryText(state, counts)` ([§5.7](#57-scenario-controls)): the PDD tokens verbatim — `Strong (uniform)`, `Strong — uniform and layered`, `slip: any` for the inactive window, `all recorded stages` for the all-stages population without a window; `any sediment` for all nine pairs; A → `Weak (layered) or Strong (uniform)` and B → `Weak (uniform) or Strong (layered)`, as the §5.7 grammar spells them; 512 distinct tokens over all 512 sediment subsets; each checkbox group's empty-group token; the offset-mode window token. |
 | `histogram.test.ts` | `histogram()` and `histogramLog()` mechanics ([§5.12](#512-charts)) only. Linear: the cap loop ends with at most 60 bins; edges ascend; the counts sum to n; valid 0 returns null. Logarithmic, with `logScaleOfferRatio()` as `offerRatio`: every edge is twice the one before, the first being 100 · 2^k recording steps; each edge value from 100 to 100 · 2^20 lands in the bin that starts at it, and the value one step below it in the bin before (below 100, in `below_counts`); the counts and `below_counts` together sum to n; no positive value returns null. Both: identical inputs give identical output. Rules, edges, counts, and whether the log histogram is offered — among them the `synthetic.histograms` threshold pair, `maxpos_s = 100 · minpos_s` not offered and `maxpos_s = 100 · minpos_s + 1` offered — are checked against the references in [§7.2](#72-calculation-parity-tests) steps 3 and 5. |
 | `scenario-controls.test.ts` | `controlModel(manifest, state)` and `dipRangeEcho(entry, dips)` ([§5.7](#57-scenario-controls)): every option list equals its fixture-manifest dictionary in dictionary order — the sediment pairs in `arm_strength_states` order, uniform arm first ([§3.2](#32-artifact-manifest)) — never hardcoded; defaults equal the manifest-derived values; disabled flags (family view disabled unless all six types are selected); the display label of data `Alternating Strong-Weak` is `Alternating Strong–Weak`; `dipRangeEcho` returns the modeled dips an entry includes. Rendering the echo is [§7.5](#75-browser-test-lane)'s. |
@@ -10236,7 +10262,7 @@ confuse.
 | `downloads.test.ts` | `buildPackage(input, stamps, generatedAt)` ([§5.9](#59-downloads)) with a fixed `generatedAt`: the members are exactly `records.csv`, `statistics.csv`, `provenance.txt`, `scenario.json`, in that order; the CSV column orders equal `RECORDS_CSV_COLUMNS` and `STATISTICS_CSV_COLUMNS`; `records.csv` writes each value from its recorded integer by the §5.9 integer rule — `s = −182` at 3 decimals as `-0.182`, slip at 4 decimals, a null as an empty field, and an unclassified record's `scarp_class` empty; the `statistics.csv` display columns equal `displayRound` of the injected values; both version stamps appear; `provenance.txt` holds the nine §5.9 label lines in the PDD §6.1 order, block 5 equal to `settingsText` of the snapshot, block 8 the `generatedAt` instant, and — on an offset-mode input with a `partly_out` dip and a converted window starting below `t_s` — block 9 equal, line for line, to the `caveats` that `selectNotices(input, cfg)` returns for the same input; `scenario.json`'s `scenario` equals the object `JSON.parse(serializeScenario(snapshot, manifest))`, and its `converted_windows` is null in slip mode and in offset mode equals the selected dips' injected `windows` entries and `flags` ([§5.8](#58-view-layer)), in ascending dip order, with floats written by `Number.prototype.toString`; no field row appears in any member when `field` is set; an empty match gives a records file holding the header row only; a package built from one `RenderInput` contains nothing of another. |
 | `file-name.test.ts` | The [DD-6](#1-ddd-decision-register) slug and file-name template of `src/download/file-name.ts` ([§5.9](#59-downloads); the file was `slug.test.ts`): key order `dip`, `sediment`, `depth`, `density`, `window`, `offset`, `classes`; A → `sediment-uniform-strong-layered-weak` and B → `sediment-uniform-weak-layered-strong`; `.` encoded as `p` — `window-1p5-to-3` against `window-1-to-5p3`, and a lone maximum `window-0-to-3`; an empty group's raw value `none`; the all-default slug `all`; injectivity checked per token, never by enumerating complete scenarios: for each group, the full slugs (before truncation) of the scenarios that differ from the default scenario in that group alone, over all its subsets — sediment (512), dips (128), classes (64), depth (8), and density (8) — are pairwise distinct, the default subset giving `all`; and each of those slugs other than `all` is a single token — its key, `-`, then only characters of `[a-z0-9-]` — so no token holds the `_` delimiter and a full slug splits at `_` into its groups' tokens unambiguously; a slug over 80 characters truncated to at most 80, ending in `-` and the first 8 hex digits of the FNV-1a-64 hash of the full slug (vectors: `''` → `cbf29ce484222325`, `'a'` → `af63dc4c8601ec8c`); the population token and the `YYYY-MM-DD` UTC date from `generatedAt`. |
 | `zip.test.ts` (with `test/zipcheck.py`) | `zip(members, modified)` ([§5.9](#59-downloads)): `crc32('123456789')` is `0xCBF43926`; the CRC-32 equals `node:zlib` `crc32` on 1,000 buffers from a fixed-seed generator, lengths 0, 1, and 65,536 included; signatures, offsets, and the end-of-central-directory counts (4 entries) are correct; an independent reader accepts the archive — the test writes `build/test/zip/fixture.zip` and runs `python3 -I test/zipcheck.py <file> <ISO instant> <member SHA-256s>`, which exits 0 only if `ZipFile(file).testzip()` is `None`, the names are the four members in order, every `compress_type` is `ZIP_STORED`, `flag_bits` is 0, every `date_time` equals the instant floored to 2 s, and, when member SHA-256s are given, they match (a missing `python3` fails the test, never skips it); the same members and instant give identical bytes. |
-| `views-text.test.ts` | `chartSummary` and `statsRows` ([§5.8](#58-view-layer); [DD-9](#1-ddd-decision-register)) with independently injected statistics and `MeasurementCounts`: rows in the PDD §4.2 order; `statsRows(null, { valid: 0, excludedNull: 1 }, m, cfg)` and the same call with `excludedNull: 2` show distinct excluded counts and seven null marks; captions with identical non-null statistics and different `counts.valid` show different N; values by `displayRound` at the D-23 decimals and counts by `formatCount`; the PDD §4.3 unclassified line present exactly when unclassified records match; `displayRound` on the display-rounding vectors of [§7.3](#73-pipeline-and-export-tests), identical to the Python list — formatting only, per the pipeline-first rule above. |
+| `views-text.test.ts` | `chartSummary`, `statsRows`, and `unclassifiedLine` ([§5.8](#58-view-layer); [DD-9](#1-ddd-decision-register)) with independently injected statistics and `MeasurementCounts`: rows in the PDD §4.2 order; `statsRows(null, { valid: 0, excludedNull: 1 }, m, cfg)` shows `0` in the valid-count row, `1` in the excluded-null row, and seven null marks, and the same call with `excludedNull: 2` shows `2` there; captions with identical non-null statistics print N as `formatCount(counts.valid)`, unchanged when only `counts.excludedNull` changes and changed when `counts.valid` changes; values by `displayRound` at the D-23 decimals and counts by `formatCount`; `unclassifiedLine(0)` null and `unclassifiedLine(3434)` the PDD §4.3 line with X `3,434`; `displayRound` on the display-rounding vectors of [§7.3](#73-pipeline-and-export-tests), identical to the Python list — formatting only, per the pipeline-first rule above. |
 | `toolchain.test.ts` | The pinned runtime ([§2](#2-repository-structure-naming-and-toolchain)): `process.version` equals `'v' + process.env.EGR_EXPECTED_NODE`, which `webappTest` sets from the plugin's `node.version`; an unset variable fails the test. |
 | `compat.test.ts` | The documented-API check of [§7.6](#76-performance-and-compatibility-measurements). |
 
@@ -11475,7 +11501,7 @@ scenario page — and at every release after it.
 | 2 | Full-data run: `pytestFullData`, run by `publishVintage` against the staged vintage, exits 0 with zero skips and every `full_data_required.txt` test collected and passed ([§7.3](#73-pipeline-and-export-tests)). | Vintage release | The pytest summary line in the publication record. |
 | 3 | Publication: `publishVintage` completed ([§4.2](#42-publication-of-a-data-vintage)) — the data tag peels to the source commit, the release's asset names and SHA-256s equal the pointer exactly, the release is published — which locks it, the repository's releases being immutable (§4.2 step 1 re-checks this) — and the owner's pointer commit sits directly on the source commit. | Vintage release | The publication record `dist/app/data-vN.publication.json` and its copy in the data release's body. |
 | 4 | Browser lane: `webappBrowserTest` (projects `desktop` and `mobile`) exits 0 on the release branch, its `playwrightInstall` dependency first installing the pinned Chromium build ([§7.5](#75-browser-test-lane)). | Every release | `subprojects/webapp/build/playwright/report.json` and the traces, attached. |
-| 5 | Measurements ([§7.6](#76-performance-and-compatibility-measurements)) against [PDD §9.1 — Performance budgets (D-9, Proposed)](pdd.md#91-performance-budgets-d-9-proposed): (a) before the merge, `webappMeasureReference` on the release branch completes — its measure run exiting 0, its report downloaded, and the VM destroyed (§7.6 step 7) — with a report recording `environment.kind` `aws-ec2`, the instance type, region, and AMI of [DD-12](#1-ddd-decision-register) (Performance reference environment), the DD-12 `network` values, its `terraform_version`, and `source_tree_clean` true; the release is then accepted on that report, a decision separate from the run's completion, only when every workload reads `within_budget` true: nearest-rank 95th percentiles of 30 runs (`sorted[28]`: at least 29 of the 30 observed runs within budget, a sample-based acceptance rule) at most 2.0 s cold, 1.0 s warm in both variants, and 200 ms for each interaction workload, with every cold run's data payload at most 4 MB compressed; (b) after the release's deployment, fast-forward the clean local release branch to the verified `<main sha>` and require HEAD to equal it ([IP T-65](ip.md#t-65--v03-release-owner), step 4); from the repository root, the published-site run (`-Pegr.perf.target=published`) completes, its measure run exiting 0, so the header sets match, with a report recording `environment.kind` `aws-ec2`, the instance type, region, and AMI of DD-12, the DD-12 `network` values, `source_commit` equal to `<main sha>`, and `source_tree_clean` true, and its cold and fresh-warm workloads read `within_budget` true — a miss reopens the release. | Every release | The report directories `subprojects/webapp/build/perf/<run_id>/`, attached, with browser, device, version, vintage, revision, and Terraform version named. |
+| 5 | Measurements ([§7.6](#76-performance-and-compatibility-measurements)) against [PDD §9.1 — Performance budgets (D-9, Proposed)](pdd.md#91-performance-budgets-d-9-proposed): (a) before the merge, `webappMeasureReference` on the release branch completes — its measure run exiting 0, its report downloaded, and the VM destroyed (§7.6 step 7) — with a report recording `environment.kind` `aws-ec2`, the instance type, region, and AMI of [DD-12](#1-ddd-decision-register) (Performance reference environment), the DD-12 `network` values, its `terraform_version`, and `source_tree_clean` true; the release is then accepted on that report, a decision separate from the run's completion, only when every workload reads `within_budget` true: nearest-rank 95th percentiles of 30 runs (`sorted[28]`: at least 29 of the 30 observed runs within budget, a sample-based acceptance rule) at most 2.0 s cold, 1.0 s warm in both variants, and 200 ms for each interaction workload, with every cold run's data payload at most 4 MB compressed; (b) after the release's deployment, fast-forward the clean local release branch to `<main sha>`, the merge commit that deploys the release (Evidence ledger, below), and require `HEAD` to equal it ([IP T-65 — v0.3 release (owner)](ip.md#t-65--v03-release-owner), step (4)); from the repository root, the published-site run (`-Pegr.perf.target=published`) completes, its measure run exiting 0, so the header sets match, with a report recording `environment.kind` `aws-ec2`, the instance type, region, and AMI of DD-12, the DD-12 `network` values, `source_commit` equal to `<main sha>`, and `source_tree_clean` true, and its cold and fresh-warm workloads read `within_budget` true — a miss reopens the release. | Every release | The report directories `subprojects/webapp/build/perf/<run_id>/`, attached, with browser, device, version, vintage, revision, and Terraform version named. |
 | 6 | Success criteria: each row of the table below verified by its named artifact. | Every release | Per row. |
 | 7 | [D-10](pdd.md#1-decision-register) (Liability-limitation text referenced by CR-4) gate: the standing disclaimer in `scenario.md`'s `#gre-disclaimer` is the owner-sourced text, and the item-7 search below prints nothing. Until the text is approved PDD §5.1's bracketed slot "[the project's liability limitations — text pending, D-10]" stands in `#gre-disclaimer` verbatim, as the unlisted prototype of [§6.1](#61-build-outputs-asset-paths-and-page-scaffold) shows it, and the bundle carries no PDD §5.1 text ([§5.8](#58-view-layer)). No placeholder liability text ships in a public release. | Every release | The empty search output and the sourcing record. |
 | 8 | Glossary: every first-use glossary anchor of [PDD §5.11 — Labels, units, and glossary links (FR-G3, CR-3, CR-7)](pdd.md#511-labels-units-and-glossary-links-fr-g3-cr-3-cr-7) resolves in both built trees (the lane's `render` spec asserts the application's links; the strict builds check the authored pages); the pre-launch additions are present — the PFDHA and engineer-of-record glossary entries of [§6.4](#64-product-pages-beyond-the-scenario-page-p2p3), the copy-marked `glossary.md` block that step 7 of `check_pdd_agreement.py` compares with §6.4 and step 8 lists ([§5.13](#513-application-configuration)); and the FDHI entry's spelling is aligned to the singular "Fault Displacement Hazard Initiative": the item-8 search below prints nothing. | Every release | The search output and the step-8 list of item 1's **Check PDD agreement** run. |
@@ -11589,7 +11615,8 @@ revision, except the rows of items 2 and 3, which name `tag_commit`,
 and the rows of items 5 (b) and 10, which name the tagged `main`
 commit. The row of item 5 (b) reads `pass` only when its report's
 `source_commit` equals that tagged `main` commit and
-`source_tree_clean` is true, and the build identity holds — the full SHA-256 of `app.js` and of `app.css` is the
+`source_tree_clean` is true, and the build identity holds — the full
+SHA-256 of `app.js` and of `app.css` is the
 same in the three places the release record lists: the `webapp-dist`
 artifact of item 1's Companion site run; that of the Companion site
 push run that deployed the `main` commit (each artifact read with
@@ -11697,11 +11724,18 @@ Kind, Check, and Status columns against the corrected document on
 every row but those added by hand, the Source and Obligation cells
 are the sweep's extraction, unchanged. The sweep has not run again
 since `36abc56`, and until it does, rows added by hand, the one
-exception to that rule, carry what three later source changes direct
+exception to that rule, carry what five later source changes direct
 at this document and the implementation plan: the row whose Source
 reads `HLDD §2 L215-226 (amended 2026-10-30)`, for the HLDD's amended
-Performance budgets constraint, and the rows of
-[§8.4](#84-from-the-adrs-and-the-adr-process) whose Source names
+Performance budgets constraint; the two `PDD §4.1` rows on the
+cumulative curve's drawing error and on reader-selected cumulative-curve
+accuracy, for the amendment of 2026-11-01 to
+[PDD §4.1 — Measurement views (FR-O1)](pdd.md#41-measurement-views-fr-o1);
+the `PDD §7.3` row on one-shot reload recovery, for the section of
+2026-11-01
+[PDD §7.3 — Reload recovery (MVP)](pdd.md#73-reload-recovery-mvp);
+and the rows of [§8.4](#84-from-the-adrs-and-the-adr-process) whose
+Source names
 [ADR-0016 — Performance reference environment — an on-demand AWS VM defined by Terraform](../adr/0016-performance-reference-environment.md)
 or
 [ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md),
@@ -11715,7 +11749,7 @@ consequence (L113-122) — have no rows of their own until the sweep
 runs again. The lint of
 §8.4 checks each row's form and citations and its IP twin, never
 that the matrix is complete. The rows that direct an obligation at
-the implementation plan recur, identical, in
+the implementation plan recur, equal cell for cell, in
 [IP §7 — Traceability](ip.md#7-traceability).
 
 Each table has six columns. **Source** names the approved document
@@ -11751,14 +11785,16 @@ parentheses by the task that creates it, `(T-nn)`, or by the tasks
 that each create a part of it, `(T-nn, T-nn)`; for the existing test
 `test_regression_views.py` the task is T-14, whose full-data gate
 lets none of its tests skip. An export rule is written
-`§4.1 step <n> rule <name> (T-nn)`, or `§4.1 step <n> rules <name>, <name> (T-nn)`, with comma-separated
-names. A contract file of [§7.3](#73-pipeline-and-export-tests) is
+`§4.1 step <n> rule <name> (T-nn)`, or, for two or more names,
+`§4.1 step <n> rules <name>, <name> (T-nn)` with the names separated
+by commas. A contract file of [§7.3](#73-pipeline-and-export-tests) is
 cited per lane: its fixture lane by the bare path, with T-16, and its
 full-data lane as `::test_full_*` or by one named `test_full_` test,
 with T-14. A `measure` check is written `§7.6 report: <field> (T-nn)`
 or `§3.8: <row> (T-nn)`, the row being a size-table row or a pending
 item, with the same task lists as a `test` check; a `release` check
-is `§7.7 item <n>`; an `owner` check is the `OA-n` or `G-n`; a
+is `§7.7 item <n>`, alone or followed by a parenthetical; an
+`owner` check is the `OA-n` or `G-n`; a
 `schedule` entry is a bare `T-nn` or an `IP §5` line, and `§9` is a
 `schedule` entry in a `parked` or `deferred` row, the deferral it
 records; `—` is the one entry of an `n/a` row; and every other entry
@@ -12000,10 +12036,10 @@ deliberately keeps.
 | PDD §4.1 | panel arrangement (tabs vs stacked) left open to design | §1, §5.8 | text+test | §1 DD-4; §5.8; subprojects/webapp/playwright/specs/render.spec.ts (T-60) | planned |
 | PDD §4.1 | histogram bin rule (fixed and stated) and log-scale toggle | §1, §5.12, §5.8 | text+test | §1 DD-5; §5.12; subprojects/webapp/test/parity.ts::histogram, histogram_log, synthetic.histograms, PDD §4.1 transcription (T-35); subprojects/webapp/test/histogram.test.ts (T-32); subprojects/python/tests/test_reference_results.py (T-16); subprojects/webapp/playwright/specs/render.spec.ts (T-60); subprojects/webapp/playwright/specs/interactions.spec.ts (T-60); .github/scripts/check_pdd_agreement.py (T-47) | planned |
 | PDD §4.1 | Us − Ud fourth measurement out of MVP; slot reserved (D-20) | §3.1, §5.8, §9 | text | §3.1; §5.8; §9 | designed |
-| PDD §4.2 | statistics table: statistic set, render states, framing head | §5.8 | text+test | §5.8; subprojects/webapp/test/views-text.test.ts (T-32, T-42); subprojects/webapp/test/parity.ts::statistics, display (T-35); subprojects/webapp/playwright/specs/golden-scenario.spec.ts (T-60); subprojects/webapp/playwright/specs/a11y.spec.ts::GS-5 (T-60); .github/scripts/check_pdd_agreement.py::step 6 (T-47) | planned |
-| PDD §4.2 | reader-facing display precision per quantity (D-23) | §5.13, §5.8 | test | .github/scripts/check_pdd_agreement.py::step 4 (T-47); subprojects/webapp/test/parity.ts::D-23 transcription, display (T-35); subprojects/webapp/test/views-text.test.ts (T-32, T-42); subprojects/python/tests/test_reference_results.py (T-16) | planned |
+| PDD §4.2 | statistics table: statistic set, render states, framing head | §5.8 | text+test | §5.8; subprojects/webapp/test/views-text.test.ts (T-32, T-41, T-42); subprojects/webapp/test/parity.ts::statistics, display (T-35); subprojects/webapp/playwright/specs/golden-scenario.spec.ts (T-60); subprojects/webapp/playwright/specs/a11y.spec.ts::GS-5 (T-60); .github/scripts/check_pdd_agreement.py::step 6 (T-47) | planned |
+| PDD §4.2 | reader-facing display precision per quantity (D-23) | §5.13, §5.8 | test | .github/scripts/check_pdd_agreement.py::step 4 (T-47); subprojects/webapp/test/parity.ts::D-23 transcription, display (T-35); subprojects/webapp/test/views-text.test.ts (T-32, T-41, T-42); subprojects/python/tests/test_reference_results.py (T-16) | planned |
 | PDD §4.3 | unclassified-record population semantics (D-12) | §5.3, §3.1 | test | subprojects/webapp/test/parity.ts::GS-0 (T-35); subprojects/webapp/test/parity.ts::synthetic.ensembles (T-35); §4.1 step 3 rule null-counts (T-12); §4.1 step 3 rule unclassified-has-no-valid-measurement (T-12); subprojects/python/tests/test_reference_results.py::test_full_* (T-14) | planned |
-| PDD §4.3 | unclassified exclusions, added statistics line, neutral-gray fallback | §5.8, §5.12 | text+test | §5.12; subprojects/webapp/test/views-text.test.ts (T-32, T-42); subprojects/webapp/playwright/specs/golden-scenario.spec.ts (T-60); subprojects/webapp/test/parity.ts::GS-0, GS-6 (T-35); §4.1 step 3 rule unclassified-has-no-valid-measurement (T-12) | planned |
+| PDD §4.3 | unclassified exclusions, added statistics line, neutral-gray fallback | §5.8, §5.12 | text+test | §5.12; subprojects/webapp/test/views-text.test.ts (T-32, T-41, T-42); subprojects/webapp/playwright/specs/golden-scenario.spec.ts (T-60); subprojects/webapp/test/parity.ts::GS-0, GS-6 (T-35); §4.1 step 3 rule unclassified-has-no-valid-measurement (T-12) | planned |
 | PDD §4.4 | field-overlay default set, per-source analogue map, labels (D-18) | §3.4, §5.8 | owner+test+schedule | subprojects/python/tests/test_field_export.py (T-16); subprojects/python/tests/test_field_export.py::test_full_* (T-14); §4.1 step 3 rule view-reread (T-12); subprojects/webapp/test/field-overlay.test.ts (T-49); subprojects/webapp/playwright/specs/interactions.spec.ts (T-60); subprojects/webapp/playwright/specs/render.spec.ts (T-60); .github/scripts/check_pdd_agreement.py::step 6 (T-47); OA-14; T-55 | owner-pending |
 | PDD §4.5 | warning and chart-suppression tiers (D-11: 30 and 10) | §5.8, §5.13 | test | subprojects/webapp/playwright/specs/interactions.spec.ts::GS-2, GS-5 (T-60); subprojects/webapp/playwright/specs/a11y.spec.ts::GS-5 (T-60); subprojects/webapp/test/notices.test.ts (T-43); .github/scripts/check_pdd_agreement.py::step 4 (T-47) | planned |
 | PDD §4.5 | empty-result single-condition diagnostic; combinations out of scope | §5.3 | text+test | §5.3; subprojects/webapp/test/parity.ts::GS-4, synthetic.ensembles (T-35); subprojects/python/tests/test_reference_results.py (T-16); subprojects/webapp/playwright/specs/interactions.spec.ts::GS-4 (T-60); subprojects/webapp/test/notices.test.ts (T-43) | planned |
@@ -12060,7 +12096,7 @@ deliberately keeps.
 | PDD §10.1 SC-7 | SC-7 research-group sign-off gate | IP §3 G-4, IP §4 OA-4 | test+release+owner | .github/scripts/check_pdd_agreement.py::step 8 (T-47); §7.7 item 6 (SC-7 row); G-4; OA-4 | owner-pending |
 | PDD §10.1 tolerance note | pipeline statistical definitions and reference values authoritative | Introduction | text | Introduction — Authority and change control; §3.6; §7.4 | designed |
 | PDD §10.1 tolerance note | numerical tolerance per calculation to be defined | §7.1 | text+test | §7.1; §1 DD-2; subprojects/webapp/test/parity.ts::tolerance (T-35); subprojects/python/tests/test_reference_results.py::test_full_display_tie_census (T-14); subprojects/python/tests/test_reference_results.py::test_full_evaluation_order_effect (T-14) | planned |
-| PDD §10.1 tolerance note | displayed values equal correspondingly rounded pipeline reference | §7.2, §5.8 | test | subprojects/webapp/test/parity.ts::display, synthetic.display_rounding (T-35); subprojects/webapp/playwright/specs/golden-scenario.spec.ts (T-60); subprojects/webapp/test/views-text.test.ts (T-32, T-42); subprojects/python/tests/test_reference_results.py (T-16) | planned |
+| PDD §10.1 tolerance note | displayed values equal correspondingly rounded pipeline reference | §7.2, §5.8 | test | subprojects/webapp/test/parity.ts::display, synthetic.display_rounding (T-35); subprojects/webapp/playwright/specs/golden-scenario.spec.ts (T-60); subprojects/webapp/test/views-text.test.ts (T-32, T-41, T-42); subprojects/python/tests/test_reference_results.py (T-16) | planned |
 | PDD §10.2 preamble | golden-scenario numbers owned by pipeline, not redefined downstream | §3.6, Introduction | text+test | §3.6; §7.4; subprojects/python/tests/test_reference_results.py::test_full_* (T-14) | planned |
 | PDD §10.2 GS-0 | GS-0 full-ensemble counts | §3.6, §7.2 | test | subprojects/webapp/test/parity.ts::GS-0 (T-35); subprojects/python/tests/test_reference_results.py::test_full_* (T-14); subprojects/python/tests/test_scenario_export.py::test_full_* (T-14) | planned |
 | PDD §10.2 GS-1 | GS-1 per-dip conversion scenario | §3.6, §7.2, §7.5 | test | subprojects/webapp/test/parity.ts::GS-1, boundary_cases offset path (T-35); subprojects/webapp/playwright/specs/golden-scenario.spec.ts (T-60); subprojects/python/tests/test_reference_results.py::test_full_* (T-14) | planned |
@@ -12270,9 +12306,9 @@ and of [IP §7 — Traceability](ip.md#7-traceability); the `links` job of
 `.github/workflows/doc-links.yml` runs it as the
 **Check traceability** step ([§6.3](#63-ci-workflows)). It splits a
 row into its six cells at each unescaped `|`, trims leading and trailing
-whitespace from each cell, and splits a Check cell into entries at `;`.
-Row equality compares all six trimmed cells, preserving internal text.
-It checks:
+whitespace from each cell, and splits a Check cell into entries at `;`,
+trimming each entry the same way. Row equality compares all six
+trimmed cells, preserving internal text. It checks:
 
 - that every table header is exactly
   `| Source | Obligation | Home | Kind | Check | Status |`;
@@ -12321,7 +12357,7 @@ It checks:
   `verified`, `satisfied`, or `discharged`; and
 - that `(Source, Obligation)` is unique within each document
   (duplicate keys fail, even when all six cells match), and every IP §7
-  row is identical to the §8 row with that key.
+  row equals the §8 row with that key under the row equality above.
 
 It exits non-zero on any failed check, naming the row; it hardcodes
 no row count. It prints `gap rows: <n>`, where n is the number of
@@ -12501,9 +12537,9 @@ of the ADR's Accepted status. Its traceability
 tables ([IP §7 — Traceability](ip.md#7-traceability)) repeat, row
 for row, the [§8](#8-traceability) rows whose obligations fall on
 the plan, and its task T-04 builds the lint that keeps each pair
-identical (the closing *Verification (planned):* paragraph of §8).
-When a task cannot be written unambiguously from the anchors it
-cites, the missing fact is a defect of this document, fixed here
+equal cell for cell (the closing *Verification (planned):* paragraph
+of §8). When a task cannot be written unambiguously from the anchors
+it cites, the missing fact is a defect of this document, fixed here
 ([IP §8 — Relationship to the DDD](ip.md#8-relationship-to-the-ddd)).
 
 *Verification (planned):* review of the implementation plan checks

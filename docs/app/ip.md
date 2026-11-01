@@ -7,9 +7,11 @@ again after the adversarial review of the document pair (both
 The task graph, gates, and every task body are drafted
 to the execution contract against the [DDD](ddd.md) and the other
 sources at this plan's own revision
-([Execution contract](#execution-contract), rule 2). No
-task has been completed in the project; isolated specification trials
-are recorded in the review ledger. Of the owner actions, OA-11, enabling GitHub release immutability, and
+([Execution contract](#execution-contract), rule 2). No task has
+been executed in the project, and no task's Done-when has been
+checked as its acceptance; the specification trials that the review
+ledger records ran outside the project. Of the owner actions, OA-11,
+enabling GitHub release immutability, and
 OA-16, the reference image ID, are recorded as done, and OA-12 and
 OA-17, the acceptances of ADR-0016 and ADR-0017, were approved on
 2026-10-31, recorded by the owner's commit of the Accepted status
@@ -107,7 +109,13 @@ must satisfy five rules:
    deploys the site. The owner's AWS operations — OA-5's reference
    runs and their cleanup — may be carried out by Claude at the
    owner's request, outside any agent task, with the owner's
-   `egr-perf` profile; the records and checks are unchanged.
+   `egr-perf` profile; the records and checks are unchanged. Likewise
+   at the owner's request and outside any agent task, Claude performs
+   the fast-forward of the owner's local release branch to the
+   deployed `main` merge commit before release-checklist item 5 (b)
+   (T-65 step (4)), the one git operation on the owner's branch that
+   Claude may perform; an implementation agent still never commits on
+   or moves that branch ([Task format](#task-format), Executor).
    Approval acts are different in kind: an owner or research-group
    approval produces an identified, dated record, and automation
    checks that the record exists and names the current content or
@@ -435,8 +443,10 @@ T-46, and T-50 fill. No task completes with a stub this plan does not
 specify, a suppressed type error, or a check dropped from its
 Done-when.
 
-**Done when:** `./gradlew :subprojects:webapp:tscCheck` exits 0; with a
-temporary `src/stats/zz-dom.ts` holding
+**Done when:** all commands and drills run from the repository root
+unless a subshell explicitly changes directory:
+`./gradlew :subprojects:webapp:tscCheck` exits 0; with a temporary
+`subprojects/webapp/src/stats/zz-dom.ts` holding
 `export const t = document.title;`, `tscCheck` exits non-zero naming
 that file, and it exits 0 again once the file is deleted;
 `./gradlew :subprojects:webapp:webappBundle` exits 0 and
@@ -444,13 +454,12 @@ that file, and it exits 0 again once the file is deleted;
 `app.js`; in `subprojects/webapp/build.mjs`, `grep -c 'format: "esm"'`
 prints at least 1 and `grep -cE 'format: "(iife|cjs)"'` prints 0;
 `python3 -c "import json; s = json.load(open('subprojects/webapp/package.json'))['scripts']; assert list(s) == ['typecheck', 'test', 'parity', 'browser-install', 'browser-test'], s"`
-exits 0; `./gradlew :subprojects:webapp:webappTest` exits 0, while — in
-`subprojects/webapp`, in the form of
+exits 0; `./gradlew :subprojects:webapp:webappTest` exits 0, while
+`(cd subprojects/webapp && export PATH="$(ls -d "$PWD"/.gradle/nodejs/node-v22.12.0-*)/bin:$PATH" && env -u EGR_EXPECTED_NODE node --test build/test/toolchain.test.js)`
+— the form of
 [DDD §2](ddd.md#2-repository-structure-naming-and-toolchain) (Node.js
-outside Gradle), first
-`export PATH="$(ls -d "$PWD"/.gradle/nodejs/node-v22.12.0-*)/bin:$PATH"`
-— `env -u EGR_EXPECTED_NODE node --test build/test/toolchain.test.js`,
-the same runtime without `EGR_EXPECTED_NODE`, exits non-zero;
+outside Gradle) in a subshell, the same runtime without
+`EGR_EXPECTED_NODE` — exits non-zero;
 `./gradlew help --task :subprojects:webapp:<task>` names the type
 `com.github.gradle.node.npm.task.NpmTask` for each of `tscCheck`,
 `webappTest`, and `webappParity`, and
@@ -522,14 +531,17 @@ figures. (5) Give the Gradle task `mkdocsBuild` the two inputs
 `mkdocsPreview` task and CI's **Build preview site** step are T-21's;
 until then the preview build runs from the command line.
 
-**Done when:** `./gradlew :subprojects:mkdocs:mkdocsBuild` exits 0 and
-`test ! -e subprojects/mkdocs/site/scenario` succeeds; from
-`subprojects/mkdocs`, the project virtualenv's
-`mkdocs build --strict -f mkdocs.preview.yml` exits 0 — its link and
-anchor validation covering the fallback body's links — and in
-`site-preview/scenario/index.html`, `grep -c 'id="gre-root"'`,
-`grep -c 'id="gre-disclaimer"'`, and `grep -c '<noscript>'` each print
-1; in `subprojects/mkdocs/docs/scenario.md`,
+**Done when:** all commands and drills run from the repository root
+unless a subshell explicitly changes directory, every `mkdocs` command
+with the project virtualenv active:
+`./gradlew :subprojects:mkdocs:mkdocsBuild` exits 0 and
+`test ! -e subprojects/mkdocs/site/scenario` succeeds;
+`(cd subprojects/mkdocs && mkdocs build --strict -f mkdocs.preview.yml)`
+exits 0 — its link and anchor validation covering the fallback body's
+links — and in `subprojects/mkdocs/site-preview/scenario/index.html`,
+`grep -c 'id="gre-root"'`, `grep -c 'id="gre-disclaimer"'`, and
+`grep -c '<noscript>'` each print 1; in
+`subprojects/mkdocs/docs/scenario.md`,
 `grep -c '^<!-- copy:docs/app/ddd.md#510-failure-states -->$'`,
 `grep -c '^<!-- copy:docs/app/pdd.md#51-standing-disclaimer-cr-4-d-10-open -->$'`,
 and
@@ -547,23 +559,31 @@ prints nothing; `git check-ignore -q` exits 0 for each of the five
 §6.1 entries (for a directory entry, a path inside it); and the §6.1
 hook drills for arms (a), (b), and (d) hold, each under rule 5 of the
 [Execution contract](#execution-contract) —
-an unreferenced copy of a figure saved as `docs/images/zz-unlisted.png`
-makes a bare `mkdocs build --strict` exit non-zero naming that path;
-removing the `fig-05` allowlist line after a successful `mkdocsBuild`
-makes the next `mkdocsBuild` run, not report UP-TO-DATE, and fail
-naming that figure; a file under `docs/media/dev/` is absent from
-`site/` yet answers under `mkdocs serve`, and a scratch page
-referencing it fails the build naming that page; a scratch link
-from `index.md` to the drafted `scenario.md` fails the publication
-build naming `index.html`; and, with `scenario.md` and
-`assets/scenario/` removed from `draft_docs` in the working tree — the
-page unlisted — the same scratch link fails the publication build
-again, and without it a bare `mkdocs build --strict` exits 0 with
-`grep -c 'eps-ground-rupture/scenario/</loc>' site/sitemap.xml`,
-`gzip -dc site/sitemap.xml.gz | grep -c 'eps-ground-rupture/scenario/</loc>'`,
-and `grep -c '"location":"scenario/' site/search/search_index.json`
+an unreferenced copy of a figure saved as
+`subprojects/mkdocs/docs/images/zz-unlisted.png` makes
+`(cd subprojects/mkdocs && mkdocs build --strict)` exit non-zero naming
+its site-relative path `images/zz-unlisted.png`; removing the `fig-05`
+line of `subprojects/mkdocs/publication-allowlist.txt` after a
+successful `./gradlew :subprojects:mkdocs:mkdocsBuild` makes the next
+`./gradlew :subprojects:mkdocs:mkdocsBuild` run, not report
+UP-TO-DATE, and fail naming that figure; a file under
+`subprojects/mkdocs/docs/media/dev/` is absent from
+`subprojects/mkdocs/site/` yet answers under
+`(cd subprojects/mkdocs && mkdocs serve)`, and a scratch page
+referencing it fails the build naming that page; a scratch link from
+`subprojects/mkdocs/docs/index.md` to the drafted `scenario.md` fails
+the publication build naming `index.html`; and, with `scenario.md`
+and `assets/scenario/` removed from `draft_docs` of
+`subprojects/mkdocs/mkdocs.yml` in the working tree — the page
+unlisted — the same scratch link fails the publication build again,
+and without it
+`(cd subprojects/mkdocs && mkdocs build --strict)` exits 0 with
+`grep -c 'eps-ground-rupture/scenario/</loc>' subprojects/mkdocs/site/sitemap.xml`,
+`gzip -dc subprojects/mkdocs/site/sitemap.xml.gz | grep -c 'eps-ground-rupture/scenario/</loc>'`,
+and
+`grep -c '"location":"scenario/' subprojects/mkdocs/site/search/search_index.json`
 each printing 0, while after the preview build
-`grep -c 'eps-ground-rupture/scenario/</loc>' site-preview/sitemap.xml`
+`grep -c 'eps-ground-rupture/scenario/</loc>' subprojects/mkdocs/site-preview/sitemap.xml`
 prints 1. The verbatim comparison of both copy-marked
 blocks with the sections they cite is step 7 of
 `check_pdd_agreement.py`
@@ -583,8 +603,9 @@ the matrix tables of `docs/app/ddd.md` (§8.1–§8.4) and
 `docs/app/ip.md` (§7.1–§7.4), with the entry forms and the Status
 precedence that [DDD §8](ddd.md#8-traceability) defines. It splits a
 row into its six cells at each unescaped `|`, trims leading and trailing
-whitespace from each cell, and splits a Check cell into entries at `;`;
-row equality compares all six trimmed cells, preserving internal text.
+whitespace from each cell, and splits a Check cell into entries at `;`,
+trimming each entry the same way; row equality compares all six
+trimmed cells, preserving internal text.
 It checks, each as that paragraph words it and no
 narrower: every table header is exactly
 `| Source | Obligation | Home | Kind | Check | Status |`; every
@@ -620,9 +641,10 @@ every whole word matching `T-[0-9]{2}`, `OA-[0-9]+`, or `G-[0-9]+` in
 a Check cell is a task row of [§2](#2-task-graph), an owner action of
 [§4](#4-owner-and-research-group-actions), or a gate of
 [§3](#3-gates-and-release-sequence); no Check or Status cell carries
-the words `passed`, `verified`, `satisfied`, or `discharged`; and `(Source, Obligation)` is unique within each document
-(duplicate keys fail even if all six cells match), with every IP §7
-row identical to the DDD §8 row with that key. It exits non-zero on any
+the words `passed`, `verified`, `satisfied`, or `discharged`; and
+`(Source, Obligation)` is unique within each document (duplicate keys
+fail even if all six cells match), with every IP §7 row equal, by that
+row equality, to the DDD §8 row with that key. It exits non-zero on any
 failed check, naming the row; it hardcodes no row count and prints
 `gap rows: <n>`, counting only DDD §8 rows whose Status is `gap`, not
 the IP §7 mirrors. With `--release` it also exits non-zero unless n is
@@ -641,7 +663,7 @@ release-time run with `--release` is item 16 of the
 (T-65).
 
 **Done when:** `python3 .github/scripts/check_traceability.py` exits 0
-on the committed documents and prints the gap count, and
+on the committed documents and prints its `gap rows: <n>` line, and
 `python3 .github/scripts/check_traceability.py --release` exits 0
 exactly when that count is 0; in that run the committed rows that cite
 a workflow step, the existing test, the conftest of the full-data
@@ -660,10 +682,13 @@ its closed set, a `T-99` citation, a `verified` Status, a `test` entry
 without its task list, a `planned` row given an `OA-4` entry, and an
 IP §7 row whose Check differs from its DDD twin — each make it exit
 non-zero naming the row; duplicating an existing row within either
-document also fails; changing a DDD row and its IP mirror to Status
-`gap` prints exactly `gap rows: 1`, passes without `--release`, and
-fails with it; the saved originals are restored after each case.
-Every mutation is a drill under rule 5 of the
+document likewise makes it exit non-zero naming the row; changing one
+DDD row whose Status is not `gap`, and its IP mirror, to Status `gap`
+raises the printed n by exactly 1 (`gap rows: 0` on gap-free
+documents becomes `gap rows: 1`), the run without `--release` still
+exiting 0 and the run with `--release` exiting non-zero; the saved
+originals are restored after each case. Every mutation is a drill
+under rule 5 of the
 [Execution contract](#execution-contract);
 `(cd subprojects/python && poetry run python -c "import yaml; s = yaml.safe_load(open('../../.github/workflows/doc-links.yml'))['jobs']['links']['steps']; n = [x['name'] for x in s if 'name' in x]; o = ['Check links and anchors', 'Check PDD agreement', 'Check traceability', 'Self-test doc scripts']; assert n == [k for k in o if k in n] and {'name': 'Check traceability', 'run': 'python .github/scripts/check_traceability.py'} in s, n")`
 exits 0 — the named steps of job `links` are those of the §6.3 order
@@ -983,19 +1008,31 @@ count in the header comment of `.github/workflows/tests.yml` (§7.3).
 **Done when:** all commands run from the repository root unless a
 subshell explicitly changes directory:
 `(cd subprojects/python && poetry run pytest tests/test_full_data_gate.py)`
-exits 0; with the
-export inputs of [DDD §4.1](ddd.md#41-export-task-and-validation)
-step 1 and `data/raw/FDHI_Cleaned_Measurements.csv` present — the
-full-data run needs both (§7.3) — and a staged development vintage
-(`./gradlew :subprojects:python:exportApp -Pdata.tag=data-v0-test`),
-`./gradlew :subprojects:python:pytestFullData` exits 0 — under the flag
-a skip, an xfail, or a required test without a successful call report
-fails the run, so exit 0 means zero skips and every manifest test run to
-success; in a checkout without the gitignored data, plain
-`(cd subprojects/python && poetry run pytest)` exits 0 while
-`(cd subprojects/python && EGR_REQUIRE_FULL_DATA=1 poetry run pytest)`
-exits non-zero with every
-would-be skip reported under the prefix;
+exits 0; with the export inputs of
+[DDD §4.1](ddd.md#41-export-task-and-validation) step 1 and
+`data/raw/FDHI_Cleaned_Measurements.csv` present — the full-data run
+needs both (§7.3) — one shell script under rule 5 of the
+[Execution contract](#execution-contract), started while the
+clean-tree command of §4.1 step 1 prints nothing, runs
+`./gradlew :subprojects:python:exportApp -Pdata.tag=data-v0-test`,
+which stages a development vintage and writes
+`subprojects/webapp/data/pointer.json`, then
+`./gradlew :subprojects:python:pytestFullData`, and only after that
+run writes the pointer back, or deletes it if it was missing before
+the export, since the full-data tests find the staged vintage through
+it (§7.3); `pytestFullData` exits 0 — under the flag a skip, an xfail,
+or a required test without a successful call report fails the run, so
+exit 0 means zero skips and every manifest test run to success; in a
+linked worktree that `git worktree add` creates from `HEAD` and
+`git worktree remove` deletes afterwards — a checkout without the
+gitignored data — and from that worktree's root,
+`(cd subprojects/python && PYTHONPATH=src poetry run pytest)` exits 0
+while
+`(cd subprojects/python && PYTHONPATH=src EGR_REQUIRE_FULL_DATA=1 poetry run pytest)`
+exits non-zero with every would-be skip reported under the prefix;
+`PYTHONPATH=src` makes the worktree's own package, whose
+`config.REPO_ROOT` is that worktree, shadow the shared virtualenv's
+editable install of the main working tree, which holds the data;
 `./gradlew check --dry-run | grep -c pytestFullData` prints 0;
 `grep -r EGR_REQUIRE_FULL_DATA .github/workflows/` prints nothing; and
 the pull request's CI `pytest` job reports the skip count the
@@ -1169,14 +1206,18 @@ value. `test_manifests.py` covers the
 [DDD §3.2](ddd.md#32-artifact-manifest)/[§3.3](ddd.md#33-pointer-manifest)
 consistency rules on synthetic vintages, one rejected fixture per rule.
 
-**Done when:** in a checkout without the gitignored data,
-`poetry run pytest tests/test_scenario_export.py tests/test_field_export.py tests/test_reference_results.py tests/test_manifests.py`
-exits 0 in `subprojects/python`, every skip in its `-ra` tail giving a
-§7.3 remedy, `run exportApp` or `run egr-build`;
-`poetry run pytest tests/test_scenario_export.py --collect-only -q | grep -oE 'corrupt-[a-z0-9-]+' | sed -E 's/-[0-9]+$//' | sort -u | grep -c .`
+**Done when:** in a linked worktree that `git worktree add` creates
+from `HEAD` and `git worktree remove` deletes afterwards — a checkout
+without the gitignored data —
+`PYTHONPATH=src poetry run pytest tests/test_scenario_export.py tests/test_field_export.py tests/test_reference_results.py tests/test_manifests.py`
+exits 0 in that worktree's `subprojects/python`, `PYTHONPATH=src`
+importing the worktree's own package as in T-14, every skip in its
+`-ra` tail giving a §7.3 remedy, `run exportApp` or `run egr-build`;
+in the same directory,
+`PYTHONPATH=src poetry run pytest tests/test_scenario_export.py --collect-only -q | grep -oE 'corrupt-[a-z0-9-]+' | sed -E 's/-[0-9]+$//' | sort -u | grep -c .`
 prints 18, one per rule of §4.1 steps 3 and 5, no
-`corrupt-finite-reference-values` among them;
-`poetry run pytest tests/test_scenario_export.py --collect-only -q | grep -oE 'nonfinite-[0-9]+' | sort -u | grep -c .`
+`corrupt-finite-reference-values` among them, and
+`PYTHONPATH=src poetry run pytest tests/test_scenario_export.py --collect-only -q | grep -oE 'nonfinite-[0-9]+' | sort -u | grep -c .`
 prints at least 2 — at least one case per mechanism; and CI's `pytest`
 job is green on the pull request.
 
@@ -1416,7 +1457,9 @@ with `env: GH_TOKEN: ${{ github.token }}`); after the unchanged
 the last `build` step, with `path: subprojects/mkdocs/site`. Every pin
 the workflow already carries stays as it is.
 
-**Done when:** `./gradlew :subprojects:mkdocs:mkdocsBuild --dry-run`
+**Done when:** all commands and drills run from the repository root
+unless a subshell explicitly changes directory:
+`./gradlew :subprojects:mkdocs:mkdocsBuild --dry-run`
 lists `:subprojects:mkdocs:fetchVintage`,
 `:subprojects:mkdocs:scenarioAssets`, and
 `:subprojects:mkdocs:mkdocsBuild` in that order;
@@ -1427,21 +1470,25 @@ exits 0, after which `test ! -e subprojects/mkdocs/site/scenario` and
 prints 1, and `subprojects/mkdocs/site-preview/assets/scenario/` holds
 exactly `data/`, one `app-<12 hex>.js`, and one `app-<12 hex>.css`,
 every pointer-listed file in `data/` matching its pointer SHA-256
-(`shasum -a 256`). All commands and staging drills run from the
-repository root, each drill under
-rule 5 of the [Execution contract](#execution-contract): the stray files
-`subprojects/mkdocs/docs/assets/scenario/data/stray-000000000000.bin` and
-`subprojects/mkdocs/docs/assets/scenario/app-000000000000.js` are gone after the next
-`./gradlew :subprojects:mkdocs:scenarioAssets`, which leaves the sorted
-listing of `subprojects/mkdocs/docs/assets/scenario/data/` equal to the pointer's sorted
-`files` keys; an immediate rerun reports `fetchVintage` and
-`scenarioAssets` UP-TO-DATE; a byte flipped in a staged data file is
-restored by the next run; a changed `version` in `CITATION.cff` makes
+(`shasum -a 256`). Staging drills, each under rule 5 of the
+[Execution contract](#execution-contract): the stray files
+`subprojects/mkdocs/docs/assets/scenario/data/stray-000000000000.bin`
+and `subprojects/mkdocs/docs/assets/scenario/app-000000000000.js` are
+gone after the next `./gradlew :subprojects:mkdocs:scenarioAssets`,
+which leaves the sorted listing of
+`subprojects/mkdocs/docs/assets/scenario/data/` equal to the pointer's
+sorted `files` keys; an immediate rerun reports `fetchVintage` and
+`scenarioAssets` UP-TO-DATE; a byte flipped in one file of
+`subprojects/mkdocs/docs/assets/scenario/data/` is restored by the
+next `scenarioAssets` run; a changed `version` in `CITATION.cff` makes
 the next `scenarioAssets` run execute instead of reporting UP-TO-DATE;
-one changed hex digit of a pointer SHA-256 makes `fetchVintage` fail
-naming that file; a scratch `subprojects/mkdocs/docs/assets/other/keep.txt` survives
+one changed hex digit in the SHA-256 of one `files` entry of
+`subprojects/webapp/data/pointer.json` makes `fetchVintage` fail
+naming that entry's file; a scratch
+`subprojects/mkdocs/docs/assets/other/keep.txt` survives
 `./gradlew :subprojects:mkdocs:clean`, which removes
-`subprojects/mkdocs/docs/assets/scenario/` and `subprojects/mkdocs/docs/includes/scenario-head.html`, and
+`subprojects/mkdocs/docs/assets/scenario/` and
+`subprojects/mkdocs/docs/includes/scenario-head.html`, and
 `git check-ignore subprojects/mkdocs/docs/assets/other/keep.txt`
 exits 1. `grep -cxF '<entry>' .gitignore` prints 1 for each of the five
 §6.1 entries.
@@ -1568,18 +1615,18 @@ the mapped `manifest` in the `Vintage`, and record
 `loadVintage(manifestUrl, expected)`, the fetching wrapper whose
 `readFile(name)` fetches `new URL(name, manifestUrl)` with the global
 `fetch`; `loadRegression(url, expectedExportVersion)` and
-`loadFieldExport(url, expectedExportVersion)`, each behind
-the same gzip guard, requiring `schema_version` 1 and mapping through
-`REGRESSION_FIELDS` or `FIELD_EXPORT_FIELDS`, then checking the mapped
-envelope's `exportVersion` against the required string argument before
-returning anything. A mismatch rejects with kind `'data-version'`,
-`expected` the argument and `loaded` the envelope's version. The field
-loader then returns only `rows` (`FieldRow[]`); the regression loader
-returns the mapped `Regression`. Browser callers pass
-`vintage.manifest.exportVersion`, and the parity harness passes the
-pointer's `export_version`; and
-`parseReferences(bytes)` through `REFERENCE_FIELDS`, for the parity
-harness only. (3) Every rejection is the `LoadError` of
+`loadFieldExport(url, expectedExportVersion)`, each behind the same gzip
+guard, requiring `schema_version` 1, mapping through `REGRESSION_FIELDS`
+or `FIELD_EXPORT_FIELDS`, and then requiring the mapped envelope's
+`exportVersion` to equal the required string argument before returning
+anything — a mismatch rejects with kind `'data-version'`, `expected` the
+argument and `loaded` the envelope's version — the field loader
+returning only `rows` (`FieldRow[]`) and the regression loader the
+mapped `Regression`; and `parseReferences(bytes)` through
+`REFERENCE_FIELDS`, for the parity harness only. Browser callers pass
+`vintage.manifest.exportVersion` as `expectedExportVersion`, and the
+parity harness passes the pointer's `export_version`. (3) Every
+rejection is the `LoadError` of
 [DDD §5.10](ddd.md#510-failure-states) (Internal failure) — `kind`
 `'retrieval'`, `'read'`, `'schema-version'`, or `'data-version'`, the
 last carrying `expected` and `loaded` — with a `SchemaError` of
@@ -1679,13 +1726,15 @@ repository root; that run also rewrites the working-tree pointer
 of the [Execution contract](#execution-contract) saves before the run
 and writes back after it. T-37 extends the script end to end.
 
-**Done when:** `./gradlew :subprojects:webapp:tscCheck` and
+**Done when:** all commands run from the repository root unless a
+subshell explicitly changes directory:
+`./gradlew :subprojects:webapp:tscCheck` and
 `./gradlew :subprojects:webapp:webappTest` exit 0, with
-`subprojects/webapp/build/test/engine.test.js` present; from
-`subprojects/webapp`, in the DDD §2 form above (its `PATH` export),
-`node build/spot/spot-timing.mjs ../../dist/app/data-v0-test` exits 0
-and prints `v22.12.0`, the decode time, and the median query time, which
-the completion report records — a diagnostic, never acceptance evidence;
+`subprojects/webapp/build/test/engine.test.js` present;
+`(cd subprojects/webapp && export PATH="$(ls -d "$PWD"/.gradle/nodejs/node-v22.12.0-*)/bin:$PATH" && node build/spot/spot-timing.mjs ../../dist/app/data-v0-test)`,
+the DDD §2 form above in a subshell, exits 0 and prints `v22.12.0`,
+the decode time, and the median query time, which the completion
+report records — a diagnostic, never acceptance evidence;
 and, once rule 5 has written it back, `cmp` of
 `subprojects/webapp/data/pointer.json` with its saved copy exits 0, or
 that file is missing because it was missing before the export.
@@ -1818,18 +1867,18 @@ setting `familyView` off in one update, the rest of the display state
 unchanged; and a scarp-filter change that leaves fewer than six classes
 setting `familyView` to false in the same update. (2)
 `src/state/parse.ts`, the free-entry validation of
-[DDD §5.7](ddd.md#57-scenario-controls): grammar G, its 16-character
-limit both after trimming and after canonicalization, and its canonical
-form — `.12345678901234` accepted as `0.12345678901234`, but
-`.123456789012345` rejected because its canonical form has 17
-characters; row R1 (both slip fields
-judged together and compared as exact decimals with `BigInt`: both
-BLANK give the inactive window, a lone BLANK minimum reads as `0` and
-a lone BLANK maximum as `String(slip_window_bounds.max)`, and the
-rejections are those §5.7 lists), R2 (the offset maximum: `0` to
-`1000` accepted, compared as exact decimals; INVALID text, a value
-above `1000`, and BLANK at a commit rejected), R4 (the dip-range
-grammar, with the same 16-character limit), and R6 (the read-off
+[DDD §5.7](ddd.md#57-scenario-controls): grammar G, its canonical form
+(a `0` supplied before a leading point), and its 16-character limit both
+after trimming and on the canonical form — `.12345678901234` accepted as
+`0.12345678901234`, but `.123456789012345` rejected because its
+canonical form has 17 characters; row R1 (both slip fields judged
+together and compared as exact decimals with `BigInt`: both BLANK give
+the inactive window, a lone BLANK minimum reads as `0` and a lone BLANK
+maximum as `String(slip_window_bounds.max)`, and the rejections are
+those §5.7 lists), R2 (the offset maximum: `0` to `1000` accepted,
+compared as exact decimals; INVALID text, a value above `1000`, and
+BLANK at a commit rejected), R4 (the dip-range grammar, with the same
+16-character limit after trimming), and R6 (the read-off
 classification); and
 `storedBoundsFromDecimal(min, max)` — `lo_s = ⌈min · 10^4⌉` and
 `hi_s = ⌊max · 10^4⌋` by integer arithmetic on the digit string
@@ -1883,10 +1932,10 @@ missing file, a final status other than 200, a transport error, or a
 mismatch fails under rule `fetch`. (2) Load and pair: `decodeVintage` on
 the verified bytes with `expected` =
 `{ exportVersion: <the pointer's export_version>, schemaVersions: [1] }`;
-`loadRegression(url, pointer.export_version)` through a `fetch` the
-harness installs for its own
-process, answering `file:` URLs inside the verified directory with
-`new Response(<bytes>)` and rejecting every other URL; the reference
+`loadRegression(url, <the pointer's export_version>)` through a `fetch`
+the harness installs for its own process, answering `file:` URLs inside
+the verified directory with `new Response(<bytes>)` and rejecting every
+other URL; the reference
 file gunzipped with `node:zlib` and parsed by `parseReferences`; then
 rule `pairing` in both directions, rule `D-23 transcription`
 (`displayDecimals(m)` of `config.ts` against `display_decimals[m]` for
@@ -1978,11 +2027,11 @@ rejecting with its `LoadError` kind of
 for a truncated buffer, a count mismatch, and a `SchemaError`;
 `'schema-version'`; `'data-version'`, carrying `expected` and `loaded`;
 and `'retrieval'` for a non-2xx `fetch` stub of `loadFieldExport` or
-`loadRegression`; for both lazy loaders, matching expected versions
-return the documented result and mismatching versions reject before
-returning it, carrying the expected argument and loaded envelope version.
-(3) `test/fields.test.ts`, the §7.4 row: the six DD-10
-tables total and injective over the closed field lists of
+`loadRegression`; for each lazy loader, a matching
+`expectedExportVersion` returns its documented result, and a different
+one rejects with `'data-version'`, `expected` the argument and `loaded`
+the fixture envelope's version. (3) `test/fields.test.ts`, the §7.4 row:
+the six DD-10 tables total and injective over the closed field lists of
 [§3.2](ddd.md#32-artifact-manifest)–[§3.6](ddd.md#36-reference-results),
 no snake_case key left outside the data-keyed maps and the verbatim
 `provenance` and `inputs`, and the three column lists in their §3.1 and
@@ -1993,23 +2042,25 @@ derived defaults and Reset restoring every
 [§5.7](ddd.md#57-scenario-controls) control's default with family view
 off while the overlay switch and `logScale` stay. (5)
 `test/parse.test.ts`, the §7.4 row, among its cases the stored bounds
-`0.00005` → 1, `5.01349` → 50134, and `5.0135` → 50135;
-`.12345678901234` normalizes to the accepted 16-character
-`0.12345678901234`, while `.123456789012345` is INVALID because
-normalization would make it 17 characters; raw inputs over 16
-characters remain INVALID even if normalization would shorten them.
-(6) `test/scenario-json.test.ts`, the §7.4 row: GS-1's golden
-bytes of §5.6, the round trips (including the accepted normalization
-boundary, whose serialized decimal also passes grammar G on re-edit),
-the rejected 17-character normalized value, the pair sets A and B
-serializing differently, and `ScenarioInputError` for an unknown key and an
-out-of-vocabulary value. (7) `test/recovery.test.ts`, the complete
-§7.4 row: envelope/display validation, accepted-state round trips,
-same/new-version restoration, and incompatible settings without partial
-application or silent adjustment. Every test imports only browser-and-Node files,
-touches no network, and holds no hand-maintained calculation expectation
-(the §7.4 pipeline-first rule); rendered behavior belongs to the browser
-lane (T-60).
+`0.00005` → 1, `5.01349` → 50134, and `5.0135` → 50135, and the
+canonical-form limit: `.12345678901234` and `.123456789012340` accepted
+as the 16-character `0.12345678901234`; `.123456789012345` and
+`,123456789012345` INVALID because their canonical form has 17
+characters; and the 17-character `00.12345678901234` INVALID although
+its canonical form has 16. (6) `test/scenario-json.test.ts`, the §7.4
+row: GS-1's golden bytes of §5.6; the round trips, among them an offset
+maximum entered as `.12345678901234`, serialized as `0.12345678901234`,
+parsed back to an equal Scenario, and read back unchanged by grammar G;
+`ScenarioInputError` naming `offset_max` for the 17-character
+`0.123456789012345`; the pair sets A and B serializing differently; and
+`ScenarioInputError` for an unknown key and an out-of-vocabulary value.
+(7) `test/recovery.test.ts`, the complete §7.4 row: envelope/display
+validation, accepted-state round trips, same/new-version restoration,
+and incompatible settings without partial application or silent
+adjustment. Every test imports only browser-and-Node files, touches no
+network, and holds no hand-maintained calculation expectation (the §7.4
+pipeline-first rule); rendered behavior belongs to the browser lane
+(T-60).
 
 **Done when:** `./gradlew :subprojects:webapp:tscCheck` and
 `./gradlew :subprojects:webapp:webappTest` exit 0, and
@@ -2050,16 +2101,18 @@ runs it, in the one form of
 [DDD §2](ddd.md#2-repository-structure-naming-and-toolchain) (Node.js
 outside Gradle).
 
-**Done when:** `./gradlew :subprojects:webapp:tscCheck` exits 0; from
-`subprojects/webapp`, in that DDD §2 form (after
-`./gradlew :subprojects:webapp:npmCi` from the repository root, the
-`PATH` export of T-31), the esbuild command of T-31 rebuilds
-`build/spot/spot-timing.mjs`, and
-`node build/spot/spot-timing.mjs ../../dist/app/data-v0-test` exits 0,
-printing `v22.12.0`, the decode time, the minimum, median, 95th
-percentile, and maximum over 30 runs, and the diagnostic line; the
-completion report records the printed figures; and the pointer check
-of T-31 holds once rule 5 has written the pointer back.
+**Done when:** all commands run from the repository root unless a
+subshell explicitly changes directory:
+`./gradlew :subprojects:webapp:tscCheck` exits 0; after
+`./gradlew :subprojects:webapp:npmCi`, one subshell in that DDD §2
+form,
+`(cd subprojects/webapp && export PATH="$(ls -d "$PWD"/.gradle/nodejs/node-v22.12.0-*)/bin:$PATH" && npx esbuild test/spot-timing.ts --bundle --platform=node --format=esm --target=es2020 --outfile=build/spot/spot-timing.mjs && node build/spot/spot-timing.mjs ../../dist/app/data-v0-test)`,
+rebuilds `subprojects/webapp/build/spot/spot-timing.mjs` with the
+esbuild command of T-31 and exits 0, printing `v22.12.0`, the decode
+time, the minimum, median, 95th percentile, and maximum over 30 runs,
+and the diagnostic line; the completion report records the printed
+figures; and the pointer check of T-31 holds once rule 5 has written
+the pointer back.
 
 ### M4 — Product surface
 
@@ -2265,7 +2318,7 @@ from the full array, which need not lie on a step. The bins are T-32's
 `fieldTableSpec(rows, order)`, and `segmentTitle`, per the §5.11
 templates — and `chartSummary(stats, counts, measurement, cfg)` in
 `src/views/summary.ts`, the caption sentence, with non-null `Stats`
-and the same result's `selection.perMeasurement[measurement]` as
+and the same result's `Selection.perMeasurement[measurement]` as
 `MeasurementCounts`; N is `counts.valid`, and the builder is called
 only when a chart is drawn. (6)
 `src/views/dom/panels.ts` — the three DD-4 panel `<section>`s in
@@ -2343,7 +2396,10 @@ header order, the six-to-three family fold keeping row totals, group
 cells summing to each Total, the field-row order, one distinct
 `chartLabel` per combination of chart kind and field ticks and, for the
 histogram, family view and log scale, and a `below 0.1 m` first row
-exactly when the below counts are not all zero; in
+exactly when the below counts are not all zero; `views-text.test.ts`:
+`chartSummary` with identical non-null statistics prints N as
+`formatCount(counts.valid)`, unchanged when only `counts.excludedNull`
+changes and changed when `counts.valid` changes; in
 `subprojects/webapp/src/views/render-input.ts`, `grep -cw` of each of
 `windows`, `flags`, `regression`, and `field` prints at least 1;
 `test -f subprojects/webapp/src/views/dom/wiring.ts` and
@@ -2368,10 +2424,11 @@ wrappers at 360 px are covered by `render.spec.ts`,
 #### T-42 — Statistics table
 
 **Steps.** Per [DDD §5.8](ddd.md#58-view-layer) (Statistics tables): (1)
-`src/views/stats-table.ts` — `statsRows(stats, counts, measurement, cfg)`,
-with `stats: Stats | null` and `counts: MeasurementCounts` from the same
-result's `selection.perMeasurement[measurement]`, supplied together by
-the render pass even when `stats` is null. The first two rows read
+`src/views/stats-table.ts` —
+`statsRows(stats, counts, measurement, cfg)`, with `stats: Stats | null`
+and `counts: MeasurementCounts` from the same result's
+`Selection.perMeasurement[measurement]`, supplied together by the
+render pass even when `stats` is null. The first two rows read
 `counts.valid` and `counts.excludedNull`; rows are in the
 [PDD §4.2 — Statistics table (FR-O2)](pdd.md#42-statistics-table-fr-o2)
 order, labeled "Valid count", "Excluded null count", "Median", "16th
@@ -2379,34 +2436,34 @@ percentile", "84th percentile", "Minimum", "Maximum", "Mean", and
 "Standard deviation"; values by `displayRound(v, displayDecimals(m))`
 (T-32, T-47) at render time only, counts by `formatCount`, and a null
 statistic as `—` (U+2014); the engine's float64 values never mutated.
-(2) `src/views/dom/table.ts` — the one real `<table>` in `.gre-table`,
+In the same file, `unclassifiedLine(unclassified)` returns the line of
+[PDD §4.3 — Unclassified records (D-12, Proposed)](pdd.md#43-unclassified-records-d-12-proposed)
+with X `formatCount(unclassified)` when `unclassified` is above 0, and
+null otherwise; the render pass passes it `Selection.unclassified` from
+the same `RenderInput`, separately from `counts` — the matched
+class-code-255 count, not `counts.excludedNull`. (2)
+`src/views/dom/table.ts` — the one real `<table>` in `.gre-table`,
 built from those rows, its `<caption>` the entry of
 [PDD §5.5 — Statistics framing (CR-5)](pdd.md#55-statistics-framing-cr-5),
-and, while the matching population holds unclassified records, the
-`<tfoot>` line of
-[PDD §4.3 — Unclassified records (D-12, Proposed)](pdd.md#43-unclassified-records-d-12-proposed)
-with X the `formatCount` of `Selection.unclassified`, supplied
-separately to the table applier from the same `RenderInput`; it is the
-matched class-code-255 count, not `counts.excludedNull`. Population
-semantics stay the engine's. (3) `copy.json` gains the row labels and
-the null mark (§5.8 fixed-here entries) and the PDD §4.3 line. (4) The
-`statsRows` cases of `test/views-text.test.ts`
-([DDD §7.4](ddd.md#74-application-tests)).
+and a non-null `unclassifiedLine` result as its `<tfoot>` line,
+unchanged. Population semantics stay the engine's. (3) `copy.json`
+gains the row labels and the null mark (§5.8 fixed-here entries) and
+the PDD §4.3 line. (4) The `statsRows` and `unclassifiedLine` cases of
+`test/views-text.test.ts` ([DDD §7.4](ddd.md#74-application-tests)).
 
 **Done when:** `./gradlew :subprojects:webapp:tscCheck` and
 `./gradlew :subprojects:webapp:webappTest` exit 0, `views-text.test.ts`
 covering `statsRows` — rows in the PDD §4.2 order, values by
 `displayRound` at the D-23 decimals (−0.005 at two decimals rendering
 `-0.01` with the ASCII hyphen-minus, −0.004 rendering `0.00`), counts by
-`formatCount` (1234567 → `1,234,567`), with null statistics and
-`{ valid: 0, excludedNull: 1 }` versus `{ valid: 0, excludedNull: 2 }`
-giving distinct excluded counts and seven null marks; `chartSummary`
-with identical non-null statistics and different valid counts changes N;
-and the unclassified line exactly
-when unclassified records match;
-`python3 .github/scripts/check_pdd_agreement.py` exits 0; the parity of
-the displayed strings is T-35's (rule `display`), and the rendered table
-is covered by `golden-scenario.spec.ts` (T-60).
+`formatCount` (1234567 → `1,234,567`), and, with null statistics, the
+valid-count row `0`, the excluded-null row `1` for
+`{ valid: 0, excludedNull: 1 }` and `2` for
+`{ valid: 0, excludedNull: 2 }`, and the other seven rows `—` — and
+`unclassifiedLine`, null at 0 and the PDD §4.3 line with X `3,434` at
+3434; `python3 .github/scripts/check_pdd_agreement.py` exits 0; the
+parity of the displayed strings is T-35's (rule `display`), and the
+rendered table is covered by `golden-scenario.spec.ts` (T-60).
 
 #### T-43 — Notices and caveats
 
@@ -2767,8 +2824,8 @@ regression-export prefetch, its request for an accepted offset-mode
 Scenario, the field export when `update(next)` turns `overlay` on
 while its state is `absent` or `failed`),
 passing `vintage.manifest.exportVersion` as the required second
-argument to both `loadFieldExport` and `loadRegression`; each loader
-validates its envelope version before its promise resolves
+argument to both `loadFieldExport` and `loadRegression`, each loader
+validating its envelope version before its promise resolves
 ([§5.2](ddd.md#52-artifact-loading-and-decoding), Lazy exports),
 superseded continuations dropped, failures handled per §5.10 (Lazy-load
 failures), and the field export's state — `absent`, `loading`,
@@ -3022,12 +3079,12 @@ scarp-dip measurement." for `scarp_dip`, null otherwise). (2)
 `src/overlay/field-overlay.ts`, browser only, over the `field` rows of
 the `RenderInput` (T-41) — the `FieldRow[]` that
 `loadFieldExport(url, vintage.manifest.exportVersion)` (T-30) yields
-after version validation for the [§3.4](ddd.md#34-field-data-export) rows while
-the field export's state is `ready`, `'failed'` while it is `failed`,
-and null otherwise ([§5.3](ddd.md#53-query-engine) item 3) — each
-mechanic as the §5.8 bullets fix it; T-46 supplies the one global
-recovery action of §5.10, while this task keeps the field legends and
-ordinary off/on retry:
+after version validation for the
+[§3.4](ddd.md#34-field-data-export) rows while the field export's
+state is `ready`, `'failed'` while it is `failed`, and null otherwise
+([§5.3](ddd.md#53-query-engine) item 3) — each mechanic as the §5.8
+bullets fix it; T-46 supplies the one global recovery action of §5.10,
+while this task keeps the field legends and ordinary off/on retry:
 the one results-header switch "Compare with field measurements (past
 earthquakes)", the `<input type="checkbox" id="gre-overlay">` inside its
 `<label>`, off by default, display state that Reset leaves alone; while
@@ -3354,13 +3411,16 @@ with conclusion `success` whose `deploy` job ran
 0 — no nav link;
 `curl -s <SITE_URL>sitemap.xml | grep -c 'scenario/</loc>'` and
 `curl -s <SITE_URL>search/search_index.json | grep -c '"location":"scenario/'`
-each print 0; and, in `subprojects/webapp` after
-`./gradlew :subprojects:webapp:playwrightInstall` and the PATH export
-of [DDD §2](ddd.md#2-repository-structure-naming-and-toolchain)
-(Node.js outside Gradle),
-`node -e 'const { chromium } = require("@playwright/test"); (async () => { const b = await chromium.launch(); const p = await b.newPage(); await p.goto(process.argv[1]); console.log(await p.locator("#gre-prototype").textContent()); await b.close(); })();' '<SITE_URL>scenario/'`
-prints exactly the `text` of the `ddd5.8.prototypeNotice` entry of
-`src/views/copy.json` — the prototype notice shown on the live page.
+each print 0; and, after
+`./gradlew :subprojects:webapp:playwrightInstall` at the repository
+root,
+`(cd subprojects/webapp && export PATH="$(ls -d "$PWD"/.gradle/nodejs/node-v22.12.0-*)/bin:$PATH" && node -e 'const { chromium } = require("@playwright/test"); (async () => { const b = await chromium.launch(); const p = await b.newPage(); await p.goto(process.argv[1]); console.log(await p.locator("#gre-prototype").textContent()); await b.close(); })();' '<SITE_URL>scenario/')`
+— the form of
+[DDD §2](ddd.md#2-repository-structure-naming-and-toolchain) (Node.js
+outside Gradle) in a subshell — prints exactly the `text` of the
+`ddd5.8.prototypeNotice` entry of
+`subprojects/webapp/src/views/copy.json`, the prototype notice shown
+on the live page.
 
 ### M6 — Release
 
@@ -4134,9 +4194,11 @@ the release branch contains `main` — then merge the release pull request
 by a merge commit ([DDD §6.3](ddd.md#63-ci-workflows), Required checks)
 and, for that merge commit `<main sha>`
 (`git rev-parse origin/main` after another `git fetch origin`), check
-that `git diff --quiet <release sha> <main sha>` exits 0; the push
-run on `main` deploys the activated page, the glossary additions, and
-the new footer stamp
+that `git diff --quiet <release sha> <main sha>` and
+`git merge-base --is-ancestor <release sha> <main sha>` exit 0 — the
+merge commit has the release commit's tree and descends from it; the
+push run on `main` deploys the activated page, the glossary additions,
+and the new footer stamp
 ([DDD §6.2](ddd.md#62-software-and-data-version-stamps)). Record the
 two `webapp-dist` digest pairs of the build identity of
 [DDD §7.7](ddd.md#77-site-validation-and-release-checklist)
@@ -4144,15 +4206,20 @@ two `webapp-dist` digest pairs of the build identity of
 Companion site push run on `<main sha>` — each in a new empty
 temporary directory with
 `gh run download <run id> --name webapp-dist --dir <that directory>`,
-then `shasum -a 256 app.js app.css` in it. After that deployment,
-return to the repository root. Require
+then `shasum -a 256 app.js app.css` in it. After that deployment —
+`gh run list --workflow mkdocs.yml --commit <main sha> --json conclusion --jq '.[0].conclusion'`
+printing `success` — return to the repository root. Require
 `git status --porcelain=v1 --untracked-files=all` to print nothing and
-`git branch --show-current` to print `dev-v.0.3.x`; fast-forward that
-local release branch with `git merge --ff-only <main sha>`, then require
-`git rev-parse HEAD` to equal `<main sha>` and the clean-tree command
-still to print nothing. Keep `<release sha>` as the recorded pre-merge
-commit; do not redefine it from the new HEAD. From this clean checkout,
-run item 5 (b):
+`git branch --show-current` to print `dev-v.0.3.x`. Claude then
+fast-forwards that local release branch, the owner's branch, with
+`git merge --ff-only <main sha>`, at the owner's request and outside
+any agent task — the one git operation on the owner's branch that
+Claude may perform ([Execution contract](#execution-contract),
+rule 3); an implementation agent never commits on or moves that
+branch. Then require `git rev-parse HEAD` to equal `<main sha>` and
+that `git status` command still to print nothing. Keep
+`<release sha>` as the recorded pre-merge commit; do not redefine it
+from the new HEAD. From this clean checkout, run item 5 (b):
 `./gradlew :subprojects:webapp:webappMeasureReference -Pegr.perf.target=published`
 completes, its measure run exiting 0, so the header sets match, its
 report recording the same environment and `network` values, its cold and
@@ -4160,8 +4227,36 @@ fresh-warm workloads reading `within_budget` true, and its `bundle`
 digests equal to both recorded pairs. Its downloaded report must also
 name the measured checkout exactly:
 `python3 -c 'import json,sys; r=json.load(open(sys.argv[1])); assert r["source_commit"] == sys.argv[2] and r["source_tree_clean"] is True' subprojects/webapp/build/perf/<run_id>/report.json <main sha>`
-exits 0. A miss, differing digest, wrong source commit, or dirty source
-stops the release at step (7).
+exits 0. An operational failure of the fast-forward or of the
+item-5 (b) run is retried clean: a refused fast-forward; a failed
+requirement of the checkout above, an unclean tree among them; a
+report that names another commit or a dirty tree, a measure run that
+exits non-zero, or a report whose environment or `network` values
+differ, each showing no budget miss and no differing digest; or an
+infrastructure or report-retrieval failure — a run that fails before
+its measure run exits, or whose measure run exits 0 but whose report
+is not downloaded — after which `run.mjs` may keep the VM
+([DDD §7.6](ddd.md#76-performance-and-compatibility-measurements),
+step 7). Such a failure changes nothing on `origin` and is no
+item-5 (b) evidence: it is noted in the checklist copy, without an
+evidence-ledger row; a report left on a kept VM whose measure run
+exited 0 is first retrieved through `run.mjs ssh`
+([DDD §7.6](ddd.md#76-performance-and-compatibility-measurements), Access) and
+judged like any report, a miss in it being a miss; any kept VM is
+then removed with
+`./gradlew :subprojects:webapp:webappMeasureDestroy`; the clean
+checkout above is restored at `<main sha>`; and item 5 (b) runs again
+from its first step, the `git status` check. A second consecutive
+failure of the same kind is not retried: the VM, if kept, stays for
+investigation, and the failure is reported to the owner. When
+restoring that
+checkout would discard an uncommitted change or an unpushed commit,
+the owner's work, or would change it by a git command other than that
+fast-forward, stop and ask the owner instead. A budget miss or a
+differing digest is never retried away: item 5 fails in the run's
+record, it is reported to the owner at once
+([Execution contract](#execution-contract), rule 4), and the release
+stops at step (7).
 (5) Create the annotated tag on `<main sha>`, push it, and create
 the draft release with
 `gh release create <software tag> --verify-tag --draft`
@@ -4196,11 +4291,12 @@ digest pairs of step
 then paste the filled checklist into the draft's description, the
 §7.7 release record, and publish it with
 `gh release edit <software tag> --draft=false`. (7) A failure after
-the release merge and before that publication stops the task. The
-owner records in the checklist copy the failing output and the
-deployed state — `<main sha>`, its push run, and the digest pairs,
-except as the first row below states — and acts on the row of the
-publication state, read from the push run's conclusion
+the release merge and before that publication stops the task, unless
+step (4) retries it clean. The owner records in the checklist copy
+the failing output and the deployed state — `<main sha>`, its push
+run, and the digest pairs, except as the first row below states — and
+acts on the row of the publication state, read from the push run's
+conclusion
 (`gh run list --workflow mkdocs.yml --commit <main sha> --json conclusion,databaseId,url`),
 from `gh release view <software tag> --json isDraft --jq .isDraft`
 (`true` for a draft, a non-zero exit when no release exists), and
@@ -4213,7 +4309,7 @@ release's assets and tag when it is published.
 | Publication state | Response |
 |---|---|
 | The Companion site push run on `<main sha>` failed; neither a draft nor a tag on `origin`. | The site of the newest successful Companion site run on `main` stays published ([DDD §6.3](ddd.md#63-ci-workflows)): record that run's `headSha` and URL, which `gh run list --workflow mkdocs.yml --branch main --status success --limit 1 --json headSha,url` prints. Rerun the push run's failed jobs, `gh run rerun <run id> --failed`, and continue step (4) once the run succeeds; a check failing again is fixed forward. |
-| `<main sha>` is deployed; neither a draft nor a tag on `origin`. | A check of step (4) or item 5 (b) failed: fix forward, with nothing to delete. Step (5) stopped before `origin` had the tag: step (5) again from its failed command. |
+| `<main sha>` is deployed; neither a draft nor a tag on `origin`. | A failed check of step (4) or item 5 (b) that step (4) does not retry clean — a budget miss or a differing digest among them: fix forward, with nothing to delete. Step (5) stopped before `origin` had the tag: step (5) again from its failed command. |
 | The tag is on `origin`, with no release. | A failed `gh release create`: step (5) again from it, unless GitHub refused the tag. Otherwise `git push origin :refs/tags/<software tag>`, then `git tag -d <software tag>`, and fix forward. |
 | A draft exists. | Item 11 failed: `gh release delete <software tag> --yes`, which keeps the tag, then step (5) again from `gh release create`. A `gh release edit` of step (6) failed: that command again. Any other failure: `gh release delete <software tag> --yes --cleanup-tag`, then `git tag -d <software tag>`, and fix forward. |
 
@@ -4221,12 +4317,13 @@ To fix forward — the first release has no rollback target (item 12),
 and [DDD §7.6](ddd.md#76-performance-and-compatibility-measurements)
 answers a miss by optimizing and measuring again — the owner makes
 the corrective commit on the release branch once
-`git merge --ff-only origin/main` has brought it to `<main sha>`,
-and records that corrective commit as the next attempt's
-`<release sha>`. It repeats steps (3)–(6) on that commit through a new
-release pull request,
-the OA-4 check included, so a change to a listed text, the vintage,
-or the bundle needs a new OA-4 record first. If GitHub refuses to
+`git merge --ff-only origin/main` has brought it to `<main sha>`, and
+records as the next attempt's `<release sha>` the release-branch head
+that its new release pull request carries — the corrective commit, or
+the new OA-4 record or step-(2) release commit below that follows it.
+It repeats steps (3)–(6) on that head through that pull request, the
+OA-4 check included, so a change to a listed text, the vintage, or the
+bundle needs a new OA-4 record first. If GitHub refuses to
 reuse the software tag after its draft release is deleted, the
 release takes the next patch version: a new OA-7 record names it,
 and its step-(2) release commit takes that same path. Once
@@ -4396,8 +4493,10 @@ ends with the evidence ledger
 ## 4. Owner and research-group actions
 
 Acts the agent never performs; only the owner's AWS operations of
-OA-5 may be carried out by Claude, at the owner's request and outside
-any agent task ([Execution contract](#execution-contract), rule 3).
+OA-5 and the fast-forward of the owner's release branch in T-65
+step (4) may be carried out by Claude, at the owner's request and
+outside any agent task ([Execution contract](#execution-contract),
+rule 3).
 The actions themselves — what each is, its phase, and the task it
 must precede — are the owner's list in
 [`notes/Roadmap.md` — Ground Rupture Explorer — owner actions (opened 2026-10-30)](../../notes/Roadmap.md#ground-rupture-explorer--owner-actions-opened-2026-10-30);
@@ -4513,7 +4612,12 @@ ID is reused; OA-15 is retired
   for OA-12 and OA-16. The reference runs and their cleanup are the
   owner's AWS operations, which Claude may carry out at the owner's
   request with the owner's `egr-perf` profile (Execution contract,
-  rule 3); the records and checks above are unchanged.
+  rule 3); the records and checks above are unchanged. Before
+  item 5 (b), Claude also fast-forwards the owner's local release
+  branch to the deployed `main` merge commit, at the owner's request
+  and outside any agent task — the one git operation on the owner's
+  branch that Claude may perform (T-65 step (4)); an implementation
+  agent never commits on or moves that branch.
   The AWS setup the reference measurement needs exists since
   2026-10-31, made at the owner's request with the owner's
   credentials: the identity `egr-perf` with the policy
@@ -4785,14 +4889,21 @@ independent scheduling authority.
 ## 7. Traceability
 
 The matrix below maps every obligation the approved documents place
-on the implementation plan — the thirty rows the obligation sweep of
-2026-10-29 directed at this plan, of the 420 it extracted from the
-PRD, PDD, HLDD, accepted ADRs, and `notes/Roadmap.md` at commit
-`36abc56`, and the six rows added by hand for what two later
-decisions, both accepted on 2026-10-31, direct at it,
+on the implementation plan — thirty-eight rows: the thirty rows the
+obligation sweep of 2026-10-29 directed at this plan, of the 420 it
+extracted from the PRD, PDD, HLDD, accepted ADRs, and
+`notes/Roadmap.md` at commit `36abc56`; the six rows added by hand
+for what two later decisions, both accepted on 2026-10-31, direct at it,
 [ADR-0016 — Performance reference environment — an on-demand AWS VM defined by Terraform](../adr/0016-performance-reference-environment.md)
 and
-[ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md)
+[ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md);
+and the two rows added by hand for the owner's directions of
+2026-11-01, in
+[PDD §4.1 — Measurement views (FR-O1)](pdd.md#41-measurement-views-fr-o1),
+which makes a reader choice of cumulative-curve accuracy a P3
+consideration, and in
+[PDD §7.3 — Reload recovery (MVP)](pdd.md#73-reload-recovery-mvp),
+which adds one-shot reload recovery
 ([DDD §8 — Traceability](ddd.md#8-traceability) holds the full
 register and states what the sweep has not covered since) — to its
 home in this plan and to the check planned to
@@ -4805,8 +4916,9 @@ by hand after it, re-rendered when the sources change; the
 correction pass of 2026-10-30 re-rendered the Kind, Check, and
 Status columns against the
 corrected documents. Each row repeats its DDD §8 twin — the row
-with the same Source and Obligation — exactly, which the traceability
-lint of T-04 checks. Kind and Status take the closed values DDD §8
+with the same Source and Obligation — cell for cell, which the
+traceability lint of T-04 checks. Kind and Status take the closed
+values DDD §8
 defines: Kind is one of `text`, `test`, `measure`, `release`, `owner`,
 `schedule`, and `n/a`, several joined with `+`; Status is one of
 `designed`, `planned`, `owner-pending`, `parked`, `deferred`, `gap`,

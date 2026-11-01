@@ -10,10 +10,10 @@ implementation plan cite this file.
 **Scope.** Seven reviews: three of 2026-10-30 — review 1 of the full
 DDD draft, review 2 of the corrected DDD, and a review of
 [ADR-0016 — Performance reference environment — an on-demand AWS VM defined by Terraform](../adr/0016-performance-reference-environment.md)
-— two reviews of the implementation plan, both of 2026-10-31, and
-the repository-backed design review of 2026-10-31 with its
-correction pass of 2026-11-01, and the IP consistency review and
-correction pass of 2026-11-01.
+— two reviews of the implementation plan, both of 2026-10-31, the
+repository-backed design review of 2026-10-31 with its correction
+pass of 2026-11-01, and the IP consistency review of 2026-11-01 with
+its correction pass.
 The review texts are model output from the owner's review agent, not
 statements of the research group or of any other person. Reviews 1
 and 2 state that they read the supplied text and did not
@@ -33,12 +33,14 @@ does not reproduce the review texts. It also records the correction
 passes' own verification rounds and the owner's rulings made during
 them.
 
-**Evidence.** No planned application code has been built in the
-project, and no planned application test or release check has run.
-The isolated T-04 implementation trials described below are diagnostics
-of the specification, not completion of that project task. A disposition is a change to the
-documents: the Where column names the sections that now carry it and
-the IP tasks that will implement it, not evidence that it holds.
+**Evidence.** Nothing the DDD specifies has been built in the
+project, and none of the checks it introduces has run there. The
+diagnostics that the sections below record — among them the isolated
+trials of [T-04](ip.md#t-04--traceability-lint) (Traceability lint) —
+ran outside the project: they test the specification, and none is an
+execution of a planned task or check. A disposition is a change to
+the documents: the Where column names the sections that now carry it
+and the IP tasks that will implement it, not evidence that it holds.
 
 ## Review 1 — full DDD draft (2026-10-30)
 
@@ -667,14 +669,14 @@ The owner directed that the P1 finding be fixed, allowed a fresher
 browser requirement, and required explicit error messages. The owner
 initially deferred the P2 and P3 findings below; those labels are
 review priorities, not the product's delivery phases. The later
-DF-1 decision below accepts a bounded ECDF correction; the other
-five findings remain deferred.
+DF-1 and DF-2 decisions below accept a bounded ECDF correction and
+explicit reload recovery; the other four findings remain deferred.
 
 | Finding | Disposition | Correction or deferred work | Where |
 |---|---|---|---|
 | **P1 — Compatibility gate cannot pass** | Corrected in design | The old dataset and 24-month window select Firefox 108 and Safari/iOS 16.2, below the required `DecompressionStream` minima. The support policy now uses 12 months, the dataset pin is `1.0.30001820`, and the release gate requires its newest browser release to be at most 30 days old. The inventory records a scoped Safari Streams partial-support exception backed by MDN's used-API evidence. Failure diagnostics name the API and tested browser. Runtime and ordinary static fallback copy state the browser policy and explicit update/reload steps, including iOS/iPadOS updates for Safari. | [PDD §9.2](pdd.md#92-browser-and-mobile-baseline-d-16-proposed); [HLDD §2](hldd.md#2-architectural-constraints), [§6.1](hldd.md#61-failure-honesty-adr-0010); [DDD §2](ddd.md#2-repository-structure-naming-and-toolchain), [§5.10](ddd.md#510-failure-states), [§7.5](ddd.md#75-browser-test-lane), [§7.6](ddd.md#76-performance-and-compatibility-measurements), [§7.7](ddd.md#77-site-validation-and-release-checklist); [IP T-01](ip.md#t-01--gradle-webapp-subproject), [T-03](ip.md#t-03--scenario-page-scaffold), [T-44](ip.md#t-44--failure-states), [T-61](ip.md#t-61--measurement-suite), [T-65](ip.md#t-65--v03-release-owner); [ADR-0014](../adr/0014-committed-content-hashed-artifacts.md) |
 | **P2 — ECDF thinning loses large tied jumps** | Corrected in design after owner decision (2026-11-01) | The superseded rule understates the scarp-dip cumulative share by about 8 percentage points at slip 0–0.5 m. DF-1 replaces it with count-based thinning guaranteeing at most 100/511 ≈ 0.195695 percentage points of vertical simplification error, with a visible and accessible accuracy statement; statistics and percentile read-offs still use the full data. Reader-selected accuracy is a P3 consideration. | [PDD §4.1](pdd.md#41-measurement-views-fr-o1), [§6.3](pdd.md#63-chart-export-fr-d2-p2-d-14-proposed); [DDD §5.12](ddd.md#512-charts), [§7.4](ddd.md#74-application-tests); [IP T-41](ip.md#t-41--measurement-panels-and-charts), [§5](ip.md#5-parked-capabilities-p2p3) |
-| **P2 — Deployment removes assets needed by open pages** | Deferred by owner | A data-vintage refresh removes old hashes before an open tab's first lazy request; a code-only deployment with the same pointer retains those data filenames. Specify retention for nonwithdrawn assets or recovery that preserves the scenario. | [DDD §5.2](ddd.md#52-artifact-loading-and-decoding), [§6.1](ddd.md#61-build-outputs-asset-paths-and-page-scaffold) |
+| **P2 — Deployment removes assets needed by open pages** | Corrected in design after owner decision (2026-11-01) | DF-2 keeps the single-vintage deployment and adds **Reload and restore settings** after a failed lazy load. Preserve the latest accepted Scenario and DisplayState, validate against the newly loaded manifest before any result, recompute, and report changed versions, incompatible settings, and storage failures explicitly. | [PDD §7.3](pdd.md#73-reload-recovery-mvp); [DDD §5.1](ddd.md#51-modules-and-interfaces), [§5.3](ddd.md#53-query-engine), [§5.6](ddd.md#56-scenario-state-and-url-encoding), [§5.7](ddd.md#57-scenario-controls), [§5.8](ddd.md#58-view-layer), [§5.10](ddd.md#510-failure-states), [§5.11](ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle), [§7.4](ddd.md#74-application-tests), [§7.5](ddd.md#75-browser-test-lane), [§7.6](ddd.md#76-performance-and-compatibility-measurements); [IP T-34](ip.md#t-34--scenario-state), [T-36](ip.md#t-36--application-unit-tests), [T-40](ip.md#t-40--scenario-controls), [T-44](ip.md#t-44--failure-states), [T-46](ip.md#t-46--accessibility-and-navigation-lifecycle), [T-49](ip.md#t-49--field-overlay), [T-60](ip.md#t-60--browser-test-lane), [T-61](ip.md#t-61--measurement-suite) |
 | **P2 — Evidence-ledger revision exceptions omit traceability checks** | Deferred by owner | Extend the publication-commit exception to traceability evidence inherited from the pinned vintage. | [DDD §7.7](ddd.md#77-site-validation-and-release-checklist); [IP T-65](ip.md#t-65--v03-release-owner) |
 | **P2 — Deferred loading announcement can outlive a cached load** | Deferred by owner | Cancel or invalidate the loading timer when the first result or failure commits. | [DDD §5.11](ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle) |
 | **P3 — Stage-count validation and stride disagree** | Deferred by owner | Enforce 101 stages for schema 1 or derive the query stride from the measured count. Current full-data tests protect the shipped dataset. | [DDD §4.1](ddd.md#41-export-task-and-validation), [§5.3](ddd.md#53-query-engine) |
@@ -696,56 +698,94 @@ bundle cannot start. The application remains unbuilt.
 The owner requested a consistency and ambiguity check, followed by
 independent implementation trials outside the project. The review used
 commit `78e2d352d888366a51d124b592085c2108f91625` as its baseline. It
-found five inconsistencies in task contracts; the T-04 trials exposed
-one additional counting ambiguity. The owner then authorized these
-corrections. That IP correction left the older findings deferred,
-including the separate publication-evidence exception. The later
-DF-1 acceptance is recorded below.
+found five inconsistencies in task contracts; the trials of
+[T-04](ip.md#t-04--traceability-lint) (Traceability lint) exposed one
+additional counting ambiguity. The owner reviewed these corrections
+through an independent review on 2026-11-01, recorded at the end of
+this section, and ruled on findings 3, 4, 5, and 6. That IP
+correction left the findings that the owner deferred in
+[Repository-backed design review (2026-10-31; disposition 2026-11-01)](#repository-backed-design-review-2026-10-31-disposition-2026-11-01)
+deferred, among them
+**P2 — Evidence-ledger revision exceptions omit traceability checks**,
+which finding 5 below does not change. The later DF-1 and DF-2
+acceptances are recorded below.
 
 | Finding | Disposition | Correction | Where |
 |---|---|---|---|
 | **1 — Lazy field loader loses the version that its caller must validate** | Corrected in design | Both lazy loaders require `expectedExportVersion: string`, compare it with the mapped envelope before resolving, and reject a mismatch with `data-version`, `expected`, and `loaded`. Field rows retain their documented array shape. Browser callers pass the loaded manifest version; parity passes the pointer version. Both loaders have matching/mismatching-version acceptance cases. | [DDD §5.1](ddd.md#51-modules-and-interfaces), [§5.2](ddd.md#52-artifact-loading-and-decoding), [§5.8](ddd.md#58-view-layer), [§7.2](ddd.md#72-calculation-parity-tests), [§7.4](ddd.md#74-application-tests); [IP T-30](ip.md#t-30--loader-and-decoder), [T-35](ip.md#t-35--node-parity-harness), [T-36](ip.md#t-36--application-unit-tests), [T-46](ip.md#t-46--accessibility-and-navigation-lifecycle), [T-49](ip.md#t-49--field-overlay) |
-| **2 — Statistics builder has no input for counts** | Corrected in design | The engine exports `MeasurementCounts`; `statsRows` and `chartSummary` receive it explicitly from the same result as their statistics. Caption N is the valid count; the table footer receives `Selection.unclassified` separately. Acceptance cases keep statistics fixed while changing counts, including null statistics. | [DDD §5.1](ddd.md#51-modules-and-interfaces), [§5.3](ddd.md#53-query-engine), [§5.8](ddd.md#58-view-layer), [§5.11](ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle), [§7.4](ddd.md#74-application-tests); [IP T-31](ip.md#t-31--query-engine), [T-41](ip.md#t-41--measurement-panels-and-charts), [T-42](ip.md#t-42--statistics-table) |
-| **3 — Accepted decimals can fail after serialization or re-edit** | Corrected in design; owner selected the limit | Grammar G requires at most 16 characters both after trimming and after normalization. `.12345678901234` becomes the accepted `0.12345678901234`; `.123456789012345` is invalid because its normalized value has 17 characters. The parser and round-trip acceptance cases enforce both boundaries. | [DDD §5.6](ddd.md#56-scenario-state-and-url-encoding), [§5.7](ddd.md#57-scenario-controls), [§7.4](ddd.md#74-application-tests); [IP T-34](ip.md#t-34--scenario-state), [T-36](ip.md#t-36--application-unit-tests) |
-| **4 — Acceptance commands mix repository and subproject working directories** | Corrected in plan | T-14 starts at the repository root and scopes Poetry commands to subshells. T-21 keeps its staging drills at the root and gives staged files their full repository-relative paths. | [IP T-14](ip.md#t-14--required-full-data-checks), [T-21](ip.md#t-21--mkdocsyml-webapp-build-and-vintage-staging) |
-| **5 — Published measurement runs from the pre-merge HEAD** | Corrected in design and plan | Before item 5(b), fast-forward the clean local release branch to the verified deployed main commit, require HEAD to equal it, and retain the original release SHA separately. Accept the report only when its source commit is that main commit and its source tree is clean. Fix-forward records a new release SHA for the next attempt. | [DDD §7.7](ddd.md#77-site-validation-and-release-checklist); [IP T-65](ip.md#t-65--v03-release-owner) |
-| **6 — Mirrored gaps have two plausible counts** | Clarified in design and plan | Print `gap rows: <n>` counting DDD obligations only; IP mirrors add nothing. Keys `(Source, Obligation)` must be unique within each document; row equality compares six trimmed cells. Plural export-rule names are comma-separated. The acceptance drill requires one mirrored gap to print 1, pass ordinary lint, and fail release lint. | [DDD §8](ddd.md#8-traceability), [§8.4](ddd.md#84-from-the-adrs-and-the-adr-process); [IP T-04](ip.md#t-04--traceability-lint) |
+| **2 — Statistics builder has no input for counts** | Corrected in design | The engine exports `MeasurementCounts`; `statsRows` and `chartSummary` receive it explicitly from the same result as their statistics. Caption N is the valid count; the table footer's line comes from the pure `unclassifiedLine`, which receives `Selection.unclassified` separately. Acceptance cases keep statistics fixed while changing counts, including null statistics, and pin N to the valid count. | [DDD §5.1](ddd.md#51-modules-and-interfaces), [§5.3](ddd.md#53-query-engine), [§5.8](ddd.md#58-view-layer), [§5.11](ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle), [§7.4](ddd.md#74-application-tests); [IP T-31](ip.md#t-31--query-engine), [T-41](ip.md#t-41--measurement-panels-and-charts), [T-42](ip.md#t-42--statistics-table) |
+| **3 — Accepted decimals can fail after serialization or re-edit** | Corrected in design; limit by the owner's ruling of 2026-11-01 | Grammar G requires at most 16 characters both after trimming and in canonical form. `.12345678901234` becomes the accepted `0.12345678901234`; `.123456789012345` is INVALID because its canonical form has 17 characters. The signed grammar of inverse mode (DDD §5.14) applies both limits to the text after its `-`. Planned parser and round-trip cases cover both boundaries. | [DDD §5.6](ddd.md#56-scenario-state-and-url-encoding), [§5.7](ddd.md#57-scenario-controls), [§5.8](ddd.md#58-view-layer), [§5.14](ddd.md#514-inverse-mode-p2), [§7.4](ddd.md#74-application-tests); [IP T-34](ip.md#t-34--scenario-state), [T-36](ip.md#t-36--application-unit-tests) |
+| **4 — Acceptance commands mix repository and subproject working directories** | Corrected in plan | The Done-when blocks of T-02, T-03, T-14, T-21, T-31, T-37, and T-54 run from the repository root, each subproject command in a subshell — the DDD §2 form of Node.js outside Gradle included — and name files by repository-relative paths. T-14 runs the development export and `pytestFullData` as one rule-5 script that writes the pointer back only after the full-data run. T-14 and T-16 run their no-data checks in a linked worktree of `HEAD` with `PYTHONPATH=src`, which imports that worktree's own package instead of the shared virtualenv's editable install of the main working tree. | [IP T-02](ip.md#t-02--build-and-check-tasks), [T-03](ip.md#t-03--scenario-page-scaffold), [T-14](ip.md#t-14--required-full-data-checks), [T-16](ip.md#t-16--pipeline-fixture-tests), [T-21](ip.md#t-21--mkdocsyml-webapp-build-and-vintage-staging), [T-31](ip.md#t-31--query-engine), [T-37](ip.md#t-37--early-feasibility-diagnostic), [T-54](ip.md#t-54--prototype-deployment-unlisted) |
+| **5 — Published measurement runs from the pre-merge HEAD** | Corrected in design and plan; procedure by the owner's ruling of 2026-11-01 | Before item 5 (b), Claude, at the owner's request and outside any agent task, fast-forwards the clean local release branch to the deployed `main` merge commit — the one git operation on the owner's branch that Claude may perform — requires HEAD to equal it, and keeps the original release SHA separately; that merge commit must also descend from the release commit. The report is accepted only when its source commit is that merge commit and its source tree is clean. An operational failure — a refused fast-forward, an unclean tree, a report naming another commit or a dirty tree without a budget miss or a differing digest, or an infrastructure or report-retrieval failure — is retried clean: any kept VM removed, the clean checkout restored at the merge commit, and item 5 (b) run again from its first step, unless restoring would discard the owner's work or change the checkout by a git command other than the fast-forward, when the owner is asked instead. A budget miss or a differing bundle digest is never retried away: item 5 fails, is reported to the owner at once, and stops the release for a fix-forward, whose next attempt takes the new release-branch head as its release SHA. | [DDD §7.7](ddd.md#77-site-validation-and-release-checklist); [IP Execution contract](ip.md#execution-contract), [§4](ip.md#4-owner-and-research-group-actions), [T-65](ip.md#t-65--v03-release-owner) |
+| **6 — Mirrored gaps have two plausible counts** | Clarified in design and plan | The lint prints `gap rows: <n>`, n counting only DDD §8 rows whose Status is `gap`; IP §7 mirrors add nothing. Keys `(Source, Obligation)` must be unique within each document; row equality compares the six trimmed cells, and Check entries are trimmed too. Plural export-rule names are comma-separated, and a `release` entry is `§7.7 item <n>`, alone or followed by a parenthetical. The acceptance drill turns one mirrored row to `gap` and requires the count to rise by 1 (`gap rows: 1` on gap-free documents), exit 0 without `--release`, and a non-zero exit with it. | [DDD §8](ddd.md#8-traceability), [§8.4](ddd.md#84-from-the-adrs-and-the-adr-process); [IP T-04](ip.md#t-04--traceability-lint), [§7](ip.md#7-traceability) |
 
-The first independent T-04 trials used Terra and Astra in separate
-scratch copies. Both agreed on the expected pass/fail outcomes of all
-32 shared cases, but reported a mirrored gap as 1 and 2 respectively;
-their source code differed. This was evidence of a specification
-ambiguity, not a requirement that independent implementations have
-identical source. No trial implementation was copied into the project.
+**Owner ruling (2026-11-01).** Grammar G caps both the trimmed text and
+its canonical form at 16 characters (finding 3), so that every accepted
+decimal survives serialization and re-entry;
+[DDD §5.7](ddd.md#57-scenario-controls) records it.
+
+**Owner ruling (2026-11-01), finding 5.** Before item 5 (b), Claude,
+at the owner's request, fast-forwards the owner's local release
+branch to the deployed `main` merge commit — the one git operation on
+the owner's branch that Claude may perform — so that the
+published-site report names the deployed commit; implementation
+agents still never commit on or move that branch. An operational
+failure of that fast-forward or of the run is retried from a clean
+checkout unless restoring it would discard the owner's work, while a
+budget miss or a differing bundle digest is never retried away, by
+rules already in force: the owner's performance rule of 2026-10-31
+(IP rule 4) and the build identity of DDD §7.7.
+[IP T-65 — v0.3 release (owner)](ip.md#t-65--v03-release-owner),
+step (4), records it, with two safeguards added in this correction: a
+report left on a kept VM is retrieved and judged before the VM is
+removed, and a second consecutive failure of the same kind is reported
+to the owner, the VM kept for investigation.
+
+The first independent T-04 trials ran two implementing agents in
+separate scratch copies. Both returned the expected exit status, pass
+or fail, in all 32 shared cases, but reported a mirrored gap as 1 and
+2 respectively; their source code differed. This was evidence of a
+specification ambiguity, not a requirement that independent
+implementations have identical source. No trial implementation was
+copied into the project.
 
 Verification of the corrections: two independent readers found no
 remaining contradiction within these six fixes. The revised sandbox
 checker passed all 10 focused cases, including duplicate keys, trimmed
 cell equality, and the mirrored-gap count; at that verification the
 matrices had 436 DDD rows, 36 matching IP mirrors, and no gaps or
-duplicate keys.
-All 4,760 repository-relative documentation links resolve, and all 20
-inline Python commands in the DDD/IP parse. A throwaway Git repository
-confirmed the release-branch fast-forward and its retry. A scratch
+duplicate keys, all 4,760 repository-relative documentation links
+resolved, and all 20 inline Python commands, every one in the IP,
+parsed. A throwaway Git repository
+confirmed the release-branch fast-forward and its retry after a
+fix-forward. A scratch
 model of grammar G passed 11 boundary cases and preserved canonical
 values through JSON and re-entry for all 8,586 accepted inputs among
 10,000 generated decimal strings. These are specification diagnostics;
 the production loaders, views, parser, and release tooling remain
 planned work.
 
+**Independent review of the corrections (2026-11-01).** Seven
+read-only review agents, one for each of the six findings and one
+across all of them, each recommended accepting the corrections it
+reviewed with changes. The changes the owner accepted were applied
+the same day, those for finding 5 after the owner's ruling on it.
+
 ## Deferred-finding discussion (2026-11-01)
 
 The owner reopened discussion of the six deferred findings above and
 requested that they be recorded. The owner subsequently accepted DF-1
 with a clear reader-facing statement and asked that reader-selected
-accuracy be considered in P3. DF-1 is now corrected in the normative
-PDD/DDD/IP; DF-2–DF-6 remain proposals. The IDs refer to the six
-initially deferred rows of the repository-backed review, in their order.
+accuracy be considered in P3. The owner then accepted DF-2's explicit
+reload-and-restore proposal. DF-1 and DF-2 are now corrected in the
+normative PDD/DDD/IP; DF-3–DF-6 remain proposals. The IDs refer to the
+six initially deferred rows of the repository-backed review, in their
+order.
 
 | ID and finding | Resolution or proposal | Decision and acceptance check |
 |---|---|---|
 | **DF-1 — ECDF thinning** | Keep the 512-point cap, but select by cumulative count. For m ≤ 512 keep all distinct-value points. Otherwise keep index 0; scan interior indices k in ascending order and retain k exactly when `511 * (c[k] - c[lastKept]) > n`; then retain m − 1. The drawn curve stays at or below the exact ECDF with a vertical shortfall at most 1/511, about 0.196 percentage points. Statistics and percentile read-offs continue to use the full data. The marker explanation now accounts for ties: a percentile can lie on a vertical jump, without the invalid unconditional claim of less than 1/n difference from F(x). | Accepted by owner and corrected in design (2026-11-01), including a visible and accessible cumulative-caption statement and the same disclosure in P2 chart exports. Reader-selected accuracy is recorded as a P3 consideration, with options and limits undecided. Assert monotonicity, endpoints, ≤512 retained points, the error bound over every original step, large tied jumps, and the existing 511/512/513 and constant-data boundaries. Homes: DDD §5.12/§7.4; IP T-41. |
-| **DF-2 — Open tabs across data updates** | Keep the single-vintage deployment and add an explicit reload action that preserves accepted scenario settings in a versioned, one-shot same-tab recovery record. Revalidate against the new manifest, announce a changed data version, and recompute results; unsupported settings or unavailable recovery storage must be reported explicitly. Preserve the accepted Scenario, including offset mode waiting for coefficients, rather than only the last successful RenderInput. | Choose whether seamless continuation on the old vintage is required. Recommended: explicit reload with settings recovery. Retaining older vintages instead requires a retention policy and amendments to ADR-0014 and withdrawal/staging procedures, and finite retention still needs a recovery path. Test both lazy exports across a vintage replacement, incompatible settings, and recovery-storage failure. Homes: DDD §§5.2/5.6/5.10/5.11/7.5; IP T-34/T-44/T-46/T-49/T-60. |
+| **DF-2 — Open tabs across data updates** | Keep the single-vintage deployment and add **Reload and restore settings**, preserving the click-time accepted Scenario and all DisplayState members in a versioned, one-shot same-tab record. This includes accepted offset input waiting for coefficients. Validate unchanged selections and effective endpoints against the new manifest before any result; recompute and announce the restored/current version. Incompatible settings require an explicit new-scenario choice. Storage failures have distinct visible messages and never silently claim restoration. | Accepted by owner and corrected in design (2026-11-01). Pure envelope/parser checks and browser cases cover both lazy exports across a vintage replacement, same-version retries, all display settings, pending offset input, incompatible settings, each storage failure, repeated load failures, one-shot instant navigation, aborts, and focus/announcements. The existing one-vintage staging and withdrawal policy remains; this choice needs no ADR-0014 retention amendment. Homes: [PDD §7.3](pdd.md#73-reload-recovery-mvp); [DDD §5.1](ddd.md#51-modules-and-interfaces), [§5.3](ddd.md#53-query-engine), [§5.6](ddd.md#56-scenario-state-and-url-encoding), [§5.7](ddd.md#57-scenario-controls), [§5.8](ddd.md#58-view-layer), [§5.10](ddd.md#510-failure-states), [§5.11](ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle), [§7.4](ddd.md#74-application-tests), [§7.5](ddd.md#75-browser-test-lane), [§7.6](ddd.md#76-performance-and-compatibility-measurements); [IP T-34](ip.md#t-34--scenario-state), [T-36](ip.md#t-36--application-unit-tests), [T-40](ip.md#t-40--scenario-controls), [T-44](ip.md#t-44--failure-states), [T-46](ip.md#t-46--accessibility-and-navigation-lifecycle), [T-49](ip.md#t-49--field-overlay), [T-60](ip.md#t-60--browser-test-lane), [T-61](ip.md#t-61--measurement-suite). |
 | **DF-3 — Inherited publication evidence** | Assign revision by the concrete check. Export-validation rules, publication full-data checks, and export-only size evidence may name the pinned vintage publication's `tag_commit`, with the same vintage and checksum set identified. Fixture/CI/parity/application checks retain the software-release revision; published measurement/tag checks retain the deployed-main revision. | A narrow consistency repair. Add an explicit mapping and acceptance cases covering inherited export evidence, current application evidence, and rejection of evidence for a different vintage. Do not give every Python test or every size measurement a blanket publication exception. Homes: DDD §7.7; IP T-65. |
 | **DF-4 — Stale loading announcement** | Guard the deferred startup announcement with mount-local `initialPending`, initially true and set false before the first results or unavailable-state commit. Its existing `live` callback requires both an unaborted mount and `initialPending`. | A narrow lifecycle repair. Deterministic browser cases cover cached success, immediate failure, navigation away, and a genuinely slow initial load. Homes: DDD §5.11/§7.5; IP T-46/T-60. |
 | **DF-5 — Stage count and stride** | Treat 101 stages per trial as a schema-1 invariant. Measure and validate it in the exporter; reject a different manifest value in the decoder before constructing usable data. Keep total records and trials measured. | Recommended: enforce the existing fixed-stride contract. Supporting arbitrary stage counts would require a broader format/algorithm amendment. Test equal-length 100-stage and 102-stage ensembles as well as unequal trials. Homes: DDD §§3.1/3.2/4.1/5.2/7.3/7.4; IP T-11/T-12/T-16/T-30/T-36. |
@@ -785,9 +825,40 @@ at most 1/557 (0.179533 points). A threshold-equality case attains
 These diagnostics validate the specified algorithm; application and
 browser implementation remain planned work. An independent consistency
 read found no remaining contradiction in the algorithm, disclosure,
-export, configuration exclusion, or P3 record. All 4,769 relative
-documentation links resolve; scratch traceability lint accepts all 475
-rows (438 DDD obligations and 37 IP mirrors), with no gaps.
+export, configuration exclusion, or P3 record. At that verification, all
+4,769 relative documentation links resolved; scratch traceability lint
+accepted all 475 rows (438 DDD obligations and 37 IP mirrors), with no
+gaps.
+
+The accepted DF-2 contract preserves accepted settings, including all
+display settings, rather than uncommitted editing text or previously
+computed results. A restored offset waits for the current coefficients
+before its first result; a restored overlay loads after that result.
+An incompatible record blocks results and shows the saved scenario
+summary until the reader explicitly starts a new scenario. The existing
+logarithmic-display availability rule may turn that setting off, with
+a specific notice; no Scenario value is silently changed.
+
+A failed recovery save keeps the page in place. If the initial storage
+read is impossible, startup may use defaults only with a persistent
+warning that saved settings could not be checked; it says the page
+started with defaults only after a default result actually commits.
+Once a record is read, failure to remove it or verify removal blocks
+restoration until an explicit retry or discard succeeds. A consumed
+record stays in mount memory across a subsequent load failure for an
+explicit retry, but is never replayed by instant navigation. The design
+adds no automatic reload loop.
+
+The DF-2 implementation and browser tests remain planned work. The
+review checked the pure/browser module boundary, startup and resumed
+startup, state preservation, exact messages, and acceptance coverage;
+it did not run a built application. Two final independent reads found
+no remaining material contradiction in DF-2. At that verification, all
+4,779 repository-relative documentation links resolved; the scratch
+traceability checker accepted 477 rows (439 DDD obligations and 38 IP
+mirrors), with no errors or gaps, and `git diff --check` passed. The
+other four deferred findings,
+including DF-4's ordinary loading-announcement race, remain open.
 
 ## References
 
