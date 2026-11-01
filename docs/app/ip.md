@@ -2,14 +2,21 @@
 
 **Status:** first full draft, corrected after external review and
 again after the adversarial review of the document pair (both
-2026-10-30). The task graph, gates, and every task body are drafted
-to the execution contract against the corrected [DDD](ddd.md). No
+2026-10-30), and after the two external reviews of this plan (both
+2026-10-31). The task graph, gates, and every task body are drafted
+to the execution contract against the [DDD](ddd.md) and the other
+sources at this plan's own revision
+([Execution contract](#execution-contract), rule 2). No
 task has been executed and none of the Done-when commands has run; of
-the owner actions, only OA-11, enabling GitHub release immutability,
-is recorded as done ([§4](#4-owner-and-research-group-actions)). The
-reviews' findings and their dispositions accompany this draft in the
-report to the owner. Status cells reflect the drafted inputs, and the
-owner's acceptance of the document pair finalizes them.
+the owner actions, OA-11, enabling GitHub release immutability, and
+OA-16, the reference image ID, are recorded as done, and OA-12 and
+OA-17, the acceptances of ADR-0016 and ADR-0017, were approved on
+2026-10-31, recorded by the owner's commit of the Accepted status
+([§4](#4-owner-and-research-group-actions)). The
+external reviews' findings and their dispositions are recorded in
+the review ledger, [`docs/app/ddd-review.md`](ddd-review.md). Status
+cells reflect the drafted inputs; no body is yet Accepted and no task
+Done ([Task format](#task-format)).
 
 This implementation plan (IP) is the last of the project's staged
 documents (PRD → PDD → HLDD → DDD → IP). It adds no design content:
@@ -56,7 +63,7 @@ documents](hldd.md#12-scope-of-the-following-documents)). The
 executing agent is assumed competent but literal: it follows a task
 exactly, verifies with the named commands, and is never asked to
 infer an unstated intention. Accordingly, every task in this plan
-must satisfy four rules:
+must satisfy five rules:
 
 1. **One interpretation.** A task is written so that two readers
    cannot implement it differently. Where a source left a choice, the
@@ -64,9 +71,10 @@ must satisfy four rules:
    decision, an ADR); a task never asks the executing agent to
    choose.
 2. **Self-contained inputs.** Every technical fact in a task is a
-   link to a DDD or source anchor, and the task lists the exact files
-   and paths it touches. The agent needs the task and its cited
-   anchors, nothing else.
+   link to a DDD or source anchor, read at the revision that carries
+   this plan, and the task lists the exact files and paths it
+   touches. The agent needs the task and its cited anchors, nothing
+   else.
 3. **Machine-checked completion.** Every implementation task ends
    with a **Done when** block: named commands with expected results;
    a subjective completion criterion in an implementation task is a
@@ -74,7 +82,31 @@ must satisfy four rules:
    credentials, and a command that runs `node` or `npx` outside a
    Gradle task runs in the one form of
    [DDD §2](ddd.md#2-repository-structure-naming-and-toolchain)
-   (Node.js outside Gradle), never on the machine's own `node`.
+   (Node.js outside Gradle), never on the machine's own `node`. A
+   Done-when that asserts the presence, order, or nesting of a key or
+   item in a workflow under `.github/workflows/`, in
+   `subprojects/mkdocs/mkdocs.yml`, or in
+   `subprojects/webapp/package.json` parses that file — YAML with
+   `yaml.safe_load` under `poetry run python` in `subprojects/python`,
+   where a workflow's `on` key loads as `True`, and JSON with
+   `json.load` — instead of matching its lines. A `grep` asserts
+   literal text — documentation, copy, `.gitignore` lines, generated
+   pages, command output — or that text's absence; over code it only
+   guards text the DDD fixes, beside the type-check, test, or build
+   that runs that code. On the owner's machine, which holds the
+   gitignored research data, an agent task may also run local
+   operations on that data that make nothing public, among them
+   temporary view builds, exports under the tag `data-v0-test` — the
+   only tag an agent exports from the research data
+   ([DDD §3.8](ddd.md#38-measured-sizes)) and one that
+   `publishVintage` refuses — full-data test runs, and timing
+   diagnostics. Each is a precheck or a diagnostic, never the
+   publication or release evidence of T-18, T-63, and T-65, and the
+   agent never uploads a release asset, publishes a release, or
+   deploys the site. The owner's AWS operations — OA-5's reference
+   runs and their cleanup — may be carried out by Claude at the
+   owner's request, outside any agent task, with the owner's
+   `egr-perf` profile; the records and checks are unchanged.
    Approval acts are different in kind: an owner or research-group
    approval produces an identified, dated record, and automation
    checks that the record exists and names the current content or
@@ -85,45 +117,99 @@ must satisfy four rules:
    reports it; the question is resolved in the owning document before
    dependent work proceeds
    ([HLDD §12 — Scope of the following
-   documents](hldd.md#12-scope-of-the-following-documents)).
+   documents](hldd.md#12-scope-of-the-following-documents)). By the
+   owner's performance rule of 2026-10-31, a reference run that
+   misses a budget is recorded as a failure — release-checklist item 5
+   ([DDD §7.7](ddd.md#77-site-validation-and-release-checklist))
+   fails in the run's record — and reported to the owner at once; an
+   obvious improvement that sacrifices no functionality, every
+   specified behavior kept and every test, parity check, and
+   browser-lane check unchanged, is made by default, before any other
+   remedy and also when every budget is met; and an improvement that
+   would change specified behavior or a DDD decision goes to the owner
+   as a proposal, the escalation this rule requires.
+5. **Drills leave the tree as they found it.** A drill — a step of a
+   task body that itself edits, creates, or deletes a file to
+   exercise a check — runs in this repository's working tree only
+   when the clean-tree command of
+   [DDD §4.1](ddd.md#41-export-task-and-validation) step 1 prints
+   nothing, and as one shell script: before its first change it
+   copies into a `mktemp -d` directory the exact bytes of every file
+   it will edit, create, or delete, recording a path that does not
+   exist as missing, and its `EXIT` trap (in Python, `finally`)
+   writes each file back from its copy, confirms it with `cmp`, and
+   deletes each path recorded missing, so that the clean-tree command
+   prints nothing again; it never restores with `git checkout`,
+   `git restore`, `git stash`, or `git reset`. Every development
+   export (tag `data-v0-test`) that a task body runs saves and writes
+   back `subprojects/webapp/data/pointer.json`, which the export
+   rewrites (§4.1 step 6), by the same copy and trap. A drill that
+   commits or pushes a branch of this repository — a scratch branch
+   or pull request — runs instead in a linked worktree that
+   `git worktree add` creates from `HEAD` and `git worktree remove`
+   deletes afterwards; T-15's publication drills run in their own
+   clone. Every drill and development export of the task bodies
+   follows this rule. The agent reaches the clean tree by committing
+   its task's work on its local task branch
+   ([Task format](#task-format), Executor), never by stashing or
+   discarding it.
 
 ### Scheduling model
 
 One model is authoritative: **the Depends-on columns plus the gate
 prerequisites of [§3](#3-gates-and-release-sequence) determine when a
-task may run.** Milestones group deliverables and summarize
-completion; they are not barriers, and nothing is sequenced by
-milestone membership alone. The tasks also fall into the two phases
-of
+task may start, when it is complete, and when it may take a public
+or external step**, as the three conditions below state. Milestones
+group deliverables and summarize completion; they are not barriers,
+and nothing is sequenced by milestone membership alone. The tasks
+also fall into the two phases of
 [ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md)
-(Proposed) that [§1](#1-milestones) lists: **Phase 1 — Prototype
+that [§1](#1-milestones) lists: **Phase 1 — Prototype
 (unlisted)**, which ends when T-54 deploys the scenario page unlisted
 for the research group's review — a merge into `main`, not a
 release — and **Phase 2 — Review and public release**, which ends
 with T-65. Phases sequence nothing either, and no Phase-1 task
-depends on a Phase-2 owner action. A task is executable when its body is
-accepted, every task in its Depends-on is complete, every owner
-action there has its record
-([§4](#4-owner-and-research-group-actions)), and every gate named for
-it in §3 is met. The release task T-65's dependency closure
-reaches every task the release requires, with one deliberate
-exception: T-48 joins it only through the
-[D-6](pdd.md#1-decision-register) (Kern County field-data group and
-principal-width rule) decision of [§3](#3-gates-and-release-sequence).
-Diagnostics (T-17, T-31's timing spot check, T-37) inform the work
-but gate nothing.
+depends on a Phase-2 owner action. A task may **start** once its
+body is Accepted ([Task format](#task-format)), every task in its
+Depends-on is Done, and every owner action there has its record
+([§4](#4-owner-and-research-group-actions)), except for the work its
+body lets start earlier (below). The release task T-65's dependency
+closure reaches every task the release requires, T-48 among them, so
+an open [D-6](pdd.md#1-decision-register) (Kern County field-data
+group and principal-width rule) holds the release until D-6 is
+decided ([§3](#3-gates-and-release-sequence)). Diagnostics (T-17,
+T-31's timing spot check, T-37) inform the work: a diagnostic's
+completion and record bind as any task's do — T-65 depends on T-17
+and T-37 for theirs — but its numerical result is never an acceptance
+gate; the reference measurement of release-checklist item 5
+([DDD §7.7](ddd.md#77-site-validation-and-release-checklist)) remains
+the performance acceptance gate.
 
-A Depends-on edge means the consumer cannot be **completed and
-accepted** before the producer. Beginning work against an accepted
-interface earlier is allowed when the task body says so and names the
-later integration check that closes the gap.
+A Depends-on edge always binds **completion**: a task is complete,
+and its Status set to Done, only when its Done-when holds, every task
+in its Depends-on is Done, and every owner action there has its
+record. Its body may let work start earlier: against the accepted
+interface of a Depends-on task not yet Done, naming the later
+integration check that closes the gap, or before an owner action's
+record, naming the work that may begin. On the release branch of
+[§3](#3-gates-and-release-sequence), whose commits reach `main` only
+with the release merge, T-52 and T-55 become Done with that merge,
+and until then their commits on that branch stand in for their Done
+when T-55 and T-65 start. A step with a **public or
+external effect** — a pushed tag, a GitHub release or its assets, a
+merge into `main` or another site deployment, or a run in the AWS
+account — runs only once every gate that
+[§3](#3-gates-and-release-sequence) names for that step is met and
+every owner action §3 places before it has its record, each checked
+at that step by the task's body or the tooling it runs.
 
 ### Task format
 
 Each task carries: an ID (`T-nn`; IDs do not encode milestones); a
 title; **Depends on** (the IDs of the tasks, and of the owner actions
 of [§4](#4-owner-and-research-group-actions), whose completion or
-record the task's own completion needs — gate prerequisites live in
+record the task waits for under the
+[Scheduling model](#scheduling-model) — gate prerequisites live in
 [§3](#3-gates-and-release-sequence)); **Inputs** (the DDD and source
 anchors that fix its content — only those the task consumes);
 **Effort** (agent implementation effort only: S under half a day, M
@@ -131,19 +217,41 @@ up to two days, L up to a week; an L task is decomposed into
 execution units when its body is drafted; owner and research-group
 executions are not effort-rated and carry "—"); **Executor** (agent,
 owner, or research group — the agent implements tooling, code, and
-scripts; the owner runs operational steps such as full-data checks,
-publications, and release-time executions, per
+scripts, and runs the local research-data operations that the
+[Execution contract](#execution-contract) allows; the owner runs
+operational steps such as publications, with the full-data checks
+inside them, and release-time executions, per
 [HLDD §9 — Testing and release
 architecture](hldd.md#9-testing-and-release-architecture); the agent
-never performs an owner or research-group act); and **Status**:
+never performs an owner or research-group act; it may create local
+throw-away branches, its task branch among them, and commit there —
+never on `main` or the branch the owner works on, by the owner's
+standing permission of 2026-10-31 — and it pushes a branch or opens
+a pull request only when the owner asks); and **Status**:
 
 - **Draftable** — every input is an accepted document or section, so
   the task body can be written now; during the full-draft campaign a
   drafted DDD section that has completed its review round counts,
   and the owner's acceptance of the document pair finalizes it.
-  Draftable is not executable: execution additionally requires the
-  accepted body, completed dependencies, recorded owner actions, and
-  met gates.
+  Draftable is not executable: a task starts only once its body is
+  Accepted, and then under the [Scheduling model](#scheduling-model).
+- **Accepted (YYYY-MM-DD)** — the owner has accepted the body: the
+  record is the dated owner commit that sets the cell; the owner's
+  acceptance of the document pair sets, in one such commit, the
+  cells of the bodies it accepts. A body is accepted only from
+  Draftable, at a revision whose sources state every fact it cites
+  ([Execution contract](#execution-contract), rule 2).
+- **Done (YYYY-MM-DD)** — the task is complete and accepted under
+  the [Scheduling model](#scheduling-model). The cell's change rides
+  in the task's last pull request when the task is complete before
+  that pull request merges, and otherwise in the first pull request
+  merged after it is complete; the owner merges every task pull
+  request into `main`, and the merge that carries the change is the
+  record, with no separate owner commit. A Done record means that the
+  task's implementation is on `main`, not only its Status cell; the
+  commits of T-52 and T-55, made on the release branch, reach `main`
+  with the release merge, which makes them Done. Nothing else marks a
+  task complete.
 - **Blocked** — names the DDD sections or decisions the body waits
   for. A Blocked row still fixes the task's shape, inputs, and gate.
 
@@ -161,7 +269,7 @@ traceability lint, and T-59, the reference measurement environment.
 The second added four owner actions that tasks wait on
 ([§4](#4-owner-and-research-group-actions)): OA-12, the acceptance of
 [ADR-0016 — Performance reference environment — an on-demand AWS VM defined by Terraform](../adr/0016-performance-reference-environment.md),
-Proposed, before T-59; OA-13, the licensing texts, now the final
+before T-59; OA-13, the licensing texts, now the final
 texts of Phase 2, before T-63; OA-14, the membership of
 [D-18](pdd.md#1-decision-register) (Field-overlay default set and
 per-source analogue map), before T-55, the public activation; and
@@ -172,17 +280,18 @@ environment, before T-59 completes. The split into the two phases of
 added T-54, the prototype deployment, and OA-17, the owner's
 acceptance of ADR-0017, before T-18 and T-54; it moved the T-15
 drills onto a stub `gh`, which retired OA-15, and made T-18 the
-end-to-end publication run. Where a body meets a
-fact the corrected DDD does not yet state, it says **Escalate** and
-names the gap, which is resolved in the DDD before the body is
-accepted. A milestone closes when every task grouped under it is
-complete and its gates are met.
+end-to-end publication run. The owner approved both ADRs on
+2026-10-31 ([§4](#4-owner-and-research-group-actions)). Where a
+body meets a fact the corrected DDD does not yet state, it says
+**Escalate** and names the gap, which is resolved in the DDD before
+the body is accepted. A milestone closes when every task grouped
+under it is complete and its gates are met.
 
 ## 1. Milestones
 
 The tasks fall into the two phases of
-[ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md)
-(Proposed). **Phase 1 — Prototype (unlisted)** builds the
+[ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md).
+**Phase 1 — Prototype (unlisted)** builds the
 application and deploys it, with its first data vintage, as the
 unlisted prototype of
 [DDD §6.1](ddd.md#61-build-outputs-asset-paths-and-page-scaffold) —
@@ -203,7 +312,7 @@ state the task graph produces; the graph and gates are the authority
 | Milestone | Phase | Delivers | Closes when |
 |---|---|---|---|
 | M0 — Toolchain and scaffolding | 1; T-04 in 2 | The webapp subproject builds and type-checks; the scenario page exists with its no-JS fallback as an unpublished draft, absent from the site tree, sitemap and search index and built only by the preview configuration; the site checks hook guards every build; the traceability lint runs in CI. | Build and check tasks exit 0 locally; both strict builds exit 0 with the hook's arms (a), (b), and (d); the **Check traceability** step runs in the `links` job (T-04, Phase 2); the webapp's CI coverage lands with M2. |
-| M1 — Pipeline data lane | 1 | Export tooling, validation, references, full-data checks, publication tooling, and the first owner-published vintage. | T-18: the owner's first publication — one `publishVintage` run (export, full-data checks against the staged vintage, draft-first upload, read-back, publish) and the pointer commit, merged into `main` — with [G-1](#3-gates-and-release-sequence) (licensing terms recorded and release immutability enabled before the first vintage upload) recorded first, in its Phase-1 form: the assumed terms. [GS-3](pdd.md#102-golden-scenarios) (Kern preset (after D-6)) joins the reference set when [D-6](pdd.md#1-decision-register) (Kern County field-data group and principal-width rule) is decided. |
+| M1 — Pipeline data lane | 1 | Export tooling, validation, references, full-data checks, publication tooling, and the first owner-published vintage. | T-18: the owner's first publication — one `publishVintage` run (export, full-data checks against the staged vintage, draft-first upload, read-back, publish) and the pointer commit, merged into `main` — with [G-1](#3-gates-and-release-sequence) (licensing terms recorded and release immutability enabled before the first vintage upload) recorded first, in its Phase-1 form: the assumed terms beside one terms line per source. [GS-3](pdd.md#102-golden-scenarios) (Kern preset (after D-6)) joins the reference set when [D-6](pdd.md#1-decision-register) (Kern County field-data group and principal-width rule) is decided. |
 | M2 — CI integration | 1 | CI builds the bundle in `webapp-bundle`, fetches and verifies the pinned vintage, builds the publication and preview sites, and runs the `webapp-test` job scaffold; a failed build cannot replace the site. | All workflows green on a pull request — their pull-request triggers run unfiltered — and on the first post-merge run. The **Parity** steps land with T-23. |
 | M3 — Application core | 1 | Decoder, query engine, statistics, conversion, and state, replayed against the generated references by the Node parity harness wired into CI. | The CI-wired parity harness (T-23) is green on the generated reference file — golden scenarios, boundary cases, and synthetic cases — at the [DD-2](ddd.md#1-ddd-decision-register) (Per-calculation numerical tolerances) tolerance (GS-3 joins after D-6). |
 | M4 — Product surface | 1; T-48 in 2 | Controls, panels, charts, notices — the prototype notice among them — failure states, downloads, field overlay, and accessibility per the PDD. | Application tests (`webappTest`) green; rendered notice, failure, and interaction behavior is the browser lane's to check (T-60). |
@@ -239,7 +348,7 @@ output `node_modules/`); `package.json` with `"private": true`, no
 `"type"` field, no runtime `dependencies`, and exactly the six
 development pins of §2 at exact versions — `typescript 5.5.4`,
 `esbuild 0.24.0`, `@playwright/test 1.47.2`, `@types/node 22.10.2`,
-`@axe-core/playwright 4.10.0`, and `caniuse-lite 1.0.30001687` — none
+`@axe-core/playwright 4.10.0`, and `caniuse-lite 1.0.30001820` — none
 with `^` or `~` (the npm scripts are T-02's); and `tsconfig.json` and
 `tsconfig.node.json` with exactly the options, `include`, and `exclude`
 lists of §2's TypeScript configuration. Every other path of the §2 tree
@@ -254,7 +363,7 @@ module's `README.md` by T-60; `perf/` by T-59; and `data/pointer.json`
 is written by the export (T-11) and committed at T-18. (4) Create
 `package-lock.json` with one `npm install` under the
 pinned runtime — the plugin's `npmInstall` task, never a machine-wide
-npm; commit it (the owner commits).
+npm; commit it on the task branch.
 
 **Done when:** `git check-ignore -q subprojects/webapp/node_modules/x`
 exits 0 and `git ls-files subprojects/webapp | grep -c node_modules`
@@ -267,10 +376,10 @@ each print 1, and
 `./gradlew :subprojects:webapp:npmCi` exits 0 on a clean checkout, after
 which `ls subprojects/webapp/.gradle/nodejs | grep -c '^node-v22.12.0-'`
 prints 1; `git ls-files subprojects/webapp` lists `package-lock.json`
-and no path under `build/`; and in `subprojects/webapp/package.json`,
-`grep -cE '"(typescript": "5\.5\.4|esbuild": "0\.24\.0|@playwright/test": "1\.47\.2|@types/node": "22\.10\.2|@axe-core/playwright": "4\.10\.0|caniuse-lite": "1\.0\.30001687)"'`
-prints 6, `grep -cE '": "[~^]'` prints 0, and `grep -c '"type"'` prints
-0.
+and no path under `build/`; and
+`python3 -c "import json; p = json.load(open('subprojects/webapp/package.json')); assert p['private'] is True and 'type' not in p and not p.get('dependencies') and p['devDependencies'] == {'typescript': '5.5.4', 'esbuild': '0.24.0', '@playwright/test': '1.47.2', '@types/node': '22.10.2', '@axe-core/playwright': '4.10.0', 'caniuse-lite': '1.0.30001820'}, p"`
+exits 0 — the six exact pins and no other package, no runtime
+dependency, and no `"type"` field.
 
 #### T-02 — Build and check tasks
 
@@ -309,6 +418,21 @@ by T-60 — `webappBrowserTest` once T-21 has created the
 runtime tripwire of the §2 table and
 [DDD §7.4](ddd.md#74-application-tests): it fails unless
 `process.version` equals `v` followed by `EGR_EXPECTED_NODE`.
+`tscCheck` checks every TypeScript file the module holds
+([DDD §2](ddd.md#2-repository-structure-naming-and-toolchain),
+TypeScript configuration); from this task on, every task that adds or
+changes one runs it in its Done-when, and its files import only what
+it creates or what a task in its Depends-on closure completed. The
+shared modules and types are each created by one task — among them
+`decode/` by T-30, `state/` by T-34, `test/fixtures.ts` by T-36,
+`engine/` with `PerDipWindows` by T-31, `convert/` by T-33,
+`config.ts` and `copy.ts` by T-47, `stats/` and `views/format.ts` by
+T-32, and the `RenderInput`, `Wiring`, and `Scheduler` types and
+`announce` by T-41, whose `Scheduler` T-46 implements — and
+`src/main.ts` above is the one TypeScript placeholder, which T-44,
+T-46, and T-50 fill. No task completes with a stub this plan does not
+specify, a suppressed type error, or a check dropped from its
+Done-when.
 
 **Done when:** `./gradlew :subprojects:webapp:tscCheck` exits 0; with a
 temporary `src/stats/zz-dom.ts` holding
@@ -326,7 +450,12 @@ outside Gradle), first
 `export PATH="$(ls -d "$PWD"/.gradle/nodejs/node-v22.12.0-*)/bin:$PATH"`
 — `env -u EGR_EXPECTED_NODE node --test build/test/toolchain.test.js`,
 the same runtime without `EGR_EXPECTED_NODE`, exits non-zero;
-`grep -c 'Exec::class' subprojects/webapp/build.gradle.kts` prints 0;
+`./gradlew help --task :subprojects:webapp:<task>` names the type
+`com.github.gradle.node.npm.task.NpmTask` for each of `tscCheck`,
+`webappTest`, and `webappParity`, and
+`com.github.gradle.node.task.NodeTask` for `webappBundle` — the
+[DDD §2](ddd.md#2-repository-structure-naming-and-toolchain) task
+table's types, never Gradle `Exec`;
 `./gradlew :subprojects:webapp:check --dry-run` lists `tscCheck` and
 `webappTest` and not `webappParity`; and `./gradlew check` exits 0
 repo-wide. The check that the built bundle keeps `import.meta.url`
@@ -344,7 +473,7 @@ blank line; the `# Ground Rupture Explorer` masthead; then
 `<!-- copy:docs/app/ddd.md#510-failure-states -->` and
 `<!-- /copy -->`, the no-JS fallback body: the content of the fenced
 block of [DDD §5.10](ddd.md#510-failure-states) (Unavailable browser
-capabilities), verbatim — its two paragraphs with their Markdown
+capabilities), verbatim — its three paragraphs with their Markdown
 links, relative to `scenario.md`, then the `<noscript>` element
 holding one `<p>`; then
 `<div id="gre-disclaimer" markdown="1">`, a sibling after `#gre-root`
@@ -410,11 +539,13 @@ each print 1,
 `grep -c '^<!-- /copy -->$'` prints 2, and
 `grep -oE '\]\((#gre-disclaimer|paper\.md|data\.md|index\.md|glossary\.md)\)' subprojects/mkdocs/docs/scenario.md | sort -u | grep -c .`
 prints 5, one per link target of the §5.10 block;
-`grep -c 'scenario.md' subprojects/mkdocs/mkdocs.yml` prints 2;
+`(cd subprojects/python && poetry run python -c "import yaml; c = yaml.safe_load(open('../mkdocs/mkdocs.yml')); assert c['draft_docs'].split() == ['media/dev/', 'scenario.md', 'assets/scenario/'] and c['not_in_nav'].split() == ['scenario.md'] and c['hooks'] == ['hooks/site_checks.py']")`
+exits 0 — the three §6.1 blocks;
 `printf 'INHERIT: mkdocs.yml\ndraft_docs: |\n  media/dev/\nsite_dir: site-preview\n' | diff - subprojects/mkdocs/mkdocs.preview.yml`
 prints nothing; `git check-ignore -q` exits 0 for each of the five
 §6.1 entries (for a directory entry, a path inside it); and the §6.1
-hook drills for arms (a), (b), and (d) hold, each reverted afterwards —
+hook drills for arms (a), (b), and (d) hold, each under rule 5 of the
+[Execution contract](#execution-contract) —
 an unreferenced copy of a figure saved as `docs/images/zz-unlisted.png`
 makes a bare `mkdocs build --strict` exit non-zero naming that path;
 removing the `fig-05` allowlist line after a successful `mkdocsBuild`
@@ -517,20 +648,19 @@ gate, and a two-task list stand unchanged — `grep -cF` on
 with the Check cell of the first DDD §8 row whose Kind is `test`
 replaced in the working tree by
 `subprojects/webapp/test/config.test.ts (T-47)`, the script exits
-non-zero naming that path, and `git checkout -- docs/app/ddd.md`
-restores exit 0; one-cell working-tree mutations of the same kind — a
-renamed header cell, a Kind or a Status outside its closed set, a
-`T-99` citation, a `verified` Status, a `test` entry without its task
-list, a `planned` row given an `OA-4` entry, and an IP §7 row whose
-Check differs from its DDD twin — each make it exit non-zero naming
-the row, each reverted afterwards with
-`git checkout -- docs/app/ddd.md docs/app/ip.md`;
-`grep -c 'check_traceability.py' .github/workflows/doc-links.yml`
-prints 1, and
-`grep -oE 'Check links and anchors|Check PDD agreement|Check traceability|Self-test doc scripts' .github/workflows/doc-links.yml`
-prints the step names present in the §6.3 order; and the pull
-request's Doc links run shows **Check traceability** green
-(`gh run view --log`).
+non-zero naming that path and, with `docs/app/ddd.md` written back
+from its saved copy, exits 0 again; one-cell working-tree mutations
+of the same kind — a renamed header cell, a Kind or a Status outside
+its closed set, a `T-99` citation, a `verified` Status, a `test` entry
+without its task list, a `planned` row given an `OA-4` entry, and an
+IP §7 row whose Check differs from its DDD twin — each make it exit
+non-zero naming the row; every mutation is a drill under rule 5 of the
+[Execution contract](#execution-contract);
+`(cd subprojects/python && poetry run python -c "import yaml; s = yaml.safe_load(open('../../.github/workflows/doc-links.yml'))['jobs']['links']['steps']; n = [x['name'] for x in s if 'name' in x]; o = ['Check links and anchors', 'Check PDD agreement', 'Check traceability', 'Self-test doc scripts']; assert n == [k for k in o if k in n] and {'name': 'Check traceability', 'run': 'python .github/scripts/check_traceability.py'} in s, n")`
+exits 0 — the named steps of job `links` are those of the §6.3 order
+that exist, in that order, **Check traceability** among them with its
+command; and the pull request's Doc links run shows
+**Check traceability** green (`gh run view --log`).
 
 ### M1 — Pipeline data lane
 
@@ -541,10 +671,10 @@ request's Doc links run shows **Check traceability** green
 | T-12 | Export validation: every named rule of DDD §4.1 inside the export run — the preconditions, the decode checks (bitwise restore, sentinels, slip order, dictionary orders, view re-read, coefficient reach, reference invariants), the manifest cross-checks, and the pointer checks — each printing its rule's line; a `--reproduce` run runs every rule but `retained-copy`, the pointer checks against the pointer it was given. | T-11, T-13 | [DDD §4.1](ddd.md#41-export-task-and-validation), [§3.1](ddd.md#31-scenario-artifact-binary-layout)–[§3.6](ddd.md#36-reference-results), [§4.3](ddd.md#43-retention-rollback-recovery-and-withdrawal). | M | agent | Draftable |
 | T-13 | Reference-results generator, its file joining the T-11 export run: golden-scenario counts, statistics, percentiles, linear and logarithmic histograms, display strings, selections with classes, converted windows and range flags, diagnosed conditions, and the boundary and synthetic cases. [GS-3](pdd.md#102-golden-scenarios) (Kern preset (after D-6)) joins when [D-6](pdd.md#1-decision-register) (Kern County field-data group and principal-width rule) is decided ([PDD §10.2 — Golden scenarios](pdd.md#102-golden-scenarios)). | T-10, T-11 | [DDD §3.6](ddd.md#36-reference-results), [§3.8](ddd.md#38-measured-sizes), [§4.1](ddd.md#41-export-task-and-validation), [§5.3](ddd.md#53-query-engine), [§5.4](ddd.md#54-statistics), [§5.5](ddd.md#55-offset-to-slip-conversion-assist), [§5.6](ddd.md#56-scenario-state-and-url-encoding), [§5.8](ddd.md#58-view-layer), [§5.12](ddd.md#512-charts), [§7.3](ddd.md#73-pipeline-and-export-tests); [PDD §10.2 — Golden scenarios](pdd.md#102-golden-scenarios). | L | agent | Draftable |
 | T-14 | Required full-data checks: the `EGR_REQUIRE_FULL_DATA` conftest, the required-test manifest, `pytestFullData`, the full-data lanes of the four §7.3 contract files, and the gate self-tests — a skipped check is never a pass. | T-12, T-13 | [DDD §7.3](ddd.md#73-pipeline-and-export-tests), [§4.1](ddd.md#41-export-task-and-validation), [§4.2](ddd.md#42-publication-of-a-data-vintage). | M | agent | Draftable |
-| T-15 | Publication tooling `publishVintage`: the permission gate (exactly one [OA-1](#4-owner-and-research-group-actions) record line — the assumed record in Phase 1, the confirmed record from Phase 2 — the `README.md` and `LICENSE-docs` wording naming the terms file, and release immutability), the clean tree, resumable states, the export and full-data checks inside the run, the annotated tag, the draft prerelease, upload, read-back, publication, and the publication record; the drill override; the owner's pointer commit follows — one task, one run, one commit per vintage ([ADR-0014](../adr/0014-committed-content-hashed-artifacts.md)). Tooling only, drilled against a synthetic fixture in a local drill clone with a stub `gh` that models releases, drafts, tags, and immutability, so no drill reaches GitHub; executions are T-18, the end-to-end run, and T-63. | T-11, T-12, T-14, T-16 | [DDD §4.2](ddd.md#42-publication-of-a-data-vintage), [§4.1](ddd.md#41-export-task-and-validation), [§4.3](ddd.md#43-retention-rollback-recovery-and-withdrawal), [§4.4](ddd.md#44-licensing-archival-distribution-and-release-attachments), [§7.3](ddd.md#73-pipeline-and-export-tests). | L | agent | Draftable |
+| T-15 | Publication tooling `publishVintage`: the terms-record gate (exactly one [OA-1](#4-owner-and-research-group-actions) record line — the assumed record in Phase 1, the confirmed record from Phase 2 — the `README.md` and `LICENSE-docs` wording naming the terms file, and release immutability), the clean tree, resumable states, the export and full-data checks inside the run, the annotated tag, the draft prerelease, upload, read-back, publication, and the publication record; the drill override; the owner's pointer commit follows — one task, one run, one commit per vintage ([ADR-0014](../adr/0014-committed-content-hashed-artifacts.md)). Tooling only, drilled against a synthetic fixture in a local drill clone with a stub `gh` that models releases, drafts, tags, and immutability, so no drill reaches GitHub; executions are T-18, the end-to-end run, and T-63. | T-11, T-12, T-14, T-16 | [DDD §4.2](ddd.md#42-publication-of-a-data-vintage), [§4.1](ddd.md#41-export-task-and-validation), [§4.3](ddd.md#43-retention-rollback-recovery-and-withdrawal), [§4.4](ddd.md#44-licensing-archival-distribution-and-release-attachments), [§7.3](ddd.md#73-pipeline-and-export-tests), [§3.1](ddd.md#31-scenario-artifact-binary-layout), [§3.2](ddd.md#32-artifact-manifest). | L | agent | Draftable |
 | T-16 | Pipeline fixture tests: the fixture lanes of the four DDD §7.3 contract files, CI-sized, with one corruption per rule of DDD §4.1 steps 3 and 5 and the non-finite cases. | T-11, T-12 | [DDD §7.3](ddd.md#73-pipeline-and-export-tests), [§3.1](ddd.md#31-scenario-artifact-binary-layout)–[§3.6](ddd.md#36-reference-results), [§4.1](ddd.md#41-export-task-and-validation), [§5.6](ddd.md#56-scenario-state-and-url-encoding). | M | agent | Draftable |
 | T-17 | Early payload diagnostic: the generated artifact's compressed size printed against the budget of [PDD §9.1 — Performance budgets (D-9, Proposed)](pdd.md#91-performance-budgets-d-9-proposed) as soon as T-11 produces it ([R-19](prd.md#94-delivery-and-technical-risks) asks for early validation against the budget; [R-16](prd.md#94-delivery-and-technical-risks) is the payload-budget risk it tests early). A diagnostic lower bound — the full payload scope is T-61's; [DDD §3.8](ddd.md#38-measured-sizes) records the figure from the line. | T-11 | [PDD §9.1 — Performance budgets (D-9, Proposed)](pdd.md#91-performance-budgets-d-9-proposed); [DDD §3.8](ddd.md#38-measured-sizes), [§4.1](ddd.md#41-export-task-and-validation), [§7.6](ddd.md#76-performance-and-compatibility-measurements). | S | agent | Draftable |
-| T-18 | First publication, the end-to-end run of the T-15 tooling: the owner runs `publishVintage` for `data-v1` — export, full-data checks (T-14) against the staged vintage, draft-first publication — and commits the pointer, merged into `main`, producing the first pinned vintage, which the unlisted prototype serves; gated by [G-1](#3-gates-and-release-sequence) in its Phase-1 form — the owner's `data/REDISTRIBUTION.md` with the assumed terms and the assumed [OA-1](#4-owner-and-research-group-actions) record, and `README.md` and `LICENSE-docs` naming it, before the first vintage upload — by release immutability (OA-11, done), and by the owner's acceptance of ADR-0017 ([OA-17](#4-owner-and-research-group-actions)). A failure that leaves a published release failing its checks is retried with the next tag number. | T-13, T-14, T-15, OA-1, OA-17 | [DDD §4.2](ddd.md#42-publication-of-a-data-vintage), [§4.1](ddd.md#41-export-task-and-validation), [§4.3](ddd.md#43-retention-rollback-recovery-and-withdrawal), [§4.4](ddd.md#44-licensing-archival-distribution-and-release-attachments), [§7.3](ddd.md#73-pipeline-and-export-tests); [HLDD §9 — Testing and release architecture](hldd.md#9-testing-and-release-architecture). | — | owner | Draftable |
+| T-18 | First publication, the end-to-end run of the T-15 tooling: the owner runs `publishVintage` for `data-v1` — export, full-data checks (T-14) against the staged vintage, draft-first publication — and commits the pointer, merged into `main`, producing the first pinned vintage, which the unlisted prototype serves; gated by [G-1](#3-gates-and-release-sequence) in its Phase-1 form — the owner's `data/REDISTRIBUTION.md` with the assumed terms, the assumed [OA-1](#4-owner-and-research-group-actions) record, and one terms line per source, and `README.md` and `LICENSE-docs` naming it, before the first vintage upload — by release immutability (OA-11, done), and by the owner's acceptance of ADR-0017 ([OA-17](#4-owner-and-research-group-actions)). A failure that leaves a published release failing its checks is retried with the next tag number. | T-13, T-14, T-15, T-20, OA-1, OA-17 | [DDD §4.2](ddd.md#42-publication-of-a-data-vintage), [§4.1](ddd.md#41-export-task-and-validation), [§4.3](ddd.md#43-retention-rollback-recovery-and-withdrawal), [§4.4](ddd.md#44-licensing-archival-distribution-and-release-attachments), [§7.3](ddd.md#73-pipeline-and-export-tests); [HLDD §9 — Testing and release architecture](hldd.md#9-testing-and-release-architecture). | — | owner | Draftable |
 
 #### T-10 — Product export views
 
@@ -626,8 +756,11 @@ byte-for-byte copy of `data/REDISTRIBUTION.md`
 ([DDD §4.4](ddd.md#44-licensing-archival-distribution-and-release-attachments))
 or, for a `data-v0-test` run without that file, an empty file, both
 uncompressed; (4) step 6's pointer manifest
-([DDD §3.3](ddd.md#33-pointer-manifest)), written to
-`subprojects/webapp/data/pointer.json` and never committed by the run;
+([DDD §3.3](ddd.md#33-pointer-manifest)), its `files` naming exactly
+the files this run writes — until the reference-results file joins
+the run with T-13, §3.3's exact file set without that file —
+written to `subprojects/webapp/data/pointer.json` and never committed
+by the run;
 (5) the report frame — `source_commit` and `source_tree_clean` first;
 after the rule lines (T-12), the closing size report, one line per
 vintage file sorted by file name, `size: <name> <bytes>`, and for a
@@ -675,12 +808,13 @@ prints 1 — the artifact's decompressed byte count, the length its
 `blocks` declare;
 `cp subprojects/webapp/data/pointer.json "$tmp/"; (cd subprojects/python && poetry run egr-export-app --reproduce "$tmp/pointer.json")`
 exits 0, every file of `dist/app/data-v0-test.reproduced/` matching the
-pointer's SHA-256, and exits 0 again with an empty
-`dist/app/data-v0-test.publication.json` present, which rule
-`retained-copy` refuses in an export run (the file deleted afterwards);
+pointer's SHA-256;
 and every figure the run adds to §3.8 equals a `size:` line of
 `"$tmp/run.txt"` and is labeled as measured on the `data-v0-test`
-export.
+export. Before T-12 the run prints no rule line, and before T-13 its
+pointer omits the reference-results file; the complete §3.3 file set
+and all 23 rule lines close with T-12's Done-when, which runs after
+T-13 — the later integration check of this task's export foundation.
 
 #### T-12 — Export validation
 
@@ -725,7 +859,8 @@ with `-Pdata.tag=data-v01` the export run exits non-zero at
 `subprojects/webapp/data/pointer.json` is the same before and after
 that run; and with an empty
 `dist/app/data-v0-test.publication.json` present it exits non-zero at
-`retained-copy: FAILED`, the file deleted afterwards. That each rule of
+`retained-copy: FAILED` and the `--reproduce` command above, which
+skips that rule, exits 0, the file deleted afterwards. That each rule of
 steps 3 and 5 fails on its own single-property corruption is checked in
 T-16's Done-when, whose `test_manifests.py` lane also exercises the
 pointer rules.
@@ -870,7 +1005,7 @@ property `-Pdata.tag`, passing `-Ppublish.failAfterUploads=<k>` as
 as `--drill-repository <owner>/<name>`, wired into no lifecycle task —
 that performs steps 1–10 of
 [DDD §4.2](ddd.md#42-publication-of-a-data-vintage) exactly, each step
-first detecting work already done: step 1, the permission gate — the
+first detecting work already done: step 1, the terms-record gate — the
 tag matches `^data-v[1-9][0-9]*$`, `data/REDISTRIBUTION.md` holds
 exactly one OA-1 record line, the assumed record or the confirmed
 record, each a line equal to its step-1 form with `YYYY-MM-DD`
@@ -911,10 +1046,17 @@ it. (3) The drill fixture of that line, never committed to this
 repository: the four raw inputs that rule
 `inputs-present` names ([DDD §4.1](ddd.md#41-export-task-and-validation)
 step 1), written only into the drill clone's gitignored `data/raw/`
-from the synthetic frames of the T-16 fixture lanes in the column
-layouts `egr-build` reads, so that after `egr-build` the clean-tree
-command still prints nothing (§4.2 step 4) and every rule of the
-export run holds; the files stay there, and the code that writes
+to that line's fixture contract — the column layouts of the
+committed `deploy/terraform/tables.json`, and the `DEM_dataset.csv`
+trials over the values of
+[DDD §3.1](ddd.md#31-scenario-artifact-binary-layout) and the pairs
+of [§3.2](ddd.md#32-artifact-manifest) — so that after `egr-build`
+the clean-tree command still prints nothing (§4.2 step 4) and every
+rule of the export run and of the reference generator holds, none
+changed for the drill: only `publish.py` reads the override, and a
+rule the fixture cannot meet is escalated
+([Execution contract](#execution-contract), rule 4), never relaxed;
+the files stay there, and the code that writes
 them lives outside the drill clone's working tree, since an
 untracked file inside it would fail step 2's clean-tree check. (4)
 The drill environment of that line, which reaches no GitHub
@@ -944,8 +1086,15 @@ drills: (a) a fresh run exits 0,
 `git ls-remote origin 'refs/tags/data-v1^{}'` prints `S`, the release's
 asset names equal the pointer's `files` keys,
 `gh release view data-v1 --json isDraft,isPrerelease` reports `false`
-and `true`, and the staged record holds `published_at`, `size_report`,
-and `pytest_full_data` `drill: not run`; (b) a run with
+and `true`, the staged record holds `published_at`, `size_report`,
+and `pytest_full_data` `drill: not run`, and the staged
+`references-<h12>.json.gz`, gunzipped and parsed, lists the
+scenarios that T-13's Done-when names and 86 `boundary_cases` — the
+fixture's demonstration that `egr-build`, the export, and the
+reference generator pass on it unchanged, with
+`grep -rl --include='*.py' drill subprojects/python/src/eps_ground_rupture`
+printing only `subprojects/python/src/eps_ground_rupture/publish.py`;
+(b) a run with
 `-Ppublish.failAfterUploads=1` exits non-zero after one upload, and the
 rerun publishes with the pointer's `export_date` unchanged; (c) an
 extra asset planted on a draft is deleted; (d) a tag at another commit
@@ -1052,9 +1201,10 @@ form — `data/REDISTRIBUTION.md`, committed by the owner with the
 assumed terms of
 [DDD §4.4](ddd.md#44-licensing-archival-distribution-and-release-attachments)
 (Vintage terms), carries exactly one
-[OA-1](#4-owner-and-research-group-actions) record line, by the check
-OA-1 names, and `README.md` and `LICENSE-docs` each contain the path
-`data/REDISTRIBUTION.md`
+[OA-1](#4-owner-and-research-group-actions) record line and one
+terms line per source, by the checks OA-1 names — a source without
+its line: stop and report — and `README.md` and `LICENSE-docs` each
+contain the path `data/REDISTRIBUTION.md`
 (`grep -L 'data/REDISTRIBUTION.md' README.md LICENSE-docs` prints
 nothing); the [OA-17](#4-owner-and-research-group-actions) record,
 the acceptance of ADR-0017, by the check OA-17 names; OA-11 done —
@@ -1069,10 +1219,27 @@ the head of `pin-data-v1`, a short-lived branch that the owner starts at
 `git switch -c pin-data-v1 origin/main` — never named like a data tag,
 `data-v1` being the tag's name — on which step (3) commits the pointer
 and which merges into `main` by a merge commit
-([DDD §6.3](ddd.md#63-ci-workflows), Required checks). A
+([DDD §6.3](ddd.md#63-ci-workflows), Required checks);
+`origin/main` must by then carry T-10–T-16, whose code the run
+executes at `S`, and T-20, with T-01 and T-02, so that the pointer
+pull request also runs Tests — all of them in T-18's Depends-on
+closure, so Done and on `main` ([Task format](#task-format), Done) —
+and the OA-1 and OA-17 commits, whose checks read the tree at `S`. A
 `./gradlew :subprojects:python:pytestFullData` run beforehand is a
 precheck, never evidence
-([DDD §7.3](ddd.md#73-pipeline-and-export-tests)). (2) Run
+([DDD §7.3](ddd.md#73-pipeline-and-export-tests)). None of these
+preconditions shows that a source permits the upload: it goes ahead
+with the distribution risk of G-1 unresolved — the vintage is
+fetchable by anyone who finds it, fetched copies cannot be recalled,
+and the remedy for a source whose terms forbid it is the withdrawal
+of [DDD §4.3](ddd.md#43-retention-rollback-recovery-and-withdrawal)
+— a risk the owner accepts in ADR-0017 (Consequences) while the
+licensing decision waits for Phase 2
+([OA-13](#4-owner-and-research-group-actions)); that acceptance, not
+evidence of permission, answers the hold that this plan's second
+external review placed on this upload
+([Implementation plan review 2 (2026-10-31)](ddd-review.md#implementation-plan-review-2-2026-10-31)),
+a hold the owner overrode on 2026-10-31. (2) Run
 `./gradlew :subprojects:python:publishVintage -Pdata.tag=data-v1` — the
 one run that exports, runs the full-data checks against the staged
 vintage, tags, drafts, uploads, reads back, publishes, and writes the
@@ -1091,7 +1258,18 @@ stands for `data-v1` in step (3) and below (§4.2 steps 3 and 9).
 untracked; check that `git rev-parse HEAD^` prints `S` and that
 `git diff --name-only HEAD^ HEAD` prints only that path; the commit
 then takes the normal pull-request path, and the vintage becomes
-current when that pull request is merged into `main`.
+current when that pull request is merged into `main`. That pull
+request meets only the checks `main` then carries — Doc links /
+`links`, Tests / `pytest`, whose full-data tests skip on CI, and
+Tests / `webapp-test` / **Webapp checks** — none of which reads a
+pinned file or is yet required
+([OA-10](#4-owner-and-research-group-actions) follows
+T-23); Companion site does not run on it, its pull-request trigger
+path-filtered until T-21. CI first fetches and verifies the vintage
+in T-21's **Stage scenario assets** and T-23's **Parity** steps,
+after this merge, which T-21 and T-35 depend on; until then the
+Done-when's retention check stands for that verification
+([DDD §4.2](ddd.md#42-publication-of-a-data-vintage) step 11).
 
 **Done when** (recorded artifacts):
 `gh release view data-v1 --json isDraft,isPrerelease` reports `false`
@@ -1140,13 +1318,12 @@ hermetic download of the §2 Node.js pin is the Node setup
 `workflow_dispatch`, and `permissions` stay unchanged; the **Parity**
 step joins in T-23.
 
-**Done when:** in `.github/workflows/tests.yml`,
-`grep -cxF "      - 'subprojects/webapp/data/pointer.json'"`,
-`grep -cx "      - '.subprojects/webapp/perf/\*\*'"` (the `.` standing
-for the `!`), and `grep -cx '  webapp-test:'` each print 1 and
-`grep -cx '  webapp:'` prints 0;
-`awk '/^  pull_request:/{f=1;next} /^  [a-z_]+:/{f=0} f && /paths:/' .github/workflows/tests.yml`
-prints nothing; on a pull request, `gh pr checks <number>` lists
+**Done when:**
+`(cd subprojects/python && poetry run python -c 'import yaml; w = yaml.safe_load(open("../../.github/workflows/tests.yml")); t = w.get("on", w.get(True)); p = t["push"]["paths"]; i = p.index("subprojects/webapp/**"); assert p[i + 1:i + 3] == ["!subprojects/webapp/perf/**", "subprojects/webapp/data/pointer.json"] and "paths" not in (t["pull_request"] or {}) and "webapp" not in w["jobs"] and [s.get("uses") or s.get("name") for s in w["jobs"]["webapp-test"]["steps"]] == ["actions/checkout@v7", "Webapp checks"], t')`
+exits 0 — the `perf/` negation and the pointer line directly after
+`'subprojects/webapp/**'`, no `paths` on the pull-request trigger, no
+job `webapp`, and `webapp-test` holding the checkout and
+**Webapp checks**; on a pull request, `gh pr checks <number>` lists
 `pytest` and `webapp-test` as successful, and
 `gh run view <run-id> --log` shows **Webapp checks** running
 `:subprojects:webapp:tscCheck` and `:subprojects:webapp:webappTest`; on
@@ -1238,8 +1415,8 @@ exits 0, after which `test ! -e subprojects/mkdocs/site/scenario` and
 prints 1, and `subprojects/mkdocs/site-preview/assets/scenario/` holds
 exactly `data/`, one `app-<12 hex>.js`, and one `app-<12 hex>.css`,
 every pointer-listed file in `data/` matching its pointer SHA-256
-(`shasum -a 256`). Staging drills in `subprojects/mkdocs/`, each undone
-afterwards: the stray files
+(`shasum -a 256`). Staging drills in `subprojects/mkdocs/`, each under
+rule 5 of the [Execution contract](#execution-contract): the stray files
 `docs/assets/scenario/data/stray-000000000000.bin` and
 `docs/assets/scenario/app-000000000000.js` are gone after the next
 `./gradlew :subprojects:mkdocs:scenarioAssets`, which leaves the sorted
@@ -1254,14 +1431,13 @@ naming that file; a scratch `docs/assets/other/keep.txt` survives
 `docs/assets/scenario/` and `docs/includes/scenario-head.html`, and
 `git check-ignore subprojects/mkdocs/docs/assets/other/keep.txt`
 exits 1. `grep -cxF '<entry>' .gitignore` prints 1 for each of the five
-§6.1 entries. In `.github/workflows/mkdocs.yml`,
-`grep -cx '  webapp-bundle:'` prints 1, `grep -cx '  webapp:'` prints 0,
-`grep -cx "      - '.subprojects/webapp/perf/\*\*'" .github/workflows/mkdocs.yml`
-(the `.` standing for the `!`) and
-`grep -cxF "      - 'CITATION.cff'" .github/workflows/mkdocs.yml`
-each print 1, and
-`awk '/^  pull_request:/{f=1;next} /^  [a-z_]+:/{f=0} f && /paths:/' .github/workflows/mkdocs.yml`
-prints nothing; a pull-request run shows `webapp-bundle` and
+§6.1 entries.
+`(cd subprojects/python && poetry run python -c 'import yaml; w = yaml.safe_load(open("../../.github/workflows/mkdocs.yml")); t = w.get("on", w.get(True)); p = t["push"]["paths"]; i = p.index("subprojects/webapp/**"); assert p[i + 1:i + 3] == ["!subprojects/webapp/perf/**", "subprojects/webapp/data/pointer.json"] and "CITATION.cff" in p and t["push"]["branches"] == ["main"] and "paths" not in (t["pull_request"] or {}) and "webapp" not in w["jobs"] and "webapp-bundle" in w["jobs"] and w["jobs"]["build"]["needs"] == "webapp-bundle", t')`
+exits 0 — the push filter, on branches `[main]`, holds `CITATION.cff`
+and, directly after `'subprojects/webapp/**'`, the `perf/` negation and
+the pointer line; the pull-request trigger has no `paths`; no job is
+named `webapp`; and `build` needs `webapp-bundle`; a pull-request run
+shows `webapp-bundle` and
 `build` succeeded, **Build preview site** in the `build` log, and
 `deploy` skipped (`gh run view <run-id>`).
 
@@ -1292,11 +1468,11 @@ three run URLs in the completion report. The perturbed-statistic drill
 of §6.3 and its corrupted-pointer drill with both **Parity** steps in
 place need those steps and are T-23's.
 
-**Done when:** in `.github/workflows/mkdocs.yml`,
-`grep -c "cancel-in-progress: false"` and
-`grep -c "github.event_name != 'pull_request'"` each print 1 and
-`grep -cF "format('pages-pr-{0}', github.event.pull_request.number)"`
-prints 1; `gh run view <run-id>` shows drill (a) failed at
+**Done when:**
+`(cd subprojects/python && poetry run python -c "import yaml; w = yaml.safe_load(open('../../.github/workflows/mkdocs.yml')); c = w['concurrency']; d = w['jobs']['deploy']; assert c['cancel-in-progress'] is False and \"format('pages-pr-{0}', github.event.pull_request.number)\" in c['group'] and d['if'] == \"github.event_name != 'pull_request'\", (c, d.get('if'))")`
+exits 0 — the workflow-level `concurrency` keyed by the §6.3
+expression and never cancelling a run in progress, and `deploy` gated
+by its `if`; `gh run view <run-id>` shows drill (a) failed at
 **Webapp checks** of `webapp-bundle` with `build` and `deploy` not run,
 and drill (b) failed at **Stage scenario assets** with **Build site**
 not run; for both drills,
@@ -1339,9 +1515,10 @@ and path filters stay as T-20 and T-21 left them.
 **Done when:** `./gradlew :subprojects:webapp:check --dry-run` lists
 `:subprojects:webapp:tscCheck` and `:subprojects:webapp:webappTest` and
 not `:subprojects:webapp:webappParity`;
-`grep -c './gradlew :subprojects:webapp:webappParity'` prints 1 in each
-of the two workflow files, and
-`grep -c 'GH_TOKEN' .github/workflows/tests.yml` prints 0; on a pull
+`(cd subprojects/python && poetry run python -c "import yaml; d = '../../.github/workflows/'; t = yaml.safe_load(open(d + 'tests.yml'))['jobs']['webapp-test']['steps']; b = yaml.safe_load(open(d + 'mkdocs.yml'))['jobs']['webapp-bundle']['steps']; n = lambda x: [s.get('name') for s in x]; p = {'name': 'Parity', 'run': './gradlew :subprojects:webapp:webappParity'}; assert p in t and p in b and n(t)[n(t).index('Webapp checks') + 1] == 'Parity' and n(b)[n(b).index('Webapp checks') + 1:n(b).index('Webapp checks') + 3] == ['Parity', 'Build bundle'], (n(t), n(b))")`
+exits 0 — each **Parity** step in its §6.3 place with its command and
+no environment — and `grep -c 'GH_TOKEN' .github/workflows/tests.yml`
+prints 0; on a pull
 request, `webapp-test` and `webapp-bundle` are green with **Parity** in
 their logs (`gh run view <run-id> --log`); the two §6.3 drills, each on
 a scratch pull request and reverted afterwards: with the mean
@@ -1414,10 +1591,16 @@ identifiers; each of `MANIFEST_FIELDS`, `POINTER_FIELDS`,
 `SCENARIO_INPUT_FIELDS`, `TRIAL_TABLE_COLUMNS`, `RECORDS_CSV_COLUMNS`,
 and `STATISTICS_CSV_COLUMNS` occurs in
 `subprojects/webapp/src/decode/fields.ts` (`grep -c <name>` prints at
-least 1). The decoder's behavior closes with T-36 (`decode.test.ts`,
-`fields.test.ts`) and T-35 (the parity run decodes the published
-vintage), the later checks the [Scheduling model](#scheduling-model)
-allows.
+least 1); and
+`grep -rnE "(from|import)[ (]*['\"]\.\./state" subprojects/webapp/src/decode`
+prints nothing — the boundary with T-34 that
+[DDD §5.6](ddd.md#56-scenario-state-and-url-encoding) fixes: `decode/`
+holds `SCENARIO_INPUT_FIELDS` and `mapRecord`, `parseScenario` in
+`state/` maps the scenario object through them and interprets it,
+and no `decode/` file imports `state/`. The decoder's behavior
+closes with T-36 (`decode.test.ts`, `fields.test.ts`) and T-35 (the
+parity run decodes the published vintage), the later checks the
+[Scheduling model](#scheduling-model) allows.
 
 #### T-31 — Query engine
 
@@ -1468,12 +1651,9 @@ then
 Its input is `dist/app/data-v0-test/`, which
 `./gradlew exportApp -Pdata.tag=data-v0-test` writes when run from the
 repository root; that run also rewrites the working-tree pointer
-([DDD §4.1](ddd.md#41-export-task-and-validation) step 6), so restore it
-afterwards from the repository root: with
-`git checkout -- subprojects/webapp/data/pointer.json` when
-`git ls-files --error-unmatch subprojects/webapp/data/pointer.json`
-succeeds, otherwise with `rm subprojects/webapp/data/pointer.json`
-(no pointer committed yet). T-37 extends the script end to end.
+([DDD §4.1](ddd.md#41-export-task-and-validation) step 6), which rule 5
+of the [Execution contract](#execution-contract) saves before the run
+and writes back after it. T-37 extends the script end to end.
 
 **Done when:** `./gradlew :subprojects:webapp:tscCheck` and
 `./gradlew :subprojects:webapp:webappTest` exit 0, with
@@ -1482,9 +1662,9 @@ succeeds, otherwise with `rm subprojects/webapp/data/pointer.json`
 `node build/spot/spot-timing.mjs ../../dist/app/data-v0-test` exits 0
 and prints `v22.12.0`, the decode time, and the median query time, which
 the completion report records — a diagnostic, never acceptance evidence;
-from the repository root,
-`git status --porcelain subprojects/webapp/data/pointer.json` prints
-nothing.
+and, once rule 5 has written it back, `cmp` of
+`subprojects/webapp/data/pointer.json` with its saved copy exits 0, or
+that file is missing because it was missing before the export.
 
 #### T-32 — Statistics module
 
@@ -1641,9 +1821,13 @@ grammar stays deferred to P2.
 **Done when:** `./gradlew :subprojects:webapp:tscCheck` and
 `./gradlew :subprojects:webapp:webappTest` exit 0;
 `grep -rn 'URLSearchParams' subprojects/webapp/src/state` prints
-nothing. The module's behavior closes with T-36 (`state.test.ts`,
-`parse.test.ts`, `scenario-json.test.ts`) and T-35 (rule
-`inputs-roundtrip` on every reference `inputs`).
+nothing; and, now that `src/state/` exists, T-30's import guard
+`grep -rnE "(from|import)[ (]*['\"]\.\./state" subprojects/webapp/src/decode`
+still prints nothing — `state/` imports `decode/`, never the reverse
+([DDD §5.6](ddd.md#56-scenario-state-and-url-encoding)). The module's
+behavior closes with T-36 (`state.test.ts`, `parse.test.ts`,
+`scenario-json.test.ts`) and T-35 (rule `inputs-roundtrip` on every
+reference `inputs`).
 
 #### T-35 — Node parity harness
 
@@ -1713,19 +1897,27 @@ largest |app − reference| per scenario prints as a diagnostic; one
 summary line per scenario and case group follows the full pass; any
 difference makes the exit status non-zero.
 
-**Done when:** after T-18, `./gradlew :subprojects:webapp:webappParity`
-exits 0 against the committed pointer, and every `id` of the reference
+**Done when:** `./gradlew :subprojects:webapp:tscCheck` exits 0; after
+T-18, `./gradlew :subprojects:webapp:webappParity` exits 0 against the
+committed pointer, and every `id` of the reference
 file's `scenarios` (GS-0 to GS-7, GS-3 absent until D-6 is decided)
-appears in its summary lines; drills, each reverted afterwards — with
-one hex digit of a pointer SHA-256 changed, it exits non-zero with a
-line naming rule `fetch` and that file; with the `value` of
-`logScaleMinDecades` in `subprojects/webapp/src/config.json` set to 3,
-it exits non-zero naming rule `PDD §4.1 transcription`; with the `value`
-of `displayPrecision.dzw` set to 0.01, it exits non-zero naming rule
-`D-23 transcription`; with the cached reference file in
-`subprojects/webapp/build/parity/<data_tag>/` replaced by a re-gzipped
-copy whose `reference_version` differs, and the pointer's SHA-256 for
-that file set to the copy's, it exits non-zero naming rule `pairing`.
+appears in its summary lines; then four drills, each under rule 5 of
+the [Execution contract](#execution-contract), each exiting non-zero
+with the first difference line of the
+[DDD §7.2](ddd.md#72-calculation-parity-tests) report naming the rule
+given: with one hex digit of a pointer SHA-256 changed, rule `fetch`,
+naming that file; with the `value` of `logScaleMinDecades` in
+`subprojects/webapp/src/config.json` set to 3, rule
+`PDD §4.1 transcription`; with the `value` of `displayPrecision.dzw`
+set to 0.01, rule `D-23 transcription`; and with a coherent modified
+vintage, rule `pairing` — the cached reference file's JSON object with
+`reference_version` set to `drill`, serialized and gzipped as
+[DDD §4.1](ddd.md#41-export-task-and-validation) step 2 writes it and
+saved in `subprojects/webapp/build/parity/<data_tag>/` under its own
+step-2 name over its exact bytes, `references-<h12>.json.gz`, and the
+pointer's entry for the reference file replaced by that name and its
+SHA-256, so that every file is reused from the cache, every checksum
+matches, and the vintage decodes before the pairing check.
 
 #### T-36 — Application unit tests
 
@@ -1769,7 +1961,8 @@ touches no network, and holds no hand-maintained calculation expectation
 (the §7.4 pipeline-first rule); rendered behavior belongs to the browser
 lane (T-60).
 
-**Done when:** `./gradlew :subprojects:webapp:webappTest` exits 0, and
+**Done when:** `./gradlew :subprojects:webapp:tscCheck` and
+`./gradlew :subprojects:webapp:webappTest` exit 0, and
 `subprojects/webapp/build/test/` then holds `decode.test.js`,
 `fields.test.js`, `state.test.js`, `parse.test.js`, and
 `scenario-json.test.js`; `git ls-files subprojects/webapp/test` lists
@@ -1807,16 +2000,16 @@ runs it, in the one form of
 [DDD §2](ddd.md#2-repository-structure-naming-and-toolchain) (Node.js
 outside Gradle).
 
-**Done when:** from `subprojects/webapp`, in that DDD §2 form (after
+**Done when:** `./gradlew :subprojects:webapp:tscCheck` exits 0; from
+`subprojects/webapp`, in that DDD §2 form (after
 `./gradlew :subprojects:webapp:npmCi` from the repository root, the
 `PATH` export of T-31), the esbuild command of T-31 rebuilds
 `build/spot/spot-timing.mjs`, and
 `node build/spot/spot-timing.mjs ../../dist/app/data-v0-test` exits 0,
 printing `v22.12.0`, the decode time, the minimum, median, 95th
 percentile, and maximum over 30 runs, and the diagnostic line; the
-completion report records the printed figures; from the repository root,
-`git status --porcelain subprojects/webapp/data/pointer.json` prints
-nothing.
+completion report records the printed figures; and the pointer check
+of T-31 holds once rule 5 has written the pointer back.
 
 ### M4 — Product surface
 
@@ -1829,9 +2022,9 @@ nothing.
 | T-44 | Failure states: the capability probe and notice, the unavailable state with its reasons, and the presentations the internal and lazy-load failures enter — never one category shown as another. | T-30, T-36, T-40, T-43 | [DDD §5.10](ddd.md#510-failure-states), [§5.8](ddd.md#58-view-layer). | M | agent | Draftable |
 | T-45 | Downloads: the four-member package and its byte-exact ZIP, the provenance order with block 9 from T-43's notice plan, the [DD-6](ddd.md#1-ddd-decision-register) (Download file-name scenario-slug rules) file name, the [DD-11](ddd.md#1-ddd-decision-register) (Canonical scenario serialization) `scenario.json`, and the no-mix invariant. | T-40, T-41, T-43, T-47 | [DDD §5.9](ddd.md#59-downloads), [§5.8](ddd.md#58-view-layer), [§5.1](ddd.md#51-modules-and-interfaces), [§5.3](ddd.md#53-query-engine), [§7.4](ddd.md#74-application-tests). | L | agent | Draftable |
 | T-46 | Accessibility and navigation lifecycle: the §5.11 lifecycle algorithm in `main.ts` with `start(a, tag)`, the same-page fragment-link guard, and the per-mount §5.3 scheduler behind T-41's `Scheduler` type, handing every applier its `Wiring`; live announcements, focus rules, the [DD-9](ddd.md#1-ddd-decision-register) (Chart text-alternative mechanism) disclosure handling, and the 360 px floor — integrating the surfaces of T-40–T-45 and T-49. | T-40–T-45, T-49 | [DDD §5.11](ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle), [§5.1](ddd.md#51-modules-and-interfaces), [§5.3](ddd.md#53-query-engine), [§5.7](ddd.md#57-scenario-controls), [§5.10](ddd.md#510-failure-states), [§5.8](ddd.md#58-view-layer), [§7.6](ddd.md#76-performance-and-compatibility-measurements). | L | agent | Draftable |
-| T-47 | Application configuration: `config.json` with its ten MVP entries — the [D-11](pdd.md#1-decision-register) (Small-result warning threshold, chart floor, and empty-result diagnosis rule) thresholds, the [D-4](pdd.md#1-decision-register) (Low-slip measurement-reliability policy) trigger, the D-23 precisions, `logScaleMinDecades` — and the six typed accessors of `config.ts`; `copy.json` with the PDD §5 copy-deck entries; the PDD-agreement check `check_pdd_agreement.py` with its self-tests in the Doc links workflow. | T-02, T-03 | [DDD §5.13](ddd.md#513-application-configuration), [§5.8](ddd.md#58-view-layer), [§5.10](ddd.md#510-failure-states), [§6.3](ddd.md#63-ci-workflows). | L | agent | Draftable |
+| T-47 | Application configuration: `config.json` with its ten MVP entries — the [D-11](pdd.md#1-decision-register) (Small-result warning threshold, chart floor, and empty-result diagnosis rule) thresholds, the [D-4](pdd.md#1-decision-register) (Low-slip measurement-reliability policy) trigger, the D-23 precisions, `logScaleMinDecades` — and the six typed accessors of `config.ts`; `copy.json` with the PDD §5 copy-deck entries; the PDD-agreement check `check_pdd_agreement.py` with its self-tests in the Doc links workflow. | T-02, T-03, T-30 | [DDD §5.13](ddd.md#513-application-configuration), [§5.8](ddd.md#58-view-layer), [§5.10](ddd.md#510-failure-states), [§6.3](ddd.md#63-ci-workflows). | L | agent | Draftable |
 | T-49 | Field overlay: the export's rows, loaded lazily through `decode/` at the scheduler's request and read as `RenderInput`'s `field`; the pure overlay model; marks in the reserved band grouped per (`source`, `source_quantity`) with the PDD §4.4 labels and data-page links; the default sets and per-panel show-all; the scarp-dip note in its legend; the field table of the drawn rows; field measurements never entering simulation statistics; the listeners take T-41's `Wiring`. | T-30, T-41 | [DDD §5.8](ddd.md#58-view-layer), [§3.4](ddd.md#34-field-data-export), [§5.12](ddd.md#512-charts), [§5.11](ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle), [§5.1](ddd.md#51-modules-and-interfaces), [§7.4](ddd.md#74-application-tests); [PDD §4.4 — Field overlay (FR-O5, D-18 Proposed)](pdd.md#44-field-overlay-fr-o5-d-18-proposed). | L | agent | Draftable |
-| T-48 | Kern County worked-example preset ([FR-O6 — Kern County worked example](prd.md#fr-o6-kern-county-worked-example), P1): preset entry, walkthrough steps, [GS-3](pdd.md#102-golden-scenarios) (Kern preset (after D-6)) reproduction — ships only after [D-6](pdd.md#1-decision-register) (Kern County field-data group and principal-width rule). | T-40, T-41, T-49, T-13 | [DDD §5.8](ddd.md#58-view-layer); [PDD §4.7 — Kern County worked example (FR-O6, D-6 Open)](pdd.md#47-kern-county-worked-example-fr-o6-d-6-open). | M | agent | Blocked — D-6 (research group); DDD §5.8 amendment (preset mount point, module, §7.4 row) |
+| T-48 | Kern County worked-example preset ([FR-O6 — Kern County worked example](prd.md#fr-o6-kern-county-worked-example), P1): preset entry, walkthrough steps, [GS-3](pdd.md#102-golden-scenarios) (Kern preset (after D-6)) reproduction — ships only after [D-6](pdd.md#1-decision-register) (Kern County field-data group and principal-width rule), through the chain of its body: the DDD amendment, its pipeline step (0) before T-63, the vintage T-63 then publishes with GS-3, the preset, its browser checks, and the [OA-4](#4-owner-and-research-group-actions) approval of its copy. | T-13, T-40, T-41, T-49, T-60, T-63, OA-2 | [DDD §5.8](ddd.md#58-view-layer), [§3.4](ddd.md#34-field-data-export), [§3.6](ddd.md#36-reference-results); [PDD §4.7 — Kern County worked example (FR-O6, D-6 Open)](pdd.md#47-kern-county-worked-example-fr-o6-d-6-open). | M | agent | Blocked — D-6 ([OA-2](#4-owner-and-research-group-actions), research group); the DDD amendment after it (§5.8 preset mount point, module, §7.4 row; §3.4 `kern_field_group` values; §3.6 GS-3 entry) |
 
 #### T-40 — Scenario controls
 
@@ -2229,7 +2422,9 @@ options object, and the `signal` option are not probed. (2) In
 `src/views/dom/notices.ts`: `showCapabilityNotice(root, missing)`,
 inserting as the first child of `#gre-root` a `<p role="alert">` with
 the fixed-here capability notice, `{apis}` the failing names in test
-order joined with `, `, while the fallback stands — no skeleton is
+order joined with `, `, including the 12-month support policy, the
+latest-stable-browser update and reload action, and the iOS/iPadOS
+update action for Safari, while the fallback stands — no skeleton is
 built and no live region exists; and the unavailable state — `hidden`
 on `#gre-panels`; in `#gre-state` the fixed-here notice
 "Results are unavailable: {reason}. Reload the page to try again.",
@@ -2261,8 +2456,13 @@ pinned by `decode.test.ts` (T-36);
 `grep -c 'userAgent' subprojects/webapp/src/main.ts` prints 0;
 `python3 .github/scripts/check_pdd_agreement.py` exits 0; the four
 presentations, pairwise distinct, the capability notice with the
-fallback and `#gre-disclaimer` standing and no skeleton, and the
+complete §5.10 text verbatim, fallback and `#gre-disclaimer` standing
+and no skeleton, and the
 lazy-load failures are covered by `failure-states.spec.ts` (T-60).
+That spec also checks the static browser-policy and recovery paragraph
+with the application bundle request aborted while JavaScript is
+enabled (`<noscript>` absent), and with JavaScript disabled
+(`<noscript>` visible).
 
 #### T-45 — Downloads
 
@@ -2547,8 +2747,10 @@ research-derived value appears (the §5.13 exclusions). (2)
 `src/config.ts` — imports it (`resolveJsonModule`), checks its shape
 with `satisfies`, the member names typed by the §5.13 naming rule
 (camelCase, a per-quantity entry ending in its quantity's name: the
-DD-10 `ColumnName` for slip and the three measurements, `counts` or
-`shares` for the two count quantities), deep-freezes it, and exports
+DD-10 `ColumnName` for slip and the three measurements — imported
+from T-30's `src/decode/fields.ts`, never redeclared — and `counts`
+or `shares` for the two count quantities), deep-freezes it, and
+exports
 exactly the six accessors §5.13 names, none holding a second literal:
 `smallResultWarnBelow()` and `chartFloorBelow()`, the D-11 thresholds;
 `lowSlipThresholdStored()`, the `lowSlipCaveatBelowMetres` value in
@@ -2610,14 +2812,21 @@ that the job reads in the [DDD §6.3](ddd.md#63-ci-workflows) order —
 **Check PDD agreement** directly after **Check links and anchors**,
 before **Check traceability** when T-04 has added that step, and
 **Self-test doc scripts** as the job's last step; the workflow stays
-unfiltered and installs nothing.
+unfiltered and installs nothing. From this task on, the registry's
+one completeness rule, §5.13 step 6 — every PDD §5 subsection with a
+blockquote, §5.1 and the P2 list aside, has at least one entry —
+binds every run of the script, this Done-when's and every later pull
+request's **Check PDD agreement** step, and the entries of step (3)
+meet it; every other entry joins with the task that renders it, whose
+Done-when runs the script on it.
 
 **Done when:** `python3 .github/scripts/check_pdd_agreement.py` exits 0
 and `python3 -m unittest discover -s .github/scripts -p 'test_*.py'`
 exits 0; before T-52,
 `python3 .github/scripts/check_pdd_agreement.py | grep -c 'glossary\.md'`
 prints 0 — `glossary.md` holds no copy markers yet, so step 8 lists
-no block of it; drills, each reverted — the `value` of
+no block of it; drills under rule 5 of the
+[Execution contract](#execution-contract) — the `value` of
 `smallResultWarnBelow` set to 29 makes the script exit 1 naming that
 key, and a renamed fragment in one `source` makes it exit 1;
 `python3 -c 'import json; print(sorted(json.load(open("subprojects/webapp/src/config.json"))))'`
@@ -2626,7 +2835,7 @@ each of `smallResultWarnBelow`, `chartFloorBelow`,
 `lowSlipThresholdStored`, `displayDecimals`, `logScaleMinDecades`, and
 `logScaleOfferRatio`, `grep -c <name> subprojects/webapp/src/config.ts`
 prints at least 1;
-`awk '/^      - name: /{sub(/^      - name: /, ""); print}' .github/workflows/doc-links.yml`
+`(cd subprojects/python && poetry run python -c "import yaml; print([x['name'] for x in yaml.safe_load(open('../../.github/workflows/doc-links.yml'))['jobs']['links']['steps'] if 'name' in x])")`
 prints `Check links and anchors`, `Check PDD agreement`,
 `Check traceability` (once T-04 has added it), and
 `Self-test doc scripts`, in that order and nothing else;
@@ -2636,17 +2845,25 @@ prints `Check links and anchors`, `Check PDD agreement`,
 #### T-48 — Kern County preset
 
 **Steps.** Gated by D-6 ([OA-2](#4-owner-and-research-group-actions)):
-proceed only once the decision is recorded, by the check OA-2 names,
-a published vintage carries
-non-null `kern_field_group` in the field export
-([DDD §3.4](ddd.md#34-field-data-export)), and GS-3 is in the reference
-results (T-13/T-63). **Escalate before implementing:** neither
+proceed only once the decision is recorded, by the check OA-2 names.
+**Escalate before implementing:** neither
 [DDD §5.8](ddd.md#58-view-layer) nor
 [PDD §4.7 — Kern County worked example (FR-O6, D-6 Open)](pdd.md#47-kern-county-worked-example-fr-o6-d-6-open)
-fixes where the preset entry renders; a DDD §5.8 amendment names the
-mount point, the preset's module, and its
-[DDD §7.4](ddd.md#74-application-tests) test row — the executing agent
-does not choose. Then: (1) the preset entry "Worked example: Kern County
+fixes where the preset entry renders, and
+[DDD §3.4](ddd.md#34-field-data-export) and
+[§3.6](ddd.md#36-reference-results) keep `kern_field_group` null and
+GS-3 out of the reference results; a DDD amendment names the mount
+point, the preset's module, and its
+[DDD §7.4](ddd.md#74-application-tests) test row, and fixes the
+`kern_field_group` values and GS-3's reference entry — the executing
+agent does not choose. Then: (0) per that amendment, the
+`field_export` view (T-10) fills `kern_field_group` and the reference
+generator (T-13) adds GS-3, with their tests, merged into `main`
+before T-63 exports the release vintage, so that vintage — the GS-3
+vintage this task depends on — carries both: work begun before T-63,
+which this task's `webappParity` check closes
+([Scheduling model](#scheduling-model)); once T-63's pointer commit
+is on `main`, (1) the preset entry "Worked example: Kern County
 (1952)" applies, in one update, the predefined Scenario of PDD §4.7 (dip
 30°, the Pressure Ridge scarp type, the filter D-6 decides) and the
 display state §5.8 names — `measurement` `dzw` and the overlay on, the
@@ -2655,15 +2872,19 @@ three-step walkthrough copy joins `copy.json`, subject to
 [G-4](#3-gates-and-release-sequence) approval; (3) its browser checks
 join the T-60 inventory per that task's row.
 
-**Done when:** `./gradlew :subprojects:webapp:webappTest` exits 0
-including the preset test the amendment names, asserting that
+**Done when:** `./gradlew :subprojects:webapp:tscCheck` exits 0, and
+`./gradlew :subprojects:webapp:webappTest` exits 0 including the
+preset test the amendment names, asserting that
 `serializeScenario` of the applied preset Scenario equals the GS-3
 reference `inputs`
 ([PDD §10.2 — Golden scenarios](pdd.md#102-golden-scenarios));
 `./gradlew :subprojects:webapp:webappParity` exits 0 with GS-3 replayed;
 `python3 .github/scripts/check_pdd_agreement.py` exits 0 with the
-walkthrough entries; the rendered walkthrough is covered by
-`interactions.spec.ts` (T-60).
+walkthrough entries;
+`./gradlew :subprojects:webapp:webappBrowserTest` exits 0 with the
+preset's checks in `interactions.spec.ts` (T-60); and, in
+`subprojects/python`, `poetry run pytest` exits 0 with step (0)'s
+tests.
 
 #### T-49 — Field overlay
 
@@ -2743,7 +2964,7 @@ table in its scroll wrapper are covered by `render.spec.ts`,
 | T-50 | Version stamps: software and data versions sourced at staging time and stamped on `#gre-app`; in the mount T-46 builds, the branch for a missing or empty attribute of the startup's load step and the footer `#gre-versions` with its copy entry. The data stamp's check against the loaded manifest is the T-30 loader's, its failure state T-44's. | T-03, T-21, T-30, T-44, T-46 | [DDD §6.2](ddd.md#62-software-and-data-version-stamps), [§6.1](ddd.md#61-build-outputs-asset-paths-and-page-scaffold), [§5.8](ddd.md#58-view-layer), [§5.10](ddd.md#510-failure-states), [§5.2](ddd.md#52-artifact-loading-and-decoding), [§7.4](ddd.md#74-application-tests). | S | agent | Draftable |
 | T-51 | Site validation additions: the site checks hook's arms (c), application subtree, and (e), Tableau exclusion, with the [DDD §6.1](ddd.md#61-build-outputs-asset-paths-and-page-scaffold) Tableau loader that arm (e) requires; the release-checklist template of [DDD §7.7](ddd.md#77-site-validation-and-release-checklist) with its item-15 procedure and evidence ledger. The runtime half of the Tableau exclusion and the regression checks on existing surfaces are the browser lane's (T-60). | T-03, T-21 | [DDD §6.1](ddd.md#61-build-outputs-asset-paths-and-page-scaffold), [§7.7](ddd.md#77-site-validation-and-release-checklist), [§4.4](ddd.md#44-licensing-archival-distribution-and-release-attachments). | M | agent | Draftable |
 | T-52 | Glossary additions before launch: PFDHA; engineer of record; FDHI spelling aligned. [DDD §6.4](ddd.md#64-product-pages-beyond-the-scenario-page-p2p3) (Glossary additions (MVP)) closes the PDD's entry-or-gloss alternative as a glossary entry (Proposed, owner acceptance) and states both entries verbatim as one fenced block, which `glossary.md` holds between copy markers citing §6.4. Committed on the release branch of T-55 step (2) after OA-3's D-10 commit and before the [G-4](#3-gates-and-release-sequence) ([SC-7](pdd.md#101-success-criteria) scientific sign-off) record, in the release-branch order of [§3](#3-gates-and-release-sequence). | T-47, OA-3 | [PDD §5.11 — Labels, units, and glossary links (FR-G3, CR-3, CR-7)](pdd.md#511-labels-units-and-glossary-links-fr-g3-cr-3-cr-7); [DDD §6.4](ddd.md#64-product-pages-beyond-the-scenario-page-p2p3), [§5.13](ddd.md#513-application-configuration), [§7.7](ddd.md#77-site-validation-and-release-checklist) (item 8). | S | agent | Draftable |
-| T-54 | Prototype deployment (unlisted), which closes Phase 1: the one prototype-deployment commit of [DDD §6.1](ddd.md#61-build-outputs-asset-paths-and-page-scaffold) — `scenario.md` and `assets/scenario/` out of `draft_docs`, the `not_in_nav` block and the hook kept — whose merge deploys the page as the unlisted prototype of [ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md) (Proposed): no nav entry, no link from another page, out of `sitemap.xml` and the search index, the prototype notice shown. The agent prepares the commit and runs the browser lane on it, the pre-deployment check (T-60); the owner merges it into `main` once the [OA-17](#4-owner-and-research-group-actions) and [OA-10](#4-owner-and-research-group-actions) records exist — a merge, not a release ([DDD §7.7](ddd.md#77-site-validation-and-release-checklist), Phases); the Done-when checks the live site. | T-23, T-50, T-51, T-60, OA-10, OA-17 | [DDD §6.1](ddd.md#61-build-outputs-asset-paths-and-page-scaffold), [§6.3](ddd.md#63-ci-workflows), [§7.7](ddd.md#77-site-validation-and-release-checklist) (Phases), [§5.8](ddd.md#58-view-layer) (the prototype notice), [§2](ddd.md#2-repository-structure-naming-and-toolchain) (Node.js outside Gradle). | S | agent | Draftable |
+| T-54 | Prototype deployment (unlisted), which closes Phase 1: the one prototype-deployment commit of [DDD §6.1](ddd.md#61-build-outputs-asset-paths-and-page-scaffold) — `scenario.md` and `assets/scenario/` out of `draft_docs`, the `not_in_nav` block and the hook kept — whose merge deploys the page as the unlisted prototype of [ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md): no nav entry, no link from another page, out of `sitemap.xml` and the search index, the prototype notice shown. The agent prepares the commit and runs the browser lane on it, the pre-deployment check (T-60); the owner merges it into `main` once the [OA-17](#4-owner-and-research-group-actions) and [OA-10](#4-owner-and-research-group-actions) records exist — a merge, not a release ([DDD §7.7](ddd.md#77-site-validation-and-release-checklist), Phases); the Done-when checks the live site. | T-23, T-50, T-51, T-60, OA-10, OA-17 | [DDD §6.1](ddd.md#61-build-outputs-asset-paths-and-page-scaffold), [§6.3](ddd.md#63-ci-workflows), [§7.7](ddd.md#77-site-validation-and-release-checklist) (Phases), [§5.8](ddd.md#58-view-layer) (the prototype notice), [§2](ddd.md#2-repository-structure-naming-and-toolchain) (Node.js outside Gradle). | S | agent | Draftable |
 
 #### T-50 — Version stamps
 
@@ -2853,9 +3074,11 @@ existing surfaces are the lane's `site-regression.spec.ts` (T-60).
 `./gradlew :subprojects:mkdocs:mkdocsPreview` each exit 0 — both run
 all five hook arms;
 `grep -c 'tableau.embedding' subprojects/mkdocs/mkdocs.yml` prints 0,
-`grep -c 'javascripts/tableau-loader.js' subprojects/mkdocs/mkdocs.yml`
-prints 1, and `grep -q 'tableau-loader.js' subprojects/mkdocs/EMBEDS.md`
-exits 0; three drills, each undone afterwards, fail the build naming
+`(cd subprojects/python && poetry run python -c "import yaml; e = yaml.safe_load(open('../mkdocs/mkdocs.yml'))['extra_javascript']; assert e == ['javascripts/tableau-loader.js', 'javascripts/tableau-fit.js', 'javascripts/cite-modal.js', 'javascripts/figure-modal.js'], e")`
+exits 0 — the loader first, the three other entries where they
+were — and `grep -q 'tableau-loader.js' subprojects/mkdocs/EMBEDS.md`
+exits 0; three drills under rule 5 of the
+[Execution contract](#execution-contract) fail the build naming
 the offending path: the Embedding API entry restored as the first
 `extra_javascript` entry fails
 `./gradlew :subprojects:mkdocs:mkdocsBuild` (arm (e)); a file
@@ -2899,10 +3122,14 @@ the measurement-flatfile paragraph in `docs/data.md` (root-level
 this Done-when's scope).
 The two entries are reader-facing texts that ship only after their
 [SC-7](pdd.md#101-success-criteria) (scientific sign-off) approval
-(§6.4): commit them on the release branch of T-55 step (2), after
-OA-3's D-10 commit, in the release-branch order of
-[§3](#3-gates-and-release-sequence), never on `main` before the
-release merge; the commit stays unpublished until that merge, which
+(§6.4): commit them on a local branch that starts at the head of the
+release branch of T-55 step (2), after OA-3's D-10 commit — never on
+the release branch itself, which is the owner's
+([Task format](#task-format), Executor); the owner brings the commit
+onto the release branch with `git merge --ff-only <branch>`, in the
+release-branch order of [§3](#3-gates-and-release-sequence), and
+never onto `main` before the release merge; the commit stays
+unpublished until that merge, which
 the [OA-4](#4-owner-and-research-group-actions) record, printed after
 T-55's activation commit, precedes. Item 8 of the release checklist of
 [DDD §7.7](ddd.md#77-site-validation-and-release-checklist) re-checks
@@ -2953,7 +3180,22 @@ checksum-verified data. The merge is not a release
 ([DDD §7.7](ddd.md#77-site-validation-and-release-checklist),
 Phases): no release branch, release checklist, or approval record
 applies, and the page shows its unapproved copy, PDD §5.1's pending
-D-10 slot included, as drafted. It is gated by the deployment
+D-10 slot included, as drafted. Its authorizations stay separate:
+the OA-17 record covers deploying the page, sharing its address, and
+serving the T-18 vintage under the assumed terms; whether each
+source permits that redistribution waits for the licensing decision
+of Phase 2 (OA-13); and nothing approves that copy, which waits for
+G-4 and G-5. Until the licensing decision of Phase 2 the deployment
+serves the T-18 vintage with the distribution risk of
+[G-1](#3-gates-and-release-sequence) unresolved — the vintage is
+fetchable by anyone who finds it, fetched copies cannot be recalled,
+and the remedy for a source whose terms forbid it is the withdrawal
+of [DDD §4.3](ddd.md#43-retention-rollback-recovery-and-withdrawal)
+— a risk the owner accepts in ADR-0017 (Consequences); that
+acceptance, not evidence of permission, answers the hold that this
+plan's second external review placed on this deployment
+([Implementation plan review 2 (2026-10-31)](ddd-review.md#implementation-plan-review-2-2026-10-31)),
+a hold the owner overrode on 2026-10-31. It is gated by the deployment
 safeguards that stand from the first deployment: the CI gates of
 [DDD §6.3](ddd.md#63-ci-workflows), the site checks hook's arms
 (a)–(e) in both strict builds, arm (d) checking the unlisted state,
@@ -2964,10 +3206,9 @@ documented permission).
 **Done when:** on the branch, after `git fetch origin`,
 `git diff --name-only origin/main HEAD` prints only
 `subprojects/mkdocs/mkdocs.yml`;
-`grep -A1 '^draft_docs:' subprojects/mkdocs/mkdocs.yml` prints the
-`draft_docs` line and `  media/dev/`, and
-`grep -cxE '  (scenario\.md|assets/scenario/)' subprojects/mkdocs/mkdocs.yml`
-prints 1, the `not_in_nav` line;
+`(cd subprojects/python && poetry run python -c "import yaml; c = yaml.safe_load(open('../mkdocs/mkdocs.yml')); assert c['draft_docs'].split() == ['media/dev/'] and c['not_in_nav'].split() == ['scenario.md'] and c['hooks'] == ['hooks/site_checks.py']")`
+exits 0 — `draft_docs` holding `media/dev/` alone, the `not_in_nav`
+block and the hook kept;
 `./gradlew :subprojects:mkdocs:mkdocsBuild :subprojects:mkdocs:mkdocsPreview`
 exits 0, after which
 `test -f subprojects/mkdocs/site/scenario/index.html` exits 0,
@@ -3000,14 +3241,14 @@ prints exactly the `text` of the `ddd5.8.prototypeNotice` entry of
 
 | ID | Task | Depends on | Inputs | Effort | Executor | Status |
 |---|---|---|---|---|---|---|
-| T-59 | Reference measurement environment: the Terraform root `subprojects/webapp/perf/` with its `run.mjs` driver and owner README, and the Gradle tasks `webappMeasureReference` and `webappMeasureDestroy` — the AWS virtual machine of [DD-12](ddd.md#1-ddd-decision-register) (Performance reference environment), which [DDD §7.6](ddd.md#76-performance-and-compatibility-measurements) specifies — the agreed acceptance baseline, recreatable from the repository, not calibrated against laptops, its timings varying from run to run — on which the T-61 suite produces budget evidence. It waits on [OA-12](#4-owner-and-research-group-actions), the owner's acceptance of [ADR-0016 — Performance reference environment — an on-demand AWS VM defined by Terraform](../adr/0016-performance-reference-environment.md), Proposed, and on [OA-16](#4-owner-and-research-group-actions), the owner's `ami_id` value ([§3](#3-gates-and-release-sequence), Owner-action prerequisites). The agent builds and checks it without AWS credentials; the first real measurement run is the owner's (OA-5), once T-61 lands the measure specs. | T-02, OA-12, OA-16 | [DDD §7.6](ddd.md#76-performance-and-compatibility-measurements), [§2](ddd.md#2-repository-structure-naming-and-toolchain); [ADR-0016](../adr/0016-performance-reference-environment.md) (Proposed). | L | agent | Blocked — ADR-0016 (Proposed; its acceptance is OA-12) |
+| T-59 | Reference measurement environment: the Terraform root `subprojects/webapp/perf/` with its `run.mjs` driver and owner README, and the Gradle tasks `webappMeasureReference` and `webappMeasureDestroy` — the AWS virtual machine of [DD-12](ddd.md#1-ddd-decision-register) (Performance reference environment), which [DDD §7.6](ddd.md#76-performance-and-compatibility-measurements) specifies — the agreed acceptance baseline, recreatable from the repository, not calibrated against laptops, its timings varying from run to run — on which the T-61 suite produces budget evidence. It waits on [OA-12](#4-owner-and-research-group-actions), the owner's acceptance of [ADR-0016 — Performance reference environment — an on-demand AWS VM defined by Terraform](../adr/0016-performance-reference-environment.md), given on 2026-10-31 and recorded by the owner's commit of its Accepted status, and on [OA-16](#4-owner-and-research-group-actions), the owner's `ami_id` value ([§3](#3-gates-and-release-sequence), Owner-action prerequisites). The agent builds and checks it without AWS credentials; the first real measurement run is the owner's (OA-5), which Claude may carry out at the owner's request with the owner's `egr-perf` profile ([Execution contract](#execution-contract), rule 3), once T-61 lands the measure specs. | T-02, T-21, OA-12, OA-16 | [DDD §7.6](ddd.md#76-performance-and-compatibility-measurements), [§2](ddd.md#2-repository-structure-naming-and-toolchain); [ADR-0016](../adr/0016-performance-reference-environment.md). | L | agent | Draftable |
 | T-60 | Browser test lane: the [DD-3](ddd.md#1-ddd-decision-register) (Browser-testing tool and test inventory) tool and the eleven-spec inventory in the projects `desktop` and `mobile`, run by `webappBrowserTest`, after `playwrightInstall` installs the pinned Chromium, against the strict preview build (stamps, hook, and Tableau loader in place). The agent builds and runs it in development and as T-54's pre-deployment check; the owner runs it at release (§7.7 item 4). T-48's preset checks join the inventory when it ships. | T-21, T-40–T-46, T-49, T-50, T-51 | [DDD §7.5](ddd.md#75-browser-test-lane), [§2](ddd.md#2-repository-structure-naming-and-toolchain). | L | agent | Draftable |
-| T-61 | Measurement suite (acceptance): the `measure` project of [DDD §7.6](ddd.md#76-performance-and-compatibility-measurements) — network emulation, cache variants, workloads, payload scope, report, over the marks the application records — and the browser-compatibility test; the agent runs it as a diagnostic and records the [DDD §3.8](ddd.md#38-measured-sizes) figures it supplies; the owner runs it in the T-59 environment at release (OA-5), and G-2 cites those reports. | T-30–T-32, T-41, T-50, T-59, T-60 | [DDD §7.6](ddd.md#76-performance-and-compatibility-measurements), [§3.8](ddd.md#38-measured-sizes), [§5.2](ddd.md#52-artifact-loading-and-decoding), [§5.3](ddd.md#53-query-engine), [§5.7](ddd.md#57-scenario-controls), [§5.10](ddd.md#510-failure-states), [§7.7](ddd.md#77-site-validation-and-release-checklist), [§2](ddd.md#2-repository-structure-naming-and-toolchain). | M | agent | Draftable |
-| T-62 | Acceptance walkthrough scripts: [US-1](prd.md#us-1-dam-foundation-scenario) (Dam foundation scenario), [US-2](prd.md#us-2-pipeline-crossing) (Pipeline crossing), and [US-3](prd.md#us-3-design-review) (Design review) as scripted demos against the golden scenarios, pass conditions from the stories and SC rows. The agent writes the scripts; human reviewers execute them at release — a human acceptance session, distinct from the automated lane (T-60). | T-60 | [PDD §10.3 — Acceptance walkthroughs](pdd.md#103-acceptance-walkthroughs); [DDD §7.7](ddd.md#77-site-validation-and-release-checklist), [§5.7](ddd.md#57-scenario-controls). | M | agent | Draftable |
-| T-63 | Release vintage: the owner publishes the vintage the release ships with `publishVintage` — under the confirmed terms, since a vintage with the assumed record serves only the unlisted prototype ([DDD §4.4](ddd.md#44-licensing-archival-distribution-and-release-attachments), Vintage terms) — or, if the pinned vintage is unchanged and already holds the confirmed record, verifies its recorded publication evidence (publication record, retention check, CI's fetch-and-verify) instead of regenerating. | T-18, OA-1, OA-13, OA-14 | [DDD §4.2](ddd.md#42-publication-of-a-data-vintage), [§4.3](ddd.md#43-retention-rollback-recovery-and-withdrawal), [§7.7](ddd.md#77-site-validation-and-release-checklist), [§3.4](ddd.md#34-field-data-export); [HLDD §9 — Testing and release architecture](hldd.md#9-testing-and-release-architecture). | — | owner | Draftable |
-| T-64 | Rollback rehearsal: a pointer-manifest revert exercised on the published vintage, checksum-verified, with the normal validation and deployment checks applied — both **Parity** steps (T-23) among them — before T-55's activation commit, while the scenario page is drafted or unlisted, its net-zero merge redeploying the site unchanged, so it has no public effect; the agent tools it, the owner runs and authorizes it. | T-22, T-23, T-63 | [DDD §4.3](ddd.md#43-retention-rollback-recovery-and-withdrawal), [§6.3](ddd.md#63-ci-workflows), [§7.7](ddd.md#77-site-validation-and-release-checklist); [HLDD §9 — Testing and release architecture](hldd.md#9-testing-and-release-architecture). | — | owner | Draftable |
+| T-61 | Measurement suite (acceptance): the `measure` project of [DDD §7.6](ddd.md#76-performance-and-compatibility-measurements) — network emulation, cache variants, workloads, payload scope, report, over the marks the application records — and the browser-compatibility test; the agent completes it without T-59, running it locally as a diagnostic and recording the [DDD §3.8](ddd.md#38-measured-sizes) figures it supplies; the owner runs it in the T-59 environment at release (OA-5; T-65 item 5), and G-2 cites those reports. | T-30–T-32, T-41, T-50, T-60 | [DDD §7.6](ddd.md#76-performance-and-compatibility-measurements), [§3.8](ddd.md#38-measured-sizes), [§5.2](ddd.md#52-artifact-loading-and-decoding), [§5.3](ddd.md#53-query-engine), [§5.7](ddd.md#57-scenario-controls), [§5.10](ddd.md#510-failure-states), [§7.7](ddd.md#77-site-validation-and-release-checklist), [§2](ddd.md#2-repository-structure-naming-and-toolchain). | M | agent | Draftable |
+| T-62 | Acceptance walkthrough scripts: [US-1](prd.md#us-1-dam-foundation-scenario) (Dam foundation scenario), [US-2](prd.md#us-2-pipeline-crossing) (Pipeline crossing), and [US-3](prd.md#us-3-design-review) (Design review) as scripted demos against the golden scenarios, pass conditions from the stories and SC rows. The agent writes the scripts; human reviewers execute them at release — a human acceptance session, distinct from the automated lane (T-60). | T-60 | [PDD §10.3 — Acceptance walkthroughs](pdd.md#103-acceptance-walkthroughs); [DDD §7.7](ddd.md#77-site-validation-and-release-checklist), [§5.7](ddd.md#57-scenario-controls). | M | agent | Blocked — the scenario each of the US-2 and US-3 walkthroughs drives, with the consultant's reported scarp height for US-3: a product acceptance decision under [D-21](pdd.md#1-decision-register) (Success criteria and acceptance walkthroughs) that the product owner records in [PDD §10.3 — Acceptance walkthroughs](pdd.md#103-acceptance-walkthroughs) |
+| T-63 | Release vintage: the owner publishes the vintage the release ships with `publishVintage` — under the confirmed terms, since a vintage with the assumed record serves only the unlisted prototype ([DDD §4.4](ddd.md#44-licensing-archival-distribution-and-release-attachments), Vintage terms) — or, if the pinned vintage is unchanged and already holds the confirmed record, verifies its recorded publication evidence (publication record, retention check, CI's fetch-and-verify) instead of regenerating. With [OA-2](#4-owner-and-research-group-actions) recorded, its export follows T-48 step (0), so the vintage carries [GS-3](pdd.md#102-golden-scenarios) (Kern preset (after D-6)) and `kern_field_group`: the GS-3 vintage T-48 depends on — unless the product owner's release-scope amendment of the PRD and the PDD takes the preset out of this release ([§3](#3-gates-and-release-sequence)). | T-18, OA-1, OA-2, OA-13, OA-14 | [DDD §4.2](ddd.md#42-publication-of-a-data-vintage), [§4.3](ddd.md#43-retention-rollback-recovery-and-withdrawal), [§7.7](ddd.md#77-site-validation-and-release-checklist), [§3.4](ddd.md#34-field-data-export); [HLDD §9 — Testing and release architecture](hldd.md#9-testing-and-release-architecture). | — | owner | Draftable |
+| T-64 | Rollback rehearsal, a revert-path rehearsal: a pointer-manifest revert exercised on the published vintage, checksum-verified, with the normal validation and deployment checks applied — both **Parity** steps (T-23) among them — before T-55's activation commit, while the scenario page is drafted or unlisted. It restores no earlier vintage or release, the first release having no rollback target ([DDD §7.7](ddd.md#77-site-validation-and-release-checklist), item 12), and the redeploy after its net-zero merge, built from an unchanged tree, is a public deployment that the owner authorizes explicitly by starting it; the agent tools it, the owner runs it. | T-22, T-23, T-63 | [DDD §4.3](ddd.md#43-retention-rollback-recovery-and-withdrawal), [§6.3](ddd.md#63-ci-workflows), [§7.7](ddd.md#77-site-validation-and-release-checklist); [HLDD §9 — Testing and release architecture](hldd.md#9-testing-and-release-architecture). | — | owner | Draftable |
 | T-55 | Public activation: the [D-2](pdd.md#1-decision-register) navigation entry ([PDD §2.2 — Entry point (D-2, Decided 2026-10-28)](pdd.md#22-entry-point-d-2-decided-2026-10-28)) as the one [DDD §6.1](ddd.md#61-build-outputs-asset-paths-and-page-scaffold) activation commit on the release branch — unlisted prototype to activated: the nav entry in, the `not_in_nav` block, the page's front matter, and the prototype notice's copy entry out — made once G-5 is recorded, T-52's glossary commit is in, the [OA-10](#4-owner-and-research-group-actions) ruleset is in place, and the [OA-14](#4-owner-and-research-group-actions) membership is recorded and carried by `LABELED_FIELD_EVENTS` ([§3](#3-gates-and-release-sequence), Owner-action prerequisites); the G-4 record follows the commit, and the page becomes public with the release merge (T-65), after G-2, G-3, and G-4 are recorded on that branch. Until that merge every deploy carries the scenario page as the unlisted prototype of T-54. | T-51, T-52, T-54, T-60, T-62, T-64, OA-3, OA-10, OA-14 | [DDD §6.1](ddd.md#61-build-outputs-asset-paths-and-page-scaffold), [§7.7](ddd.md#77-site-validation-and-release-checklist), [§5.13](ddd.md#513-application-configuration), [§6.4](ddd.md#64-product-pages-beyond-the-scenario-page-p2p3), [§3.4](ddd.md#34-field-data-export); [PDD §4.4 — Field overlay (FR-O5, D-18 Proposed)](pdd.md#44-field-overlay-fr-o5-d-18-proposed). | S | agent | Draftable |
-| T-65 | v0.3 release: the version commit on the release branch that carries T-55's activation commit; the [DDD §7.7](ddd.md#77-site-validation-and-release-checklist) release checks before the merge and the published-site measurement after the deployment; then the first GitHub release — code, plotting CSVs, `CITATION.cff`, and the current app exports attached per [DD-8](ddd.md#1-ddd-decision-register) (Release data-attachment mechanism) while the release is a draft — whose record is the filled checklist with its evidence ledger, including the check that the release tag's `git archive` contains zero `fig-*` entries ([`notes/Roadmap.md` — Decisions made](../../notes/Roadmap.md#decisions-made), Paper figures). | T-04, T-16, T-17, T-23, T-37, T-52, T-55, T-60–T-64, OA-4, OA-6, OA-7 | [DDD §4.4](ddd.md#44-licensing-archival-distribution-and-release-attachments), [§7.7](ddd.md#77-site-validation-and-release-checklist), [§6.2](ddd.md#62-software-and-data-version-stamps), [§4.3](ddd.md#43-retention-rollback-recovery-and-withdrawal); [`notes/Roadmap.md` — Decisions made](../../notes/Roadmap.md#decisions-made). | — | owner | Draftable |
+| T-65 | v0.3 release: the version commit on the release branch that carries T-55's activation commit; the [DDD §7.7](ddd.md#77-site-validation-and-release-checklist) release checks before the merge and the published-site measurement after the deployment; then the first GitHub release — code, plotting CSVs, `CITATION.cff`, and the current app exports attached per [DD-8](ddd.md#1-ddd-decision-register) (Release data-attachment mechanism) while the release is a draft — whose record is the filled checklist with its evidence ledger, including the check that the release tag's `git archive` contains zero `fig-*` entries ([`notes/Roadmap.md` — Decisions made](../../notes/Roadmap.md#decisions-made), Paper figures). | T-04, T-16, T-17, T-23, T-37, T-48, T-52, T-55, T-59–T-64, OA-4, OA-6, OA-7 | [DDD §4.4](ddd.md#44-licensing-archival-distribution-and-release-attachments), [§7.7](ddd.md#77-site-validation-and-release-checklist), [§6.2](ddd.md#62-software-and-data-version-stamps), [§4.3](ddd.md#43-retention-rollback-recovery-and-withdrawal); [`notes/Roadmap.md` — Decisions made](../../notes/Roadmap.md#decisions-made). | — | owner | Draftable |
 
 #### T-55 — Public activation
 
@@ -3038,13 +3279,17 @@ commit: the [OA-4](#4-owner-and-research-group-actions) record lists
 the reader-facing texts as the activation commit leaves them, the
 prototype notice removed
 ([DDD §7.7](ddd.md#77-site-validation-and-release-checklist), SC-7
-approval record; T-65 checks it). (2) On the
-release branch `dev-v.0.3.x` — the owner's development branch for
-v0.3, off `main`, which carries the release
+approval record; T-65 checks it). (2) On a local branch that starts
+at the head of the release branch `dev-v.0.3.x` — the owner's
+development branch for v0.3, off `main`, which carries the release
 ([DDD §7.7](ddd.md#77-site-validation-and-release-checklist)) and
-which T-52 and T-65 use — make the one activation commit of
+which T-52 and T-65 use, and on which the agent never commits
+([Task format](#task-format), Executor) — make the one activation
+commit of
 [DDD §6.1](ddd.md#61-build-outputs-asset-paths-and-page-scaffold),
-which turns T-54's unlisted prototype into the activated page: in
+which the owner then brings onto the release branch with
+`git merge --ff-only <branch>`, and which turns T-54's unlisted
+prototype into the activated page: in
 `subprojects/mkdocs/mkdocs.yml`, delete the `not_in_nav` block, whose
 only line is `scenario.md`; keep `draft_docs`, `media/dev/` alone
 since T-54, and the `hooks` entry; and insert
@@ -3056,19 +3301,17 @@ whose only key is `search`, with the blank line after it; and delete
 the entry
 `ddd5.8.prototypeNotice` from `subprojects/webapp/src/views/copy.json`,
 which removes the prototype notice ([DDD §5.8](ddd.md#58-view-layer)).
-(3) Push the branch and open its pull request. It merges only as the
-release (T-65), once G-2, G-3, and G-4 are recorded on this branch:
+(3) Once the owner has brought the commit onto the release branch,
+push the release branch and open its pull request. It merges only as
+the release (T-65), once G-2, G-3, and G-4 are recorded on this branch:
 the §7.7 checks, the browser lane's release run among them (§6.1), run
 on the release branch before the merge that releases the change.
 
-**Done when:** `grep -c 'not_in_nav' subprojects/mkdocs/mkdocs.yml`
-prints 0; `grep -A1 '^draft_docs:' subprojects/mkdocs/mkdocs.yml`
-prints the `draft_docs` line and `  media/dev/`, and
-`grep -cxE '  (scenario\.md|assets/scenario/)' subprojects/mkdocs/mkdocs.yml`
-prints 0; `grep -c 'hooks/site_checks.py' subprojects/mkdocs/mkdocs.yml`
-prints 1;
-`grep -A1 'Scenario explorer: scenario.md' subprojects/mkdocs/mkdocs.yml`
-prints the `- Data: data.md` line;
+**Done when:**
+`(cd subprojects/python && poetry run python -c "import yaml; c = yaml.safe_load(open('../mkdocs/mkdocs.yml')); k = [list(x)[0] for x in c['nav']]; i = k.index('Dashboards'); assert 'not_in_nav' not in c and c['draft_docs'].split() == ['media/dev/'] and c['hooks'] == ['hooks/site_checks.py'] and c['nav'][i + 1] == {'Scenario explorer': 'scenario.md'} and k[i + 2] == 'Data', k")`
+exits 0 — no `not_in_nav` block, `draft_docs` holding `media/dev/`
+alone, the hook kept, and the nav entry directly after `Dashboards`
+and before `Data`;
 `head -1 subprojects/mkdocs/docs/scenario.md` prints
 `# Ground Rupture Explorer`, and
 `grep -c 'ddd5.8.prototypeNotice' subprojects/webapp/src/views/copy.json`
@@ -3095,9 +3338,9 @@ the decision whose toolchain this task introduces
 ([§3](#3-gates-and-release-sequence), Owner-action prerequisites),
 and exactly per
 [DDD §7.6](ddd.md#76-performance-and-compatibility-measurements)
-(Reference environment; Where the suite runs; Access;
-Self-termination and cleanup; Terraform commands; the `run` steps
-1–7) and the
+(Reference environment; Where the suite runs; Reference network;
+Access; Self-termination and cleanup; Terraform commands; the `run`
+steps 1–7) and the
 [DDD §2](ddd.md#2-repository-structure-naming-and-toolchain) tree, task
 table, Reference environment (`perf/`) paragraph, and `run.mjs`
 interface — the environment that
@@ -3110,15 +3353,19 @@ backend: state is local; (2) `variables.tf` — `aws_profile`,
 Canonical's SSM parameter
 `/aws/service/canonical/ubuntu/server/24.04/stable/current/amd64/hvm/ebs-gp3/ami-id`
 names in `us-east-1`; reading it needs AWS credentials, which the
-agent never holds, so the owner supplies the value
-([OA-16](#4-owner-and-research-group-actions)), which stands in this
-task's Depends-on, and the agent commits it as the default; (3)
-`main.tf` and `outputs.tf` — the `aws` provider
-(`region = "us-east-1"`, `profile = var.aws_profile`), the
+agent never holds, so the value is the record of
+[OA-16](#4-owner-and-research-group-actions), which stands in this
+task's Depends-on — `ami-0d6dd9e8265d48906`, read on 2026-10-31 —
+and the agent writes it as the default; (3) `main.tf` and
+`outputs.tf` — the `aws` provider (`region = "us-east-1"`,
+`profile = var.aws_profile`, and the `default_tags` of §7.6), the
+`aws_subnet` data source of §7.6 (Reference network), the
 `tls_private_key` (`ED25519`) with its `aws_key_pair`, the
-`aws_security_group`, and the `aws_instance` of the DD-12 type
-`c6i.xlarge` with every argument and tag of the §7.6 bullet list —
-`vpc_security_group_ids` holding that security group's `id`, and the
+`aws_security_group` in that subnet's VPC, and the `aws_instance` of
+the DD-12 type `c6i.xlarge` with every argument and tag of the §7.6
+bullet list — `subnet_id` from the data source,
+`vpc_security_group_ids` holding that security group's `id`,
+`volume_tags`, and the
 root volume's `delete_on_termination = true` and
 `instance_initiated_shutdown_behavior = "terminate"`, both set
 explicitly, among them — and the
@@ -3156,15 +3403,20 @@ every report records; no `.gitignore` entry is added, because the
 root rules `**/.terraform/`, `*.tfstate`, and `*.tfstate.*` cover the
 local state; (7) `README.md` — the owner's instructions:
 `egr.perf.awsProfile` in `~/.gradle/gradle.properties` naming a profile
-allowed, in `us-east-1`, every action of the §7.6 permission list, each
-named — the EC2 actions on the instance, the key pair, the security
-group and its rules, and the instance's tags, the read-only
-`ec2:Describe*` actions, and `ssm:GetParameter` under
-`/aws/service/canonical/` (the owner's ready policy granting exactly
-these is Phase A3 of the owner's local, uncommitted note
+allowed exactly the §7.6 permissions, each named with its scope — the
+tagged instance, the reference subnet, the security groups of the
+reference VPC, public images owned by `amazon` or Canonical, the
+tagged key pair, tags on that instance, those security groups, and
+that key pair and on anything else only while creating it, the
+read-only `ec2:Describe*` actions, and `ssm:GetParameter` under
+`/aws/service/canonical/` (the owner's policy granting exactly these
+is `egr-perf-reference`, whose text the owner keeps beside the local,
+uncommitted note
 `notes/2026-10-30/aws-terraform-walkthrough.md`, which the README does
-not cite); Terraform `~> 1.7` on
-`PATH`; the two Gradle tasks and the published-site variant; for a
+not cite); the reference network of §7.6, which the owner creates once
+and the data source finds by its tag, and the four required tags;
+Terraform `~> 1.7` on `PATH`; the two Gradle tasks and the
+published-site variant; for a
 kept VM, `node perf/run.mjs ssh` in `subprojects/webapp`, preceded
 by the PATH export of the DDD §2 form (Node.js outside Gradle); for
 leftovers, `node perf/run.mjs status` in the same form, with
@@ -3191,13 +3443,31 @@ accepts, any other value failing the task when it executes, in a
 configures the build script, and neither task joins `check`,
 `assemble`, or any workflow. The first real measurement run is the
 owner's, through `webappMeasureReference` (OA-5), once T-61 has landed
-the measure specs; a run before T-61 is only a shakedown of the
-environment, expected to fail at step 5, which finds no measure spec,
-and so to keep its VM, which the owner then removes with
+the measure specs — a run that, like its cleanup, Claude may carry
+out at the owner's request with the owner's `egr-perf` profile
+([Execution contract](#execution-contract), rule 3); a run before
+T-61 is only a shakedown of the environment, expected to fail at
+step 5, which finds no measure spec, and so to keep its VM, which the
+owner, or Claude at the owner's request, then removes with
 `./gradlew :subprojects:webapp:webappMeasureDestroy`.
 
 **Done when** (no AWS credentials needed; at the repository root
-unless stated):
+unless stated). Machine: the owner's machine, where each reference
+run's `terraform init` later uses the lock file this task commits,
+with Terraform within `~> 1.7` already on `PATH` — the operator's
+installation of
+[DDD §2](ddd.md#2-repository-structure-naming-and-toolchain), never
+downloaded or installed by this task; without it, stop and report.
+Network: only the Gradle build's own downloads, among them the pinned
+runtime and the lockfile's packages that
+`./gradlew :subprojects:webapp:npmCi` fetches; the `hashicorp/aws` and
+`hashicorp/tls` providers that `terraform init` fetches through the
+Terraform registry; and the drill's operator-IP lookups at
+`https://checkip.amazonaws.com`, which carry no credential. The real
+`terraform` runs only `version`, `init`, `validate`, and `fmt`; every
+other `terraform` command, and `ssh` and `scp`, is only printed by a
+`--dry-run` or answered by a drill stub, so no command uses an AWS
+credential or opens an SSH connection. The checks:
 `terraform -chdir=subprojects/webapp/perf init -backend=false -input=false`,
 `terraform -chdir=subprojects/webapp/perf validate`, and
 `terraform -chdir=subprojects/webapp/perf fmt -check` each exit 0;
@@ -3207,14 +3477,22 @@ unless stated):
 directory prefix), and
 `git check-ignore subprojects/webapp/perf/.terraform subprojects/webapp/perf/terraform.tfstate`
 prints both paths;
-`grep -cE '^ *default *= *"ami-[0-9a-f]{17}"' subprojects/webapp/perf/variables.tf`
+`grep -cE '^ *default *= *"ami-0d6dd9e8265d48906"' subprojects/webapp/perf/variables.tf`
 prints 1;
 `grep -c 'vpc_security_group_ids' subprojects/webapp/perf/main.tf`,
 `grep -cE 'delete_on_termination *= *true' subprojects/webapp/perf/main.tf`,
+`grep -cE 'instance_initiated_shutdown_behavior *= *"terminate"' subprojects/webapp/perf/main.tf`,
+`grep -cE '^data +"aws_subnet"' subprojects/webapp/perf/main.tf`,
+`grep -cE '^ *default_tags *\{' subprojects/webapp/perf/main.tf`,
+`grep -cE '^ *volume_tags *=' subprojects/webapp/perf/main.tf`,
+`grep -cE '^ *subnet_id *= *data\.aws_subnet\.' subprojects/webapp/perf/main.tf`,
 and
-`grep -cE 'instance_initiated_shutdown_behavior *= *"terminate"' subprojects/webapp/perf/main.tf`
-each print 1; `grep -c 'v22\.12\.0' subprojects/webapp/perf/run.mjs`
-prints at least 1; `grep -cF 'node perf/run.mjs ssh' subprojects/webapp/perf/README.md`
+`grep -cE '^ *vpc_id *= *data\.aws_subnet\.' subprojects/webapp/perf/main.tf`
+each print 1;
+`for t in 'Purpose"? *= *"perf-reference"' 'School"? *= *"EPS"' 'Project"? *= *"eps-ground-rupture"' 'Stakeholder"? *= *"John Shaw"' 'ManagedBy"? *= *"terraform"'; do grep -cE "$t" subprojects/webapp/perf/main.tf; done`
+prints five numbers, none of them 0;
+`grep -c 'v22\.12\.0' subprojects/webapp/perf/run.mjs` prints at least
+1; `grep -cF 'node perf/run.mjs ssh' subprojects/webapp/perf/README.md`
 prints at least 1. Then, after `./gradlew :subprojects:webapp:npmCi`,
 in `subprojects/webapp` with the plugin's runtime first on `PATH` by
 the one command of
@@ -3285,8 +3563,17 @@ value ending in `/32` other than that placeholder; and, with
 `egr.perf.awsProfile` set;
 `./gradlew check --dry-run | grep -c webappMeasure` prints 0, and
 `grep -rnE 'webappMeasure|run\.mjs' .github/workflows/` prints
-nothing. The `doFirst` refusal of any other `egr.perf.target` value
-runs once `mkdocsPreview` exists (T-21), in T-61's Done-when.
+nothing. With `mkdocsPreview` registered (T-21),
+`./gradlew :subprojects:webapp:webappMeasureReference --dry-run` lists
+`:subprojects:mkdocs:mkdocsPreview` and `:subprojects:webapp:npmCi`
+before `:subprojects:webapp:webappMeasureReference` and executes
+nothing, and
+`./gradlew :subprojects:webapp:webappMeasureReference -Pegr.perf.target=staging -x :subprojects:mkdocs:mkdocsPreview`,
+which skips the preview build and with it the vintage fetch, exits
+non-zero, its output carrying the message
+`egr.perf.target must be 'published' (got 'staging')` of
+[DDD §2](ddd.md#2-repository-structure-naming-and-toolchain) — the
+`doFirst` refusal.
 
 #### T-60 — Browser test lane
 
@@ -3423,11 +3710,20 @@ and judging) lists them. No measure spec calls `page.route`,
 `test/compat-inventory.ts`, per §7.6 Browser compatibility: the
 baseline of
 [PDD §9.2 — Browser and mobile baseline (D-16, Proposed)](pdd.md#92-browser-and-mobile-baseline-d-16-proposed)
-over `caniuse-lite`, pinned at `1.0.30001687` among the §2 dev
-dependencies; the window ending at the dataset's newest browser
-release; Android Chrome mapped to the desktop `chrome` versions of the
-window; the explicit rows §7.6 lists; and the printed dataset
-version, window end, and Android mapping — with
+over `caniuse-lite`, pinned at `1.0.30001820` among the §2 dev
+dependencies; the inclusive 12-month window ending at the dataset's
+newest browser release, with UTC calendar subtraction and day clamping;
+Android Chrome mapped to the desktop `chrome` versions of the window;
+the explicit rows §7.6 lists, including its narrowly scoped Safari
+Streams partial-support exception; and the printed dataset version,
+both window dates, every browser's oldest in-window version, and the
+Android mapping. Assert the pinned output of §7.6, and cover its
+historical failing `DecompressionStream` fixture, empty browser
+windows, missing evidence, and unapproved partial support. Failure
+messages name the API, browser, tested version, support code or
+required minimum, evidence source, and corrective action. The release
+checklist, not a wall-clock-dependent CI test, checks that the window
+end is on or before release and no more than 30 days earlier — with
 `test/caniuse-lite.d.ts` holding exactly
 `declare module 'caniuse-lite';`
 ([DDD §2](ddd.md#2-repository-structure-naming-and-toolchain),
@@ -3443,17 +3739,22 @@ plus item 1's compressed size as served), and item 4, moving items 1,
 2, and 4 out of the pending list — their size-report figures (T-11)
 are recorded by then — and updating the *Contributes to:* line. (5)
 Budget evidence is the owner's
-([OA-5](#4-owner-and-research-group-actions)), once
-[OA-12](#4-owner-and-research-group-actions) is recorded:
-`webappMeasureReference` in the T-59 environment on the release
-branch, and with `-Pegr.perf.target=published` after the release's
-deployment ([DDD §7.7](ddd.md#77-site-validation-and-release-checklist)
+([OA-5](#4-owner-and-research-group-actions)) and no part of this
+task's completion: once T-59, which waits on
+[OA-12](#4-owner-and-research-group-actions), and this task are
+complete, `webappMeasureReference` in the T-59 environment on the
+release branch, and with `-Pegr.perf.target=published` after the
+release's deployment, both run by T-65
+([DDD §7.7](ddd.md#77-site-validation-and-release-checklist)
 item 5). A reference run completes when the measure run exits 0 and
 its report is downloaded, and the VM is then destroyed, a budget miss
 included; whether the budgets are met is the release's separate
 decision, taken on the report (§7.7 item 5). A reference-run budget
 miss — a workload whose
-`within_budget` is false — is optimized and measured again
+`within_budget` is false — is recorded as a failure, item 5 failing
+in the run's record, and reported to the owner at once, then
+optimized under the owner's performance rule of the
+[Execution contract](#execution-contract) (rule 4) and measured again
 ([HLDD §7.1 — Performance estimates and verification](hldd.md#71-performance-estimates-and-verification));
 a budget that cannot be met escalates to the owner —
 [D-9](pdd.md#1-decision-register) (Numeric performance and payload
@@ -3461,7 +3762,9 @@ budgets) is PDD material this plan cannot relax.
 
 **Done when:** `./gradlew :subprojects:webapp:tscCheck` exits 0;
 `./gradlew :subprojects:webapp:webappTest` exits 0, its output
-containing `1.0.30001687`;
+containing `1.0.30001820`, window `2025-10-27`–`2026-10-27`, and
+oldest versions Chrome 142, Edge 142, Firefox 145, Safari 26.2,
+iOS Safari 26.1, and Android Chrome mapped to Chrome 142;
 `test "$(cat subprojects/webapp/test/caniuse-lite.d.ts)" = "declare module 'caniuse-lite';"`
 exits 0;
 `grep -rlE 'page\.route|context\.route|routeFromHAR|recordHar' subprojects/webapp/playwright/measure/`
@@ -3472,15 +3775,6 @@ prints nothing; after
 repository root
 `python3 -c "import hashlib, json; r = json.load(open('subprojects/webapp/build/measure/report.json')); e = r['environment']; assert e['kind'] == 'other' and e['instance_type'] is None and e['terraform_version'] is None; w = r['workloads']; assert [x['id'] for x in w] == ['load-cold', 'load-warm-fresh', 'load-warm-revalidating', 'into-gs0', 'into-gs1', 'into-gs6']; assert all(len(x['samples']) == 30 and {'budget_ms', 'min_ms', 'median_ms', 'p95_ms', 'max_ms', 'within_budget'} <= set(x) for x in w); assert all(x['p95_ms'] == sorted(s['ms'] for s in x['samples'])[28] for x in w); assert {'software_version', 'data_version', 'source_commit', 'source_tree_clean', 'base_url', 'network', 'bundle'} <= set(r); assert all(r['bundle'][k]['sha256'] == hashlib.sha256(open('subprojects/webapp/build/dist/app.' + k, 'rb').read()).hexdigest() for k in ('js', 'css'))"`
 exits 0 — a diagnostic report, never budget evidence;
-`./gradlew :subprojects:webapp:webappMeasureReference --dry-run` lists
-`:subprojects:mkdocs:mkdocsPreview` and `:subprojects:webapp:npmCi`
-before `:subprojects:webapp:webappMeasureReference` — T-59's wiring,
-which resolves once `mkdocsPreview` exists — and executes nothing,
-and `./gradlew :subprojects:webapp:webappMeasureReference -Pegr.perf.target=staging`
-exits non-zero, its output carrying the message
-`egr.perf.target must be 'published' (got 'staging')` of
-[DDD §2](ddd.md#2-repository-structure-naming-and-toolchain) — T-59's
-`doFirst` refusal;
 `sed -n '/^\*\*Pending first generation\*\*/,/^\*Contributes to:\*/p' docs/app/ddd.md | grep -c 'measurement suite'`
 prints 0.
 
@@ -3498,10 +3792,15 @@ scenario it drives, and a
 paragraph verbatim and naming its
 [SC rows](pdd.md#101-success-criteria). US-1 drives GS-1, which
 [PDD §10.2 — Golden scenarios](pdd.md#102-golden-scenarios) names
-as US-1. **Escalation:** no document maps US-2 or US-3 to a golden
-scenario; draft their steps from the stories, then stop for the
-owner to designate the scenario(s) — a PDD-side resolution — before
-this body is accepted; the script never picks one silently. The
+as US-1. **Blocked** until the product owner records, in
+[PDD §10.3 — Acceptance walkthroughs](pdd.md#103-acceptance-walkthroughs)
+under [D-21](pdd.md#1-decision-register) (Success criteria and
+acceptance walkthroughs), the scenario each of US-2 and US-3 drives
+and, for US-3, the consultant's reported scarp height: no document
+maps either story to a golden scenario, and the scripts never
+choose them silently. Candidate US-2 and US-3 steps drafted from the
+stories, as input to that decision, are preparatory work: they
+neither start this task nor accept its body. The
 scripts whose stories end in a download (US-1 and US-3) close with
 the reviewer step of the
 [SC-2 (download reproducibility)](pdd.md#101-success-criteria) row of
@@ -3556,9 +3855,12 @@ SHA-256; and CI's fetch-and-verify green on the current `main` head
 Refresh path — the T-18 sequence for the next tag `data-vN`, once
 [OA-13](#4-owner-and-research-group-actions)'s final texts and the
 confirmed [OA-1](#4-owner-and-research-group-actions) record are
-committed:
+committed and, with [OA-2](#4-owner-and-research-group-actions)
+recorded by the check OA-2 names, T-48 step (0) is on `main` unless
+a release-scope amendment keeps the preset out of this release
+([§3](#3-gates-and-release-sequence)):
 `./gradlew :subprojects:python:publishVintage -Pdata.tag=data-vN`,
-whose one run checks the permission gate (the OA-1 record line, the
+whose one run checks the terms-record gate (the OA-1 record line, the
 `README.md` and `LICENSE-docs` wording, and release immutability,
 OA-11), exports,
 runs the full-data checks against the staged vintage, publishes the
@@ -3588,11 +3890,13 @@ item 17.
 
 #### T-64 — Rollback rehearsal (owner)
 
-**Steps** (owner-run, agent-prepared; before T-55's activation
-commit, while the scenario page is drafted or unlisted
-([DDD §6.1](ddd.md#61-build-outputs-asset-paths-and-page-scaffold)),
-so the redeploy after the rehearsal's net-zero merge changes nothing
-on the site and has no public effect).
+**Steps** (owner-run, agent-prepared; a revert-path rehearsal, before
+T-55's activation commit, while the scenario page is drafted or
+unlisted
+([DDD §6.1](ddd.md#61-build-outputs-asset-paths-and-page-scaffold));
+the redeploy after the rehearsal's net-zero merge builds an unchanged
+tree but is still a public deployment, which the owner authorizes
+explicitly by starting it in step (3)).
 (1) On a branch off `main`, commit a deliberate bad pin — edit
 `subprojects/webapp/data/pointer.json` to a scratch `data_tag` — then
 `git revert` that commit, restoring the published vintage's pointer:
@@ -3612,8 +3916,9 @@ merge changes no files, so no push filter of
 §6.3 matches and no main-branch run starts — the owner starts Tests
 and Companion site on `main` with `workflow_dispatch` (the §6.3 manual
 backstop), which applies the validation and deployment checks and
-redeploys the unchanged site. (4) Record the pair the reverted state
-checked — the application commit and the vintage (§4.3, Rollback).
+redeploys the site from the unchanged tree. (4) Record the pair the
+reverted state checked — the application commit and the vintage
+(§4.3, Rollback).
 (5) Run the §4.3 retention check against the vintage the revert
 restored:
 `gh release download <data_tag> --dir <empty temporary directory>`
@@ -3639,22 +3944,26 @@ commits of the release-branch order of
 [§3](#3-gates-and-release-sequence) — OA-3's D-10 commit, T-52's
 glossary commit, T-55's activation commit, and the
 [OA-4](#4-owner-and-research-group-actions) record — on
-the release branch of T-55 step (2), with CI green; the OA-7
-decision fixes version and contents; the
+the release branch of T-55 step (2), with CI green; the
+[OA-7](#4-owner-and-research-group-actions) record, by the check
+OA-7 names, which fixes version and contents; the
 [OA-6](#4-owner-and-research-group-actions) record, checked before
-the release is cut by the check OA-6 names: the file
-`docs/app/approvals/zenodo-YYYY-MM-DD.md` exists and names one of
-its two lines; the G-1, G-4, G-5, and G-6 records of §3 in hand;
+the release is cut by the check OA-6 names: the newest
+`docs/app/approvals/zenodo-YYYY-MM-DD.md` holds one line for each of
+its two decisions; the G-1, G-4, G-5, and G-6 records of §3 in hand;
 T-63's vintage evidence and T-64's rehearsal records in hand.
 (2) On the release branch, set the `version` key in `CITATION.cff`
-and `.zenodo.json` to the decided version
+and `.zenodo.json` to the version the OA-7 record names
 ([PDD §9.4 — Releases](pdd.md#94-releases)) and commit: the release
 commit. (3) Before the merge, on the release
 commit ([DDD §7.7](ddd.md#77-site-validation-and-release-checklist):
 the checks run on the release branch before the merge that releases
 the change), fill a copy of `docs/app/release-checklist.md`: item 1
 (`gh run list --commit <release sha>`, with the compatibility test's
-printed dataset version and window end); items 2 and 3 for a vintage
+printed dataset version, both window dates, oldest tested versions,
+and Android mapping; verify the window end is on or before the release
+date and no more than 30 days earlier, upgrading the dataset and
+rerunning the check first if necessary); items 2 and 3 for a vintage
 release (T-63); item 4,
 `./gradlew :subprojects:webapp:webappBrowserTest`, whose
 `playwrightInstall` dependency first installs the pinned Chromium;
@@ -3704,7 +4013,7 @@ completes, its measure run exiting 0, so the header sets match, its
 report recording the same environment and `network` values, its cold and
 fresh-warm workloads reading `within_budget` true, and its `bundle`
 digests equal to both recorded pairs — a miss or a differing digest
-reopens the release.
+stops the release at step (7).
 (5) Create the annotated tag on `<main sha>`, push it, and create
 the draft release with
 `gh release create <software tag> --verify-tag --draft`
@@ -3736,7 +4045,41 @@ when the build identity of §7.7 holds — the two digest pairs of step
 `CITATION.cff` version and its pointer's `export_version` —
 then paste the filled checklist into the draft's description, the
 §7.7 release record, and publish it with
-`gh release edit <software tag> --draft=false`.
+`gh release edit <software tag> --draft=false`. (7) A failure after
+the release merge and before that publication stops the task. The
+owner records in the checklist copy the failing output and the
+deployed state — `<main sha>`, its push run, and the digest pairs,
+except as the first row below states — and acts on the row of the
+publication state, read from the push run's conclusion
+(`gh run list --workflow mkdocs.yml --commit <main sha> --json conclusion,databaseId,url`),
+from `gh release view <software tag> --json isDraft --jq .isDraft`
+(`true` for a draft, a non-zero exit when no release exists), and
+from `git ls-remote --tags origin refs/tags/<software tag>` (listing
+the tag once `origin` has it). Nothing is locked before publication:
+release immutability (OA-11;
+[DDD §4.2](ddd.md#42-publication-of-a-data-vintage)) locks a
+release's assets and tag when it is published.
+
+| Publication state | Response |
+|---|---|
+| The Companion site push run on `<main sha>` failed; neither a draft nor a tag on `origin`. | The site of the newest successful Companion site run on `main` stays published ([DDD §6.3](ddd.md#63-ci-workflows)): record that run's `headSha` and URL, which `gh run list --workflow mkdocs.yml --branch main --status success --limit 1 --json headSha,url` prints. Rerun the push run's failed jobs, `gh run rerun <run id> --failed`, and continue step (4) once the run succeeds; a check failing again is fixed forward. |
+| `<main sha>` is deployed; neither a draft nor a tag on `origin`. | A check of step (4) or item 5 (b) failed: fix forward, with nothing to delete. Step (5) stopped before `origin` had the tag: step (5) again from its failed command. |
+| The tag is on `origin`, with no release. | A failed `gh release create`: step (5) again from it, unless GitHub refused the tag. Otherwise `git push origin :refs/tags/<software tag>`, then `git tag -d <software tag>`, and fix forward. |
+| A draft exists. | Item 11 failed: `gh release delete <software tag> --yes`, which keeps the tag, then step (5) again from `gh release create`. A `gh release edit` of step (6) failed: that command again. Any other failure: `gh release delete <software tag> --yes --cleanup-tag`, then `git tag -d <software tag>`, and fix forward. |
+
+To fix forward — the first release has no rollback target (item 12),
+and [DDD §7.6](ddd.md#76-performance-and-compatibility-measurements)
+answers a miss by optimizing and measuring again — the owner makes
+the corrective commit on the release branch once
+`git merge --ff-only origin/main` has brought it to `<main sha>`,
+and repeats steps (3)–(6) on it through a new release pull request,
+the OA-4 check included, so a change to a listed text, the vintage,
+or the bundle needs a new OA-4 record first. If GitHub refuses to
+reuse the software tag after its draft release is deleted, the
+release takes the next patch version: a new OA-7 record names it,
+and its step-(2) release commit takes that same path. Once
+published, the release's assets and tag are never changed; a defect
+found after step (6) is corrected by the next patch release.
 
 **Done when** (recorded artifacts):
 `gh release view <software tag> --json isDraft,body` shows `isDraft`
@@ -3747,7 +4090,8 @@ ledger complete — every row reading `pass` and naming the revision
 byte-identical to the pointer's and the immutability command printing
 `true`; the item-10 listing prints 0 and the item-17 search 1;
 `git show <software tag>:CITATION.cff | sed -n 's/^version: *//p'`
-prints the released version;
+prints the version the [OA-7](#4-owner-and-research-group-actions)
+record names;
 `git rev-parse '<software tag>^{commit}'` prints `<main sha>` and
 `git diff --quiet <release sha> <software tag>` exits 0; the G-2–G-5
 approval references resolve to dated records.
@@ -3758,22 +4102,37 @@ The gates are the PDD's success criteria and the HLDD's required
 checks — nothing new. Each is scheduled here and assigned an
 executor; the IP schedules the checks, it does not define them. In
 the phases of
-[ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md)
-(Proposed), Phase 1 has two gates: G-1 in its Phase-1 form, before
+[ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md),
+Phase 1 has two gates: G-1 in its Phase-1 form, before
 the first vintage upload (T-18), and G-6, from the first deploy; the
 prototype deployment, T-54, is gated by G-6 with the CI gates and the
 site checks hook
 ([DDD §7.7](ddd.md#77-site-validation-and-release-checklist),
 Phases). G-1's Phase-2 form and G-2–G-5 apply, with G-6, at the
 release that activates the scenario page and at every release after
-it.
+it. Four authorizations stay separate, none standing in for another
+(ADR-0017, Four authorizations, kept apart): the owner's acceptance
+of ADR-0017 ([OA-17](#4-owner-and-research-group-actions))
+authorizes the unlisted deployment, the owner's sharing of its
+address with the research group, and publication under the assumed
+terms, and it is neither evidence that a source permits
+redistribution nor approval of a text; the other three come in
+Phase 2 — the reader-facing texts' scientific sign-off (G-4), the
+displayed disclaimer's D-10 text (G-5), and the licensing decision,
+source by source, which G-1's Phase-2 form records
+([OA-13](#4-owner-and-research-group-actions) with the confirmed
+OA-1 record). Until then the prototype shows its texts unapproved
+and the pending D-10 slot under its prototype notice, and serves its
+data under the assumed terms beside each source's own terms
+([DDD §4.4](ddd.md#44-licensing-archival-distribution-and-release-attachments),
+Vintage terms).
 
 | Gate | Content | Verified by | Assigned to |
 |---|---|---|---|
-| G-1 | Licensing terms recorded and release immutability enabled before the first vintage upload — assets on a public repository are public and a published vintage is never modified, so this precedes T-18 — in the two forms of ADR-0017: in Phase 1, the owner-committed `data/REDISTRIBUTION.md` stating the assumed terms with the assumed [OA-1](#4-owner-and-research-group-actions) record; from Phase 2, the final texts of [OA-13](#4-owner-and-research-group-actions) with the confirmed record, which the vintage pinned by the release that activates the page, and by every later release, carries ([DDD §4.4](ddd.md#44-licensing-archival-distribution-and-release-attachments), Vintage terms). The T-15 drills reach no GitHub repository: they run against a stub `gh`. | `data/REDISTRIBUTION.md` holding exactly one OA-1 record line — the assumed record in Phase 1, the confirmed record from Phase 2 — beside the per-source terms and attributions, and `README.md` and `LICENSE-docs` each naming that file; and [OA-11](#4-owner-and-research-group-actions), done 2026-10-30. `publishVintage` step 1 refuses to run unless all hold ([DDD §4.2](ddd.md#42-publication-of-a-data-vintage)), and release-checklist item 17 requires the confirmed record in the pinned vintage's terms file ([DDD §7.7](ddd.md#77-site-validation-and-release-checklist)). | Owner (OA-1 in Phase 1; OA-11); owner with the research group (OA-13; OA-1 in Phase 2). |
+| G-1 | Licensing terms recorded and release immutability enabled before the first vintage upload — assets on a public repository are public and a published vintage is never modified, so this precedes T-18 — in the two forms of ADR-0017: in Phase 1, the owner-committed `data/REDISTRIBUTION.md` stating the assumed terms with the assumed [OA-1](#4-owner-and-research-group-actions) record beside one terms line per source (the source's own terms and the URL stating them, or `not established (checked YYYY-MM-DD)` and the source's DOI URL, and the attribution the source asks for) — no evidence that a source permits the redistribution, which neither that record nor [OA-17](#4-owner-and-research-group-actions) supplies and ADR-0017 defers, source by source, to Phase 2; from Phase 2, the final texts of [OA-13](#4-owner-and-research-group-actions) with the confirmed record, which the vintage pinned by the release that activates the page, and by every later release, carries ([DDD §4.4](ddd.md#44-licensing-archival-distribution-and-release-attachments), Vintage terms). Phase 1 publishes with the distribution risk unresolved, a risk the owner accepts in ADR-0017 (Consequences), which OA-17 records: the vintage is fetchable by anyone who finds it, copies already fetched cannot be recalled, and if the licensing decision of Phase 2 (OA-13) finds that a source's terms do not permit the redistribution, the remedy is the withdrawal of [DDD §4.3](ddd.md#43-retention-rollback-recovery-and-withdrawal), applied to each vintage carrying data derived from that source; that acceptance, not evidence of permission, answers the hold that this plan's second external review ([Implementation plan review 2 (2026-10-31)](ddd-review.md#implementation-plan-review-2-2026-10-31)) placed on T-18 and T-54, a hold the owner overrode on 2026-10-31. The T-15 drills reach no GitHub repository: they run against a stub `gh`. | `data/REDISTRIBUTION.md` holding exactly one OA-1 record line — the assumed record in Phase 1, the confirmed record from Phase 2 — beside the per-source terms and attributions, and `README.md` and `LICENSE-docs` each naming that file; and [OA-11](#4-owner-and-research-group-actions), done 2026-10-30. `publishVintage` step 1, the terms-record gate, refuses to run unless all hold ([DDD §4.2](ddd.md#42-publication-of-a-data-vintage)) — it checks the record line, the wording, and immutability, never that a source permits the redistribution — and release-checklist item 17 requires the confirmed record in the pinned vintage's terms file ([DDD §7.7](ddd.md#77-site-validation-and-release-checklist)). The per-source terms lines have their own check, OA-1's per-source check, which T-18 runs before the first upload; `publishVintage` does not repeat it. | Owner (OA-1 in Phase 1; OA-11); owner with the research group (OA-13; OA-1 in Phase 2). |
 | G-2 | [SC-1](pdd.md#101-success-criteria)–SC-4: core workflow, download reproducibility, correctness parity, performance budgets. | Parity harness (T-35, run by both **Parity** steps of [DDD §6.3](ddd.md#63-ci-workflows)); browser lane (T-60; [DDD §7.7](ddd.md#77-site-validation-and-release-checklist) item 4); the reference-environment report of item 5 from a completed run, `environment.kind` `aws-ec2` on the instance type, region, and AMI of [DD-12](ddd.md#1-ddd-decision-register) (Performance reference environment) with the DD-12 `network` values, the release accepted on it — a decision separate from the run's completion — only when every workload's `within_budget` is true (T-59, T-61); walkthroughs (T-62; item 13); the manual engine and mobile-browser pass (item 15). | Agent implements and runs in development, the reference measurement excepted; at release the owner runs the lane, the reference measurement, and the engine pass ([OA-5](#4-owner-and-research-group-actions)), human reviewers run the walkthroughs (SC-1 needs a product-naive engineer), and the owner accepts. |
 | G-3 | [SC-5](pdd.md#101-success-criteria) candor and [SC-6](pdd.md#101-success-criteria) site integrity. | Browser lane (T-60) and site validation: both strict builds with the site checks hook (T-03, T-51; [DDD §7.7](ddd.md#77-site-validation-and-release-checklist), Site validation). | Agent implements; the owner runs at release and accepts. |
-| G-4 | [SC-7](pdd.md#101-success-criteria) scientific sign-off: the research group has approved the reader-facing texts — the [PDD §5 — Copy deck](pdd.md#5-copy-deck) texts, every fixed-here text `check_pdd_agreement.py` lists, in `copy.json` or between copy markers ([DDD §5.13](ddd.md#513-application-configuration)), and the glossary additions of [DDD §6.4](ddd.md#64-product-pages-beyond-the-scenario-page-p2p3) — after T-52's glossary commit and T-55's activation commit, which removes the prototype notice, and before the release merge, in the release-branch order below. | A recorded approval ([OA-4](#4-owner-and-research-group-actions)) in the form of the SC-7 approval record of [DDD §7.7](ddd.md#77-site-validation-and-release-checklist), whose listing the release checklist (item 6, SC-7 row; T-65) compares with the step-8 listing at the release commit. | Research group; owner records. |
+| G-4 | [SC-7](pdd.md#101-success-criteria) scientific sign-off: the research group has approved the reader-facing texts — the [PDD §5 — Copy deck](pdd.md#5-copy-deck) texts, every fixed-here text `check_pdd_agreement.py` lists, in `copy.json` or between copy markers ([DDD §5.13](ddd.md#513-application-configuration)), and the glossary additions of [DDD §6.4](ddd.md#64-product-pages-beyond-the-scenario-page-p2p3) — after T-52's glossary commit and T-55's activation commit, which removes the prototype notice, and before the release merge, in the release-branch order below. | A recorded approval ([OA-4](#4-owner-and-research-group-actions)) in the form of the SC-7 approval record of [DDD §7.7](ddd.md#77-site-validation-and-release-checklist), whose listing, `data_tag`, and bundle digests the release checklist (item 6, SC-7 row; T-65) compares with the release commit's before the release merge. | Research group; owner records. |
 | G-5 | [D-10](pdd.md#1-decision-register) liability text authored or sourced — no placeholder is ever publicly activated (T-55) or released; the unlisted prototype shows PDD §5.1's pending slot as drafted (ADR-0017). | The release checklist's D-10 check — the item-7 search over `site/` and `site-preview/` printing nothing ([DDD §7.7](ddd.md#77-site-validation-and-release-checklist)) — and the record of [OA-3](#4-owner-and-research-group-actions), the dated owner commit that lands the text, by the checks OA-3 names. | Product owner. |
 | G-6 | [R-12](prd.md#93-content-and-media-dependencies): no third-party photograph in any public deploy, site tree, or release archive without documented permission — live from the first deploy, not only when a media surface ships (the zero-`fig-*` archive check in T-65 is its release-time form). | The site checks hook's arms (a) and (b) in every build, from T-03 on ([DDD §6.1](ddd.md#61-build-outputs-asset-paths-and-page-scaffold); §7.7 item 9), and the T-65 archive check (item 10); permission records from [OA-8](#4-owner-and-research-group-actions). | Research group supplies records; build enforces. |
 
@@ -3786,17 +4145,18 @@ waits for a Phase-2 action:
 
 | Owner action | Phase | Precedes | Ground |
 |---|---|---|---|
-| [OA-17](#4-owner-and-research-group-actions) | 1 | T-18, T-54 | ADR-0017 is Proposed, and the DDD's [Authority and change control](ddd.md#authority-and-change-control) holds the first data vintage published under its assumed terms, and the prototype deployment, until the owner accepts it. |
-| [OA-1](#4-owner-and-research-group-actions) | 1, then 2 | T-18 (the assumed record); T-63 (the confirmed record) | `publishVintage` step 1 requires exactly one OA-1 record line in `data/REDISTRIBUTION.md` ([DDD §4.2](ddd.md#42-publication-of-a-data-vintage)), and the first vintage upload is public (G-1); the release that activates the page pins a vintage whose terms file holds the confirmed record ([DDD §7.7](ddd.md#77-site-validation-and-release-checklist), item 17). |
+| [OA-17](#4-owner-and-research-group-actions) | 1 | T-18, T-54 | The owner approved ADR-0017 on 2026-10-31, and the DDD's [Authority and change control](ddd.md#authority-and-change-control) holds the first data vintage published under its assumed terms, and the prototype deployment, until that acceptance is recorded by the owner's dated commit of the ADR's Accepted status. |
+| [OA-1](#4-owner-and-research-group-actions) | 1, then 2 | T-18 (the assumed record and the per-source terms lines); T-63 (the confirmed record) | `publishVintage` step 1 requires exactly one OA-1 record line in `data/REDISTRIBUTION.md` ([DDD §4.2](ddd.md#42-publication-of-a-data-vintage)), and the first vintage upload is public (G-1); the release that activates the page pins a vintage whose terms file holds the confirmed record ([DDD §7.7](ddd.md#77-site-validation-and-release-checklist), item 17). |
 | [OA-10](#4-owner-and-research-group-actions) | 1 | T-54, T-55 | The `main` ruleset of [DDD §6.3](ddd.md#63-ci-workflows) protects the prototype deployment's merge and every merge after it, the release merge among them. |
+| [OA-2](#4-owner-and-research-group-actions) | 2 | T-63, T-48, and through T-48 the release, T-65 | [FR-O6 — Kern County worked example](prd.md#fr-o6-kern-county-worked-example) is P1, and the preset ships only after [D-6](pdd.md#1-decision-register) (Kern County field-data group and principal-width rule): T-48 step (0) puts [GS-3](pdd.md#102-golden-scenarios) (Kern preset (after D-6)) and `kern_field_group` into the exports before T-63 publishes the vintage the release pins. Only a release-scope amendment of the PRD and the PDD by the product owner, taking FR-O6 out of this release, lets a commit of this plan drop T-48 from T-65's Depends-on; the D-6 decision may give its reason, not its authority (below). |
 | [OA-3](#4-owner-and-research-group-actions) | 2 | T-52, T-55 | No placeholder liability text is ever publicly activated (G-5): one dated owner commit replaces PDD §5.1's bracketed slot, in the PDD and in `scenario.md`'s `#gre-disclaimer`, with the D-10 text, the first commit of the release-branch order below, before T-52's glossary commit. |
-| [OA-4](#4-owner-and-research-group-actions) | 2 | T-65 | The research group's approval of the reader-facing texts, the record G-4 checks, is printed after T-52's glossary commit and T-55's activation commit, which removes the prototype notice, and precedes the release merge that makes those texts public; T-65 compares the newest record's listing with the step-8 listing at the release commit ([DDD §7.7](ddd.md#77-site-validation-and-release-checklist), SC-7 approval record). |
-| [OA-6](#4-owner-and-research-group-actions) | 2 | T-65 | The Zenodo GitHub integration archives only releases published after it is enabled, and the DOI route runs through the first GitHub release; T-65 checks the record before the release is cut. |
-| [OA-7](#4-owner-and-research-group-actions) | 2 | T-65 | The first release's version and contents are decided before it is cut. |
-| [OA-12](#4-owner-and-research-group-actions) | 2 | T-59, and so every reference run (OA-5's runs for T-61 and T-65 item 5) | [ADR-0016 — Performance reference environment — an on-demand AWS VM defined by Terraform](../adr/0016-performance-reference-environment.md) is Proposed, and dependent work waits for its acceptance (the DDD's [Authority and change control](ddd.md#authority-and-change-control)). |
+| [OA-4](#4-owner-and-research-group-actions) | 2 | T-65 | The research group's approval of the reader-facing texts, the record G-4 checks, is printed after T-52's glossary commit and T-55's activation commit, which removes the prototype notice, and precedes the release merge that deploys the activated page; T-65 compares the newest record's listing, `data_tag`, and bundle digests with the release commit's ([DDD §7.7](ddd.md#77-site-validation-and-release-checklist), SC-7 approval record). |
+| [OA-6](#4-owner-and-research-group-actions) | 2 | T-65 | The Zenodo GitHub integration archives only releases published after it is enabled, and the DOI route runs through the first GitHub release; the dataset-deposit decision of [DDD §4.4](ddd.md#44-licensing-archival-distribution-and-release-attachments) (Archival distribution) is taken with it, and T-65 checks the record's line for each decision before the release is cut. |
+| [OA-7](#4-owner-and-research-group-actions) | 2 | T-65 | The first release's version and contents are recorded before T-65 begins; T-65 checks the record, writes its version, and verifies the tag against it. |
+| [OA-12](#4-owner-and-research-group-actions) | 2 | T-59, and so every reference run (OA-5's runs of T-65 item 5) | The owner approved [ADR-0016 — Performance reference environment — an on-demand AWS VM defined by Terraform](../adr/0016-performance-reference-environment.md) on 2026-10-31, and dependent work waits for that acceptance to be recorded by the owner's dated commit of the ADR's Accepted status (the DDD's [Authority and change control](ddd.md#authority-and-change-control)). |
 | [OA-13](#4-owner-and-research-group-actions) | 2 | T-63 | The vintage that the release activating the page pins carries the final texts with the confirmed record ([DDD §4.4](ddd.md#44-licensing-archival-distribution-and-release-attachments), Vintage terms), which `publishVintage` step 1 checks ([DDD §4.2](ddd.md#42-publication-of-a-data-vintage)); in Phase 1 the owner's file of OA-1 stands in, and rule `inputs-present` of [DDD §4.1](ddd.md#41-export-task-and-validation) lets the development exports of T-11–T-17 run without either. |
 | [OA-14](#4-owner-and-research-group-actions) | 2 | T-55, T-63 | The activation makes the field overlay's default set public: `LABELED_FIELD_EVENTS`, and the pinned vintage exported from it, carry the recorded [D-18](pdd.md#1-decision-register) (Field-overlay default set and per-source analogue map) membership ([DDD §3.4](ddd.md#34-field-data-export), Labeled set); until then the constant holds the Proposed reading, which the development exports and the T-18 vintage carry. |
-| [OA-16](#4-owner-and-research-group-actions) | 2 | T-59 | The `ami_id` default of `subprojects/webapp/perf/variables.tf` is read with AWS credentials, which the agent never holds ([DDD §7.6](ddd.md#76-performance-and-compatibility-measurements), Reference environment). |
+| [OA-16](#4-owner-and-research-group-actions) | 2 | T-59 | The `ami_id` default of `subprojects/webapp/perf/variables.tf` is read with AWS credentials, which an agent task never holds ([DDD §7.6](ddd.md#76-performance-and-compatibility-measurements), Reference environment); recorded 2026-10-31. |
 
 The prototype deployment that closes Phase 1, T-54, is a merge into
 `main`, not a release: it uses no release branch, and the release
@@ -3821,11 +4181,17 @@ approve reader-facing texts land in one order, the release-branch
 order that T-52, T-55, and T-65 cite: OA-3's D-10 commit; T-52's
 glossary commit; T-55's activation commit, which removes the
 prototype notice; the OA-4 record, its step-8 listing printed at that
-commit or later
+commit or later, once the branch contains `main` with every task
+T-65 depends on that lands there
 ([DDD §7.7](ddd.md#77-site-validation-and-release-checklist), SC-7
 approval record); then T-65's release commit and the merge. These
-commits stay unpublished until that merge, which the OA-4 record
-precedes, so one approval covers the release.
+commits stay unpublished until that merge, which deploys the
+activated page and which the OA-4 record precedes. T-65's release
+commit, between them, changes only the version, which enters none of
+the listing, the pointer, or the bundle
+([DDD §6.2](ddd.md#62-software-and-data-version-stamps)), so one
+approval — of the texts, the data vintage, and the build its record
+names — covers the release.
 A software-only release uses the currently pinned vintage, verifies
 its recorded publication evidence, and regenerates nothing; the
 full-data checks run, inside `publishVintage`, only when a new
@@ -3840,13 +4206,33 @@ notice
 ([DDD §6.1](ddd.md#61-build-outputs-asset-paths-and-page-scaffold)),
 so intermediate merges publish no listed product surface. If
 [D-6](pdd.md#1-decision-register) is still open as the release nears,
-the sources conflict — the preset ships only after D-6
-([PDD §4.7 — Kern County worked example (FR-O6, D-6
-Open)](pdd.md#47-kern-county-worked-example-fr-o6-d-6-open)), yet
-FR-O6 is a P1 requirement — and the owner decides whether v0.3 waits
-for D-6 or the P1 scope is formally amended (a PRD/PDD change this
-plan cannot make); T-48 and GS-3 join when D-6 is decided
-([PDD §10.2 — Golden scenarios](pdd.md#102-golden-scenarios)). The
+the release waits for it — the preset ships only after D-6
+([PDD §4.7 — Kern County worked example (FR-O6, D-6 Open)](pdd.md#47-kern-county-worked-example-fr-o6-d-6-open)),
+and FR-O6 is a P1 requirement. The graph holds the release meanwhile:
+T-63 and T-48 depend on OA-2, and T-65 on T-48, so the chain after
+D-6 — the DDD amendment, T-48 step (0), the vintage T-63 then
+publishes with GS-3 in its reference results
+([PDD §10.2 — Golden scenarios](pdd.md#102-golden-scenarios)), the
+preset with its browser checks, and the OA-4 approval covering its
+copy — precedes the release merge. Only a release-scope amendment
+takes the preset out of this release: removing FR-O6, a P1
+requirement, from v0.3 is the product owner's decision, for which the
+D-6 decision may give the reason but is not the authority. Its record
+is one dated commit by the product owner that moves FR-O6 out of P1
+in the PRD, its row in the PRD's
+[Appendix A. Requirements index](prd.md#appendix-a-requirements-index)
+included, and adds a PDD decision-register row whose Decision cell
+reads `FR-O6 (Kern County worked example) is out of the v0.3 release.`,
+its Owner `Product owner`, its Status `Decided (YYYY-MM-DD)`, and its
+Resolution / proposal cell giving the reason. Its check, run before
+the commit of this plan that cites the record:
+`grep -cE '^\| D-[0-9]+ \| FR-O6 \(Kern County worked example\) is out of the v0\.3 release\. \|[^|]*\| Product owner \| Decided \([0-9]{4}-[0-9]{2}-[0-9]{2}\) \|' docs/app/pdd.md`
+prints 1 and
+`grep -cE '^\| \[FR-O6\]\(#fr-o6-kern-county-worked-example\) \|[^|]*\| P1 \|' docs/app/prd.md`
+prints 0. That commit then drops T-48 from T-65's Depends-on and
+states in §1, T-13, T-14, and T-35 that GS-3 and the preset stay out
+of this release; T-63, still after OA-2, exports without
+T-48 step (0); without the record, the chain above holds. The
 release record identifies the software revision (the 40-hex commit),
 the pointer-manifest revision and data vintage, the test-suite and
 lane versions with their results, and the approval references, and it
@@ -3855,8 +4241,11 @@ ends with the evidence ledger
 
 ## 4. Owner and research-group actions
 
-Acts the agent never performs. The actions themselves — what each
-is, its phase, and the task it must precede — are the owner's list in
+Acts the agent never performs; only the owner's AWS operations of
+OA-5 may be carried out by Claude, at the owner's request and outside
+any agent task ([Execution contract](#execution-contract), rule 3).
+The actions themselves — what each is, its phase, and the task it
+must precede — are the owner's list in
 [`notes/Roadmap.md` — Ground Rupture Explorer — owner actions (opened 2026-10-30)](../../notes/Roadmap.md#ground-rupture-explorer--owner-actions-opened-2026-10-30);
 [§3](#3-gates-and-release-sequence) places each in the task graph.
 This section keeps, per stable ID, what the tasks and gates verify:
@@ -3883,15 +4272,35 @@ ID is reused; OA-15 is retired
   prints 1 — and
   `grep -L 'data/REDISTRIBUTION.md' README.md LICENSE-docs` prints
   nothing; release-checklist item 17 checks the pinned vintage's
-  terms file (T-65).
+  terms file (T-65). From Phase 1 the file also holds one terms line
+  per source, the per-source terms of
+  [DDD §4.4](ddd.md#44-licensing-archival-distribution-and-release-attachments)
+  (Vintage terms): the source's own terms and the URL that states
+  them, or, where none were found,
+  `not established (checked YYYY-MM-DD)` and the source's DOI URL; and
+  the attribution the source asks for, beside the assumed terms — no
+  evidence that they permit redistributing the derived data, which
+  neither the OA-1 record nor OA-17 implies and the licensing
+  decision of Phase 2 settles (OA-13), which also establishes the
+  terms of any source whose line records them as `not established`.
+  Its per-source check, which T-18 runs before the first upload:
+  `for s in DEM FDHI SURE 'Kern County'; do grep -cE "^Source $s: .+ — https://[^ ]+; attribution: .+" data/REDISTRIBUTION.md; done`
+  prints `1` four times; a missing line stops the upload, a
+  `not established` line does not; and no placeholder date is left:
+  `grep -c 'YYYY-MM-DD' data/REDISTRIBUTION.md` prints 0.
 - **OA-2** — the [D-6](pdd.md#1-decision-register) (Kern County
   field-data group and principal-width rule) decision, by the research
-  group, Phase 2, before T-48: the record is the PDD decision-register
-  row D-6 reading `Decided (YYYY-MM-DD)`, landed in a dated owner
-  commit; its check, which T-48 runs:
+  group, Phase 2, before T-63 and T-48: the record is the PDD
+  decision-register row D-6 reading `Decided (YYYY-MM-DD)`, landed in
+  a dated owner commit; its check, which T-63 and T-48 run:
   `grep -cE '^\| D-6 \|.*\| Decided \([0-9]{4}-[0-9]{2}-[0-9]{2}\) \|' docs/app/pdd.md`
   prints 1. [GS-3](pdd.md#102-golden-scenarios) (Kern preset (after
-  D-6)) joins the reference results with it (T-13, T-63).
+  D-6)) joins the reference results through T-48 step (0) and the
+  vintage T-63 then publishes. A D-6 decision may give the reason for
+  taking the preset out of this release but is no record of it: only
+  the product owner's release-scope amendment of the PRD and the PDD
+  ([§3](#3-gates-and-release-sequence)), once a commit of this plan
+  cites it, drops T-48 from T-65's Depends-on.
 - **OA-3** — the [D-10](pdd.md#1-decision-register)
   (Liability-limitation text referenced by CR-4) text (G-5), Phase 2,
   before T-52 and T-55: the record is the one dated owner commit, the
@@ -3918,9 +4327,15 @@ ID is reused; OA-15 is retired
   [DDD §6.4](ddd.md#64-product-pages-beyond-the-scenario-page-p2p3).
   The record is the SC-7 approval record of
   [DDD §7.7](ddd.md#77-site-validation-and-release-checklist), the
-  dated file `docs/app/approvals/sc7-YYYY-MM-DD.md`; its check, which
-  T-65 runs (item 6, SC-7 row): the newest record's listing equals,
-  line for line, the step-8 listing printed at the release commit.
+  dated file `docs/app/approvals/sc7-YYYY-MM-DD.md`, which names the
+  texts (the step-8 listing), the data vintage (`data_tag`), and the
+  build (the `app.js` and `app.css` SHA-256s) that the approval
+  covers; its check, which T-65 runs before the release merge
+  (item 6, SC-7 row): the newest record's listing equals, line for
+  line, the step-8 listing printed at the release commit, its
+  `data_tag` that of the release commit's pointer manifest, and its
+  digests those of item 1's `webapp-dist` artifact, read as T-65
+  step (4) reads it.
 - **OA-5** — the release-time checks the owner runs on the release
   branch (G-2, G-3), Phase 2, for T-61's budget evidence and for
   T-65: the browser lane (item 4), the reference measurement in the
@@ -3936,29 +4351,59 @@ ID is reused; OA-15 is retired
   destroyed — after a failed final destroy, by `webappMeasureDestroy`
   (DDD §7.6 step 7) — a budget miss included, and the release is
   accepted on the report, a separate decision, only when every
-  workload's `within_budget` is true. T-61 and T-65 check them; the
-  reference runs wait for OA-12.
-- **OA-6** — the Zenodo GitHub integration and the dataset-record
-  deposit decision
+  workload's `within_budget` is true; a run that misses a budget
+  fails item 5 in its record and is reported to the owner at once, its
+  remedy following the owner's performance rule of the
+  [Execution contract](#execution-contract) (rule 4). T-65 checks
+  them; the reference runs wait for T-59 and T-61, and through T-59
+  for OA-12 and OA-16. The reference runs and their cleanup are the
+  owner's AWS operations, which Claude may carry out at the owner's
+  request with the owner's `egr-perf` profile (Execution contract,
+  rule 3); the records and checks above are unchanged.
+  The AWS setup the reference measurement needs exists since
+  2026-10-31, made at the owner's request with the owner's
+  credentials: the identity `egr-perf` with the policy
+  `egr-perf-reference`, which grants the permissions of
+  [DDD §7.6](ddd.md#76-performance-and-compatibility-measurements),
+  its local profile, the Gradle property `egr.perf.awsProfile`, and
+  the reference network of DDD §7.6, every part of it carrying the
+  four required tags.
+- **OA-6** — two decisions
   ([`notes/Roadmap.md` — Decisions made](../../notes/Roadmap.md#decisions-made)),
-  Phase 2, before T-65 cuts the first release: the record is a dated
-  file the owner commits, `docs/app/approvals/zenodo-YYYY-MM-DD.md`,
-  holding one of two lines:
+  Phase 2, before T-65 cuts the first release: software archiving,
+  the Zenodo GitHub integration, which archives only releases
+  published after it is enabled; and the data deposit, the Zenodo
+  dataset record of
+  [DDD §4.4](ddd.md#44-licensing-archival-distribution-and-release-attachments)
+  (Archival distribution). The record is a dated file the owner
+  commits, `docs/app/approvals/zenodo-YYYY-MM-DD.md`, holding one line
+  per decision: for software archiving,
   `Zenodo GitHub integration enabled for HarvardRC/eps-ground-rupture`
-  or `deposit deferred: <reason>`. Its check, which T-65 runs before
-  cutting the release:
-  `grep -lE '^(Zenodo GitHub integration enabled for HarvardRC/eps-ground-rupture|deposit deferred: .+)$' docs/app/approvals/zenodo-*.md`
-  prints at least one path. A repository admin may also confirm the
-  first line in the repository's webhook listing,
+  or `Zenodo GitHub integration deferred: <reason>`; for the data
+  deposit, `Dataset deposit: Zenodo dataset record` or
+  `Dataset deposit deferred: <reason>`. Its check, which T-65 runs
+  before cutting the release on the newest such file by name:
+  `grep -cxE 'Zenodo GitHub integration (enabled for HarvardRC/eps-ground-rupture|deferred: .+)' "$(ls docs/app/approvals/zenodo-*.md | tail -n 1)"`
+  prints 1, and
+  `grep -cxE 'Dataset deposit(: Zenodo dataset record| deferred: .+)' "$(ls docs/app/approvals/zenodo-*.md | tail -n 1)"`
+  prints 1. A repository admin may also confirm the enabled line in
+  the repository's webhook listing,
   `gh api repos/HarvardRC/eps-ground-rupture/hooks` — an optional
   confirmation, not the check.
 - **OA-7** — the first release's contents and version, Phase 2,
-  before T-65 cuts it (tags v0.2.0–v0.2.2 exist; no GitHub release
-  yet): the record is the version that T-65 step (2) writes to
-  `CITATION.cff` and `.zenodo.json` and the contents its release
-  record lists; its check is T-65's Done-when,
+  recorded before T-65 begins (tags v0.2.0–v0.2.2 exist; no GitHub
+  release yet): the record is a dated file the owner commits on the
+  release branch, `docs/app/approvals/release-YYYY-MM-DD.md`, holding
+  the line `Version: <version>` and the contents, which T-65 releases
+  per [DD-8](ddd.md#1-ddd-decision-register) (Release data-attachment
+  mechanism) — code, plotting CSVs, `CITATION.cff`, and the current
+  app exports. Its check, which T-65 step (1) runs on the newest such
+  file by name:
+  `grep -cxE 'Version: [0-9]+\.[0-9]+\.[0-9]+' "$(ls docs/app/approvals/release-*.md | tail -n 1)"`
+  prints 1; T-65 step (2) writes that version, and T-65's Done-when
+  verifies it,
   `git show <software tag>:CITATION.cff | sed -n 's/^version: *//p'`
-  printing the released version.
+  printing the same version.
 - **OA-8** — photograph permission records (G-6), in either phase,
   before any third-party media enters a deploy or archive: the record
   is each file's documented permission — from P2, the media-index
@@ -3995,20 +4440,28 @@ ID is reused; OA-15 is retired
   the stub `gh` of the T-15 drills answers it.
 - **OA-12** — the acceptance of
   [ADR-0016 — Performance reference environment — an on-demand AWS VM defined by Terraform](../adr/0016-performance-reference-environment.md)
-  (Proposed 2026-10-30) under the repository's ADR process, Phase 2,
-  before T-59 and so before every reference run
+  under the repository's ADR process, Phase 2, before T-59 and so
+  before every reference run
   ([Authority and change control](ddd.md#authority-and-change-control)):
   the record is the ADR's status line, and its row in
   `docs/adr/README.md`, reading Accepted in a dated commit; its check:
   `grep -cF -e '- **Status**: Accepted' docs/adr/0016-performance-reference-environment.md`
-  prints 1. Accepting the ADR includes one sweep commit after that
-  record, which the agent prepares on request: it updates the ADR's
-  other Proposed mentions, its "(Proposed)" labels included, in the DDD,
-  this plan, the HLDD, `notes/Roadmap.md`, and `docs/adr/README.md`, and
-  is not part of the record.
+  prints 1. The owner approved the ADR on 2026-10-31; the owner's
+  commit of its Accepted status line and row is the record. The sweep
+  of the ADR's other Proposed mentions, its "(Proposed)" labels
+  included, is made in the DDD, this plan, the HLDD,
+  `notes/Roadmap.md`, and `docs/adr/README.md`, and is not part of
+  the record.
 - **OA-13** — the final licensing texts, written with the research
   group, Phase 2, before T-63 publishes the vintage that the
-  activating release pins: in `data/REDISTRIBUTION.md`, the
+  activating release pins — the record of the licensing decision of
+  Phase 2, which also establishes the terms of any source whose
+  Phase-1 terms line records them as `not established`, and one of
+  whose named inputs is §4.2(a) of ODC-By 1.0, the DEM experiments'
+  license, which asks that a publicly conveyed derivative database be
+  conveyed only under the terms of that license, set against the
+  assumed CC BY 4.0 of the derived data exports: in
+  `data/REDISTRIBUTION.md`, the
   per-source terms and attributions for the DEM, FDHI, SURE, and Kern
   County sources, and the Licensing section of `README.md` and
   `LICENSE-docs` that distinguishes application code, raw inputs, and
@@ -4049,26 +4502,35 @@ ID is reused; OA-15 is retired
   `subprojects/webapp/perf/variables.tf`, Phase 2, before T-59
   completes: the AMI ID that Canonical's SSM parameter of
   [DDD §7.6](ddd.md#76-performance-and-compatibility-measurements)
-  names in `us-east-1`, read with AWS credentials, which the agent
-  never holds. The record is the value given to the agent, which T-59
-  commits as the default; its check:
-  `grep -cE '^ *default *= *"ami-[0-9a-f]{17}"' subprojects/webapp/perf/variables.tf`
+  names in `us-east-1`, read with AWS credentials, which an agent
+  task never holds. Recorded 2026-10-31, read with the
+  `egr-perf` profile: `ami-0d6dd9e8265d48906`, Canonical's
+  `ubuntu-noble-24.04-amd64-server-20261023`. The record is that
+  value, which T-59 writes as the default; its check:
+  `grep -cE '^ *default *= *"ami-0d6dd9e8265d48906"' subprojects/webapp/perf/variables.tf`
   prints 1.
 - **OA-17** — the acceptance of
   [ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md)
-  (Proposed 2026-10-30) under the repository's ADR process, Phase 1,
-  before T-18 publishes the first vintage under the assumed terms and
-  before T-54's prototype deployment
+  under the repository's ADR process, Phase 1, before T-18 publishes
+  the first vintage under the assumed terms and before T-54's
+  prototype deployment
   ([Authority and change control](ddd.md#authority-and-change-control)):
   the record is the ADR's status line, and its row in
   `docs/adr/README.md`, reading Accepted in a dated commit; its check,
   which T-18 and T-54 run:
   `grep -cF -e '- **Status**: Accepted' docs/adr/0017-unadvertised-prototype-before-public-release.md`
-  prints 1. Accepting the ADR includes one sweep commit after that
-  record, which the agent prepares on request: it updates the ADR's
-  other Proposed mentions, its "(Proposed)" labels included, in the DDD,
-  this plan, the HLDD, `notes/Roadmap.md`, and `docs/adr/README.md`, and
-  is not part of the record.
+  prints 1. The owner approved the ADR on 2026-10-31; the owner's
+  commit of its Accepted status line and row is the record. The sweep
+  of the ADR's other Proposed mentions, its "(Proposed)" labels
+  included, is made in the DDD, this plan, the HLDD,
+  `notes/Roadmap.md`, and `docs/adr/README.md`, and is not part of
+  the record. The acceptance authorizes the prototype
+  deployment, the owner's sharing of its address with the research
+  group, and publication under the assumed terms before the research
+  group confirms them; it is no evidence that a source permits
+  redistributing its derived data, which ADR-0017 defers, source by
+  source, to the licensing decision of Phase 2 (OA-13), and it
+  approves no text (G-4, G-5).
 
 ## 5. Parked capabilities (P2/P3)
 
@@ -4130,10 +4592,10 @@ sources. Each line names what unparks it.
 During drafting, this index ordered DDD work by implementation
 value. Every listed section is now drafted and has been through the
 adversarial reviews and corrections of 2026-10-30, and every Status
-cell but T-48's and T-59's reads Draftable — T-59's input
-[ADR-0016](../adr/0016-performance-reference-environment.md) is
-Proposed until OA-12; the index remains as the
-section-to-task map. It is derived mechanically from §2: a task
+cell but T-48's and T-62's reads Draftable — T-59's input
+[ADR-0016](../adr/0016-performance-reference-environment.md) was
+accepted by the owner on 2026-10-31 (OA-12); the index remains as
+the section-to-task map. It is derived mechanically from §2: a task
 stands beside a section group when its Inputs cell or its body links
 a DDD section of that group, and a register row appears beside the
 section that closes it. Tasks blocked on decisions, gates, owner
@@ -4144,14 +4606,14 @@ independent scheduling authority.
 | DDD section | Unblocks |
 |---|---|
 | §2 (with DD-10) | T-01, T-02, T-20, T-23, T-31, T-35, T-37, T-54, T-59–T-61, T-65. |
-| §3.1–§3.3 (with DD-1) | T-11, T-12, T-16, T-30, T-36, T-40. |
+| §3.1–§3.3 (with DD-1) | T-11, T-12, T-15, T-16, T-30, T-36, T-40. |
 | §3.4–§3.6 | T-10–T-13, T-16, T-30, T-32, T-33, T-35, T-36, T-48, T-49, T-55, T-63. |
 | §3.8 | T-11, T-13, T-17, T-61. |
-| §4.1–§4.2 (with DD-7) | T-04, T-10–T-18, T-31, T-63. |
-| §4.3–§4.4 (with DD-8) | T-11, T-12, T-15, T-18, T-51, T-63–T-65. |
+| §4.1–§4.2 (with DD-7) | T-04, T-10–T-18, T-31, T-35, T-63, T-65. |
+| §4.3–§4.4 (with DD-8) | T-11, T-12, T-15, T-18, T-51, T-54, T-63–T-65. |
 | §5.1–§5.6 (with DD-11) | T-13, T-16, T-30–T-37, T-40, T-41, T-43, T-45, T-46, T-49, T-50, T-61. |
 | §5.7–§5.13 (with DD-4, DD-5, DD-6, DD-9) | T-03, T-13, T-30, T-32, T-34–T-36, T-40–T-50, T-52, T-54, T-55, T-61, T-62. |
-| §6.1–§6.3 | T-02–T-04, T-20–T-23, T-47, T-50, T-51, T-54, T-55, T-64, T-65. |
+| §6.1–§6.3 | T-02–T-04, T-18, T-20–T-23, T-47, T-50, T-51, T-54, T-55, T-64, T-65. |
 | §6.4 | T-52, T-55. |
 | §7.1–§7.4 (with DD-2) | T-02, T-04, T-13–T-16, T-18, T-23, T-31, T-32, T-35, T-36, T-40–T-43, T-45, T-48–T-50. |
 | §7.5–§7.7 (with DD-3, DD-12) | T-03, T-04, T-17, T-37, T-46, T-51, T-52, T-54, T-55, T-59–T-65. |
@@ -4163,16 +4625,23 @@ The matrix below maps every obligation the approved documents place
 on the implementation plan — the thirty rows the obligation sweep of
 2026-10-29 directed at this plan, of the 420 it extracted from the
 PRD, PDD, HLDD, accepted ADRs, and `notes/Roadmap.md` at commit
-`36abc56` ([DDD §8 — Traceability](ddd.md#8-traceability) holds the
-full register) — to its home in this plan and to the check planned to
+`36abc56`, and the six rows added by hand for what two later
+decisions, both accepted on 2026-10-31, direct at it,
+[ADR-0016 — Performance reference environment — an on-demand AWS VM defined by Terraform](../adr/0016-performance-reference-environment.md)
+and
+[ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md)
+([DDD §8 — Traceability](ddd.md#8-traceability) holds the full
+register and states what the sweep has not covered since) — to its
+home in this plan and to the check planned to
 evidence it, with its kind and status. It shows coverage and planned
 evidence, never satisfaction: executed results live only in the
 release records, in the evidence ledger of
 [DDD §7.7](ddd.md#77-site-validation-and-release-checklist). The
-tables are the stored rendering of that sweep, re-rendered — never
-hand-edited — when the sources change; this correction pass
-re-rendered the Kind, Check, and Status columns against the corrected
-documents on 2026-10-30. Each row repeats its DDD §8 twin — the row
+tables are the stored rendering of that sweep and of the rows added
+by hand after it, re-rendered when the sources change; the
+correction pass of 2026-10-30 re-rendered the Kind, Check, and
+Status columns against the
+corrected documents. Each row repeats its DDD §8 twin — the row
 with the same Source and Obligation — exactly, which the traceability
 lint of T-04 checks. Kind and Status take the closed values DDD §8
 defines: Kind is one of `text`, `test`, `measure`, `release`, `owner`,
@@ -4186,8 +4655,7 @@ greppable — a stated exception to the link convention for this
 generated table); `IP` coordinates refer to this document's sections.
 A row may resolve to an owner action
 ([§4](#4-owner-and-research-group-actions)) or a parked line; none of
-the thirty resolves to "not an IP obligation (stays with its
-source)".
+the rows resolves to "not an IP obligation (stays with its source)".
 
 ### 7.1 From the HLDD
 
@@ -4238,6 +4706,12 @@ source)".
 | ADR-0014 Decision, Derived data (L140-145) | sequenced open items: confirm source terms before first vintage upload; Zenodo dataset deposit step; README/LICENSE-docs wording | IP §3 G-1, IP §4 OA-1, IP §4 OA-13, IP §4 OA-6, §4.4 | owner+text+release | G-1; OA-1; §4.2 step 1 (the OA-1 record gate and the README/LICENSE-docs condition); ADR-0017; §7.7 item 17; OA-13; OA-6; §4.4 (Archival distribution); §4.4 (Vintage terms: the README and LICENSE-docs wording) | owner-pending |
 | ADR-0014 Consequences (L183-186) | site deploys and PR validation gain the fetch-and-verify step | IP §2 T-21, T-22 | test+text+schedule | .github/workflows/mkdocs.yml::build / Stage scenario assets (T-21); §6.3 (pull_request triggers unfiltered, a failed run never deploys); T-22 | planned |
 | ADR-0015 amendment 2 of 2026-10-29 (L60-63) | release gate: browser test lane run against the locally built site, required before a release | IP §2 T-60, IP §3 G-2, IP §4 OA-5 | release+schedule+owner | §7.7 item 4; T-60; G-2; G-3; OA-5 | owner-pending |
+| ADR-0016 Consequences (L159-162) | the owner's AWS profile allowed to create, describe, and delete EC2 instances, key pairs, and security groups in the chosen region, and ssm:GetParameter on the public parameter naming the pinned image | §7.6, IP §4 OA-5, IP §4 OA-16 | text+owner | §7.6 (Where the suite runs: the profile's EC2 and SSM actions); OA-16; OA-5 | owner-pending |
+| ADR-0017 Decision, Prototype (L32-43) | Phase 1: the application deployed with its first data vintage at the site's final address, unadvertised — no nav entry, no page linking to it, out of the search index and sitemap.xml, a short prototype notice — its texts awaiting approval, the pending D-10 slot included, shown as drafted | §6.1, §5.8, IP §2 T-18, IP §2 T-54 | text+test+schedule+owner | §6.1 (the unlisted prototype, the prototype deployment); §5.8 (the prototype notice); subprojects/mkdocs/hooks/site_checks.py arm (d) (T-03); subprojects/webapp/playwright/specs/render.spec.ts (T-60); T-18; T-54; OA-17 | owner-pending |
+| ADR-0017 Decision, Review and public release (L44-50) | Phase 2: the owner records the research group's approvals and decisions — texts, D-10, D-18, D-6, the deferred licensing decision — in the owning documents; only then is the page activated (nav entry, search and sitemap inclusion, notice removed) and the first software release cut | §6.1, IP §2 T-55, IP §2 T-65, IP §3 sequence | text+schedule+owner | §6.1 (Activation); IP §3 (the release-branch order); T-55; T-65; OA-4; OA-3; OA-14; OA-2; OA-1; OA-13 | owner-pending |
+| ADR-0017 Decision, Not a public release (L52-62) | the rules a public release carries — text approval, the D-10 text, media permissions, the release checklist — apply at activation and the first software release, not at the prototype deployment; the CI test and parity gates, the publication-inventory and media checks, and the photograph rule hold from the first deployment | §7.7, §6.1, IP §3 G-6 | text+test+owner | §7.7 (Phases); .github/workflows/tests.yml::webapp-test / Parity (T-23); .github/workflows/mkdocs.yml::webapp-bundle / Parity (T-23); subprojects/mkdocs/hooks/site_checks.py arms (a), (b) (T-03); G-6; OA-8 | owner-pending |
+| ADR-0017 Decision, Licensing deferred (L64-79) | the licensing decision deferred to Phase 2; until then the exports carry the stated assumption in data/REDISTRIBUTION.md, beside each source's terms and attribution, and in the record line the publication tool checks before every upload; the confirmation precedes activation and the first software release, whose pinned vintage carries the confirmed terms | §4.2, §4.4, §7.7, IP §3 G-1, IP §4 OA-1, IP §4 OA-13, IP §2 T-63 | text+owner+schedule+release | §4.2 step 1 (the OA-1 record gate); §4.4 (Vintage terms); G-1; OA-1; OA-13; T-63; §7.7 item 17 | owner-pending |
+| ADR-0017 Decision, Four authorizations (L88-95) | sharing the prototype, the owner's decision, stands for none of the three authorizations the review supplies: the research group's text approval (SC-7), the D-10 text, and the licensing decision, source by source | IP §4 OA-17, IP §3 G-4, IP §3 G-5, IP §4 OA-13 | owner | OA-17; G-4; OA-4; G-5; OA-3; OA-13 | owner-pending |
 
 ## 8. Relationship to the DDD
 
@@ -4246,7 +4720,8 @@ Every technical fact in this plan is a citation into the
 design content, never closes a DDD register row, and never resolves a
 conflict between documents — it schedules the work those documents
 define, holding work that depends on a Proposed decision until the
-owner accepts it, as T-59 waits for OA-12 and T-18 and T-54 for OA-17
+owner accepts it, as T-59 waits for the record of OA-12 and T-18 and
+T-54 for that of OA-17 — acceptances the owner gave on 2026-10-31
 ([DDD §10 — Relationship to the implementation
 plan](ddd.md#10-relationship-to-the-implementation-plan)). When a
 task body cannot be written unambiguously from its cited anchors, the

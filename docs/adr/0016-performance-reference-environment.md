@@ -1,10 +1,10 @@
 # ADR-0016: Performance reference environment — an on-demand AWS VM defined by Terraform
 
-- **Status**: Proposed
+- **Status**: Accepted
 - **Date**: 2026-10-30 (drafted with the DDD correction pass; the
   owner chose the AWS VM, its lifecycle, and the 95th-percentile
   judging rule the same day; clarified the same day after an external
-  review of this ADR)
+  review of this ADR); accepted 2026-10-31
 - **Deciders**: Michael Bouzinier (project owner)
 
 ## Context

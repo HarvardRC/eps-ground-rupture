@@ -4,21 +4,33 @@ The record of the external reviews of the detailed design document
 ([`docs/app/ddd.md`](ddd.md)) and of the implementation plan that
 accompanies it ([`docs/app/ip.md`](ip.md)), and of what was done with
 each finding. Review 2 asked for it: "Review records need a durable
-evidence location". The DDD's status line cites this file.
+evidence location". The status lines of the DDD and of the
+implementation plan cite this file.
 
-**Scope.** Three reviews, all of 2026-10-30: review 1 of the full DDD
-draft, review 2 of the corrected DDD, and a review of
-[ADR-0016 — Performance reference environment — an on-demand AWS VM defined by Terraform](../adr/0016-performance-reference-environment.md).
+**Scope.** Six reviews: three of 2026-10-30 — review 1 of the full
+DDD draft, review 2 of the corrected DDD, and a review of
+[ADR-0016 — Performance reference environment — an on-demand AWS VM defined by Terraform](../adr/0016-performance-reference-environment.md)
+— two reviews of the implementation plan, both of 2026-10-31, and
+the repository-backed design review of 2026-10-31 with its
+correction pass of 2026-11-01.
 The review texts are model output from the owner's review agent, not
 statements of the research group or of any other person. Reviews 1
 and 2 state that they read the supplied text and did not
 independently check the repository contents, the reported
-measurements, the revised PDD decisions, or the amended ADRs. This
-ledger restates each finding in one line under its review's own
-identifier — review 2's observations are lettered here, and the
-ADR-0016 points numbered — and does not reproduce the review texts.
-It also records the correction pass's own verification rounds and
-the owner's rulings made during the pass.
+measurements, the revised PDD decisions, or the amended ADRs; the
+first review of the implementation plan states that it read the plan
+against an earlier DDD and did not inspect
+[ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md),
+the later DDD amendments, the repository, or any workflow run, and
+the second that it did not inspect the current DDD, ADR-0017, this
+ledger, or the repository, and executed no commands. This ledger
+restates each finding in one line under its review's own identifier
+— review 2's observations are lettered here, the ADR-0016 points
+numbered, the first implementation-plan review's observations
+lettered, and the second's publication-governance item named — and
+does not reproduce the review texts. It also records the correction
+passes' own verification rounds and the owner's rulings made during
+them.
 
 **Evidence.** Nothing the DDD specifies has been built, and none of
 the checks it specifies has run. A disposition is a change to the
@@ -216,19 +228,341 @@ overrides the earlier proposal or rule named with it.
   [ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md)
   (Proposed) overrides the documents' earlier rule that nothing could
   deploy before the research group's approvals. The application is
-  deployed unlisted, with a prototype notice, under assumed licensing
-  terms, for the research group's review. The rules attached to a
-  public release — among them approval of the texts under
-  [SC-7](pdd.md#101-success-criteria) (scientific sign-off), the
-  [D-10](pdd.md#1-decision-register) (Liability-limitation text
-  referenced by CR-4) text, confirmed data terms, and the release
-  checklist — apply at activation and at the first software release;
+  deployed unlisted, with a prototype notice, under the current
+  licensing stated as an assumption, for the research group's review.
+  The rules attached to a public release — among them approval of the
+  texts under [SC-7](pdd.md#101-success-criteria) (scientific
+  sign-off), the [D-10](pdd.md#1-decision-register)
+  (Liability-limitation text referenced by CR-4) text, and the release
+  checklist — apply at activation and at the first software release,
+  which the licensing decision, deferred to Phase 2, also precedes;
   the CI gates, the publication-inventory and media checks, and the
   rule that no third-party photograph deploys without documented
   permission apply from the first deployment
   ([DDD §6.1](ddd.md#61-build-outputs-asset-paths-and-page-scaffold),
   [§4.2](ddd.md#42-publication-of-a-data-vintage),
   [§7.7](ddd.md#77-site-validation-and-release-checklist)).
+
+## Implementation plan review (2026-10-31)
+
+The owner's review agent reviewed the implementation plan against an
+earlier DDD, from before the amendments of review 2 and of
+[ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md);
+where the plan relies on the current DDD, a finding is a baseline
+mismatch. It raised 14 findings and five observations, lettered here,
+and recommended: "do not rewrite the plan." Seven proposer groups
+drafted 111 edits for them, and one editor applied 110 as written and
+the last by hand, then made seven consistency fixes, among them
+setting aside the exclusion proposal of finding 2. Three verifiers
+then read the result against the owner's rulings below, the review,
+and the documents' consistency; their 60 edits went in the same way,
+and edits that repeated or overlapped another verifier's edit of the
+same text were merged into it by hand. The verdicts are the
+proposers', as the verifiers judged them.
+
+| Finding | Verdict | Disposition | Where |
+|---|---|---|---|
+| **1** One reviewed document baseline before execution | Partly confirmed: every absence it lists is in the current DDD (baseline mismatch); the plan named no source revision, and no task body had an acceptance record | The plan's status line ties it to the sources at its own revision, which rule 2 reads; the status `Accepted (YYYY-MM-DD)` records the owner's acceptance of a body; the status lines of both documents name this review and cite this ledger. | [IP](ip.md) (status line), [Execution contract](ip.md#execution-contract) (rule 2), [Task format](ip.md#task-format); [DDD](ddd.md) (status line) |
+| **2** The prototype phase changes the approval and distribution boundaries | Partly confirmed: nothing recorded each source's own terms, and the authorizations were not stated apart. Refuted: that the prototype is a governance change from the PRD — the PRD and the PDD hold no implementation sequencing (owner ruling below); a restricted review deployment was weighed and rejected in ADR-0017 (Alternatives considered), and ADR-0017 deploys the prototype with its first data vintage | ADR-0017, amended 2026-10-31, defers the licensing decision to Phase 2 and keeps four authorizations apart: sharing the prototype (OA-17), the texts' sign-off (G-4), the [D-10](pdd.md#1-decision-register) (Liability-limitation text referenced by CR-4) text (G-5), and the licensing decision, source by source (OA-13, with the confirmed OA-1 record). `data/REDISTRIBUTION.md` holds one terms line per source that records only what is known, `not established` where nothing was found; no source is excluded, and T-18 stops on a missing line. A first proposal to exclude any source without evidence of permission was set aside, since ADR-0017 defers that question. | [ADR-0017 Decision](../adr/0017-unadvertised-prototype-before-public-release.md#decision); [DDD §4.4](ddd.md#44-licensing-archival-distribution-and-release-attachments) (Vintage terms), [§4.2](ddd.md#42-publication-of-a-data-vintage), [§6.1](ddd.md#61-build-outputs-asset-paths-and-page-scaffold); [IP §3](ip.md#3-gates-and-release-sequence) (G-1), [§4](ip.md#4-owner-and-research-group-actions) (OA-1, OA-13, OA-17), [T-18](ip.md#t-18--first-verified-publication-owner), [T-54](ip.md#t-54--prototype-deployment-unlisted) |
+| **3** The first publication can be blocked by the CI changes it enables | Partly confirmed: the graph already put every check that reads the pointer, and every required check, after the first pointer pull request, but the plan never stated the bootstrap order | T-18 names what `main` carries before it — T-10–T-16, the OA-1 and OA-17 commits, and T-20 with T-01 and T-02, first as a merge order and, since [Implementation plan review 2 (2026-10-31)](#implementation-plan-review-2-2026-10-31), in T-18's Depends-on — and the checks its pointer pull request meets; CI first fetches and verifies the vintage after that merge, and the DDD states the first-vintage case. | [IP T-18](ip.md#t-18--first-verified-publication-owner); [DDD §4.2](ddd.md#42-publication-of-a-data-vintage) (step 11), [§7.3](ddd.md#73-pipeline-and-export-tests) |
+| **4** T-11's completion depends on functionality assigned to its successors | Partly confirmed: T-11's Done-when never required the complete vintage, but its pointer step cited the full file set, one clause tested T-12's rule, and no integration check was named | T-11 states the intermediate pointer; the retained-copy clause moved to T-12, whose Done-when, after T-13, is named as the integration check. | [IP T-11](ip.md#t-11--export-task), [T-12](ip.md#t-12--export-validation) |
+| **5** Incremental type-checking and copy checks need a construction strategy | Partly confirmed: the copy checker cannot bind before its resources exist, since T-47 creates them together; but T-47 imported a type that T-30 declares without depending on T-30, four tasks lacked the type-check, and nothing said when the checks bind | T-02 states the rule: `tscCheck` binds from T-02 for every task that adds or changes TypeScript, and a task imports only what its Depends-on closure created — no stubs, suppressed errors, or weakened checks. T-47 depends on T-30, and the copy-registry completeness rule binds from T-47; `tscCheck` joins the Done-whens of T-35, T-36, T-37, and T-48. | [IP T-02](ip.md#t-02--build-and-check-tasks), [T-47](ip.md#t-47--application-configuration), [T-35](ip.md#t-35--node-parity-harness), [T-36](ip.md#t-36--application-unit-tests), [T-37](ip.md#t-37--early-feasibility-diagnostic), [T-48](ip.md#t-48--kern-county-preset) |
+| **6** "Agent task" completion includes owner-only executions | Confirmed: agent Done-whens ran research-data exports and full-data tests, while the plan reserved full-data operations to the owner | Rule 3 lets the agent run, on the owner's machine, local research-data operations that publish nothing — prechecks and diagnostics, never the publication or release evidence of T-18, T-63, or T-65; the owner runs publications, with the full-data checks inside them. The DDD points to the rule. | [IP Execution contract](ip.md#execution-contract) (rule 3), [Task format](ip.md#task-format); [DDD §7.3](ddd.md#73-pipeline-and-export-tests) |
+| **7** Several verification drills are impossible as written | Partly confirmed. T-35: confirmed, its re-gzipped copy kept a content-derived name over new bytes. T-51: refuted (baseline), its check is already a bare MkDocs build after staging. Grep assertions on configuration: confirmed | T-35 builds a coherent modified vintage and names each drill's expected first failure. Configuration is checked by parsing its YAML or JSON, and by tests; greps stay for literal text and absences, and as guards beside the type-check and tests. | [IP Execution contract](ip.md#execution-contract) (rule 3), [T-35](ip.md#t-35--node-parity-harness), [T-51](ip.md#t-51--site-validation-additions) |
+| **8** Destructive verification commands | Confirmed: `git checkout` restores and pointer rewrites could discard uncommitted work | Rule 5: a drill runs in the working tree only when it is clean, saves the exact bytes of every file it touches, and writes them back from an `EXIT` trap, confirmed with `cmp` — never through `git checkout`, `git restore`, `git stash`, or `git reset`; drills that commit or push run in a linked worktree; development exports save and restore the pointer. The agent reaches the clean tree by committing on its local task branch, which the owner allowed on 2026-10-31 (Owner rulings, below). | [IP Execution contract](ip.md#execution-contract) (rule 5); [T-03](ip.md#t-03--scenario-page-scaffold), [T-04](ip.md#t-04--traceability-lint), [T-21](ip.md#t-21--mkdocsyml-webapp-build-and-vintage-staging), [T-31](ip.md#t-31--query-engine), [T-35](ip.md#t-35--node-parity-harness), [T-37](ip.md#t-37--early-feasibility-diagnostic), [T-47](ip.md#t-47--application-configuration), [T-51](ip.md#t-51--site-validation-additions) |
+| **9** Scheduling rules disagree about when work may begin | Confirmed: the start, completion, and gate conditions disagreed, and nothing recorded accepted bodies or completed tasks | One scheduling model separates starting a task, completing it, and taking a step with a public or external effect. The statuses Accepted and Done carry durable records: the owner's commit accepting the document pair sets Accepted; a task's Done rides in its last pull request, recorded by the owner's merge; on the release branch, T-52 and T-55 become Done with the release merge. | [IP Scheduling model](ip.md#scheduling-model), [Task format](ip.md#task-format) |
+| **10** T-48 remains a release dependency outside the graph | Confirmed: T-48 joined the release only through an owner decision outside the graph | The chain is in the graph: T-48 depends on OA-2 and on the vintage T-63 publishes with [GS-3](pdd.md#102-golden-scenarios) (Kern preset (after D-6)), T-63 on OA-2, and T-65 on T-48, so the one release vintage follows [D-6](pdd.md#1-decision-register) (Kern County field-data group and principal-width rule). Revised after [Implementation plan review 2 (2026-10-31)](#implementation-plan-review-2-2026-10-31), finding 5: taking the preset out of this release is not a D-6 decision but a release-scope amendment of the PRD and the PDD, approved and committed by the product owner, for which the D-6 decision may give the reason; only a plan commit citing that dated record, after its check, drops T-48 from T-65's Depends-on, and T-63 still follows OA-2. | [IP §3](ip.md#3-gates-and-release-sequence), [§4](ip.md#4-owner-and-research-group-actions) (OA-2), [T-48](ip.md#t-48--kern-county-preset), [T-63](ip.md#t-63--release-vintage-owner), [T-65](ip.md#t-65--v03-release-owner) |
+| **11** The rollback rehearsal does not rehearse rollback between working releases | Confirmed: an invalid pointer and its revert restore no earlier working state, and the redeploy has a public effect | T-64 is a revert-path rehearsal that restores no earlier vintage or release — the first release has no rollback target — and its redeploy, from an unchanged tree, is a public deployment the owner authorizes by starting it. | [IP T-64](ip.md#t-64--rollback-rehearsal-owner); [DDD §4.3](ddd.md#43-retention-rollback-recovery-and-withdrawal) |
+| **12** Release approval timing needs one authoritative revision rule | Partly confirmed. Refuted: the timing complaint (baseline — the current DDD places the approval record after the activation commit and before the release merge) and the request to align the PDD — the PDD requires approval before public release, after [CR-10 — Scientific-content approval](prd.md#cr-10-scientific-content-approval), and which commit the approval precedes is the plan's. Confirmed: the record named no data vintage or build | The [SC-7](pdd.md#101-success-criteria) (scientific sign-off) approval record names the approved texts, the `data_tag`, and the `app.js` and `app.css` SHA-256s; T-65 compares them with the release commit before the merge; the record follows the merge of `main` into the release branch, and the version commit after it changes none of them. | [DDD §7.7](ddd.md#77-site-validation-and-release-checklist) (SC-7 approval record), [§6.1](ddd.md#61-build-outputs-asset-paths-and-page-scaffold), [§6.4](ddd.md#64-product-pages-beyond-the-scenario-page-p2p3); [IP §3](ip.md#3-gates-and-release-sequence), [§4](ip.md#4-owner-and-research-group-actions) (OA-4), [T-65](ip.md#t-65--v03-release-owner) |
+| **13** The performance task has late dependencies not all needed | Confirmed: T-61's local specs and diagnostic run waited, through T-59, on Phase-2 owner actions | T-61 completes without T-59, run locally as a diagnostic; T-59 runs on the owner's machine with the operator's Terraform and names every network access its credential-free checks make; the reference runs belong to the release (OA-5, T-65), and accepting their report is a separate decision. | [IP T-59](ip.md#t-59--reference-measurement-environment), [T-61](ip.md#t-61--measurement-suite), [§4](ip.md#4-owner-and-research-group-actions) (OA-5) |
+| **14** The traceability baseline omits the decisions that changed the plan | Confirmed: the rows date from the obligation sweep at `36abc56`, before [ADR-0016 — Performance reference environment — an on-demand AWS VM defined by Terraform](../adr/0016-performance-reference-environment.md) and ADR-0017 | Hand-added rows carry what ADR-0016 and ADR-0017 direct at the DDD and the plan, with their IP twins; the introductions say the sweep has not run since `36abc56`, which rows were added by hand, and which two ADR-0017 passages have none; the lint's claim stays limited to each row's form, citations, and twin. The sweep is not re-run now. | [DDD §8](ddd.md#8-traceability); [IP §7](ip.md#7-traceability) |
+| **a** OA-7's record is produced by T-65, which depends on OA-7 | Confirmed | A dated record, `docs/app/approvals/release-YYYY-MM-DD.md` with the line `Version: X.Y.Z`, is committed before T-65, whose first step checks it; if GitHub will not reuse the software tag after its draft release is deleted, a new record names the next patch version. | [IP §4](ip.md#4-owner-and-research-group-actions) (OA-7), [T-65](ip.md#t-65--v03-release-owner) |
+| **b** OA-6 combines software archiving with the data-deposit decision | Confirmed | One record line per decision — software archiving enabled or deferred with a reason, and the data deposit a Zenodo dataset record or deferred with a reason — each checked by T-65. | [IP §3](ip.md#3-gates-and-release-sequence), [§4](ip.md#4-owner-and-research-group-actions) (OA-6), [T-65](ip.md#t-65--v03-release-owner) |
+| **c** T-59's credential-free validation needs an exact policy for tools and network | Confirmed | T-59 names the machine, the operator's Terraform installation, and each network access. | [IP T-59](ip.md#t-59--reference-measurement-environment) |
+| **d** The release needs failure handling between public deployment and publication | Confirmed | From the release merge until publication, a failure stops T-65 and the owner records the deployed state; the first release has no rollback target, so the fix goes forward through a new release pull request, once the release branch is fast-forwarded to `main`, with the OA-4 check run again. | [IP T-65](ip.md#t-65--v03-release-owner) |
+| **e** Retries must respect locked assets and tags | Partly confirmed: T-18 already respected the locks; T-65 had no retry rule | T-65 retries only on the unpublished draft; once published, a release's assets and tag never change, and a later defect goes to the next patch release. | [IP T-65](ip.md#t-65--v03-release-owner) |
+
+**Owner rulings (2026-10-31).** Each overrides any earlier proposal
+or rule it touches.
+
+- **The licensing decision is deferred to Phase 2, and the documents
+  say so.** ADR-0017, amended the same day, states it in its
+  paragraphs "The licensing decision is deferred to Phase 2" and
+  "Four authorizations, kept apart"; Phase 1 runs on the current
+  licensing, stated as an assumption. Phase 1 adds no licensing rule
+  beyond recording facts: no source is excluded, and each source's
+  terms line records what is known — the license or a written
+  permission found, with the `https://` URL of the page that states
+  it, or `not established (checked YYYY-MM-DD)` with the source's DOI
+  URL. Establishing the terms not yet known belongs to the deferred
+  decision (OA-13). A missing line stops the upload; a
+  `not established` line does not.
+- **The PRD and the PDD hold no implementation sequencing.** Phases,
+  the prototype, gate timing, and deferrals are not theirs: they are
+  not amended for them and are never cited as the authority for a
+  sequencing or data-terms rule. The OA-1 record line in
+  [DDD §4.4](ddd.md#44-licensing-archival-distribution-and-release-attachments)
+  therefore cites
+  [Licensing and archival distribution](hldd.md#licensing-and-archival-distribution),
+  not [NFR-6 — Licensing](prd.md#nfr-6-licensing), which covers code,
+  prose, paper figures, and third-party media. Citations of the PRD
+  and the PDD for product content stay: the copy-deck texts, SC-7 as a
+  success criterion, CR-10's approval before a public release, and the
+  D-10 text.
+- **Releases stay immutable, with no test repository.** T-18 is the
+  end-to-end publication run; if GitHub will not reuse a software tag
+  after its draft release is deleted, the release takes the next
+  patch version.
+- **Commits and pushes.** The agent may create local throw-away
+  branches, its task branch among them, and commit there — never on
+  `main` or the branch the owner works on; it pushes a branch or
+  opens a pull request only when the owner asks. Rule 5's clean tree
+  is reached by committing on the task branch.
+- **The reference environment's AWS setup.** It uses the account of
+  the parked Athena work, which is shared and had no VPC, a default
+  one included; the VM runs in a dedicated network that the owner
+  keeps (a VPC, one public subnet, an internet gateway, a route
+  table), never a default VPC. That network and every resource
+  Terraform creates, the instance's network interface excepted, carry
+  the tags `Purpose=perf-reference`, `School=EPS`,
+  `Project=eps-ground-rupture`, and `Stakeholder=John Shaw`; beyond
+  the read-only `ec2:Describe*` actions and Canonical's public SSM
+  parameters, the measurement profile may create, change, or delete
+  only tagged instances, security groups inside that network, and
+  tagged key pairs, and no network
+  ([DDD §7.6](ddd.md#76-performance-and-compatibility-measurements);
+  [IP §4](ip.md#4-owner-and-research-group-actions): OA-16, recorded
+  2026-10-31, and the setup that OA-5's reference runs need, in place
+  since that date).
+
+**Answers applied to the first correction pass's questions.** The
+owner merges every task pull request; the owner's commit accepting
+the document pair sets each accepted body's status to Accepted, and
+a task's Done rides in its last pull request, recorded by the
+owner's merge (finding 9). A withdrawal over a source's terms applies
+to each vintage carrying data derived from that source, as
+ADR-0017's Consequences now say; DDD §4.3 already works vintage by
+vintage. The Kern County chain stays in the graph, with one release
+vintage (finding 10); the approval record names the vintage and the
+build (finding 12); the OA-6 and OA-7 records stand (observations a
+and b); the agent's local research-data operations are allowed
+(finding 6); T-20 merges before T-18 (finding 3); T-47 depends on
+T-30 (finding 5); the code greps stay as guards (finding 7); T-59 runs
+on the owner's machine, and its drill may look up the operator's
+address at `https://checkip.amazonaws.com` (observation c); and the
+obligation sweep is not re-run now (finding 14).
+
+**Per-source terms as found on 2026-10-31.** What each source's
+Phase-1 terms line can record:
+
+- **SURE 2.0** (Nurminen et al., 2022): CC BY 4.0, as its Zenodo
+  record states,
+  [10.5281/zenodo.7020265](https://doi.org/10.5281/zenodo.7020265).
+- **DEM experiments** (Chiama et al., 2024a and 2024b,
+  DesignSafe-CI): the Open Data Commons Attribution License (ODC-By),
+  which DesignSafe states for project PRJ-4680 and both its
+  publications in the metadata of the page both DOIs open,
+  <https://www.designsafe-ci.org/data/browser/public/designsafe.storage.published/PRJ-4680>,
+  and for the project in its publications API, as a second search
+  found the same day
+  ([Implementation plan review 2 (2026-10-31)](#implementation-plan-review-2-2026-10-31));
+  the DataCite records of
+  [10.17603/ds2-xpq0-gw80](https://doi.org/10.17603/ds2-xpq0-gw80) and
+  [10.17603/ds2-gfsj-pp60](https://doi.org/10.17603/ds2-gfsj-pp60)
+  list no rights.
+- **FDHI flatfile** (Sarmiento et al., 2021, UCLA Dataverse): CC0
+  1.0, which the UCLA Dataverse dataset page,
+  <https://dataverse.ucla.edu/dataset.xhtml?persistentId=doi:10.25346/S6/Y4F9LJ>,
+  and its API state for version 1.4 of the dataset (2024-05-29), as
+  a later look found the same day
+  ([Implementation plan review 2 (2026-10-31)](#implementation-plan-review-2-2026-10-31));
+  the DataCite record of
+  [10.25346/S6/Y4F9LJ](https://doi.org/10.25346/S6/Y4F9LJ) lists no
+  rights.
+- **Kern County compilation**: the written permission of 2026-09-18
+  from the lead author, who compiled the rows, that they may be
+  redistributed with the code and data, as
+  [`docs/datasets.md` — Kern County (`Combine_BuwaldaFDHI_KernSDC.csv`)](../datasets.md#kern-county-combine_buwaldafdhi_kernsdccsv)
+  records; its terms line cites that file on `main`,
+  <https://github.com/HarvardRC/eps-ground-rupture/blob/main/docs/datasets.md>.
+  Whether the permission covers the compilation's FDHI entries
+  belongs to the deferred decision.
+
+**Open owner questions.**
+
+- **Commits on task branches — answered 2026-10-31.** Yes: local
+  throw-away branches with commits (Owner rulings, above).
+- **The DEM terms line's URL.** The URL slot takes the first
+  publication's DOI; the attribution cites both publications with
+  both DOIs, and the line format keeps one URL. Applied as drafted;
+  the owner may revise it.
+- **Done after a task's own merge.** T-18, T-54, T-63, T-64, and T-65
+  carry their Done in the next pull request merged; on the release
+  branch, T-52 and T-55 become Done with the release merge, their
+  commits standing in until then. Applied as written; the owner may
+  revise it.
+- **Approval after `main` joins the release branch.** Because the
+  approval record names the vintage and the build, it is made once
+  the release branch contains `main` with every task T-65 depends on,
+  so the research group approves T-48's copy and preset with the
+  rest. Applied as written; the owner may revise it.
+- **Rows for two ADR-0017 passages.** Its paragraph Implementation
+  sequencing only and its withdrawal consequence have no traceability
+  rows until the sweep runs again; not added by hand, and the DDD §8
+  introduction names them.
+
+## Implementation plan review 2 (2026-10-31)
+
+The owner's review agent reviewed the revised implementation plan a
+second time the same day, without the current DDD,
+[ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md),
+or this ledger; a finding that only those settle is a baseline
+mismatch. It found that the revision "resolves most of the previous
+review's execution-planning findings", requested no broad rewrite,
+raised seven findings and an item on publication governance, and
+recommended: "accept the general structure and stop expanding
+supporting process." It named as ready to proceed, subject
+to the owner's acceptance of their source sections, the toolchain and
+build scaffolding, the draft-only page scaffolding, the pipeline
+views, the export and reference-generation implementation, the
+fixture tests, the decoder and state contracts, and the early
+nonpublishing calculation diagnostics. Seven proposer groups drafted
+42 edits, each judging its finding against the current documents,
+and one editor applied all 42 as written, then made five consistency
+fixes: the status lines of both documents; this review's name where
+the plan cites it; what G-1 says `publishVintage` step 1 checks; the
+plan's Blocked-by index, which the new links of T-15, T-54, and T-65
+extend; and the scope of the DesignSafe evidence below. The verdicts
+are the proposers'. A final review of the result found that the FDHI
+terms could be established (below), four minor defects, and a
+cosmetic one; one editor fixed them and applied the owner's decisions
+of the same day (rulings below).
+
+| Finding | Verdict | Disposition | Where |
+|---|---|---|---|
+| **1** T-62 is still Draftable despite an explicitly unresolved input | Confirmed: the body stopped for an owner designation that no document records — the PDD's golden-scenario table maps only US-1 to a scenario — and the pass condition of [US-3](prd.md#us-3-design-review) (Design review) also needs the consultant's reported scarp height, which no source gives | T-62 is Blocked until the product owner records, under [D-21](pdd.md#1-decision-register) (Success criteria and acceptance walkthroughs) in [PDD §10.3 — Acceptance walkthroughs](pdd.md#103-acceptance-walkthroughs), the scenario each of the [US-2](prd.md#us-2-pipeline-crossing) (Pipeline crossing) and US-3 walkthroughs drives, with US-3's reported scarp height; candidate steps drafted meanwhile are preparatory work, neither starting the task nor accepting its body. Only T-55 and T-65, both of Phase 2, depend on T-62. | [IP §2](ip.md#2-task-graph) (T-62 row), [T-62](ip.md#t-62--acceptance-walkthrough-scripts), [§6](ip.md#6-blocked-by-index); [`notes/Roadmap.md` — Ground Rupture Explorer — owner actions (opened 2026-10-30)](../../notes/Roadmap.md#ground-rupture-explorer--owner-actions-opened-2026-10-30) (OA-5) |
+| **2** First-publication ordering still has a prerequisite outside the graph | Confirmed: T-18 asked for T-20, with T-01 and T-02, as "a merge order, not a Depends-on edge", outside the Depends-on columns that the scheduling model makes authoritative, and a Done record did not say whether the task's implementation had reached `main` | T-20 joins T-18's Depends-on, whose closure then holds T-01, T-02, T-10–T-16, and T-20, with no cycle; T-18 step (1) names them as Done and on `main` through that closure. The Task format states once that a Done record means the task's implementation is on `main`, the commits of T-52 and T-55 reaching it with the release merge. T-20's whole Done-when, its scratch-branch push checks included, now precedes T-18. | [IP T-18](ip.md#t-18--first-verified-publication-owner), [Task format](ip.md#task-format) |
+| **3** "Diagnostics gate nothing" contradicts T-65's dependency list | Confirmed: T-65 depends directly on T-17 and T-37 | The Scheduling model separates a diagnostic's completion and record, which bind as any task's do — T-65 depends on T-17 and T-37 for theirs — from its numerical result, which is never an acceptance gate; the reference measurement of release-checklist item 5 remains the performance acceptance gate. | [IP Scheduling model](ip.md#scheduling-model); [DDD §7.7](ddd.md#77-site-validation-and-release-checklist) (item 5) |
+| **4** T-61 leaves an early type-checking prerequisite late | Partly confirmed. Refuted: the `caniuse-lite` ordering, which the review itself calls workable — no file before T-61 imports the package, and T-61 creates `test/caniuse-lite.d.ts` with its one importer. Confirmed: the DDD put `SCENARIO_INPUT_FIELDS` and `mapRecord` in `decode/` and the scenario's interpretation in `parseScenario` in `state/`, but stated no import direction, and no Done-when checked one | DDD §5.6 states that `src/state/scenario-json.ts` imports `SCENARIO_INPUT_FIELDS` and `mapRecord` from `src/decode/fields.ts` and that no file of `src/decode/` imports a file of `src/state/`; T-30's Done-when guards the boundary with a grep beside `tscCheck`, and T-34 runs the same guard once `src/state/` exists. An interface check, not a new task. | [DDD §5.6](ddd.md#56-scenario-state-and-url-encoding); [IP T-30](ip.md#t-30--loader-and-decoder), [T-34](ip.md#t-34--scenario-state) |
+| **5** The Kern-example scope-change path needs product-scope authority | Confirmed: the plan let a [D-6](pdd.md#1-decision-register) (Kern County field-data group and principal-width rule) decision that the preset is not in this release drop T-48 from T-65's Depends-on, but D-6 decides only the preset's family and slip-cap filter and its field-data group, and [FR-O6 — Kern County worked example](prd.md#fr-o6-kern-county-worked-example) is a P1 requirement of the v0.3 release | Only a release-scope amendment of the PRD and the PDD by the product owner takes the preset out of this release; the D-6 decision may give the reason, never the authority. IP §3 states the amendment's record — one dated product-owner commit that moves FR-O6 out of P1 in the PRD, its Appendix A row included, and adds a PDD decision-register row — and its check, run before the plan commit that cites the record; only that commit drops T-48 from T-65's Depends-on, and T-63 still follows OA-2. Without the amendment, the default chain holds. Finding 10 of the first review of the plan is revised to match. | [IP §3](ip.md#3-gates-and-release-sequence), [§4](ip.md#4-owner-and-research-group-actions) (OA-2), [T-63](ip.md#t-63--release-vintage-owner); [`notes/Roadmap.md` — Ground Rupture Explorer — owner actions (opened 2026-10-30)](../../notes/Roadmap.md#ground-rupture-explorer--owner-actions-opened-2026-10-30) (OA-2) |
+| **6** T-65's failure handling does not cover all post-merge failures | Confirmed: step (7) named no failed main-branch deployment, and its cleanup assumed a draft or a tag, which a failure in step (4) precedes | T-65 step (7) reads the publication state — the push run's conclusion, the release, and the tag on `origin` — and a four-row table gives each state's response: a failed push run leaves the site of the newest successful Companion site run published, recorded by that run's `headSha` and URL, and is rerun or fixed forward; with neither a draft nor a tag, nothing is deleted; a tag alone is deleted from `origin` and locally; a draft is deleted, its tag kept only for an item-11 retry. | [IP T-65](ip.md#t-65--v03-release-owner); [DDD §6.3](ddd.md#63-ci-workflows), [§4.2](ddd.md#42-publication-of-a-data-vintage) |
+| **7** The publication drill fixture needs an explicit synthetic-mode contract | Confirmed: the fixture DDD §4.2 specified, the frames of the §7.3 fixture lanes, met neither the layouts of the committed `deploy/terraform/tables.json` that step 4's clean-tree check needs nor the nine-pair `dictionary-order` constant, the 101-stage stride, rule `coefficient-reach`, or the GS-1 dips that the boundary cases read | DDD §4.2 states the fixture contract — raw files with the layouts and types the committed `deploy/terraform/tables.json` records, and `DEM_dataset.csv` trials over the nine pairs and the §3.1 values — under which `egr-build`, the export, and the reference generator run unchanged; only `publish.py` reads the drill override, and no rule is relaxed. T-15 follows the contract and escalates a rule the fixture cannot meet; its drill (a) is the fixture-backed demonstration — the staged reference file lists the scenarios of T-13's Done-when and 86 boundary cases — with a grep confining the override to `publish.py`. The contract was drafted against the repository's pipeline code with a throwaway script, not kept; the evidence is drill (a), planned. | [DDD §4.2](ddd.md#42-publication-of-a-data-vintage); [IP T-15](ip.md#t-15--publication-tooling) |
+| **Publication governance** The plan still publishes before establishing whether each source permits it | Partly confirmed: the plan already said that the assumed record is no evidence of permission, but recorded the deferral without the distribution risk the owner accepts with it, and still labelled `publishVintage` step 1 a permission gate. Not adopted: the required authorization before T-18 or T-54, or a review under restricted access or already-authorized data — the owner keeps the deferral (ruling below), which the review allows when the risk is recorded explicitly | G-1, T-18 step (1), and T-54 each state the unresolved distribution risk — the vintage fetchable by anyone who finds it, fetched copies beyond recall, and the withdrawal of DDD §4.3 the remedy for a source whose terms forbid the redistribution — which the owner accepts in ADR-0017 (Consequences), and that this acceptance, not evidence of permission, answers the hold, which the owner overrode on 2026-10-31 (ruling below). Step 1 is the terms-record gate, named for what it checks — the record line, the wording, and immutability — and G-1 says that it never checks whether a source permits the redistribution. A second search found the DEM terms, and a later look the same day the FDHI terms (below). | [IP §3](ip.md#3-gates-and-release-sequence) (G-1), [T-15](ip.md#t-15--publication-tooling), [T-18](ip.md#t-18--first-verified-publication-owner), [T-54](ip.md#t-54--prototype-deployment-unlisted), [T-63](ip.md#t-63--release-vintage-owner); [DDD §4.2](ddd.md#42-publication-of-a-data-vintage) (step 1); [ADR-0017 Consequences](../adr/0017-unadvertised-prototype-before-public-release.md#consequences) |
+
+**Owner rulings (2026-10-31).** The rulings of the first review of
+the plan stand; six are made for this one.
+
+- **The licensing decision stays deferred.** The owner keeps
+  ADR-0017's deferral against the review's hold on the external
+  publication steps, as the review allows when the unresolved
+  distribution risk is recorded explicitly and G-1's assumed form is
+  not described as a verified permission gate. Phase 1 adds no
+  licensing rule beyond recording facts.
+- **Product decisions are the PRD's and the PDD's.** They hold no
+  implementation sequencing, but taking a P1 requirement such as
+  FR-O6 out of a release is a product decision, which the product
+  owner records there; the plan then cites that record. The
+  correction pass edits neither document: the plan states what the
+  product owner records.
+- **ADR-0016 and ADR-0017 are accepted.** The owner approved both on
+  2026-10-31, owner actions OA-12 and OA-17. Their status lines and
+  their rows in `docs/adr/README.md` read Accepted in the working
+  tree, where the HLDD's "(Proposed)" labels are swept as well; the
+  record is the owner's dated commit of that status. The final pass
+  removed the labels from the DDD, the plan, and `notes/Roadmap.md`,
+  and states the two acceptances where those documents, the owner's
+  local walkthrough note, and this ledger's open items still had them
+  pending; the earlier sections of this ledger keep the labels they
+  recorded at the time.
+- **The review's hold is overridden.** The owner overrode the hold
+  that the review placed on T-18 and T-54. G-1, T-18 step (1), and
+  T-54 say so beside the risk the owner accepts in ADR-0017
+  (Consequences); neither the acceptance nor the override is evidence
+  that a source permits the redistribution.
+- **Claude carries out the reference environment's AWS operations.**
+  OA-5's reference runs and their cleanup are run by Claude at the
+  owner's request with the owner's `egr-perf` profile; an agent
+  task's commands still run without AWS credentials, and the records
+  and checks are unchanged
+  ([IP Execution contract](ip.md#execution-contract), rule 3;
+  [T-59](ip.md#t-59--reference-measurement-environment); OA-5).
+- **A budget miss is a failure, and obvious improvements come
+  first.** A reference run that misses a budget is recorded as a
+  failure — release-checklist item 5 fails in the run's record — and
+  reported to the owner at once. An obvious improvement that
+  sacrifices no functionality — every specified behavior kept, every
+  test, parity check, and browser-lane check unchanged — is made by
+  default, before any other remedy, and also when every budget is
+  met; one that would change specified behavior or a DDD decision goes
+  to the owner as a proposal
+  ([IP Execution contract](ip.md#execution-contract), rule 4;
+  [T-61](ip.md#t-61--measurement-suite); OA-5).
+
+**Per-source terms, second search (2026-10-31).** The DEM
+experiments are under the Open Data Commons Attribution License
+(ODC-By): the metadata of the DesignSafe page that both DOIs open
+states it for project PRJ-4680 and both its publications, and
+DesignSafe's publications API states it for the project. The FDHI
+flatfile is under CC0 1.0: the search met a bot check at the UCLA
+Dataverse and did not bypass it, and the DataCite and OpenAIRE
+records, the FDHI database report (GIRS-2021-08, Rev. 3.2), and the
+FDHI databases page of UCLA's NHR3 center state no license, but the
+Dataverse dataset page and its API, which answered plain requests
+the same day, state CC0 1.0 for version 1.4 of the dataset
+(2024-05-29), its flatfile unrestricted. The DEM and FDHI bullets of
+the first review's list and OA-1 in `notes/Roadmap.md` now record
+them. Two facts for the licensing
+decision of Phase 2 (OA-13): ODC-By 1.0 asks that a publicly conveyed
+Derivative Database be conveyed "only under the terms of this
+License" (§4.2 a), and that a publicly used Produced Work carry a
+notice that its content was obtained from the database and is
+available under that license (§4.3); and the DEM experiments'
+creators in their DataCite records are the five authors of the study
+the exports serve.
+
+**Open owner questions.**
+
+- **The walkthrough scenarios of US-2 and US-3** (finding 1): which
+  scenario each walkthrough drives, and the reported scarp height the
+  US-3 script gives the reviewer, recorded under D-21 in PDD §10.3.
+  Recommended: US-3 on the settings of US-1's golden scenario, with
+  one stated reported value; US-2 on stated settings that fit its
+  story — loose, shallow sediment on a steeply dipping fault — since
+  none of the eight golden scenarios does; and §10.3 saying that a
+  walkthrough scenario need not be a golden scenario,
+  [SC-3](pdd.md#101-success-criteria) (correctness) resting on the
+  golden scenarios through the parity run. A new golden scenario
+  would also change PDD §10.2,
+  [ADR-0015 — Golden-scenario references and a pipeline↔client parity harness](../adr/0015-golden-scenario-parity.md),
+  DDD §3.6, and T-13; on the recommended path, the commit that
+  unblocks T-62 aligns "against the golden scenarios" in DDD §7.7
+  item 13 and in T-62's row and step (1) with the new §10.3 wording.
+  Recorded before or with the acceptance of the document pair, the
+  decision lets T-62 be accepted with the rest.
+- **The release-scope amendment's form** (finding 5). Recommended: the
+  form IP §3 states — one dated product-owner commit that moves FR-O6
+  out of P1 in the PRD, its Appendix A row included, and adds a PDD
+  decision-register row whose Decision cell reads
+  `FR-O6 (Kern County worked example) is out of the v0.3 release.`,
+  with Owner `Product owner`, Status `Decided (YYYY-MM-DD)`, and the
+  reason in its last cell. Amending the row of
+  [D-1](pdd.md#1-decision-register) (P1 is the MVP and release target
+  (v0.3)) instead would need another check.
+- **D-6 after such an amendment** (finding 5): should a release
+  without FR-O6 still wait for D-6? Recommended: yes — T-63 keeps
+  OA-2, since ADR-0017 lists D-6 among the decisions recorded before
+  activation; a release free of D-6 needs that list amended first,
+  and the same plan commit then removes OA-2 from T-63.
+- **The DEM terms line's URL** (publication governance). Recommended:
+  keep the first publication's DOI in the URL slot: it opens the
+  DesignSafe page that states the license, as the SURE line's DOI
+  opens the Zenodo record that states its own.
+- **ODC-By and the assumed CC BY 4.0 — answered 2026-10-31**
+  (publication governance): its §4.2 and §4.3 bear on the assumed
+  terms of the three DEM-derived exports. As recommended, no Phase-1
+  change: the licensing decision of Phase 2 (OA-13) takes them up
+  with the DEM experiments' authors, §4.2(a) of ODC-By 1.0 among its
+  named inputs.
 
 ## Open items routed to owner actions
 
@@ -257,15 +591,18 @@ reviews and the verification rounds leave with the owner:
   environment), on which every [SC-4](pdd.md#101-success-criteria)
   (performance) verdict rests, and the three readings listed in
   [Authority and change control](ddd.md#authority-and-change-control).
-- **The two Proposed ADRs.** Owner action
-  [OA-12](ip.md#4-owner-and-research-group-actions) accepts
-  [ADR-0016 — Performance reference environment — an on-demand AWS VM defined by Terraform](../adr/0016-performance-reference-environment.md)
-  before the reference environment is built, and
-  [OA-16](ip.md#4-owner-and-research-group-actions) supplies its
-  pinned image ID;
-  [ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md)
-  is accepted before the first data vintage is published and before
-  the prototype deployment.
+- **The two ADRs approved on 2026-10-31.** The owner approved
+  [ADR-0016 — Performance reference environment — an on-demand AWS VM defined by Terraform](../adr/0016-performance-reference-environment.md),
+  owner action [OA-12](ip.md#4-owner-and-research-group-actions),
+  which precedes the building of the reference environment — its
+  pinned image ID, [OA-16](ip.md#4-owner-and-research-group-actions),
+  is recorded (2026-10-31) — and
+  [ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md),
+  owner action OA-17, which precedes the publication of the first
+  data vintage and the prototype deployment. Left is the record, the
+  owner's dated commit of their Accepted status, which the working
+  tree holds
+  ([Implementation plan review 2 (2026-10-31)](#implementation-plan-review-2-2026-10-31)).
 - **[OA-10](ip.md#4-owner-and-research-group-actions)**, the `main`
   ruleset of review 1's B-9, with its reading of
   [ADR-0015 — Golden-scenario references and a pipeline↔client parity harness](../adr/0015-golden-scenario-parity.md)'s
@@ -276,12 +613,24 @@ reviews and the verification rounds leave with the owner:
   them the fixed-here texts these corrections added, such as the
   slip-entry rejection line (B-2), the chart-data disclosure label
   (C-1), and the prototype notice — recorded with each text's
-  SHA-256, so that a later change to a listed text needs a new
-  approval.
+  SHA-256, the `data_tag`, and the `app.js` and `app.css` SHA-256s,
+  so that a later change to a listed text, the vintage, or the bundle
+  needs a new approval.
 - **[OA-5](ip.md#4-owner-and-research-group-actions)**, the
   release-time reference measurement (C-3) and the manual pass over
   the other baseline engines and mobile browsers (C-2; review 2,
   item 3).
+- **The walkthrough scenarios of
+  [US-2](prd.md#us-2-pipeline-crossing) (Pipeline crossing) and
+  [US-3](prd.md#us-3-design-review) (Design review)**, with US-3's
+  reported scarp height — a product acceptance decision under
+  [D-21](pdd.md#1-decision-register) (Success criteria and acceptance
+  walkthroughs) that the product owner records in
+  [PDD §10.3 — Acceptance walkthroughs](pdd.md#103-acceptance-walkthroughs);
+  [T-62](ip.md#t-62--acceptance-walkthrough-scripts), the walkthrough
+  scripts, is Blocked until then
+  ([Implementation plan review 2 (2026-10-31)](#implementation-plan-review-2-2026-10-31),
+  finding 1).
 - **Release steps** of [T-65](ip.md#t-65--v03-release-owner), the
   v0.3 release, which the owner runs under
   [OA-9](ip.md#4-owner-and-research-group-actions): approving the
@@ -294,12 +643,49 @@ reviews and the verification rounds leave with the owner:
   activation; [OA-3](ip.md#4-owner-and-research-group-actions) lands
   the [D-10](pdd.md#1-decision-register) (Liability-limitation text
   referenced by CR-4) text; and
-  [OA-13](ip.md#4-owner-and-research-group-actions) and
-  [OA-1](ip.md#4-owner-and-research-group-actions) write and then
-  confirm the data terms; until then, Phase 1 publishes under the
+  [OA-13](ip.md#4-owner-and-research-group-actions) records the
+  licensing decision that ADR-0017 defers to Phase 2, and the
+  confirmed record of [OA-1](ip.md#4-owner-and-research-group-actions)
+  lands with it or after it; until then, Phase 1 publishes under the
   assumed terms that
-  [DDD §4.2](ddd.md#42-publication-of-a-data-vintage) step 1
-  records.
+  [DDD §4.2](ddd.md#42-publication-of-a-data-vintage) step 1 records,
+  beside each source's terms line.
+
+## Repository-backed design review (2026-10-31; disposition 2026-11-01)
+
+This review read the product, architecture, detailed-design, and
+implementation-plan documents against relevant pipeline code,
+checked the documentation links and task dependencies, and ran
+targeted diagnostics against the raw simulation data and the exact
+browser-support package. These diagnostics are not execution of the
+planned application or its test suite.
+
+The owner directed that the P1 finding be fixed, allowed a fresher
+browser requirement, and required explicit error messages. The owner
+deferred the P2 and P3 findings below; those labels are review
+priorities, not the product's delivery phases. Their specified
+behavior is unchanged by this correction pass.
+
+| Finding | Disposition | Correction or deferred work | Where |
+|---|---|---|---|
+| **P1 — Compatibility gate cannot pass** | Corrected in design | The old dataset and 24-month window select Firefox 108 and Safari/iOS 16.2, below the required `DecompressionStream` minima. The support policy now uses 12 months, the dataset pin is `1.0.30001820`, and the release gate requires its newest browser release to be at most 30 days old. The inventory records a scoped Safari Streams partial-support exception backed by MDN's used-API evidence. Failure diagnostics name the API and tested browser. Runtime and ordinary static fallback copy state the browser policy and explicit update/reload steps, including iOS/iPadOS updates for Safari. | [PDD §9.2](pdd.md#92-browser-and-mobile-baseline-d-16-proposed); [HLDD §2](hldd.md#2-architectural-constraints), [§6.1](hldd.md#61-failure-honesty-adr-0010); [DDD §2](ddd.md#2-repository-structure-naming-and-toolchain), [§5.10](ddd.md#510-failure-states), [§7.5](ddd.md#75-browser-test-lane), [§7.6](ddd.md#76-performance-and-compatibility-measurements), [§7.7](ddd.md#77-site-validation-and-release-checklist); [IP T-01](ip.md#t-01--gradle-webapp-subproject), [T-03](ip.md#t-03--scenario-page-scaffold), [T-44](ip.md#t-44--failure-states), [T-61](ip.md#t-61--measurement-suite), [T-65](ip.md#t-65--v03-release-owner); [ADR-0014](../adr/0014-committed-content-hashed-artifacts.md) |
+| **P2 — ECDF thinning loses large tied jumps** | Deferred by owner | At slip 0–0.5 m, the specified curve understates the scarp-dip cumulative share by about 8 percentage points. Preserve large jumps or impose a probability-error bound. | [DDD §5.12](ddd.md#512-charts) |
+| **P2 — Deployment removes assets needed by open pages** | Deferred by owner | An ordinary refresh removes old hashes before an open tab's first lazy request. Specify retention for nonwithdrawn assets or recovery that preserves the scenario. | [DDD §5.2](ddd.md#52-artifact-loading-and-decoding), [§6.1](ddd.md#61-build-outputs-asset-paths-and-page-scaffold) |
+| **P2 — Evidence-ledger revision exceptions omit traceability checks** | Deferred by owner | Extend the publication-commit exception to traceability evidence inherited from the pinned vintage. | [DDD §7.7](ddd.md#77-site-validation-and-release-checklist); [IP T-65](ip.md#t-65--v03-release-owner) |
+| **P2 — Deferred loading announcement can outlive a cached load** | Deferred by owner | Cancel or invalidate the loading timer when the first result or failure commits. | [DDD §5.11](ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle) |
+| **P3 — Stage-count validation and stride disagree** | Deferred by owner | Enforce 101 stages for schema 1 or derive the query stride from the measured count. Current full-data tests protect the shipped dataset. | [DDD §4.1](ddd.md#41-export-task-and-validation), [§5.3](ddd.md#53-query-engine) |
+| **P3 — Export prerequisites omit a builder input** | Deferred by owner | Include `fdhi_cleaned` among prerequisites or restrict the view builder to the required product views. The ordinary fresh build already supplies it. | [DDD §4.1](ddd.md#41-export-task-and-validation) |
+
+The correction's dataset diagnostic used the exact
+[`caniuse-lite@1.0.30001820` package](https://registry.npmjs.org/caniuse-lite/1.0.30001820).
+It selected 2025-10-27–2026-10-27, with oldest versions Chrome 142,
+Edge 142, Firefox 145, Safari 26.2, and iOS Safari 26.1; Android
+Chrome uses the desktop mapping. Required dataset-backed surfaces
+pass, with only the documented Safari Streams exception, and the
+explicit API minima are below those versions. Planned checks now
+also cover the historical failing versions, rejected missing or
+partial evidence, and browser-update guidance when the application
+bundle cannot start. The application remains unbuilt.
 
 ## References
 

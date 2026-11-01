@@ -114,7 +114,7 @@ named in the last column carry the detail.
 | D-13 | Scarp-family view availability and label. | FR-G2 | Product owner | Proposed | Toggle "Group collapse variants"; §3.7. |
 | D-14 | Chart-export provenance format. | FR-D2 (P2) | Product owner | Proposed | Caption strip + sidecar text; §6.3. |
 | D-15 | Shared-link version notice. | FR-X1 (P2) | Product owner | Proposed | URLs carry no version stamp when links first ship (P2); notice rule for later; §7.2. |
-| D-16 | Browser and mobile baseline. | NFR-4 | Product owner | Proposed | Evergreen 24-month window; 360 px floor; §9.2. |
+| D-16 | Browser and mobile baseline. | NFR-4 | Product owner | Proposed | Evergreen 12-month window; 360 px floor; §9.2. Browser window amended at owner review, 2026-11-01. |
 | D-17 | Accessibility conformance target. | NFR-5 | Product owner | Proposed | WCAG 2.2 AA for new pages; §9.3. |
 | D-18 | Field-overlay default set and per-source analogue map. | FR-O5 | Owner, research-group review | Proposed | §4.4. |
 | D-19 | Native full-dataset exploration panel in v0.3. | FR-G5, C8 | Product owner | Proposed | None — no documented gap; the five dashboards serve C8; recorded gap process in §2.4. |
@@ -844,9 +844,19 @@ runtime or comparably heavy environment (NFR-3).
 ### 9.2 Browser and mobile baseline (D-16, Proposed)
 
 Evergreen Chrome, Edge, Firefox, and Safari versions released within
-24 months of each product release; iOS Safari and Android Chrome in
+12 months before each product release; iOS Safari and Android Chrome in
 the same window; no legacy-browser support. Mobile floor: fully
 usable at 360 px width, no hover-dependent essentials (NFR-4).
+
+The browser window was narrowed at the owner's review on 2026-11-01.
+When a required browser feature is unavailable, the page names the
+missing feature and tells the reader to update to the latest stable
+browser and reload; for Safari on iPhone or iPad it tells the reader
+to update iOS or iPadOS. The ordinary static fallback also states
+the supported-browser policy and recovery steps, so the guidance is
+visible even when the application script cannot start. An older
+browser is not rejected solely because of its version: startup
+checks the required features.
 
 ### 9.3 Accessibility target (D-17, Proposed)
 

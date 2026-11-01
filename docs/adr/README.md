@@ -35,8 +35,8 @@ old number to its fate. The originals remain in git history.
 | [0013](0013-row-level-scenario-artifact.md)           | Row-level, trial-major columnar scenario artifact | Accepted |
 | [0014](0014-committed-content-hashed-artifacts.md)    | Product artifacts in release assets, pinned by a committed manifest | Accepted |
 | [0015](0015-golden-scenario-parity.md)                | Golden-scenario references; pipeline↔client parity harness | Accepted |
-| [0016](0016-performance-reference-environment.md)     | Performance reference environment — an on-demand AWS VM defined by Terraform | Proposed |
-| [0017](0017-unadvertised-prototype-before-public-release.md) | An unadvertised prototype deployment precedes the public release | Proposed |
+| [0016](0016-performance-reference-environment.md)     | Performance reference environment — an on-demand AWS VM defined by Terraform | Accepted |
+| [0017](0017-unadvertised-prototype-before-public-release.md) | An unadvertised prototype deployment precedes the public release | Accepted |
 | [—](dead-ends.md)                                     | **Dead ends** — the retired 2026-05/06 architecture, as one story | Retrospective |
 
 ## Adding a new ADR

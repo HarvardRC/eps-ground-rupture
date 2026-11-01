@@ -111,11 +111,15 @@ never committed: CI builds it from committed source (ADR-0011).
   downloads** (the four text exports beside it add only tens of
   kilobytes). The browser inflates it with the built-in
   DecompressionStream API, supported by every evergreen browser inside
-  the 24-month window of
+  the 12-month window of
   [PDD §9.2 — Browser and mobile baseline (D-16,
   Proposed)](../app/pdd.md#92-browser-and-mobile-baseline-d-16-proposed).
   Shipping the compressed file makes the download size a property of
   the artifact itself, not of the host.
+  The window was narrowed from 24 to 12 months at the owner's review
+  on 2026-11-01; DDD §7.6 checks the required APIs against a pinned
+  browser-support dataset, and its release checklist requires that
+  dataset's newest browser release to be no more than 30 days old.
 - **No raw (uncompressed) twin is uploaded beside it** (proposed):
   the compressed file is checksummed in both manifests and parity-tested
   in CI ([ADR-0015 — Golden-scenario references and a pipeline↔client

@@ -1,7 +1,8 @@
 # Ground Rupture Explorer — detailed design document
 
 **Status:** first full draft, corrected after external review
-(2026-10-30). Every section is drafted and normative; every register
+(2026-10-30) and again after the reviews of the implementation plan
+(2026-10-31). Every section is drafted and normative; every register
 row is Proposed. Nothing it specifies has been built yet, and none of
 the checks it introduces has run: every *Verification (planned):*
 line names a planned check. The external review findings and their
@@ -156,7 +157,7 @@ independently redefine scientific or statistical behavior.
   failure blocks merge" under the admin bypass included (owner
   action OA-10, Proposed).
 - Architecture is the ADRs': [ADR-0010–ADR-0015](../adr/README.md),
-  accepted, and two Proposed decisions,
+  accepted, and two decisions the owner accepted on 2026-10-31,
   [ADR-0016 — Performance reference environment — an on-demand AWS VM defined by Terraform](../adr/0016-performance-reference-environment.md)
   and
   [ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md),
@@ -164,12 +165,14 @@ independently redefine scientific or statistical behavior.
   review, then the public release — are publication states of
   [§6.1](#61-build-outputs-asset-paths-and-page-scaffold). A change,
   or a new decision such as these two, completes the repository's
-  ADR process before dependent work proceeds: for ADR-0016 that is
-  the owner's acceptance, owner action OA-12 of
+  ADR process before dependent work proceeds. For these two that is
+  the owner's acceptance of 2026-10-31, owner actions OA-12
+  (ADR-0016) and OA-17 (ADR-0017) of
   [IP §4 — Owner and research-group actions](ip.md#4-owner-and-research-group-actions),
-  and for ADR-0017 the owner's acceptance before the first data
-  vintage is published under its assumed terms
-  ([§4.2](#42-publication-of-a-data-vintage) step 1) and before the
+  recorded by the owner's dated commit that sets each ADR's status
+  to Accepted; that record precedes the Terraform root of ADR-0016,
+  the publication of the first data vintage under ADR-0017's assumed
+  terms ([§4.2](#42-publication-of-a-data-vintage) step 1), and the
   prototype deployment.
 - Scientific and statistical rules are the core Python
   implementation's and its tests'; the pipeline is the single
@@ -281,7 +284,7 @@ grounds, and the check planned to verify the choice.
 | DD-9 | Chart text-alternative mechanism. | Every chart needs a text alternative equivalent to its content; the PDD sets the target, the DDD the mechanism. Because the mechanism is user-visible, the row closes only with the owner's acceptance of the drafted section. | [PDD §9.3 — Accessibility target (D-17, Proposed)](pdd.md#93-accessibility-target-d-17-proposed); [HLDD §7.2 — Accessibility and supported environments](hldd.md#72-accessibility-and-supported-environments). | Proposed (2026-10-30) |
 | DD-10 | Field-naming convention at the pipeline-to-application boundary. | Export field names cross from the Python pipeline into TypeScript; fix one convention and the single mapping point. No approved document governs this; the row exists so the choice is registered rather than implicit. | [HLDD §12 — Scope of the following documents](hldd.md#12-scope-of-the-following-documents) (module interfaces; schemas). | Proposed (2026-10-30) |
 | DD-11 | Canonical scenario serialization. | One lossless, machine-readable form of the accepted scenario, byte-identical from the Python reference generator and the TypeScript client, shared by the reference results' scenario inputs, the download package, and the P2 shared-link vocabulary; display state excluded. PDD §6.1 fixes the package contents but no serialization; the fourth package member, `scenario.json` ([§5.9](#59-downloads)), is a user-visible addition, so the row closes only with the owner's acceptance of §5.6 and §5.9. | [FR-D1 — Download matching simulation records and statistics](prd.md#fr-d1-download-matching-simulation-records-and-statistics); [PDD §6.1 — Download package (FR-D1)](pdd.md#61-download-package-fr-d1); [PDD §7.1 — Shared links](pdd.md#71-shared-links). | Proposed (2026-10-30) |
-| DD-12 | Performance reference environment. | The amended PDD §9.1 sets as reference conditions "a fixed reference environment standing in for a mid-range laptop (2020 or later) — a cloud virtual machine whose exact specification the DDD fixes", each time budget judged at the 95th percentile of 30 measured runs; HLDD §2 (Performance budgets) leaves "the machine specification and the run procedure" to the DDD, and ADR-0016 (Proposed) records the kind — an AWS virtual machine of fixed specification, defined by Terraform — and leaves "the exact values" to the DDD. Left to the DDD: instance type and region, image, root volume, the network conditions beyond the PDD's 10 Mbps, and the percentile's definition over 30 runs, which must meet HLDD §2's "for at least 95% of measured interactions". Candidates: instance types without CPU burst credits; burstable types, whose CPU credits tie a run to the instance's history, are excluded. The environment is the agreed acceptance baseline, recreatable from the repository, not a calibration against laptops; its timings still vary from run to run. Because every [SC-4](pdd.md#101-success-criteria) (performance) verdict rests on the choice, the row closes only with the owner's acceptance of the drafted section. | [PDD §9.1 — Performance budgets (D-9, Proposed)](pdd.md#91-performance-budgets-d-9-proposed); [HLDD §2 — Architectural constraints](hldd.md#2-architectural-constraints) (Performance budgets, amended 2026-10-30); [HLDD §7.1 — Performance estimates and verification](hldd.md#71-performance-estimates-and-verification); [ADR-0016](../adr/0016-performance-reference-environment.md) (Proposed). | Proposed (2026-10-30) |
+| DD-12 | Performance reference environment. | The amended PDD §9.1 sets as reference conditions "a fixed reference environment standing in for a mid-range laptop (2020 or later) — a cloud virtual machine whose exact specification the DDD fixes", each time budget judged at the 95th percentile of 30 measured runs; HLDD §2 (Performance budgets) leaves "the machine specification and the run procedure" to the DDD, and ADR-0016 records the kind — an AWS virtual machine of fixed specification, defined by Terraform — and leaves "the exact values" to the DDD. Left to the DDD: instance type and region, image, root volume, the network conditions beyond the PDD's 10 Mbps, and the percentile's definition over 30 runs, which must meet HLDD §2's "for at least 95% of measured interactions". Candidates: instance types without CPU burst credits; burstable types, whose CPU credits tie a run to the instance's history, are excluded. The environment is the agreed acceptance baseline, recreatable from the repository, not a calibration against laptops; its timings still vary from run to run. Because every [SC-4](pdd.md#101-success-criteria) (performance) verdict rests on the choice, the row closes only with the owner's acceptance of the drafted section. | [PDD §9.1 — Performance budgets (D-9, Proposed)](pdd.md#91-performance-budgets-d-9-proposed); [HLDD §2 — Architectural constraints](hldd.md#2-architectural-constraints) (Performance budgets, amended 2026-10-30); [HLDD §7.1 — Performance estimates and verification](hldd.md#71-performance-estimates-and-verification); [ADR-0016](../adr/0016-performance-reference-environment.md). | Proposed (2026-10-30) |
 
 ### Closure notes (Proposed 2026-10-30)
 
@@ -755,9 +758,11 @@ runs.
     ([§7.6](#76-performance-and-compatibility-measurements)) — is
     that of
     [ADR-0016](../adr/0016-performance-reference-environment.md),
-    which is Proposed: the Terraform root of T-59, and with it every
-    reference run, waits for its acceptance, owner action OA-12 of
-    [IP §4 — Owner and research-group actions](ip.md#4-owner-and-research-group-actions).
+    which the owner accepted on 2026-10-31: the Terraform root of
+    T-59, and with it every reference run, follows the record of that
+    acceptance, owner action OA-12 of
+    [IP §4 — Owner and research-group actions](ip.md#4-owner-and-research-group-actions),
+    the owner's dated commit that sets the ADR's status to Accepted.
     Grounds: PDD §9.1 asks for a fixed stand-in for a device class,
     not a calibrated copy of one laptop, so no laptop benchmark
     enters the choice: the environment is the project's agreed
@@ -908,7 +913,7 @@ calls in both environments — released alongside the runtime pin),
 [§7.5](#75-browser-test-lane), contemporary with the other pins; the
 lockfile resolves its `axe-core` dependency to one exact version, and
 `@playwright/test` satisfies its `playwright-core` peer), and
-`caniuse-lite 1.0.30001687` (the browser-support dataset of the
+`caniuse-lite 1.0.30001820` (the browser-support dataset of the
 compatibility test of
 [§7.6](#76-performance-and-compatibility-measurements), which states
 when the dataset is upgraded). The list is complete: another package
@@ -928,9 +933,9 @@ what the reader receives or how it is built, or a tool such as the
 Terraform of `perf/` (below) — needs an ADR first
 ([NFR-8 — Architecture decision record](prd.md#nfr-8-architecture-decision-record)),
 and `perf/`'s is
-[ADR-0016](../adr/0016-performance-reference-environment.md)
-(Proposed); no application framework may be introduced. No DOM
-implementation (jsdom, happy-dom, linkedom) joins the dependencies
+[ADR-0016](../adr/0016-performance-reference-environment.md); no
+application framework may be introduced. No DOM implementation
+(jsdom, happy-dom, linkedom) joins the dependencies
 either, although one would change neither: Node tests import only the
 pure modules of [§5.1](#51-modules-and-interfaces), and every check
 that needs a DOM belongs to the browser lane
@@ -1064,8 +1069,8 @@ reference environment of
 whose exact specification the DDD fixes" of
 [PDD §9.1 — Performance budgets (D-9,
 Proposed)](pdd.md#91-performance-budgets-d-9-proposed), of the kind
-that [ADR-0016](../adr/0016-performance-reference-environment.md),
-Proposed, records together with its toolchain, Terraform `~> 1.7`
+that [ADR-0016](../adr/0016-performance-reference-environment.md)
+records together with its toolchain, Terraform `~> 1.7`
 with the `hashicorp/aws` and `hashicorp/tls` providers. It is
 separate from the parked data layer under `deploy/terraform/`: it
 never references that directory and shares no module, state,
@@ -1184,7 +1189,7 @@ References:
   structure (ADR-0011)](hldd.md#43-language-toolchain-and-repository-structure-adr-0011).
 - [ADR-0011](../adr/0011-webapp-toolchain.md);
   [ADR-0016](../adr/0016-performance-reference-environment.md)
-  (Proposed: the reference environment and its Terraform toolchain).
+  (the reference environment and its Terraform toolchain).
 - [NFR-8 — Architecture decision record](prd.md#nfr-8-architecture-decision-record).
 - [gradle-node-plugin 7.1.0 — Usage](https://github.com/node-gradle/gradle-node-plugin/blob/7.1.0/docs/usage.md)
   (the `node { }` extension; task types `NpmTask` and `NodeTask`).
@@ -2667,7 +2672,7 @@ The sequence, with `S` the commit at `HEAD` when the run starts and
 without such a peeled line, the commit of its `refs/tags/data-vN`
 line; `T` is empty when no such tag exists:
 
-1. **Permission gate.** The task refuses to run unless all four
+1. **Terms-record gate.** The task refuses to run unless all four
    hold: `--data-tag` matches `^data-v[1-9][0-9]*$`, the publishable
    form of the [§3](#3-data-formats) tag format, so the development
    tag `data-v0-test` is refused; `data/REDISTRIBUTION.md` holds
@@ -2679,13 +2684,16 @@ line; `T` is empty when no such tag exists:
    on a public repository are public
    ([Licensing and archival distribution](hldd.md#licensing-and-archival-distribution)):
    in Phase 1 of
-   [ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md)
-   (Proposed), the assumed record, a line equal to
+   [ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md),
+   the assumed record, a line equal to
    `Assumed YYYY-MM-DD: code Apache-2.0, prose CC BY 4.0, derived data exports CC BY 4.0 with per-source attribution — pending research-group confirmation`,
    with which the owner accepts publishing before the research group
-   confirms the terms, in place of the HLDD's confirmation "before its
-   first public upload"; from Phase 2, the confirmed record that
-   replaces it, a line equal to `Confirmed: YYYY-MM-DD`; in both,
+   confirms the terms (the record is no evidence that a source permits
+   the redistribution: ADR-0017 defers the confirmation the HLDD
+   requires "before its first public upload", for the prototype's
+   vintages, to activation and the first software release); from
+   Phase 2, the confirmed record that replaces it, a line equal to
+   `Confirmed: YYYY-MM-DD`; in both,
    `YYYY-MM-DD` matches `[0-9]{4}-[0-9]{2}-[0-9]{2}` and every other
    character is as written; `README.md` and `LICENSE-docs` each
    contain the path `data/REDISTRIBUTION.md` — the §4.4 wording that
@@ -2846,7 +2854,13 @@ line; `T` is empty when no such tag exists:
     fetch-and-verify validates the published state independently
     ([§6.3](#63-ci-workflows)), and the vintage becomes current when
     that pull request is merged into `main`, by a merge commit (§6.3,
-    Required checks).
+    Required checks). The first vintage's pointer pull request runs
+    without that fetch-and-verify: **Stage scenario assets** and both
+    **Parity** steps read the committed pointer, so they join the
+    workflows only after that pull request's merge, and until then
+    the read-back of steps 8 and 9 and the retention check of
+    [§4.3](#43-retention-rollback-recovery-and-withdrawal) stand in
+    for it.
 
 *Closes:* DD-7 (by design-against; the rule itself stays
 ADR-0014's). *Verification (planned):* the read-back of steps 8 and
@@ -2869,9 +2883,29 @@ draft, and a published release that fails its checks is replaced
 under the next tag number (steps 3 and 9). The fixture
 is the four raw inputs of rule `inputs-present`
 ([§4.1](#41-export-task-and-validation) step 1), built in the drill
-clone's gitignored `data/raw/` from the synthetic frames of the
-[§7.3](#73-pipeline-and-export-tests) fixture lanes, in the column
-layouts `egr-build` reads. The drill copy of
+clone's gitignored `data/raw/` to a contract under which `egr-build`,
+the export, and the reference generator pass unchanged: only
+`eps_ground_rupture/publish.py` reads the drill override below, and
+no rule is relaxed for a drill. Each file's header lists, in order,
+the Parquet field names that the `comment` members of the committed
+`deploy/terraform/tables.json` record for the tables built from that
+file, its values typed so that `egr-build` writes the recorded types
+— a column that `fdhi_cleaned` records as `bigint` and
+`fdhi_measurements` as `double` holds `-999` in a row whose `style`
+is `Reverse` — so `egr-build` rewrites `tables.json` byte-identically
+(step 4). `DEM_dataset.csv` holds one trial per combination of the
+nine pairs of the `product_export.py` constant of
+[§3.2](#32-artifact-manifest) and the `fault_dip`, `depth`, and
+`density` values that [§3.1](#31-scenario-artifact-binary-layout)
+lists, its site conditions the same on every stage; each trial has
+101 stages of strictly ascending `Slip`, the first at 0 m with null
+`Scarp_Class`, `Scarp_Height`, `DZW`, and `Scarp_Dip`, the others
+carrying a `config.SCARP_CLASSES` name; every `Slip`,
+`Scarp_Height`, `DZW`, and `Scarp_Dip` value lies on its §3.1 grid
+inside its §3.1 physical range; and `VD_HW` is
+`0.5 * Slip - 0.005` (m). Rule `coefficient-reach` then holds for
+every dip, and every value that a golden scenario or boundary case
+of [§3.6](#36-reference-results) names is present. The drill copy of
 `data/REDISTRIBUTION.md` — and, while the §4.4 wording has not
 landed, drill edits of `README.md` and `LICENSE-docs` that name it —
 exist only in the drill clone and its bare origin, and the drill copy
@@ -2953,7 +2987,9 @@ application supports its `schema_version`
 rolled back changed both application code and data, the rollback
 restores a compatible pair — the pointer commit and the application
 are reverted together, to versions whose supported `schema_version`
-matches — and the rollback rehearsal records which pair it checked.
+matches. The revert-path rehearsal of the
+[implementation plan](ip.md#2-task-graph) records the pair its
+reverted state checked; it restores no earlier vintage or release.
 The release checklist's rollback-readiness item
 ([§7.7](#77-site-validation-and-release-checklist), item 12) names
 each release's rollback target, which the owner approves: an earlier
@@ -3105,7 +3141,7 @@ copies, per the ADR-0014 amendment. The deleted data release cannot
 carry the notice, so the notice lives in the pointer commit, when
 step 3 applies, and in the release notes.
 
-*Verification (planned):* the rollback rehearsal of the
+*Verification (planned):* the revert-path rehearsal of the
 [implementation plan](ip.md#2-task-graph), under the normal checks;
 the retention check of each release's rollback target before every
 release, or the owner-approved absence of one
@@ -3138,22 +3174,43 @@ pointer manifest. The terms file is a byte-for-byte copy of the
 committed `data/REDISTRIBUTION.md` — the per-source terms and
 attributions for the DEM, FDHI, SURE, and Kern County sources, and
 the OA-1 record line of §4.2 step 1
-([NFR-6 — Licensing](prd.md#nfr-6-licensing)) — so the published
-terms are exactly the recorded ones, and its `.txt` name keeps MkDocs
-from treating the staged copy as a page (§4.1 step 6). The file and
+([Licensing and archival distribution](hldd.md#licensing-and-archival-distribution))
+— so the published terms are exactly the recorded ones, and its
+`.txt` name keeps MkDocs from treating the staged copy as a page
+(§4.1 step 6). The file and
 the wording of the Licensing section of `README.md` and of
 `LICENSE-docs` that distinguishes application code, raw inputs, and
 distributed derived exports, naming `data/REDISTRIBUTION.md` for
 the exports' terms, come in the two phases of
-[ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md)
-(Proposed). In Phase 1 the owner commits the file stating the
+[ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md).
+In Phase 1 the owner commits the file stating the
 assumed terms — code Apache-2.0, prose CC BY 4.0, derived data
 exports CC BY 4.0 with per-source attribution — with the assumed
 record, and the `README.md` and `LICENSE-docs` lines that name it; in
 Phase 2 the final texts that the owner writes with the research
 group (owner action OA-13 of the
 [implementation plan](ip.md#4-owner-and-research-group-actions))
-replace them, and the confirmed record replaces the assumed one.
+replace them, and the confirmed record replaces the assumed one. In
+both phases the per-source terms are one terms line per source,
+`Source <name>: <terms> — <URL>; attribution: <text>`, for `<name>`
+`DEM`, `FDHI`, `SURE`, and `Kern County`, the last answering for the
+whole compilation, the FDHI entries it holds included
+([`docs/datasets.md` — Input datasets and derived views](../datasets.md)):
+the source's own terms, as its license or a written permission from
+its authors states them, and the `https://` URL of the page that
+states them, or, where neither was found,
+`not established (checked YYYY-MM-DD)` and the source's DOI URL; and
+the attribution the source asks for. Establishing a source's unknown
+terms belongs to the licensing decision of Phase 2 (owner action
+OA-13). The owner checks the four lines before the first upload
+(owner action OA-1 of the
+[implementation plan](ip.md#4-owner-and-research-group-actions)): a
+missing line stops that upload until the owner adds it, and a
+`not established` line does not. In Phase 1 a line records what is
+known of its source's terms beside the assumed terms and is no
+evidence that they permit redistributing the derived data, nor is
+the OA-1 record or the acceptance of ADR-0017: ADR-0017 defers that
+question, source by source, to the licensing decision of Phase 2.
 §4.2 step 1 refuses publication until both texts are in place. This
 document cites that gate, never grants it. A published vintage is
 never modified (§4.2), so a vintage exported under the assumed
@@ -4315,7 +4372,10 @@ repeated, a decimal that is not canonical, or an inconsistent
 combination — `slip_window` or `offset_max` disagreeing with
 `entry_mode`, or a slip window or offset that breaks the §5.7 rules; a
 `SchemaError` from `mapRecord` becomes a `ScenarioInputError` for
-the same key. For every valid object `o` and the vintage's manifest `m`,
+the same key. `src/state/scenario-json.ts` imports
+`SCENARIO_INPUT_FIELDS` and `mapRecord` from `src/decode/fields.ts`,
+and no file of `src/decode/` imports a file of `src/state/`. For
+every valid object `o` and the vintage's manifest `m`,
 `JSON.parse(serializeScenario(parseScenario(o, m), m))` deep-equals
 `o`. The serialization is the scenario's identity: the download's
 `scenario.json` carries it as the object
@@ -6024,7 +6084,7 @@ and it links to "the paper, data archive, dashboards, glossary, and
 limitations". The PDD copy deck holds no such text, so the body is
 fixed here, for the [SC-7](pdd.md#101-success-criteria) (scientific
 sign-off) review. `scenario.md` carries exactly the content of the
-fenced block below — two paragraphs, then a `<noscript>` element
+fenced block below — three paragraphs, then a `<noscript>` element
 holding one `<p>` — between
 `<!-- copy:docs/app/ddd.md#510-failure-states -->` and
 `<!-- /copy -->`, and step 7 of the
@@ -6040,6 +6100,14 @@ deformation-zone width, and scarp dip of the matching simulations,
 with summary statistics, and to download the matching records. The
 limits of these results are stated in the
 [full disclaimer](#gre-disclaimer) below.
+
+The interactive controls require JavaScript and a supported browser:
+Chrome, Edge, Firefox, or Safari released within the 12 months before
+this application release, including Safari on iOS and Chrome on
+Android. If the controls do not appear, update your browser to the
+latest stable version and reload this page. For Safari on iPhone or
+iPad, update iOS or iPadOS. If the controls still do not appear, use
+the related pages below.
 
 Related pages: [the paper](paper.md),
 [the data and how to cite it](data.md),
@@ -6059,7 +6127,11 @@ The first sentence restates the PDD's own "It shows conditional
 results from a published computer-simulation ensemble"
 ([PDD §5.1 — Standing disclaimer (CR-4; D-10 Open)](pdd.md#51-standing-disclaimer-cr-4-d-10-open));
 the rest names inputs and outputs of PDD §3, §4, and §6.1 and makes
-no scientific claim. The `<noscript>` text can appear only when
+no scientific claim. The browser-policy paragraph is ordinary
+fallback content, outside `<noscript>`, so it remains visible when
+JavaScript is enabled but the application module cannot load or
+parse. It gives recovery steps without diagnosing that failure as
+disabled JavaScript. The `<noscript>` text can appear only when
 scripts never ran, so a startup failure is never misrepresented as
 disabled JavaScript. With scripts running, step 1 tests the subset
 of the
@@ -6090,11 +6162,16 @@ measurement alone, and the `signal` option of `addEventListener`
 has no type to test. On a missing capability the fallback stays
 standing and `showCapabilityNotice(root, missing)` inserts, as the
 first child of `#gre-root`, a `<p role="alert">` holding the
-fixed-here notice "This browser lacks {apis}, which Ground Rupture
-Explorer needs to show results. Use a current version of Chrome,
-Edge, Firefox, or Safari." — `{apis}` the failing names in test
-order joined with `, `, and the browsers those of PDD §9.2. No
-skeleton is built and no live region exists.
+fixed-here notice "This browser cannot run Ground Rupture Explorer
+because required browser features are unavailable ({apis}). Update
+Chrome, Edge, Firefox, or Safari to the latest stable version, then
+reload this page. For Safari on iPhone or iPad, update iOS or iPadOS.
+Supported browsers are versions released within the 12 months before
+this application release." — `{apis}` the failing names in test
+order joined with `, `, and the browsers and window those of PDD
+§9.2. No skeleton is built and no live region exists. A feature
+failure is reported even if the browser's advertised version is
+recent; no version or user-agent inference replaces the probe.
 
 **Internal failure.** These enter the unavailable state: a failure
 in step 2 or 3 — a loader rejection, a missing or empty `data-*`
@@ -6220,8 +6297,14 @@ the unavailable state is never phrased as "no matching records".
 *Verification (planned):* `failure-states.spec.ts`
 ([§7.5](#75-browser-test-lane)) drives each category and asserts the
 four presentations pairwise distinct. Deleting `DecompressionStream`
-with an init script gives the capability notice, the fallback and
-`#gre-disclaimer` standing and no skeleton. An aborted artifact
+with an init script gives the complete capability notice verbatim,
+naming `DecompressionStream`, the 12-month policy, the update-and-reload
+action, and the iOS/iPadOS action, with the fallback and
+`#gre-disclaimer` standing and no skeleton. With JavaScript enabled
+but the application bundle request aborted, the ordinary fallback's
+browser-policy paragraph remains visible and the `<noscript>` message
+is absent; the same paragraph is visible with JavaScript disabled.
+An aborted artifact
 request, a truncated artifact, and a wrong-version manifest give the
 unavailable state, the last naming both versions — never empty or
 stale results — and the scenario HTML served by `page.route` with
@@ -8056,8 +8139,7 @@ while `mkdocs serve` still includes it (mkdocs 1.6.1, locked in
 three publication states, which the publication configuration
 `subprojects/mkdocs/mkdocs.yml` declares: development, then the two
 phases of
-[ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md)
-(Proposed):
+[ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md):
 
 1. *draft* (development): `draft_docs` lists `scenario.md` and
    `assets/scenario/`, so no deploy carries the page, the bundle, or
@@ -8096,8 +8178,14 @@ or a tagged GitHub release"
 included, as drafted (ADR-0017), and the approval that reader-facing
 texts need "before a public release that introduces or changes them"
 ([CR-10 — Scientific-content approval](prd.md#cr-10-scientific-content-approval))
-is recorded before the release that activates the page
-([§7.7](#77-site-validation-and-release-checklist)).
+is recorded before the release merge that deploys the activated page
+([§7.7](#77-site-validation-and-release-checklist), SC-7 approval
+record). Deploying it is
+the owner's decision under ADR-0017, which approves none of that copy
+and is no evidence that a source permits redistribution: the vintage
+it serves carries the assumed terms beside each source's own terms
+([§4.4](#44-licensing-archival-distribution-and-release-attachments),
+Vintage terms) until the licensing decision of Phase 2.
 `media/dev/` stays drafted permanently
 ([§6.4](#64-product-pages-beyond-the-scenario-page-p2p3)).
 `not_in_nav` stays until activation because the preview build, and
@@ -8397,7 +8485,7 @@ References:
   [ADR-0010](../adr/0010-native-client-side-scenario-app.md);
   [ADR-0009](../adr/0009-github-pages-hosting.md);
   [ADR-0017](../adr/0017-unadvertised-prototype-before-public-release.md)
-  (Proposed: the publication states).
+  (the publication states).
 - [PDD §2.2 — Entry point (D-2, Decided
   2026-10-28)](pdd.md#22-entry-point-d-2-decided-2026-10-28);
   [PDD §5.1 — Standing disclaimer (CR-4; D-10
@@ -8826,8 +8914,8 @@ No workflow runs the browser lane: `webappBrowserTest` stays a
 locally invoked release check
 ([§7.5](#75-browser-test-lane); [DD-3](#1-ddd-decision-register)).
 Nor does any workflow run the reference-environment measurement of
-[§7.6](#76-performance-and-compatibility-measurements), which the
-Proposed [ADR-0016](../adr/0016-performance-reference-environment.md)
+[§7.6](#76-performance-and-compatibility-measurements), which
+[ADR-0016](../adr/0016-performance-reference-environment.md)
 keeps "Outside CI": `webappMeasureReference` and
 `webappMeasureDestroy` are
 owner-invoked and never part of `check`, and `perf/run.mjs`, which
@@ -8930,8 +9018,7 @@ References:
 - [ADR-0011](../adr/0011-webapp-toolchain.md);
   [ADR-0014](../adr/0014-committed-content-hashed-artifacts.md);
   [ADR-0015](../adr/0015-golden-scenario-parity.md);
-  [ADR-0016](../adr/0016-performance-reference-environment.md)
-  (Proposed);
+  [ADR-0016](../adr/0016-performance-reference-environment.md);
   [ADR-0009](../adr/0009-github-pages-hosting.md).
 - [NFR-7 — Build and data-quality
   gates](prd.md#nfr-7-build-and-data-quality-gates).
@@ -9218,8 +9305,8 @@ Both are public reader-facing texts, so they ship only after their
 the research group's record under owner action OA-4 of the
 [implementation plan, §4](ip.md#4-owner-and-research-group-actions).
 `glossary.md` is a published page that no `draft_docs` entry holds
-back, so the two entries land in the release that activates the
-scenario page
+back, so the two entries become public with the release merge that
+activates the scenario page
 ([§6.1](#61-build-outputs-asset-paths-and-page-scaffold)), after
 that approval and never before it.
 
@@ -9562,9 +9649,12 @@ fixture's `pytest.skip` — never at import time and never through a
 mark — so it is always collected, and its name begins `test_full_`.
 A test that reads the staged vintage finds it through the
 working-tree pointer manifest `subprojects/webapp/data/pointer.json`,
-whose `data_tag` names `dist/app/<data_tag>/`; a missing directory
-skips with the reason "staged vintage missing; run exportApp", and a
-missing processed table keeps the established "run egr-build" reason.
+whose `data_tag` names `dist/app/<data_tag>/`; a missing pointer —
+as in every fresh checkout before the first vintage's pointer commit
+([§4.2](#42-publication-of-a-data-vintage) step 11) — or a missing
+directory skips with the reason
+"staged vintage missing; run exportApp", and a missing processed
+table keeps the established "run egr-build" reason.
 
 **Two input lanes.**
 [HLDD §9 — Testing and release architecture](hldd.md#9-testing-and-release-architecture)
@@ -9572,9 +9662,12 @@ missing processed table keeps the established "run egr-build" reason.
 implements. Small committed fixtures run in "Local development and
 CI" to "Exercise calculation rules, export formats, and edge cases
 without the raw research datasets"; the full research datasets are
-read only in "The owner's local export process" to "Verify the
-actual ensemble, exported values, and reference results before
-publication". CI — the `pytest` job of
+read only locally: in "The owner's local export process" to "Verify
+the actual ensemble, exported values, and reference results before
+publication", and in the agent's development runs on the same
+machine, which the implementation plan's
+[Execution contract](ip.md#execution-contract) allows and which are
+never publication evidence. CI — the `pytest` job of
 `.github/workflows/tests.yml` ([§6.3](#63-ci-workflows)) — therefore
 runs the fixture lane only: the full-data tests skip there under the
 file-existence convention, and the change that adds full-data tests
@@ -10091,7 +10184,7 @@ eleven specs live in `subprojects/webapp/playwright/specs/`.
 | `golden-scenario.spec.ts` | "at least one golden scenario is evaluated end to end, and every displayed value equals the display-rounded reference result exactly" | Replays GS-1 through the real page. Every displayed count — matching records, each panel's valid and excluded-null counts, the unclassified line's count when shown — equals the reference `counts`; every displayed statistic and read-off pre-mark equals the reference `display` string, and every converted-window value — the assist panel's `{lo}` and `{hi}` and the `{Y}` of the 30° per-dip line — the reference `window_lo_display` or `window_hi_display`, exactly ([SC-3 (correctness)](pdd.md#101-success-criteria)); with each chart-data disclosure open, the bin table has `bins` rows whose group cells equal the reference `histogram` `counts` row by row; every applicable caveat is present in the default view of the result ([SC-5 (candor)](pdd.md#101-success-criteria), the acceptance list of HLDD §9). |
 | `determinism.spec.ts` | "the same starting state and action sequence produce identical scenario settings and displayed results on every run" | Runs the GS-1 action sequence twice in fresh contexts; asserts that the scenario summary, every displayed result, and the downloaded `scenario.json` bytes are identical between runs. |
 | `consistency.spec.ts` | "scenario summaries, charts, tables, and downloads describe the same active scenario" | Builds GS-1 through the controls; captures the summary, chart labels, table values, and a download (Playwright's download event); asserts one scenario describes them all: the downloaded `scenario.json`'s `scenario` deep-equals the reference GS-1 `inputs`; `python3 -I test/zipcheck.py <download> <instant of provenance block 8>` exits 0, so the archive holds the four members, stored and well formed; and the package's settings, versions, counts, and statistics match the displayed ones, the footer stamps included ([SC-2 (download reproducibility)](pdd.md#101-success-criteria)'s reviewer path). |
-| `failure-states.spec.ts` | "each §6.1 state appears when its condition holds — invalid or out-of-range input, no data for the selected scenario, unavailable browser capabilities, and internal failure — without being confused with one another" (the §6.1 is [HLDD §6.1 — Failure honesty (ADR-0010)](hldd.md#61-failure-honesty-adr-0010)) | Drives each category. Invalid input: offset entries `abc`, `-1`, `1000.0001` (above the 1000 m bound of [§5.7](#57-scenario-controls) R2), and a blank commit, and slip-window entries `-1`, `abc`, minimum `3` with maximum `2`, and a maximum above `slip_window_bounds.max`, each get `aria-invalid="true"`, an accessible description that ends with its `copy.json` line verbatim (for a slip field, after the `#gre-slip-range` and `#gre-slip-help` texts), the element the appended id names holding exactly that line, the field text unchanged, and the summary and a captured download's provenance unchanged; entering offset mode with a blank field shows no error and changes nothing ([§5.7](#57-scenario-controls)). Out-of-range input: an offset entry whose 30° window runs past the recorded maximum is accepted and flagged `partly_out`, never rejected ([§5.10](#510-failure-states)), and the offset `1000`, the largest R2 accepts, is accepted with the results rendered, never the unavailable state. No data: GS-4 shows the empty state. Unavailable capabilities: deleting `DecompressionStream` with an init script yields the capability state naming it, the fallback and `#gre-disclaimer` standing and no skeleton built. Internal failure: an aborted artifact request, a truncated artifact, a manifest whose `export_version` differs from `data-data-version`, and the scenario HTML with `data-software-version=""`, each served by `page.route`, yield the unavailable state — the third its version-mismatch variant naming both versions, the fourth the reason "the page is missing information it needs to load the data" with `#gre-versions` empty — "never empty or stale results" ([ADR-0015](../adr/0015-golden-scenario-parity.md), second amendment), with focus on `#gre-state` ([§5.11](#511-accessibility-supported-environments-and-navigation-lifecycle)); with every regression-export request aborted, entering offset mode — a prefetch — shows nothing, and the offset `3`, committed by moving focus to the short disclaimer's link (the field's `change`), an accepted offset-mode Scenario, then yields the unavailable state naming the conversion coefficients and moves focus from that link to `#gre-state` ([§5.3](#53-query-engine), [§5.10](#510-failure-states)); an aborted field-export request on switching the overlay on shows the overlay legend's unavailable line and leaves the simulation results rendered, and switching the overlay off and on again with the request unrouted then draws the marks on the height and width panels and removes that line; an error thrown by an unrelated script added with `page.addScriptTag` leaves the results rendered. Asserts the presentations pairwise distinct, `#gre-disclaimer` present in every state, and the short disclaimer in `#gre-caveats` present in every state except the capability notice, which builds no skeleton ([§5.10](#510-failure-states)). |
+| `failure-states.spec.ts` | "each §6.1 state appears when its condition holds — invalid or out-of-range input, no data for the selected scenario, unavailable browser capabilities, and internal failure — without being confused with one another" (the §6.1 is [HLDD §6.1 — Failure honesty (ADR-0010)](hldd.md#61-failure-honesty-adr-0010)) | Drives each category. Invalid input: offset entries `abc`, `-1`, `1000.0001` (above the 1000 m bound of [§5.7](#57-scenario-controls) R2), and a blank commit, and slip-window entries `-1`, `abc`, minimum `3` with maximum `2`, and a maximum above `slip_window_bounds.max`, each get `aria-invalid="true"`, an accessible description that ends with its `copy.json` line verbatim (for a slip field, after the `#gre-slip-range` and `#gre-slip-help` texts), the element the appended id names holding exactly that line, the field text unchanged, and the summary and a captured download's provenance unchanged; entering offset mode with a blank field shows no error and changes nothing ([§5.7](#57-scenario-controls)). Out-of-range input: an offset entry whose 30° window runs past the recorded maximum is accepted and flagged `partly_out`, never rejected ([§5.10](#510-failure-states)), and the offset `1000`, the largest R2 accepts, is accepted with the results rendered, never the unavailable state. No data: GS-4 shows the empty state. Unavailable capabilities: deleting `DecompressionStream` with an init script yields the complete §5.10 capability notice verbatim, naming it and stating the 12-month policy, latest-stable-browser update and reload, and iOS/iPadOS update instructions; the fallback and `#gre-disclaimer` stand and no skeleton is built. With JavaScript enabled and the application bundle request aborted, the ordinary fallback's browser-policy and recovery paragraph remains visible and the `<noscript>` text is absent; with JavaScript disabled, both that paragraph and the `<noscript>` text are visible. Internal failure: an aborted artifact request, a truncated artifact, a manifest whose `export_version` differs from `data-data-version`, and the scenario HTML with `data-software-version=""`, each served by `page.route`, yield the unavailable state — the third its version-mismatch variant naming both versions, the fourth the reason "the page is missing information it needs to load the data" with `#gre-versions` empty — "never empty or stale results" ([ADR-0015](../adr/0015-golden-scenario-parity.md), second amendment), with focus on `#gre-state` ([§5.11](#511-accessibility-supported-environments-and-navigation-lifecycle)); with every regression-export request aborted, entering offset mode — a prefetch — shows nothing, and the offset `3`, committed by moving focus to the short disclaimer's link (the field's `change`), an accepted offset-mode Scenario, then yields the unavailable state naming the conversion coefficients and moves focus from that link to `#gre-state` ([§5.3](#53-query-engine), [§5.10](#510-failure-states)); an aborted field-export request on switching the overlay on shows the overlay legend's unavailable line and leaves the simulation results rendered, and switching the overlay off and on again with the request unrouted then draws the marks on the height and width panels and removes that line; an error thrown by an unrelated script added with `page.addScriptTag` leaves the results rendered. Asserts the presentations pairwise distinct, `#gre-disclaimer` present in every state, and the short disclaimer in `#gre-caveats` present in every state except the capability notice, which builds no skeleton ([§5.10](#510-failure-states)). |
 | `a11y.spec.ts` | "the automatable accessibility checks pass" | Runs axe with the tags above, the WCAG 2.2 AA set of [PDD §9.3 — Accessibility target (D-17, Proposed)](pdd.md#93-accessibility-target-d-17-proposed), on the scenario page in the loaded state (again with the width panel's "Logarithmic scale" checked), the warning (GS-2), suppression (GS-5), and empty (GS-4) states, and the failure states — each with the chart-data disclosures closed and again open — and on each shipped product page; asserts zero violations. On GS-1 and GS-2, asserts the [DD-9](#1-ddd-decision-register) artifacts of [§5.11](#511-accessibility-supported-environments-and-navigation-lifecycle): each chart `toHaveRole('img')`, an accessible name matching the §5.11 chart-label template with N equal to the panel head's valid count, and an accessible description equal to its `<figcaption>`; `aria-details` resolving to the panel's `<details id="{pid}-data">`; with the disclosure open, the bin-table headers are the label with unit, the legend labels, and `Total`, each row's group cells sum to its Total, the Totals sum to the panel N, and the nonzero segments of bar i equal the nonzero cells of row i; the family toggle gives three group columns with unchanged Totals; with the overlay on, the field table has one row per tick drawn. In GS-5, a panel whose chart is suppressed shows no figure and no disclosure and keeps its statistics table. Read-off: `fill('95')` then Tab makes the input's accessible description match `/^Percentile 95: /`, and the status region announces exactly once. Rapid changes ([§5.3](#53-query-engine) item 2): from the loaded GS-0 state, after `performance.clearMarks()` and with a `MutationObserver` recording each non-empty text of the status region, one `page.evaluate` clicks the one-state population radio (GS-7) and then registers a `requestAnimationFrame` callback that clicks the all-stages radio — registered after the click's frame request, so it runs right after the scheduler's frame callback — so the second change is accepted after the first's frame commits and before that frame's announcement and mark tasks run; once the status region holds text, the observer has recorded exactly one text, the §5.11 "Results updated: {matching} matching records." with {matching} GS-0's reference `matching_records` by `formatCount`, and exactly one `egr:results-updated` mark exists, its `detail.seq` equal to that of the later of the two `egr:change-accepted` marks. |
 | `keyboard-responsive.spec.ts` | "keyboard interaction and responsive layouts behave as PDD §9.2, PDD §9.3, and §7.2 specify" (the §7.2 is [HLDD §7.2 — Accessibility and supported environments](hldd.md#72-accessibility-and-supported-environments)) | Traverses the page by keyboard: every control reachable with visible focus, and operating a control by keyboard produces the same result update as the pointer path. Focus retention: a dip checkbox (Space), a population radio (ArrowDown), a panel view-switch radio (ArrowRight), the read-off input (`84`, Enter), the overlay switch (Space), and the slip maximum (`3`, Enter), each operated with `h = document.activeElement` stored first. After the update settles — for the dip checkbox, the population radio, the read-off, and the slip maximum, a status-region change; for the view-switch radio and the overlay switch, which are display-only and announce nothing ([§5.11](#511-accessibility-supported-environments-and-navigation-lifecycle)), the next replacement of the `.gre-chart` slot of the operated panel (for the overlay switch, of `#gre-scarp_height`), with the status region asserted unchanged — `h === document.activeElement && h.isConnected`. Mid-edit: with the field-export request held by `page.route`, switch the overlay on, focus the slip maximum, type `2.5` without Enter, release the request; marks then appear on the height and width panels with neither the Scenario nor the display state changed ([§5.3](#53-query-engine) item 3), while the value stays `2.5`, `selectionStart` is 3, focus, summary, and `aria-invalid` are unchanged; Enter then makes the summary read "slip 0–2.5 m". Empty-state focus: type `0` in the offset field and commit by clicking panel 1's Cumulative radio; `document.activeElement.id` is `gre-state`. In the `mobile` project the spec operates the view switch and the read-off with `tap()`; asserts no page-level horizontal scroll — `document.documentElement.scrollWidth` at most `window.innerWidth` — with every chart-data disclosure closed and again with every one open, each open table scrolling inside its `.gre-table-scroll` wrapper instead ([§5.11](#511-accessibility-supported-environments-and-navigation-lifecycle)); asserts `#gre-summary` in the viewport and its box clear of the focused control's, first with focus on the first fault-dip checkbox and then on Reset, each reached by Tab — the small-screen persistent summary of [§5.7](#57-scenario-controls) and WCAG 2.2 SC 2.4.11; and asserts no hover-dependent essentials. |
 | `site-regression.spec.ts` | the per-release regression checks of [§7.7](#77-site-validation-and-release-checklist) on existing surfaces | Visits the existing dashboard, navigation, and citation pages: embeds and links present and loading; the scenario bundle requested only on the scenario page; the site-wide Tableau embedding module never requested there (the [§6.1](#61-build-outputs-asset-paths-and-page-scaffold) exclusion, observed from each page's requests); each dashboard page entered both directly and by instant navigation from a non-dashboard page, the probe surviving, its `<tableau-viz>` upgrading on both paths (the §6.1 loader). Host fidelity of the served tree: `request.get('data', { maxRedirects: 0 })` gets 301 to `BASE_URL` + `data/`; `request.get('no-such-page/')` gets 404 `text/html`; a `.gz` data file comes back without `Content-Encoding`. |
@@ -10142,9 +10235,10 @@ run procedure"; this section registers both as
 [DD-12](#1-ddd-decision-register) (Performance reference
 environment), within the kind of environment that
 [ADR-0016 — Performance reference environment — an on-demand AWS VM defined by Terraform](../adr/0016-performance-reference-environment.md)
-records — an ADR still Proposed, whose acceptance, owner action
-[OA-12](ip.md#4-owner-and-research-group-actions), precedes the
-Terraform root of `perf/` and every reference run. The environment:
+records — an ADR the owner accepted on 2026-10-31, owner action
+[OA-12](ip.md#4-owner-and-research-group-actions), whose record, the
+owner's dated commit of its Accepted status, precedes the Terraform
+root of `perf/` and every reference run. The environment:
 one Amazon EC2 instance in region `us-east-1`, instance type
 `c6i.xlarge` (4 vCPU, 8 GiB, no CPU burst credits), running Ubuntu
 Server 24.04 LTS for amd64 from a gp3 root volume of 30 GiB, under
@@ -10158,8 +10252,8 @@ repeatable, but timings still vary from run to run, which is why
 each budget is judged over 30 runs (Repetitions and judging, below).
 The image is the default of the Terraform variable `ami_id`: an AMI
 ID that the owner reads once, before T-59 completes
-([OA-16](ip.md#4-owner-and-research-group-actions)), from Canonical's
-SSM parameter
+([OA-16](ip.md#4-owner-and-research-group-actions), recorded
+2026-10-31), from Canonical's SSM parameter
 `/aws/service/canonical/ubuntu/server/24.04/stable/current/amd64/hvm/ebs-gp3/ami-id`
 in `us-east-1` with the AWS profile named below, and changed only
 by a deliberate commit. A run is
@@ -10229,42 +10323,87 @@ the root `.gitignore` rules `**/.terraform/`, `*.tfstate`, and
 `*.tfstate.*` already ignore `subprojects/webapp/perf/.terraform/`
 and `subprojects/webapp/perf/terraform.tfstate*`, so no entry is
 added, and the lock file stays committed. The `aws` provider uses
-`region = "us-east-1"` and `profile = var.aws_profile`, the AWS profile
+`region = "us-east-1"`, `profile = var.aws_profile` — the AWS profile
 the owner names in `egr.perf.awsProfile` (set in
-`~/.gradle/gradle.properties`, never committed); that profile must be
-allowed, in `us-east-1`, the EC2 actions Terraform calls on the
-resources below — `ec2:RunInstances`, `ec2:TerminateInstances`,
-`ec2:ModifyInstanceAttribute`, and `ec2:ModifyInstanceMetadataOptions`
-for the instance; `ec2:ImportKeyPair` and `ec2:DeleteKeyPair` for the
-key pair; `ec2:CreateSecurityGroup`, `ec2:DeleteSecurityGroup`,
-`ec2:AuthorizeSecurityGroupIngress`, `ec2:RevokeSecurityGroupIngress`,
-`ec2:AuthorizeSecurityGroupEgress`, and `ec2:RevokeSecurityGroupEgress`
-for the security group and its rules; `ec2:CreateTags` and
-`ec2:DeleteTags` for the instance's tags; and the read-only
-`ec2:Describe*` actions, with which Terraform reads those resources and
-the images, VPCs, subnets, volumes, instance types, and account
-attributes it resolves for them — and `ssm:GetParameter` on Canonical's
-public parameter above, under the parameter path
-`/aws/service/canonical/`, which OA-16 reads. In the account's default
-VPC, `main.tf` declares:
+`~/.gradle/gradle.properties`, never committed) — and `default_tags`
+holding the four tags the owner requires of every AWS resource of the
+project, `Purpose=perf-reference`, `School=EPS`,
+`Project=eps-ground-rupture`, and `Stakeholder=John Shaw`, and
+`ManagedBy=terraform`, which marks what this root manages. Each
+resource carries them from its create request (tag-on-create); the
+instance's launch request tags its root volume with them as well, and
+the instance's `volume_tags` repeat them, so that Terraform reads the
+volume's tags back. The network interface that EC2 creates and
+deletes with the instance carries no tags. That profile is allowed,
+in `us-east-1`, these actions and no others, each on the resources
+named with it: `ec2:RunInstances` for an instance tagged
+`Purpose=perf-reference` in its launch request, into the reference
+subnet, with security groups of the reference VPC and any key pair,
+volume, and snapshot, from a public image whose owner the condition
+key `ec2:Owner` reads as `amazon` — Amazon or a verified provider,
+Canonical among them — or as Canonical's account `099720109477`;
+`ec2:TerminateInstances`, `ec2:ModifyInstanceAttribute`,
+`ec2:ModifyInstanceMetadataOptions`, `ec2:CreateTags`, and
+`ec2:DeleteTags` on instances carrying that tag;
+`ec2:CreateSecurityGroup` in the reference VPC, and
+`ec2:DeleteSecurityGroup`, `ec2:AuthorizeSecurityGroupIngress`,
+`ec2:RevokeSecurityGroupIngress`, `ec2:AuthorizeSecurityGroupEgress`,
+`ec2:RevokeSecurityGroupEgress`, `ec2:ModifySecurityGroupRules`,
+`ec2:UpdateSecurityGroupRuleDescriptionsIngress`,
+`ec2:UpdateSecurityGroupRuleDescriptionsEgress`, `ec2:CreateTags`,
+`ec2:DeleteTags`, and `ec2:ModifyInstanceAttribute` on any security
+group of that VPC, its default security group included;
+`ec2:ImportKeyPair` for a key pair tagged `Purpose=perf-reference` in
+its import request, and `ec2:DeleteKeyPair`, `ec2:CreateTags`, and
+`ec2:DeleteTags` on a key pair carrying that tag; `ec2:CreateTags` on
+any other resource only in the `RunInstances`, `CreateSecurityGroup`,
+`ImportKeyPair`, `AuthorizeSecurityGroupIngress`, or
+`AuthorizeSecurityGroupEgress` request that creates it (the condition
+`ec2:CreateAction`); the read-only `ec2:Describe*` actions on every
+resource of the region, with which Terraform reads those resources
+and the images, VPCs, subnets, volumes, instance types, and account
+attributes it resolves for them; and `ssm:GetParameter` on Canonical's
+public parameters under the path `/aws/service/canonical/`, the one
+above among them, which OA-16 reads. The profile may create no VPC,
+subnet, gateway, or route table, and this root creates none. A commit
+that changes a kept VM's type, root volume, volume tags, or security
+groups needs `ec2:StopInstances`, `ec2:ModifyVolume`, `ec2:CreateTags`
+on the volume, or `ec2:ModifyNetworkInterfaceAttribute`, which the
+profile lacks, so such a commit is applied only after
+`webappMeasureDestroy` has removed the kept VM.
+
+**Reference network.** The VM runs in a network that the owner
+creates once and keeps, outside this Terraform root: a VPC with one
+public subnet — public IPv4 addresses on launch, in a zone that offers
+the registered type — an internet gateway, and a route table sending
+`0.0.0.0/0` to it, every part carrying the four required tags above
+but not `ManagedBy=terraform`, since no Terraform root manages it;
+none of it costs anything while no VM runs. It is never the account's
+default VPC, which an account may lack. `main.tf` finds the subnet
+with an `aws_subnet` data source filtered on the tag
+`Purpose=perf-reference`, which must match exactly one subnet or the
+plan fails — the refresh that precedes every `terraform destroy`
+included, so the network and its one tagged subnet stay while the
+state records anything — and declares, in that subnet and its VPC:
 
 - a `tls_private_key` with `algorithm = "ED25519"` and an
   `aws_key_pair` from its `public_key_openssh` — created once per
   VM lifetime and left unchanged by a re-apply, so an existing VM is
   reused;
-- an `aws_security_group` admitting tcp/22 only from
-  `var.operator_cidr` — the operator's current public IP as a /32,
-  which `run.mjs` reads from `https://checkip.amazonaws.com` — with
-  egress open;
+- an `aws_security_group` in the subnet's VPC (`vpc_id` from the
+  data source) admitting tcp/22 only from `var.operator_cidr` —
+  the operator's current public IP as a /32, which `run.mjs` reads
+  from `https://checkip.amazonaws.com` — with egress open;
 - an `aws_instance` of the registered type and image with
-  `key_name` from that key pair, `vpc_security_group_ids` holding
-  that security group's `id`, `root_block_device` gp3 of 30 GiB
+  `subnet_id` from the data source, `key_name` from that key pair,
+  `vpc_security_group_ids` holding that security group's `id`,
+  `root_block_device` gp3 of 30 GiB
   with `delete_on_termination = true`,
   `instance_initiated_shutdown_behavior = "terminate"`,
   `metadata_options { http_tokens = "required" }`, `user_data` from
-  `cloud-init.yaml` with `user_data_replace_on_change = true`, and
-  the tags `Project=eps-ground-rupture`, `Purpose=perf-reference`,
-  and `ManagedBy=terraform`;
+  `cloud-init.yaml` with `user_data_replace_on_change = true`,
+  `volume_tags` equal to the provider's default tags, and the tag
+  `Name=egr-perf-reference`;
 - the outputs `instance_id`, `public_ip`, and the sensitive
   `ssh_private_key`, the key's `private_key_openssh`.
 
@@ -10688,22 +10827,25 @@ separately:
    against the baseline of
    [PDD §9.2 — Browser and mobile baseline (D-16, Proposed)](pdd.md#92-browser-and-mobile-baseline-d-16-proposed),
    quoted: "Evergreen Chrome, Edge, Firefox, and Safari versions
-   released within 24 months of each product release; iOS Safari
+   released within 12 months before each product release; iOS Safari
    and Android Chrome in the same window; no legacy-browser
    support." The dataset is `caniuse-lite`, a development dependency
-   pinned at exactly `1.0.30001687` in `package.json` beside the §2
+   pinned at exactly `1.0.30001820` in `package.json` beside the §2
    pins; it is a dataset, not a toolchain, and affects neither the
    bundle nor the build, so under §2's rule it needs no ADR, and its
    missing type declarations are supplied by §2's
-   `test/caniuse-lite.d.ts`. The 24-month window ends at the newest
+   `test/caniuse-lite.d.ts`. The 12-month window ends at the newest
    browser release date in the pinned dataset, so a commit's result
-   never depends on the calendar date. An older dataset checks older
-   browser versions than a release needs, which is conservative,
-   until a release's own 24-month window starts after the dataset's
-   newest browser release; before such a release the dataset is
-   upgraded, under [ADR-0011](../adr/0011-webapp-toolchain.md)
-   review (item 1 of the release checklist,
-   [§7.7](#77-site-validation-and-release-checklist)). Android
+   never depends on the calendar date. Both endpoints are inclusive;
+   subtract 12 calendar months in UTC, clamping the day to the target
+   month's last day. At each release, item 1 of
+   [§7.7](#77-site-validation-and-release-checklist) requires the
+   dataset's newest browser release to be on or before the product
+   release date and no more than 30 days earlier; otherwise upgrade
+   the exact pin and lockfile, re-review the explicit support rows,
+   and rerun the compatibility test before releasing. This freshness
+   check belongs to the dated release record, not a wall-clock check
+   in CI. Android
    Chrome, for which the dataset holds only the latest version, maps
    to the desktop `chrome` versions released in the window
    (browserslist's mobile-to-desktop convention). The test fails if
@@ -10716,7 +10858,12 @@ separately:
    source recorded beside it and re-reviewed at every dataset
    upgrade, and a required API with neither dataset coverage nor an
    explicit row fails the check. Every run prints the dataset
-   version, the window's end date, and the Android mapping. This
+   version, both window dates, each browser's oldest in-window
+   version, and the Android mapping. A failure names the API,
+   browser, tested version, dataset support code or explicit minimum,
+   and evidence source, and says to update the dataset if stale or
+   amend the implementation or approved baseline; it never silently
+   removes a failing browser from the supported set. This
    evidence is documentary: the test executes nothing in Firefox,
    Safari, or a mobile browser.
 3. **Executed compatibility.** The [§7.5](#75-browser-test-lane) lane
@@ -10724,6 +10871,17 @@ separately:
    desktop viewport and at the 360 px floor under Chromium mobile
    emulation — which is not Firefox, not Safari, and not a mobile
    browser.
+
+For the pinned `1.0.30001820` dataset, the window is 2025-10-27
+through 2026-10-27. Its oldest versions are Chrome 142, Edge 142,
+Firefox 145, Safari 26.2, and iOS Safari 26.1; Android Chrome maps
+to Chrome 142. These are the compatibility test's expected output
+for this pin, not permanent version floors or a user-agent block.
+The test also exercises a historical 2022-11-26–2024-11-26 fixture
+with Firefox 108 and Safari/iOS 16.2: `DecompressionStream` fails
+with the browser and required minimum named. Empty browser windows,
+missing API evidence, and unapproved partial-support results fail
+too; the scoped Streams exception below does not waive any other row.
 
 Executed confirmation on the remaining baseline engines and on mobile
 browsers — the
@@ -10751,7 +10909,7 @@ serve measurement alone, and the `signal` option of
 | API | Used by |
 |---|---|
 | `fetch` | The [§5.2](#52-artifact-loading-and-decoding) loader — all pinned files. |
-| `ReadableStream` with `pipeThrough` | [§5.2](#52-artifact-loading-and-decoding) — the decompression pipe. |
+| `ReadableStream` with `pipeThrough` | [§5.2](#52-artifact-loading-and-decoding) — the decompression pipe. The dataset's umbrella `streams` feature marks Safari and iOS Safari partial (`a #4`), so this row has a scoped exception: the application uses `ReadableStream.pipeThrough` with `DecompressionStream`, whose used surfaces are supported throughout the checked baseline. For this row only, accept that partial code at Safari/iOS 16.4 or later; earlier versions and other partial codes fail. Evidence: MDN browser-compat-data [`api/ReadableStream.json`](https://github.com/mdn/browser-compat-data/blob/main/api/ReadableStream.json) (`pipeThrough`) and [`api/DecompressionStream.json`](https://github.com/mdn/browser-compat-data/blob/main/api/DecompressionStream.json) (`gzip`); re-review the exception if the loader starts using another Streams surface. |
 | `DecompressionStream` (`"gzip"`) | [§5.2](#52-artifact-loading-and-decoding) — decoding the pre-compressed artifact ([HLDD §7.3 — Delivery and caching](hldd.md#73-delivery-and-caching), Pre-compressed simulation data), which requires "support for the selected compression format throughout the supported browser baseline" to be verified — the one API called out there by name. The pinned dataset does not catalog Compression Streams, so it carries an explicit row: Chrome 80, Edge 80, Firefox 113, Safari 16.4, iOS Safari 16.4, Android Chrome 80 (source: MDN browser-compat-data `api/DecompressionStream.json`, recorded beside the row). |
 | `TextDecoder` | [§5.2](#52-artifact-loading-and-decoding) — text from decompressed bytes. |
 | `TextEncoder` | [§5.9](#59-downloads) — the UTF-8 bytes of the download members. |
@@ -10858,7 +11016,7 @@ References:
 - [PDD §10.2 — Golden scenarios](pdd.md#102-golden-scenarios).
 - [HLDD §10 — Risks and open dependencies](hldd.md#10-risks-and-open-dependencies) (Performance and delivery risks).
 - [ADR-0016](../adr/0016-performance-reference-environment.md)
-  (Proposed: the reference environment and its toolchain);
+  (the reference environment and its toolchain);
   [ADR-0015](../adr/0015-golden-scenario-parity.md) (second
   amendment of 2026-10-29: the browser lane, of which this
   measurement is not part); [ADR-0011](../adr/0011-webapp-toolchain.md)
@@ -10939,8 +11097,8 @@ on the software release's tag while its release is still a draft
 **Phases.** The checklist gates public releases. The prototype
 deployment of [§6.1](#61-build-outputs-asset-paths-and-page-scaffold)
 — Phase 1 of
-[ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md)
-(Proposed), not a public release — is gated by the deployment
+[ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md),
+not a public release — is gated by the deployment
 safeguards that stand from the first deployment: the CI gates of
 [§6.3](#63-ci-workflows), which keep a commit that fails them from
 `deploy`; the `site_checks` hook arms (a)–(e) in both strict builds,
@@ -10952,7 +11110,7 @@ scenario page — and at every release after it.
 
 | # | Check | Applies to | Evidence recorded |
 |---|---|---|---|
-| 1 | CI green on the release commit ([§6.3](#63-ci-workflows)): Tests — `pytest`, and `webapp-test` with **Webapp checks** (the compatibility and toolchain tests included) and **Parity**; Companion site — `webapp-bundle` with **Webapp checks**, **Parity**, and **Build bundle**, and `build` with **Build site** and **Build preview site**, the `site_checks` hook included; Doc links — `links`, with **Check links and anchors**, **Check PDD agreement**, **Check traceability**, and **Self-test doc scripts**. Pull-request runs are unfiltered, and both workflows' push filters name `CITATION.cff`, which every release commit changes, so the runs exist. The window end the compatibility test prints — the newest browser release in the pinned `caniuse-lite` — is no more than 24 months before the release date; otherwise the dataset is upgraded first ([§7.6](#76-performance-and-compatibility-measurements)). | Every release | `gh run list --commit <release sha>` output, the run URLs, and the compatibility test's printed dataset version and window end. |
+| 1 | CI green on the release commit ([§6.3](#63-ci-workflows)): Tests — `pytest`, and `webapp-test` with **Webapp checks** (the compatibility and toolchain tests included) and **Parity**; Companion site — `webapp-bundle` with **Webapp checks**, **Parity**, and **Build bundle**, and `build` with **Build site** and **Build preview site**, the `site_checks` hook included; Doc links — `links`, with **Check links and anchors**, **Check PDD agreement**, **Check traceability**, and **Self-test doc scripts**. Pull-request runs are unfiltered, and both workflows' push filters name `CITATION.cff`, which every release commit changes, so the runs exist. The window end the compatibility test prints — the newest browser release in the pinned `caniuse-lite` — is on or before the release date and no more than 30 days earlier; otherwise the exact dataset pin and lockfile are upgraded, explicit support rows are re-reviewed, and the compatibility test is rerun first ([§7.6](#76-performance-and-compatibility-measurements)). | Every release | `gh run list --commit <release sha>` output, the run URLs, and the compatibility test's printed dataset version and window end. |
 | 2 | Full-data run: `pytestFullData`, run by `publishVintage` against the staged vintage, exits 0 with zero skips and every `full_data_required.txt` test collected and passed ([§7.3](#73-pipeline-and-export-tests)). | Vintage release | The pytest summary line in the publication record. |
 | 3 | Publication: `publishVintage` completed ([§4.2](#42-publication-of-a-data-vintage)) — the data tag peels to the source commit, the release's asset names and SHA-256s equal the pointer exactly, the release is published — which locks it, the repository's releases being immutable (§4.2 step 1 re-checks this) — and the owner's pointer commit sits directly on the source commit. | Vintage release | The publication record `dist/app/data-vN.publication.json` and its copy in the data release's body. |
 | 4 | Browser lane: `webappBrowserTest` (projects `desktop` and `mobile`) exits 0 on the release branch, its `playwrightInstall` dependency first installing the pinned Chromium build ([§7.5](#75-browser-test-lane)). | Every release | `subprojects/webapp/build/playwright/report.json` and the traces, attached. |
@@ -11094,29 +11252,39 @@ criteria are
 | [SC-4 (performance)](pdd.md#101-success-criteria) | The [§7.6](#76-performance-and-compatibility-measurements) reports of item 5 from the reference environment (`environment.kind` `aws-ec2`, the instance type, region, and AMI of [DD-12](#1-ddd-decision-register), and the DD-12 `network` values): nearest-rank 95th percentiles of 30 runs at most 2.0 s cold, 1.0 s warm, and 200 ms per interaction workload, with the payload at most 4 MB compressed; and the published-site run after deployment. |
 | [SC-5 (candor)](pdd.md#101-success-criteria) | The lane's default-view caveat assertions plus the acceptance review: every applicable caveat present in the default view, the population name always visible with its explainer one action away. |
 | [SC-6 (site integrity)](pdd.md#101-success-criteria) | The strict builds' exit status on both trees, the `site_checks` hook included, the lane's `site-regression` spec, and the acceptance confirmation that the existing dashboards, navigation, citation pages, and deployment are unaffected. |
-| [SC-7 (scientific sign-off)](pdd.md#101-success-criteria) | The recorded research-group approval ([OA-4](ip.md#4-owner-and-research-group-actions)) of the reader-facing texts — the [PDD §5 — Copy deck](pdd.md#5-copy-deck) texts and every fixed-here text `check_pdd_agreement.py` lists, in `copy.json` or between copy markers ([§5.13](#513-application-configuration)), the glossary additions of [§6.4](#64-product-pages-beyond-the-scenario-page-p2p3) among them — as the SC-7 approval record below, referenced from the release record: the newest record's listing equals the step-8 listing printed at the release commit, and the record follows the activation commit of [§6.1](#61-build-outputs-asset-paths-and-page-scaffold) and precedes the release merge that makes the activated page public. |
+| [SC-7 (scientific sign-off)](pdd.md#101-success-criteria) | The recorded research-group approval ([OA-4](ip.md#4-owner-and-research-group-actions)) of the reader-facing texts — the [PDD §5 — Copy deck](pdd.md#5-copy-deck) texts and every fixed-here text `check_pdd_agreement.py` lists, in `copy.json` or between copy markers ([§5.13](#513-application-configuration)), the glossary additions of [§6.4](#64-product-pages-beyond-the-scenario-page-p2p3) among them — as the SC-7 approval record below, referenced from the release record: the newest record's listing, `data_tag`, and bundle digests equal the step-8 listing printed at the release commit, its pointer's `data_tag`, and its build's digests, and the record follows the activation commit of [§6.1](#61-build-outputs-asset-paths-and-page-scaffold) and precedes the release merge that deploys the activated page. |
 
 **SC-7 approval record.** The record of owner action
 [OA-4](ip.md#4-owner-and-research-group-actions) is a dated file
 that the owner commits on the release branch,
 `docs/app/approvals/sc7-YYYY-MM-DD.md`, holding the approver role or
-roles, the approved commit as 40 hex digits, and, as its one fenced
-code block, the step-8 listing of
+roles, the approved commit as 40 hex digits, the `data_tag` of that
+commit's pointer manifest, the full SHA-256 of `app.js` and of
+`app.css` in the `webapp-dist` artifact of a successful Companion site
+run on that commit, read as the Evidence ledger above reads it, and,
+as its one fenced code block, the step-8 listing of
 [§5.13](#513-application-configuration) that
 `python3 .github/scripts/check_pdd_agreement.py` prints at that
-commit, where it exits 0. A task that checks the record takes the
+commit, where it exits 0 — the texts, the data vintage, and the build
+that the approval covers. A task that checks the record takes the
 newest such file by name and compares its listing, line for line,
-with the step-8 listing printed at its own `HEAD`; a difference, a
-missing file, or a file without its date, roles, or commit stops the
-task, which reports it. The record postdates every commit of the
-release branch that changes, adds, or removes a listed text — in the
+with the step-8 listing printed at its own `HEAD`, its `data_tag`
+with that of `HEAD`'s pointer manifest, and its two digests with
+those of a successful Companion site run on `HEAD`; a difference, a
+missing file, or a file without its date, roles, commit, `data_tag`,
+or digests stops the task, which reports it. The approval precedes
+public deployment: the record postdates every commit of the release
+branch that changes, adds, or removes a listed text — in the
 release-branch order of
 [IP §3 — Gates and release sequence](ip.md#3-gates-and-release-sequence),
 the D-10 commit, the glossary commit, and the activation commit,
 which removes the prototype notice of [§5.8](#58-view-layer),
-precede it, and the release merge follows it — so one record covers
-the release; a later change to a listed text needs a new OA-4
-record.
+precede it — and the release merge, which deploys the activated
+page, follows it. The release commit between them changes only the
+version, which enters none of the listing, the pointer, or the
+bundle ([§6.2](#62-software-and-data-version-stamps)), so one record
+covers the release; a later change to a listed text, the pinned
+vintage, or the bundle needs a new OA-4 record.
 
 *Verification (planned):* the strict builds' exit status on both
 trees, the `site_checks` hook included; the checklist itself is the
@@ -11135,7 +11303,7 @@ References:
 - [PDD §10.3 — Acceptance walkthroughs](pdd.md#103-acceptance-walkthroughs).
 - [`notes/Roadmap.md` — Decisions made](../../notes/Roadmap.md#decisions-made).
 - [ADR-0017](../adr/0017-unadvertised-prototype-before-public-release.md)
-  (Proposed: the phases).
+  (the phases).
 - `docs/app/ip.md` (§3 carries the release-record enumeration);
   `docs/app/release-checklist.md` (the template, including the
   item-15 procedure).
@@ -11164,13 +11332,28 @@ against the sources at their current revisions and the tables are
 re-rendered, never hand-edited. This correction pass re-rendered the
 Kind, Check, and Status columns against the corrected document on
 2026-10-30, with the Home of each obligation the correction moved; in
-every row but one, the Source and Obligation cells are the sweep's
-extraction, unchanged. The amendments of 2026-10-30 to PDD §9.1 and
-to the HLDD's Performance budgets constraint postdate the sweep: the
-PDD §9.1 rows cover the first, and the one row this pass added, whose
-Source reads `HLDD §2 L213-224 (amended 2026-10-30)`, carries what
-the second directs at this document. The rows that direct an
-obligation at the implementation plan recur, identical, in
+every row but those added by hand, the Source and Obligation cells
+are the sweep's extraction, unchanged. The sweep has not run again
+since `36abc56`, and until it does, rows added by hand, the one
+exception to that rule, carry what three later source changes direct
+at this document and the implementation plan: the row whose Source
+reads `HLDD §2 L215-226 (amended 2026-10-30)`, for the HLDD's amended
+Performance budgets constraint, and the rows of
+[§8.4](#84-from-the-adrs-and-the-adr-process) whose Source names
+[ADR-0016 — Performance reference environment — an on-demand AWS VM defined by Terraform](../adr/0016-performance-reference-environment.md)
+or
+[ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md),
+both accepted, each row with the line numbers its source has at
+this document's revision. The amendment of 2026-10-30 to PDD §9.1 falls
+within the PDD §9.1 rows, while the passages of the HLDD,
+`notes/Roadmap.md`, and `docs/adr/README.md` that cite the two ADRs,
+and two passages of ADR-0017 as amended on 2026-10-31 — its
+paragraph Implementation sequencing only (L81-86) and its withdrawal
+consequence (L113-122) — have no rows of their own until the sweep
+runs again. The lint of
+§8.4 checks each row's form and citations and its IP twin, never
+that the matrix is complete. The rows that direct an obligation at
+the implementation plan recur, identical, in
 [IP §7 — Traceability](ip.md#7-traceability).
 
 Each table has six columns. **Source** names the approved document
@@ -11267,7 +11450,7 @@ deliberately keeps.
 | HLDD Intro L72-76 | IP execution brief | IP §2 task graph | text | IP Introduction | designed |
 | HLDD Intro L66-67 | where code references belong | Introduction | text | Introduction; §2; §5.1; §6.1 | designed |
 | HLDD Intro L93-97 | ADRs constrain DDD/IP | Introduction | text | Introduction; IP Introduction; IP §8 | designed |
-| HLDD §2 L213-224 (amended 2026-10-30) | reference environment for the budgets: a fixed-specification AWS VM from Terraform, each time budget at the 95th percentile of 30 runs; the DDD fixes machine specification and run procedure | §1 DD-12, §7.6, §2 | text+measure+owner | §1 DD-12; §7.6; §2; ADR-0016; §7.6 report: environment (T-59, T-61); §7.6 report: workloads (T-61); OA-12 | owner-pending |
+| HLDD §2 L215-226 (amended 2026-10-30) | reference environment for the budgets: a fixed-specification AWS VM from Terraform, each time budget at the 95th percentile of 30 runs; the DDD fixes machine specification and run procedure | §1 DD-12, §7.6, §2 | text+measure+owner | §1 DD-12; §7.6; §2; ADR-0016; §7.6 report: environment (T-59, T-61); §7.6 report: workloads (T-61); OA-12 | owner-pending |
 | HLDD §4.3 L637-639 | state/view lifecycle responsibilities | §5.1, §5.10, §5.11 | text+test | §5.1; §5.3; §5.10; §5.11; subprojects/webapp/playwright/specs/mount.spec.ts (T-60); subprojects/webapp/playwright/specs/navigation-lifecycle.spec.ts (T-60) | planned |
 | HLDD §4.3 L654-656 | chart behaviors and tests | §5.12, §5.11 | text+test | §5.11; §5.12; subprojects/webapp/test/charts.test.ts (T-41); subprojects/webapp/test/histogram.test.ts (T-32); subprojects/webapp/test/chart-text.test.ts (T-41); subprojects/webapp/playwright/specs/render.spec.ts (T-60); subprojects/webapp/playwright/specs/interactions.spec.ts (T-60); subprojects/webapp/playwright/specs/a11y.spec.ts (T-60); subprojects/webapp/playwright/specs/keyboard-responsive.spec.ts (T-60) | planned |
 | HLDD §4.3 L662-663 | bundle size measurement | §7.6, §3.8 | measure | §3.8: pending item 4 (T-61); §7.6 report: workloads.samples.files (T-61) | planned |
@@ -11556,7 +11739,7 @@ deliberately keeps.
 | PRD §8.1 NFR-2 | static-site constraint: no backend; deploy from main via existing GitHub Pages site/build/URL space | §6.1, §6.3 | text | §6.3 (deploy: three-layer main-only gating); §6.1 (Transport contract: own-origin fetch, the shared URL space and build); §5.3; §5.9 (client-side engine and downloads) | designed |
 | PRD §8.2 NFR-3 | performance budgets and their test conditions come from the PDD; implementation must be benchmarked against them | §7.6 | text+measure+release | §7.6 (budgets and reference conditions quoted from PDD §9.1); §1 DD-12 (the reference environment PDD §9.1 leaves to this document); §7.6 report: workloads (T-61); §7.6 report: network (T-61); §7.6 report: environment (T-59, T-61); §7.7 item 5 | planned |
 | PRD §8.3 NFR-5 | failure/version-mismatch behavior: page-vs-export expected-version check and plain failure reporting | §5.10, §6.2, §5.2 | text+test | §6.2 (Runtime check); §5.2 step 1 (kind 'data-version'); §5.10; subprojects/webapp/test/decode.test.ts (T-36); subprojects/webapp/playwright/specs/failure-states.spec.ts (T-60); subprojects/webapp/playwright/specs/navigation-lifecycle.spec.ts::stamp change (T-60) | planned |
-| PRD §8.4 NFR-6 | licensing model preserved (Apache-2.0 / CC BY 4.0 / publisher terms); third-party media release-gated on permissions held elsewhere | §4.4, §7.7 | text+test+release+owner | §4.4 (Vintage terms: data-terms-<h12>.txt, a byte copy of data/REDISTRIBUTION.md); §4.2 step 1 (the OA-1 record gate); subprojects/mkdocs/hooks/site_checks.py arms (a), (b) (T-03); §7.7 item 9; §7.7 item 10; §7.7 item 17; G-6; OA-8; OA-13 | owner-pending |
+| PRD §8.4 NFR-6 | licensing model preserved (Apache-2.0 / CC BY 4.0 / publisher terms); third-party media release-gated on permissions held elsewhere | §4.4, §7.7 | text+test+release+owner | §4.4 (Vintage terms: the README and LICENSE-docs wording); subprojects/mkdocs/hooks/site_checks.py arms (a), (b) (T-03); §7.7 item 9; §7.7 item 10; G-6; OA-8 | owner-pending |
 | PRD §8.5 NFR-7 | strict build gate: fail on warnings or broken links per existing repo rules | §6.3, §7.7 | test+release | .github/workflows/mkdocs.yml::build / Build site (T-21); .github/workflows/mkdocs.yml::build / Build preview site (T-21); subprojects/mkdocs/hooks/site_checks.py (T-03, T-51); §7.7 item 1 | planned |
 | PRD §8.5 NFR-7 | derived-value reference tests as a build/data-quality gate (restates DR-1) | §7.2 | test+owner | subprojects/webapp/test/parity.ts (T-35); .github/workflows/tests.yml::webapp-test / Parity (T-23); .github/workflows/mkdocs.yml::webapp-bundle / Parity (T-23); OA-10 | owner-pending |
 | PRD §8.5 NFR-7 | cache-busting convention: asset address changes when content changes | §6.1, §6.2 | text+test+measure | §6.1 (content-hashed app-<hash> and vintage file names); §6.2 (Cache busting); §4.1 step 6 rule file-names (T-12); subprojects/mkdocs/hooks/site_checks.py arm (c) (T-51); §7.6 report: workloads (T-61) | planned |
@@ -11699,6 +11882,21 @@ deliberately keeps.
 | ADR-0015 Alternatives (L150-152) | query engine must be pure and synchronous so Node can drive it headlessly | §5.1, §5.3 | text+test | §5.1 (engine/ pure and synchronous); §2 (TypeScript configuration: tsconfig.node.json); subprojects/webapp/test/engine.test.ts (T-31); subprojects/webapp/test/parity.ts (T-35) | planned |
 | ADR-0015 Consequences (L161-162) | pipeline-first discipline: new displayed statistics land in the reference generator before the app | §3.6, §5.4, §7.4 | text | §3.6; §5.4; §7.4 (Pipeline-first rule); §5.12 (histogram_log in the generator before the client) | designed |
 | ADR-0015 Consequences (L163-164) | parity failure blocks merge in tests.yml; golden scenarios double as acceptance-walkthrough material | §7.2, §6.3, §7.7 | test+owner+release | .github/workflows/tests.yml::webapp-test / Parity (T-23); .github/workflows/mkdocs.yml::webapp-bundle / Parity (T-23); OA-10; §7.7 item 13 | owner-pending |
+| ADR-0016 Decision (L45-61) | budget measurements run on an AWS EC2 VM of fixed specification, defined by a Terraform configuration in the repository and created for measurement runs: the agreed acceptance baseline, recreatable from the repository, not calibrated against laptops | §1 DD-12, §7.6 | text+schedule+owner | §1 DD-12; §7.6 (Reference environment); T-59; OA-12 | owner-pending |
+| ADR-0016 Decision, Judging rule (L63-69) | each time budget judged at the nearest-rank 95th percentile of 30 runs, the 29th of the 30 ascending samples: met when at least 29 of the 30 runs are within it | §1 DD-12, §7.6 | text+measure | §1 DD-12; §7.6 (Repetitions and judging); §7.6 report: workloads (T-61) | planned |
+| ADR-0016 Decision, Separate root and Fixed specification (L71-82) | Terraform root subprojects/webapp/perf/ with its own local state and Gradle tasks, sharing nothing with deploy/terraform/; an instance type without CPU burst credits in one region, a pinned image, the webapp's browser and Node.js pins; every report records the environment, and only its runs count as budget evidence | §2, §1 DD-12, §7.6 | text+measure+owner | §2 (Reference environment (perf/)); §1 DD-12; §7.6 (Reference environment); §7.6 report: environment (T-59, T-61); OA-16 | owner-pending |
+| ADR-0016 Decision, Lifecycle (L83-91) | one owner-invoked task creates the VM if absent, uploads the locally built site, runs the suite, downloads the report, and destroys the VM once the run completed, budget pass or miss; a failure keeps the VM; meeting the budgets is a separate release decision | §7.6, §7.7 | text+schedule+release+owner | §7.6 (Where the suite runs, Terraform commands); T-59; §7.7 item 5; OA-5 | owner-pending |
+| ADR-0016 Decision, Runtime safeguard and Credentials (L92-108) | a 24-hour self-shutdown that terminates the instance, its root volume deleted on termination, and a documented way to find and clean up a leftover run; a Terraform-generated SSH key written only to temporary owner-only files; state, plans, and key files kept out of commits, logs, and uploaded evidence | §7.6 | text | §7.6 (Self-termination and cleanup, Access) | designed |
+| ADR-0016 Decision, Network conditions (L109-118) | emulated network conditions: a fixed 10 Mbps throughput and a fixed 40 ms latency | §1 DD-12, §7.6 | text+measure | §1 DD-12; §7.6 (Network); §7.6 report: network (T-61) | planned |
+| ADR-0016 Decision, Outside CI (L119-122) | no workflow runs the measurement; the functional browser lane stays locally invoked and unchanged | §6.3, §7.5 | text | §6.3 (no workflow runs the browser lane or the §7.6 reference-environment measurement); §7.5 (webappBrowserTest joins no lifecycle target and no CI job) | designed |
+| ADR-0016 Decision, New toolchain (L124-132) | Terraform CLI constrained to ~> 1.7, the version used recorded with every measurement; the hashicorp/aws and hashicorp/tls providers pinned by the committed dependency lock file | §2, §7.6 | text+measure | §2 (Reference environment (perf/)); §7.6 report: environment (T-59, T-61) | planned |
+| ADR-0016 Consequences (L159-162) | the owner's AWS profile allowed to create, describe, and delete EC2 instances, key pairs, and security groups in the chosen region, and ssm:GetParameter on the public parameter naming the pinned image | §7.6, IP §4 OA-5, IP §4 OA-16 | text+owner | §7.6 (Where the suite runs: the profile's EC2 and SSM actions); OA-16; OA-5 | owner-pending |
+| ADR-0017 Decision, Prototype (L32-43) | Phase 1: the application deployed with its first data vintage at the site's final address, unadvertised — no nav entry, no page linking to it, out of the search index and sitemap.xml, a short prototype notice — its texts awaiting approval, the pending D-10 slot included, shown as drafted | §6.1, §5.8, IP §2 T-18, IP §2 T-54 | text+test+schedule+owner | §6.1 (the unlisted prototype, the prototype deployment); §5.8 (the prototype notice); subprojects/mkdocs/hooks/site_checks.py arm (d) (T-03); subprojects/webapp/playwright/specs/render.spec.ts (T-60); T-18; T-54; OA-17 | owner-pending |
+| ADR-0017 Decision, Review and public release (L44-50) | Phase 2: the owner records the research group's approvals and decisions — texts, D-10, D-18, D-6, the deferred licensing decision — in the owning documents; only then is the page activated (nav entry, search and sitemap inclusion, notice removed) and the first software release cut | §6.1, IP §2 T-55, IP §2 T-65, IP §3 sequence | text+schedule+owner | §6.1 (Activation); IP §3 (the release-branch order); T-55; T-65; OA-4; OA-3; OA-14; OA-2; OA-1; OA-13 | owner-pending |
+| ADR-0017 Decision, Not a public release (L52-62) | the rules a public release carries — text approval, the D-10 text, media permissions, the release checklist — apply at activation and the first software release, not at the prototype deployment; the CI test and parity gates, the publication-inventory and media checks, and the photograph rule hold from the first deployment | §7.7, §6.1, IP §3 G-6 | text+test+owner | §7.7 (Phases); .github/workflows/tests.yml::webapp-test / Parity (T-23); .github/workflows/mkdocs.yml::webapp-bundle / Parity (T-23); subprojects/mkdocs/hooks/site_checks.py arms (a), (b) (T-03); G-6; OA-8 | owner-pending |
+| ADR-0017 Decision, Licensing deferred (L64-79) | the licensing decision deferred to Phase 2; until then the exports carry the stated assumption in data/REDISTRIBUTION.md, beside each source's terms and attribution, and in the record line the publication tool checks before every upload; the confirmation precedes activation and the first software release, whose pinned vintage carries the confirmed terms | §4.2, §4.4, §7.7, IP §3 G-1, IP §4 OA-1, IP §4 OA-13, IP §2 T-63 | text+owner+schedule+release | §4.2 step 1 (the OA-1 record gate); §4.4 (Vintage terms); G-1; OA-1; OA-13; T-63; §7.7 item 17 | owner-pending |
+| ADR-0017 Decision, Four authorizations (L88-95) | sharing the prototype, the owner's decision, stands for none of the three authorizations the review supplies: the research group's text approval (SC-7), the D-10 text, and the licensing decision, source by source | IP §4 OA-17, IP §3 G-4, IP §3 G-5, IP §4 OA-13 | owner | OA-17; G-4; OA-4; G-5; OA-3; OA-13 | owner-pending |
+| ADR-0017 Consequences (L123-126) | three publication states of the scenario page — draft, unlisted prototype, activated — and the release checklist applied at activation and at the software release | §6.1, §7.7 | text+test | §6.1 (the three publication states); subprojects/mkdocs/hooks/site_checks.py arm (d) (T-03); §7.7 (Phases) | planned |
 
 *Verification (planned):* `.github/scripts/check_traceability.py`,
 which uses the Python standard library only, lints the matrix tables
@@ -11771,13 +11969,14 @@ References:
   itself is not in the repository, and this correction pass
   re-rendered the Kind, Check, and Status columns against the
   corrected document on 2026-10-30 and added the row of the HLDD
-  amendment of that day.
+  amendment of that day; the correction pass of 2026-10-31 added the
+  rows of ADR-0016 and ADR-0017.
 - [HLDD §2 — Architectural constraints](hldd.md#2-architectural-constraints)
   (Performance budgets, amended 2026-10-30);
   [PDD §9.1 — Performance budgets (D-9, Proposed)](pdd.md#91-performance-budgets-d-9-proposed)
   (amended 2026-10-30);
-  [ADR-0016 — Performance reference environment — an on-demand AWS VM defined by Terraform](../adr/0016-performance-reference-environment.md)
-  (Proposed).
+  [ADR-0016 — Performance reference environment — an on-demand AWS VM defined by Terraform](../adr/0016-performance-reference-environment.md);
+  [ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md).
 - `.github/scripts/check_traceability.py`;
   `.github/workflows/doc-links.yml`.
 
@@ -11848,16 +12047,16 @@ authority that owns it:
   no-raw-twin rule, which [§4.2](#42-publication-of-a-data-vintage)
   is designed against ([DD-7](#1-ddd-decision-register)), stays with
   [ADR-0014 — Product artifacts in release assets, pinned by a committed manifest](../adr/0014-committed-content-hashed-artifacts.md).
-  Accepting
   [ADR-0016 — Performance reference environment — an on-demand AWS VM defined by Terraform](../adr/0016-performance-reference-environment.md),
   which the `perf/` root of
   [§2](#2-repository-structure-naming-and-toolchain),
   [§7.6](#76-performance-and-compatibility-measurements), and
   [DD-12](#1-ddd-decision-register) (Performance reference
-  environment) are designed against, stays with the owner, owner
-  action OA-12 of the
+  environment) are designed against, was accepted by the owner on
+  2026-10-31, owner action OA-12 of the
   [implementation plan](ip.md#4-owner-and-research-group-actions);
-  the Terraform root and every reference run wait for it.
+  the Terraform root and every reference run wait for its record, the
+  owner's dated commit of the ADR's Accepted status.
   The "Kern County is red" correction of
   [ADR-0007 — Dashboard design conventions](../adr/0007-dashboard-design-conventions.md)
   goes through the ADR process, not this document.
@@ -11917,7 +12116,12 @@ that depends on a Proposed decision until the owner accepts it, as
 [Authority and change control](#authority-and-change-control)
 requires: the Terraform root of
 [ADR-0016 — Performance reference environment — an on-demand AWS VM defined by Terraform](../adr/0016-performance-reference-environment.md)
-waits for owner action OA-12. Its traceability
+waits for the record of owner action OA-12, and under
+[ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md)
+the publication of the first data vintage and the prototype
+deployment wait for that of owner action OA-17 — acceptances the
+owner gave on 2026-10-31, each recorded by the owner's dated commit
+of the ADR's Accepted status. Its traceability
 tables ([IP §7 — Traceability](ip.md#7-traceability)) repeat, row
 for row, the [§8](#8-traceability) rows whose obligations fall on
 the plan, and its task T-04 builds the lint that keeps each pair

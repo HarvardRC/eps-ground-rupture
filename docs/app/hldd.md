@@ -100,11 +100,10 @@ proceeds.
 
 ## 1. Architecture decisions
 
-This design is based on six accepted architecture decisions,
-recorded in [ADR-0010–ADR-0015](../adr/README.md), and two proposed
-decisions: ADR-0016, on the performance reference environment, and
-ADR-0017, on an unadvertised prototype deployment before the public
-release. The
+This design is based on eight accepted architecture decisions,
+recorded in [ADR-0010–ADR-0017](../adr/README.md), among them
+ADR-0016, on the performance reference environment, and ADR-0017, on
+an unadvertised prototype deployment before the public release. The
 table below summarizes what each decision covers and points to the
 corresponding explanation in this document.
 
@@ -120,8 +119,8 @@ approves it, incorporating any amendments agreed during review.
 | [ADR-0013](../adr/0013-row-level-scenario-artifact.md) | **Simulation-data organization and calculation.** The browser receives the individual recorded stages of the simulations, not just precomputed counts or summary statistics. Site conditions are stored once per simulation trial; measurements are stored for each recorded stage, grouped by measurement rather than by record. When a user changes the scenario, the browser selects the matching records and calculates their counts, percentiles, and other statistics. | [§5.2 Simulation data organization](#52-simulation-data-organization-adr-0013), [§5.3 Records rather than precomputed summaries](#53-records-rather-than-precomputed-summaries-adr-0013), [§7.1 Performance estimates and verification](#71-performance-estimates-and-verification) |
 | [ADR-0014](../adr/0014-committed-content-hashed-artifacts.md) | **Data publication and versioning.** Store the application data files as GitHub release assets; commit only a pointer manifest that pins them by checksum. Publish compressed simulation data and use filenames that change when file content changes. Deploy only the pinned data vintage; retain earlier vintages as release assets. Derived data keeps its source terms: it never enters the repository, and each release carries it as a data asset. | [§5.4 Pinned, versioned artifacts](#54-pinned-versioned-artifacts-adr-0014), [§7.3 Delivery and caching](#73-delivery-and-caching) |
 | [ADR-0015](../adr/0015-golden-scenario-parity.md) | **Data and calculation verification.** Verify two things separately: that the exported application data preserves the pipeline's approved records and values, and that the application's filtering and statistics reproduce independently calculated pipeline results for predefined test scenarios. The pipeline also supplies the surface-offset-to-slip conversion coefficients, so the application does not maintain a separate copy of those numbers. | [§5.6 Reference results and verification](#56-reference-results-and-verification-adr-0015), [§5.7 Conversion coefficients](#57-conversion-coefficients-adr-0015), [§9 Testing and release architecture](#9-testing-and-release-architecture) |
-| [ADR-0016](../adr/0016-performance-reference-environment.md) | **Performance reference environment (Proposed).** Measure the performance budgets on an AWS virtual machine of fixed specification, defined by a Terraform configuration in the repository: each measurement run creates it if it does not exist, runs against the locally built site, and destroys it when the run succeeds. Each time budget is judged at the 95th percentile of 30 measured runs. | [Performance budgets](#performance-budgets), [§7.1 Performance estimates and verification](#71-performance-estimates-and-verification) |
-| [ADR-0017](../adr/0017-unadvertised-prototype-before-public-release.md) | **Prototype before public release (Proposed).** Deploy the application first as an unadvertised prototype — no navigation entry, excluded from site search and the sitemap, marked as a prototype, under the current licensing assumed until confirmed — so the research group can review it; approvals, the D-10 text and confirmed data terms are required at activation and at the first software release, not at the prototype deployment. | [Licensing and media permissions](#licensing-and-media-permissions), [§9 Testing and release architecture](#9-testing-and-release-architecture) |
+| [ADR-0016](../adr/0016-performance-reference-environment.md) | **Performance reference environment.** Measure the performance budgets on an AWS virtual machine of fixed specification, defined by a Terraform configuration in the repository: each measurement run creates it if it does not exist, runs against the locally built site, and destroys it when the run succeeds. Each time budget is judged at the 95th percentile of 30 measured runs. | [Performance budgets](#performance-budgets), [§7.1 Performance estimates and verification](#71-performance-estimates-and-verification) |
+| [ADR-0017](../adr/0017-unadvertised-prototype-before-public-release.md) | **Prototype before public release.** Deploy the application first as an unadvertised prototype — no navigation entry, excluded from site search and the sitemap, marked as a prototype, with the licensing decision deferred and the current licensing stated as an assumption — so the research group can review it; approvals, the D-10 text and the licensing decision are required at activation and at the first software release, not at the prototype deployment. | [Licensing and media permissions](#licensing-and-media-permissions), [§9 Testing and release architecture](#9-testing-and-release-architecture) |
 
 ---
 
@@ -238,7 +237,7 @@ References:
 
 The application must support the browser baseline defined in the PDD:
 evergreen Chrome, Edge, Firefox, and Safari versions released within
-24 months of each product release, and iOS Safari and Android Chrome in
+12 months before each product release, and iOS Safari and Android Chrome in
 the same window.
 
 It must remain fully usable at a viewport width of 360 CSS pixels.
@@ -342,9 +341,8 @@ confirmed. A public release is the activated site — the scenario page
 in the site's navigation — or a tagged GitHub release, whose source
 archive feeds the project's planned Zenodo record. An unadvertised
 prototype deployment for the research group's review is not a public
-release ([ADR-0017](../adr/0017-unadvertised-prototype-before-public-release.md),
-Proposed); it never carries a third-party photograph without documented
-permission.
+release ([ADR-0017](../adr/0017-unadvertised-prototype-before-public-release.md)); it never
+carries a third-party photograph without documented permission.
 
 The application data files derived from the input datasets keep those
 datasets' terms rather than the code's Apache-2.0. They never enter
@@ -1199,7 +1197,13 @@ The DDD defines the operational steps.
 
 Permission to redistribute each export must be confirmed before its
 first public upload. This applies to the simulation data, field data,
-and any derived tables or reference results.
+and any derived tables or reference results. For the data vintages of
+the unadvertised prototype the licensing decision is deferred
+([ADR-0017](../adr/0017-unadvertised-prototype-before-public-release.md)): they
+are uploaded under the project's current licensing,
+stated as an assumption pending the research group's confirmation, and
+the confirmation is required before activation and before the first
+software release.
 
 Application code is licensed under Apache-2.0. That license must not be
 presented as automatically covering the data exports. Each data vintage
@@ -1795,6 +1799,13 @@ set is the
 [PDD §9.2](pdd.md#92-browser-and-mobile-baseline-d-16-proposed)
 baseline; a browser being outside it is not by itself treated as proof
 that the application cannot run.
+
+A missing-feature notice names the unavailable features, asks the
+reader to update to the latest stable browser and reload, and
+explains that updating Safari on iPhone or iPad requires updating
+iOS or iPadOS. The ordinary static fallback states the browser
+policy and these recovery steps outside `<noscript>`, so a script
+that cannot load or parse still leaves useful guidance.
 
 The application replaces or hides its fallback presentation only after
 the corresponding interactive content is ready.
@@ -2589,9 +2600,14 @@ References:
 ### Data rights and archival distribution
 
 Permission to distribute the derived exports must be confirmed before
-their first public upload. Storing them outside Git, or attaching them
-separately from Apache-2.0 application code, does not itself establish
-permission to redistribute them.
+their first public upload — except for the unadvertised prototype's
+vintages, for which
+[ADR-0017](../adr/0017-unadvertised-prototype-before-public-release.md)
+defers the licensing decision to activation and the first
+software release. Storing the exports outside Git, attaching them
+separately from Apache-2.0 application code, or stating an assumed
+license for them does not itself establish permission to redistribute
+them.
 
 The owner, with the research group, must:
 
