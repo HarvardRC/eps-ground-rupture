@@ -972,22 +972,181 @@ def run(root: Path, data_tag: str) -> None:
         print(line)
 
 
+# --------------------------------------------------------------------------
+# Regeneration: `--reproduce <pointer>` (§4.3)
+# --------------------------------------------------------------------------
+
+
+def recorded_inputs(pointer: dict[str, object]) -> tuple[list[str], str]:
+    """The nine data paths of a `--reproduce` run: those the pointer's
+    `provenance.inputs` records, which must be the eight fixed paths and
+    exactly one path matching :data:`FLATFILE_PATTERN`. Returns the paths
+    and the recorded flatfile path; never discovers an input."""
+    records = pointer["provenance"]["inputs"]  # type: ignore[index]
+    paths = [str(record["path"]) for record in records]
+    fixed = [*PROCESSED_INPUTS, *RAW_FIXED_INPUTS]
+    problems = [
+        f"{path} is missing from the pointer's provenance.inputs"
+        for path in sorted(fixed)
+        if path not in paths
+    ]
+    flatfiles = [path for path in paths if matches_flatfile_pattern(path)]
+    if not flatfiles:
+        problems.append(f"no path matching {FLATFILE_PATTERN} in the pointer's provenance.inputs")
+    seen: set[str] = set()
+    for path in paths:
+        if path in seen:
+            problems.append(f"{path} is recorded more than once in the pointer's provenance.inputs")
+        elif path not in fixed and not matches_flatfile_pattern(path):
+            problems.append(f"{path} in the pointer's provenance.inputs is not an export input")
+        seen.add(path)
+    if len(set(flatfiles)) > 1:
+        problems.append(
+            f"more than one path matching {FLATFILE_PATTERN} in the pointer's "
+            f"provenance.inputs: {', '.join(sorted(set(flatfiles)))}"
+        )
+    if problems:
+        raise ExportFailure("inputs-present", "\n".join(problems))
+    return paths, flatfiles[0]
+
+
+def check_reproducible(
+    root: Path, pointer: dict[str, object], commit: str, clean: bool, allow_drift: bool
+) -> None:
+    """The refusals of §4.3, each naming the failing `provenance` member:
+    HEAD must equal `source_commit`; `source_tree_clean` must be true and
+    the clean-tree command print nothing; every input must match its
+    recorded SHA-256 and byte count; and, unless ``allow_drift``, the
+    running environment must equal `environment` member by member."""
+    provenance: dict = pointer["provenance"]  # type: ignore[assignment]
+    problems: list[str] = []
+    if commit != provenance["source_commit"]:
+        problems.append(
+            f"provenance.source_commit: HEAD is {commit}, the pointer records "
+            f"{provenance['source_commit']}"
+        )
+    if provenance["source_tree_clean"] is not True:
+        problems.append("provenance.source_tree_clean: the pointer records a dirty tree")
+    if not clean:
+        problems.append(
+            "provenance.source_tree_clean: the clean-tree command prints output; "
+            "the working tree is not clean"
+        )
+    mismatched: list[str] = []
+    for record in provenance["inputs"]:
+        sha, size = hash_file(root / record["path"])
+        if sha != record["sha256"] or size != record["bytes"]:
+            mismatched.append(record["path"])
+            problems.append(
+                f"provenance.inputs: {record['path']} has SHA-256 {sha} and {size} bytes, "
+                f"the pointer records {record['sha256']} and {record['bytes']} bytes"
+            )
+    if mismatched and all(path in PROCESSED_INPUTS for path in mismatched):
+        flatfile = next(
+            r["path"] for r in provenance["inputs"] if matches_flatfile_pattern(r["path"])
+        )
+        problems.append(
+            "Only processed tables differ; the recorded raw files match. "
+            + REBUILD_COMMAND_REPRODUCE.format(path=flatfile)
+        )
+    if not allow_drift:
+        running = environment()
+        recorded: dict = provenance["environment"]
+        for member in sorted(set(running) | set(recorded)):
+            if running.get(member) != recorded.get(member):
+                problems.append(
+                    f"provenance.environment.{member}: running {running.get(member)!r}, "
+                    f"the pointer records {recorded.get(member)!r}"
+                )
+    if problems:
+        raise ExportFailure("provenance", "\n".join(problems))
+
+
+def compare_with_pointer(written: dict[str, str], recorded: dict[str, str]) -> None:
+    """Every output file's SHA-256 against the pointer's, naming every
+    file that differs."""
+    problems = [
+        f"{name}: in the pointer, not reproduced"
+        for name, sha in sorted(recorded.items())
+        if written.get(name) != sha
+    ]
+    problems += [
+        f"{name}: reproduced, not in the pointer"
+        for name, sha in sorted(written.items())
+        if recorded.get(name) != sha
+    ]
+    if problems:
+        raise ExportFailure("pointer-exact", "\n".join(problems))
+
+
+def reproduce(root: Path, pointer_path: Path, allow_drift: bool) -> None:
+    """Regenerate a vintage from its pointer into
+    `dist/app/<data-tag>.reproduced/`, writing no pointer (§4.3)."""
+    pointer = json.loads(pointer_path.read_text(encoding="utf-8"))
+    data_tag = str(pointer["data_tag"])
+    commit = source_commit(root)
+    clean = tree_is_clean(root)
+    print_source_lines(commit, clean)
+    paths, flatfile = recorded_inputs(pointer)
+    check_inputs_present(root, data_tag, paths, flatfile=flatfile)
+    check_reproducible(root, pointer, commit, clean, allow_drift)
+    provenance = dict(pointer["provenance"])
+    if allow_drift:
+        provenance["environment"] = environment()
+    out_dir = root / DIST_APP_DIR / f"{data_tag}.reproduced"
+    reset_dir(out_dir)
+    ctx = RunContext(
+        root=root,
+        data_tag=data_tag,
+        export_date=str(pointer["export_date"]),
+        provenance=provenance,
+        out_dir=out_dir,
+    )
+    vintage = export_vintage(ctx)
+    compare_with_pointer(vintage.written, pointer["files"])
+    for line in size_report(out_dir, list(vintage.written)):
+        print(line)
+
+
 def main(argv: list[str] | None = None, *, root: Path | None = None) -> int:
     parser = argparse.ArgumentParser(
         description=(
             "Export one data vintage for the scenario page into dist/app/<data-tag>/ "
-            "and write the working-tree pointer manifest (docs/app/ddd.md §4.1)."
+            "and write the working-tree pointer manifest (docs/app/ddd.md §4.1); or, "
+            "with --reproduce, regenerate a vintage from its pointer (§4.3)."
+        ),
+    )
+    mode = parser.add_mutually_exclusive_group(required=True)
+    mode.add_argument(
+        "--data-tag",
+        help="The vintage tag: data-vN, or data-v0-test for a development export.",
+    )
+    mode.add_argument(
+        "--reproduce",
+        metavar="POINTER",
+        help=(
+            "Regenerate the vintage a pointer manifest pins, byte for byte, into "
+            "dist/app/<data-tag>.reproduced/; the tag and every input path come from "
+            "the pointer, and no pointer is written."
         ),
     )
     parser.add_argument(
-        "--data-tag",
-        required=True,
-        help="The vintage tag: data-vN, or data-v0-test for a development export.",
+        "--allow-environment-drift",
+        action="store_true",
+        help=(
+            "With --reproduce: waive the environment match and record the running "
+            "environment instead."
+        ),
     )
     args = parser.parse_args(argv)
+    if args.allow_environment_drift and not args.reproduce:
+        parser.error("--allow-environment-drift applies only with --reproduce")
     root = root or REPO_ROOT
     try:
-        run(root, args.data_tag)
+        if args.reproduce:
+            reproduce(root, Path(args.reproduce), args.allow_environment_drift)
+        else:
+            run(root, args.data_tag)
     except ExportFailure as exc:
         print(exc.detail)
         return 1

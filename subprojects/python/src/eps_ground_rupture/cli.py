@@ -53,7 +53,33 @@ def main(argv: list[str] | None = None) -> int:
             f"(default: {DEFAULT_S3_PREFIX}). Per-table dirs are appended."
         ),
     )
+    parser.add_argument(
+        "--fdhi-flatfile",
+        metavar="PATH",
+        default=None,
+        help=(
+            "Build from this FDHI flatfile — a repository-relative path, resolved "
+            f"against the repository root, to an existing file matching "
+            f"data/raw/{io.FDHI_FLATFILE_GLOB} — instead of discovering it; the "
+            "rebuild a reproduction of a recorded vintage asks for (docs/app/ddd.md §4.3)."
+        ),
+    )
     args = parser.parse_args(argv)
+
+    # The given flatfile must exist and match the pattern; checked first, so
+    # a bad path exits before anything is read or written.
+    flatfile: Path | None = None
+    if args.fdhi_flatfile is not None:
+        from .product_export import matches_flatfile_pattern
+
+        flatfile = REPO_ROOT / args.fdhi_flatfile
+        if not (matches_flatfile_pattern(args.fdhi_flatfile) and flatfile.is_file()):
+            print(
+                f"error: --fdhi-flatfile {args.fdhi_flatfile}: not an existing file "
+                f"matching data/raw/{io.FDHI_FLATFILE_GLOB}",
+                file=sys.stderr,
+            )
+            return 2
 
     # Fail fast, before anything is written: an incomplete input set would
     # otherwise rewrite generated artifacts (including the tracked
@@ -65,7 +91,8 @@ def main(argv: list[str] | None = None) -> int:
         print(f"error: {exc}", file=sys.stderr)
         return 2
 
-    flatfile = io.find_fdhi_flatfile()
+    if flatfile is None:
+        flatfile = io.find_fdhi_flatfile()
     raw_fdhi = io.load_fdhi_flatfile(flatfile)
     frames = [
         ("dem", io.load_dem()),
