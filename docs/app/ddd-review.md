@@ -1047,6 +1047,132 @@ of their Consequences, except their Date lines. These are document
 checks; the specified pipeline, browser, and application tests have
 not yet been implemented.
 
+## Consistency, ambiguity, and feasibility review (2026-11-01)
+
+The owner requested another review after the deferred-finding
+corrections. This round read the clean baseline
+`23931151e7616c7ff2dc89486675b8fe4016ecc7`, including the later
+corrections recorded above. Three independent read-only reviews
+covered the data lifecycle, browser contracts, and implementation
+sequence; the coordinating review checked the findings, chart and
+configuration contracts, and documentation diagnostics. Line numbers
+below refer to that baseline. These findings are open; recording
+them does not change the normative design or task instructions.
+
+1. **CF-1 — P2: reproduction discovers a different FDHI input.**
+   [DDD §4.1](ddd.md#41-export-task-and-validation), L2483–2489,
+   uses `io.find_fdhi_flatfile()` for the raw FDHI input, and its
+   `provenance` rule, L2700–2707, requires exactly that discovered
+   input set. [DDD §4.3](ddd.md#43-retention-rollback-recovery-and-withdrawal),
+   L3264–3286, applies that same preflight and validation to
+   reproduction while preserving the supplied pointer's provenance.
+   The actual helper selects the last matching filename. With the
+   recorded 20220719 file still present and unchanged, adding a
+   20261101 file changes the selected path and makes the old
+   provenance fail the exact-set check. The prescribed `egr-build`
+   retry also selects the newer input. Reproduction must select
+   recorded inputs from its supplied pointer, including when
+   rebuilding processed files, or prescribe an isolated environment
+   containing exactly those inputs. Fresh exports may keep discovery.
+   Add a two-flatfile reproduction case. **Evidence:** the actual
+   helper, extracted unchanged from its AST, was executed on
+   temporary synthetic files; the selected path changed while the
+   older file's checksum did not. Confidence: high.
+
+2. **CF-2 — P2: the warm-cache assertion lacks required CDP events.**
+   [DDD §7.6](ddd.md#76-performance-and-compatibility-measurements),
+   L11479–11482, requires recognizing disk/memory hits and HTTP 304
+   from `Network.responseReceived` alone;
+   [IP T-61](ip.md#t-61--measurement-suite), L4141–4143, inherits it.
+   The protocol places the wire 304 status in
+   `responseReceivedExtraInfo.statusCode`, while the corresponding
+   response event can report 200. Cache-served requests also have
+   `requestServedFromCache`, and extra response information can
+   arrive before or after the response event. A literal assertion
+   lacks the specified evidence for distinguishing these cases from
+   a downloaded response and can reject a valid warm repetition.
+   Specify correlation by `requestId`, both event orders, and
+   `hasExtraInfo`; accept verified cache hits or wire status 304,
+   and reject a downloaded 200 body. Cached responses must not wait
+   indefinitely for extra information that will not arrive; the
+   pinned Playwright network manager handles this case separately.
+   Add focused classification cases. **Evidence:** the
+   [official Network protocol definition](https://raw.githubusercontent.com/ChromeDevTools/devtools-protocol/master/pdl/domains/Network.pdl)
+   and the matching protocol declarations in pinned Playwright
+   1.47.2. Confidence: high for the event-contract mismatch. No
+   pinned Chromium installation was available for a runtime trace;
+   this is not a claim that every revalidated request fails.
+
+3. **CF-3 — P2: parity's self-check has no failure-accounting rule.**
+   [DDD §7.2](ddd.md#72-calculation-parity-tests), L10208–10215,
+   deliberately injects three differences and requires reporting
+   them on every run. Its Report paragraph, L10266–10277, and
+   [IP T-35](ip.md#t-35--node-parity-harness), L2169–2177, make any
+   difference produce a nonzero exit, while T-35's Done-when
+   requires a correct ordinary run to exit zero. The intended
+   self-test is clear, but its exception and output accounting are
+   unstated. Collect injected differences separately, assert their
+   exact expected identities and rules, and fail only if that
+   assertion or the real comparison fails. Specify whether expected
+   injections print as diagnostics or stay silent. Add correct-run,
+   missing-injection, and extra-difference cases. Confidence: medium;
+   this is an ambiguity in the specification, not an observed
+   application failure.
+
+4. **CF-4 — P2: two deferred announcements omit lifetime guards.**
+   [IP T-40](ip.md#t-40--scenario-controls), L2403–2405, requires
+   `announce(wiring.status, line)` for rejected input;
+   [IP T-41](ip.md#t-41--measurement-panels-and-charts), L2572–2574,
+   prescribes the same two-argument form for a percentile read-off.
+   The helper writes later without a predicate when `live` is
+   omitted (T-41, L2494–2496), contrary to
+   [DDD §5.11](ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle),
+   L7432–7434, which requires timers to return after mount abort.
+   Hold either callback, navigate away, then release it: the
+   specified call still writes to the disposed status element.
+   Require the mount-lifetime predicate at both call sites and
+   define invalidation when a transient message is superseded, such
+   as a rejected entry cleared by Reset. Cover disposal and
+   correction/Reset with held-callback tests. Confidence: high.
+
+5. **CF-5 — P2: terminal failure does not guard pending startup.**
+   [DDD §5.10](ddd.md#510-failure-states), L6454–6466, installs the
+   global error handlers before awaiting the vintage; a routed
+   error enters unavailable state (L6516–6520). That state is
+   terminal (L6690–6695), but the specified startup continuation
+   tests only navigation abort (L6486–6488), and the described
+   terminal stop belongs to the scheduler, created after the first
+   result. Hold the artifact response, route a bundle error, then
+   release the response: the startup recipe can continue to a result
+   that replaces the terminal notice. Define a mount-level terminal
+   state checked after awaits and before commits, separate from
+   navigation abort so recovery controls remain usable. Cover first
+   startup, restored-offset loading, and resumed startup with held
+   responses and a routed error. Confidence: medium-high; terminal
+   behavior is stated, but the prescribed mechanism omits this path.
+
+No new P1 or architectural blocker was found. The five findings
+should be closed before accepting the affected task bodies; they do
+not require revisiting the accepted product choices. The already
+recorded difference between HLDD §5.5/ADR-0012's field-source list
+and DDD §3.4 remains a separate documentation-alignment item, not a
+new finding in this round. Explicit owner and research-group gates
+remain gates, not undiscovered design gaps.
+
+At this review, all 5,098 relative links in 54 Markdown files
+resolved. Scratch traceability lint accepted 484 rows (443 DDD
+obligations and 41 IP mirrors), with no errors or gaps. The task
+graph's 47 tasks and 151 task-dependency edges had no cycle or
+undefined task reference. All 14 configuration-register quotes
+occurred in their cited PDD sections. These are documentation and
+targeted specification diagnostics; they do not establish browser
+performance or constitute execution of the planned application,
+publication, or release test suite.
+
+After this record was added, the link check covered 5,108 relative
+links in the same 54 Markdown files with no broken links, and
+`git diff --check` passed. Only this review ledger changed.
+
 ## References
 
 - [`docs/app/ddd.md` — Ground Rupture Explorer — detailed design document](ddd.md).
