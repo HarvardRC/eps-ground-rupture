@@ -1,0 +1,4 @@
+INHERIT: mkdocs.yml
+draft_docs: |
+  media/dev/
+site_dir: site-preview

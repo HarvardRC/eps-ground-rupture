@@ -48,6 +48,10 @@ val mkdocsBuild by tasks.registering(Exec::class) {
 
     inputs.dir("docs")
     inputs.file("mkdocs.yml")
+    // The site checks hook and its allowlist decide what the build may
+    // publish (docs/app/ddd.md §6.1): an edit to either re-runs the build.
+    inputs.file("hooks/site_checks.py")
+    inputs.file("publication-allowlist.txt")
     outputs.dir(layout.projectDirectory.dir("site"))
 }
 
