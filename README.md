@@ -140,7 +140,7 @@ Then:
   Gradle tool surface, setup, known gaps
 - `docs/adr/` — active decisions + [dead-ends.md](docs/adr/dead-ends.md)
 - `docs/datasets.md` — the input datasets (DEM, FDHI, SURE, Kern) and the
-  thirteen derived views
+  fourteen derived views
 - `docs/dashboards/` — per-dashboard developer docs: data contracts,
   calculated fields, how to edit a workbook safely; `tableau-editing-notes.md`
   collects the `.twb` traps that apply to every workbook
