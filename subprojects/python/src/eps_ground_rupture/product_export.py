@@ -900,6 +900,27 @@ def write_manifest_and_terms(ctx: RunContext, vintage: Vintage) -> None:
     vintage.terms_name = write_vintage_file(ctx.out_dir, "data_terms", terms, vintage.written)
 
 
+def build_pointer(ctx: RunContext, vintage: Vintage) -> dict[str, object]:
+    """The pointer manifest of §3.3: its `files` name exactly the files this
+    run writes — the artifact manifest, every file the manifest names, and
+    the terms file; the reference-results file joins with T-13."""
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "data_tag": ctx.data_tag,
+        "export_version": ctx.data_tag,
+        "export_date": ctx.export_date,
+        "provenance": ctx.provenance,
+        "files": dict(vintage.written),
+    }
+
+
+def write_pointer(root: Path, pointer: dict[str, object]) -> None:
+    """§4.1 step 6: write the working-tree pointer; the run never commits it."""
+    path = root / POINTER_PATH
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(canonical_json(pointer))
+
+
 def export_vintage(ctx: RunContext) -> Vintage:
     """Steps 2 onward of §4.1."""
     vintage = write_data_files(ctx)
@@ -924,7 +945,8 @@ def run(root: Path, data_tag: str) -> None:
         provenance=provenance,
         out_dir=out_dir,
     )
-    export_vintage(ctx)
+    vintage = export_vintage(ctx)
+    write_pointer(root, build_pointer(ctx, vintage))
 
 
 def main(argv: list[str] | None = None, *, root: Path | None = None) -> int:
