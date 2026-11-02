@@ -144,6 +144,21 @@ extra_css:
 exclude_docs: |
   includes/
 
+# The publication boundary (docs/app/ddd.md §6.1, Publication and
+# activation). `draft_docs` leaves a page or file out of `mkdocs build`
+# entirely (out of the site tree, sitemap.xml, and the search index) while
+# `mkdocs serve` still builds it; mkdocs.preview.yml drafts only media/dev/.
+# `not_in_nav` only declares a nav omission deliberate. The site checks hook
+# fails every build whose output crosses the boundary.
+draft_docs: |
+  media/dev/
+  scenario.md
+  assets/scenario/
+not_in_nav: |
+  scenario.md
+hooks:
+  - hooks/site_checks.py
+
 validation:
   omitted_files: warn
   absolute_links: warn

@@ -1,0 +1,9 @@
+# Publication allowlist (docs/app/ddd.md §6.1, site checks hook arm (b)):
+# the non-text files a build may publish outside assets/scenario/, one
+# fnmatch pattern per line, matched against the site-relative path. A new
+# project image enters by a reviewed one-line diff of this file.
+assets/images/favicon.png
+images/fig-03-dem-model-schematic.png
+images/fig-04-compare-dem-models.png
+images/fig-05-ml-model-measurements.jpg
+images/fig-07-homogeneous-vs-ctu.png
