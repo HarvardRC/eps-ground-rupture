@@ -7,13 +7,14 @@ each finding. Review 2 asked for it: "Review records need a durable
 evidence location". The status lines of the DDD and of the
 implementation plan cite this file.
 
-**Scope.** Seven reviews: three of 2026-10-30 — review 1 of the full
+**Scope.** Eight reviews: three of 2026-10-30 — review 1 of the full
 DDD draft, review 2 of the corrected DDD, and a review of
 [ADR-0016 — Performance reference environment — an on-demand AWS VM defined by Terraform](../adr/0016-performance-reference-environment.md)
 — two reviews of the implementation plan, both of 2026-10-31, the
 repository-backed design review of 2026-10-31 with its correction
-pass of 2026-11-01, and the IP consistency review of 2026-11-01 with
-its correction pass.
+pass of 2026-11-01, the IP consistency review of 2026-11-01 with its
+correction pass, and the consistency, ambiguity, and feasibility
+review of 2026-11-01 with its correction pass of 2026-11-02.
 The review texts are model output from the owner's review agent, not
 statements of the research group or of any other person. Reviews 1
 and 2 state that they read the supplied text and did not
@@ -25,17 +26,21 @@ against an earlier DDD and did not inspect
 the later DDD amendments, the repository, or any workflow run, and
 the second that it did not inspect the current DDD, ADR-0017, this
 ledger, or the repository, and executed no commands. This ledger
-restates each finding in one line under its review's own identifier
-— review 2's observations are lettered here, the ADR-0016 points
-numbered, the first implementation-plan review's observations
-lettered, and the second's publication-governance item named — and
-does not reproduce the review texts. It also records the correction
-passes' own verification rounds and the owner's rulings made during
-them, and the owner's decisions of 2026-11-01 on versions and
-branches.
+restates each finding under its review's own identifier, in one line
+or, for the consistency, ambiguity, and feasibility review, in one
+numbered item — review 2's observations are lettered here, the
+ADR-0016 points numbered, the first implementation-plan review's
+observations lettered, and the second's publication-governance item
+named — and does not reproduce the review texts. It also records the
+correction passes' own verification rounds and the owner's rulings
+made during them, the owner's decisions of 2026-11-01 on versions and
+branches, and those of 2026-11-02 on the first implementation wave.
 
-**Evidence.** Nothing the DDD specifies has been built in the
-project, and none of the checks it introduces has run there. The
+**Evidence.** Whether what the DDD specifies has been built and its
+checks have run is recorded by the tasks' Status cells in
+[IP §2 — Task graph](ip.md#2-task-graph)
+([Task format](ip.md#task-format)), never by this ledger, whose dated
+sections state what held at their dates. The
 diagnostics that the sections below record — among them the isolated
 trials of [T-04](ip.md#t-04--traceability-lint) (Traceability lint) —
 ran outside the project: they test the specification, and none is an
@@ -1176,6 +1181,55 @@ After this record was added, the link check covered 5,108 relative
 links in the same 54 Markdown files with no broken links, and
 `git diff --check` passed. Only this review ledger changed.
 
+On 2026-11-02 the five findings were corrected, the DDD first and
+then each IP restatement, by choices the owner delegated, and the
+owner adopted those choices the same day, with the recommendations on
+the questions they had left open.
+CF-1: reproduction takes every input path from its pointer's
+`provenance.inputs`, never from `io.find_fdhi_flatfile()`, and a
+rebuild passes the recorded flatfile to a new
+`egr-build --fdhi-flatfile` option, the owner rebuilding without it
+once back on the working branch; T-16 adds the two-flatfile case.
+CF-2: the warm-cache check correlates each request's CDP events by
+`requestId` in either order, counts a response served from cache
+(`fromDiskCache` or `Network.requestServedFromCache`; the protocol
+has no memory-cache member) as warm without waiting for extra
+information, otherwise reads the wire status, and waits at most
+5,000 ms; T-61 adds the focused cases. CF-3: the parity self-check
+checks its three injected differences apart from the real ones and
+reports them in one diagnostic line, never as difference lines, so a
+correct run exits 0; T-35 adds the correct-run, missing-injection,
+and extra-difference cases. CF-4: the rejection and read-off
+announcements pass `live`, whose supersession test requires the
+message to be still shown when it is written. CF-5: each mount's
+`terminal` flag, set on entering the unavailable state and checked
+after every startup `await` and before each startup commit, stops a
+pending startup without aborting the mount. The browser cases of
+CF-4 and CF-5 join the DDD §7.5 rows of `a11y.spec.ts` and
+`failure-states.spec.ts`, which T-60's body performs by reference,
+and by the owner's decision one sentence of that body now names
+them. The owner also decided that entering the unavailable state
+while a recovery-decision state is shown removes that state's
+**Retry recovery** and **Start a new scenario** instead of leaving
+them enabled with nothing to resume (DDD §5.10, and a fourth case of
+§7.5's Terminal state during startup; T-44 (Failure states), T-46
+(Accessibility and navigation lifecycle), and T-60); that
+T-16 tests `egr-build --fdhi-flatfile`, a wrong path exiting 2
+(DDD §4.1 and [§7.3](ddd.md#73-pipeline-and-export-tests)); that the
+parity exit rule keeps its meaning in plainer words (DDD §7.2,
+T-35); that restoring the processed tables after a reproduction
+(DDD §4.3) stays a manual owner step, with no machine check; and
+that this ledger's Scope counts this review. T-60's body, changed
+after its acceptance, returns to Draftable, and the bodies of T-11,
+T-12, T-16, T-35, T-40, T-41, T-44, T-46, T-60, and T-61 stay
+Draftable until the owner accepts them. After these corrections, all
+5,259 relative links in 54 Markdown files resolved; the DDD §8
+matrices held 444 rows and the IP §7 matrix 42, each IP row identical
+to its DDD twin; the traceability lint, `check_traceability.py`,
+reported no failed check and `gap rows: 0`; and `git diff --check`
+passed. These are document checks, not runs of the tests that the
+corrections specify.
+
 ## Owner decisions on versions and branches (2026-11-01)
 
 The owner decided on 2026-11-01 how versions and branches carry the
@@ -1291,6 +1345,76 @@ passed; and ADR-0017 was identical to its accepted version through
 the end of its Consequences, except its Date line. These are
 document checks: none of the tasks, workflow edits, or owner actions
 that these changes describe has been carried out.
+
+## Owner decisions on the first implementation wave (2026-11-02)
+
+The owner decided on 2026-11-02, adopting the agent's
+recommendations, four questions that the first task pull requests
+raised. These decisions are not review findings. The owner's
+decisions of the same day on the CF corrections and their follow-ups
+are recorded at the end of
+[Consistency, ambiguity, and feasibility review (2026-11-01)](#consistency-ambiguity-and-feasibility-review-2026-11-01).
+
+- **Task state is read from the Status column.** On 2026-11-02 the
+  Done record of [T-04](ip.md#t-04--traceability-lint) (Traceability
+  lint) made untrue the IP's opening statement that no task had been
+  executed and none was Done, and
+  [T-01](ip.md#t-01--gradle-webapp-subproject) (Gradle webapp
+  subproject) and [T-10](ip.md#t-10--product-export-views) (Product
+  export views) were to follow. The passages that stated the state of
+  tasks or checks — the status paragraphs of the DDD and the IP, the
+  introduction of
+  [IP §6 — Blocked-by index](ip.md#6-blocked-by-index), the DDD's
+  [Document conventions](ddd.md#document-conventions) and
+  [Closure notes (Proposed 2026-10-30)](ddd.md#closure-notes-proposed-2026-10-30),
+  and this ledger's Evidence paragraph — now point instead to the
+  Status column of [IP §2 — Task graph](ip.md#2-task-graph), the
+  record of each task's state, or to the Done record of the task that
+  runs a check ([Task format](ip.md#task-format)), so that none goes
+  stale as tasks complete. One passage of that kind is unchanged: the
+  definition of Status `planned` in
+  [DDD §8 — Traceability](ddd.md#8-traceability), "specified in this
+  document, and none has run".
+- **The npm audit of T-01's pins.** With npm 10.9.0, `npm audit` of
+  the exact development pins of
+  [DDD §2 — Repository structure, naming, and toolchain](ddd.md#2-repository-structure-naming-and-toolchain),
+  which T-01 installs, reports two advisories.
+  [GHSA-7mvr-c777-76hp](https://github.com/advisories/GHSA-7mvr-c777-76hp),
+  high, affects `playwright` before 1.55.1, which `@playwright/test`
+  1.47.2 installs: "Playwright downloads and installs browsers without
+  verifying the authenticity of the SSL certificate". It matters only
+  where `playwright install` runs — the reference VM's install of
+  [T-59](ip.md#t-59--reference-measurement-environment) (Reference
+  measurement environment) and `playwrightInstall` of
+  [T-60](ip.md#t-60--browser-test-lane) (Browser test lane) — not in
+  T-01.
+  [GHSA-67mh-4wv8-2f99](https://github.com/advisories/GHSA-67mh-4wv8-2f99),
+  moderate, affects `esbuild` up to 0.24.2: "esbuild enables any
+  website to send any requests to the development server and read the
+  response"; `build.mjs` does not use that server. T-01 merges with
+  the DDD §2 pins as specified, and the esbuild advisory is accepted
+  as is. Open: before T-59 or T-60 starts, the `@playwright/test` pin,
+  and with it the `playwright-core` pin, is to be raised in DDD §2 to
+  1.55.1 or later, reviewed under
+  [ADR-0011 — Webapp toolchain — TypeScript + esbuild, no framework, SVG charts](../adr/0011-webapp-toolchain.md),
+  because it also changes the browser builds that the measurements
+  use.
+- **Derived-view counts.** T-10 adds the view `field_export`, so
+  `build_duckdb_views` creates 14 views, or 11 when the
+  `fdhi_measurements` table is absent. By the owner's decision, T-10's
+  pull request also updates the four documents that count these
+  views — `README.md`, `docs/setup.md`, `docs/datasets.md` with its
+  Derived views table, and `dashboards/duckdb/README.md` — although
+  they are outside T-10's listed files.
+- **T-04 follow-ups.** The header comment of
+  `.github/workflows/doc-links.yml` now describes both check steps of
+  its job, **Check links and anchors** and **Check traceability**. Two
+  notes from the review of T-04's pull request are recorded for later,
+  with no change to the lint now: (b) as step 2 of
+  [DDD §4.1 — Export task and validation](ddd.md#41-export-task-and-validation)
+  is worded, its file-name items count as rules, so the entry
+  `§4.1 step 2 rule scenario-<h12>.bin.gz` passes; and (c) an empty
+  Check cell or an empty entry passes as `text`/`designed`.
 
 ## References
 

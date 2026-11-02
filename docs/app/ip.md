@@ -17,11 +17,11 @@ with the fixes of that day's implementation-readiness audit.
 The task graph, gates, and every task body are drafted
 to the execution contract against the [DDD](ddd.md) and the other
 sources at this plan's own revision
-([Execution contract](#execution-contract), rule 2). No task has
-been executed in the project, and no task's Done-when has been
-checked as its acceptance; the specification trials that the review
-ledger records ran outside the project. Of the owner actions, OA-11,
-enabling GitHub release immutability, and
+([Execution contract](#execution-contract), rule 2). The record of
+each task's state is its Status cell in [§2](#2-task-graph)
+([Task format](#task-format)); the specification trials that the
+review ledger records ran outside the project. Of the owner actions,
+OA-11, enabling GitHub release immutability, and
 OA-16, the reference image ID, are recorded as done, and OA-12 and
 OA-17, the acceptances of ADR-0016 and ADR-0017, were approved on
 2026-10-31, recorded by the owner's commit of the Accepted status
@@ -35,12 +35,13 @@ dated commit of its Accepted status line and its row in
 external reviews' findings and their dispositions are recorded in
 the review ledger, [`docs/app/ddd-review.md`](ddd-review.md). The
 owner accepted the document pair on 2026-11-02: every task body whose
-Status cell reads Accepted (2026-11-02). The bodies of T-11, T-12,
-T-16, T-35, T-40, T-41, T-44, T-46, and T-61 stay Draftable until the
-corrections of the open findings CF-1 to CF-5 of
+Status cell the acceptance commit set to Accepted (2026-11-02). The
+bodies that carry the corrections of CF-1 to CF-5 of
 [Consistency, ambiguity, and feasibility review (2026-11-01)](ddd-review.md#consistency-ambiguity-and-feasibility-review-2026-11-01)
-land; T-48 and T-62 stay Blocked; and no task is Done
-([Task format](#task-format)).
+and the owner's decisions of 2026-11-02 on them — T-11, T-12, T-16,
+T-35, T-40, T-41, T-44, T-46, T-60, and T-61 — stay Draftable until
+the owner accepts them; T-60's body, changed after that acceptance,
+returned to Draftable.
 
 This implementation plan (IP) is the last of the project's staged
 documents (PRD → PDD → HLDD → DDD → IP). It adds no design content:
@@ -918,7 +919,11 @@ plain decimal integer — the run's last line until T-17 adds the
 payload diagnostic after it (§3.8), a line this task never prints;
 (6) the regeneration options of
 [DDD §4.3](ddd.md#43-retention-rollback-recovery-and-withdrawal):
-`--reproduce <pointer>`, which skips rule `retained-copy`, runs every
+`--reproduce <pointer>`, which takes every input path from the
+pointer's `provenance.inputs` — the eight fixed paths and exactly one
+flatfile path, never `io.find_fdhi_flatfile()`, a missing flatfile
+named by its recorded path, not the pattern — skips rule
+`retained-copy`, runs every
 other rule (T-12) — the same preflight before input hashing or
 checksum comparisons, with each rule reported once in normal order;
 step 6's `pointer-exact` and `file-names` against
@@ -928,7 +933,16 @@ and the size report like any run — the payload diagnostic too, once
 T-17 adds it —, its refusals naming the failing `provenance` member
 and its output
 compared file by file with the pointer's SHA-256s, and
-`--allow-environment-drift`; (7) update
+`--allow-environment-drift`; and `egr-build`'s option
+`--fdhi-flatfile <path>` in
+`subprojects/python/src/eps_ground_rupture/cli.py`, which builds from
+that repository-relative path, resolved against the repository root,
+instead of calling `io.find_fdhi_flatfile()`, and exits 2 naming the
+path — `main` printing it on standard error and returning 2, as for a
+missing raw input — unless it is an existing file matching
+`data/raw/02_FDHI_FLATFILE_MEASUREMENTS_*.csv` — the rebuild command
+that a reproduction's missing-processed-file diagnostic prints with
+the recorded flatfile path (§4.1 step 1); (7) update
 [DDD §3.8](ddd.md#38-measured-sizes) from this run's size report, each
 figure recorded as measured on the `data-v0-test` export: the selected
 layout's raw and gzip −9 sizes, item 1's manifest byte count, item 2's
@@ -1006,7 +1020,12 @@ counts (346,834, 3,434, 101) stay T-14's full-data completeness checks.
 `inputs-present` checks all nine data files before provenance hashing
 or view construction, including the shared builder's `fdhi_cleaned`
 dependency, and its missing-processed-file diagnostic names the path
-and rebuild command. `provenance` requires exactly those nine paths
+and rebuild command; in a `--reproduce` run the nine are the paths
+the pointer's `provenance.inputs` records — the eight fixed paths and
+exactly one flatfile path, or the rule fails naming each missing or
+unexpected path — and the rebuild command names `--fdhi-flatfile`
+and the recorded flatfile path (§4.1 step 1).
+`provenance` requires exactly those nine paths
 and rechecks every checksum and size, including `fdhi_cleaned`; a
 changed or omitted entry fails. The similarly named raw
 `data/raw/FDHI_Cleaned_Measurements.csv` remains a full-data test
@@ -1413,19 +1432,40 @@ with all other inputs present, omit `fdhi_cleaned` and assert
 `inputs-present` fails naming its path and rebuild command before
 the view builder is called, leaving the pointer and any existing
 `dist/app/<data_tag>/` unchanged, in both ordinary export and
-`--reproduce` (ids `inputs-missing` and `inputs-missing-reproduce`);
+`--reproduce`, whose rebuild command names `--fdhi-flatfile` and the
+recorded flatfile path (ids `inputs-missing` and
+`inputs-missing-reproduce`);
 a successful fixture run records exactly the nine expected paths
 with independently measured SHA-256s and sizes (`provenance-exact`);
 changing `fdhi_cleaned` after the initial hashes fails `provenance`
-without writing the pointer (`provenance-changed`); and
+without writing the pointer (`provenance-changed`);
 `--reproduce` refuses a changed `fdhi_cleaned` checksum, naming the
-failing input (`reproduce-changed`) — five cases parametrized with
-those ids.
+failing input (`reproduce-changed`); and, with the fixture export's
+recorded `data/raw/02_FDHI_FLATFILE_MEASUREMENTS_20220719.csv`
+present and unchanged and a newer
+`data/raw/02_FDHI_FLATFILE_MEASUREMENTS_20261101.csv` added after
+that export, `--reproduce` exits 0, selecting the recorded flatfile,
+every output matching the pointer (`reproduce-two-flatfiles`) — six
+cases parametrized with those ids. In the existing
+`subprojects/python/tests/test_raw_inputs.py`,
+`test_egr_build_rejects_a_bad_fdhi_flatfile_path` checks T-11's
+option `--fdhi-flatfile` per §7.3, after the pattern of
+`test_egr_build_fails_fast_without_writing_anything`: with
+`monkeypatch` setting `io.RAW_DIR` to a `tmp_path` directory holding
+the module's `ALL_REQUIRED` stubs, written by its `_populate`,
+`cli.TERRAFORM_TABLES_JSON` to a `tmp_path` file holding known text,
+and `cli.SQL_OUT_DIR` to a `tmp_path` directory not yet created,
+`cli.main(['--fdhi-flatfile', path])` returns 2, its standard error
+names `path`, the file's text is unchanged, and the directory does
+not exist — parametrized with the ids `missing`, for
+`data/raw/02_FDHI_FLATFILE_MEASUREMENTS_19000101.csv`, and
+`unmatched`, for `data/README.md`. It reads no research data and
+never reaches a build.
 
 **Done when:** in a linked worktree that `git worktree add` creates
 from `HEAD` and `git worktree remove` deletes afterwards — a checkout
 without the gitignored data —
-`PYTHONPATH=src poetry run pytest tests/test_scenario_export.py tests/test_field_export.py tests/test_reference_results.py tests/test_manifests.py`
+`PYTHONPATH=src poetry run pytest tests/test_scenario_export.py tests/test_field_export.py tests/test_reference_results.py tests/test_manifests.py tests/test_raw_inputs.py`
 exits 0 in that worktree's `subprojects/python`, `PYTHONPATH=src`
 importing the worktree's own package as in T-14, every skip in its
 `-ra` tail giving a §7.3 remedy, `run exportApp` or `run egr-build`;
@@ -1439,9 +1479,11 @@ prints at least 2 — at least one case per mechanism;
 prints `[stages-100] [stages-101] [stages-102] [stages-2]`;
 `PYTHONPATH=src poetry run pytest tests/test_scenario_export.py --collect-only -q | grep -oE 'corrupt-counts(-[0-9]+)?' | sort -u | grep -c .`
 prints at least 3 — one per `counts` source case;
-`PYTHONPATH=src poetry run pytest tests/test_scenario_export.py --collect-only -q | grep -oE '\[(inputs-missing|inputs-missing-reproduce|provenance-exact|provenance-changed|reproduce-changed)]' | sort -u | grep -c .`
-prints 5 — one per prerequisite/provenance case; and CI's `pytest`
-job is green on the pull request.
+`PYTHONPATH=src poetry run pytest tests/test_scenario_export.py --collect-only -q | grep -oE '\[(inputs-missing|inputs-missing-reproduce|provenance-exact|provenance-changed|reproduce-changed|reproduce-two-flatfiles)]' | sort -u | grep -c .`
+prints 6 — one per prerequisite/provenance case;
+`PYTHONPATH=src poetry run pytest tests/test_raw_inputs.py --collect-only -q | grep -cE '::test_egr_build_rejects_a_bad_fdhi_flatfile_path\[(missing|unmatched)]$'`
+prints 2 — one per `--fdhi-flatfile` case; and CI's `pytest` job is
+green on the pull request.
 
 #### T-17 — Early payload diagnostic
 
@@ -2258,7 +2300,11 @@ percentiles, and converted windows, by the
 [§7.1](ddd.md#71-numerical-tolerances) rule), and `display` (the
 reference `display` strings and
 `window_lo_display`/`window_hi_display`); on GS-0 the comparison first
-runs against the perturbed copy of rule `self-check`. (4) Boundary
+runs against the perturbed copy of rule `self-check`, whose
+differences are collected apart from the real ones and checked by
+`selfCheck(found)` of `test/parity-self-check.ts`: exactly the three
+injected identities and rules of §7.2 step 3, none missing and none
+extra. (4) Boundary
 cases: each `boundary_cases` entry's Scenario from
 `parseScenario(inputs, manifest)`; for an offset-path case, its
 `windows` turned into `PerDipWindows`, `storedBounds` of each entry
@@ -2286,16 +2332,30 @@ case against `histogram` and, when its `display_decimals` is 1,
 Report per §7.2: agreement prints nothing; each difference prints one
 line naming the case (`GS-<n>`, or the boundary or synthetic case `id`,
 a `display_rounding` case's being `round-<decimals>-<value>`, §3.6),
-the quantity, both values, and the rule; the
+the quantity (for a scenario comparison, its member path in the
+reference entry), both values, and the rule; a passing self-check
+prints the one diagnostic line of §7.2 naming the three injected
+differences as expected, and a failing one a `self-check` line per
+missing or extra difference; the
 largest |app − reference| per scenario prints as a diagnostic; after the
 full pass come one summary line per scenario, one per
 `synthetic.ensembles` entry naming its `id` and the number of its cases
-replayed, and one per other case group; any difference makes the exit
-status non-zero.
+replayed, and one per other case group; the exit status is non-zero
+if any difference line was printed, the `self-check` lines of a
+failing self-check being difference lines, and a correct run — one
+that completes every step with no real difference and a passing
+self-check — prints no difference line, since the injected
+differences print none, and exits 0. (6)
+`test/parity-self-check.test.ts`, run by `webappTest`, with the three
+cases of §7.2 step 3: a correct run, a missing injection, and an
+extra difference.
 
-**Done when:** `./gradlew :subprojects:webapp:tscCheck` exits 0; after
-T-18, `./gradlew :subprojects:webapp:webappParity` exits 0 against the
-committed pointer, and every `id` of the reference
+**Done when:** `./gradlew :subprojects:webapp:tscCheck` exits 0;
+`./gradlew :subprojects:webapp:webappTest` exits 0, with
+`subprojects/webapp/build/test/parity-self-check.test.js` present;
+after T-18, `./gradlew :subprojects:webapp:webappParity` exits 0
+against the committed pointer, its output holding the §7.2
+self-check diagnostic line once, and every `id` of the reference
 file's `scenarios` (GS-0 to GS-7, GS-3 absent until D-6 is decided)
 appears in its summary lines, as does each `synthetic.ensembles` id,
 `stages-2`, `stages-100`, `stages-101`, and `stages-102`, with the
@@ -2518,8 +2578,15 @@ result to `wiring.scheduler.update(next)`
 ([§5.3](ddd.md#53-query-engine), Scheduling); the entry-mode radio's
 selection of offset mode calls `wiring.scheduler.prefetchRegression()`;
 and each rejection line is announced once with
-`announce(wiring.status, line)` of T-41's `src/a11y/announce.ts`
-([§5.11](ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle)).
+`announce(wiring.status, line, live)` of T-41's `src/a11y/announce.ts`,
+`live` being
+`() => !wiring.signal.aborted && el.textContent === line`, `el` the
+field's error line (`#gre-slip-error` or `#gre-offset-error`), so a
+rejection that `el` no longer shows at the write — as once a corrected
+commit, a mode switch, or Reset clears the marks — or whose mount is
+disposed is never written
+([§5.11](ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle),
+Live announcements).
 (4) `src/views/assist.ts` — the pure `assistLines(input)` of
 [DDD §5.5](ddd.md#55-offset-to-slip-conversion-assist) (Use), computed
 from the `RenderInput` (T-41) alone — its Scenario snapshot and its
@@ -2576,9 +2643,10 @@ least 1; `python3 .github/scripts/check_pdd_agreement.py` exits 0 with
 the new entries; the rendered controls, the descriptive label and the
 helper line, the explainer's `<strong>` emphasis, the rejections — an
 R1 rejection at the mode switch included — the mode switch, the echo
-before Apply, Reset, the disabled Advanced group, and the sticky summary
-are covered by `render.spec.ts`, `interactions.spec.ts`,
-`failure-states.spec.ts`, and `keyboard-responsive.spec.ts` (T-60).
+before Apply, Reset, the disabled Advanced group, the sticky summary,
+and the rejection announcement's guards are covered by
+`render.spec.ts`, `interactions.spec.ts`, `failure-states.spec.ts`,
+`keyboard-responsive.spec.ts`, and `a11y.spec.ts` (T-60).
 
 #### T-41 — Measurement panels and charts
 
@@ -2686,8 +2754,15 @@ checkbox, the read-off's commit on `change` and Enter `keydown`, and the
 section's capture-phase `toggle` of §5.11 (Disclosure state) — pass
 `{ signal: wiring.signal }` and hand each display-state change to
 `wiring.scheduler.update(next)`, built from
-`wiring.scheduler.current()`; a committed read-off's output is
-announced with `announce(wiring.status, text)`; and each panel's
+`wiring.scheduler.current()`; a read-off commit that announces writes
+its `<output>` text itself and then announces it with
+`announce(wiring.status, text, live)`, `live` being
+`() => !wiring.signal.aborted && out.textContent === text`, `out`
+that `<output>`, so a text that `out` no longer shows at the write —
+as once a later commit, a settled update, or a view switch rewrites or
+empties it — or whose mount is disposed is never written
+([§5.11](ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle),
+Live announcements); and each panel's
 `ResizeObserver` disconnects on `wiring.signal`'s `abort` event. (8)
 `copy.json` gains, verbatim, the fixed-here entries of §5.12 (the axis
 titles, pre-mark labels, read-off strings, segment title, "below 0.1 m",
@@ -2742,7 +2817,8 @@ the registry also contains `pdd4.1.cumulativeAccuracy`, sourced from
 panels, the log-scale drive, the resize drive, chart suppression, the
 chart alternatives, the cumulative accuracy paragraph's visibility and
 accessible-description inclusion (also after switching views, and absent
-for histogram or suppressed charts), and the chart-data tables scrolling inside their
+for histogram or suppressed charts), the read-off announcement's guards,
+and the chart-data tables scrolling inside their
 wrappers at 360 px are covered by `render.spec.ts`,
 `interactions.spec.ts`, `golden-scenario.spec.ts`, `a11y.spec.ts`, and
 `keyboard-responsive.spec.ts` (T-60).
@@ -2907,14 +2983,20 @@ the first commit, the same skeleton — the region model of
 `#gre-root.replaceChildren(…)` with `#gre-controls` and `#gre-panels`
 empty and `hidden`, reading nothing from the vintage; and the error
 object written with `console.error`. The state is terminal for the
-mount and never phrased as "no matching records". (3) `copy.json` gains the §5.10 fixed-here entries: the
+mount — on entering it, T-46's `start` sets its `terminal` flag of
+§5.10, local to `start` — and never phrased as "no matching records".
+(3) `copy.json` gains the §5.10 fixed-here entries: the
 capability notice, both unavailable-notice variants with their reasons,
 and every recovery message/action label of §5.10. Implement the single
 `#gre-recovery` presentation, the invalid/incompatible and blocked-storage
 decision states (no default result), and ordinary-startup storage warning.
-The region is distinct from scientific caveats; recovery actions remain
-enabled when scenario controls are disabled, and saved text is rendered
-only as text nodes. T-46 owns the listeners and resumption, including
+The region is distinct from scientific caveats; its reload actions
+remain enabled when scenario controls are disabled, while entering the
+unavailable state removes a shown decision state's **Retry recovery**
+and **Start a new scenario** — the unavailable notice replaces the
+decision message, and an incompatible record's saved summary stays
+(§5.10); saved text is rendered only as text nodes. T-46 owns the
+listeners and resumption, including
 population of an already-committed minimal skeleton. The
 startup sequence's `try`/`catch`, the two `window` listeners of Error
 routing, the scheduler's guarded step, the lazy-load failure routing,
@@ -2931,7 +3013,10 @@ pinned by `decode.test.ts` (T-36);
 presentations, pairwise distinct, the capability notice with the
 complete §5.10 text verbatim, fallback and `#gre-disclaimer` standing
 and no skeleton, and the
-lazy-load failures and every §5.10 recovery presentation are covered
+lazy-load failures, every §5.10 recovery presentation, the
+terminal state's stop of a held first, restored-offset, or resumed
+startup, and the unavailable state's removal of a shown decision
+state's actions are covered
 by `failure-states.spec.ts` (T-60), including explicit save/read/remove
 failures and the no-silent-default incompatible-settings branch.
 That spec also checks the static browser-policy and recovery paragraph
@@ -3121,6 +3206,17 @@ listeners and the guard take `{ signal: a.ac.signal }`; every other
 listener is the appliers', added through their `Wiring`, except the
 recovery listeners owned here, which use the mount signal directly. After every
 `await`, timer, and frame the code returns when the signal is aborted;
+`start` also creates `let terminal = false`, local to it, the §5.10
+terminal state: set true when the mount enters the unavailable state,
+a routed `window` error included, never reset, and aborting nothing,
+so every listener stays registered and the reload actions that T-44's
+unavailable state keeps stay usable, a shown decision state's actions
+being removed (T-44); after every `await` of the
+startup recipe — the load, the first render, the restored-offset
+regression await, and a resumption — and immediately before each
+commit of results or of a recovery-decision state, the recipe returns
+when it is true, logging a rejection that arrives then with
+`console.debug`;
 on the signal's `abort` event the scheduler stops and the summary's
 observer disconnects, while the panels' observers (T-41) and the last
 download URL (T-45) follow the same signal. (3) The per-mount scheduler
@@ -3201,7 +3297,8 @@ per-dip line, counts as shown whatever its slot values; a new caveat's
 first sentence filled exactly as `#gre-caveats` renders it (T-43); the
 field-export-unavailable line on a failed field export; the rejection
 lines and the read-off output are announced by T-40's and T-41's
-modules through their `Wiring`; the templates join `copy.json` as
+modules through their `Wiring`, each with the transient `live` of
+§5.11; the templates join `copy.json` as
 fixed-here entries citing §5.11. (6) `src/a11y/focus.ts` — at mount,
 after the first commit and only while `location.hash` is empty,
 `focus({ preventScroll: true })` on the selected measurement's panel
@@ -3244,8 +3341,9 @@ prints 1, `grep -c 'function fragmentTarget'` and
 `grep -c 'function guard'` each print 1,
 `grep -c 'unhandledrejection'` prints at least 1,
 `grep -c 'window.onerror'` prints 0, and each of
-`grep -cF '() => !a.ac.signal.aborted && initialPending'` and
-`grep -cF '() => !a.ac.signal.aborted && resumePending'` prints 1;
+`grep -cF '() => !a.ac.signal.aborted && initialPending'`,
+`grep -cF '() => !a.ac.signal.aborted && resumePending'`, and
+`grep -cF 'let terminal = false'` prints 1;
 `test -f subprojects/webapp/src/views/dom/render.ts` succeeds; in
 `subprojects/webapp/src/app.css`,
 `grep -c 'scroll-margin-top: 3.6rem'` and `grep -c 'overflow-x: auto'`
@@ -3257,9 +3355,11 @@ the lifecycle drives — direct and first instant entry focusing the
 selected panel, fragment entry with the artifact held until after the
 `load` event, and the short disclaimer's link, Material's skip link,
 and a heading permalink taken by the guard — focus retention across
-settled and display-only updates, the announcements, the disclosures,
-the axe runs, the sticky summary, and the 360 px project with every
-chart-data disclosure open are covered by `mount.spec.ts`,
+settled and display-only updates, the announcements and the transient
+announcement guards, the terminal state's stop of pending startup,
+the disclosures, the axe runs, the sticky summary, and the 360 px
+project with every chart-data disclosure open are covered by
+`mount.spec.ts`,
 `navigation-lifecycle.spec.ts`, `keyboard-responsive.spec.ts`,
 `failure-states.spec.ts`, and `a11y.spec.ts` (T-60).
 
@@ -3801,7 +3901,7 @@ on the live page.
 | ID | Task | Depends on | Inputs | Effort | Executor | Status |
 |---|---|---|---|---|---|---|
 | T-59 | Reference measurement environment: the Terraform root `subprojects/webapp/perf/` with its `run.mjs` driver and owner README, and the Gradle tasks `webappMeasureReference` and `webappMeasureDestroy` — the AWS virtual machine of [DD-12](ddd.md#1-ddd-decision-register) (Performance reference environment), which [DDD §7.6](ddd.md#76-performance-and-compatibility-measurements) specifies — the agreed acceptance baseline, recreatable from the repository, not calibrated against laptops, its timings varying from run to run — on which the T-61 suite produces budget evidence. It waits on [OA-12](#4-owner-and-research-group-actions), the owner's acceptance of [ADR-0016 — Performance reference environment — an on-demand AWS VM defined by Terraform](../adr/0016-performance-reference-environment.md), given on 2026-10-31 and recorded by the owner's commit of its Accepted status, and on [OA-16](#4-owner-and-research-group-actions), the owner's `ami_id` value ([§3](#3-gates-and-release-sequence), Owner-action prerequisites). The agent builds and checks it without AWS credentials; the first real measurement run is the owner's (OA-5), which Claude may carry out at the owner's request with the owner's `egr-perf` profile ([Execution contract](#execution-contract), rule 3), once T-61 lands the measure specs. | T-02, T-21, OA-12, OA-16 | [DDD §7.6](ddd.md#76-performance-and-compatibility-measurements), [§2](ddd.md#2-repository-structure-naming-and-toolchain); [ADR-0016](../adr/0016-performance-reference-environment.md). | L | agent | Accepted (2026-11-02) |
-| T-60 | Browser test lane: the [DD-3](ddd.md#1-ddd-decision-register) (Browser-testing tool and test inventory) tool and the eleven-spec inventory in the projects `desktop` and `mobile`, run by `webappBrowserTest`, after `playwrightInstall` installs the pinned Chromium, against the strict preview build (stamps, hook, and Tableau loader in place). The agent builds and runs it in development and as T-54's pre-deployment check; the owner runs it at release (§7.7 item 4). T-48's preset checks join the inventory when it ships. | T-21, T-40–T-46, T-49, T-50, T-51 | [DDD §7.5](ddd.md#75-browser-test-lane), [§2](ddd.md#2-repository-structure-naming-and-toolchain). | L | agent | Accepted (2026-11-02) |
+| T-60 | Browser test lane: the [DD-3](ddd.md#1-ddd-decision-register) (Browser-testing tool and test inventory) tool and the eleven-spec inventory in the projects `desktop` and `mobile`, run by `webappBrowserTest`, after `playwrightInstall` installs the pinned Chromium, against the strict preview build (stamps, hook, and Tableau loader in place). The agent builds and runs it in development and as T-54's pre-deployment check; the owner runs it at release (§7.7 item 4). T-48's preset checks join the inventory when it ships. | T-21, T-40–T-46, T-49, T-50, T-51 | [DDD §7.5](ddd.md#75-browser-test-lane), [§2](ddd.md#2-repository-structure-naming-and-toolchain). | L | agent | Draftable |
 | T-61 | Measurement suite (acceptance): the `measure` project of [DDD §7.6](ddd.md#76-performance-and-compatibility-measurements) — network emulation, cache variants, workloads, payload scope, report, over the marks the application records — and the browser-compatibility test; the agent completes it without T-59, running it locally as a diagnostic and recording the [DDD §3.8](ddd.md#38-measured-sizes) figures it supplies; the owner runs it in the T-59 environment at release (OA-5; T-65 item 5), and G-2 cites those reports. | T-30–T-32, T-41, T-50, T-60 | [DDD §7.6](ddd.md#76-performance-and-compatibility-measurements), [§3.8](ddd.md#38-measured-sizes), [§5.2](ddd.md#52-artifact-loading-and-decoding), [§5.3](ddd.md#53-query-engine), [§5.7](ddd.md#57-scenario-controls), [§5.10](ddd.md#510-failure-states), [§7.7](ddd.md#77-site-validation-and-release-checklist), [§2](ddd.md#2-repository-structure-naming-and-toolchain). | M | agent | Draftable |
 | T-62 | Acceptance walkthrough scripts: [US-1](prd.md#us-1-dam-foundation-scenario) (Dam foundation scenario), [US-2](prd.md#us-2-pipeline-crossing) (Pipeline crossing), and [US-3](prd.md#us-3-design-review) (Design review) as scripted demos against the golden scenarios, pass conditions from the stories and SC rows. The agent writes the scripts; human reviewers execute them at release — a human acceptance session, distinct from the automated lane (T-60). | T-60 | [PDD §10.3 — Acceptance walkthroughs](pdd.md#103-acceptance-walkthroughs); [DDD §7.7](ddd.md#77-site-validation-and-release-checklist), [§5.7](ddd.md#57-scenario-controls). | M | agent | Blocked — the scenario each of the US-2 and US-3 walkthroughs drives, with the consultant's reported scarp height for US-3: a product acceptance decision under [D-21](pdd.md#1-decision-register) (Success criteria and acceptance walkthroughs) that the product owner records in [PDD §10.3 — Acceptance walkthroughs](pdd.md#103-acceptance-walkthroughs) |
 | T-63 | Release vintage: the owner publishes the vintage the release ships with `publishVintage` — under the confirmed terms, since a vintage with the assumed record serves only the unlisted prototype ([DDD §4.4](ddd.md#44-licensing-archival-distribution-and-release-attachments), Vintage terms) — or, if the pinned vintage is unchanged and already holds the confirmed record, verifies its recorded publication evidence (publication record, retention check, CI's fetch-and-verify) instead of regenerating. With [OA-2](#4-owner-and-research-group-actions) recorded, its export follows T-48 step (0), so the vintage carries [GS-3](pdd.md#102-golden-scenarios) (Kern preset (after D-6)) and `kern_field_group`: the GS-3 vintage T-48 depends on — unless the product owner's release-scope amendment of the PRD and the PDD takes the preset out of this release ([§3](#3-gates-and-release-sequence)). | T-18, OA-1, OA-2, OA-13, OA-14 | [DDD §4.2](ddd.md#42-publication-of-a-data-vintage), [§4.3](ddd.md#43-retention-rollback-recovery-and-withdrawal), [§7.7](ddd.md#77-site-validation-and-release-checklist), [§3.4](ddd.md#34-field-data-export); [HLDD §9 — Testing and release architecture](hldd.md#9-testing-and-release-architecture). | — | owner | Accepted (2026-11-02) |
@@ -4229,7 +4329,12 @@ all storage operations failing independently, repeated load failure without
 an automatic loop, one-shot consumption across instant re-entry, and
 abort/focus/announcement behavior. Use coherent routed fixture vintages;
 compare recovered results with a fresh page using the same inputs and
-current vintage. Keep the existing 11 spec files.
+current vintage. Keep the existing 11 spec files. Through their §7.5
+rows, `a11y.spec.ts` also performs the
+**Transient announcement guards** cases Disposal, Correction, and
+Reset, and `failure-states.spec.ts` the
+**Terminal state during startup** cases First startup,
+Restored-offset loading, Resumed startup, and Decision state.
 
 **Done when:** `./gradlew :subprojects:webapp:webappBrowserTest`
 exits 0 (it builds the preview tree through `mkdocsPreview` and
@@ -4275,7 +4380,22 @@ measurement; the first-result mark checks the initial selected measurement
 and its viewport intersection (§7.6). (2) The `measure` specs, files
 matching `*.measure.ts` in `subprojects/webapp/playwright/measure/`:
 the §7.6 network emulation; the cold and both warm variants with the
-per-repetition cache assertion; the load workloads and the three
+per-repetition warm-cache classification of §7.6 (Cache) — each
+content-hashed request's CDP events recorded by `requestId` in
+arrival order and classified by `classifyWarm(events)` of
+`test/warm-cache.ts`: cache-served (`fromDiskCache`, or a
+`Network.requestServedFromCache` event) warm at `loadingFinished`
+without waiting for extra information; otherwise the `statusCode` of
+the `Network.responseReceivedExtraInfo` event when `hasExtraInfo` is
+true, else the response's `status`, warm exactly at 304; the wait
+bounded at 5,000 ms after `egr:first-result`, a cold or still-pending
+request failing the run — with its focused cases in
+`test/warm-cache.test.ts` (a cache hit without extra information but
+with `hasExtraInfo` true, by `fromDiskCache` and by
+`requestServedFromCache`, warm at `loadingFinished`; extra information
+reporting 304 beside a response event reporting 200, in both orders,
+pending until it arrives; a downloaded 200 cold, with and without
+extra information); the load workloads and the three
 interaction workloads, each interval pairing the measured change's
 `egr:change-accepted` with the `egr:results-updated` of the same
 `detail.seq`; 30 measured repetitions per workload, judged
@@ -4354,7 +4474,8 @@ budgets) is PDD material this plan cannot relax.
 `./gradlew :subprojects:webapp:webappTest` exits 0, its output
 containing `1.0.30001820`, window `2025-10-27`–`2026-10-27`, and
 oldest versions Chrome 142, Edge 142, Firefox 145, Safari 26.2,
-iOS Safari 26.1, and Android Chrome mapped to Chrome 142;
+iOS Safari 26.1, and Android Chrome mapped to Chrome 142, with
+`subprojects/webapp/build/test/warm-cache.test.js` present;
 `test "$(cat subprojects/webapp/test/caniuse-lite.d.ts)" = "declare module 'caniuse-lite';"`
 exits 0;
 `grep -rlE 'page\.route|context\.route|routeFromHAR|recordHar' subprojects/webapp/playwright/measure/`
@@ -5502,10 +5623,11 @@ sources. Each line names what unparks it.
 
 During drafting, this index ordered DDD work by implementation
 value. Every listed section is now drafted and has been through the
-adversarial reviews and corrections of 2026-10-30, and every Status
-cell but T-48's and T-62's reads Accepted (2026-11-02), or Draftable
-for the nine bodies that the open findings CF-1 to CF-5 touch — T-59's
-input
+adversarial reviews and corrections of 2026-10-30, and each task's
+state is recorded by its Status cell in [§2](#2-task-graph)
+([Task format](#task-format)), the bodies that carry the corrections
+of CF-1 to CF-5 and the owner's decisions of 2026-11-02 on them
+staying Draftable until the owner accepts them; T-59's input
 [ADR-0016](../adr/0016-performance-reference-environment.md) was
 accepted by the owner on 2026-10-31 (OA-12); the index remains as
 the section-to-task map. It is derived mechanically from §2: a task
