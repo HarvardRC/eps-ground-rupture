@@ -71,7 +71,7 @@ MEASURE = re.compile(rf"(?:§7\.6 report: |§3\.8: ).+ {TASK_LIST}")
 RELEASE = re.compile(r"§7\.7 item [0-9]+(?: \(.*\))?")
 OWNER = re.compile(r"(?:OA|G)-[0-9]+")
 SCHEDULE = re.compile(r"T-[0-9]{2}|IP §5(?: \(.*\))?")
-DEFERRAL = re.compile(r"§9(?: \(.*\))?")  # a schedule entry in a parked or deferred row
+DEFERRAL = re.compile(r"§9")  # a schedule entry in a parked or deferred row
 NOT_APPLICABLE = "—"
 EXPORT_RULE = re.compile(rf"§4\.1 step ([0-9]+) (rules?)\b(.*?)(?: ?{TASK_LIST})?")
 CITATION = re.compile(r"\b(T-[0-9]{2}|OA-[0-9]+|G-[0-9]+)\b")
@@ -136,16 +136,23 @@ class Doc:
         raise StructureError(f"{self.path}: no heading '{'#' * level} {prefix}…'")
 
     def tables(self, span: tuple[int, int]) -> list[list[int]]:
-        """The tables in a line range, each as the indices of its lines."""
+        """The tables in a line range, each as the indices of its lines.
+
+        A table opens at a line that begins with '|' and, as GitHub renders it
+        (GFM), runs to the first blank line, heading, or fenced line; a line
+        without a leading '|' before that end is a row of the table.
+        """
         blocks: list[list[int]] = []
-        previous = False
+        inside = False
         for i in range(*span):
-            row = not self.fenced[i] and bool(TABLE_LINE.match(self.lines[i]))
-            if row and previous:
+            line = self.lines[i]
+            if self.fenced[i] or not line.strip() or HEADING.match(line):
+                inside = False
+            elif inside:
                 blocks[-1].append(i)
-            elif row:
+            elif TABLE_LINE.match(line):
                 blocks.append([i])
-            previous = row
+                inside = True
         return blocks
 
 
