@@ -37,7 +37,7 @@ DZW xmin_y, DZW xmax, DZW xmax_y, Scarp_Dip, Scarp_Class, R^2 Value`.
 
 Produced by the `dem` view — a plain passthrough,
 `SELECT * FROM read_parquet(.../dem/data.parquet)`. This family touches
-**none** of the other eleven views.
+**none** of the other thirteen views.
 
 Pinned by:
 

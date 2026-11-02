@@ -129,7 +129,7 @@ export.export_tidy
         ▼
 data/processed/<table>/data.parquet        the tidy analytical store
         │
-        ├──► views.build_duckdb_views ──► dashboards/duckdb/eps.duckdb   (13 views)
+        ├──► views.build_duckdb_views ──► dashboards/duckdb/eps.duckdb   (14 views)
         │             │
         │             └──► csvexport ──► dist/csv/<view>.csv ──► Tableau Public
         │                                                        └──► embedded in the site
@@ -235,9 +235,9 @@ Gradle sets `VIRTUAL_ENV` and `PATH` per task, so no manual activation.
 ./gradlew :subprojects:python:poetryInstall
 ./gradlew :subprojects:python:pytest
 ./gradlew :subprojects:python:egrBuild
-./gradlew :subprojects:python:csvExportAll   # every view -> dist/csv/ (dem alone ~73 MB)
+./gradlew :subprojects:python:csvExportAll   # every dashboard view -> dist/csv/ (dem alone ~73 MB)
 ./gradlew :subprojects:python:egrBuildAndExport  # egrBuild + csvExportAll, ordered — the safe one-click refresh
-./gradlew :subprojects:python:csvExportDem   # one view; one task per view exists
+./gradlew :subprojects:python:csvExportDem   # one view; one task per dashboard view exists
 ./gradlew :subprojects:python:wheel          # -> dist/python/eps_ground_rupture-*.whl
 ./gradlew :subprojects:python:clean          # removes dist/python/ and dist/csv/
 

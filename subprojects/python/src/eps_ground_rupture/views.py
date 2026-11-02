@@ -23,6 +23,18 @@ this file via the DuckDB JDBC driver and sees these logical tables:
 * `dem_slip_bin_stats` — paper Fig. 8: mean ± sample σ of the four scarp
   measures per scarp class per 0.05 m slip increment (bins with n ≥ 2).
 
+Beside them sits one **product view**, shaped for the scenario page's
+field-data export (`docs/app/ddd.md` §3.4, Field-data export) rather than
+for a workbook, and with no Athena twin (the Athena layer is parked):
+
+* `field_export` — one row per positive field measurement in each of the
+  six (source, analogue) arms — FDHI / SURE / Kern × scarp height / width —
+  with its source column named verbatim and the overlay's flags
+  (`limited_comparison`, `criterion_sub50`, `labeled_set` from
+  `config.LABELED_FIELD_EVENTS`, and `kern_field_group`, null until D-6 is
+  decided); present only alongside `fdhi_measurements`, like
+  `historic_events`.
+
 The unified view is what makes the cross-source DZW-vs-Scarp-Height
 scatter natural in Tableau: every row has `source`, `dzw`,
 `scarp_height`, plus source-specific labels (`scarp_class`, `eq_name`,
@@ -44,7 +56,7 @@ from pathlib import Path
 
 import duckdb
 
-from .config import PROCESSED_DIR, REPO_ROOT, SURE_EVENT_MAGNITUDES
+from .config import LABELED_FIELD_EVENTS, PROCESSED_DIR, REPO_ROOT, SURE_EVENT_MAGNITUDES
 
 DEFAULT_DUCKDB_PATH = REPO_ROOT / "dashboards" / "duckdb" / "eps.duckdb"
 
@@ -95,6 +107,16 @@ def require_view(con: duckdb.DuckDBPyConnection, view: str, source: object) -> N
         )
 
 
+def _normalized_name(column: str) -> str:
+    """The pipeline's event-name normalization, as a SQL expression.
+
+    NBSPs (U+00A0) become spaces and the ends are trimmed, so the stray
+    trailing NBSP some SURE.csv names carry ('Tennant Creek\\xa0') drops
+    away. `replace`/`trim`/`chr` exist in DuckDB and Trino (Athena) alike.
+    """
+    return f"trim(replace({column}, chr(160), ' '))"
+
+
 def _sure_magnitude_case(column: str) -> str:
     """A CASE expression mapping SURE `eq_name` values to event Mw.
 
@@ -116,11 +138,33 @@ def _sure_magnitude_case(column: str) -> str:
     )
     # CAST: bare decimal literals make the CASE a DECIMAL in DuckDB/Trino;
     # keep the column a plain double like every other magnitude source.
-    return (
-        f"CAST(CASE trim(replace({column}, chr(160), ' '))\n"
-        f"{whens}\n"
-        f"                END AS DOUBLE)"
-    )
+    return f"CAST(CASE {_normalized_name(column)}\n{whens}\n                END AS DOUBLE)"
+
+
+def _labeled_set_case(source: str, eq_name: str) -> str:
+    """`field_export`'s `labeled_set`, as a SQL expression over the view's
+    ``source`` and normalized ``eq_name`` columns (docs/app/ddd.md §3.4).
+
+    True exactly when `config.LABELED_FIELD_EVENTS` maps the row's source
+    to None or names the row's `eq_name` in that source's tuple — for both
+    analogues alike; an empty tuple makes no row of its source a member.
+    Each source the view emits is looked up, so a source the constant
+    lacks fails the build with ``KeyError`` instead of leaving its rows
+    without a membership. Names are SQL-escaped as in the SURE lookup.
+    """
+    whens = []
+    for name in ("FDHI", "SURE", "Kern"):
+        events = LABELED_FIELD_EVENTS[name]
+        if events is None:
+            member = "TRUE"
+        elif events:
+            listed = ", ".join(_sql_literal(event) for event in events)
+            # NULL IN (...) is NULL; the flag is a plain bool.
+            member = f"coalesce({eq_name} IN ({listed}), FALSE)"
+        else:
+            member = "FALSE"
+        whens.append(f"WHEN {_sql_literal(name)} THEN {member}")
+    return f"CASE {source} " + " ".join(whens) + " END"
 
 
 def build_duckdb_views(
@@ -471,6 +515,120 @@ def build_duckdb_views(
                     CAST({KERN_MAGNITUDE} AS DOUBLE) AS magnitude
                   FROM read_parquet({_sql_literal(parquet_files['kern_combined'])})
                   WHERE "DZW" > 0 OR "Vertical" > 0
+                """
+            )
+
+            # --------------------------------------------------------------
+            # Product view — the field-data export (docs/app/ddd.md §3.4)
+            # --------------------------------------------------------------
+            # One row per field measurement per (source, analogue) arm, on
+            # the per-source analogue map of PDD §4.4, never pooled: scarp
+            # height <- FDHI `vs_central_meters`, SURE `SH`, Kern `Vertical`;
+            # width <- FDHI `fzw_central_meters`, SURE `FNC`, Kern `DZW`.
+            # Each arm admits only rows whose own quantity is positive — the
+            # established views' `> 0`, dropping FDHI's -999 sentinels and
+            # nulls alike — so a row positive in both measures appears once
+            # per arm, and FDHI's sh-only rows stay outside the map. Magnitude
+            # is sourced as in historic_events. The four flags follow the
+            # §3.4 row rules, each stated once in the outer SELECT. Like
+            # historic_events, the FDHI arms read the optional
+            # fdhi_measurements table, so the view exists only beside it.
+            con.execute(
+                f"""
+                CREATE OR REPLACE VIEW field_export AS
+                  WITH arms AS (
+                    SELECT
+                      'FDHI'                             AS source,
+                      {_normalized_name("eq_name")}      AS eq_name,
+                      CASE WHEN magnitude > 0 THEN magnitude END AS magnitude,
+                      'scarp_height'                     AS analogue,
+                      'vs_central_meters'                AS source_quantity,
+                      CAST(vs_central_meters AS DOUBLE)  AS value
+                    FROM read_parquet({_sql_literal(fdhi_meas_parquet)})
+                    WHERE vs_central_meters > 0
+
+                    UNION ALL
+
+                    SELECT
+                      'FDHI'                             AS source,
+                      {_normalized_name("eq_name")}      AS eq_name,
+                      CASE WHEN magnitude > 0 THEN magnitude END AS magnitude,
+                      'dzw'                              AS analogue,
+                      'fzw_central_meters'               AS source_quantity,
+                      CAST(fzw_central_meters AS DOUBLE) AS value
+                    FROM read_parquet({_sql_literal(fdhi_meas_parquet)})
+                    WHERE fzw_central_meters > 0
+
+                    UNION ALL
+
+                    SELECT
+                      'SURE'                             AS source,
+                      {_normalized_name("eq_name")}      AS eq_name,
+                      {_sure_magnitude_case("eq_name")} AS magnitude,
+                      'scarp_height'                     AS analogue,
+                      'SH'                               AS source_quantity,
+                      CAST("SH" AS DOUBLE)               AS value
+                    FROM read_parquet({_sql_literal(parquet_files['sure'])})
+                    WHERE "SH" > 0
+
+                    UNION ALL
+
+                    SELECT
+                      'SURE'                             AS source,
+                      {_normalized_name("eq_name")}      AS eq_name,
+                      {_sure_magnitude_case("eq_name")} AS magnitude,
+                      'dzw'                              AS analogue,
+                      'FNC'                              AS source_quantity,
+                      CAST("FNC" AS DOUBLE)              AS value
+                    FROM read_parquet({_sql_literal(parquet_files['sure'])})
+                    WHERE "FNC" > 0
+
+                    UNION ALL
+
+                    SELECT
+                      'Kern'                             AS source,
+                      'Kern County (1952)'               AS eq_name,
+                      CAST({KERN_MAGNITUDE} AS DOUBLE)   AS magnitude,
+                      'scarp_height'                     AS analogue,
+                      'Vertical'                         AS source_quantity,
+                      CAST("Vertical" AS DOUBLE)         AS value
+                    FROM read_parquet({_sql_literal(parquet_files['kern_combined'])})
+                    WHERE "Vertical" > 0
+
+                    UNION ALL
+
+                    SELECT
+                      'Kern'                             AS source,
+                      'Kern County (1952)'               AS eq_name,
+                      CAST({KERN_MAGNITUDE} AS DOUBLE)   AS magnitude,
+                      'dzw'                              AS analogue,
+                      'DZW'                              AS source_quantity,
+                      CAST("DZW" AS DOUBLE)              AS value
+                    FROM read_parquet({_sql_literal(parquet_files['kern_combined'])})
+                    WHERE "DZW" > 0
+                  )
+                  SELECT
+                    source,
+                    eq_name,
+                    magnitude,
+                    analogue,
+                    source_quantity,
+                    value,
+                    -- SURE's FNC is a displacement, not a width: a limited
+                    -- comparison (PDD §4.4).
+                    (source = 'SURE' AND source_quantity = 'FNC') AS limited_comparison,
+                    -- The paper's < 50 m width criterion in three states, so
+                    -- "not applicable" is never read as "failed".
+                    CASE
+                      WHEN analogue = 'dzw' AND value <  CAST(50.0 AS DOUBLE) THEN 'met'
+                      WHEN analogue = 'dzw' AND value >= CAST(50.0 AS DOUBLE) THEN 'not_met'
+                      WHEN analogue = 'scarp_height' THEN 'not_applicable'
+                    END AS criterion_sub50,
+                    {_labeled_set_case("source", "eq_name")} AS labeled_set,
+                    -- Reserved for D-6 (Kern County field-data group and
+                    -- principal-width rule), Open: null in every row.
+                    CAST(NULL AS VARCHAR) AS kern_field_group
+                  FROM arms
                 """
             )
     finally:

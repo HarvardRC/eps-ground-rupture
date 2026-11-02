@@ -67,3 +67,23 @@ SURE_EVENT_MAGNITUDES: dict[str, float | None] = {
     "Coalinga (Nuñez)": 5.4,  # 1983, USA — the Nuñez ruptures of the
     #   Coalinga aftershock sequence
 }
+
+# The field overlay's default set — D-18 (Field-overlay default set and
+# per-source analogue map) — per field source: the normalized `eq_name`
+# values whose rows are members, or None when every row of the source is a
+# member. The `field_export` product view sets its `labeled_set` column from
+# this, for both analogues alike (docs/app/ddd.md §3.4, Labeled set).
+#
+# This is the Proposed reading. FDHI: the events labeled in cell 25 of the
+# notebook `legacy/2Ddem 2025 Paper Revisions - FDHI Scarp Height & DZW.ipynb`
+# that carry an FDHI central measure (`vs_central_meters` or
+# `fzw_central_meters`) — PINNED_FDHI_EVENTS of tests/test_historic_events.py;
+# Bohol, also labeled there, carries neither. SURE and Kern County: every
+# row. The membership that owner action OA-14 records (docs/app/ip.md §4)
+# replaces it in a commit that changes this constant alone. Tests import
+# the constant wherever they need the membership; they never re-pin it.
+LABELED_FIELD_EVENTS: dict[str, tuple[str, ...] | None] = {
+    "FDHI": ("Wenchuan", "Kashmir", "Killari"),
+    "SURE": None,
+    "Kern": None,
+}

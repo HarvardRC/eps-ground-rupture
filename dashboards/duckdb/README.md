@@ -14,12 +14,16 @@ Regeneration is fast because the views don't copy data.
 
 ## Views exposed
 
-**Currently 13** (11 when the optional FDHI flatfile is absent —
-`fdhi_measurements` and `historic_events` are skipped together). The
-authoritative list is
+**Currently 14** (11 when the optional FDHI flatfile is absent —
+`fdhi_measurements`, `historic_events` and `field_export` are skipped
+together). The authoritative list is
 `subprojects/python/src/eps_ground_rupture/views.py` — `build_duckdb_views`
 creates them in one pass, so read that function rather than trusting a
-count here. They fall into three layers:
+count here. One of them, `field_export`, is the product view of
+[DDD §3.4 — Field-data export](../../docs/app/ddd.md#34-field-data-export),
+shaped for the scenario page's field-data export rather than for a
+workbook; the other thirteen, the dashboard views, fall into three
+layers:
 
 **Passthrough** — one per Parquet table, `SELECT *`:
 `dem`, `fdhi_cleaned`, `fdhi_measurements`, `sure`, `kern_combined`.

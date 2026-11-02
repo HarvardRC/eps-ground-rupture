@@ -201,9 +201,9 @@ different front end) builds on the Parquet, not on the CSVs.
 
 ## Derived views
 
-`views.build_duckdb_views` creates **13 views** in
+`views.build_duckdb_views` creates **14 views** in
 `dashboards/duckdb/eps.duckdb`. Five are passthroughs over the Parquet
-above; the other eight are where the analysis lives.
+above; the other nine are where the analysis lives.
 
 | View | Rows | What it adds |
 |------|------|--------------|
@@ -220,23 +220,25 @@ above; the other eight are where the analysis lives.
 | `kern_inferred_slip` | 112 | each fit inverted — what slip would produce Kern's measured verticals — for all 7 dips × 16 non-null verticals |
 | `dem_slip_bin_stats` | 555 | paper Fig. 8: mean ± sample σ of scarp height, `Us - Ud`, DZW and scarp dip per scarp class per 0.05 m slip increment (`s < Slip <= s + 0.05`; bins with n ≥ 2). From Kristen's notebook, 2026-09-10 |
 | `historic_events` | 2,616 | `UNION ALL` of `fdhi_measurements`, `sure`, `kern_combined` onto `(source, eq_name, dzw, scarp_height, magnitude)` — one row per field measurement, the reference lines behind Dashboard 5; a row survives if **either** axis is `> 0` (unlike `unified_observations`, which needs both). Exists only alongside `fdhi_measurements`. By source: FDHI 2,392 / SURE 203 / Kern 21 |
+| `field_export` | 3,134 | the one product view, shaped for the scenario page's field-data export ([DDD §3.4 — Field-data export](app/ddd.md#34-field-data-export)) rather than for a workbook: `UNION ALL` of six (source, analogue) arms over `fdhi_measurements`, `sure`, `kern_combined` — scarp height from `vs_central_meters` / `SH` / `Vertical`, DZW from `fzw_central_meters` / `FNC` / `DZW` — onto `(source, eq_name, magnitude, analogue, source_quantity, value)`, `source_quantity` naming the source column verbatim; each arm keeps only rows whose own quantity is `> 0`, so a source row positive in both quantities appears once in each of its two arms. Adds the overlay's flags `limited_comparison`, `criterion_sub50`, `labeled_set` (from `config.LABELED_FIELD_EVENTS`) and `kern_field_group` (null until [D-6](app/pdd.md#1-decision-register) (Kern County field-data group and principal-width rule) is decided). Exists only alongside `fdhi_measurements`. By arm, scarp height / DZW: FDHI 2,376 / 472, SURE 74 / 185, Kern 16 / 11 |
 
-Row counts are as of 2026-08-18 with the current `data/raw/`; the
+Row counts are as of 2026-11-02 with the current `data/raw/`; the
 authoritative definitions are in
 `subprojects/python/src/eps_ground_rupture/views.py`.
 
-**Only four of these counts are pinned by tests** — `dem_regression` (7),
+**Only five of these counts are pinned by tests** — `dem_regression` (7),
 `dem_regression_lines` (14) and `kern_inferred_slip` (112) in
-`tests/test_regression_views.py`, and `historic_events` (2,616, and per
-source) in `tests/test_historic_events.py` — because they are derived and
-a silent change would mean the arithmetic broke. The other eight follow from
-whatever is in `data/raw/`, and the view tests build from synthetic
-fixtures rather than the real inputs, so nothing catches a drift here.
-Re-run the counts rather than trusting this table.
+`tests/test_regression_views.py`, `historic_events` (2,616, and per
+source) in `tests/test_historic_events.py`, and `dem_slip_bin_stats` (555,
+and per scarp class) in `tests/test_dem_slip_bin_stats.py` — because they
+are derived and a silent change would mean the arithmetic broke. The other
+nine follow from whatever is in `data/raw/`, and the view tests build from
+synthetic fixtures rather than the real inputs, so nothing catches a drift
+here. Re-run the counts rather than trusting this table.
 
 `egr-csv` exports any of these to `dist/csv/<view>.csv`;
-`./gradlew :subprojects:python:csvExportAll` does all thirteen. Which
-dashboard reads which file is documented per family in
+`./gradlew :subprojects:python:csvExportAll` does thirteen, all but
+`field_export`. Which dashboard reads which file is documented per family in
 [`docs/dashboards/`](dashboards/).
 
 Athena/Trino twins exist for six views (`unified_observations`,
