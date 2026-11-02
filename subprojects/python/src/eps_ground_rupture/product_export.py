@@ -38,7 +38,7 @@ import pandas as pd
 import pyarrow
 
 from . import __version__, io, views
-from .config import REPO_ROOT, SCARP_CLASSES
+from .config import REPO_ROOT, SCARP_CLASS_PALETTE, SCARP_CLASSES
 
 # --------------------------------------------------------------------------
 # Run inputs and repository paths (§4.1 step 1; §3.2 `provenance`)
@@ -759,9 +759,12 @@ def vintage_name(role: str, data: bytes) -> str:
     return f"{prefix}{sha256_hex(data)[:12]}{suffix}"
 
 
-def write_vintage_file(out_dir: Path, role: str, data: bytes) -> str:
+def write_vintage_file(out_dir: Path, role: str, data: bytes, written: dict[str, str]) -> str:
+    """Write one vintage file under its content-hashed name, recording its
+    SHA-256 in ``written`` (name -> SHA-256)."""
     name = vintage_name(role, data)
     (out_dir / name).write_bytes(data)
+    written[name] = sha256_hex(data)
     return name
 
 
@@ -799,6 +802,11 @@ class Vintage:
     """Manifest `files` key -> written file name."""
     field_rows: list[dict[str, object]]
     coefficients: list[dict[str, object]]
+    written: dict[str, str]
+    """Every file the run has written: name -> SHA-256 of its bytes."""
+    manifest: dict[str, object] | None = None
+    manifest_name: str | None = None
+    terms_name: str | None = None
 
 
 def write_data_files(ctx: RunContext) -> Vintage:
@@ -820,14 +828,16 @@ def write_data_files(ctx: RunContext) -> Vintage:
         finally:
             con.close()
 
+    written: dict[str, str] = {}
     files = {
         "scenario_artifact": write_vintage_file(
-            ctx.out_dir, "scenario_artifact", gzip_bytes(pack.artifact)
+            ctx.out_dir, "scenario_artifact", gzip_bytes(pack.artifact), written
         ),
         "field_export": write_vintage_file(
             ctx.out_dir,
             "field_export",
             gzip_bytes(canonical_json({**ctx.envelope(), "rows": field_rows})),
+            written,
         ),
         "regression_export": write_vintage_file(
             ctx.out_dir,
@@ -841,14 +851,60 @@ def write_data_files(ctx: RunContext) -> Vintage:
                     }
                 )
             ),
+            written,
         ),
     }
-    return Vintage(pack=pack, files=files, field_rows=field_rows, coefficients=coefficients)
+    return Vintage(
+        pack=pack,
+        files=files,
+        field_rows=field_rows,
+        coefficients=coefficients,
+        written=written,
+    )
+
+
+def build_manifest(ctx: RunContext, vintage: Vintage) -> dict[str, object]:
+    """The artifact manifest of §3.2, from the run's measured decode
+    information, carrying step 1's `provenance`."""
+    pack = vintage.pack
+    return {
+        **ctx.envelope(),
+        "provenance": ctx.provenance,
+        "counts": pack.counts,
+        "blocks": pack.blocks,
+        "columns": pack.columns,
+        "trial_columns": pack.trial_columns,
+        "arm_strength_states": pack.arm_strength_states,
+        "scarp_classes": list(SCARP_CLASSES),
+        "scarp_class_palette": {name: SCARP_CLASS_PALETTE[name] for name in SCARP_CLASSES},
+        "trials": pack.trials,
+        "stage_spacing": pack.stage_spacing,
+        "slip_window_bounds": pack.slip_window_bounds,
+        "files": dict(vintage.files),
+        "reference_results_version": ctx.data_tag,
+        "checksums": {name: vintage.written[name] for name in vintage.files.values()},
+    }
+
+
+def write_manifest_and_terms(ctx: RunContext, vintage: Vintage) -> None:
+    """§4.1 step 4: the artifact manifest and the vintage-terms file, both
+    uncompressed. The terms file is a byte-for-byte copy of
+    `data/REDISTRIBUTION.md` or, for a `data-v0-test` run without that
+    file, an empty file (§4.4, Vintage terms)."""
+    vintage.manifest = build_manifest(ctx, vintage)
+    vintage.manifest_name = write_vintage_file(
+        ctx.out_dir, "manifest", canonical_json(vintage.manifest), vintage.written
+    )
+    terms_source = ctx.root / REDISTRIBUTION_PATH
+    terms = terms_source.read_bytes() if terms_source.is_file() else b""
+    vintage.terms_name = write_vintage_file(ctx.out_dir, "data_terms", terms, vintage.written)
 
 
 def export_vintage(ctx: RunContext) -> Vintage:
     """Steps 2 onward of §4.1."""
-    return write_data_files(ctx)
+    vintage = write_data_files(ctx)
+    write_manifest_and_terms(ctx, vintage)
+    return vintage
 
 
 def run(root: Path, data_tag: str) -> None:
