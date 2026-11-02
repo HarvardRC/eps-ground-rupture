@@ -1,7 +1,7 @@
 # ADR-0013: Row-level, trial-major columnar scenario artifact
 
 - **Status**: Accepted
-- **Date**: 2026-10-15 (drafted with the HLDD, `docs/app/hldd.md`); rewritten in plain language and accepted 2026-10-28
+- **Date**: 2026-10-15 (drafted with the HLDD, `docs/app/hldd.md`); rewritten in plain language and accepted 2026-10-28; amended 2026-11-01 by [ADR-0018](0018-manifest-defined-stage-count.md) (the amendment precedes References)
 - **Deciders**: Michael Bouzinier (project owner)
 
 ## Context
@@ -170,6 +170,20 @@ size.
   family
   ([ADR-0014 — Product artifacts in release assets, pinned by a
   committed manifest](0014-committed-content-hashed-artifacts.md)).
+
+> **Amendment 2026-11-01 (owner decision on DF-5 of the DDD review).**
+> [ADR-0018 — Manifest-defined uniform stage count](0018-manifest-defined-stage-count.md),
+> which records the owner's resolution of
+> [DF-5 — Stage count and stride](../app/ddd-review.md#deferred-finding-discussion-2026-11-01),
+> replaces the fixed 101-stage stride of the Decision above ("each
+> trial's 101 stages" and "scan the stage arrays in strides of 101")
+> with one uniform stage count N per data vintage, measured by the
+> export, recorded in the artifact manifest as
+> `counts.stages_per_trial`, and validated by the export and the
+> decoder; trial t occupies records t·N through (t+1)·N − 1. The
+> current ensemble's 3,434 trials × 101 stages = 346,834 records
+> remain its measured geometry and a completeness check. Every other
+> decision and amendment of this ADR stands.
 
 ## References
 

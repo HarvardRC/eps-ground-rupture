@@ -2,7 +2,17 @@
 
 **Status:** first full draft, corrected after external review
 (2026-10-30) and again after the reviews of the implementation plan
-(2026-10-31), then after the IP consistency review (2026-11-01).
+(2026-10-31), then after the IP consistency review (2026-11-01) and
+the owner's decisions of the same day on four deferred findings of
+the review ledger:
+[DF-3 — Inherited publication evidence](ddd-review.md#deferred-finding-discussion-2026-11-01),
+[DF-4 — Stale loading announcement](ddd-review.md#deferred-finding-discussion-2026-11-01),
+[DF-5 — Stage count and stride](ddd-review.md#deferred-finding-discussion-2026-11-01),
+and
+[DF-6 — Missing exporter prerequisite](ddd-review.md#deferred-finding-discussion-2026-11-01);
+ADR-0019 and ADR-0018, which record the DF-3 and DF-5 decisions,
+were accepted that day
+([Authority and change control](#authority-and-change-control)).
 Every section is drafted and normative; every register row is Proposed.
 Nothing it specifies has been built in the project yet, and none of
 the checks it introduces has run there: every
@@ -159,23 +169,34 @@ independently redefine scientific or statistical behavior.
   failure blocks merge" under the admin bypass included (owner
   action OA-10, Proposed).
 - Architecture is the ADRs': [ADR-0010–ADR-0015](../adr/README.md),
-  accepted, and two decisions the owner accepted on 2026-10-31,
+  accepted, ADR-0013 as amended by
+  [ADR-0018 — Manifest-defined uniform stage count](../adr/0018-manifest-defined-stage-count.md),
+  which replaces its fixed 101-stage stride and which the owner
+  accepted on 2026-11-01; ADR-0014 as amended by
+  [ADR-0019 — Release-based data identity](../adr/0019-release-based-data-identity.md),
+  which replaces its commit-based data identity, leaving its
+  release-asset architecture unchanged, and which the owner also
+  accepted on 2026-11-01; and two decisions the owner accepted on
+  2026-10-31,
   [ADR-0016 — Performance reference environment — an on-demand AWS VM defined by Terraform](../adr/0016-performance-reference-environment.md)
   and
   [ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md),
   whose two phases — an unlisted prototype for the research group's
   review, then the public release — are publication states of
   [§6.1](#61-build-outputs-asset-paths-and-page-scaffold). A change,
-  or a new decision such as these two, completes the repository's
-  ADR process before dependent work proceeds. For these two that is
-  the owner's acceptance of 2026-10-31, owner actions OA-12
+  or a new decision such as these, completes the repository's ADR
+  process before dependent work proceeds. For ADR-0016 and ADR-0017
+  that is the owner's acceptance of 2026-10-31, owner actions OA-12
   (ADR-0016) and OA-17 (ADR-0017) of
   [IP §4 — Owner and research-group actions](ip.md#4-owner-and-research-group-actions),
   recorded by the owner's dated commit that sets each ADR's status
   to Accepted; that record precedes the Terraform root of ADR-0016,
   the publication of the first data vintage under ADR-0017's assumed
   terms ([§4.2](#42-publication-of-a-data-vintage) step 1), and the
-  prototype deployment.
+  prototype deployment. The acceptances of ADR-0018 and ADR-0019 on
+  2026-11-01 are recorded the same way, each by the owner's dated commit
+  of its Accepted status line and its row in `docs/adr/README.md`, and
+  each record precedes the tasks that implement its ADR.
 - Scientific and statistical rules are the core Python
   implementation's and its tests'; the pipeline is the single
   computational source of truth
@@ -1287,6 +1308,14 @@ without restating them:
 
 ### 3.1 Scenario artifact binary layout
 
+[ADR-0018](../adr/0018-manifest-defined-stage-count.md) fixes one
+manifest-defined stage count N per vintage. All trials have N stages;
+N is not a compiled constant. The schema remains 1: this contract is
+settled before the first application publication, and uses the existing
+manifest field and binary blocks. The current ensemble's counts and
+sizes quoted below describe that vintage only; they are not format
+limits.
+
 The scenario artifact is one gzip-compressed binary file (the
 compressed file is the artifact — [DD-7](#1-ddd-decision-register)),
 served under its content-hashed name `scenario-<h12>.bin.gz`
@@ -1310,10 +1339,11 @@ and structural validation
 agree with the manifest's `schema_version` and counts, or decoding
 stops in the unavailable state.
 
-**Trial table** — one `uint8` block of 3,434 rows × 7 columns
-(24,038 bytes), row-major, one row per trial in ascending code-point
-order of the pipeline's `Trial` string; a trial's position is its
-`trial_id` (0–3,433). Schema version 1 fixes the column order:
+**Trial table** — one `uint8` block of `counts.trials` rows × 7
+columns (currently 3,434 rows, 24,038 bytes), row-major, one row per
+trial in ascending code-point order of the pipeline's `Trial` string;
+a trial's position is its `trial_id` (0 through `counts.trials − 1`).
+Schema version 1 fixes the column order:
 `fault_dip`, `sediment_strength`, `cohesion`, `set`, `depth`,
 `density`, `model_family`. `src/decode/fields.ts` compiles this
 order in as `TRIAL_TABLE_COLUMNS` and never derives it from the
@@ -1330,8 +1360,9 @@ selectable arm-and-strength states are the measured combinations of
 lists them.
 
 **Stage arrays** — the five blocks `slip`, `scarp_height`, `dzw`,
-`scarp_dip`, and `scarp_class`, each of 346,834 entries,
-trial-major: trial `t`'s stages occupy entries `[t·101, (t+1)·101)`,
+`scarp_dip`, and `scarp_class`, each of `counts.records` entries
+(currently 346,834), trial-major: trial `t`'s stages occupy entries
+`[t·N, (t+1)·N)`, with N = `counts.stages_per_trial` (currently 101),
 in strictly ascending slip with no within-trial ties (validated at
 export; this makes "last stage within the window" equal "highest
 slip within the window",
@@ -1387,8 +1418,11 @@ distinct recorded dip in ascending order, in thousandths of a
 degree, so indices are rank-ordered — the scarp-dip range filter of
 inverse mode ([§5.14](#514-inverse-mode-p2), P2; the MVP has none)
 maps its physical endpoints to index space by binary search once,
-then compares bare indices. The 143,416-byte block is part of the
-artifact and of every size figure.
+then compares bare indices. Every entry has magnitude at most 180,000
+(180°); rule `dictionary-order` ([§4.1](#41-export-task-and-validation))
+checks it, and the exact integer sums of [§5.4](#54-statistics) rest on
+it. The 143,416-byte block is part of the artifact and of every size
+figure.
 
 **Unclassified records.** The 3,434 `scarp_class` nulls are exactly
 the slip-0 first stage of each trial — the initial state has no
@@ -1421,19 +1455,21 @@ dependencies](hldd.md#10-risks-and-open-dependencies)), and the
 room without breaking this one.
 
 *Closes:* DD-1. *Verification (planned):* the export's rules
-`bitwise-restore`, `sentinel-collision`, `slip-order`,
+`counts`, `bitwise-restore`, `sentinel-collision`, `slip-order`,
 `site-constancy`, `unclassified-has-no-valid-measurement`,
 `dictionary-order`, and `block-tiling`
 ([§4.1](#41-export-task-and-validation)) check the
-invariants above on every vintage; the decoder applies the same
-restore ([§5.2](#52-artifact-loading-and-decoding)); sizes are
-reported in [§3.8](#38-measured-sizes).
+invariants above on every vintage; the decoder validates the counts
+and applies the same restore
+([§5.2](#52-artifact-loading-and-decoding)); sizes are reported in
+[§3.8](#38-measured-sizes).
 
 References:
 
 - [HLDD §5.2 — Simulation data organization
   (ADR-0013)](hldd.md#52-simulation-data-organization-adr-0013).
 - [ADR-0013](../adr/0013-row-level-scenario-artifact.md).
+- [ADR-0018](../adr/0018-manifest-defined-stage-count.md).
 - [DR-7 — Future 3D compatibility](prd.md#dr-7-future-3d-compatibility).
 - [PDD §4.3 — Unclassified records (D-12,
   Proposed)](pdd.md#43-unclassified-records-d-12-proposed).
@@ -1456,23 +1492,52 @@ them is the unavailable state, never a guess.
 | Field | Type | Content |
 |---|---|---|
 | `schema_version` | int | 1. |
-| `export_version` | string | The data vintage — the data tag of [§4.2](#42-publication-of-a-data-vintage), in the tag format of [§3](#3-data-formats). |
+| `export_version` | string | The data vintage — the tag naming its published data release ([§3.3](#33-pointer-manifest), [§4.2](#42-publication-of-a-data-vintage)), in the tag format of [§3](#3-data-formats). The `data-v0-test` development export is never published, and a `data-vN` export is not a published vintage until §4.2 publishes its release. |
 | `export_date` | string | UTC timestamp of the export run, `YYYY-MM-DDTHH:MM:SSZ`; a `--reproduce` run reuses it verbatim ([§4.3](#43-retention-rollback-recovery-and-withdrawal)). |
 | `pipeline_version` | string | `eps_ground_rupture.__version__` of the exporting package — a label; `provenance.source_commit` identifies the code. |
 | `provenance` | object | Record identifying the export run (members below), byte-identical to the pointer manifest's ([§3.3](#33-pointer-manifest)). |
-| `counts` | object | Record of ints: `records` (346,834), `trials` (3,434), `stages_per_trial` (101) — the geometry of [HLDD §5.2 — Simulation data organization (ADR-0013)](hldd.md#52-simulation-data-organization-adr-0013), measured by the export, never assumed. |
+| `counts` | object | Record of integers: `records`, `trials`, and `stages_per_trial`, with the bounds and product identity below. All are measured by the export; the current ensemble has 346,834 records, 3,434 trials, and 101 stages per trial. The stage count is the uniform stride of [ADR-0018](../adr/0018-manifest-defined-stage-count.md). |
 | `blocks` | object | Map with exactly the keys `trial_table`, `slip`, `scarp_height`, `dzw`, `scarp_dip`, `scarp_class`, `dip_dictionary`, laid out in that order ([§3.1](#31-scenario-artifact-binary-layout)). Each value is a record {`offset` int, `length` int — data bytes, decompressed — and `dtype` string}: `trial_table` is `"uint8"` with length `counts.trials` × 7; `slip`, `scarp_height`, `dzw`, and `scarp_dip` are `"uint16"` with length `counts.records` × 2; `scarp_class` is `"uint8"` with length `counts.records`; `dip_dictionary` is `"int32"` with length 4 × its entry count. Offsets follow the §3.1 alignment rule from 16, and the decompressed length is `align4(last offset + last length)` — 3,288,980 bytes on the shipped vintage ([§3.8](#38-measured-sizes)). |
 | `columns` | object | Map with exactly the keys `slip`, `scarp_height`, `dzw`, `scarp_dip`, `scarp_class`; each value is the record of ten members tabulated below. |
 | `trial_columns` | object | Map with exactly the seven trial-table column names; each value is that column's dictionary, the array the trial-table cells index: `fault_dip` (ints, degrees) and `depth` (ints, metres) ascending; `sediment_strength`, `cohesion`, `set`, and `density` (strings) in Python `sorted()` code-point order; `model_family` `["2D"]`. The trial table's column order is `TRIAL_TABLE_COLUMNS` ([§3.1](#31-scenario-artifact-binary-layout)), never this map's key order. |
 | `arm_strength_states` | array | The nine selectable pairs, measured from the data, as records {`set`, `sediment_strength`} in data spellings, in display order: the uniform arm (`Homogeneous`) first, then the layered arm (`Heterogeneous`); within an arm the order of [PDD §3.2 — Sediment strength and structure (FR-S2)](pdd.md#32-sediment-strength-and-structure-fr-s2) — `Weak`, `Moderate`, `Strong`, `Random Heterogeneous`, `Cohesive Top Unit`, `Alternating Strong-Weak` — keeping only pairs present. `product_export.py` holds the nine pairs in this order as a constant citing PDD §3.2, and the export's rule `dictionary-order` ([§4.1](#41-export-task-and-validation)) fails when the measured pair set differs from it. This order drives the controls ([§5.7](#57-scenario-controls)), the scenario-summary token, and the download slug ([§5.9](#59-downloads)); the canonical scenario serialization ([DD-11](#1-ddd-decision-register)) sorts pairs by code point instead. Reader-facing labels go through the display-label map of [§5.8](#58-view-layer) (data `Alternating Strong-Weak`, PDD `Alternating Strong–Weak`). |
 | `scarp_classes` | array | The six class-name strings in `config.SCARP_CLASSES` order; class code i ([§3.1](#31-scenario-artifact-binary-layout)) names `scarp_classes[i]`. |
 | `scarp_class_palette` | object | Map from each of the six class names to a color string matching `^#[0-9a-f]{6}$`, re-emitted from `config.SCARP_CLASS_PALETTE` ([FR-G2 — Scarp-type colors and identification](prd.md#fr-g2-scarp-type-colors-and-identification)). |
-| `trials` | array | The 3,434 pipeline `Trial` strings in `trial_id` order — selection identities and downloads name trials by these strings, never by position alone. |
+| `trials` | array | Exactly `counts.trials` pipeline `Trial` strings (currently 3,434), in `trial_id` order — selection identities and downloads name trials by these strings, never by position alone. |
 | `stage_spacing` | object | Record {`min`, `max`, `mean`} in metres: consecutive within-trial slip differences — drafting measurement 0.0468 / 0.0565 / 0.0501 m on the [§3.1](#31-scenario-artifact-binary-layout) input, reproduced by every export run (T-11). This is the simulation spacing that [PDD §3.4 — Displacement window (FR-S5)](pdd.md#34-displacement-window-fr-s5) calls the "recording step (~0.05 m)" and the [§5.7](#57-scenario-controls) helper line states; it is never a storage scale. |
 | `slip_window_bounds` | object | Record {`min`, `max`, `recording_step`} in metres: `min` 0; `max` the largest recorded slip (≈5.0135 m currently, per PDD §3.4); `recording_step` 0.0001. The shortest round-trip decimal string of `max` (`String` in JavaScript; in Python `repr` with grammar G's canonical form of [§5.7](#57-scenario-controls) applied — a trailing `.0` dropped, so `5.0` gives `5`) is the canonical decimal against which the slip-window rules of §5.7 compare entries. `recording_step` is the storage grid of recorded slip — the unit of the stored window bounds ([§5.3](#53-query-engine)) and of the `step` shifts of the [§3.6](#36-reference-results) boundary cases — and is not the PDD's "recording step", which is `stage_spacing`. |
 | `files` | object | Record of the vintage's browser-loaded files, with exactly the keys `scenario_artifact`, `field_export`, `regression_export`, plus `media_index` from [P2](prd.md#22-mvp-and-delivery-priorities) (the second delivery priority, after the MVP); the values are the content-hashed names `scenario-<h12>.bin.gz`, `field-<h12>.json.gz`, `regression-<h12>.json.gz`, and `media-<h12>.json` of [§4.1](#41-export-task-and-validation). Keys matching `^scenario_artifact_[a-z0-9]+$` are reserved (below). |
 | `reference_results_version` | string | The paired reference file's `reference_version` ([§3.6](#36-reference-results)); equal to `export_version`. |
 | `checksums` | object | Map from file name to SHA-256 whose keys are exactly the values of `files` — never the manifest itself (the pointer manifest checksums it; the graph stays acyclic). |
+
+**Count contract.** Let T = `counts.trials`, N =
+`counts.stages_per_trial`, R = `counts.records`, and U = 4,294,967,295
+(the maximum unsigned 32-bit header count). All three are integers,
+with 1 ≤ T ≤ U, 2 ≤ N ≤ U, and 2 ≤ R ≤ U. Before multiplying, require
+T ≤ floor(U / N); then require R = T × N. Use ordinary integer or
+exact Number arithmetic after that bound check, never a bitwise coercion
+that can wrap. `product_export.py` implements this paragraph once, as
+`check_counts(trials, stages_per_trial, records)`, which returns None or
+raises `ValueError` naming the count and the violated bound or identity;
+rule `counts` and rule `manifest-figures`
+([§4.1](#41-export-task-and-validation)) call it. In browser code these
+keys are mapped by DD-10, so N is `counts.stagesPerTrial`.
+
+Every trial of the source view has exactly N stages, measured before
+packing ([§4.1](#41-export-task-and-validation) step 2). N ≥ 2 and
+T ≥ 1 keep the within-trial `stage_spacing` statistics defined. Equal
+stage counts do not require equal slip spacing. Empty query results
+are valid; an empty vintage is not. The general format permits other
+uniform counts, while the full-data checks of
+[§7.3](#73-pipeline-and-export-tests) keep the current ensemble's
+3,434 × 101 = 346,834 completeness assertion. Larger ensembles still
+undergo the existing payload and performance checks: U bounds format
+validity only, and the payload budget of
+[PDD §9.1 — Performance budgets (D-9, Proposed)](pdd.md#91-performance-budgets-d-9-proposed),
+not U, limits the sizes the application must handle, among them the
+`Int32Array` counts of `ecdfSteps` ([§5.12](#512-charts)) and the ZIP
+guard of [§5.9](#59-downloads). Unequal trial lengths require a
+separately specified format.
 
 **`columns` members.** Every member is present for every column; the
 `code` column holds null where the table says so.
@@ -1495,11 +1560,17 @@ and copies it byte-identically into the pointer manifest;
 ([§5.2](#52-artifact-loading-and-decoding)). It holds no absolute
 path and no user or host name.
 
+`source_commit` identifies only the exporter code used by the run.
+It is not a data identifier or selector: the published release and
+its exact asset checksums identify the data
+([§3.3](#33-pointer-manifest)). Reproduction checks the code
+provenance without changing that identity.
+
 | Member | Type | Content |
 |---|---|---|
 | `source_commit` | string | 40 lowercase hexadecimal characters: `git rev-parse HEAD` at run start; the run fails unless HEAD is unchanged at run end. |
 | `source_tree_clean` | bool | `true` when the clean-tree command of [§4.1](#41-export-task-and-validation) step 1 prints nothing at both run start and run end. The export records a dirty tree and does not refuse it ([§4.1](#41-export-task-and-validation)); publication refuses it ([§4.2](#42-publication-of-a-data-vintage)). |
-| `inputs` | array | Records {`path` (repository-relative POSIX path), `sha256`, `bytes` (int)}, unique and sorted by `path`, covering exactly the four processed tables the exports read — `data/processed/dem/data.parquet`, `data/processed/fdhi_measurements/data.parquet`, `data/processed/kern_combined/data.parquet`, `data/processed/sure/data.parquet` — and the four raw files `egr-build` produces them from: `data/raw/DEM_dataset.csv`, the file `io.find_fdhi_flatfile()` returns, `data/raw/SURE.csv`, and `data/raw/Combine_BuwaldaFDHI_KernSDC.csv`. The export re-hashes them before it finishes; any change fails the run. `data/raw/FDHI_Cleaned_Measurements.csv` — the pre-cleaned extract against which `test_fdhi_flatfile.py` and `test_prep.py` check the cleaning chain, which the full-data run of [§7.3](#73-pipeline-and-export-tests) also requires — is not an export input and is not in `inputs`. |
+| `inputs` | array | Records {`path` (repository-relative POSIX path), `sha256`, `bytes` (int)}, unique and sorted by `path`, covering exactly nine data files: the five processed tables required by the export and its shared view builder — `data/processed/dem/data.parquet`, `data/processed/fdhi_cleaned/data.parquet`, `data/processed/fdhi_measurements/data.parquet`, `data/processed/kern_combined/data.parquet`, `data/processed/sure/data.parquet` — and the four raw files `egr-build` produces them from: `data/raw/DEM_dataset.csv`, the file `io.find_fdhi_flatfile()` returns, `data/raw/SURE.csv`, and `data/raw/Combine_BuwaldaFDHI_KernSDC.csv`. The export re-hashes them before it finishes; any change fails the run. `data/raw/FDHI_Cleaned_Measurements.csv` — the pre-cleaned extract against which `test_fdhi_flatfile.py` and `test_prep.py` check the cleaning chain, which the full-data run of [§7.3](#73-pipeline-and-export-tests) also requires — is not an export input and is not in `inputs`. |
 | `environment` | object | Record of strings: `python` (`platform.python_version()`), `duckdb`, `numpy`, `pandas`, `pyarrow` (each module's `__version__`), `zlib` (`zlib.ZLIB_RUNTIME_VERSION`), and `platform` (`sys.platform`, `-`, and `platform.machine()` concatenated). |
 | `compression` | object | Record {`format` `"gzip"`, `call` `"gzip.compress"`, `compresslevel` 9, `mtime` 0}. |
 
@@ -1510,21 +1581,25 @@ without prescribing the undecided 3D format
 validation and readers accept them, no export emits them under
 schema version 1, and the page fetches only `scenario_artifact`.
 
-*Verification (planned):* the export's rules `dictionary-order`,
-`block-tiling`, `manifest-figures`, `checksums`, `format-spec`,
-`envelope-agreement`, and `provenance`
-([§4.1](#41-export-task-and-validation)) check the manifest against
-the artifact, the views, the paired files, and the repository state
-of the same run; the fixture lane of `test_manifests.py` rejects a
-missing `provenance` key, a manifest–pointer `provenance` mismatch,
-and unsorted or duplicate `inputs`
-([§7.3](#73-pipeline-and-export-tests)); the decoder re-validates
-structure before reading ([§5.2](#52-artifact-loading-and-decoding)).
+*Verification (planned):* the export's rules `counts`,
+`dictionary-order`, `block-tiling`, `manifest-figures`, `checksums`,
+`format-spec`, `envelope-agreement`, and `provenance`
+([§4.1](#41-export-task-and-validation)) check the manifest against the
+artifact, the views, the paired files, and the repository state of the
+same run; the fixture lane of `test_manifests.py` rejects a missing
+`provenance` key, a manifest–pointer `provenance` mismatch, unsorted or
+duplicate `inputs`, a missing or extra input path, and each
+Count-contract case that its row of
+[§7.3](#73-pipeline-and-export-tests) lists; the decoder rejects an
+invalid count or `trials` length before requesting the artifact bytes
+and re-validates structure before reading
+([§5.2](#52-artifact-loading-and-decoding)).
 
 References:
 
 - [HLDD §5.2 — Simulation data organization
   (ADR-0013)](hldd.md#52-simulation-data-organization-adr-0013).
+- [ADR-0018](../adr/0018-manifest-defined-stage-count.md).
 - [HLDD §5.4 — Pinned, versioned artifacts
   (ADR-0014)](hldd.md#54-pinned-versioned-artifacts-adr-0014).
 - [HLDD §5.7 — Conversion coefficients
@@ -1548,13 +1623,36 @@ tests read it — the staging tasks of
 fetch-and-verify of [§6.3](#63-ci-workflows), and the parity harness
 of [§7.2](#72-calculation-parity-tests); the page never fetches it.
 
+Under
+[ADR-0019 — Release-based data identity](../adr/0019-release-based-data-identity.md),
+data identity is the published data release in
+`HarvardRC/eps-ground-rupture`, named by `data_tag`, together with
+the exact filename/SHA-256 map in `files`. Its release URL is
+`https://github.com/HarvardRC/eps-ground-rupture/releases/tag/<data_tag>`.
+A Git tag alone, a draft release, a release not marked as a
+prerelease, or a release in another repository does not identify a
+published data vintage. The pointer's commit records which release
+the application selects; it does not identify the data. Git commit
+hashes record code provenance, publication sequencing, the pointer's
+selection history, and the software a check ran on; none selects or
+pins data.
+
+The export writes a staged pointer before publication; it becomes
+eligible to commit only after
+[§4.2](#42-publication-of-a-data-vintage) verifies the published
+release. Publication, retention, and release acceptance establish
+that published state. A build may reuse already checksum-verified
+cached files offline under §6.1/§7.2; a cache hit establishes byte
+identity, not current release availability, and cannot replace
+those checks.
+
 | Field | Type | Content |
 |---|---|---|
 | `schema_version` | int | 1. |
-| `data_tag` | string | The vintage's git tag — the dedicated data release the assets hang on ([§4.2](#42-publication-of-a-data-vintage)); equals `export_version`. |
+| `data_tag` | string | The tag naming the dedicated published data release in this repository ([§4.2](#42-publication-of-a-data-vintage)); a tag without that release is insufficient. Equals `export_version`. |
 | `export_version` | string | Equals the artifact manifest's `export_version`. |
 | `export_date` | string | Equals the artifact manifest's `export_date`. |
-| `provenance` | object | Byte-identical to the artifact manifest's `provenance` ([§3.2](#32-artifact-manifest)) — the same canonical serialization — so the run's identity stays in the repository even when the release assets are gone ([§4.3](#43-retention-rollback-recovery-and-withdrawal)). |
+| `provenance` | object | Byte-identical to the artifact manifest's `provenance` ([§3.2](#32-artifact-manifest)) — the same canonical serialization — so the exporter code, inputs, and environment remain recorded even when the release assets are gone ([§4.3](#43-retention-rollback-recovery-and-withdrawal)). This object does not identify or select the data release. |
 | `files` | object | Map from content-hashed file name to SHA-256, covering **every** file in the vintage (below). |
 
 **The exact file set.** `files` names exactly: the artifact manifest
@@ -1577,12 +1675,16 @@ harness does.
 
 *Verification (planned):* CI fetches every `files` entry from the
 `data_tag` release and fails the build on any missing file or
-checksum mismatch ([§6.3](#63-ci-workflows)); before anything is
-committed, the export's rules `pointer-exact` and `file-names`
-([§4.1](#41-export-task-and-validation)) check the exact file set,
-the names, and the `provenance` equality of the two manifests, and
-the fixture lane of `test_manifests.py` exercises the same rules
-([§7.3](#73-pipeline-and-export-tests)).
+checksum mismatch and, before downloading, on a failed release
+lookup or a missing, draft, or non-prerelease release
+([§6.3](#63-ci-workflows)); publication resumes only through a
+published prerelease whose assets match
+([§4.2](#42-publication-of-a-data-vintage) steps 3 and 9); before
+anything is committed, the export's rules `pointer-exact` and
+`file-names` ([§4.1](#41-export-task-and-validation)) check the
+exact file set, the names, and the `provenance` equality of the two
+manifests, and the fixture lane of `test_manifests.py` exercises the
+same rules ([§7.3](#73-pipeline-and-export-tests)).
 
 References:
 
@@ -1646,9 +1748,11 @@ records in the PDD and the constant then carries — a change to the
 constant alone, in a commit of its own. A vintage carries the
 membership the constant held at its export, so the public activation
 (task T-55) checks, before its commit, that the constant equals the
-recorded membership both at `HEAD` and at the `tag_commit` of the
-pinned vintage's publication record
-([§4.2](#42-publication-of-a-data-vintage)). Until OA-14 records it,
+recorded membership both at `HEAD` and in the exporter code named by
+`tag_commit` in the pinned release's publication record
+([§4.2](#42-publication-of-a-data-vintage)). The release and exact
+asset checksums select the data first; this comparison inspects
+exporter code provenance, not data identity. Until OA-14 records it,
 the constant holds the Proposed reading, which the development
 exports and any vintage published before then carry: `"FDHI"` maps to
 `("Wenchuan", "Kashmir", "Killari")`, the events labeled in cell 25
@@ -1840,11 +1944,13 @@ v its valid values in ascending order, and "valid" its
 | `converted_windows` | array or null | Null in slip mode. In offset mode, one record per selected dip, ascending by `fault_dip`: {`fault_dip` int, `window_lo` number, `window_hi` number (m), `range_flag` (`"in_range"`, `"partly_out"`, or `"out_of_range"`), `window_lo_display` and `window_hi_display` (strings, `display_round(·, display_decimals.slip)`)}. |
 | `diagnosed_conditions` | array or null | Null unless `matching_records` is 0; then the condition groups whose relaxation alone yields matches ([§5.3](#53-query-engine)), possibly none, as keys in the fixed order `fault_dip`, `sediment`, `depth`, `density`, `window`, `scarp_class` — `window` standing for the window group (`entry_mode`, `slip_window`, `offset_max`). [GS-4](pdd.md#102-golden-scenarios) (Alternating Strong–Weak + depth 3 m) yields `["sediment", "depth"]`. |
 
-**Selection.** `identities` is an array of
+**Selection.** N is the artifact manifest's `counts.stages_per_trial`,
+or the explicit `stages_per_trial` of a synthetic ensemble below.
+`identities` is an array of
 `[trial, stage_index, class_code]` triples, one per selected record,
 in artifact order (ascending `trial_id`, then ascending
 `stage_index`): `trial` is the record's string in the manifest's
-`trials`, `stage_index` its position 0–100 in the trial's
+`trials`, `stage_index` its position 0 through N − 1 in the trial's
 ascending-slip run, and `class_code` its `scarp_classes` index 0–5,
 or 255 for an unclassified record. `signature` is the SHA-256 of the
 UTF-8 bytes of the lines `trial;stage_index;class_code` — one per
@@ -1997,10 +2103,16 @@ depend on the vintage, built deterministically by
 `eps_ground_rupture/reference_cases.py`, which the pytest fixture
 lane shares ([§7.3](#73-pipeline-and-export-tests)):
 
-- `ensembles` — at most four records {`id`, `purpose`,
-  `scarp_classes`, `trials`, `stages`, `cases`}, each of at most 8
-  trials, every trial with exactly 101 stages (the
-  [§3.1](#31-scenario-artifact-binary-layout) stride).
+- `ensembles` — exactly four records {`id`, `purpose`,
+  `stages_per_trial`, `scarp_classes`, `trials`, `stages`, `cases`},
+  with IDs `stages-2`, `stages-100`, `stages-101`, and `stages-102`,
+  in that order, and `stages_per_trial` respectively 2, 100, 101,
+  and 102. Each has 2 to 8 trials, every trial with exactly its
+  `stages_per_trial` (N) stages, and every stage array has exactly
+  `trials.length * N` entries. The decoded field is `stagesPerTrial`
+  under [DD-10](#1-ddd-decision-register) (Field-naming convention at
+  the pipeline-to-application boundary); the fixture builder writes it
+  unchanged into its artifact manifest's `counts.stages_per_trial`.
   `scarp_classes` is the six class names in `config.SCARP_CLASSES`
   order, written by the generator: every `stages.scarp_class` name is
   one of them, and every `class_code` in `expected.selection` other
@@ -2020,12 +2132,24 @@ lane shares ([§7.3](#73-pipeline-and-export-tests)):
   ([§7.4](#74-application-tests)), writing `scarp_classes` as the
   fixture manifest's `scarp_classes` and a palette of its choosing as
   its `scarp_class_palette`. Each case is a record {`id`,
-  `inputs`, `windows`, `expected`}, with `windows` as in
+  `inputs`, `windows`, `expected`}, its `id` beginning with its
+  ensemble's `id` and a hyphen (`stages-100-onestate-nowindow`), so
+  that no two ensembles share a case `id`, with `windows` as in
   `boundary_cases` — the ensemble's modeled dips being the distinct
   `fault_dip` values of its `trials` — and `expected` the record
   {`counts`, `selection` ({`identities`}), `statistics`,
-  `diagnosed_conditions`} shaped as in a scenario entry. The cases
-  cover inclusive endpoints on recorded slips; one state per trial
+  `diagnosed_conditions`} shaped as in a scenario entry. For every N,
+  cover each population under each of an inactive window, a slip
+  window, and offset-mode per-dip windows — six cases, the one-state
+  case with no window being the one that selects each trial's final
+  index `(t+1)·N − 1` — with inclusive endpoint matches and no-match
+  windows, and include both a mask selecting only the first trial and
+  one selecting only the last. The last stage of each trial and the
+  first stage of the next differ in slip and in every measurement
+  non-null in both, and comparisons include record identities, so a
+  stride or final-index error cannot pass on equal totals. Across
+  these four ensembles, preserve all the following cases:
+  inclusive endpoints on recorded slips; one state per trial
   picking the highest slip within the window; one state per trial
   under a scarp-type filter that deselects the class of a trial's
   highest in-window stage, so that trial contributes nothing — the
@@ -2349,14 +2473,17 @@ payload diagnostic line (end of this section).
      directory then holds a staged or published vintage — the
      retained copy of
      [§4.3](#43-retention-rollback-recovery-and-withdrawal).
-     Otherwise it deletes and recreates `dist/app/data-vN/`. A
+     Otherwise, once rule `inputs-present` below has passed, it
+     deletes and recreates `dist/app/data-vN/`, so a run that fails a
+     precondition changes nothing on disk; the report still prints
+     this rule's line before that of `inputs-present`. A
      `--reproduce` run skips this rule: it writes only
      `dist/app/data-vN.reproduced/`
      ([§4.3](#43-retention-rollback-recovery-and-withdrawal)).
-   - Rule `inputs-present`: these files exist — the four processed
+   - Rule `inputs-present`: these files exist — the five processed
      tables `data/processed/<table>/data.parquet` for `dem`,
-     `fdhi_measurements`, `kern_combined`, and `sure` (the
-     established `egr-build` outputs); the four raw inputs
+     `fdhi_cleaned`, `fdhi_measurements`, `kern_combined`, and `sure`
+     (the established `egr-build` outputs); the four raw inputs
      `egr-build` reads, `data/raw/DEM_dataset.csv`, the FDHI flatfile
      `io.find_fdhi_flatfile()` returns, `data/raw/SURE.csv`, and
      `data/raw/Combine_BuwaldaFDHI_KernSDC.csv`; and, for every run
@@ -2367,13 +2494,26 @@ payload diagnostic line (end of this section).
      [implementation plan](ip.md#4-owner-and-research-group-actions) in
      Phase 1, its texts replaced by OA-13's final ones in Phase 2 — the
      two phases of §4.4. Development exports run without it (step 4).
+     Check these prerequisites before hashing inputs or building
+     views. A missing processed file fails this rule, names its full
+     repository-relative path, and says
+     `Run poetry run egr-build from subprojects/python with the project virtualenv active, then retry.`
+     A missing raw input names its repository-relative path (for the
+     FDHI flatfile, the pattern
+     `data/raw/02_FDHI_FLATFILE_MEASUREMENTS_*.csv`) and refers to
+     `data/README.md`, since `egr-build` cannot recreate it. In
+     particular, `fdhi_cleaned` is a dependency of the shared
+     `build_duckdb_views`, even though the product's field export
+     uses `fdhi_measurements`. Keep that shared builder; do not
+     silently skip its required table or substitute one FDHI table
+     for the other.
    - Provenance: the run computes the `provenance` object of
      [§3.2](#32-artifact-manifest), running every command at the
      repository root. `source_commit` is the output of
      `git rev-parse HEAD`; `source_tree_clean` is true when the
      clean-tree command
      `git status --porcelain=v1 --untracked-files=all -- . ':(exclude)subprojects/webapp/data/pointer.json'`
-     prints nothing; `inputs` lists the eight data files above —
+     prints nothing; `inputs` lists the nine data files above —
      repository-relative POSIX `path`, `sha256`, and `bytes` — sorted
      by `path` (not `data/REDISTRIBUTION.md`, which `source_commit`
      already identifies); `environment` and `compression` hold the
@@ -2388,8 +2528,16 @@ payload diagnostic line (end of this section).
      `dashboards/duckdb/eps.duckdb`, which holds whatever views the
      last `egrBuild` left — the stale-file hazard noted at the
      `csvExport` tasks of `subprojects/python/build.gradle.kts`.
-2. **Build the data files.** The scenario artifact is packed from
-   the `dem` view exactly per
+2. **Build the data files.** Before allocating or packing the scenario
+   artifact, run the source checks of rule `counts` (step 3) on the
+   `dem` view, in this order: at least one trial; every trial with at
+   least two stages; every trial with the first trial's stage count N;
+   then `check_counts` of §3.2 on the measured T, N, and R. The first
+   failure prints `counts: FAILED — <detail>`, its detail as step 3
+   states, and ends the run before any header is packed or
+   `stage_spacing` is computed; the sole `counts: ok` line waits for
+   step 3's recheck of the written artifact. The scenario artifact is
+   packed from the `dem` view exactly per
    [§3.1](#31-scenario-artifact-binary-layout); the field, regression,
    and reference files follow [§3.4](#34-field-data-export),
    [§3.5](#35-regression-export), and
@@ -2433,14 +2581,24 @@ payload diagnostic line (end of this section).
 3. **Validate from in-memory decode information** — the task decodes
    the files it has just written using the decoding information it
    holds in memory, before any manifest exists:
-   - `counts`: records, trials, and stages per trial are measured
-     from the `dem` view; every trial has the same number of stages,
-     and records equal trials × stages per trial. On the shipped
+   - `counts`: measure records, trials, and the count of every trial
+     from the `dem` view. Require a nonempty trial set, equal counts
+     N ≥ 2, `check_counts` of §3.2 passing on the measured counts, and
+     agreement with the written header and stage-array lengths. The
+     source checks run before packing (step 2); this step rechecks
+     the decoded geometry before reporting success. On the shipped
      vintage they are 346,834, 3,434, and 101 (drafting measurement
      on `data/processed/dem/data.parquet` (SHA-256
      `6a6e9149066f503588e09ecb6772a8392685716672e298d75aa925e7826eb303`),
      reproduced by the full-data lane of `test_scenario_export.py`
-     (T-14)); the rule measures them and hardcodes none.
+     (T-14)); these three numbers remain dataset-specific completeness
+     checks, never constants in the general exporter or decoder. A
+     per-trial failure — a trial with fewer than two stages, or with a
+     count other than the first trial's N — names the first offending
+     `Trial` in artifact order and its observed count, against the first
+     trial's N when the counts differ; other failures name the count and
+     the violated bound or identity. Never pad, drop, interpolate, or
+     resample stages.
    - `slip-order`: slip strictly ascends within every trial, with no
      ties.
    - `site-constancy`: site conditions are constant within every
@@ -2462,9 +2620,10 @@ payload diagnostic line (end of this section).
      dictionary, and `arm_strength_states`, as the run holds them for
      the manifest, are in their [§3.2](#32-artifact-manifest) orders;
      the `dip_dictionary` block, decoded from the written artifact, is
-     strictly ascending, as [§3.1](#31-scenario-artifact-binary-layout)
-     requires; and the measured `set` × `sediment_strength` pair set
-     equals the nine-pair `product_export.py` constant of §3.2.
+     strictly ascending with every entry's magnitude at most 180,000, as
+     [§3.1](#31-scenario-artifact-binary-layout) requires; and the
+     measured `set` × `sediment_strength` pair set equals the nine-pair
+     `product_export.py` constant of §3.2.
    - `view-reread`: the field and regression exports, re-read from
      the written files, equal the rows the run-private views return —
      the field-export product view of §3.4 and `dem_regression` — row
@@ -2516,7 +2675,10 @@ payload diagnostic line (end of this section).
    - `manifest-figures`: every data-derived manifest figure —
      `counts`, `columns`, `trial_columns`, `arm_strength_states`,
      `stage_spacing`, and `slip_window_bounds` — equals its value
-     re-measured from the packed artifact.
+     re-measured from the packed artifact; `counts` also passes
+     `check_counts` of §3.2; and `trials` equals the `dem` view's
+     distinct `Trial` strings in ascending code-point order, exactly
+     `counts.trials` of them.
    - `checksums`: every manifest checksum equals the SHA-256
      recomputed from the written file.
    - `format-spec`: every JSON file of the vintage — the field,
@@ -2539,8 +2701,10 @@ payload diagnostic line (end of this section).
      `source_commit` matches `^[0-9a-f]{40}$` and still equals
      `git rev-parse HEAD`; when `source_tree_clean` is true, the
      clean-tree command still prints nothing; `inputs` is sorted by
-     `path` with no path repeated, and every input re-hashes to its
-     recorded `sha256` and `bytes`.
+     `path` with no path repeated, its path set equals exactly the
+     nine data paths of step 1, and every input re-hashes to its
+     recorded `sha256` and `bytes`. This includes `fdhi_cleaned`;
+     dropping its provenance entry is not a way to waive a change.
 6. **Write the pointer manifest.** The run builds the
    [§3.3](#33-pointer-manifest) pointer manifest in memory, checks
    it, and only then writes it to
@@ -2594,11 +2758,22 @@ made executable.
 
 *Verification (planned):* the fixture lane of
 `test_scenario_export.py` ([§7.3](#73-pipeline-and-export-tests))
-drives the step-3 and step-5 rules on synthetic frames, each
+round-trips valid uniform frames of N = 2, 100, 101, and 102 stages,
+fails empty, one-stage, and unequal-length frames at `counts` before
+packing, calls `check_counts` directly on the arithmetic-boundary cases,
+and drives the step-3 and step-5 rules on synthetic frames, each
 single-property corruption failing its rule by name; the fixture
 lane of `test_manifests.py` rejects a missing `provenance` member, a
-manifest–pointer `provenance` mismatch, and unsorted or duplicate
-`inputs`; and a `--reproduce` run
+manifest–pointer `provenance` mismatch, unsorted or duplicate
+`inputs`, and a missing or extra input path. The fixture lane
+of `test_scenario_export.py` also checks that missing
+`fdhi_cleaned` fails at `inputs-present` before the view builder is
+called, names the path and rebuild command, and leaves the pointer
+and any existing `dist/app/data-vN/` unchanged; all nine inputs
+appear with their measured checksums and sizes; a change to
+`fdhi_cleaned` during export fails `provenance`; and reproduction
+refuses when that input differs from its recorded
+checksum. A `--reproduce` run
 ([§4.3](#43-retention-rollback-recovery-and-withdrawal)) must
 regenerate byte-identical files.
 
@@ -2612,6 +2787,7 @@ References:
 - [ADR-0012](../adr/0012-product-data-exports.md) (amendment of
   2026-10-29).
 - [ADR-0014](../adr/0014-committed-content-hashed-artifacts.md).
+- [ADR-0018](../adr/0018-manifest-defined-stage-count.md).
 - [PDD §5.6 — Conversion assist (FR-S5, D-3)](pdd.md#56-conversion-assist-fr-s5-d-3).
 - `subprojects/python/build.gradle.kts` (the `egrBuild` task
   conventions; the stale-`eps.duckdb` note at the `csvExport`
@@ -2632,9 +2808,11 @@ runs `poetry run egr-publish-vintage --data-tag data-vN` (entry point
 repository root; the pipeline commands of step 4 run in
 `subprojects/python`, as their Gradle tasks do. The vintage is
 exported exactly once, by the run that starts it — one run writes
-the artifact, both manifests, and the reference results, and one
-commit pins them
-([ADR-0014](../adr/0014-committed-content-hashed-artifacts.md)).
+the artifact, both manifests, and the reference results. One
+published release holds every file the pointer names — never the
+pointer itself — and the committed pointer selects that release and
+its exact assets
+([ADR-0019 — Release-based data identity](../adr/0019-release-based-data-identity.md)).
 Every step first detects work already done and skips it, so a rerun
 after any interruption resumes without re-exporting: a new export
 would change `export_date`, and with it every JSON file's bytes and
@@ -2665,8 +2843,22 @@ back (steps 6–9). A published vintage is never modified: every
 correction is a new vintage under the next tag number, one more run
 of this task. Publication also gives the release GitHub's release
 attestation of its tag, commit SHA, and assets, which
-`gh release verify data-vN` checks — provenance beside, never
-instead of, the manifests' `provenance` object.
+`gh release verify data-vN --repo HarvardRC/eps-ground-rupture`
+checks — provenance beside, never instead of, the manifests'
+`provenance` object.
+
+The published release and its exact asset map, not the tag's commit,
+are the data identity of [§3.3](#33-pointer-manifest).
+`source_commit`, `tag_commit`, and `tag_object` below record exporter
+code provenance and enforce resumable publication at that source;
+none is a data selector. Creating the tag or draft does not publish
+a vintage. The publication record's `data_tag`, `files`, and
+`published_at`, checked against the actual published release, bind
+its evidence to the data. Once its release is deleted, a vintage
+fails the retention check of
+[§4.3](#43-retention-rollback-recovery-and-withdrawal) even when its
+tag and local bytes remain; withdrawing it from the site still takes
+§4.3's Withdrawal procedure.
 
 The sequence, with `S` the commit at `HEAD` when the run starts and
 `T` the commit the remote tag `data-vN` points to — the commit
@@ -2708,15 +2900,16 @@ line; `T` is empty when no such tag exists:
    `S` is exactly the committed source; that command leaves out the
    pointer file, which the task itself stages.
 3. **State.** The task reads `T`, the release
-   (`gh release view data-vN --json isDraft,isPrerelease,assets`,
+   (`gh release view data-vN --repo HarvardRC/eps-ground-rupture --json isDraft,isPrerelease,assets`,
    which also finds a draft by its tag name), and the staged
    vintage, and applies the first case that holds, in this order:
    - (c) `T` is not empty and differs from `S`: refuse, naming both
      commits. For an unfinished attempt — the release is a draft, or
      no release exists and `dist/app/data-vN.publication.json`
      exists without `published_at` — the refusal also prints the
-     cleanup commands: `gh release delete data-vN --yes` (when a
-     draft exists), `git push origin :refs/tags/data-vN`,
+     cleanup commands:
+     `gh release delete data-vN --repo HarvardRC/eps-ground-rupture --yes`
+     (when a draft exists), `git push origin :refs/tags/data-vN`,
      `git tag -d data-vN`, for the pointer file
      `git checkout -- subprojects/webapp/data/pointer.json` when
      `git ls-files --error-unmatch subprojects/webapp/data/pointer.json`
@@ -2726,12 +2919,17 @@ line; `T` is empty when no such tag exists:
      never for a published or withdrawn vintage, whose tag stays
      ([§4.3](#43-retention-rollback-recovery-and-withdrawal)).
    - (d) A published release exists (`isDraft` false): when the
-     working-tree pointer has `data_tag` `data-vN` and the release's
+     release has `isPrerelease` true, the working-tree pointer has
+     `data_tag` `data-vN`, and the release's
      asset names and SHA-256s, downloaded as in step 8, equal its
      `files` exactly, report "already published" and continue at
-     step 10. Otherwise refuse: a published release is never
-     changed, so the staged vintage can only be published under the
-     next tag number.
+     step 10. When only `isPrerelease` is false, refuse, printing
+     the in-place repair of
+     [§4.3](#43-retention-rollback-recovery-and-withdrawal) (Recovery),
+     `gh release edit data-vN --repo HarvardRC/eps-ground-rupture --prerelease`,
+     after which a rerun continues through this case. Otherwise
+     refuse: a published release's assets are never changed, so the
+     staged vintage can only be published under the next tag number.
    - (e) No release exists and `dist/app/data-vN.publication.json`
      holds `published_at`: refuse, naming the next tag number, as (a)
      computes it — the vintage was published and its release
@@ -2780,9 +2978,9 @@ line; `T` is empty when no such tag exists:
    with `data_tag`, `tag_commit` (`S`), `pointer_sha256` (the
    SHA-256 of the pointer file), `files` (the pointer's `files`),
    `pytest_full_data` (the final summary line of that pytest run),
-   and `size_report` (the export run's `size:` lines of
+   `validation_report` (the export run's `<rule>: ok` lines of
    [§4.1](#41-export-task-and-validation), as an array of strings in
-   printed order).
+   printed order), and `size_report` (its `size:` lines, likewise).
 5. **Tag.** `git tag -a data-vN -m 'Data vintage data-vN' S`, skipped
    when the local tag already points to `S`; a local tag pointing
    elsewhere is refused, with `git tag -d data-vN` printed. Then
@@ -2793,41 +2991,46 @@ line; `T` is empty when no such tag exists:
    otherwise create a missing tag from the head of the default
    branch, `main`, not from `S`.
 6. **Draft prerelease**, skipped when a draft exists:
-   `gh release create data-vN --verify-tag --draft --prerelease --title 'Data vintage data-vN' --notes-file dist/app/data-vN/data-terms-<h12>.txt`,
+   `gh release create data-vN --repo HarvardRC/eps-ground-rupture --verify-tag --draft --prerelease --title 'Data vintage data-vN' --notes-file dist/app/data-vN/data-terms-<h12>.txt`,
    the terms file the pointer names — its text is the release body
    ([§4.4](#44-licensing-archival-distribution-and-release-attachments)).
 7. **Upload.** For each file the pointer names: when the release has
    no asset of that name,
-   `gh release upload data-vN dist/app/data-vN/<name>`; when it has
-   one, the task downloads it
-   (`gh release download data-vN --pattern <name> --dir <empty temporary directory>`)
+   `gh release upload data-vN dist/app/data-vN/<name> --repo HarvardRC/eps-ground-rupture`;
+   when it has one, the task downloads it
+   (`gh release download data-vN --repo HarvardRC/eps-ground-rupture --pattern <name> --dir <empty temporary directory>`)
    and compares SHA-256s, and on a mismatch runs
-   `gh release delete-asset data-vN <name> --yes` and uploads again.
+   `gh release delete-asset data-vN <name> --repo HarvardRC/eps-ground-rupture --yes`
+   and uploads again.
    It then deletes every asset whose name the pointer does not list.
    Deletions happen only while the release is a draft. The test hook
    `-Ppublish.failAfterUploads=<k>` (`--fail-after-uploads <k>`)
    makes the task exit non-zero after its `k`-th upload; a real
    publication never sets it.
 8. **Read back.**
-   `gh release download data-vN --dir <empty temporary directory>`:
+   `gh release download data-vN --repo HarvardRC/eps-ground-rupture --dir <empty temporary directory>`:
    the downloaded names must equal the pointer's `files` keys
    exactly, and every SHA-256 must match. On a failure the release
    stays a draft, and the next run resumes at step 7.
-9. **Publish.** `gh release edit data-vN --draft=false`. As soon as
-   it succeeds, the task writes `published_at` — the release's
-   `publishedAt`, read with
-   `gh release view data-vN --json publishedAt` — into the staged
-   record, so the record marks the vintage published before
-   anything else can fail (state (e) relies on it). Then
-   `gh release view data-vN --json isDraft,isPrerelease` must report
-   `isDraft` false and `isPrerelease` true, and step 8 runs once more
-   against the published release. A failure here stops the task
-   before step 10, and no pointer naming such a release is ever
+9. **Publish.**
+   `gh release edit data-vN --repo HarvardRC/eps-ground-rupture --draft=false`.
+   As soon as it succeeds, the task writes `published_at` — the
+   release's `publishedAt`, read with
+   `gh release view data-vN --repo HarvardRC/eps-ground-rupture --json publishedAt`
+   — into the staged record, so the record marks the vintage
+   published before anything else can fail (state (e) relies on it).
+   Then the release state, read with
+   `gh release view data-vN --repo HarvardRC/eps-ground-rupture --json isDraft,isPrerelease`,
+   must be `isDraft` false and `isPrerelease` true, and step 8 runs
+   once more against the published release. A failure here stops the
+   task before step 10, and no pointer naming such a release is ever
    committed: a rerun continues at step 10 through (d) when the
-   read-back now matches, and otherwise refuses the release as (d)'s
-   non-matching case — the owner then deletes it
-   (`gh release delete data-vN --yes`, keeping the tag) and publishes
-   the next tag number.
+   release is a prerelease and the read-back now matches; when only
+   the prerelease flag is missing, (d) prints its repair, after which
+   a rerun continues the same way; otherwise (d) refuses the release
+   — the owner then deletes it
+   (`gh release delete data-vN --repo HarvardRC/eps-ground-rupture --yes`,
+   keeping the tag) and publishes the next tag number.
 10. **Publication record.** The task completes
     `dist/app/data-vN.publication.json` with `tag_object` (the output
     of `git rev-parse refs/tags/data-vN`, the annotated tag object),
@@ -2837,7 +3040,7 @@ line; `T` is empty when no such tag exists:
     canonical JSON of [§4.1](#41-export-task-and-validation) step 2.
     It then sets the release body to the terms text followed by a
     fenced `json` block holding the record
-    (`gh release edit data-vN --notes-file <file>`;
+    (`gh release edit data-vN --repo HarvardRC/eps-ground-rupture --notes-file <file>`;
     release notes stay editable under release immutability). The
     step is skipped when the body already carries the record, and
     refused, naming the file, when the staged record of step 4 is
@@ -2882,7 +3085,8 @@ the research data, so no drill asset is ever public and no research
 data is uploaded. The first real publication is the end-to-end run:
 a failure there resumes by the same command while its release is a
 draft, and a published release that fails its checks is replaced
-under the next tag number (steps 3 and 9). The fixture
+under the next tag number unless only its prerelease flag is missing
+(steps 3 and 9). The fixture
 is the four raw inputs of rule `inputs-present`
 ([§4.1](#41-export-task-and-validation) step 1), built in the drill
 clone's gitignored `data/raw/` to a contract under which `egr-build`,
@@ -2900,11 +3104,12 @@ nine pairs of the `product_export.py` constant of
 [§3.2](#32-artifact-manifest) and the `fault_dip`, `depth`, and
 `density` values that [§3.1](#31-scenario-artifact-binary-layout)
 lists, its site conditions the same on every stage; each trial has
-101 stages of strictly ascending `Slip`, the first at 0 m with null
-`Scarp_Class`, `Scarp_Height`, `DZW`, and `Scarp_Dip`, the others
-carrying a `config.SCARP_CLASSES` name; every `Slip`,
-`Scarp_Height`, `DZW`, and `Scarp_Dip` value lies on its §3.1 grid
-inside its §3.1 physical range; and `VD_HW` is
+101 stages (the current ensemble's count, a fixture choice; the
+export accepts any uniform N ≥ 2) of strictly ascending `Slip`, the
+first at 0 m with null `Scarp_Class`, `Scarp_Height`, `DZW`, and
+`Scarp_Dip`, the others carrying a `config.SCARP_CLASSES` name; every
+`Slip`, `Scarp_Height`, `DZW`, and `Scarp_Dip` value lies on its §3.1
+grid inside its §3.1 physical range; and `VD_HW` is
 `0.5 * Slip - 0.005` (m). Rule `coefficient-reach` then holds for
 every dip, and every value that a golden scenario or boundary case
 of [§3.6](#36-reference-results) names is present. The drill copy of
@@ -2917,10 +3122,11 @@ drills set the drill override, `publishVintage`'s option
 `--drill-repository <owner>/<name>` beside the test hook
 `-Ppublish.failAfterUploads` of step 7, which a real publication
 never sets. With it, every `gh` call but the `gh repo view` check
-below targets that repository — each `gh release` command with
-`--repo <owner>/<name>`, and step 1's immutability check as
+below targets that repository — each `gh release` command's `--repo`
+naming `<owner>/<name>` in place of `HarvardRC/eps-ground-rupture`,
+and step 1's immutability check reading
 `gh api repos/<owner>/<name>/immutable-releases --jq .enabled` in
-place of the literal `HarvardRC/eps-ground-rupture` path — and step
+place of the literal path — and step
 4's pytest run, whose full-data pins hold only for the research
 data, is replaced by recording `pytest_full_data` as
 `drill: not run`. Step 1 refuses the option while
@@ -2934,7 +3140,9 @@ refused, with the cleanup commands for an unfinished attempt and
 without them for a withdrawn vintage; a dirty tree and the tag
 `data-v0-test` are refused; a matching published release exits 0; a
 non-matching published release is refused; and a rerun after the
-published release's deletion is refused under state (e).
+published release's deletion is refused under state (e). A
+published non-prerelease with matching assets is refused, its repair
+printed, and after that repair a rerun exits 0 through state (d).
 
 References:
 
@@ -2953,15 +3161,17 @@ References:
 
 ### 4.3 Retention, rollback, recovery, and withdrawal
 
-**Retention.** A published `data-vN` tag is never moved or deleted,
+**Retention.** A published data release's tag is never moved or deleted,
 and no other release ever reuses its name; release immutability
 ([§4.2](#42-publication-of-a-data-vintage)) keeps the release's
 assets unchanged for as long as it exists. The data release is never
 deleted while any supported repository state — the current pointer
 or any rollback target — references the vintage, except by withdrawal
 (below). A vintage counts as retained when its data release is
-published and
-`gh release download data-vN --dir <empty temporary directory>`
+published
+(`gh release view data-vN --repo HarvardRC/eps-ground-rupture --json isDraft,isPrerelease`
+reports `isDraft` false and `isPrerelease` true) and
+`gh release download data-vN --repo HarvardRC/eps-ground-rupture --dir <empty temporary directory>`
 yields exactly the files its pointer names, each with the pointer's
 SHA-256 — the retention check that rollback (below) and the release
 checklist's rollback-readiness item
@@ -2976,7 +3186,13 @@ source of the software-release attachments of
 No Gradle `clean` task deletes `dist/app/` (of `dist/`, the python
 module's `clean` removes only `dist/python/` and `dist/csv/`), and
 the `retained-copy` rule of [§4.1](#41-export-task-and-validation)
-keeps an export from overwriting it.
+keeps an export from overwriting it. A bare tag, a draft, or a
+missing release fails retention even when matching local files
+exist, and so does a non-prerelease until the repair of Recovery
+below restores its flag:
+`gh release edit data-vN --repo HarvardRC/eps-ground-rupture --prerelease`.
+The tag's commit is exporter provenance, not a substitute for the
+release.
 
 **Rollback** is a revert of the pointer-manifest commit
 (`git revert <pointer commit>`), merged like any other change, and
@@ -3009,15 +3225,24 @@ deployment checks apply to the rollback build like any other; it
 never bypasses checksum verification or substitutes another vintage
 ([Rollback](hldd.md#rollback)).
 
-**Recovery** — when a published vintage's release assets become
-unavailable, so that CI's fetch-and-verify fails on them
-([§6.3](#63-ci-workflows)). Release immutability leaves one cause,
-the deletion of the whole release, and no repair in place: a
+**Recovery** — when a published vintage's data release stops
+qualifying, so that CI's fetch-and-verify fails on it
+([§6.3](#63-ci-workflows)). Release immutability leaves two causes.
+A cleared prerelease flag — GitHub keeps the flag editable on a
+published immutable release, and `fetchVintage` and the retention
+check refuse a non-prerelease — is repaired in place with
+`gh release edit data-vN --repo HarvardRC/eps-ground-rupture --prerelease`,
+which `fetchVintage` and state (d) of
+[§4.2](#42-publication-of-a-data-vintage) print and the Retention
+paragraph above states; the retention check must then pass again,
+and the vintage keeps its tag and assets.
+The deletion of the whole release has no repair in place: a
 published release's assets cannot be replaced, and a deleted
-release's tag name can never carry another release. Recovery is
-therefore steps 3–5 of the withdrawal procedure below, with the loss
-as the reason — a replacement vintage or a rollback, the notice in
-that pointer commit, and the notice in the next release notes.
+release's tag name can never carry another release. Recovery from a
+deletion is therefore steps 3–5 of the withdrawal procedure below,
+with the loss as the reason — a replacement vintage or a rollback,
+the notice in that pointer commit, and the notice in the next
+release notes.
 
 **Regeneration** rebuilds a vintage's files byte for byte from its
 pointer and publishes nothing: it is the byte-identity check that
@@ -3036,11 +3261,21 @@ poetry sync
 poetry run egr-export-app --reproduce "$tmp/pointer.json"
 ```
 
-`--reproduce` takes the tag from the pointer and refuses, naming the
+`--reproduce` takes the tag from the pointer. It starts with the same
+§4.1 step-1 preflight, skipping `retained-copy`: `inputs-present`
+runs before any input hashing or view construction, including the
+reproduction checksum comparisons below. A missing processed input
+therefore receives the same path and rebuild-command diagnostic.
+The export continues from this preflight without running it again;
+each rule prints once in the ordinary order, so the successful
+report still has the rule list of §4.1 minus `retained-copy`.
+
+The reproduction refuses, naming the
 failing `provenance` member, unless `HEAD` equals `source_commit`;
 `source_tree_clean` is true and the clean-tree command of
 [§4.1](#41-export-task-and-validation) prints nothing; every `inputs`
-file matches its recorded SHA-256 (when only the processed tables
+file matches its recorded SHA-256 and byte count, naming the
+specific input path on a mismatch (when only the processed tables
 differ and the raw files match, the owner runs `egr-build` and
 retries); and the running environment equals `environment` member by
 member. It then exports into `dist/app/data-vN.reproduced/` (deleted
@@ -3055,7 +3290,10 @@ compared with the pointer's, a `pointer-exact` failure naming every
 file that differs; and it prints the validation report, the size
 report, and the payload diagnostic like any run. When all match, the
 directory holds the vintage's files exactly; a difference is a
-reproducibility defect to investigate. `--allow-environment-drift`
+reproducibility defect to investigate. A successful reproduction
+does not create, restore, or republish the data release, and cannot
+make a withdrawn vintage pass the retention check.
+`--allow-environment-drift`
 waives the environment match and records the running environment
 instead, so the comparison shows which files another environment
 still reproduces. Either way the output is never uploaded: its
@@ -3068,9 +3306,9 @@ licensing problem for instance. The owner:
 
 1. deletes the whole data release — release immutability forbids
    deleting a single published asset — with
-   `gh release delete data-vN --yes`, which removes its assets and
-   keeps the git tag: never `--cleanup-tag`, so history is not
-   rewritten
+   `gh release delete data-vN --repo HarvardRC/eps-ground-rupture --yes`,
+   which removes its assets and keeps the git tag: never
+   `--cleanup-tag`, so history is not rewritten
    ([ADR-0014](../adr/0014-committed-content-hashed-artifacts.md))
    and the kept tag holds the name out of the numbering of
    [§4.2](#42-publication-of-a-data-vintage) step 3;
@@ -3081,10 +3319,11 @@ licensing problem for instance. The owner:
    that the withdrawn pointer does not name — into the gitignored
    directory `dist/withdrawn/<software tag>/`:
    `mkdir -p dist/withdrawn/<software tag>`, then
-   `gh release view <software tag> --json body,assets > dist/withdrawn/<software tag>/release.json`
+   `gh release view <software tag> --repo HarvardRC/eps-ground-rupture --json body,assets > dist/withdrawn/<software tag>/release.json`
    and
-   `gh release download <software tag> --pattern '*.csv' --dir dist/withdrawn/<software tag>`;
-   then deletes it with `gh release delete <software tag> --yes`,
+   `gh release download <software tag> --repo HarvardRC/eps-ground-rupture --pattern '*.csv' --dir dist/withdrawn/<software tag>`;
+   then deletes it with
+   `gh release delete <software tag> --repo HarvardRC/eps-ground-rupture --yes`,
    since release immutability forbids deleting its withdrawn assets
    alone; the software tag, which carries no data, stays and is
    never reused;
@@ -3114,7 +3353,7 @@ licensing problem for instance. The owner:
    release record, the withdrawal notice and the `body` of every
    `release.json` that step 2 saved, and whose plotting CSVs are
    those step 2 saved from the newest of the deleted releases —
-   `gh release upload <software tag> dist/withdrawn/<deleted tag>/<file>`
+   `gh release upload <software tag> dist/withdrawn/<deleted tag>/<file> --repo HarvardRC/eps-ground-rupture`
    per file, in place of the attachment block's two CSV commands —
    except every CSV that the withdrawal reason also affects (for a
    source's terms, each CSV derived from that source), which is left
@@ -3149,7 +3388,9 @@ the retention check of each release's rollback target before every
 release, or the owner-approved absence of one
 ([§7.7](#77-site-validation-and-release-checklist), item 12); and, for
 regeneration, the `--reproduce` comparison of every output SHA-256
-with the pointer.
+with the pointer and the `test_scenario_export.py` fixture cases of
+[§7.3](#73-pipeline-and-export-tests) for its preflight and its
+input-mismatch refusal.
 
 References:
 
@@ -3162,7 +3403,8 @@ References:
 - [ADR-0014](../adr/0014-committed-content-hashed-artifacts.md)
   (amendment of 2026-10-29).
 - GitHub documentation, "Immutable releases" (published assets and
-  tags locked; a deleted release's tag name never reusable).
+  tags locked; title, notes, and the prerelease and latest flags
+  editable; a deleted release's tag name never reusable).
 
 ### 4.4 Licensing, archival distribution, and release attachments
 
@@ -3241,9 +3483,9 @@ import json
 p = json.load(open("subprojects/webapp/data/pointer.json"))
 print(" ".join("dist/app/%s/%s" % (p["data_tag"], f) for f in sorted(p["files"])))
 ')
-gh release upload <software tag> $files
+gh release upload <software tag> $files --repo HarvardRC/eps-ground-rupture
 rm -rf dist/csv && ./gradlew :subprojects:python:egrBuildAndExport
-gh release upload <software tag> dist/csv/*.csv
+gh release upload <software tag> dist/csv/*.csv --repo HarvardRC/eps-ground-rupture
 ```
 
 The owner runs it when cutting a software release, attaching the
@@ -3252,18 +3494,19 @@ current exports from the retained copy of
 plotting CSVs
 ([`notes/Roadmap.md` — Decisions made](../../notes/Roadmap.md#decisions-made));
 on a machine without that copy,
-`gh release download <data_tag> --dir dist/app/<data_tag>` restores
-it first. The checklist's attachment check then re-downloads every
-attached file the pointer names and compares each SHA-256 with the
-pointer manifest. The software release is created as a draft on its
-pushed annotated tag
-(`gh release create <software tag> --verify-tag --draft`), receives
-every attachment and the attachment check while it is a draft, and
-only then is published
-(`gh release edit <software tag> --draft=false`) — the order release
-immutability ([§4.2](#42-publication-of-a-data-vintage)) requires,
-since a published release takes no new asset. Automating the step
-later is an ordinary CI change under [§6.3](#63-ci-workflows).
+`gh release download <data_tag> --repo HarvardRC/eps-ground-rupture --dir dist/app/<data_tag>`
+restores it first. The checklist's attachment check then
+re-downloads every attached file the pointer names and compares
+each SHA-256 with the pointer manifest. The software release is
+created as a draft on its pushed annotated tag
+(`gh release create <software tag> --repo HarvardRC/eps-ground-rupture --verify-tag --draft`),
+receives every attachment and the attachment check while it is a
+draft, and only then is published
+(`gh release edit <software tag> --repo HarvardRC/eps-ground-rupture --draft=false`)
+— the order release immutability
+([§4.2](#42-publication-of-a-data-vintage)) requires, since a
+published release takes no new asset. Automating the step later is
+an ordinary CI change under [§6.3](#63-ci-workflows).
 
 **Archival distribution.** The Zenodo GitHub integration archives
 only the tag's source archive — release assets are not picked up —
@@ -3446,7 +3689,14 @@ to that section's failure states, never to empty or stale results:
    `'schema-version'` otherwise. Then map the object through
    `MANIFEST_FIELDS`, so every required field of
    [§3.2](#32-artifact-manifest) is present with its JSON type
-   (`mapRecord` throws `SchemaError` otherwise), and validate: every
+   (`mapRecord` throws `SchemaError` otherwise). Before requesting
+   artifact bytes, validate the §3.2 Count contract — integer values,
+   bounds, and product identity — using mapped `counts.stagesPerTrial`
+   for N, and require `trials` to hold exactly `counts.trials` strings.
+   Reject a violation with `LoadError` kind `'read'` whose `message`
+   names the field, the observed value, and the violated bound or
+   identity (written to the console by [§5.10](#510-failure-states)); no
+   typed-array view or partial Vintage is returned. Then validate: every
    column whose `encoding` is `scaled` or `dict` has `decimals` 3 or
    4; every column's `null_sentinel` is its dtype's maximum (65,535
    for `uint16`, 255 for `uint8`, [§3.2](#32-artifact-manifest));
@@ -3574,9 +3824,11 @@ order, fixed by schema version 1 and never read from
 `RECORDS_CSV_COLUMNS` and `STATISTICS_CSV_COLUMNS`.
 
 *Verification (planned):* `decode.test.ts`
-([§7.4](#74-application-tests)) feeds `decodeVintage` malformed,
-truncated, wrong-version, mis-tiled, and wrong-sentinel fixtures, each
-of which must reject with its `LoadError` kind
+([§7.4](#74-application-tests)) decodes fixtures of N = 2, 100, 101, and
+102 stages, rejects invalid-count manifests and a `trials` array of the
+wrong length before `readFile` is called, and feeds `decodeVintage`
+malformed, truncated, wrong-version, mis-tiled, and wrong-sentinel
+fixtures, each of which must reject with its `LoadError` kind
 ([§5.10](#510-failure-states)) and never yield a partial decode, and
 calls `loadFieldExport` and `loadRegression` with a matching and a
 different `expectedExportVersion`, the latter rejecting with kind
@@ -3599,6 +3851,7 @@ References:
   verification](hldd.md#71-performance-estimates-and-verification).
 - [HLDD §8 — Site integration](hldd.md#8-site-integration) (Software
   and data versions).
+- [ADR-0018](../adr/0018-manifest-defined-stage-count.md).
 
 ### 5.3 Query engine
 
@@ -3670,11 +3923,12 @@ inclusive at both ends
 - A window with `hi_s < lo_s` is valid and empty: it selects
   nothing.
 
-**Scan.** For each masked-in trial `t`, the engine binary-searches
-the trial's ascending slip segment `[t·101, (t+1)·101)` for its
+**Scan.** Read N from `vintage.manifest.counts.stagesPerTrial`, whose
+validity §5.2 established. For each masked-in trial `t`, binary-search
+the trial's ascending slip segment `[t·N, (t+1)·N)` for its
 stored window: `a` is the first index whose stored slip is at least
 `lo_s`, and `b` the first whose stored slip exceeds `hi_s` (each
-`(t+1)·101` when no index qualifies). In offset mode the bounds are
+`(t+1)·N` when no index qualifies). In offset mode the bounds are
 those of the trial's own `fault_dip`, so the result is the union of
 the per-dip matches
 ([PDD §3.6 — Multi-dip conversion rule (D-3, Proposed)](pdd.md#36-multi-dip-conversion-rule-d-3-proposed)).
@@ -3683,7 +3937,7 @@ Population rule
 population](prd.md#dr-3-one-state-per-trial-population)): one-state
 selects index `b − 1` — the highest slip within the window — when
 `b > a`, and nothing otherwise; with no active window it selects the
-trial's final recorded state, index `t·101 + 100`, never an
+trial's final recorded state, index `(t+1)·N − 1`, never an
 intersection with an implicit window — the trap that
 [GS-7](pdd.md#102-golden-scenarios) (One state per simulation
 trial, no active slip window) pins, because the final recorded
@@ -3726,7 +3980,18 @@ trial order, then stage), `matchingRecords`, `unclassified`,
 `excludedNull`, and `diagnosedConditions`, null unless
 `matchingRecords` is 0 — the [§3.6](#36-reference-results)
 `selection`, `counts`, and `diagnosed_conditions` quantities under
-their [DD-10](#1-ddd-decision-register) camelCase names.
+their [DD-10](#1-ddd-decision-register) camelCase names. For every
+selected global index i, its trial-table row is `floor(i / N)` and
+its within-trial stage index is `i % N`, with N from this vintage's
+`counts.stagesPerTrial`. The parity harness
+([§7.2](#72-calculation-parity-tests)) converts selected indices to
+`[trial, stage_index, class_code]` identities with this mapping — for a
+synthetic ensemble, with its explicit `stages_per_trial` — and
+`buildPackage` ([§5.9](#59-downloads)) resolves each record's trial with
+it. The reference generator never uses it: it takes `stage_index` from
+the record's position in its trial's ascending-slip run
+([§3.6](#36-reference-results)), so parity also tests the artifact's
+layout and its N.
 
 The engine exports `MeasurementCounts` as
 `Readonly<{ valid: number; excludedNull: number }>`; each
@@ -3919,19 +4184,23 @@ selection identities with classes, counts, range flags, and GS-4's
 diagnosed-condition set with the references exactly. The reference
 `boundary_cases` (both sides of the guard at GS-1's converted
 endpoints, and exact decimal slip-mode bounds including the explicit
-twin of GS-7) and `synthetic` cases (inclusive endpoints; both
-population branches; one state per trial under a scarp-type filter
-that deselects the class of a trial's highest in-window stage, so
-that trial contributes nothing; the two-count model with nulls;
-unclassified records under the default and a partial filter;
-sediment pairs; the single-condition diagnostic; and per-dip
-windows) pin the engine's semantics pipeline-first
-([§3.6](#36-reference-results)) and are replayed by §7.2.
-`engine.test.ts` ([§7.4](#74-application-tests)) asserts only
-implementation properties — identical output for identical input,
-the vintage's buffers unmodified, and binary-searched segments equal
-to a linear scan — and `parse.test.ts` pins
-`storedBoundsFromDecimal`. The browser lane
+twin of GS-7) and `synthetic` cases (for each of N = 2, 100, 101, and
+102: each population under an inactive window, a slip window, and
+offset-mode per-dip windows, the one-state case with no window selecting
+each trial's final index `(t+1)·N − 1`, inclusive endpoint matches,
+no-match windows, and a first-trial and a last-trial mask; across the
+four ensembles: one state per trial under a scarp-type filter that
+deselects the class of a trial's highest in-window stage, so that trial
+contributes nothing; the two-count model with nulls; unclassified
+records under the default and a partial filter; sediment pairs; the
+single-condition diagnostic; and per-dip windows) pin the engine's
+semantics pipeline-first ([§3.6](#36-reference-results)) and are
+replayed by §7.2. `engine.test.ts` ([§7.4](#74-application-tests))
+asserts only implementation properties, on fixtures of the same four N —
+returned indices inside the masked-in trials' `[t·N, (t+1)·N)` segments,
+identical output for identical input, the vintage's buffers unmodified,
+and binary-searched segments equal to a linear scan — and
+`parse.test.ts` pins `storedBoundsFromDecimal`. The browser lane
 ([§7.5](#75-browser-test-lane)) exercises the scheduler's ordering,
 guard, and disposal, the field-export re-render, and the discard of
 a superseded announcement and mark.
@@ -3944,6 +4213,7 @@ References:
   (ADR-0013)](hldd.md#53-records-rather-than-precomputed-summaries-adr-0013)
   (The required calculations stay fast enough in the browser).
 - [ADR-0013](../adr/0013-row-level-scenario-artifact.md).
+- [ADR-0018](../adr/0018-manifest-defined-stage-count.md).
 - [PDD §3.4 — Displacement window (FR-S5)](pdd.md#34-displacement-window-fr-s5);
   [PDD §3.7 — Population, scarp filter, family view,
   reset](pdd.md#37-population-scarp-filter-family-view-reset);
@@ -3997,12 +4267,18 @@ expected difference is zero and agreement does not rest on the
    [§5.12](#512-charts) calls it with `p = q / 100` for the
    committed integer `q`; the [DD-5](#1-ddd-decision-register) bin
    rule calls it for the interquartile range.
-4. **Mean.** `mean = S / (n · D)`, where `S = Σ s` is an exact
-   integer sum — at most 346,834 values of magnitude at most 89,765
-   steps ([§3.1](#31-scenario-artifact-binary-layout)), so every
-   partial sum is an integer far below 2^53 that a float64
-   accumulator holds exactly — followed by one correctly rounded
-   division; the order of summation cannot change it.
+4. **Mean.** `mean = S / (n · D)`, where `S = Σ s` is an exact integer
+   sum. It has n < 2^32 terms, the bound [§3.2](#32-artifact-manifest)
+   sets on `counts.records` (346,834 records on the shipped vintage),
+   each below 2^18 in magnitude: by the encoding of
+   [§3.1](#31-scenario-artifact-binary-layout), a scarp height or width
+   is a `uint16` stored value below its 65,535 null sentinel plus an
+   `offset_steps` of −182 or 0, so below 2^16, and a scarp dip is a
+   dictionary entry in thousandths of a degree, which §3.1 bounds by
+   180,000 in magnitude (89,765 on the shipped vintage). Every partial
+   sum is therefore an integer below 2^50, far below 2^53, that a
+   float64 accumulator holds exactly, so the order of summation cannot
+   change S; one correctly rounded division follows.
 5. **Standard deviation.** `sd = sqrt(acc / (n − 1))`, where an
    explicit loop over `sorted`, ascending, accumulates
    `acc += (x − mean) · (x − mean)` — the sample standard
@@ -5907,9 +6183,11 @@ The CRC-32 uses the reflected polynomial `0xEDB88320`, initial value
 `0xFFFFFFFF`, and final xor `0xFFFFFFFF`, with a 256-entry table
 built once. There is no zip64: `zip` throws `RangeError` when a size
 or offset reaches `0xFFFFFFFF` or the entry count `0xFFFF`, which is
-unreachable — a `records.csv` row is at most a few hundred bytes,
-and the artifact holds 346,834 records
-([§3.2](#32-artifact-manifest)). The archive leaves as a `Blob` of
+unreachable for the current ensemble — a `records.csv` row is at
+most a few hundred bytes, and it holds 346,834 records
+([§3.2](#32-artifact-manifest)). Larger valid vintages remain subject
+to this guard; schema validity does not promise a ZIP of any size.
+The archive leaves as a `Blob` of
 type `application/zip`: `deliver.ts` creates its object URL, appends
 to `#gre-root` an `<a download="{fileName}">` element whose `href` is
 that URL, clicks it, and removes it in the same task; it revokes the
@@ -5928,6 +6206,8 @@ conditions in the `TRIAL_TABLE_COLUMNS` order of
 `density`; then the stage columns `slip`, `scarp_height`, `dzw`,
 `scarp_dip`, `scarp_class`. The reserved `model_family` column is
 excluded while only the published 2D ensemble exists (fixed here).
+Resolve each selected index to its trial with the N-based mapping
+of [§5.3](#53-query-engine), including for trial conditions.
 Values: `trial` is the manifest's trial string; `fault_dip` and
 `depth` are the integer dictionary values; `sediment_strength`,
 `cohesion`, `set`, and `density` are the manifest dictionary
@@ -6206,6 +6486,12 @@ Rules binding `start` and everything it schedules:
 - after every `await`, timer, and animation frame it returns at once
   when `a.ac.signal.aborted`; a rejection that arrives after the
   abort is logged with `console.debug`, never rendered;
+- immediately before the first commit — of results, of the
+  unavailable state below, or of a recovery decision — it sets the
+  §5.11 `initialPending` flag false and empties the status region,
+  so a queued startup announcement writes nothing, and a resumption
+  clears its own §5.11 `resumePending` flag the same way before the
+  resumed first commit;
 - it never aborts the shared vintage load, nor the field- and
   regression-export loads kept on the same cache entry (§5.11):
   their files are content-hashed, so re-entry reuses them;
@@ -6378,7 +6664,7 @@ regression-export request of an accepted offset-mode Scenario
 | Failure | `{reason}` |
 |---|---|
 | `'retrieval'`: a rejected fetch or a non-2xx status | the simulation data could not be downloaded |
-| `'read'`: decompression, structural validation, or a missing or mistyped field | the simulation data could not be read |
+| `'read'`: decompression, an invalid manifest count or `trials` length, structural validation, or a missing or mistyped field | the simulation data could not be read |
 | `'schema-version'`: an unsupported `schema_version` | the simulation data has a format version this application does not support |
 | `'data-version'`: the loaded `export_version` differs from the page's stamp | this page expects data version {expected}, but the loaded data is version {loaded} |
 | a missing or empty `data-*` attribute of `#gre-app` (`data-software-version`, `data-data-version`, or `data-manifest`) | the page is missing information it needs to load the data |
@@ -6729,12 +7015,31 @@ before the load of the [§5.10](#510-failure-states) startup sequence
 and appends them to `#gre-root` after the fallback body, so they
 exist before any change they announce; the first render commits
 `root.replaceChildren(skeleton, status, alert)` with the same two
-elements, which are never re-created (fixed here). The first commit,
-of results or of the [§5.10](#510-failure-states) unavailable or recovery-decision
-state, empties the status region without announcing anything on ordinary
-startup; §5.10 explicitly adds a one-time recovery-success or
-storage-read-warning announcement, and recovery errors use the alert, so "Loading
-simulation data…" never outlasts the load.
+elements, which are never re-created (fixed here). Each `start()`
+owns `let initialPending = true`. Only its startup announcement uses
+`() => !a.ac.signal.aborted && initialPending` as `live`. Immediately
+before the first commit of results, the
+[§5.10](#510-failure-states) unavailable state, or a recovery-decision
+state, set `initialPending = false` and empty the status region.
+This invalidates a queued "Loading simulation data…" write before
+that commit; clearing the region alone is insufficient. Ordinary
+startup announces nothing else; §5.10 adds a one-time
+recovery-success or storage-read-warning announcement, and recovery
+errors use the alert. Those announcements keep their own guards.
+Never reset `initialPending` within this mount. When an explicit
+recovery decision resumes startup, the resumption owns
+`let resumePending = true` and announces "Loading simulation data…"
+once with `() => !a.ac.signal.aborted && resumePending` as `live`;
+immediately before the resumed first commit — of results, of the
+unavailable state, or of the invalid-record or incompatible-settings
+state, which **Retry recovery**, resuming with the retained text,
+can reach — it sets `resumePending = false` and empties the
+status region, so only a resumption that waits for a network load
+announces. Without such a decision, a restored offset keeps
+`initialPending` true while awaiting the coefficients needed for the
+first result; the restored overlay's later load affects neither flag.
+A new mount creates a new flag. Capability failure creates no mount
+or live regions, as below.
 `announce(region, text, live?)` empties the region and writes `text`
 in a later task (`setTimeout(…, 0)`), so a just-inserted region is
 registered before its first text and a text repeated by two
@@ -7117,7 +7422,9 @@ slot. `start(a, tag)` creates the two live regions, appends them to
 `#gre-root` after the fallback body, registers the fragment-link
 guard with
 `document.addEventListener('click', guard, { capture: true, signal: a.ac.signal })`,
-and announces "Loading simulation data…"; it then runs the load,
+and announces "Loading simulation data…" with the mount-local
+`initialPending` guard of Live announcements above; it then runs
+the load,
 which takes the vintage from `vintageFor(tag)`, and the first
 render, as the §5.10 startup sequence fixes them. Rules binding
 `start` and everything it schedules:
@@ -7125,6 +7432,12 @@ render, as the §5.10 startup sequence fixes them. Rules binding
 - After every `await`, timer, and animation frame, return at once
   when `a.ac.signal.aborted`; a rejection that arrives after the
   abort is logged with `console.debug`, never rendered.
+- Before the first results, unavailable-state, or recovery-decision
+  commit, set `initialPending = false` and empty the status region,
+  including synchronous failure and recovery branches. A queued
+  startup announcement then writes nothing even on a cached load.
+  A resumption clears its own `resumePending` the same way before
+  the resumed first commit (Live announcements above).
 - Never abort the shared vintage load, nor the lazily loaded field
   and regression exports ([§5.2](#52-artifact-loading-and-decoding)),
   kept on the vintage's cache entry as `field` and `regression`:
@@ -7192,7 +7505,10 @@ caption's N as `formatCount(counts.valid)`. The browser lane
 violations under the tags `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`,
 and `wcag22aa` with every chart-data disclosure closed and again
 open, and each chart's role, accessible name, description,
-`aria-details` target, and table contents against the drawn marks;
+`aria-details` target, and table contents against the drawn marks,
+and, in the startup announcement ordering cases of §7.5, no write of
+the held startup announcement after the first commit or a disposal
+and exactly one loading write while a resumption waits for its load;
 in `keyboard-responsive.spec.ts`, focus retention across settled and
 display-only updates, mid-edit preservation, empty-state focus, and
 the 360 px project operated by touch, with `#gre-summary` in view
@@ -8211,7 +8527,17 @@ application subtree under `docs/`.
   output is the cache directory `subprojects/mkdocs/build/vintage/`.
   For each `files` entry (name → SHA-256): when
   `build/vintage/<data_tag>/<name>` exists and its SHA-256 matches,
-  the entry is skipped; otherwise the task runs
+  the entry is skipped. Before downloading any remaining entries,
+  the task runs
+  `gh release view <data_tag> --repo HarvardRC/eps-ground-rupture --json isDraft,isPrerelease`
+  once and requires `isDraft` false and `isPrerelease` true; a
+  missing release (`gh` reports "release not found"), a draft, a
+  non-prerelease, or another failed lookup raises a
+  `GradleException` naming the release and the failed condition, and
+  for a non-prerelease it also prints the repair of
+  [§4.3](#43-retention-rollback-recovery-and-withdrawal) (Recovery),
+  `gh release edit <data_tag> --repo HarvardRC/eps-ground-rupture --prerelease`.
+  For each remaining entry the task then runs
   `gh release download <data_tag> --repo HarvardRC/eps-ground-rupture --pattern <name> --dir build/vintage/<data_tag> --clobber`
   — the `gh` tooling the [DD-8](#1-ddd-decision-register)
   attachment step already uses — and hashes the file again. A file
@@ -8219,7 +8545,7 @@ application subtree under `docs/`.
   a `GradleException` naming the file. The task writes nothing under
   `docs/`; its cache makes it idempotent and lets a staged checkout
   build offline. Nothing anywhere in the lane resolves "latest": the
-  pointer at the checked-out revision is the only data selector
+  pointer's published release and exact checksums select the data
   ([HLDD §8 — Site integration](hldd.md#8-site-integration),
   [Software and data versions](hldd.md#software-and-data-versions)).
 - `scenarioAssets` — a Gradle `Sync` task
@@ -8739,10 +9065,13 @@ media file neither allowlisted nor granted, an inexact application
 subtree, or an Embedding-API tag fails the build; the strict preview
 build (from the prototype deployment on, both builds) fails on a
 missing generated include or a nav omission; `fetchVintage` fails
-on any missing file or checksum mismatch, wired into CI by
-[§6.3](#63-ci-workflows); the **Check PDD agreement** step of §6.3
-compares both copy-marked blocks of `scenario.md` — the fallback
-body and the disclaimer — with the sections they cite
+on any missing file or checksum mismatch and, before any download,
+on a failed release lookup or a missing, draft, or non-prerelease
+release, wired into CI by [§6.3](#63-ci-workflows), and calls no
+`gh` command when every cached file matches; the
+**Check PDD agreement** step of §6.3 compares both copy-marked
+blocks of `scenario.md` — the fallback body and the disclaimer —
+with the sections they cite
 ([§5.13](#513-application-configuration) step 7). Staging drills:
 `./gradlew :subprojects:mkdocs:mkdocsBuild --dry-run` lists
 `fetchVintage`, `scenarioAssets`, and `mkdocsBuild` in that order;
@@ -8752,8 +9081,17 @@ stray files planted under `docs/assets/scenario/` and
 key set; an immediate rerun reports `fetchVintage` and
 `scenarioAssets` UP-TO-DATE without network access; a byte flipped
 in a staged data file is restored by the next run; a changed
-`CITATION.cff` version re-stamps `scenario-head.html`; and `clean`
-leaves an unrelated file under `docs/assets/` in place. Hook drills:
+`CITATION.cff` version re-stamps `scenario-head.html`; with a stub
+`gh` first on `PATH` that logs every call, each run being
+`./gradlew --no-daemon :subprojects:mkdocs:fetchVintage --rerun-tasks`
+so that no daemon started without the stub resolves `gh`, and one
+cache file absent, a missing release, another failed lookup, a
+draft, and a non-prerelease each fail the task naming the release
+and the failed condition, with no download call, while a published
+prerelease lets the download and checksum verification run; with
+every cached file matching, the task succeeds though every stub call
+fails, its log empty; and `clean` leaves an unrelated file under
+`docs/assets/` in place. Hook drills:
 an unreferenced copy of a figure saved as `docs/images/zz-unlisted.png`
 fails a bare `mkdocs build --strict`, naming that path; removing the
 `fig-05` allowlist line after a successful `mkdocsBuild` makes the
@@ -9896,8 +10234,15 @@ sequence:
    by the guard), ±1e-12 m (outside it), ±1e-4 m (one
    `slip_window_bounds.recording_step`), and a coefficient round
    trip — so both sides of the shared guard formula are exercised.
-5. **Synthetic cases.** For each `synthetic.ensembles` entry, build
-   its artifact and manifest through `test/fixtures.ts` from the
+5. **Synthetic cases.** Require `synthetic.ensembles` to hold exactly
+   the four (`id`, `stages_per_trial`) pairs of
+   [§3.6](#36-reference-results), in that order; any other content is
+   one difference under rule `exact`, case `synthetic.ensembles`.
+   Converting a global selected index i to an identity uses trial
+   `floor(i / N)` and stage `i % N`, with each ensemble's explicit N;
+   no fixed 101 enters either the fixture or this conversion. For
+   each `synthetic.ensembles` entry, build its artifact and manifest
+   through `test/fixtures.ts` from the
    entry's declarative spec, its `scarp_classes` becoming the
    manifest's ([§7.4](#74-application-tests)), decode them with
    `decodeVintage` reading the built bytes, and replay its `cases` —
@@ -9926,9 +10271,10 @@ the quantity, both values, and the rule — one of `fetch`, `pairing`,
 tolerance comparisons the harness also prints the largest
 |app − reference| per scenario as a diagnostic (0 expected under the
 operation-identical algorithms of [§5.4](#54-statistics); only the
-tolerance decides). After the full pass it prints one summary line
-per scenario and case group and exits non-zero if any difference was
-found.
+tolerance decides). After the full pass it prints one summary line per
+scenario, one per `synthetic.ensembles` entry naming its `id` and the
+number of its cases replayed, and one per other case group, and exits
+non-zero if any difference was found.
 
 *Verification (planned):* the two **Parity** steps of
 [§6.3](#63-ci-workflows) run the harness on every matching trigger;
@@ -10067,6 +10413,15 @@ one environment variable:
   never publication evidence.
   CI never sets the variable.
 
+The full-data lane's publication evidence belongs to the published
+data release and its exact asset checksums
+([§3.3](#33-pointer-manifest)). It may be reused across software
+releases under [§7.7](#77-site-validation-and-release-checklist)
+when it covers the unchanged requirement. The fixture lane in the
+same Python file still tests the current software revision; a shared
+filename does not make its evidence interchangeable with the
+full-data lane's evidence.
+
 **New contracts.** Four test files join the suite. Each carries a
 fixture lane that runs everywhere and a full-data lane that skips
 without the staged vintage or the processed data and may not skip
@@ -10074,10 +10429,38 @@ under the flag.
 
 | File | Fixture lane (CI and local) | Full-data lane (local; gates publication) |
 |---|---|---|
-| `test_scenario_export.py` | Drives the [§4.1](#41-export-task-and-validation) export and validation code on synthetic frames shaped like the `dem` view (the suite's established synthetic-frame style): lossless round trip of every [§3.1](#31-scenario-artifact-binary-layout) encoding, the [DD-1](#1-ddd-decision-register) dictionary included, with every restored value equal to its source double bit for bit (`float.hex`, rule `bitwise-restore`). One single-property corruption per rule of §4.1 steps 3 and 5, each failing at that rule's `<rule>: FAILED` line — among them a stored value equal to its column's null sentinel (`sentinel-collision`); a within-trial slip tie or inversion (`slip-order`); a source value off its recording grid (`bitwise-restore`); an unclassified record carrying a valid measurement (`unclassified-has-no-valid-measurement`); a regression row with `slope` 0, a positive intercept, or `−intercept/slope` above `slip_window_bounds.max` (`coefficient-reach`); block offsets that break the §3.1 alignment rule (`block-tiling`); a field name outside the closed [§3.2](#32-artifact-manifest)–[§3.6](#36-reference-results) field lists, or an unknown manifest field (`format-spec`); and a pipeline-column name outside the [DD-10](#1-ddd-decision-register) table (`dd10-names`). A NaN or an infinity fails `finite-reference-values` in the reference file and the canonical serializer's `allow_nan=False` in any other JSON payload. | Re-verifies the shipped ensemble: the [§3.2](#32-artifact-manifest) `counts` (records 346,834, trials 3,434, stages_per_trial 101); the bitwise restore of every stored value; zero within-trial slip ties or inversions and zero ties at any trial's maximum slip (zero in the drafting measurement on `data/processed/dem/data.parquet`, SHA-256 `6a6e9149066f503588e09ecb6772a8392685716672e298d75aa925e7826eb303`, reproduced by this lane, T-14; the [DR-3 — One-state-per-trial population](prd.md#dr-3-one-state-per-trial-population) invariant [ADR-0015](../adr/0015-golden-scenario-parity.md) pins pipeline-first); no unclassified record with a valid measurement; the final-stage slip envelope, pinned at 5.0128–5.0135 m (the "slip ≈ 5.013 m" of [PDD §10.2 — Golden scenarios](pdd.md#102-golden-scenarios), GS-7). |
+| `test_scenario_export.py` | Drives the [§4.1](#41-export-task-and-validation) export and validation code on synthetic frames shaped like the `dem` view (the suite's established synthetic-frame style): lossless round trip of every [§3.1](#31-scenario-artifact-binary-layout) encoding, the [DD-1](#1-ddd-decision-register) dictionary included, with every restored value equal to its source double bit for bit (`float.hex`, rule `bitwise-restore`). Valid uniform N = 2, 100, 101, 102 with multiple trials each round-trip unchanged. Empty input, one-stage trials, and unequal trial lengths fail `counts` before packing — `counts: FAILED` is the run's first failing line and no `scenario-<h12>.bin.gz` is written; the arithmetic-boundary cases — a count above 4,294,967,295, `trials * N` above it, and `records` other than `trials * N` — call `check_counts` of [§3.2](#32-artifact-manifest) directly, without allocating enormous frames. One single-property corruption per rule of §4.1 steps 3 and 5, each failing at that rule's `<rule>: FAILED` line — among them a stored value equal to its column's null sentinel (`sentinel-collision`); a within-trial slip tie or inversion (`slip-order`); a source value off its recording grid (`bitwise-restore`); an unclassified record carrying a valid measurement (`unclassified-has-no-valid-measurement`); a regression row with `slope` 0, a positive intercept, or `−intercept/slope` above `slip_window_bounds.max` (`coefficient-reach`); block offsets that break the §3.1 alignment rule (`block-tiling`); a field name outside the closed [§3.2](#32-artifact-manifest)–[§3.6](#36-reference-results) field lists, or an unknown manifest field (`format-spec`); and a pipeline-column name outside the [DD-10](#1-ddd-decision-register) table (`dd10-names`). A NaN or an infinity fails `finite-reference-values` in the reference file and the canonical serializer's `allow_nan=False` in any other JSON payload. | Re-verifies the shipped ensemble: the [§3.2](#32-artifact-manifest) `counts` (records 346,834, trials 3,434, stages_per_trial 101); the bitwise restore of every stored value; zero within-trial slip ties or inversions and zero ties at any trial's maximum slip (zero in the drafting measurement on `data/processed/dem/data.parquet`, SHA-256 `6a6e9149066f503588e09ecb6772a8392685716672e298d75aa925e7826eb303`, reproduced by this lane, T-14; the [DR-3 — One-state-per-trial population](prd.md#dr-3-one-state-per-trial-population) invariant [ADR-0015](../adr/0015-golden-scenario-parity.md) pins pipeline-first); no unclassified record with a valid measurement; the final-stage slip envelope, pinned at 5.0128–5.0135 m (the "slip ≈ 5.013 m" of [PDD §10.2 — Golden scenarios](pdd.md#102-golden-scenarios), GS-7). |
 | `test_field_export.py` | The [§3.4](#34-field-data-export) rules on synthetic source frames: each (source, analogue) arm admits only rows whose source quantity is positive; `criterion_sub50` is `met` exactly for `dzw` rows with value below 50.0, `not_met` for `dzw` rows at 50.0 or above (50.0 itself included), and `not_applicable` for `scarp_height` rows, never conflating not-applicable with failed; `limited_comparison` is true exactly on SURE `FNC` width rows; `labeled_set` follows `config.LABELED_FIELD_EVENTS` ([§3.4](#34-field-data-export)) — true exactly on the rows of a source it maps to `None` and on the rows whose `eq_name` its source's tuple names; Kern rows carry the fixed event identity; names arrive normalized; rows sort ascending by (`source`, `analogue`, `eq_name`, `source_quantity`, `value`); the envelope carries `pipeline_version`. | Pins the per-(source, analogue) row counts on the shipped sources and checks labeled-set membership against `config.LABELED_FIELD_EVENTS`, which it imports instead of re-pinning ([§3.4](#34-field-data-export)), extending the populations `test_historic_events.py` (per-source measurement rows FDHI 2,392 / SURE 203 / Kern 21) and `test_fdhi_flatfile.py` (the fzw and vs populations; Bohol's 121 sh-only rows stay outside the [§3.4](#34-field-data-export) map) already pin; the first full-data run records the new pins, which thereafter change only by deliberate re-pin. |
-| `test_reference_results.py` | The [§3.6](#36-reference-results) generator definitions on inputs from `eps_ground_rupture/reference_cases.py`, each against an independent recomputation: `quantile_linear(v, q/100).hex() == float(np.percentile(v, q, method='linear')).hex()` for q = 0 to 100 on n ∈ {1, 2, 3, 10, 1000}, duplicates and negatives on a 0.001 grid included; the null rules — valid 0 gives `statistics` null, valid 1 gives `sd` null with median, `p16`, and `p84` equal to `min` and `max` — on a GS-6-shaped and a single-valid fixture; the integer-sum mean equal to `float(Fraction(sum(s), n * 10**d))` over the integer steps `s`; per class, `histogram()` counts equal to `numpy.histogram(s, bins=edges)` over the `synthetic.histograms` cases, and for their log cases `histogram_log()` counts equal to `numpy.histogram` over the steps of at least 100 with the octave edges `first_edge · 2^j` for j = 0 to `bins`, and `below_counts` equal to the count of steps below 100, with `histogram_log()` returning None on the threshold case `maxpos_s = 100 · minpos_s` and a record on `maxpos_s = 100 · minpos_s + 1` ([PDD §4.1 — Measurement views (FR-O1)](pdd.md#41-measurement-views-fr-o1): "more than two decades"); `display_round` on the vectors below; `_stored_bounds` at 0.3, 1.0049, 4.6633, and 5.0135, each exact, ±1e-14 (bound unchanged), and ±1e-12, where only the inward shift — +1e-12 on a lower bound, −1e-12 on an upper bound — moves the bound, by one stored unit, and the outward shift leaves it; `stored_bounds_from_decimal` with lower `"0.00005"` → 1 and upper `"5.01349"` → 50134 and `"5.0135"` → 50135; the `synthetic.ensembles` cases against independent pandas recomputation; the range flags of the `synthetic.conversion` rows; the identities-versus-signature rule at the 10,000-record threshold, with class code 255 for unclassified records; a GS-4-style diagnosed-condition set; the generator's GS-1 `inputs` serializing to the [§5.6](#56-scenario-state-and-url-encoding) golden bytes; a non-finite value failing `finite-reference-values`. | Regenerates the references for GS-0–GS-7 (GS-3 once [D-6](pdd.md#1-decision-register) (Kern County field-data group and principal-width rule) is decided) and asserts what [PDD §10.2 — Golden scenarios](pdd.md#102-golden-scenarios) states: GS-0's 346,834 matching records with 3,434 `unclassified`; GS-1's `range_flag` `partly_out` at 30° — the "flagged beyond the modeled range" of PDD §10.2 read as `partly_out` ([§5.5](#55-offset-to-slip-conversion-assist)) — and `in_range` at 40°; GS-2's 18 and GS-5's 9 scarp-height `valid` — this document reads the PDD's "valid measurements" of GS-2 and GS-5 as the scarp-height panel, the one shown on load, a reading that changes no pin: a drafting measurement on `data/processed/dem/data.parquet` (SHA-256 `6a6e9149066f503588e09ecb6772a8392685716672e298d75aa925e7826eb303`) gives 18 and 9 valid in all three panels, reproduced in the regenerated `counts.per_measurement` (T-14); GS-4's `diagnosed_conditions` `["sediment", "depth"]`; GS-6's 3,434 matching records with `valid` 0 and `excluded_null` 3,434 in every panel; and GS-7's 3,434 matching records. It regenerates `boundary_cases` and asserts that for each dip at least one `out±` or `step±` case changes the selection relative to its `exact` case, so the battery stays discriminating; asserts that DuckDB `quantile_cont` and `quantile_linear` agree within one ulp at p16, p50, and p84 on every shipped column (the [§3.6](#36-reference-results) claim); and runs the two evidence tests below. |
-| `test_manifests.py` | The [§3.2](#32-artifact-manifest)/[§3.3](#33-pointer-manifest) consistency rules on synthetic vintages: required fields present; the two manifests' checksum sets cross-checkable; the checksum graph acyclic; `reference_results_version` equal to the references' `reference_version`; the `provenance` object complete, `source_commit` matching `^[0-9a-f]{40}$`, `inputs` sorted and unique, and the pointer's `provenance` deep-equal to the manifest's; every vintage file name matching its role's single pattern ([§4.1](#41-export-task-and-validation)) and none ending in `.md`. One fixture per rule — a missing `provenance` key, a manifest/pointer `provenance` mismatch, unsorted or duplicate `inputs`, and so on — each rejected. | Cross-checks the staged vintage's artifact manifest and pointer manifest inside `publishVintage`, before tagging — the same rules the [§4.1](#41-export-task-and-validation) run enforces, exercised independently as a test. |
+| `test_reference_results.py` | The [§3.6](#36-reference-results) generator definitions on inputs from `eps_ground_rupture/reference_cases.py`, each against an independent recomputation: `quantile_linear(v, q/100).hex() == float(np.percentile(v, q, method='linear')).hex()` for q = 0 to 100 on n ∈ {1, 2, 3, 10, 1000}, duplicates and negatives on a 0.001 grid included; the null rules — valid 0 gives `statistics` null, valid 1 gives `sd` null with median, `p16`, and `p84` equal to `min` and `max` — on a GS-6-shaped and a single-valid fixture; the integer-sum mean equal to `float(Fraction(sum(s), n * 10**d))` over the integer steps `s`; per class, `histogram()` counts equal to `numpy.histogram(s, bins=edges)` over the `synthetic.histograms` cases, and for their log cases `histogram_log()` counts equal to `numpy.histogram` over the steps of at least 100 with the octave edges `first_edge · 2^j` for j = 0 to `bins`, and `below_counts` equal to the count of steps below 100, with `histogram_log()` returning None on the threshold case `maxpos_s = 100 · minpos_s` and a record on `maxpos_s = 100 · minpos_s + 1` ([PDD §4.1 — Measurement views (FR-O1)](pdd.md#41-measurement-views-fr-o1): "more than two decades"); `display_round` on the vectors below; `_stored_bounds` at 0.3, 1.0049, 4.6633, and 5.0135, each exact, ±1e-14 (bound unchanged), and ±1e-12, where only the inward shift — +1e-12 on a lower bound, −1e-12 on an upper bound — moves the bound, by one stored unit, and the outward shift leaves it; `stored_bounds_from_decimal` with lower `"0.00005"` → 1 and upper `"5.01349"` → 50134 and `"5.0135"` → 50135; all four `synthetic.ensembles` (N = 2, 100, 101, 102), including for each N each population under inactive, slip, and offset-mode per-dip windows, first- and last-trial masks, inclusive endpoints, and empty matches, against independent pandas recomputation grouped by trial identity rather than flat-stride arithmetic; the range flags of the `synthetic.conversion` rows; the identities-versus-signature rule at the 10,000-record threshold, with class code 255 for unclassified records; a GS-4-style diagnosed-condition set; the generator's GS-1 `inputs` serializing to the [§5.6](#56-scenario-state-and-url-encoding) golden bytes; a non-finite value failing `finite-reference-values`. | Regenerates the references for GS-0–GS-7 (GS-3 once [D-6](pdd.md#1-decision-register) (Kern County field-data group and principal-width rule) is decided) and asserts what [PDD §10.2 — Golden scenarios](pdd.md#102-golden-scenarios) states: GS-0's 346,834 matching records with 3,434 `unclassified`; GS-1's `range_flag` `partly_out` at 30° — the "flagged beyond the modeled range" of PDD §10.2 read as `partly_out` ([§5.5](#55-offset-to-slip-conversion-assist)) — and `in_range` at 40°; GS-2's 18 and GS-5's 9 scarp-height `valid` — this document reads the PDD's "valid measurements" of GS-2 and GS-5 as the scarp-height panel, the one shown on load, a reading that changes no pin: a drafting measurement on `data/processed/dem/data.parquet` (SHA-256 `6a6e9149066f503588e09ecb6772a8392685716672e298d75aa925e7826eb303`) gives 18 and 9 valid in all three panels, reproduced in the regenerated `counts.per_measurement` (T-14); GS-4's `diagnosed_conditions` `["sediment", "depth"]`; GS-6's 3,434 matching records with `valid` 0 and `excluded_null` 3,434 in every panel; and GS-7's 3,434 matching records. It regenerates `boundary_cases` and asserts that for each dip at least one `out±` or `step±` case changes the selection relative to its `exact` case, so the battery stays discriminating; asserts that DuckDB `quantile_cont` and `quantile_linear` agree within one ulp at p16, p50, and p84 on every shipped column (the [§3.6](#36-reference-results) claim); and runs the two evidence tests below. |
+| `test_manifests.py` | The [§3.2](#32-artifact-manifest)/[§3.3](#33-pointer-manifest) consistency rules on synthetic vintages: required fields present; counts meet §3.2 and agree with packed geometry, with zero/one/fractional stage counts, zero trials, out-of-range counts, product overflow, and incorrect products rejected using small buffers or metadata-only `check_counts` inputs; the two manifests' checksum sets cross-checkable; the checksum graph acyclic; `reference_results_version` equal to the references' `reference_version`; the `provenance` object complete, `source_commit` matching `^[0-9a-f]{40}$`, `inputs` sorted and unique, and the pointer's `provenance` deep-equal to the manifest's; every vintage file name matching its role's single pattern ([§4.1](#41-export-task-and-validation)) and none ending in `.md`. One fixture per rule — a missing `provenance` key, a manifest/pointer `provenance` mismatch, unsorted or duplicate `inputs`, and so on — each rejected. | Cross-checks the staged vintage's artifact manifest and pointer manifest inside `publishVintage`, before tagging — the same rules the [§4.1](#41-export-task-and-validation) run enforces, exercised independently as a test. |
+
+The fixture lane of `test_scenario_export.py` also exercises the
+declared dependencies before view construction. Each of these cases,
+like every case of this file that runs the export, runs it against a
+temporary repository root — a `tmp_path` git repository with one
+commit whose `.gitignore` covers its synthetic `data/` files and
+`dist/`, so its clean-tree command prints nothing — under which
+every path the run reads or writes resolves, the view builder's
+processed tables included. No case reads, moves, or writes the
+checkout's `data/`, `dist/app/`, or working-tree pointer, or depends
+on the checkout's git state. With all other inputs present, a
+missing `fdhi_cleaned` fails `inputs-present`, names its
+repository-relative path and the rebuild command, never calls the
+view builder, and leaves any existing pointer and
+`dist/app/<data_tag>/` unchanged. Exercise that missing-file path in
+both ordinary export and `--reproduce`. A successful fixture export
+records exactly all nine paths with independently measured SHA-256s
+and byte counts. A change to `fdhi_cleaned` after the initial hashes
+fails `provenance` without writing the pointer; a different checksum
+or size at reproduction start fails naming that input. These
+prerequisite and reproduction cases are separate from the
+single-property corruptions of the step-3 and step-5 rules in the
+table above. The `test_manifests.py` fixture lane rejects a missing
+or extra provenance input path, including omission of
+`fdhi_cleaned`; for a manifest checked outside its export run, the
+expected set is the eight fixed paths of
+[§3.2](#32-artifact-manifest) and exactly one
+`data/raw/02_FDHI_FLATFILE_MEASUREMENTS_*.csv` path.
 
 **The two evidence tests** (full-data lane of
 `test_reference_results.py`):
@@ -10226,11 +10609,16 @@ document fixes, not calculation answers, and are asserted directly.
 16-byte header, aligned blocks, dictionaries — together with its
 matching [§3.2](#32-artifact-manifest) manifest from a declarative
 spec; each negative case corrupts exactly one declared property. The
-same function builds the `synthetic.ensembles` the parity harness
+same function builds the four `synthetic.ensembles` the parity harness
 replays ([§7.2](#72-calculation-parity-tests) step 5), whose entries
 use exactly this spec; for those, the manifest's `scarp_classes` is
 the entry's `scarp_classes` field ([§3.6](#36-reference-results)),
-and its `scarp_class_palette` one of the function's choosing. This
+and its `scarp_class_palette` one of the function's choosing. The spec's
+explicit N sets `counts.stages_per_trial`; the builder throws unless
+each stage array has `trials.length * N` entries and the counts pass the
+§3.2 Count contract, and a negative case applies its one corruption to
+the built manifest or bytes afterwards. Neither the builder nor
+selection-identity extraction ever substitutes the literal 101. This
 mirrors the pipeline suite's synthetic-frame convention and keeps
 every fixture self-documenting; no opaque binary fixture is
 committed.
@@ -10245,9 +10633,9 @@ confuse.
 
 | File | Contract under test |
 |---|---|
-| `decode.test.ts` | `decodeVintage` ([§5.2](#52-artifact-loading-and-decoding)) on in-memory fixture files; structural validation precedes every read: header–manifest agreement (magic, `schema_version`, counts), exact block tiling after the header, dtype and dictionary extents, and each column's `null_sentinel` equal to its dtype's maximum. Restored values equal `(stored + offset_steps) / 1000` (`/ 10000` for slip) and dip `dictionary[i] / 1000` bit for bit ([§3.1](#31-scenario-artifact-binary-layout)). Both branches of the gzip guard of [§5.2](#52-artifact-loading-and-decoding) step 2: bytes that open with the gzip magic (`1f 8b`) inflate, and bytes without it are used as-is. A truncated buffer and a count mismatch (`kind` `'read'`), a missing required key or a wrong JSON type in any format (a `SchemaError` from `mapRecord`, which counts as `'read'`), an unsupported `schema_version` (`'schema-version'`), and a data-version mismatch against the page's pinned version (`'data-version'`, carrying `expected` and `loaded`) each make `decodeVintage` reject with the [§5.10](#510-failure-states) `LoadError` of the kind shown — never a partial decode. Unknown additional manifest fields are ignored (the unlisted-members rule of [§3](#3-data-formats)). `loadFieldExport` and `loadRegression`, through a `fetch` stub that answers the fixture's URL, and `parseReferences` are covered the same way; for each lazy loader, a matching `expectedExportVersion` returns its documented result, and a different value rejects with `kind` `'data-version'`, `expected` equal to the argument, and `loaded` equal to the fixture envelope's version, before returning any rows or regression. A stub answering a non-2xx status makes the loaders reject with `kind` `'retrieval'`. |
+| `decode.test.ts` | `decodeVintage` ([§5.2](#52-artifact-loading-and-decoding)) on in-memory fixture files, accepting N = 2, 100, 101, 102 with multiple trials; structural validation precedes every read: header–manifest agreement (magic, `schema_version`, counts), exact block tiling after the header, dtype and dictionary extents, and each column's `null_sentinel` equal to its dtype's maximum. Restored values equal `(stored + offset_steps) / 1000` (`/ 10000` for slip) and dip `dictionary[i] / 1000` bit for bit ([§3.1](#31-scenario-artifact-binary-layout)). Both branches of the gzip guard of [§5.2](#52-artifact-loading-and-decoding) step 2: bytes that open with the gzip magic (`1f 8b`) inflate, and bytes without it are used as-is. Manifest-only cases for N = 0, 1, or fractional, zero trials, fractional/out-of-range counts, a product exceeding uint32, R not equal to T × N, and a `trials` array whose length differs from `counts.trials` reject with `kind` `'read'` before the `readFile` stub is called; no huge buffer is allocated. With valid counts and a matching header, a stage block whose `length` differs from `counts.records` times its dtype width rejects with `'read'` before any view exists. A truncated buffer and a count mismatch (`kind` `'read'`), a missing required key or a wrong JSON type in any format (a `SchemaError` from `mapRecord`, which counts as `'read'`), an unsupported `schema_version` (`'schema-version'`), and a data-version mismatch against the page's pinned version (`'data-version'`, carrying `expected` and `loaded`) each make `decodeVintage` reject with the [§5.10](#510-failure-states) `LoadError` of the kind shown — never a partial decode. Unknown additional manifest fields are ignored (the unlisted-members rule of [§3](#3-data-formats)). `loadFieldExport` and `loadRegression`, through a `fetch` stub that answers the fixture's URL, and `parseReferences` are covered the same way; for each lazy loader, a matching `expectedExportVersion` returns its documented result, and a different value rejects with `kind` `'data-version'`, `expected` equal to the argument, and `loaded` equal to the fixture envelope's version, before returning any rows or regression. A stub answering a non-2xx status makes the loaders reject with `kind` `'retrieval'`. |
 | `fields.test.ts` | The [DD-10](#1-ddd-decision-register) tables of `src/decode/fields.ts` — `MANIFEST_FIELDS`, `POINTER_FIELDS`, `FIELD_EXPORT_FIELDS`, `REGRESSION_FIELDS`, `REFERENCE_FIELDS`, `SCENARIO_INPUT_FIELDS` — are total and injective over the closed field lists of [§3.2](#32-artifact-manifest)–[§3.6](#36-reference-results); every camelCase name equals `snakeToCamel` of its snake_case name; decoding each format's fixture leaves no snake_case key at any depth outside the data-keyed maps of the [§3](#3-data-formats) records-and-maps rule and the verbatim `provenance` and `inputs` objects ([§5.2](#52-artifact-loading-and-decoding)); `TRIAL_TABLE_COLUMNS`, `RECORDS_CSV_COLUMNS`, and `STATISTICS_CSV_COLUMNS` equal the orders [§3.1](#31-scenario-artifact-binary-layout) and [§5.9](#59-downloads) fix. The cross-language check is the [§7.2](#72-calculation-parity-tests) run: real pipeline files pass through `mapRecord` there, so a required key the pipeline does not write fails parity with `SchemaError`. |
-| `engine.test.ts` | [§5.3](#53-query-engine) implementation properties only: purity — identical output for identical input, the vintage's buffers unmodified — and binary-searched window segments equal to a linear scan for every window whose endpoints are fixture slip values or midpoints between them. Selection semantics — inclusive endpoints, the one-state rule, the no-window final state, the two-count model, the scarp-type filter, `(set, sediment_strength)` pairs, empty groups and stored-empty windows, the single-condition diagnostic — are `synthetic` reference cases replayed by [§7.2](#72-calculation-parity-tests) step 5; the dip-range filter of inverse mode joins the reference coverage of [§5.14](#514-inverse-mode-p2) with P2. |
+| `engine.test.ts` | [§5.3](#53-query-engine) implementation properties only, on fixtures of N = 2, 100, 101, and 102 stages, each of at least two trials, with N taken from the fixture spec, never from the engine: every returned index i lies in trial `floor(i / N)` among the masked-in trials, under masks that include one selecting only the first trial and one selecting only the last; purity — identical output for identical input, the vintage's buffers unmodified — and binary-searched window segments equal to a linear scan over `[t·N, (t+1)·N)` for every window whose endpoints are fixture slip values or midpoints between them. These check indexing mechanics; expected selections remain the Python-generated parity cases. Selection semantics — inclusive endpoints, the one-state rule, the no-window final state, the two-count model, the scarp-type filter, `(set, sediment_strength)` pairs, empty groups and stored-empty windows, the single-condition diagnostic — are `synthetic` reference cases replayed by [§7.2](#72-calculation-parity-tests) step 5; the dip-range filter of inverse mode joins the reference coverage of [§5.14](#514-inverse-mode-p2) with P2. |
 | `state.test.ts` | The [§5.6](#56-scenario-state-and-url-encoding) scenario-state model: `defaultScenario(manifest)` equals the manifest-derived defaults of the fixture manifest; `Scenario` holds accepted values only; reducers are pure; settings outside the permitted vocabulary are rejected (the "scenario-state validation" of [HLDD §9 — Testing and release architecture](hldd.md#9-testing-and-release-architecture), Application-specific tests); Reset restores every [§5.7](#57-scenario-controls) control to its default, family view off included, and leaves the overlay switch and the width panel's `logScale` as they were (display state, [§5.6](#56-scenario-state-and-url-encoding)); deselecting any scarp type turns family view off (§5.7). |
 | `parse.test.ts` | `src/state/parse.ts`, the free-entry validation of [§5.7](#57-scenario-controls): grammar G — canonical forms (`03.50` → `3.5`, `.5` → `0.5`, `3.` → `3`, `1,5` → `1.5`), BLANK, and INVALID (`-`, `-0`, `+3`, `1e3`, `3 m`, letters, inner spaces, `1,000.5`, a lone `.`, and the 17-character `1234567890.123456`, while the 16-character `1234567890.12345` is valid, each also with a leading and a trailing space); the canonical-form limit — `.12345678901234` and `.123456789012340` accepted as `0.12345678901234`, `.123456789012345` and `,123456789012345` INVALID because their canonical form has 17 characters, and the 17-character `00.12345678901234` INVALID although its canonical form has 16; `storedBoundsFromDecimal(min, max)` by integer arithmetic — lower `0.00005` → 1, upper `5.01349` → 50134, upper `5.0135` → 50135, and 12-decimal strings; slip-window rejections — a maximum above `slip_window_bounds.max` compared as exact decimals, a lone minimum above it, a minimum above the maximum, a negative or unreadable entry; offset entries — `0` and `1000` accepted, `1000.0001` rejected (above the R2 bound, compared as exact decimals), INVALID and BLANK at commit rejected; the dip-assist grammar, `20.25° – 45.125°` (16 characters) readable and `20.125° – 45.125°` (17) unreadable; the read-off validity rule. |
 | `recovery.test.ts` | The pure §5.6 recovery envelope: round-trip accepted Scenario and every DisplayState member, including accepted offset input and overlay on; exact keys/version/type checks; invalid JSON, unknown versions, missing keys, and bad display maps return invalid-record; unchanged inputs pass through `parseScenario` against the new manifest; removed vocabulary, reordered canonical arrays, a reduced slip maximum, and incompatible family view return incompatible without partial restoration. Added dictionary members do not expand old explicit selections; saved effective endpoints and canonical decimal strings remain unchanged; same-version records are validated too; a changed coefficient file is not stored in or read from the record. No storage or DOM access in this test. |
@@ -10259,7 +10647,7 @@ confuse.
 | `chart-text.test.ts` | `chartLabel(state)`, `binTableSpec(binsByGroup, groups, edges)`, `fieldTableSpec(rows, order)`, and `segmentTitle` ([§5.11](#511-accessibility-supported-environments-and-navigation-lifecycle)) with injected counts: the header order is canonical; the six-to-three family fold keeps row totals; the group cells of each row sum to its Total; field rows follow the PDD §4.4 source order, ascending value, ties broken by `eq_name`; one distinct `chartLabel` per combination of chart kind and field ticks, and, for the histogram only, family view and log scale; on the logarithmic axis the bin table's first row is `below 0.1 m` exactly when the below counts are not all zero. |
 | `notices.test.ts` | `selectNotices(input, cfg)` ([§5.8](#58-view-layer)): at N = 0, 9, 10, 29, and 30 and at zero matching records, exactly one result notice per panel; the caveats coexist; the empty-state explainer carries its second part exactly when the diagnosed set is non-empty; on injected `RenderInput`s ([§5.8](#58-view-layer)), the plan's `caveats` in their order — the scarp-dip notice first; the low-slip caveat for a direct window whose stored lower bound `lo_s` is `t_s − 1`, not for one at `t_s`, for a converted window of `windows` below `t_s`, and never for the inactive-window default ([PDD §4.6 — Low-slip caveat (D-4, Interim)](pdd.md#46-low-slip-caveat-d-4-interim)); and a per-dip line, its `{Y}` from `windows`, for exactly the `partly_out` entries of `flags`; the thresholds, `t_s` included, come from `config.ts`, never from literals. That the short disclaimer renders in every state that commits the skeleton is asserted in the browser lane ([§7.5](#75-browser-test-lane)). |
 | `field-overlay.test.ts` | The pure overlay model `src/overlay/model.ts` ([§5.8](#58-view-layer), [§3.4](#34-field-data-export)) on injected rows: `overlayRows` default sets (scarp height: `labeled_set`; width: `labeled_set` and `criterion_sub50` `met`) and the show-all expansion; `overlayGroups` per source, never pooled, carrying the `limited_comparison` flag; `overlayNote('scarp_dip')` yields the PDD §4.4 note "Field sources provide no comparable scarp-dip measurement.", and `overlayNote` of the other two measurements yields null. |
-| `downloads.test.ts` | `buildPackage(input, stamps, generatedAt)` ([§5.9](#59-downloads)) with a fixed `generatedAt`: the members are exactly `records.csv`, `statistics.csv`, `provenance.txt`, `scenario.json`, in that order; the CSV column orders equal `RECORDS_CSV_COLUMNS` and `STATISTICS_CSV_COLUMNS`; `records.csv` writes each value from its recorded integer by the §5.9 integer rule — `s = −182` at 3 decimals as `-0.182`, slip at 4 decimals, a null as an empty field, and an unclassified record's `scarp_class` empty; the `statistics.csv` display columns equal `displayRound` of the injected values; both version stamps appear; `provenance.txt` holds the nine §5.9 label lines in the PDD §6.1 order, block 5 equal to `settingsText` of the snapshot, block 8 the `generatedAt` instant, and — on an offset-mode input with a `partly_out` dip and a converted window starting below `t_s` — block 9 equal, line for line, to the `caveats` that `selectNotices(input, cfg)` returns for the same input; `scenario.json`'s `scenario` equals the object `JSON.parse(serializeScenario(snapshot, manifest))`, and its `converted_windows` is null in slip mode and in offset mode equals the selected dips' injected `windows` entries and `flags` ([§5.8](#58-view-layer)), in ascending dip order, with floats written by `Number.prototype.toString`; no field row appears in any member when `field` is set; an empty match gives a records file holding the header row only; a package built from one `RenderInput` contains nothing of another. |
+| `downloads.test.ts` | `buildPackage(input, stamps, generatedAt)` ([§5.9](#59-downloads)) with a fixed `generatedAt`: the members are exactly `records.csv`, `statistics.csv`, `provenance.txt`, `scenario.json`, in that order; the CSV column orders equal `RECORDS_CSV_COLUMNS` and `STATISTICS_CSV_COLUMNS`; `records.csv` writes each value from its recorded integer by the §5.9 integer rule — `s = −182` at 3 decimals as `-0.182`, slip at 4 decimals, a null as an empty field, and an unclassified record's `scarp_class` empty; the `statistics.csv` display columns equal `displayRound` of the injected values; both version stamps appear; `provenance.txt` holds the nine §5.9 label lines in the PDD §6.1 order, block 5 equal to `settingsText` of the snapshot, block 8 the `generatedAt` instant, and — on an offset-mode input with a `partly_out` dip and a converted window starting below `t_s` — block 9 equal, line for line, to the `caveats` that `selectNotices(input, cfg)` returns for the same input; `scenario.json`'s `scenario` equals the object `JSON.parse(serializeScenario(snapshot, manifest))`, and its `converted_windows` is null in slip mode and in offset mode equals the selected dips' injected `windows` entries and `flags` ([§5.8](#58-view-layer)), in ascending dip order, with floats written by `Number.prototype.toString`; no field row appears in any member when `field` is set; with N = 100 and 102, an injected two-trial RenderInput selecting indices N−1, N, and 2N−1 writes the respective first/second/second trial names and site conditions, checking serialization without new scientific expectations; an empty match gives a records file holding the header row only; a package built from one `RenderInput` contains nothing of another. |
 | `file-name.test.ts` | The [DD-6](#1-ddd-decision-register) slug and file-name template of `src/download/file-name.ts` ([§5.9](#59-downloads); the file was `slug.test.ts`): key order `dip`, `sediment`, `depth`, `density`, `window`, `offset`, `classes`; A → `sediment-uniform-strong-layered-weak` and B → `sediment-uniform-weak-layered-strong`; `.` encoded as `p` — `window-1p5-to-3` against `window-1-to-5p3`, and a lone maximum `window-0-to-3`; an empty group's raw value `none`; the all-default slug `all`; injectivity checked per token, never by enumerating complete scenarios: for each group, the full slugs (before truncation) of the scenarios that differ from the default scenario in that group alone, over all its subsets — sediment (512), dips (128), classes (64), depth (8), and density (8) — are pairwise distinct, the default subset giving `all`; and each of those slugs other than `all` is a single token — its key, `-`, then only characters of `[a-z0-9-]` — so no token holds the `_` delimiter and a full slug splits at `_` into its groups' tokens unambiguously; a slug over 80 characters truncated to at most 80, ending in `-` and the first 8 hex digits of the FNV-1a-64 hash of the full slug (vectors: `''` → `cbf29ce484222325`, `'a'` → `af63dc4c8601ec8c`); the population token and the `YYYY-MM-DD` UTC date from `generatedAt`. |
 | `zip.test.ts` (with `test/zipcheck.py`) | `zip(members, modified)` ([§5.9](#59-downloads)): `crc32('123456789')` is `0xCBF43926`; the CRC-32 equals `node:zlib` `crc32` on 1,000 buffers from a fixed-seed generator, lengths 0, 1, and 65,536 included; signatures, offsets, and the end-of-central-directory counts (4 entries) are correct; an independent reader accepts the archive — the test writes `build/test/zip/fixture.zip` and runs `python3 -I test/zipcheck.py <file> <ISO instant> <member SHA-256s>`, which exits 0 only if `ZipFile(file).testzip()` is `None`, the names are the four members in order, every `compress_type` is `ZIP_STORED`, `flag_bits` is 0, every `date_time` equals the instant floored to 2 s, and, when member SHA-256s are given, they match (a missing `python3` fails the test, never skips it); the same members and instant give identical bytes. |
 | `views-text.test.ts` | `chartSummary`, `statsRows`, and `unclassifiedLine` ([§5.8](#58-view-layer); [DD-9](#1-ddd-decision-register)) with independently injected statistics and `MeasurementCounts`: rows in the PDD §4.2 order; `statsRows(null, { valid: 0, excludedNull: 1 }, m, cfg)` shows `0` in the valid-count row, `1` in the excluded-null row, and seven null marks, and the same call with `excludedNull: 2` shows `2` there; captions with identical non-null statistics print N as `formatCount(counts.valid)`, unchanged when only `counts.excludedNull` changes and changed when `counts.valid` changes; values by `displayRound` at the D-23 decimals and counts by `formatCount`; `unclassifiedLine(0)` null and `unclassifiedLine(3434)` the PDD §4.3 line with X `3,434`; `displayRound` on the display-rounding vectors of [§7.3](#73-pipeline-and-export-tests), identical to the Python list — formatting only, per the pipeline-first rule above. |
@@ -10512,6 +10900,64 @@ eleven specs live in `subprojects/webapp/playwright/specs/`.
 [§7.7](#77-site-validation-and-release-checklist); its JSON report
 and traces are attached to the release record.
 
+**Startup announcement ordering** (§5.11; `a11y.spec.ts`). Use a
+test-only `page.addInitScript` wrapper of `setTimeout` and
+`clearTimeout`, armed for one mount, to hold the first zero-delay
+callback scheduled while the new `#gre-root` contains its status and
+alert regions but has no `data-gre-mounted`. This is startup's
+synchronous create-regions → announce sequence. Delegate all other
+timers unchanged, honor cancellation, and restore the wrappers after
+each case. The test releases the held callback by running it
+synchronously in one `page.evaluate` and reads the recorded status
+texts in a later one. Before each no-write assertion it awaits one
+zero-delay timer, scheduled through the original `setTimeout` after
+the commit or release in question; HTML timer ordering runs it after
+every zero-delay timer queued before it. Observe every non-empty
+status text with a `MutationObserver`, retaining the observed element
+even after it is detached. No new production test hook or wall-clock
+delay is used; the existing `data-gre-mounted` is the wrapper's only
+test hook. Assert:
+
+- Cached success: load once, leave, arm before instant re-entry,
+  wait for the cached first result, then release the callback. No
+  "Loading simulation data…" write occurs after the result commit.
+- Immediate failure: remove a required `data-*` stamp from routed
+  scenario HTML; after the unavailable state commits, release the
+  callback. No loading write occurs, and the alert region still holds
+  the unavailable-results notice with the reason "the page is missing
+  information it needs to load the data".
+- Recovery decision: supply an incompatible recovery record, decided
+  after the vintage loads; after its decision state commits, release
+  the callback. No loading write occurs, and choosing
+  **Start a new scenario**, which needs no further load, writes none
+  through the default result. In a second run, supply an invalid
+  record (malformed JSON), decided before the first await, with the
+  artifact response held; after its decision state commits, release
+  the callback: no loading write occurs. Then choose
+  **Start a new scenario**: the resumption, waiting for the held
+  response, writes "Loading simulation data…" exactly once, and
+  releasing the response commits the default result, which clears
+  it, with no later loading write. In both runs the alert region
+  announces the decision message once.
+- Navigation away: hold the artifact response, leave before the
+  first commit, then release the callback. No loading write occurs,
+  even on the detached status element. Re-arm and re-enter while the
+  response is still held: `#gre-root` holds one status and one alert
+  region, and releasing the new mount's callback writes "Loading
+  simulation data…" once to its own status element; releasing the
+  response then commits the first result, which clears it, with no
+  later loading write.
+- Slow startup: hold the artifact response and release the callback
+  while loading is pending. Exactly one loading write occurs; the
+  first result clears it, with no later loading write. Repeat with a
+  valid restored offset Scenario whose display has the overlay on:
+  let the artifact response through, hold the regression and
+  field-export responses, and release the callback when the
+  regression request arrives. Exactly one loading write occurs and
+  stays until the first result commits; afterwards the status region
+  records only the §5.10 restoration message, while the field-export
+  response is held and after its release.
+
 **Reload recovery cases** (MVP; §5.6/§5.10). These extend existing
 specs, not the browser-spec inventory. `failure-states.spec.ts` uses
 coherent old/new fixture vintages served by `page.route`: each HTML
@@ -10570,13 +11016,14 @@ a changed bundle instance in the same document. Abort a restoring mount
 while its vintage/regression is pending; it must commit or announce
 nothing after abort. Resuming from a blocked decision preserves the
 same `#gre-root`, skeleton containers, and two live-region nodes.
-`a11y.spec.ts` exercises these states in both projects: buttons are
-keyboard-operable, storage errors keep action focus, initial blocked
-recovery focuses `#gre-state` under the usual fragment exception,
-explicit default/retry completion focuses the selected panel (or
-`#gre-state` for an empty result) without scrolling, and
-recovery messages are visible as well as announced. The ordinary
-loading-announcement timing finding remains a separate deferred item.
+`a11y.spec.ts` exercises these states in the `desktop` project:
+buttons are keyboard-operable, storage errors keep action focus,
+initial blocked recovery focuses `#gre-state` under the usual
+fragment exception, explicit default/retry completion focuses the
+selected panel (or `#gre-state` for an empty result) without
+scrolling, and recovery messages are visible as well as announced.
+Startup loading uses the guard and ordering cases specified above,
+including when a recovery decision interrupts the initial load.
 
 References:
 
@@ -11454,9 +11901,15 @@ uses the currently pinned data vintage — "It does not regenerate or
 republish research data merely because application code changed" —
 and instead verifies the existing vintage's recorded publication
 evidence: the committed pointer manifest, CI's fetch-and-verify on
-the release commit, and the vintage's publication record, which
-`publishVintage` also appended to the data release's body. It
-regenerates nothing.
+the release commit, and the vintage's publication record — its
+`data_tag` and `files` equal to the pointer's — which
+`publishVintage` also appended to the data release's body. Its
+ledger carries the rows of items 2 and 3 as inherited rows
+(Evidence ledger, below). It regenerates nothing. In both shapes the
+release runs the retention check of
+[§4.3](#43-retention-rollback-recovery-and-withdrawal) on the current
+pin — release state and exact assets — fresh for its own acceptance
+and before the merge, recorded as a ledger row and never inherited.
 
 **The checklist.** The committed template
 `docs/app/release-checklist.md` instantiates the HLDD §9 release
@@ -11467,7 +11920,8 @@ and carries it into the replacement software release
 ([§4.3](#43-retention-rollback-recovery-and-withdrawal), Withdrawal
 steps 2 and 5 — an owner decision, Proposed). The release record
 identifies the software revision (the 40-hex commit), the
-pointer-manifest revision and data vintage, the test-suite and lane
+pointer-manifest revision as selection history, the published data
+release URL and exact filename/SHA-256 map, the test-suite and lane
 versions with their results, and the approval references, and it
 ends with the evidence ledger below; the implementation plan's gate
 section ([`docs/app/ip.md`, §3](ip.md#3-gates-and-release-sequence))
@@ -11592,28 +12046,95 @@ evidence of [§7.6](#76-performance-and-compatibility-measurements)
 alone.
 
 **Evidence ledger.** The release record ends with a table
-`| Check | Revision | Result location | Result | Date |`, one row per
-item above and per separately evidenced check inside an item (each
+`| Check | Software revision | Data release | Result location | Result | Date |`,
+one row per item above and per separately evidenced check (each
 workflow run of item 1, each report of item 5), and one row per
 `test`, `measure`, or `release` Check of every [§8](#8-traceability)
-row whose Status is neither `parked`, `deferred`, nor `n/a`. Revision
-is the 40-hex commit the check ran on — for the data checks of
-items 2 and 3, the publication record's `tag_commit` (`S`). The §7.6
-reports carry `source_commit` and `source_tree_clean`; the
-publication record carries `tag_commit`, equal to the staged
-`provenance.source_commit`, whose `source_tree_clean`
-[§4.2](#42-publication-of-a-data-vintage) step 4 requires to be
-true. Result location is a CI run URL, an attached report, or a
-record identifier; Result is `pass` or `fail`. The release revision
-is the release commit — the release-branch head that item 1's runs
-check. The release branch contains `main` when it is merged, so the
-merge commit that deploys the release has the release commit's tree
+row whose Status is neither `parked`, `deferred`, nor `n/a`. The
+columns distinguish the subject of the check from the code that
+produced its evidence:
+
+- **Software revision** is the 40-hex checked software commit for a
+  software check, and `n/a` for a data-only check. An exporter commit
+  never occupies this cell merely because it produced the data.
+- **Data release** is the full release URL of
+  [§3.3](#33-pointer-manifest), the path of the matching publication
+  record, and the SHA-256 of the pinned pointer file, which equals
+  that record's `pointer_sha256` and so fixes the exact
+  filename/SHA-256 map. It is `n/a` for a check using only synthetic
+  fixtures or no data. A check using a real vintage names that
+  release even when Software revision is also present. A rollback
+  retention check names its target release and the SHA-256 of the
+  target's pointer file
+  (`git show <tag>:subprojects/webapp/data/pointer.json`); all other
+  real-data checks use the current pin. A tag alone, a draft, or a
+  commit hash cannot fill this cell.
+- **Result location** resolves to a CI run, attached report, or
+  record identifying the concrete check and requirement it covers.
+  Result is `pass` or `fail`; Date is the date that check ran, not
+  the date its evidence was copied into a later release record.
+
+Assign these subjects by the concrete check, including traceability
+checks, under this exhaustive mapping:
+
+| Check or lane | Software revision | Data release and evidence |
+|---|---|---|
+| Publication full-data checks (item 2 and the full-data lane of §7.3), export-validation rules evidenced by that publication run, its export-only byte-size report, and completed publication (item 3) | `n/a` | Published data release and exact asset map; the publication record and its covered checks. |
+| Release-state and retention checks: the fresh check of the current pin, in both release shapes, and the retention check of item 12's target | `n/a` | The checked release and exact asset map; a fresh online result for this release acceptance, never merely a historical publication result or cache hit. |
+| Published-site measurement, item 5 (b), and tagged software archive, item 10 | Tagged `main` commit | Current pin for the measurement; `n/a` for the archive check, which excludes the data assets. |
+| Every other check, including fixture tests, CI, fetch-and-verify, parity, browser checks, pre-merge measurements, and software-release attachment checks | Release commit | Current pin when used by the check; otherwise `n/a`. |
+
+A check with both publication-data and current-software lanes has
+separate rows for those lanes, and item 12 with a target has two:
+the target's retention check and the owner's approval of that
+target, a Release-commit row with Data release `n/a`. Neither a
+Python filename nor the word "size" makes all checks in that file
+or report data-only. In particular, export byte sizes may be
+inherited; application bundle and browser payload/timing
+measurements require current software evidence.
+
+Publication evidence may be inherited only for the same published
+release, identical filename/SHA-256 map, and a passing recorded
+check covering the same current requirement. The completed
+publication record is that evidence: `publishVintage` writes it, in
+§4.2 step 4, only after the export printed `ok` for every rule of
+[§4.1](#41-export-task-and-validation), which its `validation_report`
+holds, and after the full-data run passed every node id that
+`subprojects/python/tests/full_data_required.txt` listed. An
+inherited row names its rule or node id in its Check cell, and
+its Result location names that record, whose `tag_commit` fixes the
+check's definition. The row covers the current requirement when
+`git diff --quiet <tag_commit> <release sha> -- <defining files>`
+exits 0, the defining files being, for a full-data test, its test
+file, `subprojects/python/tests/conftest.py`, and
+`subprojects/python/tests/full_data_required.txt`; for the full-data
+run of item 2, every file under `subprojects/python/tests/`; for an
+export rule or the size report, the exporter package
+`subprojects/python/src/eps_ground_rupture/`; and for completed
+publication (item 3),
+`subprojects/python/src/eps_ground_rupture/publish.py`. Any other
+exit status may mean a new or strengthened requirement that the
+prior run did not cover: the row then cannot inherit a pass unless
+it cites the owner's recorded review of that diff stating that it
+adds or strengthens no requirement the row covers, and without that
+review the reuse path of
+[IP T-63 — Release vintage (owner)](ip.md#t-63--release-vintage-owner)
+fails and the owner takes its refresh path. A different software
+commit alone does not invalidate data evidence. Exporter
+`provenance.source_commit` and publication `tag_commit` remain code
+provenance for the run and its check definitions, never the data
+identity. The publication run must still have `source_tree_clean`
+true under §4.2 step 4.
+
+The release revision is the release commit — the release-branch
+head that item 1's runs check. The release branch contains `main`
+when it is merged, so the merge commit that deploys the release has
+the release commit's tree
 (`git diff --quiet <release sha> <main sha>` exits 0), and the
 software tag names that `main` commit. A release record is complete
-only when every ledger row reads `pass` and names the release
-revision, except the rows of items 2 and 3, which name `tag_commit`,
-and the rows of items 5 (b) and 10, which name the tagged `main`
-commit. The row of item 5 (b) reads `pass` only when its report's
+only when every ledger row reads `pass` and its subjects and
+evidence satisfy the mapping and inheritance rules above. The row
+of item 5 (b) reads `pass` only when its report's
 `source_commit` equals that tagged `main` commit and
 `source_tree_clean` is true, and the build identity holds — the full
 SHA-256 of `app.js` and of `app.css` is the
@@ -11628,6 +12149,21 @@ and when its report's `software_version` and `data_version` equal
 the release commit's `CITATION.cff` version and its pointer's
 `export_version`. Version labels alone never establish which build
 was tested, deployed, or measured.
+
+*Verification (planned):* the checklist-template check of
+[IP T-51 — Site validation additions](ip.md#t-51--site-validation-additions)
+finds once, in the template's verbatim copy of this ledger text,
+each sentence that decides whether a release record accepts
+unchanged published-release evidence across two software revisions
+while requiring fresh software checks, and whether it rejects a bare
+tag, a draft, another or missing release, a missing, extra, or
+mismatched asset, an uncovered new or strengthened requirement, a
+data-evidence row in place of a current-software check, and a
+historical retention result in place of a fresh one; the owner
+applies that contract when completing each release record
+([IP T-65 — v0.3 release (owner)](ip.md#t-65--v03-release-owner),
+step (6)). A contract file's full-data lane and its fixture lane
+occupy separate rows.
 
 **Success criteria and their verifying artifacts** (item 6; the
 criteria are
@@ -11712,8 +12248,9 @@ withdrawal procedure of
 [§4.3](#43-retention-rollback-recovery-and-withdrawal) saves before
 it deletes a software release and carries into the replacement
 release. The evidence ledger that ends a release record gives each
-check the revision it ran on, the location of its result, and the
-result, and it holds one row per `test`, `measure`, or `release`
+check its software revision and/or published data release with exact
+asset checksums, the location of its result, and the result, and it
+holds one row per `test`, `measure`, or `release`
 Check of every row whose Status is neither `parked`, `deferred`, nor
 `n/a` — the obligations of the MVP release. The tables are the stored
 rendering of that sweep: when a source changes, the sweep runs again
@@ -11724,9 +12261,9 @@ Kind, Check, and Status columns against the corrected document on
 every row but those added by hand, the Source and Obligation cells
 are the sweep's extraction, unchanged. The sweep has not run again
 since `36abc56`, and until it does, rows added by hand, the one
-exception to that rule, carry what five later source changes direct
+exception to that rule, carry what seven later source changes direct
 at this document and the implementation plan: the row whose Source
-reads `HLDD §2 L215-226 (amended 2026-10-30)`, for the HLDD's amended
+reads `HLDD §2 L222-233 (amended 2026-10-30)`, for the HLDD's amended
 Performance budgets constraint; the two `PDD §4.1` rows on the
 cumulative curve's drawing error and on reader-selected cumulative-curve
 accuracy, for the amendment of 2026-11-01 to
@@ -11736,20 +12273,42 @@ the `PDD §7.3` row on one-shot reload recovery, for the section of
 [PDD §7.3 — Reload recovery (MVP)](pdd.md#73-reload-recovery-mvp);
 and the rows of [§8.4](#84-from-the-adrs-and-the-adr-process) whose
 Source names
-[ADR-0016 — Performance reference environment — an on-demand AWS VM defined by Terraform](../adr/0016-performance-reference-environment.md)
-or
+[ADR-0016 — Performance reference environment — an on-demand AWS VM defined by Terraform](../adr/0016-performance-reference-environment.md),
 [ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md),
-both accepted, each row with the line numbers its source has at
-this document's revision. The amendment of 2026-10-30 to PDD §9.1 falls
-within the PDD §9.1 rows, while the passages of the HLDD,
-`notes/Roadmap.md`, and `docs/adr/README.md` that cite the two ADRs,
-and two passages of ADR-0017 as amended on 2026-10-31 — its
+[ADR-0018 — Manifest-defined uniform stage count](../adr/0018-manifest-defined-stage-count.md),
+or
+[ADR-0019 — Release-based data identity](../adr/0019-release-based-data-identity.md),
+all accepted, each row with the line numbers its source has at
+this document's revision. ADR-0018 amends
+[ADR-0013 — Row-level, trial-major columnar scenario artifact](../adr/0013-row-level-scenario-artifact.md),
+replacing its fixed 101-stage stride. Two ADR-0018 rows succeed the
+ADR-0013 Decision rows (L88-94 and L137-142) whose obligations named
+that stride; each such row's Source names the ADR-0018 lines that change
+its obligation and then, after "amending", the ADR-0013 lines that state
+the clauses the amendment leaves unchanged. A third ADR-0018 row adds
+the count-validation obligation, and a fourth, from its Consequences,
+the separation of format validity from current-data completeness. The
+other ADR-0013 rows keep their sweep Source and Obligation cells, for
+the decisions ADR-0018 leaves unchanged: ADR-0013's amendment of
+2026-11-01 follows its Consequences, so none of their line numbers
+moves, and its obligations are those of the ADR-0018 rows. The
+[ADR-0014 — Product artifacts in release assets, pinned by a committed manifest](../adr/0014-committed-content-hashed-artifacts.md)
+rows keep their sweep Source and Obligation cells in the same way:
+ADR-0019 amends ADR-0014, replacing its commit-based data identity and
+leaving its storage and publication decisions unchanged, and ADR-0014's
+amendment of 2026-11-01 also follows its Consequences, so it moves none
+of their line numbers. Two ADR-0019 rows, after the ADR-0014 rows, add
+the release-based data identity and evidence-subject obligations, which
+include that of ADR-0014's amendment. The amendment of 2026-10-30 to
+PDD §9.1 falls within the PDD §9.1 rows, while the passages of the HLDD,
+`notes/Roadmap.md`, and `docs/adr/README.md` that cite these four ADRs,
+the README's rule of 2026-11-01 on dated amendments, and two passages of
+ADR-0017 as amended on 2026-10-31 — its
 paragraph Implementation sequencing only (L81-86) and its withdrawal
-consequence (L113-122) — have no rows of their own until the sweep
-runs again. The lint of
-§8.4 checks each row's form and citations and its IP twin, never
-that the matrix is complete. The rows that direct an obligation at
-the implementation plan recur, equal cell for cell, in
+consequence (L113-122) — have no rows of their own until the sweep runs
+again. The lint of §8.4 checks each row's form and citations and its
+IP twin, never that the matrix is complete. The rows that direct an
+obligation at the implementation plan recur, equal cell for cell, in
 [IP §7 — Traceability](ip.md#7-traceability).
 
 Each table has six columns. **Source** names the approved document
@@ -11848,7 +12407,7 @@ deliberately keeps.
 | HLDD Intro L72-76 | IP execution brief | IP §2 task graph | text | IP Introduction | designed |
 | HLDD Intro L66-67 | where code references belong | Introduction | text | Introduction; §2; §5.1; §6.1 | designed |
 | HLDD Intro L93-97 | ADRs constrain DDD/IP | Introduction | text | Introduction; IP Introduction; IP §8 | designed |
-| HLDD §2 L215-226 (amended 2026-10-30) | reference environment for the budgets: a fixed-specification AWS VM from Terraform, each time budget at the 95th percentile of 30 runs; the DDD fixes machine specification and run procedure | §1 DD-12, §7.6, §2 | text+measure+owner | §1 DD-12; §7.6; §2; ADR-0016; §7.6 report: environment (T-59, T-61); §7.6 report: workloads (T-61); OA-12 | owner-pending |
+| HLDD §2 L222-233 (amended 2026-10-30) | reference environment for the budgets: a fixed-specification AWS VM from Terraform, each time budget at the 95th percentile of 30 runs; the DDD fixes machine specification and run procedure | §1 DD-12, §7.6, §2 | text+measure+owner | §1 DD-12; §7.6; §2; ADR-0016; §7.6 report: environment (T-59, T-61); §7.6 report: workloads (T-61); OA-12 | owner-pending |
 | HLDD §4.3 L637-639 | state/view lifecycle responsibilities | §5.1, §5.10, §5.11 | text+test | §5.1; §5.3; §5.10; §5.11; subprojects/webapp/playwright/specs/mount.spec.ts (T-60); subprojects/webapp/playwright/specs/navigation-lifecycle.spec.ts (T-60) | planned |
 | HLDD §4.3 L654-656 | chart behaviors and tests | §5.12, §5.11 | text+test | §5.11; §5.12; subprojects/webapp/test/charts.test.ts (T-41); subprojects/webapp/test/histogram.test.ts (T-32); subprojects/webapp/test/chart-text.test.ts (T-41); subprojects/webapp/playwright/specs/render.spec.ts (T-60); subprojects/webapp/playwright/specs/interactions.spec.ts (T-60); subprojects/webapp/playwright/specs/a11y.spec.ts (T-60); subprojects/webapp/playwright/specs/keyboard-responsive.spec.ts (T-60) | planned |
 | HLDD §4.3 L662-663 | bundle size measurement | §7.6, §3.8 | measure | §3.8: pending item 4 (T-61); §7.6 report: workloads.samples.files (T-61) | planned |
@@ -12230,13 +12789,15 @@ deliberately keeps.
 | ADR-0013 amendment 2026-10-29 (3) (L71-74) | precomputed side-values include regression intercepts, not slopes alone | §3.5 | text+test | §3.5 (coefficients: slope and intercept at full float64); §5.5 (the back-projection uses both); §4.1 step 3 rule view-reread (T-12); §4.1 step 5 rule format-spec (T-12) | planned |
 | ADR-0013 amendment 2026-10-29 (4) (L74-75) | corrected dip-grid count: 102,295 values = 102,294 steps of 0.001° | §3.1 | text+test | §3.1 (scarp_dip row: −12.529…89.765° at 0.001°, a dictionary of 35,854 values); §4.1 step 3 rule bitwise-restore (T-12) | planned |
 | ADR-0013 Decision (L81-86) | no precomputed aggregates: only scalar side-values precomputed; client computes everything else | §3.1, §5.4 | text+test | §3.1 (row-level: every record shipped, only manifest ranges and §3.5 coefficients precomputed); §5.4; subprojects/webapp/test/parity.ts (T-35) | planned |
-| ADR-0013 Decision (L88-94) | artifact organization: row-level, trial-major contiguous runs of 101, columnar typed arrays with no parse step | §3.1 | text+test | §3.1; §5.2 (typed-array views, nothing copied); §4.1 step 3 rule counts (T-12); §4.1 step 5 rule block-tiling (T-12); subprojects/webapp/test/decode.test.ts (T-36) | planned |
-| ADR-0013 Decision (L98-103) | trial-table layout: columns incl. reserved model-family dimension | §3.1 | text+test | §3.1 (Trial table: 3,434 × 7 uint8, model_family reserved); §4.1 step 3 rule site-constancy (T-12); subprojects/webapp/test/fields.test.ts::TRIAL_TABLE_COLUMNS (T-36) | planned |
+| ADR-0018 Decision (L54-56), amending ADR-0013 Decision (L88-94) | artifact organization: row-level, trial-major contiguous runs of manifest-defined N, columnar typed arrays with no parse step | §3.1 | text+test | §3.1; §5.2 (typed-array views, nothing copied); §4.1 step 3 rule counts (T-12); §4.1 step 5 rule block-tiling (T-12); subprojects/webapp/test/decode.test.ts (T-36) | planned |
+| ADR-0013 Decision (L98-103) | trial-table layout: columns incl. reserved model-family dimension | §3.1 | text+test | §3.1 (Trial table: counts.trials × 7 uint8, model_family reserved); §4.1 step 3 rule site-constancy (T-12); subprojects/webapp/test/fields.test.ts::TRIAL_TABLE_COLUMNS (T-36) | planned |
 | ADR-0013 Decision (L104-110) | stage-array encodings: 16-bit scaled integers restoring recorded precision exactly, explicit null sentinel | §3.1 | text+test | §3.1; §4.1 step 3 rules bitwise-restore, sentinel-collision, null-counts (T-12); subprojects/webapp/test/decode.test.ts (T-36) | planned |
 | ADR-0013 Decision (L110-117) | dip-column encoding: the DDD decides under the SC-3 parity rule (candidate list per the 2026-10-28 amendment) | §1 (DD-1) | text+test+measure | §1 (DD-1 closure note 1); §4.1 step 3 rules bitwise-restore, dictionary-order (T-12); §3.8: Selected row (T-11, T-17) | planned |
 | ADR-0013 Decision (L120-128) | artifact-manifest JSON required fields the DDD schema-tizes | §3.2 | text+test | §3.2; §4.1 step 5 rules format-spec, manifest-figures, provenance (T-12); subprojects/python/tests/test_manifests.py (T-16) | planned |
 | ADR-0013 Decision (L129-135) | null representation: sentinels, never dropped rows; negative measurements carried as-is per DR-4 | §3.1, §5.4 | text+test | §3.1; §5.4; §4.1 step 3 rules null-counts, sentinel-collision, bitwise-restore (T-12) | planned |
-| ADR-0013 Decision (L137-142) | query algorithm: trial mask then stride-101 scan; percentile sort dominates within 200 ms budget | §5.3 | text+test+measure | §5.3; subprojects/webapp/test/engine.test.ts (T-31); subprojects/webapp/test/parity.ts (T-35); §7.6 report: workloads (T-61) | planned |
+| ADR-0018 Decision (L56-59), amending ADR-0013 Decision (L137-142) | query and download trial boundaries: trial mask then stride-N scan and final index (t+1)*N-1; downloads resolve each record's trial from the same boundaries; percentile sort dominates within 200 ms budget | §5.3, §5.9 | text+test+measure | §5.3; §5.9 (records.csv); subprojects/webapp/test/engine.test.ts (T-31); subprojects/webapp/test/parity.ts (T-35); subprojects/webapp/test/downloads.test.ts (T-45); §7.6 report: workloads (T-61) | planned |
+| ADR-0018 Decision (L34-54) | uniform stage count N at least 2, uint32 count bounds and product identity; validate before packing and decoding | §3.1, §3.2, §3.6, §4.1, §5.2, §5.3, IP §2 T-11, IP §2 T-30 | text+test+schedule | §3.2; §4.1 step 3 rule counts (T-12); subprojects/python/tests/test_scenario_export.py (T-16); subprojects/python/tests/test_reference_results.py (T-16); subprojects/python/tests/test_manifests.py (T-16); subprojects/webapp/test/decode.test.ts (T-36); subprojects/webapp/test/parity.ts::synthetic.ensembles (T-35); T-11; T-13; T-30; T-31 | planned |
+| ADR-0018 Consequences (L93-97) | format validity and current-data completeness stay separate: full-data checks keep 3,434 trials, 346,834 records, 101 stages | §3.2, §7.3 | text+test | §3.2 (Count contract); subprojects/python/tests/test_scenario_export.py::test_full_* (T-14) | planned |
 | ADR-0013 Consequences (L165-167) | DDD fixes exact field encodings, scales, endianness, byte layout (under SC-3 parity rule) | §3 (Data formats scope), §3.1 | text+test | §3 (Rules every format follows: checksums, little-endian, schema versions); §3.1; §4.1 step 3 rules bitwise-restore, sentinel-collision (T-12); §4.1 step 5 rule block-tiling (T-12) | planned |
 | ADR-0013 Consequences (L165-167) | dip-column encoding: the one named decision left open for the DDD | §1 (DD-1) | text | §1 (DD-1 register row, Proposed 2026-10-30, closure note 1); §3.1 (Closes: DD-1) | designed |
 | ADR-0013 Consequences (L168-172) | future partition rule the schema must not preclude: one artifact per model family at 3D scale | §3.1, §3.2, §3.3 | text | §3.1 (model_family, schema_version headroom); §3.2 (reserved scenario_artifact_<family> keys, never emitted under schema_version 1); §3.3 | designed |
@@ -12261,6 +12822,8 @@ deliberately keeps.
 | ADR-0014 Decision, Derived data (L140-145) | sequenced open items: confirm source terms before first vintage upload; Zenodo dataset deposit step; README/LICENSE-docs wording | IP §3 G-1, IP §4 OA-1, IP §4 OA-13, IP §4 OA-6, §4.4 | owner+text+release | G-1; OA-1; §4.2 step 1 (the OA-1 record gate and the README/LICENSE-docs condition); ADR-0017; §7.7 item 17; OA-13; OA-6; §4.4 (Archival distribution); §4.4 (Vintage terms: the README and LICENSE-docs wording) | owner-pending |
 | ADR-0014 Decision (L146-152) | manifest must support pinning multiple per-family artifacts; default page fetches only the 2D family | §3.2, §3.3 | text | §3.2 (reserved scenario_artifact_<family> keys, the page fetching only scenario_artifact); §3.3 (a reserved file pinned the same way) | designed |
 | ADR-0014 Consequences (L183-186) | site deploys and PR validation gain the fetch-and-verify step | IP §2 T-21, T-22 | test+text+schedule | .github/workflows/mkdocs.yml::build / Stage scenario assets (T-21); §6.3 (pull_request triggers unfiltered, a failed run never deploys); T-22 | planned |
+| ADR-0019 Decision (L31-78) | data identity is the published data release plus exact asset filename/SHA-256 map; commits record code provenance only; bare tags, drafts, and non-prereleases do not qualify; verified caches remain usable offline | §3.2, §3.3, §4.2, §4.3, §6.1, IP §2 T-15, IP §2 T-21, IP §2 T-63 | text+test+release+schedule | §3.2; §3.3; §4.2; §4.3 (Retention); §6.1 (Staging tasks); .github/workflows/mkdocs.yml::build / Stage scenario assets (T-21); §7.7 item 3; §7.7 item 12; T-15; T-21; T-63 | planned |
+| ADR-0019 Decision (L61-78) | evidence subjects distinguish published data release and exact assets from current software revision; inherit only matching data and covered requirements, with fresh release-state and retention checks | §7.3, §7.7, IP §2 T-51, IP §2 T-63, IP §2 T-65 | text+release+schedule | §7.3; §7.7 (Two release shapes); §7.7 (Evidence ledger); §7.7 item 2; §7.7 item 3; §7.7 item 12; T-51; T-63; T-65 | planned |
 | ADR-0015 Context (L22-28) | tolerance contract: display-rounded values exact; full-precision values within the per-calculation tolerance PDD §10.1 allows | §7.1, §1 (DD-2) | text+test | §7.1; §1 (DD-2 closure note 2); subprojects/webapp/test/parity.ts::tolerance, display (T-35); subprojects/python/tests/test_reference_results.py::test_full_display_tie_census (T-14); subprojects/python/tests/test_reference_results.py::test_full_evaluation_order_effect (T-14) | planned |
 | ADR-0015 Context (L28-33) | reference numbers must be pinned artifacts CI fetches and verifies without running the pipeline | §3.6, §7.2 | text+test | §3.3 (the pointer pins the reference-results file); subprojects/webapp/test/parity.ts::fetch, pairing (T-35); .github/workflows/tests.yml::webapp-test / Parity (T-23) | planned |
 | ADR-0015 amendment 2026-10-29 (1) (L39-43) | reference-artifact schema: per-scenario selection identities or exact signature; per-dip converted slip window and range flag for offset mode | §3.6 | text+test | §3.6 (selection, converted_windows); subprojects/python/tests/test_reference_results.py (T-16); §4.1 step 3 rule reference-invariants (T-12) | planned |
@@ -12375,13 +12938,20 @@ References:
   re-rendered the Kind, Check, and Status columns against the
   corrected document on 2026-10-30 and added the row of the HLDD
   amendment of that day; the correction pass of 2026-10-31 added the
-  rows of ADR-0016 and ADR-0017.
+  rows of ADR-0016 and ADR-0017; and those of 2026-11-01 added the two
+  `PDD §4.1` rows and the `PDD §7.3` row, replaced the two fixed-stride
+  ADR-0013 rows with ADR-0018 rows that name the ADR-0013 lines they
+  amend, added ADR-0018's count-validation and completeness rows and
+  ADR-0019's two rows, and renumbered the HLDD §2 row's Source to the
+  amended HLDD's lines.
 - [HLDD §2 — Architectural constraints](hldd.md#2-architectural-constraints)
   (Performance budgets, amended 2026-10-30);
   [PDD §9.1 — Performance budgets (D-9, Proposed)](pdd.md#91-performance-budgets-d-9-proposed)
   (amended 2026-10-30);
   [ADR-0016 — Performance reference environment — an on-demand AWS VM defined by Terraform](../adr/0016-performance-reference-environment.md);
-  [ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md).
+  [ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md);
+  [ADR-0018 — Manifest-defined uniform stage count](../adr/0018-manifest-defined-stage-count.md);
+  [ADR-0019 — Release-based data identity](../adr/0019-release-based-data-identity.md).
 - `.github/scripts/check_traceability.py`;
   `.github/workflows/doc-links.yml`.
 

@@ -669,18 +669,21 @@ The owner directed that the P1 finding be fixed, allowed a fresher
 browser requirement, and required explicit error messages. The owner
 initially deferred the P2 and P3 findings below; those labels are
 review priorities, not the product's delivery phases. The later
-DF-1 and DF-2 decisions below accept a bounded ECDF correction and
-explicit reload recovery; the other four findings remain deferred.
+DF-1–DF-6 decisions below accept a bounded ECDF correction, explicit
+reload recovery, release-based data identity and evidence, guarded
+startup announcements, a manifest-defined uniform stage count, and
+complete exporter prerequisites and provenance. All six are corrected
+in design.
 
 | Finding | Disposition | Correction or deferred work | Where |
 |---|---|---|---|
 | **P1 — Compatibility gate cannot pass** | Corrected in design | The old dataset and 24-month window select Firefox 108 and Safari/iOS 16.2, below the required `DecompressionStream` minima. The support policy now uses 12 months, the dataset pin is `1.0.30001820`, and the release gate requires its newest browser release to be at most 30 days old. The inventory records a scoped Safari Streams partial-support exception backed by MDN's used-API evidence. Failure diagnostics name the API and tested browser. Runtime and ordinary static fallback copy state the browser policy and explicit update/reload steps, including iOS/iPadOS updates for Safari. | [PDD §9.2](pdd.md#92-browser-and-mobile-baseline-d-16-proposed); [HLDD §2](hldd.md#2-architectural-constraints), [§6.1](hldd.md#61-failure-honesty-adr-0010); [DDD §2](ddd.md#2-repository-structure-naming-and-toolchain), [§5.10](ddd.md#510-failure-states), [§7.5](ddd.md#75-browser-test-lane), [§7.6](ddd.md#76-performance-and-compatibility-measurements), [§7.7](ddd.md#77-site-validation-and-release-checklist); [IP T-01](ip.md#t-01--gradle-webapp-subproject), [T-03](ip.md#t-03--scenario-page-scaffold), [T-44](ip.md#t-44--failure-states), [T-61](ip.md#t-61--measurement-suite), [T-65](ip.md#t-65--v03-release-owner); [ADR-0014](../adr/0014-committed-content-hashed-artifacts.md) |
 | **P2 — ECDF thinning loses large tied jumps** | Corrected in design after owner decision (2026-11-01) | The superseded rule understates the scarp-dip cumulative share by about 8 percentage points at slip 0–0.5 m. DF-1 replaces it with count-based thinning guaranteeing at most 100/511 ≈ 0.195695 percentage points of vertical simplification error, with a visible and accessible accuracy statement; statistics and percentile read-offs still use the full data. Reader-selected accuracy is a P3 consideration. | [PDD §4.1](pdd.md#41-measurement-views-fr-o1), [§6.3](pdd.md#63-chart-export-fr-d2-p2-d-14-proposed); [DDD §5.12](ddd.md#512-charts), [§7.4](ddd.md#74-application-tests); [IP T-41](ip.md#t-41--measurement-panels-and-charts), [§5](ip.md#5-parked-capabilities-p2p3) |
 | **P2 — Deployment removes assets needed by open pages** | Corrected in design after owner decision (2026-11-01) | DF-2 keeps the single-vintage deployment and adds **Reload and restore settings** after a failed lazy load. Preserve the latest accepted Scenario and DisplayState, validate against the newly loaded manifest before any result, recompute, and report changed versions, incompatible settings, and storage failures explicitly. | [PDD §7.3](pdd.md#73-reload-recovery-mvp); [DDD §5.1](ddd.md#51-modules-and-interfaces), [§5.3](ddd.md#53-query-engine), [§5.6](ddd.md#56-scenario-state-and-url-encoding), [§5.7](ddd.md#57-scenario-controls), [§5.8](ddd.md#58-view-layer), [§5.10](ddd.md#510-failure-states), [§5.11](ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle), [§7.4](ddd.md#74-application-tests), [§7.5](ddd.md#75-browser-test-lane), [§7.6](ddd.md#76-performance-and-compatibility-measurements); [IP T-34](ip.md#t-34--scenario-state), [T-36](ip.md#t-36--application-unit-tests), [T-40](ip.md#t-40--scenario-controls), [T-44](ip.md#t-44--failure-states), [T-46](ip.md#t-46--accessibility-and-navigation-lifecycle), [T-49](ip.md#t-49--field-overlay), [T-60](ip.md#t-60--browser-test-lane), [T-61](ip.md#t-61--measurement-suite) |
-| **P2 — Evidence-ledger revision exceptions omit traceability checks** | Deferred by owner | Extend the publication-commit exception to traceability evidence inherited from the pinned vintage. | [DDD §7.7](ddd.md#77-site-validation-and-release-checklist); [IP T-65](ip.md#t-65--v03-release-owner) |
-| **P2 — Deferred loading announcement can outlive a cached load** | Deferred by owner | Cancel or invalidate the loading timer when the first result or failure commits. | [DDD §5.11](ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle) |
-| **P3 — Stage-count validation and stride disagree** | Deferred by owner | Enforce 101 stages for schema 1 or derive the query stride from the measured count. Current full-data tests protect the shipped dataset. | [DDD §4.1](ddd.md#41-export-task-and-validation), [§5.3](ddd.md#53-query-engine) |
-| **P3 — Export prerequisites omit a builder input** | Deferred by owner | Include `fdhi_cleaned` among prerequisites or restrict the view builder to the required product views. The ordinary fresh build already supplies it. | [DDD §4.1](ddd.md#41-export-task-and-validation) |
+| **P2 — Evidence-ledger revision exceptions omit traceability checks** | Corrected in design after owner decision (2026-11-01) | DF-3 identifies data by its published release and exact asset map. The release record's evidence ledger separates data subjects from software revisions; unchanged publication evidence may be inherited only for matching data and covered requirements. Exporter commits remain code provenance only. | [ADR-0019](../adr/0019-release-based-data-identity.md), [ADR-0014](../adr/0014-committed-content-hashed-artifacts.md) (amendment of 2026-11-01); [HLDD §1](hldd.md#1-architecture-decisions), [§4.3](hldd.md#43-language-toolchain-and-repository-structure-adr-0011), [§5.4](hldd.md#54-pinned-versioned-artifacts-adr-0014), [§8](hldd.md#8-site-integration), [§9](hldd.md#9-testing-and-release-architecture), [§11](hldd.md#11-decision-records); [DDD Authority and change control](ddd.md#authority-and-change-control), [§3.2](ddd.md#32-artifact-manifest), [§3.3](ddd.md#33-pointer-manifest), [§3.4](ddd.md#34-field-data-export), [§4.2](ddd.md#42-publication-of-a-data-vintage), [§4.3](ddd.md#43-retention-rollback-recovery-and-withdrawal), [§6.1](ddd.md#61-build-outputs-asset-paths-and-page-scaffold), [§7.3](ddd.md#73-pipeline-and-export-tests), [§7.7](ddd.md#77-site-validation-and-release-checklist), [§8](ddd.md#8-traceability); [IP T-15](ip.md#t-15--publication-tooling), [T-18](ip.md#t-18--first-verified-publication-owner), [T-21](ip.md#t-21--mkdocsyml-webapp-build-and-vintage-staging), [T-51](ip.md#t-51--site-validation-additions), [T-55](ip.md#t-55--public-activation), [T-63](ip.md#t-63--release-vintage-owner), [T-64](ip.md#t-64--rollback-rehearsal-owner), [T-65](ip.md#t-65--v03-release-owner), [§3](ip.md#3-gates-and-release-sequence), [§7](ip.md#7-traceability) |
+| **P2 — Deferred loading announcement can outlive a cached load** | Corrected in design after owner decision (2026-11-01) | DF-4 guards the startup write with mount-local `initialPending` and the abort signal. Clear pending before the first result, unavailable state, or recovery decision; never reset it within that mount. | [DDD §5.10](ddd.md#510-failure-states), [§5.11](ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle), [§7.5](ddd.md#75-browser-test-lane); [IP T-46](ip.md#t-46--accessibility-and-navigation-lifecycle), [T-60](ip.md#t-60--browser-test-lane) |
+| **P3 — Stage-count validation and stride disagree** | Corrected in design after owner decision (2026-11-01) | DF-5 uses the measured uniform count N from the manifest for schema 1, validates N ≥ 2 and the count identity before packing/decoding, and queries each trial with stride N. The current ensemble's full-data completeness checks remain. | [ADR-0018](../adr/0018-manifest-defined-stage-count.md), [ADR-0013](../adr/0013-row-level-scenario-artifact.md) (amendment of 2026-11-01); [HLDD §1](hldd.md#1-architecture-decisions), [§5.2](hldd.md#52-simulation-data-organization-adr-0013), [§5.3](hldd.md#53-records-rather-than-precomputed-summaries-adr-0013), [Future 3D data](hldd.md#future-3d-data), [§11](hldd.md#11-decision-records); [DDD Authority and change control](ddd.md#authority-and-change-control), [§3.1](ddd.md#31-scenario-artifact-binary-layout), [§3.2](ddd.md#32-artifact-manifest), [§3.6](ddd.md#36-reference-results), [§4.1](ddd.md#41-export-task-and-validation), [§4.2](ddd.md#42-publication-of-a-data-vintage), [§5.2](ddd.md#52-artifact-loading-and-decoding), [§5.3](ddd.md#53-query-engine), [§5.4](ddd.md#54-statistics), [§5.9](ddd.md#59-downloads), [§5.10](ddd.md#510-failure-states), [§7.2](ddd.md#72-calculation-parity-tests), [§7.3](ddd.md#73-pipeline-and-export-tests), [§7.4](ddd.md#74-application-tests), [§8](ddd.md#8-traceability); [IP T-11](ip.md#t-11--export-task), [T-12](ip.md#t-12--export-validation), [T-13](ip.md#t-13--reference-results-generator), [T-16](ip.md#t-16--pipeline-fixture-tests), [T-30](ip.md#t-30--loader-and-decoder), [T-31](ip.md#t-31--query-engine), [T-35](ip.md#t-35--node-parity-harness), [T-36](ip.md#t-36--application-unit-tests), [T-45](ip.md#t-45--downloads), [§7](ip.md#7-traceability) |
+| **P3 — Export prerequisites omit a builder input** | Corrected in design after owner decision (2026-11-01) | DF-6 declares `fdhi_cleaned` as a dependency of the shared view builder. Preconditions and provenance cover nine data inputs; a missing processed file fails early with its path and rebuild command, including during reproduction. | [DDD §3.2](ddd.md#32-artifact-manifest), [§4.1](ddd.md#41-export-task-and-validation), [§4.3](ddd.md#43-retention-rollback-recovery-and-withdrawal), [§7.3](ddd.md#73-pipeline-and-export-tests); [IP T-11](ip.md#t-11--export-task), [T-12](ip.md#t-12--export-validation), [T-16](ip.md#t-16--pipeline-fixture-tests) |
 
 The correction's dataset diagnostic used the exact
 [`caniuse-lite@1.0.30001820` package](https://registry.npmjs.org/caniuse-lite/1.0.30001820).
@@ -707,8 +710,8 @@ correction left the findings that the owner deferred in
 [Repository-backed design review (2026-10-31; disposition 2026-11-01)](#repository-backed-design-review-2026-10-31-disposition-2026-11-01)
 deferred, among them
 **P2 — Evidence-ledger revision exceptions omit traceability checks**,
-which finding 5 below does not change. The later DF-1 and DF-2
-acceptances are recorded below.
+which finding 5 below does not change. The later DF-1–DF-6
+acceptances are recorded below; DF-3 resolves that finding.
 
 | Finding | Disposition | Correction | Where |
 |---|---|---|---|
@@ -777,19 +780,24 @@ The owner reopened discussion of the six deferred findings above and
 requested that they be recorded. The owner subsequently accepted DF-1
 with a clear reader-facing statement and asked that reader-selected
 accuracy be considered in P3. The owner then accepted DF-2's explicit
-reload-and-restore proposal. DF-1 and DF-2 are now corrected in the
-normative PDD/DDD/IP; DF-3–DF-6 remain proposals. The IDs refer to the
-six initially deferred rows of the repository-backed review, in their
-order.
+reload-and-restore proposal, then selected DF-5 option 2: a uniform
+manifest-defined stage count. For DF-3 the owner clarified that data
+is pinned to published releases, retaining exporter commits solely
+as code provenance. The owner also accepted DF-4's guard against
+stale startup announcements, then chose to declare the shared view
+builder's dependencies for DF-6. All six findings are corrected in
+the normative documents. The IDs
+refer to the six initially deferred rows of the repository-backed
+review, in their order.
 
 | ID and finding | Resolution or proposal | Decision and acceptance check |
 |---|---|---|
-| **DF-1 — ECDF thinning** | Keep the 512-point cap, but select by cumulative count. For m ≤ 512 keep all distinct-value points. Otherwise keep index 0; scan interior indices k in ascending order and retain k exactly when `511 * (c[k] - c[lastKept]) > n`; then retain m − 1. The drawn curve stays at or below the exact ECDF with a vertical shortfall at most 1/511, about 0.196 percentage points. Statistics and percentile read-offs continue to use the full data. The marker explanation now accounts for ties: a percentile can lie on a vertical jump, without the invalid unconditional claim of less than 1/n difference from F(x). | Accepted by owner and corrected in design (2026-11-01), including a visible and accessible cumulative-caption statement and the same disclosure in P2 chart exports. Reader-selected accuracy is recorded as a P3 consideration, with options and limits undecided. Assert monotonicity, endpoints, ≤512 retained points, the error bound over every original step, large tied jumps, and the existing 511/512/513 and constant-data boundaries. Homes: DDD §5.12/§7.4; IP T-41. |
+| **DF-1 — ECDF thinning** | Keep the 512-point cap, but select by cumulative count. For m ≤ 512 keep all distinct-value points. Otherwise keep index 0; scan interior indices k in ascending order and retain k exactly when `511 * (c[k] - c[lastKept]) > n`; then retain m − 1. The drawn curve stays at or below the exact ECDF with a vertical shortfall at most 1/511, about 0.196 percentage points. Statistics and percentile read-offs continue to use the full data. The marker explanation now accounts for ties: a percentile can lie on a vertical jump, without the invalid unconditional claim of less than 1/n difference from F(x). | Accepted by owner and corrected in design (2026-11-01), including a visible and accessible cumulative-caption statement and the same disclosure in P2 chart exports. Reader-selected accuracy is recorded as a P3 consideration, with options and limits undecided. Assert monotonicity, endpoints, ≤512 retained points, the error bound over every original step, large tied jumps, and the existing 511/512/513 and constant-data boundaries. Homes: [DDD §5.12](ddd.md#512-charts), [§7.4](ddd.md#74-application-tests); [IP T-41](ip.md#t-41--measurement-panels-and-charts). |
 | **DF-2 — Open tabs across data updates** | Keep the single-vintage deployment and add **Reload and restore settings**, preserving the click-time accepted Scenario and all DisplayState members in a versioned, one-shot same-tab record. This includes accepted offset input waiting for coefficients. Validate unchanged selections and effective endpoints against the new manifest before any result; recompute and announce the restored/current version. Incompatible settings require an explicit new-scenario choice. Storage failures have distinct visible messages and never silently claim restoration. | Accepted by owner and corrected in design (2026-11-01). Pure envelope/parser checks and browser cases cover both lazy exports across a vintage replacement, same-version retries, all display settings, pending offset input, incompatible settings, each storage failure, repeated load failures, one-shot instant navigation, aborts, and focus/announcements. The existing one-vintage staging and withdrawal policy remains; this choice needs no ADR-0014 retention amendment. Homes: [PDD §7.3](pdd.md#73-reload-recovery-mvp); [DDD §5.1](ddd.md#51-modules-and-interfaces), [§5.3](ddd.md#53-query-engine), [§5.6](ddd.md#56-scenario-state-and-url-encoding), [§5.7](ddd.md#57-scenario-controls), [§5.8](ddd.md#58-view-layer), [§5.10](ddd.md#510-failure-states), [§5.11](ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle), [§7.4](ddd.md#74-application-tests), [§7.5](ddd.md#75-browser-test-lane), [§7.6](ddd.md#76-performance-and-compatibility-measurements); [IP T-34](ip.md#t-34--scenario-state), [T-36](ip.md#t-36--application-unit-tests), [T-40](ip.md#t-40--scenario-controls), [T-44](ip.md#t-44--failure-states), [T-46](ip.md#t-46--accessibility-and-navigation-lifecycle), [T-49](ip.md#t-49--field-overlay), [T-60](ip.md#t-60--browser-test-lane), [T-61](ip.md#t-61--measurement-suite). |
-| **DF-3 — Inherited publication evidence** | Assign revision by the concrete check. Export-validation rules, publication full-data checks, and export-only size evidence may name the pinned vintage publication's `tag_commit`, with the same vintage and checksum set identified. Fixture/CI/parity/application checks retain the software-release revision; published measurement/tag checks retain the deployed-main revision. | A narrow consistency repair. Add an explicit mapping and acceptance cases covering inherited export evidence, current application evidence, and rejection of evidence for a different vintage. Do not give every Python test or every size measurement a blanket publication exception. Homes: DDD §7.7; IP T-65. |
-| **DF-4 — Stale loading announcement** | Guard the deferred startup announcement with mount-local `initialPending`, initially true and set false before the first results or unavailable-state commit. Its existing `live` callback requires both an unaborted mount and `initialPending`. | A narrow lifecycle repair. Deterministic browser cases cover cached success, immediate failure, navigation away, and a genuinely slow initial load. Homes: DDD §5.11/§7.5; IP T-46/T-60. |
-| **DF-5 — Stage count and stride** | Treat 101 stages per trial as a schema-1 invariant. Measure and validate it in the exporter; reject a different manifest value in the decoder before constructing usable data. Keep total records and trials measured. | Recommended: enforce the existing fixed-stride contract. Supporting arbitrary stage counts would require a broader format/algorithm amendment. Test equal-length 100-stage and 102-stage ensembles as well as unequal trials. Homes: DDD §§3.1/3.2/4.1/5.2/7.3/7.4; IP T-11/T-12/T-16/T-30/T-36. |
-| **DF-6 — Missing exporter prerequisite** | Add `data/processed/fdhi_cleaned/data.parquet` to `inputs-present` and provenance: nine inputs, five processed plus four raw. Keep the shared view builder, which already requires this processed file; the ordinary build already produces it. | A narrow pipeline-contract repair. Missing this file must fail at `inputs-present`, naming it; complete input provenance must contain its hash. Homes: DDD §4.1; IP T-11/T-12/T-16. |
+| **DF-3 — Inherited publication evidence** | Pin data to the published data release and exact filename/SHA-256 map. A bare tag or draft does not qualify. Separate Software revision and Data release columns; exporter commits are code provenance only. Inherit publication full-data, evidenced export-validation, export-only size, and completed-publication results only for the same release/assets and covered requirement. Current application checks remain current; retention acceptance is fresh. | Accepted by owner and corrected in design (2026-11-01). ADR-0019 amends ADR-0014, replacing only its commit-identity wording. Accept unchanged-release evidence across software revisions; reject other/missing/draft releases, asset mismatches, uncovered requirements, historical retention, and data evidence substituted for current software checks. Verified caches remain usable offline; `fetchVintage` cache misses check published-release state, while the parity harness's plain HTTPS download does not. Homes: [ADR-0019](../adr/0019-release-based-data-identity.md), [ADR-0014](../adr/0014-committed-content-hashed-artifacts.md) (amendment of 2026-11-01); [HLDD §1](hldd.md#1-architecture-decisions), [§4.3](hldd.md#43-language-toolchain-and-repository-structure-adr-0011), [§5.4](hldd.md#54-pinned-versioned-artifacts-adr-0014), [§8](hldd.md#8-site-integration), [§9](hldd.md#9-testing-and-release-architecture), [§11](hldd.md#11-decision-records); [DDD Authority and change control](ddd.md#authority-and-change-control), [§3.2](ddd.md#32-artifact-manifest), [§3.3](ddd.md#33-pointer-manifest), [§3.4](ddd.md#34-field-data-export), [§4.2](ddd.md#42-publication-of-a-data-vintage), [§4.3](ddd.md#43-retention-rollback-recovery-and-withdrawal), [§6.1](ddd.md#61-build-outputs-asset-paths-and-page-scaffold), [§7.3](ddd.md#73-pipeline-and-export-tests), [§7.7](ddd.md#77-site-validation-and-release-checklist), [§8](ddd.md#8-traceability); [IP T-15](ip.md#t-15--publication-tooling), [T-18](ip.md#t-18--first-verified-publication-owner), [T-21](ip.md#t-21--mkdocsyml-webapp-build-and-vintage-staging), [T-51](ip.md#t-51--site-validation-additions), [T-55](ip.md#t-55--public-activation), [T-63](ip.md#t-63--release-vintage-owner), [T-64](ip.md#t-64--rollback-rehearsal-owner), [T-65](ip.md#t-65--v03-release-owner), [§3](ip.md#3-gates-and-release-sequence), [§7](ip.md#7-traceability). |
+| **DF-4 — Stale loading announcement** | Guard the deferred startup announcement with mount-local `initialPending`, initially true and set false before the first result, unavailable-state, or recovery-decision commit. Its `live` callback requires both an unaborted mount and `initialPending`. Same-mount recovery never resets it. | Accepted by owner and corrected in design (2026-11-01). Deterministic browser cases hold the queued write until after cached success, immediate failure, a recovery decision, or navigation disposal, and release it during a genuinely slow load. Required restored-offset coefficients keep startup pending; a later overlay load does not. Other announcements retain their guards. Homes: [DDD §5.10](ddd.md#510-failure-states), [§5.11](ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle), [§7.5](ddd.md#75-browser-test-lane); [IP T-46](ip.md#t-46--accessibility-and-navigation-lifecycle), [T-60](ip.md#t-60--browser-test-lane). |
+| **DF-5 — Stage count and stride** | Use one measured N = `counts.stages_per_trial` per vintage, common to every trial. Schema 1 requires integer N ≥ 2, a nonempty trial set, uint32 count bounds, and records = trials × N. Export and decode validate before packing or constructing views; query segments and selection identities use N. Unequal lengths fail explicitly, with no padding, dropping, interpolation, or resampling. | Accepted by owner and corrected in design (2026-11-01), choosing option 2 over the earlier fixed-101 recommendation. ADR-0018 amends ADR-0013, replacing only its fixed 101-stage stride. Test valid N = 2, 100, 101, 102, adjacent-trial boundaries, final stages, each population under each window mode, empty selections, invalid counts, a `trials` array of the wrong length, unequal lengths, and overflow. Current-data completeness pins stay 3,434 × 101 = 346,834. Homes: [ADR-0018](../adr/0018-manifest-defined-stage-count.md), [ADR-0013](../adr/0013-row-level-scenario-artifact.md) (amendment of 2026-11-01); [HLDD §1](hldd.md#1-architecture-decisions), [§5.2](hldd.md#52-simulation-data-organization-adr-0013), [§5.3](hldd.md#53-records-rather-than-precomputed-summaries-adr-0013), [Future 3D data](hldd.md#future-3d-data), [§11](hldd.md#11-decision-records); [DDD Authority and change control](ddd.md#authority-and-change-control), [§3.1](ddd.md#31-scenario-artifact-binary-layout), [§3.2](ddd.md#32-artifact-manifest), [§3.6](ddd.md#36-reference-results), [§4.1](ddd.md#41-export-task-and-validation), [§4.2](ddd.md#42-publication-of-a-data-vintage), [§5.2](ddd.md#52-artifact-loading-and-decoding), [§5.3](ddd.md#53-query-engine), [§5.4](ddd.md#54-statistics), [§5.9](ddd.md#59-downloads), [§5.10](ddd.md#510-failure-states), [§7.2](ddd.md#72-calculation-parity-tests), [§7.3](ddd.md#73-pipeline-and-export-tests), [§7.4](ddd.md#74-application-tests), [§8](ddd.md#8-traceability); [IP T-11](ip.md#t-11--export-task), [T-12](ip.md#t-12--export-validation), [T-13](ip.md#t-13--reference-results-generator), [T-16](ip.md#t-16--pipeline-fixture-tests), [T-30](ip.md#t-30--loader-and-decoder), [T-31](ip.md#t-31--query-engine), [T-35](ip.md#t-35--node-parity-harness), [T-36](ip.md#t-36--application-unit-tests), [T-45](ip.md#t-45--downloads), [§7](ip.md#7-traceability). |
+| **DF-6 — Missing exporter prerequisite** | Add `data/processed/fdhi_cleaned/data.parquet` to `inputs-present` and provenance: nine inputs, five processed plus four raw. Keep the shared view builder, which already requires this processed file; the ordinary build already produces it. | Accepted by owner and corrected in design (2026-11-01). Missing input fails before hashing or view construction and leaves the pointer unchanged; a missing processed file names its path and the rebuild command. Verify exact provenance paths, checksums and sizes, changed-input rejection, and the same preflight for reproduction. The raw `FDHI_Cleaned_Measurements.csv` remains a separate full-data test input. Homes: [DDD §3.2](ddd.md#32-artifact-manifest), [§4.1](ddd.md#41-export-task-and-validation), [§4.3](ddd.md#43-retention-rollback-recovery-and-withdrawal), [§7.3](ddd.md#73-pipeline-and-export-tests); [IP T-11](ip.md#t-11--export-task), [T-12](ip.md#t-12--export-validation), [T-16](ip.md#t-16--pipeline-fixture-tests). |
 
 A read-only calculation against the current raw DEM data reproduced
 DF-1: for scarp dip at slip 0–0.5 m, the superseded index-based rule's
@@ -857,8 +865,187 @@ no remaining material contradiction in DF-2. At that verification, all
 4,779 repository-relative documentation links resolved; the scratch
 traceability checker accepted 477 rows (439 DDD obligations and 38 IP
 mirrors), with no errors or gaps, and `git diff --check` passed. The
-other four deferred findings,
-including DF-4's ordinary loading-announcement race, remain open.
+other four deferred findings, including DF-4's ordinary
+loading-announcement race, remained open at that verification; DF-3,
+DF-4, DF-5, and DF-6 were subsequently resolved as recorded below.
+
+The owner selected DF-5 option 2 after comparing fixed 101, a uniform
+manifest-defined N, and per-trial variable lengths. The accepted
+contract uses the existing manifest field and binary blocks, with
+N ≥ 2 so that stage-spacing statistics remain defined. Schema 1 is
+settled before the first application publication. ADR-0018 records
+the decision and its alternatives; ADR-0013 stays Accepted, with a
+dated amendment of 2026-11-01 that points to ADR-0018.
+
+The correction updates the format, export precheck, decoder, query,
+reference identities, four synthetic ensembles, task instructions,
+and planned checks together. General format validity does not replace
+current-data completeness: the known ensemble still must have 101
+stages per trial, and larger future datasets still need the required
+performance and scientific checks. Application implementation remains
+planned. DF-3, DF-4, and DF-6 remained deferred at that point; DF-3
+was subsequently resolved as recorded below.
+
+Four independent read-only reviews of the DF-5 correction followed on
+2026-11-01, each recommending acceptance with changes, and the owner
+answered their questions the same day. ADR-0018 amends ADR-0013, which
+stays Accepted with a dated amendment that points to ADR-0018; the ADR
+index gains the rule that a partial change to an accepted decision is a
+dated amendment. ADR-0018 is accepted on 2026-11-01, and the owner's
+dated commit of this change set is its acceptance record. The decoder
+and rule `manifest-figures` also require `trials` to hold exactly
+`counts.trials` strings. For every stage count, the synthetic cases
+cover each population under each of the three window kinds, with both a
+first-trial and a last-trial mask. The pipeline's count check is
+`check_counts` in `product_export.py`. The publication drill fixture
+keeps 101 stages per trial. ADR-0018's traceability rows carry line
+numbers, and a separate DDD row traces its completeness consequence.
+The correction applied these answers and the reviews' other findings
+to ADR-0013, ADR-0018, the ADR index, the HLDD, the DDD, the IP, and
+this ledger.
+
+The DF-5 consistency checks covered the count bounds, rule ordering,
+reference and download indexing, and task construction dependencies. At
+that verification, after this correction, all 4,960 relative links in 53
+Markdown files resolved, including the new ADR; the DDD §8 matrices held
+441 rows and the IP §7 matrix 39, each IP row identical to its DDD twin
+and none with Status `gap`; `git diff --check` passed; and ADR-0013's
+lines 1–173 were identical to its accepted version except the Date line,
+its amendment following the Consequences. These are document checks; the
+specified pipeline and application tests have not yet been implemented.
+
+The owner clarified DF-3's data identity: a published data release,
+located by its associated tag in this repository, plus its exact
+filename/SHA-256 map. A tag alone is insufficient. The owner retained
+the exporter's source commit solely as code provenance. ADR-0019
+records that decision and amends ADR-0014, which stays Accepted with
+a dated amendment that points to ADR-0019; ADR-0014's storage and
+publication architecture stands.
+
+The corrected evidence ledger names software revisions and data
+releases in separate columns. An unchanged published release can
+carry its covered, passing publication evidence into later software
+releases. New or strengthened data requirements need corresponding
+evidence; the reuse path fails when that evidence is absent.
+Fixture, parity, browser, and performance checks still run against
+the current software, and release-state and retention checks are
+fresh at acceptance. A checksum-valid cache remains usable offline;
+`fetchVintage` verifies published-release state before any
+cache-miss download, while the parity harness's plain HTTPS download
+does not. DF-4 and DF-6 remained deferred at that point; DF-4 was
+subsequently resolved as recorded below. These are design changes;
+application implementation remains planned.
+
+The DF-3 consistency review also aligned rollback-target evidence,
+the release-record fields in the IP, and refusal of a published
+non-prerelease during publication resumption. At that verification,
+all 4,881 relative links in 54 Markdown files resolved, including
+the two new ADRs; scratch traceability lint accepted 483 rows
+(442 DDD obligations and 41 IP mirrors), with no errors or gaps.
+Added prose stayed within 72 columns and `git diff --check`
+passed. ADR-0014's body from Context onward remained byte-identical
+to its accepted version. The publication, retrieval, and ledger
+acceptance cases are specified checks, not executed application
+tests.
+
+When the DF-3 and DF-5 changes were merged on 2026-11-01, the DF-5
+corrections' amend rule was applied to ADR-0019 and ADR-0014 as well:
+ADR-0019 amends ADR-0014 and is accepted on 2026-11-01, recorded like
+ADR-0018's acceptance, and its list of the ADR-0014 decisions that stand
+no longer names recovery, which ADR-0014 does not decide; ADR-0014 stays
+Accepted, its supersession note replaced by a dated amendment that
+precedes its References and points to ADR-0019. The ADR index, the HLDD,
+the DDD, and this ledger use amend wording, and ADR-0019's two
+traceability rows carry line numbers and follow the ADR-0014 rows. At
+that verification, all 4,992 relative links in 54 Markdown files
+resolved; the DDD §8 matrices held 443 rows and the IP §7 matrix 41,
+each IP row identical to its DDD twin and none with Status `gap`;
+`git diff --check` passed; and ADR-0013 and ADR-0014 were identical to
+their accepted versions through the end of their Consequences, except
+their Date lines. These are document checks.
+
+The owner accepted DF-4's startup-announcement guard on 2026-11-01.
+The first result, unavailable state, or recovery decision invalidates
+the queued loading write before committing. Navigation disposal also
+blocks it through the existing abort signal. Recovery resumption in
+the same mount never re-enables startup loading; restored offset mode
+waits for its required coefficients, while a later overlay load does
+not prolong startup. The browser specification forces each ordering
+with a test-only timer wrapper, without changing production APIs or
+other announcement guards. These are planned application checks;
+DF-6 remained deferred at that point and was resolved next.
+
+The owner accepted DF-6 on 2026-11-01, choosing to declare the shared
+view builder's dependency instead of refactoring it. The five
+processed inputs include `fdhi_cleaned`; the same four raw inputs
+produce them. Prerequisites and provenance therefore cover nine
+files, with exact path, SHA-256, and byte-count checks. Missing
+processed inputs fail before hashing or view construction with their
+path and the rebuild command. Reproduction uses the same preflight
+before comparing recorded inputs, with each rule reported once.
+The similarly named raw `FDHI_Cleaned_Measurements.csv` stays a
+full-data test input, outside export provenance.
+
+This keeps one indirect dependency: changing or losing
+`fdhi_cleaned` can prevent reproduction even when product values
+would be unchanged. A fresh export records its new checksum, so
+provenance bytes and manifest hashes can change without a numerical
+change. The ordinary build already creates the file; the added work
+is hashing and recording one more input, with no new raw dataset.
+Planned fixture checks cover missing inputs, exact provenance,
+changes during export, and reproduction mismatches. All six deferred
+findings are now resolved in design; application implementation and
+its acceptance checks remain planned.
+
+At the DF-4/DF-6 verification, made before the DF-5 corrections
+were merged, all 4,879 relative links in 54 Markdown files resolved,
+including the new ADRs. Scratch
+traceability lint accepted 483 rows (442 DDD obligations and 41 IP
+mirrors), with no errors or gaps. Added prose met the 72-column
+convention and `git diff --check` passed. A read-only pipeline check
+confirmed the shared builder requires `fdhi_cleaned` and the normal
+build produces it. These checks validate the design documents;
+the planned browser and exporter tests have not been implemented.
+
+Independent read-only reviews of the DF-3, DF-4, and DF-6 corrections
+followed on 2026-11-01 — four of DF-3 and three of DF-4 and DF-6 —
+each recommending acceptance with changes, and the owner answered
+their questions the same day. A data vintage's prerelease state is
+part of its identity: a cleared prerelease flag is repaired in place
+with
+`gh release edit <data_tag> --repo HarvardRC/eps-ground-rupture --prerelease`,
+which the refusals that detect it print. An inherited ledger row
+covers the current requirement only when `git diff --quiet` between
+its publication `tag_commit` and the release commit, over the files
+that the DDD names as defining its check, exits 0, or when it cites
+the owner's recorded review of that diff stating that it adds or
+strengthens no requirement the row covers; otherwise the release
+publishes a new vintage, the only remedy for a new or strengthened
+data requirement. The publication record also stores the export's
+validation report; completed publication may be inherited, while
+release state and retention are checked fresh before the release
+merge in both release shapes; and every `gh release` command names
+this repository. A resumed startup that must wait for a network load
+announces loading once, through its own flag, and the export deletes
+its staging directory only after `inputs-present` passes. The
+corrections applied these answers, the owner's defaults for the
+remaining questions, and the reviews' other findings to ADR-0019, the
+HLDD, the DDD, the IP, and this ledger, merged with the DF-3 and DF-5
+changes.
+[HLDD §5.5 — Field-data export (ADR-0012)](hldd.md#55-field-data-export-adr-0012)
+and
+[ADR-0012 — Purpose-built product exports feed the scenario app](../adr/0012-product-data-exports.md)
+still list `fdhi_cleaned` among the field export's source views, a
+known difference from
+[DDD §3.4 — Field-data export](ddd.md#34-field-data-export) left for
+their next revision. After these corrections, all 5,098 relative links
+in 54 Markdown files resolved; the DDD §8 matrices held 443 rows and
+the IP §7 matrix 41, each IP row identical to its DDD twin and none
+with Status `gap`; `git diff --check` passed; and ADR-0013 and
+ADR-0014 were identical to their accepted versions through the end
+of their Consequences, except their Date lines. These are document
+checks; the specified pipeline, browser, and application tests have
+not yet been implemented.
 
 ## References
 

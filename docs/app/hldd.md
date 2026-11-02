@@ -83,12 +83,13 @@ record (ADR) directory](../adr). This HLDD explains how those decisions
 fit together into a coherent design; it does not replace the ADRs as
 the authoritative decision records.
 
-The six architecture decisions supporting this draft are recorded in
-[ADR-0010–ADR-0015](../adr/README.md); each entered review as
-**Proposed** and is now **Accepted** (2026-10-28), incorporating the
-amendments agreed during review. [Chapter 1](#1-architecture-decisions)
-provides their index; the [ADR index](../adr/README.md) tracks each
-acceptance.
+The ten architecture decisions supporting this draft are recorded in
+[ADR-0010–ADR-0019](../adr/README.md), and each is now **Accepted**:
+ADR-0010–ADR-0015 on 2026-10-28, incorporating the amendments agreed
+during review; ADR-0016 and ADR-0017 on 2026-10-31; and ADR-0018, which
+amends ADR-0013, and ADR-0019, which amends ADR-0014, on 2026-11-01.
+[Chapter 1](#1-architecture-decisions) provides their index; the
+[ADR index](../adr/README.md) tracks each acceptance.
 
 The DDD and IP take accepted architectural decisions as constraints
 rather than reopening them. If detailed design or implementation reveals
@@ -100,14 +101,18 @@ proceeds.
 
 ## 1. Architecture decisions
 
-This design is based on eight accepted architecture decisions,
-recorded in [ADR-0010–ADR-0017](../adr/README.md), among them
-ADR-0016, on the performance reference environment, and ADR-0017, on
-an unadvertised prototype deployment before the public release. The
+This design is based on ten accepted architecture decisions,
+recorded in [ADR-0010–ADR-0019](../adr/README.md), among them
+ADR-0016, on the performance reference environment, ADR-0017, on an
+unadvertised prototype deployment before the public release, and the
+two decisions accepted on 2026-11-01: ADR-0018, which amends ADR-0013
+by replacing its fixed 101-stage stride with a manifest-defined
+uniform stage count, and ADR-0019, which amends ADR-0014 by replacing
+its commit-based data identity with release-based data identity. The
 table below summarizes what each decision covers and points to the
 corresponding explanation in this document.
 
-The ADRs are the authoritative decision records. Each enters review
+The ADRs are the authoritative decision records. Each may enter review
 with status **Proposed** and is marked **Accepted** as the owner
 approves it, incorporating any amendments agreed during review.
 
@@ -116,11 +121,13 @@ approves it, incorporating any amendments agreed during review.
 | [ADR-0010](../adr/0010-native-client-side-scenario-app.md) | **Application platform and site integration.** Build the scenario page as a client-side application within the existing MkDocs site. Filtering and calculations run in the browser, without a backend or browser-based Python runtime. Reuse existing dashboards through links and use static pages for educational and contact content. | [§4.1 Native client-side application](#41-native-client-side-application-adr-0010), [§4.2 Surface map](#42-surface-map-adr-0010), [§6 Application architecture](#6-application-architecture), [§6.1 Failure honesty](#61-failure-honesty-adr-0010) |
 | [ADR-0011](../adr/0011-webapp-toolchain.md) | **Language and build tools.** Use TypeScript and esbuild, without an application framework. Draw charts using SVG. Add a Gradle subproject to build and test the application. CI builds the application bundle; it is never committed. | [§4.3 Language, toolchain, and repository structure](#43-language-toolchain-and-repository-structure-adr-0011), [§9 Testing and release architecture](#9-testing-and-release-architecture) |
 | [ADR-0012](../adr/0012-product-data-exports.md) | **Data supplied by the pipeline.** Export simulation records, field measurements, conversion coefficients, reference results for testing, and a media index for the later education pages and animation offers. The application does not load the existing Tableau-oriented `dem.csv` file. | [§5.1 Application data exports](#51-application-data-exports-adr-0012), [§5.5 Field-data export](#55-field-data-export-adr-0012), [§6.2 Media architecture](#62-media-architecture-adr-0012) |
-| [ADR-0013](../adr/0013-row-level-scenario-artifact.md) | **Simulation-data organization and calculation.** The browser receives the individual recorded stages of the simulations, not just precomputed counts or summary statistics. Site conditions are stored once per simulation trial; measurements are stored for each recorded stage, grouped by measurement rather than by record. When a user changes the scenario, the browser selects the matching records and calculates their counts, percentiles, and other statistics. | [§5.2 Simulation data organization](#52-simulation-data-organization-adr-0013), [§5.3 Records rather than precomputed summaries](#53-records-rather-than-precomputed-summaries-adr-0013), [§7.1 Performance estimates and verification](#71-performance-estimates-and-verification) |
-| [ADR-0014](../adr/0014-committed-content-hashed-artifacts.md) | **Data publication and versioning.** Store the application data files as GitHub release assets; commit only a pointer manifest that pins them by checksum. Publish compressed simulation data and use filenames that change when file content changes. Deploy only the pinned data vintage; retain earlier vintages as release assets. Derived data keeps its source terms: it never enters the repository, and each release carries it as a data asset. | [§5.4 Pinned, versioned artifacts](#54-pinned-versioned-artifacts-adr-0014), [§7.3 Delivery and caching](#73-delivery-and-caching) |
+| [ADR-0013](../adr/0013-row-level-scenario-artifact.md), amended by [ADR-0018](../adr/0018-manifest-defined-stage-count.md) | **Simulation-data organization and calculation.** The browser receives the individual recorded stages of the simulations, not just precomputed counts or summary statistics. Site conditions are stored once per simulation trial; measurements are stored for each recorded stage, grouped by measurement rather than by record. When a user changes the scenario, the browser selects the matching records and calculates their counts, percentiles, and other statistics. | [§5.2 Simulation data organization](#52-simulation-data-organization-adr-0013), [§5.3 Records rather than precomputed summaries](#53-records-rather-than-precomputed-summaries-adr-0013), [§7.1 Performance estimates and verification](#71-performance-estimates-and-verification) |
+| [ADR-0014](../adr/0014-committed-content-hashed-artifacts.md), amended by [ADR-0019](../adr/0019-release-based-data-identity.md) | **Data publication and versioning.** Store the application data files as GitHub release assets; commit only a pointer manifest that selects a published data release and its exact asset checksums. Publish compressed simulation data and use filenames that change when file content changes. Deploy only the pinned data vintage; retain earlier vintages as release assets. Derived data keeps its source terms: it never enters the repository, and each release carries it as a data asset. | [§5.4 Pinned, versioned artifacts](#54-pinned-versioned-artifacts-adr-0014), [§7.3 Delivery and caching](#73-delivery-and-caching) |
 | [ADR-0015](../adr/0015-golden-scenario-parity.md) | **Data and calculation verification.** Verify two things separately: that the exported application data preserves the pipeline's approved records and values, and that the application's filtering and statistics reproduce independently calculated pipeline results for predefined test scenarios. The pipeline also supplies the surface-offset-to-slip conversion coefficients, so the application does not maintain a separate copy of those numbers. | [§5.6 Reference results and verification](#56-reference-results-and-verification-adr-0015), [§5.7 Conversion coefficients](#57-conversion-coefficients-adr-0015), [§9 Testing and release architecture](#9-testing-and-release-architecture) |
 | [ADR-0016](../adr/0016-performance-reference-environment.md) | **Performance reference environment.** Measure the performance budgets on an AWS virtual machine of fixed specification, defined by a Terraform configuration in the repository: each measurement run creates it if it does not exist, runs against the locally built site, and destroys it when the run succeeds. Each time budget is judged at the 95th percentile of 30 measured runs. | [Performance budgets](#performance-budgets), [§7.1 Performance estimates and verification](#71-performance-estimates-and-verification) |
 | [ADR-0017](../adr/0017-unadvertised-prototype-before-public-release.md) | **Prototype before public release.** Deploy the application first as an unadvertised prototype — no navigation entry, excluded from site search and the sitemap, marked as a prototype, with the licensing decision deferred and the current licensing stated as an assumption — so the research group can review it; approvals, the D-10 text and the licensing decision are required at activation and at the first software release, not at the prototype deployment. | [Licensing and media permissions](#licensing-and-media-permissions), [§9 Testing and release architecture](#9-testing-and-release-architecture) |
+| [ADR-0018](../adr/0018-manifest-defined-stage-count.md) | **Uniform stage count per vintage.** The manifest records a measured count N shared by every trial, and queries use N as their stride. Schema 1 requires at least two stages per trial; the current dataset's 101 stages remain a completeness check, not a universal format constant. | [§5.2 Simulation data organization](#52-simulation-data-organization-adr-0013), [§5.3 Records rather than precomputed summaries](#53-records-rather-than-precomputed-summaries-adr-0013) |
+| [ADR-0019](../adr/0019-release-based-data-identity.md) | **Data identity.** Pin data by the published dedicated data release and its exact filenames and SHA-256 checksums. A bare tag, a draft release, or a release not marked as a prerelease is insufficient. Exporter commits identify code provenance only. | [§5.4 Pinned, versioned artifacts](#54-pinned-versioned-artifacts-adr-0014), [Data refresh and deployment](#data-refresh-and-deployment) |
 
 ---
 
@@ -712,8 +719,9 @@ Application data and generated application code therefore follow
 different rules, though neither enters git:
 
 - application data is generated locally by the owner, uploaded as
-  release assets on a data tag, and pinned by the committed pointer
-  manifest that CI fetches and checksum-verifies
+  assets of a published dedicated data release, and selected by the
+  committed pointer manifest that CI reads to fetch and
+  checksum-verify the files
   ([§5.4](#54-pinned-versioned-artifacts-adr-0014));
 - application JavaScript and CSS are built from committed source during
   validation and deployment.
@@ -865,22 +873,32 @@ References:
 
 ### 5.2 Simulation data organization (ADR-0013)
 
-The export exploits the ensemble's verified geometry: 3,434 trials ×
+The current ensemble's verified geometry is 3,434 trials ×
 exactly 101 recorded stages = 346,834 records, with every site
 condition constant within a trial. The artifact is **trial-major** —
-records are grouped by trial, each trial's 101 stages in one
+records are grouped by trial, each trial's stages in one
 contiguous run — and **columnar**: values are stored column by column,
 each column a typed array, a fixed-type numeric array the browser
 reads directly with no parsing step.
 
-- **Trial table** (3,434 rows): fault dip, sediment arm and strength
-  label (the nine arm×label states of
+Under [ADR-0018](../adr/0018-manifest-defined-stage-count.md), every
+trial of a vintage has the same number of stages, N, which the export
+measures and records in the artifact manifest. Schema 1 requires at
+least one trial and at least two stages per trial, with the record
+count equal to trials × N. Export validation rejects trials of unequal
+length; it never pads, drops, interpolates, or resamples records. The
+decoder validates the counts before use, and the query derives each
+trial's boundaries from N. Equal counts do not require equal slip
+spacing. The DDD fixes the count bounds and validation details.
+
+- **Trial table** (currently 3,434 rows): fault dip, sediment arm
+  and strength label (the nine arm×label states of
   [PDD §3.2](pdd.md#32-sediment-strength-and-structure-fr-s2) Sediment
   strength and structure), depth, density, and a **model-family
   dimension** reserved for the on-hold 3D arm
   ([DR-7](prd.md#dr-7-future-3d-compatibility) Future 3D compatibility)
   — about 6 bytes per trial, ≈ 21 KB in all.
-- **Stage arrays** (346,834 entries): slip, scarp height,
+- **Stage arrays** (currently 346,834 entries): slip, scarp height,
   deformation-zone width, scarp dip, scarp class. Slip (0–5.0135 m,
   1,797 distinct values), scarp height (−0.182–5.029 m), and
   deformation-zone width (0–45.811 m) are encoded as **16-bit scaled
@@ -924,7 +942,8 @@ reads directly with no parsing step.
   contents: data-export
   version and date ([DR-2](prd.md#dr-2-versioned-exports) Versioned
   exports); record and
-  trial counts; per-column storage scales and offsets needed to decode
+  trial counts and the uniform stages-per-trial count; per-column
+  storage scales and offsets needed to decode
   the values; physical minima and maxima; simulation-stage spacing
   information that explains the slip control's range and step
   ([PDD §3.4](pdd.md#34-displacement-window-fr-s5) Displacement
@@ -950,16 +969,18 @@ the pipeline's documented measurement-hygiene policy
 the DDD cites rather than re-decides. Exact field encodings, scales,
 endianness, and byte layout are DDD material.
 
-The fixed 101-stage layout is a property of the current 2D export, not
-a permanent assumption for every model family. A future model family
-may use a different layout, identified through the artifact manifest
-and handled at the decoding boundary
+The 101-stage count is a property of the current 2D export. A different
+uniform count uses the same schema-1 layout. Different lengths within
+one vintage are not supported by this format. A future model family
+may use a separately specified layout, identified through the artifact
+manifest and handled at the decoding boundary
 ([DR-7](prd.md#dr-7-future-3d-compatibility) Future 3D compatibility).
 
 References:
 
 - [ADR-0013 — Row-level, trial-major columnar scenario
   artifact](../adr/0013-row-level-scenario-artifact.md).
+- [ADR-0018 — Manifest-defined uniform stage count](../adr/0018-manifest-defined-stage-count.md).
 - [DR-2 — Versioned exports](prd.md#dr-2-versioned-exports).
 - [DR-4 — Measurement hygiene](prd.md#dr-4-measurement-hygiene).
 - [DR-7 — Future 3D compatibility](prd.md#dr-7-future-3d-compatibility).
@@ -1025,9 +1046,11 @@ For each scenario, the query engine:
    measurements for each output; and
 5. calculates the required statistics and chart data.
 
-For the current 2D export, each trial's 101 stages are stored together,
-so the engine can scan the stages belonging to matching trials without
-repeatedly checking their site conditions.
+Each trial's N stages are stored together, with N taken from the
+validated manifest under
+[ADR-0018](../adr/0018-manifest-defined-stage-count.md). The engine
+scans the stages belonging to matching trials without repeatedly
+checking their site conditions. On the current 2D export, N is 101.
 
 Filtering requires a scan of the relevant records. Exact percentile
 calculation additionally requires sorting the selected values, or an
@@ -1048,6 +1071,7 @@ References:
 
 - [ADR-0013 — Row-level, trial-major columnar scenario
   artifact](../adr/0013-row-level-scenario-artifact.md).
+- [ADR-0018 — Manifest-defined uniform stage count](../adr/0018-manifest-defined-stage-count.md).
 - [DR-1 — Controlled data source](prd.md#dr-1-controlled-data-source).
 - [DR-6 — Payload and interaction support](prd.md#dr-6-payload-and-interaction-support).
 - [FR-O2 — Summary statistics](prd.md#fr-o2-summary-statistics).
@@ -1069,9 +1093,13 @@ rebuild the pipeline from the raw research inputs.
 Generated data files are not committed to Git. Instead, each versioned
 set of exports — a **data vintage** — is uploaded as the assets of a
 GitHub prerelease (a release marked as not a regular software release,
-so it never shows as the repository's latest) on a dedicated **data
-tag**; together, the tag and its prerelease are the vintage's **data
-release**. A vintage contains the outputs of
+so it never shows as the repository's latest). That prerelease is
+the vintage's **data release**, created as a draft and published
+only after its assets are verified. Its dedicated **data tag**
+locates the release in this repository; a tag without a release, a
+draft release, and a release not marked as a prerelease are not
+published vintages. A vintage contains
+the outputs of
 [§5.1](#51-application-data-exports-adr-0012): the scenario artifact
 with its artifact manifest, the field export, the regression export,
 the reference results, and, from
@@ -1083,14 +1111,19 @@ must retrieve.
 This storage arrangement follows the owner's rule recorded in
 [ADR-0014](../adr/0014-committed-content-hashed-artifacts.md) (review
 of 2026-10-28): generated data stays out of git, separated from the
-code that produces it.
+code that produces it. Its data-identity wording is amended by
+[ADR-0019](../adr/0019-release-based-data-identity.md): the published
+data release and the pointer's exact asset filenames and SHA-256
+checksums identify the data. A Git commit never pins the data. The
+commit carrying the pointer versions the application's selection;
+the exporter's source commit records code provenance only.
 
 #### Two manifests with different responsibilities
 
 | Manifest | Location | Contents and purpose | Consumer |
 |---|---|---|---|
-| **Artifact manifest** | A file in the data vintage. | Describes the simulation data and names the other browser-loaded export files: versions and export date, counts, ranges, storage information, stage spacing, label dictionaries, null sentinels, checksums, and filenames (full field list: [§5.2](#52-simulation-data-organization-adr-0013); defined by [ADR-0013](../adr/0013-row-level-scenario-artifact.md)). | Browser application. |
-| **Pointer manifest** | Committed to the repository. | Identifies the data tag, content-hashed filenames, checksums, export version, and export date. | CI and local build tasks. |
+| **Artifact manifest** | A file in the data vintage. | Describes the simulation data and names the other browser-loaded export files: versions and export date, counts, ranges, storage information, stage spacing, label dictionaries, null sentinels, checksums, and filenames (full field list: [§5.2](#52-simulation-data-organization-adr-0013); defined by [ADR-0013](../adr/0013-row-level-scenario-artifact.md) as amended by [ADR-0018](../adr/0018-manifest-defined-stage-count.md)). | Browser application. |
+| **Pointer manifest** | Committed to the repository. | Locates the published data release by its data tag in this repository and identifies its exact content-hashed filenames and SHA-256 checksums, export version, and export date. | CI and local build tasks. |
 
 One export-task run prepares the data files, reference results, and both
 manifests. The pointer manifest includes checksums for every file in the
@@ -1113,12 +1146,13 @@ The refresh process extends the existing Gradle commands, including
    ([§5.6](#56-reference-results-and-verification-adr-0015)).
 3. Produce the artifact manifest, content-hashed filenames, and pointer
    manifest.
-4. Upload the vintage's files to its data release.
-5. Verify that the uploaded files match the generated checksums.
+4. Upload the vintage's files to its draft data release.
+5. Verify the exact uploaded file set and generated checksums,
+   publish the release, and verify the published release and assets.
 6. Commit the updated pointer manifest and submit it for review.
 
 The updated pointer manifest must not be committed (step 6) until the
-vintage's upload and verification are complete.
+vintage's publication and verification are complete.
 
 The DDD defines the task names, upload mechanism, and exact manifest
 schemas.
@@ -1131,6 +1165,11 @@ substitute another vintage.
 
 Before using a file, the build verifies its checksum against the pointer
 manifest. A missing file or checksum mismatch fails the build.
+Checksum-valid cached files may be reused offline. Publication,
+retention checks, and release acceptance establish that the pointer
+locates a published data release; cached bytes alone do not establish
+that state or restore a withdrawn release. A cached build does not
+require a new network lookup solely to recheck release identity.
 
 The site build places the verified files in the application's data
 directory and publishes them with the site. Release assets are therefore
@@ -1237,6 +1276,7 @@ The following remain open and are tracked in §10:
 References:
 
 - [ADR-0014 — Product artifacts in release assets, pinned by a committed manifest](../adr/0014-committed-content-hashed-artifacts.md).
+- [ADR-0019 — Release-based data identity](../adr/0019-release-based-data-identity.md).
 - [ADR-0013 — Row-level, trial-major columnar scenario
   artifact](../adr/0013-row-level-scenario-artifact.md).
 - [DR-2 — Versioned exports](prd.md#dr-2-versioned-exports).
@@ -2168,7 +2208,9 @@ The product footer and every download identify two distinct versions:
 - **Software version:** the product release version, recorded in the
   application at build time.
 - **Data-export version:** the version of the data used to calculate
-  the displayed or downloaded result.
+  the displayed or downloaded result, naming its published data
+  release. The release and exact checksums establish data identity;
+  neither this display label alone nor an exporter commit does so.
 
 The build records the expected data-export version from the committed
 pointer manifest. At runtime, the application reads the loaded
@@ -2494,9 +2536,11 @@ A data refresh follows this sequence:
 1. The owner runs the local export task and its required full-data checks.
 2. The task produces the data files, reference results, artifact
    manifest, and pointer manifest.
-3. The owner uploads the verified files to the vintage's data release.
-4. The export task verifies that the uploaded files match the
-   generated checksums
+3. The owner uploads the verified files to the vintage's draft data
+   release.
+4. The export task verifies the exact uploaded file set and generated
+   checksums, publishes the release, and verifies the published
+   release and its assets
    ([§5.4](#54-pinned-versioned-artifacts-adr-0014)).
 5. The owner commits the updated pointer manifest and opens a pull
    request.
@@ -2515,6 +2559,15 @@ A data refresh follows this sequence:
 A software-only change uses the currently pinned data vintage unless
 the change explicitly requires a new one. It does not regenerate or
 republish research data merely because application code changed.
+
+Data-publication evidence identifies the published data release and
+its exact asset set. It may carry forward when that data and the
+covered requirement are unchanged. A new or strengthened requirement
+needs corresponding evidence. Current-application checks still run
+against the software being released; publication evidence cannot
+replace them. Any recorded commit identifies code — the software
+checked, or the code that exported or checked the data — never the
+data vintage.
 
 The displayed software version changes with a software release. The
 displayed data-export version changes with a data refresh, following
@@ -2665,8 +2718,10 @@ References:
 ### Future 3D data
 
 The current artifact represents the published 2D ensemble. It carries a
-model-family identifier, and the decoding boundary must not make the
-current 101-stage layout a permanent requirement for all future data.
+model-family identifier and a manifest-defined uniform stage count
+([ADR-0018](../adr/0018-manifest-defined-stage-count.md)). The decoding
+boundary must not make the current layout a permanent requirement for
+all future data.
 
 The design does not yet prescribe the 3D format, loading strategy, or
 number of files. Those decisions require the future dataset's actual
@@ -2674,6 +2729,7 @@ structure and size.
 
 References:
 
+- [ADR-0018 — Manifest-defined uniform stage count](../adr/0018-manifest-defined-stage-count.md).
 - [DR-7 — Future 3D compatibility](prd.md#dr-7-future-3d-compatibility).
 - [§5.2 — Simulation data organization](#52-simulation-data-organization-adr-0013).
 
@@ -2685,7 +2741,7 @@ The ADRs are the authoritative architecture decision records.
 [Chapter 1](#1-architecture-decisions) provides their index; this HLDD
 explains how the decisions fit together.
 
-The six decisions supporting this design are:
+The ten decisions supporting this design are:
 
 - **[ADR-0010](../adr/0010-native-client-side-scenario-app.md):**
   the client-side application, implementation choices for product
@@ -2698,18 +2754,37 @@ The six decisions supporting this design are:
   results, and P2 media index.
 - **[ADR-0013](../adr/0013-row-level-scenario-artifact.md):**
   row-level, trial-major, columnar simulation data and browser-side
-  scenario calculations.
+  scenario calculations, as amended by ADR-0018.
 - **[ADR-0014](../adr/0014-committed-content-hashed-artifacts.md):**
   release-asset storage, the committed pointer manifest, verified
-  retrieval, and content-hashed, pre-compressed publication.
+  retrieval, and content-hashed, pre-compressed publication, as
+  amended by ADR-0019.
 - **[ADR-0015](../adr/0015-golden-scenario-parity.md):**
   export-integrity checks, independently calculated Python reference
   results, application calculation-parity tests, and the
   pipeline-supplied offset-to-slip conversion coefficients.
+- **[ADR-0016](../adr/0016-performance-reference-environment.md):**
+  the performance reference environment, an AWS virtual machine of
+  fixed specification defined by Terraform, and the judging of each
+  time budget at the 95th percentile of 30 measured runs.
+- **[ADR-0017](../adr/0017-unadvertised-prototype-before-public-release.md):**
+  the unadvertised prototype deployment that precedes the public
+  release.
+- **[ADR-0018](../adr/0018-manifest-defined-stage-count.md):**
+  one uniform stage count per data vintage, measured by the export,
+  recorded in the artifact manifest, validated before use, and used
+  as the query stride; it amends ADR-0013.
+- **[ADR-0019](../adr/0019-release-based-data-identity.md):**
+  release-based data identity: the published data release and its exact
+  asset filenames and SHA-256 checksums identify the data, never a
+  commit, and the exporter's source commit records code provenance only;
+  it amends ADR-0014, replacing its commit-based data-identity wording.
 
-The six ADRs entered review as Proposed and are Accepted
-(2026-10-28), incorporating the amendments agreed during review. The
-status recorded in each ADR is authoritative.
+ADR-0010–ADR-0015 entered review as Proposed and were accepted on
+2026-10-28, incorporating the amendments agreed during review;
+ADR-0016 and ADR-0017 were accepted on 2026-10-31, and ADR-0018 and
+ADR-0019 on 2026-11-01. The status recorded in each ADR is
+authoritative.
 
 The ADRs and this HLDD must agree before approval is complete. After
 acceptance, architectural changes follow the repository's ADR process;

@@ -1,7 +1,7 @@
 # ADR-0014: Product artifacts in release assets, pinned by a committed manifest
 
 - **Status**: Accepted
-- **Date**: 2026-10-15 (drafted with the HLDD, `docs/app/hldd.md`); rewritten in plain language 2026-10-28; reworked at owner review 2026-10-28 — the data moved from committed files to release assets; accepted 2026-10-28
+- **Date**: 2026-10-15 (drafted with the HLDD, `docs/app/hldd.md`); rewritten in plain language 2026-10-28; reworked at owner review 2026-10-28 — the data moved from committed files to release assets; accepted 2026-10-28; amended 2026-11-01 by [ADR-0019](0019-release-based-data-identity.md) (the amendment precedes References)
 - **Deciders**: Michael Bouzinier (project owner)
 
 ## Context
@@ -197,6 +197,20 @@ never committed: CI builds it from committed source (ADR-0011).
   stage.
 - A release's source archive never contains the data; the site and the
   release's data asset carry it, under its own terms.
+
+> **Amendment 2026-11-01 (owner decision on DF-3 of the DDD review).**
+> [ADR-0019 — Release-based data identity](0019-release-based-data-identity.md),
+> which records the owner's resolution of
+> [DF-3 — Inherited publication evidence](../app/ddd-review.md#deferred-finding-discussion-2026-11-01),
+> replaces the commit-based data identity of the Consequences above
+> ("Every deployed vintage is pinned by a commit") with identity by the
+> published dedicated data release in this repository and its exact
+> assets: the pointer manifest's `data_tag` locates the release, and its
+> `files` map fixes every asset filename and SHA-256 checksum. No Git
+> commit identifies or pins a data vintage; the commit carrying the
+> pointer versions the application's selection. The rest of that
+> consequence stands, as does every other decision and amendment of
+> this ADR.
 
 ## References
 
