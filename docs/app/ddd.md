@@ -23,13 +23,15 @@ the `playwright-core` pin and the stylesheet build of
 fresh-clone skip count of [§7.3](#73-pipeline-and-export-tests).
 Every section is drafted and normative. The owner accepted this
 document, its register rows with it, together with the implementation
-plan on 2026-11-02; the task bodies that the open findings CF-1 to
-CF-5 of
+plan on 2026-11-02; the task bodies that carry the corrections of
+CF-1 to CF-5 of
 [Consistency, ambiguity, and feasibility review (2026-11-01)](ddd-review.md#consistency-ambiguity-and-feasibility-review-2026-11-01)
-touch wait for their corrections.
-Nothing it specifies has been built in the project yet, and none of
-the checks it introduces has run there: every
-*Verification (planned):* line names a planned check. The external
+and the owner's decisions of 2026-11-02 on them stay Draftable until
+the owner accepts them. The record of each task's state is its Status
+cell in [IP §2 — Task graph](ip.md#2-task-graph)
+([Task format](ip.md#task-format)). Every *Verification (planned):*
+line names a planned check; whether a check has run is recorded by
+the Done record of the task that runs it. The external
 review findings and their dispositions, and the specification trials
 run outside the project, are recorded in the review ledger,
 [`docs/app/ddd-review.md`](ddd-review.md). The owner reviews the
@@ -288,9 +290,11 @@ prose wraps at 72 columns; the word "outcomes" is not used; the PRD
 and PDD are never called design documents. Each section ends with a
 References list; sections that close a register row say *Closes:*,
 and each names its *Verification (planned):* — the check planned to
-show that the section's content holds. None of the checks this draft
-introduces has run, so no such line reports a result; executed
-results live only in the release records of
+show that the section's content holds. No such line reports a result
+or claims a run: whether a check has run is recorded by the Done
+record of the task that runs it (the implementation plan's
+[Task format](ip.md#task-format)), and executed results live only in
+the release records of
 [§7.7](#77-site-validation-and-release-checklist), which the
 withdrawal procedure of
 [§4.3](#43-retention-rollback-recovery-and-withdrawal) saves before
@@ -327,7 +331,8 @@ grounds, and the check planned to verify the choice.
 ### Closure notes (Proposed 2026-10-30)
 
 Each note states the proposed resolution, its grounds, and the check
-planned to verify it; none of those checks has run yet. Figures
+planned to verify it; whether one has run is recorded by the Done
+record of the task that runs it. Figures
 marked *drafting measurement* were taken while drafting on
 `data/processed/dem/data.parquet` (SHA-256
 `6a6e9149066f503588e09ecb6772a8392685716672e298d75aa925e7826eb303`;
@@ -887,12 +892,12 @@ subprojects/webapp/
     download/             # §5.9 package.ts, csv.ts, zip.ts,
                           #   file-name.ts (pure); deliver.ts (browser)
     a11y/                 # §5.11 announcements, focus (browser only)
-  test/                   # §7.4 Node tests with fixtures.ts and
-                          #   compat-inventory.ts (§7.6);
-                          #   caniuse-lite.d.ts (below); §7.2
-                          #   parity.ts; zipcheck.py, the §5.9
-                          #   archive check; spot-timing.ts, the
-                          #   §5.3 diagnostic
+  test/                   # §7.4 Node tests with fixtures.ts,
+                          #   compat-inventory.ts and warm-cache.ts
+                          #   (§7.6), and caniuse-lite.d.ts (below);
+                          #   §7.2 parity.ts and parity-self-check.ts;
+                          #   zipcheck.py, the §5.9 archive check;
+                          #   spot-timing.ts, the §5.3 diagnostic
   playwright/             # §7.5 browser lane (DD-3); serve.mjs,
                           #   global-setup.ts (the globalSetup module)
     specs/                # functional specs: desktop, mobile projects
@@ -2522,13 +2527,29 @@ payload diagnostic line (end of this section).
      [implementation plan](ip.md#4-owner-and-research-group-actions) in
      Phase 1, its texts replaced by OA-13's final ones in Phase 2 — the
      two phases of §4.4. Development exports run without it (step 4).
+     A `--reproduce` run discovers no input: its nine data paths are
+     those its pointer's `provenance.inputs` records, which must be
+     the eight fixed paths above and exactly one path matching
+     `data/raw/02_FDHI_FLATFILE_MEASUREMENTS_*.csv`, or this rule
+     fails naming each missing or unexpected path
+     ([§4.3](#43-retention-rollback-recovery-and-withdrawal)).
      Check these prerequisites before hashing inputs or building
      views. A missing processed file fails this rule, names its full
      repository-relative path, and says
      `Run poetry run egr-build from subprojects/python with the project virtualenv active, then retry.`
-     A missing raw input names its repository-relative path (for the
-     FDHI flatfile, the pattern
-     `data/raw/02_FDHI_FLATFILE_MEASUREMENTS_*.csv`) and refers to
+     — in a `--reproduce` run
+     `Run poetry run egr-build --fdhi-flatfile <path> from subprojects/python with the project virtualenv active, then retry.`,
+     `<path>` the recorded flatfile path, so that the rebuild reads
+     the recorded raw files. That option makes `egr-build` build from
+     the given repository-relative path, resolved against the
+     repository root, instead of calling `io.find_fdhi_flatfile()`,
+     and exit 2 naming the path — `cli.main` printing it on standard
+     error and returning 2, as for a missing raw input — unless it is
+     an existing file matching that pattern; without it, `egr-build`
+     discovers the flatfile as before. A missing raw input names its
+     repository-relative path (for the FDHI flatfile, the pattern
+     `data/raw/02_FDHI_FLATFILE_MEASUREMENTS_*.csv`, or in a
+     `--reproduce` run its recorded path) and refers to
      `data/README.md`, since `egr-build` cannot recreate it. In
      particular, `fdhi_cleaned` is a dependency of the shared
      `build_duckdb_views`, even though the product's field export
@@ -2796,12 +2817,18 @@ manifest–pointer `provenance` mismatch, unsorted or duplicate
 `inputs`, and a missing or extra input path. The fixture lane
 of `test_scenario_export.py` also checks that missing
 `fdhi_cleaned` fails at `inputs-present` before the view builder is
-called, names the path and rebuild command, and leaves the pointer
-and any existing `dist/app/data-vN/` unchanged; all nine inputs
-appear with their measured checksums and sizes; a change to
-`fdhi_cleaned` during export fails `provenance`; and reproduction
-refuses when that input differs from its recorded
-checksum. A `--reproduce` run
+called, names the path and rebuild command — in `--reproduce`, the
+command with `--fdhi-flatfile` and the recorded flatfile — and leaves
+the pointer and any existing `dist/app/data-vN/` unchanged; all nine
+inputs appear with their measured checksums and sizes; a change to
+`fdhi_cleaned` during export fails `provenance`; reproduction refuses
+when that input differs from its recorded checksum; and, with a newer
+flatfile added beside the recorded one, reproduction still selects
+the recorded flatfile and matches the pointer. `test_raw_inputs.py`
+(§7.3) checks that `egr-build --fdhi-flatfile` exits 2, naming the
+path and writing nothing, for a path that matches the pattern but
+does not exist and for an existing file that does not match it. A
+`--reproduce` run
 ([§4.3](#43-retention-rollback-recovery-and-withdrawal)) must
 regenerate byte-identical files.
 
@@ -3294,11 +3321,16 @@ poetry sync
 poetry run egr-export-app --reproduce "$tmp/pointer.json"
 ```
 
-`--reproduce` takes the tag from the pointer. It starts with the same
-§4.1 step-1 preflight, skipping `retained-copy`: `inputs-present`
-runs before any input hashing or view construction, including the
-reproduction checksum comparisons below. A missing processed input
-therefore receives the same path and rebuild-command diagnostic.
+`--reproduce` takes the tag from the pointer, and every input path
+from the pointer's `provenance.inputs`: a reproduction never
+discovers an input, so it never calls `io.find_fdhi_flatfile()`, and
+a newer flatfile beside the recorded one changes nothing. It starts
+with the same §4.1 step-1 preflight, skipping `retained-copy`:
+`inputs-present` checks the recorded paths before any input hashing
+or view construction, including the reproduction checksum
+comparisons below. A missing processed input therefore receives the
+same path and rebuild-command diagnostic, the command naming the
+recorded flatfile (§4.1 step 1).
 The export continues from this preflight without running it again;
 each rule prints once in the ordinary order, so the successful
 report still has the rule list of §4.1 minus `retained-copy`.
@@ -3308,10 +3340,12 @@ failing `provenance` member, unless `HEAD` equals `source_commit`;
 `source_tree_clean` is true and the clean-tree command of
 [§4.1](#41-export-task-and-validation) prints nothing; every `inputs`
 file matches its recorded SHA-256 and byte count, naming the
-specific input path on a mismatch (when only the processed tables
-differ and the raw files match, the owner runs `egr-build` and
-retries); and the running environment equals `environment` member by
-member. It then exports into `dist/app/data-vN.reproduced/` (deleted
+specific input path on a mismatch (when only processed tables differ
+and the recorded raw files match, the owner rebuilds them from those
+raw files with `poetry run egr-build --fdhi-flatfile <path>`, `<path>`
+the recorded flatfile path, and retries); and the running environment
+equals `environment` member by member. It then exports into
+`dist/app/data-vN.reproduced/` (deleted
 and recreated first; never into the retained `dist/app/data-vN/`),
 reusing the pointer's `export_version`, `export_date`, and
 `provenance` verbatim, and validates like any export run: it runs
@@ -3331,8 +3365,12 @@ waives the environment match and records the running environment
 instead, so the comparison shows which files another environment
 still reproduces. Either way the output is never uploaded: its
 `export_version` names an existing vintage. Afterwards the owner
-checks out the working branch and runs `poetry sync` again. Nothing
-ever replaces the files behind an existing pointer.
+checks out the working branch and runs `poetry sync` again, and, if
+processed tables were rebuilt for the reproduction,
+`poetry run egr-build` without `--fdhi-flatfile`, so that the next
+export's processed tables again come from the working branch's code
+and the flatfile that export discovers and records. Nothing ever
+replaces the files behind an existing pointer.
 
 **Withdrawal** — when a published vintage must be pulled, over a
 licensing problem for instance. The owner:
@@ -3433,8 +3471,9 @@ release, or the owner-approved absence of one
 ([§7.7](#77-site-validation-and-release-checklist), item 12); and, for
 regeneration, the `--reproduce` comparison of every output SHA-256
 with the pointer and the `test_scenario_export.py` fixture cases of
-[§7.3](#73-pipeline-and-export-tests) for its preflight and its
-input-mismatch refusal.
+[§7.3](#73-pipeline-and-export-tests) for its preflight, its
+input-mismatch refusal, and its selection of the recorded flatfile
+beside a newer one.
 
 References:
 
@@ -5166,7 +5205,10 @@ invalid value (§5.12):
 - the rejected field — for R1, the field just committed, or at an
   R3 switch every non-BLANK slip field — gets `aria-invalid="true"`,
   and the error line's id is appended to its `aria-describedby`;
-- one status announcement carries the error line
+- one status announcement carries the error line, a transient
+  announcement left unwritten when the line no longer shows it at
+  its write, as once the marks clear (below), or when the mount is
+  disposed
   ([§5.11](#511-accessibility-supported-environments-and-navigation-lifecycle));
 - focus never moves (§5.11);
 - the Scenario does not change, so nothing renders: the results,
@@ -6530,6 +6572,21 @@ Rules binding `start` and everything it schedules:
 - after every `await`, timer, and animation frame it returns at once
   when `a.ac.signal.aborted`; a rejection that arrives after the
   abort is logged with `console.debug`, never rendered;
+- it owns `let terminal = false`, the mount's terminal state, set
+  true as the mount enters the unavailable state below — a routed
+  `window` error (Error routing, below) included — and never reset
+  within the mount. It aborts nothing, so every listener stays
+  registered and the reload actions that `#gre-recovery` keeps stay
+  usable; a recovery-decision state's actions, which exist to resume
+  startup, are removed (Reload recovery presentation and startup,
+  below). After every `await` of the startup recipe — steps 2 and 3,
+  the restored-offset regression await, and a resumption after a
+  recovery decision (Reload recovery presentation and startup,
+  below) — and immediately before each commit it makes of results or
+  of a recovery-decision state, the recipe returns at once when
+  `terminal` is true, a rejection that arrives then being logged
+  with `console.debug`, never rendered; so no such commit, no focus
+  move, and no first-result mark follows the unavailable state;
 - immediately before the first commit — of results, of the
   unavailable state below, or of a recovery decision — it sets the
   §5.11 `initialPending` flag false and empties the status region,
@@ -6694,8 +6751,10 @@ counts as `'read'`. The state is one presentation, built by
 - `#gre-summary` is emptied and `#gre-caveats` keeps only the short
   disclaimer, since both otherwise describe results; every control
   in `#gre-controls`, the overlay switch `#gre-overlay`, and the
-  download button `#gre-download` get `disabled`; recovery actions in
-  `#gre-recovery` remain enabled;
+  download button `#gre-download` get `disabled`; the reload actions
+  in `#gre-recovery` remain enabled, and a recovery-decision state's
+  actions are removed (Reload recovery presentation and startup,
+  below);
 - before the first commit, `notices.ts` commits that same skeleton
   through `#gre-root.replaceChildren(…)` with `#gre-controls` and
   `#gre-panels` empty and `hidden`: this path reads nothing from the
@@ -6735,12 +6794,14 @@ never swallowed (fixed here). The state is terminal for the mount
 (fixed here: with a single exit, no later render can replace the
 notice while its cause may persist): the scheduler cancels its
 pending frame and ignores every later frame and lazy-load
-continuation ([§5.3](#53-query-engine) item 5), and the state ends
-only when a new mount starts, on re-entry or reload; the §5.11
-vintage cache never keeps a failed load. Focus follows §5.11: when
-the state is the mount's first render, mount focuses `#gre-state`
-(with an empty `location.hash`); entered later, it moves any focus
-inside `#gre-root` to `#gre-state` (§5.11, rule 2).
+continuation ([§5.3](#53-query-engine) item 5), a startup still
+pending stops at its `terminal` checks (Rules binding `start`,
+above), and the state ends only when a new mount starts, on re-entry
+or reload; the §5.11 vintage cache never keeps a failed load. Focus
+follows §5.11: when the state is the mount's first render, mount
+focuses `#gre-state` (with an empty `location.hash`); entered later,
+it moves any focus inside `#gre-root` to `#gre-state` (§5.11,
+rule 2).
 
 **Lazy-load failures.** The [§5.3](#53-query-engine) scheduler
 requests the regression export for offset mode and the field export
@@ -6819,6 +6880,23 @@ other slots; do not replace `#gre-root` or recreate the skeleton or live
 regions. The first actual result still has sequence 0 and receives the
 first-result mark. A failure after resumption still follows ordinary
 unavailable-state handling.
+
+Entering the unavailable state while a recovery-decision state is
+shown, whether or not its resumption is pending, removes that state's
+actions, **Retry recovery** and **Start a new scenario**, from
+`#gre-recovery`: the terminal state stops any startup they would
+resume, so none stays enabled in vain. The unavailable notice
+replaces the decision message in `#gre-state`, so no remaining text
+asks for a removed action, as the incompatible record's message does
+("Start a new scenario to continue."). An incompatible record's
+saved summary stays under **Saved scenario settings**: it asks for no
+action, and a reload cannot show it again, since the record was
+consumed (§5.6). The reload actions of the table's first two rows
+remain enabled where they apply. A removed action that held focus
+follows the existing hidden-control focus rule: the render that
+enters the unavailable state moves that focus to `#gre-state`
+([§5.11](#511-accessibility-supported-environments-and-navigation-lifecycle),
+rule 2). The alert region announces the unavailable state once.
 
 For ready recovery, step 3 uses the restored Scenario and display as
 its initial state. If it is offset mode, await the current manifest's
@@ -6907,7 +6985,15 @@ to `#gre-state`; an aborted field-export request with the overlay on
 gives the legend line, the results unchanged, and switching the
 overlay off and on again unrouted gives the marks and no line. An
 error thrown by an unrelated injected script leaves the results
-rendered. The offset entries `abc`, `-1`, `1000.0001`, and a blank
+rendered. A routed error dispatched while a response is held — the
+artifact on first startup, the regression export while a restored
+offset Scenario loads, the artifact while a resumed startup waits —
+enters the unavailable state, and releasing the response commits
+nothing over it; one dispatched while an incompatible record's
+decision state is shown leaves the saved summary but neither
+decision action in `#gre-recovery` (§7.5, Terminal state during
+startup). The offset
+entries `abc`, `-1`, `1000.0001`, and a blank
 commit, and the slip entries `abc`, `-1`, a minimum above the
 maximum, and a
 maximum above the recorded one, each leave the field text unchanged,
@@ -7090,6 +7176,20 @@ registered before its first text and a text repeated by two
 consecutive updates is announced both times; given `live`, it writes
 only if `live()` is true in that task — the binding of a settled
 update to its sequence number ([§5.3](#53-query-engine) item 2).
+A rejection line of [§5.7](#57-scenario-controls) and a read-off
+output of [§5.12](#512-charts) are transient announcements, which
+their appliers make through the `Wiring` of
+[§5.1](#51-modules-and-interfaces). Each passes as `live`
+`() => !wiring.signal.aborted && el.textContent === text`, the
+mount-lifetime predicate joined with currency, `el` being the element
+that shows `text`: the field's error line, which the rejection fills
+(§5.7), or the panel's read-off `<output>`, which the commit fills
+before announcing (§5.12). The message is superseded when `el` no
+longer shows it at the write — a corrected commit, a switch away from
+the field's mode, or Reset clears the rejection's marks (§5.7); a
+later commit, a settled update, or a view switch rewrites or empties
+the read-off output — and a superseded message, like any message of
+a disposed mount, is never written.
 
 A settled update is the render of a newly accepted Scenario
 ([§5.7](#57-scenario-controls) commit model). The first render is
@@ -7475,7 +7575,9 @@ render, as the §5.10 startup sequence fixes them. Rules binding
 
 - After every `await`, timer, and animation frame, return at once
   when `a.ac.signal.aborted`; a rejection that arrives after the
-  abort is logged with `console.debug`, never rendered.
+  abort is logged with `console.debug`, never rendered. The startup
+  recipe also stops at the terminal state of
+  [§5.10](#510-failure-states), which aborts nothing.
 - Before the first results, unavailable-state, or recovery-decision
   commit, set `initialPending = false` and empty the status region,
   including synchronous failure and recovery branches. A queued
@@ -7552,7 +7654,10 @@ open, and each chart's role, accessible name, description,
 `aria-details` target, and table contents against the drawn marks,
 and, in the startup announcement ordering cases of §7.5, no write of
 the held startup announcement after the first commit or a disposal
-and exactly one loading write while a resumption waits for its load;
+and exactly one loading write while a resumption waits for its load,
+and, in the transient announcement guards of §7.5, no write of a
+held rejection or read-off announcement after a disposal or a
+correction, or of a held rejection after Reset;
 in `keyboard-responsive.spec.ts`, focus retention across settled and
 display-only updates, mid-edit preservation, empty-state focus, and
 the 360 px project operated by touch, with `#gre-summary` in view
@@ -7830,10 +7935,12 @@ alone commits nothing. On commit, per row R6 of the
   in the status region
   ([§5.11](#511-accessibility-supported-environments-and-navigation-lifecycle)).
 
-The input is never re-rendered, so its text survives scenario
-updates; a settled update recomputes the output for the new selection
-without announcing it. q = 100 and a single valid value take the
-endpoint branch of `quantileLinear`.
+An announcing commit writes the output itself and then announces it,
+a transient announcement (§5.11); the render pass that follows writes
+the same text. The input is never re-rendered, so its text survives
+scenario updates; a settled update recomputes the output for the new
+selection without announcing it. q = 100 and a single valid value
+take the endpoint branch of `quantileLinear`.
 
 **Overlay marks.** The third mark kind
 ([ADR-0011](../adr/0011-webapp-toolchain.md)): black (`#000000`, the
@@ -10349,10 +10456,26 @@ sequence:
    perturbed copy — `counts.matching_records` plus 1,
    `statistics.scarp_height.median` multiplied by 1 + 1e-6 (a
    thousand times the tolerance), and the last digit of
-   `display.scarp_height.median` incremented modulo 10 — which must
-   report exactly those three differences (rule `self-check`, so a
-   comparator blind to differences is caught on every run), then
-   against the entry itself.
+   `display.scarp_height.median` incremented modulo 10 — then against
+   the entry itself. The harness collects the perturbed comparison's
+   differences apart from the run's real ones, and rule `self-check`
+   requires them to be exactly the three injected differences, each
+   identified by case, quantity, and rule: (`GS-0`,
+   `counts.matching_records`, `exact`), (`GS-0`,
+   `statistics.scarp_height.median`, `tolerance`), and (`GS-0`,
+   `display.scarp_height.median`, `display`). A comparator blind to a
+   difference, or one reporting a difference that was not injected,
+   is thus caught on every run, and the injected differences never
+   count as real ones. The check is the pure `selfCheck(found)` of
+   `test/parity-self-check.ts`: `found` holds the collected
+   differences as `{ caseId, quantity, rule }` records, and it
+   returns `{ missing, extra }` against the three, in any order.
+   `test/parity-self-check.test.ts`, part of `webappTest`
+   ([§7.4](#74-application-tests)), asserts a correct run (exactly
+   the three found: nothing missing or extra), a missing injection
+   (the `display` difference absent: it alone missing), and an extra
+   difference (a fourth, (`GS-0`, `counts.unclassified`, `exact`): it
+   alone extra).
 4. **Boundary cases.** For every `boundary_cases` entry
    ([§3.6](#36-reference-results)), build the case's `Scenario` with
    `parseScenario(inputs, manifest)` from its full
@@ -10405,20 +10528,32 @@ sequence:
 
 **Report.** Agreement prints nothing; each difference prints one line
 naming the case (`GS-<n>`, or the boundary or synthetic case `id`),
-the quantity, both values, and the rule — one of `fetch`, `pairing`,
-`D-23 transcription`, `PDD §4.1 transcription`, `inputs-roundtrip`,
-`self-check`, `presence`, `exact`, `tolerance`, `display`. For the
-tolerance comparisons the harness also prints the largest
+the quantity (for a scenario comparison, its member path in the
+reference entry, such as `counts.matching_records`), both values, and
+the rule — one of `fetch`, `pairing`, `D-23 transcription`,
+`PDD §4.1 transcription`, `inputs-roundtrip`, `self-check`,
+`presence`, `exact`, `tolerance`, `display`. The self-check's
+injected differences print no difference line: a passing self-check
+prints the one diagnostic line
+`self-check: expected differences reported: GS-0 counts.matching_records exact; GS-0 statistics.scarp_height.median tolerance; GS-0 display.scarp_height.median display`,
+and a failing one prints, under rule `self-check`, one line per
+missing or extra difference, naming its case, quantity, and rule. For
+the tolerance comparisons the harness also prints the largest
 |app − reference| per scenario as a diagnostic (0 expected under the
 operation-identical algorithms of [§5.4](#54-statistics); only the
 tolerance decides). After the full pass it prints one summary line per
 scenario, one per `synthetic.ensembles` entry naming its `id` and the
-number of its cases replayed, and one per other case group, and exits
-non-zero if any difference was found.
+number of its cases replayed, and one per other case group. It exits
+non-zero if it printed any difference line; the `self-check` lines of
+a failing self-check are difference lines. A correct run — one that
+completes every step with no real difference and a passing
+self-check — prints no difference line, since the injected
+differences print none, and exits 0.
 
 *Verification (planned):* the two **Parity** steps of
 [§6.3](#63-ci-workflows) run the harness on every matching trigger;
-the step-3 self-check exercises its failure path on every run.
+the step-3 self-check exercises the comparator's difference path on
+every run, and `parity-self-check.test.ts` its accounting.
 
 References:
 
@@ -10592,11 +10727,18 @@ missing `fdhi_cleaned` fails `inputs-present`, names its
 repository-relative path and the rebuild command, never calls the
 view builder, and leaves any existing pointer and
 `dist/app/<data_tag>/` unchanged. Exercise that missing-file path in
-both ordinary export and `--reproduce`. A successful fixture export
-records exactly all nine paths with independently measured SHA-256s
-and byte counts. A change to `fdhi_cleaned` after the initial hashes
-fails `provenance` without writing the pointer; a different checksum
-or size at reproduction start fails naming that input. These
+both ordinary export and `--reproduce`, whose rebuild command names
+`--fdhi-flatfile` and the recorded flatfile path. A successful
+fixture export records exactly all nine paths with independently
+measured SHA-256s and byte counts. A change to `fdhi_cleaned` after
+the initial hashes fails `provenance` without writing the pointer; a
+different checksum or size at reproduction start fails naming that
+input. With the fixture export's recorded
+`data/raw/02_FDHI_FLATFILE_MEASUREMENTS_20220719.csv` present and
+unchanged and a newer
+`data/raw/02_FDHI_FLATFILE_MEASUREMENTS_20261101.csv` added after
+that export, `--reproduce` exits 0, selecting the recorded flatfile,
+and every output matches the pointer. These
 prerequisite and reproduction cases are separate from the
 single-property corruptions of the step-3 and step-5 rules in the
 table above. The `test_manifests.py` fixture lane rejects a missing
@@ -10605,6 +10747,19 @@ or extra provenance input path, including omission of
 expected set is the eight fixed paths of
 [§3.2](#32-artifact-manifest) and exactly one
 `data/raw/02_FDHI_FLATFILE_MEASUREMENTS_*.csv` path.
+
+A new test in the existing `test_raw_inputs.py` checks the
+`egr-build` option `--fdhi-flatfile` of
+[§4.1](#41-export-task-and-validation) step 1 after the pattern of its
+`test_egr_build_fails_fast_without_writing_anything`. With the four
+raw inputs as stub files in a temporary directory, so that only the
+option can fail, and the Terraform schema file and the DDL directory
+redirected there, `egr-build` given
+`data/raw/02_FDHI_FLATFILE_MEASUREMENTS_19000101.csv`, which matches
+the pattern and does not exist, and given `data/README.md`, an
+existing file that does not match it, exits 2 each time, naming the
+path on standard error, and writes nothing. It reads no research data
+and never reaches a build.
 
 **The two evidence tests** (full-data lane of
 `test_reference_results.py`):
@@ -10797,6 +10952,8 @@ confuse.
 | `views-text.test.ts` | `chartSummary`, `statsRows`, and `unclassifiedLine` ([§5.8](#58-view-layer); [DD-9](#1-ddd-decision-register)) with independently injected statistics and `MeasurementCounts`: rows in the PDD §4.2 order; `statsRows(null, { valid: 0, excludedNull: 1 }, m, cfg)` shows `0` in the valid-count row, `1` in the excluded-null row, and seven null marks, and the same call with `excludedNull: 2` shows `2` there; captions with identical non-null statistics print N as `formatCount(counts.valid)`, unchanged when only `counts.excludedNull` changes and changed when `counts.valid` changes; values by `displayRound` at the D-23 decimals and counts by `formatCount`; `unclassifiedLine(0)` null and `unclassifiedLine(3434)` the PDD §4.3 line with X `3,434`; `displayRound` on the display-rounding vectors of [§7.3](#73-pipeline-and-export-tests), identical to the Python list — formatting only, per the pipeline-first rule above. |
 | `toolchain.test.ts` | The pinned runtime ([§2](#2-repository-structure-naming-and-toolchain)): `process.version` equals `'v' + process.env.EGR_EXPECTED_NODE`, which `webappTest` sets from the plugin's `node.version`; an unset variable fails the test. |
 | `compat.test.ts` | The documented-API check of [§7.6](#76-performance-and-compatibility-measurements). |
+| `warm-cache.test.ts` | The warm-cache classification of [§7.6](#76-performance-and-compatibility-measurements) (Cache): `classifyWarm` of `test/warm-cache.ts` on the focused CDP event sequences that section lists. |
+| `parity-self-check.test.ts` | The self-check accounting of [§7.2](#72-calculation-parity-tests) step 3: `selfCheck` of `test/parity-self-check.ts` on a correct run, a missing injection, and an extra difference. |
 
 Two earlier files are gone. `config-pdd.test.ts`: the agreement of
 `config.ts` and the copy registry with the PDD is checked by
@@ -11034,8 +11191,8 @@ eleven specs live in `subprojects/webapp/playwright/specs/`.
 | `golden-scenario.spec.ts` | "at least one golden scenario is evaluated end to end, and every displayed value equals the display-rounded reference result exactly" | Replays GS-1 through the real page. Every displayed count — matching records, each panel's valid and excluded-null counts, the unclassified line's count when shown — equals the reference `counts`; every displayed statistic and read-off pre-mark equals the reference `display` string, and every converted-window value — the assist panel's `{lo}` and `{hi}` and the `{Y}` of the 30° per-dip line — the reference `window_lo_display` or `window_hi_display`, exactly ([SC-3 (correctness)](pdd.md#101-success-criteria)); with each chart-data disclosure open, the bin table has `bins` rows whose group cells equal the reference `histogram` `counts` row by row; every applicable caveat is present in the default view of the result ([SC-5 (candor)](pdd.md#101-success-criteria), the acceptance list of HLDD §9). |
 | `determinism.spec.ts` | "the same starting state and action sequence produce identical scenario settings and displayed results on every run" | Runs the GS-1 action sequence twice in fresh contexts; asserts that the scenario summary, every displayed result, and the downloaded `scenario.json` bytes are identical between runs. |
 | `consistency.spec.ts` | "scenario summaries, charts, tables, and downloads describe the same active scenario" | Builds GS-1 through the controls; captures the summary, chart labels, table values, and a download (Playwright's download event); asserts one scenario describes them all: the downloaded `scenario.json`'s `scenario` deep-equals the reference GS-1 `inputs`; `python3 -I test/zipcheck.py <download> <instant of provenance block 8>` exits 0, so the archive holds the four members, stored and well formed; and the package's settings, versions, counts, and statistics match the displayed ones, the footer stamps included ([SC-2 (download reproducibility)](pdd.md#101-success-criteria)'s reviewer path). |
-| `failure-states.spec.ts` | "each §6.1 state appears when its condition holds — invalid or out-of-range input, no data for the selected scenario, unavailable browser capabilities, and internal failure — without being confused with one another" (the §6.1 is [HLDD §6.1 — Failure honesty (ADR-0010)](hldd.md#61-failure-honesty-adr-0010)) | Drives each category. Invalid input: offset entries `abc`, `-1`, `1000.0001` (above the 1000 m bound of [§5.7](#57-scenario-controls) R2), and a blank commit, and slip-window entries `-1`, `abc`, minimum `3` with maximum `2`, and a maximum above `slip_window_bounds.max`, each get `aria-invalid="true"`, an accessible description that ends with its `copy.json` line verbatim (for a slip field, after the `#gre-slip-range` and `#gre-slip-help` texts), the element the appended id names holding exactly that line, the field text unchanged, and the summary and a captured download's provenance unchanged; entering offset mode with a blank field shows no error and changes nothing ([§5.7](#57-scenario-controls)). Out-of-range input: an offset entry whose 30° window runs past the recorded maximum is accepted and flagged `partly_out`, never rejected ([§5.10](#510-failure-states)), and the offset `1000`, the largest R2 accepts, is accepted with the results rendered, never the unavailable state. No data: GS-4 shows the empty state. Unavailable capabilities: deleting `DecompressionStream` with an init script yields the complete §5.10 capability notice verbatim, naming it and stating the 12-month policy, latest-stable-browser update and reload, and iOS/iPadOS update instructions; the fallback and `#gre-disclaimer` stand and no skeleton is built. With JavaScript enabled and the application bundle request aborted, the ordinary fallback's browser-policy and recovery paragraph remains visible and the `<noscript>` text is absent; with JavaScript disabled, both that paragraph and the `<noscript>` text are visible. Internal failure: an aborted artifact request, a truncated artifact, a manifest whose `export_version` differs from `data-data-version`, and the scenario HTML with `data-software-version=""`, each served by `page.route`, yield the unavailable state — the third its version-mismatch variant naming both versions, the fourth the reason "the page is missing information it needs to load the data" with `#gre-versions` empty — "never empty or stale results" ([ADR-0015](../adr/0015-golden-scenario-parity.md), second amendment), with focus on `#gre-state` ([§5.11](#511-accessibility-supported-environments-and-navigation-lifecycle)); with every regression-export request aborted, entering offset mode — a prefetch — shows nothing, and the offset `3`, committed by moving focus to the short disclaimer's link (the field's `change`), an accepted offset-mode Scenario, then yields the unavailable state naming the conversion coefficients and moves focus from that link to `#gre-state` ([§5.3](#53-query-engine), [§5.10](#510-failure-states)); an aborted field-export request on switching the overlay on shows the overlay legend's unavailable line and leaves the simulation results rendered, and switching the overlay off and on again with the request unrouted then draws the marks on the height and width panels and removes that line; an error thrown by an unrelated script added with `page.addScriptTag` leaves the results rendered. Asserts the presentations pairwise distinct, `#gre-disclaimer` present in every state, and the short disclaimer in `#gre-caveats` present in every state except the capability notice, which builds no skeleton ([§5.10](#510-failure-states)). |
-| `a11y.spec.ts` | "the automatable accessibility checks pass" | Runs axe with the tags above, the WCAG 2.2 AA set of [PDD §9.3 — Accessibility target (D-17, Proposed)](pdd.md#93-accessibility-target-d-17-proposed), on the scenario page in the loaded state (again with the width panel's "Logarithmic scale" checked), the warning (GS-2), suppression (GS-5), and empty (GS-4) states, and the failure states — each with the chart-data disclosures closed and again open — and on each shipped product page; asserts zero violations. On GS-1 and GS-2, asserts the [DD-9](#1-ddd-decision-register) artifacts of [§5.11](#511-accessibility-supported-environments-and-navigation-lifecycle): each chart `toHaveRole('img')`, an accessible name matching the §5.11 chart-label template with N equal to the panel head's valid count, and an accessible description equal to its `<figcaption>`, including the PDD §4.1 accuracy paragraph in cumulative view and excluding it in histogram view; `aria-details` resolving to the panel's `<details id="{pid}-data">`; with the disclosure open, the bin-table headers are the label with unit, the legend labels, and `Total`, each row's group cells sum to its Total, the Totals sum to the panel N, and the nonzero segments of bar i equal the nonzero cells of row i; the family toggle gives three group columns with unchanged Totals; with the overlay on, the field table has one row per tick drawn. In GS-5, a panel whose chart is suppressed shows no figure and no disclosure and keeps its statistics table. Read-off: `fill('95')` then Tab makes the input's accessible description match `/^Percentile 95: /`, and the status region announces exactly once. Rapid changes ([§5.3](#53-query-engine) item 2): from the loaded GS-0 state, after `performance.clearMarks()` and with a `MutationObserver` recording each non-empty text of the status region, one `page.evaluate` clicks the one-state population radio (GS-7) and then registers a `requestAnimationFrame` callback that clicks the all-stages radio — registered after the click's frame request, so it runs right after the scheduler's frame callback — so the second change is accepted after the first's frame commits and before that frame's announcement and mark tasks run; once the status region holds text, the observer has recorded exactly one text, the §5.11 "Results updated: {matching} matching records." with {matching} GS-0's reference `matching_records` by `formatCount`, and exactly one `egr:results-updated` mark exists, its `detail.seq` equal to that of the later of the two `egr:change-accepted` marks. |
+| `failure-states.spec.ts` | "each §6.1 state appears when its condition holds — invalid or out-of-range input, no data for the selected scenario, unavailable browser capabilities, and internal failure — without being confused with one another" (the §6.1 is [HLDD §6.1 — Failure honesty (ADR-0010)](hldd.md#61-failure-honesty-adr-0010)) | Drives each category. Invalid input: offset entries `abc`, `-1`, `1000.0001` (above the 1000 m bound of [§5.7](#57-scenario-controls) R2), and a blank commit, and slip-window entries `-1`, `abc`, minimum `3` with maximum `2`, and a maximum above `slip_window_bounds.max`, each get `aria-invalid="true"`, an accessible description that ends with its `copy.json` line verbatim (for a slip field, after the `#gre-slip-range` and `#gre-slip-help` texts), the element the appended id names holding exactly that line, the field text unchanged, and the summary and a captured download's provenance unchanged; entering offset mode with a blank field shows no error and changes nothing ([§5.7](#57-scenario-controls)). Out-of-range input: an offset entry whose 30° window runs past the recorded maximum is accepted and flagged `partly_out`, never rejected ([§5.10](#510-failure-states)), and the offset `1000`, the largest R2 accepts, is accepted with the results rendered, never the unavailable state. No data: GS-4 shows the empty state. Unavailable capabilities: deleting `DecompressionStream` with an init script yields the complete §5.10 capability notice verbatim, naming it and stating the 12-month policy, latest-stable-browser update and reload, and iOS/iPadOS update instructions; the fallback and `#gre-disclaimer` stand and no skeleton is built. With JavaScript enabled and the application bundle request aborted, the ordinary fallback's browser-policy and recovery paragraph remains visible and the `<noscript>` text is absent; with JavaScript disabled, both that paragraph and the `<noscript>` text are visible. Internal failure: an aborted artifact request, a truncated artifact, a manifest whose `export_version` differs from `data-data-version`, and the scenario HTML with `data-software-version=""`, each served by `page.route`, yield the unavailable state — the third its version-mismatch variant naming both versions, the fourth the reason "the page is missing information it needs to load the data" with `#gre-versions` empty — "never empty or stale results" ([ADR-0015](../adr/0015-golden-scenario-parity.md), second amendment), with focus on `#gre-state` ([§5.11](#511-accessibility-supported-environments-and-navigation-lifecycle)); with every regression-export request aborted, entering offset mode — a prefetch — shows nothing, and the offset `3`, committed by moving focus to the short disclaimer's link (the field's `change`), an accepted offset-mode Scenario, then yields the unavailable state naming the conversion coefficients and moves focus from that link to `#gre-state` ([§5.3](#53-query-engine), [§5.10](#510-failure-states)); an aborted field-export request on switching the overlay on shows the overlay legend's unavailable line and leaves the simulation results rendered, and switching the overlay off and on again with the request unrouted then draws the marks on the height and width panels and removes that line; an error thrown by an unrelated script added with `page.addScriptTag` leaves the results rendered. Asserts the presentations pairwise distinct, `#gre-disclaimer` present in every state, and the short disclaimer in `#gre-caveats` present in every state except the capability notice, which builds no skeleton ([§5.10](#510-failure-states)). Also the **Terminal state during startup** cases below. |
+| `a11y.spec.ts` | "the automatable accessibility checks pass" | Runs axe with the tags above, the WCAG 2.2 AA set of [PDD §9.3 — Accessibility target (D-17, Proposed)](pdd.md#93-accessibility-target-d-17-proposed), on the scenario page in the loaded state (again with the width panel's "Logarithmic scale" checked), the warning (GS-2), suppression (GS-5), and empty (GS-4) states, and the failure states — each with the chart-data disclosures closed and again open — and on each shipped product page; asserts zero violations. On GS-1 and GS-2, asserts the [DD-9](#1-ddd-decision-register) artifacts of [§5.11](#511-accessibility-supported-environments-and-navigation-lifecycle): each chart `toHaveRole('img')`, an accessible name matching the §5.11 chart-label template with N equal to the panel head's valid count, and an accessible description equal to its `<figcaption>`, including the PDD §4.1 accuracy paragraph in cumulative view and excluding it in histogram view; `aria-details` resolving to the panel's `<details id="{pid}-data">`; with the disclosure open, the bin-table headers are the label with unit, the legend labels, and `Total`, each row's group cells sum to its Total, the Totals sum to the panel N, and the nonzero segments of bar i equal the nonzero cells of row i; the family toggle gives three group columns with unchanged Totals; with the overlay on, the field table has one row per tick drawn. In GS-5, a panel whose chart is suppressed shows no figure and no disclosure and keeps its statistics table. Read-off: `fill('95')` then Tab makes the input's accessible description match `/^Percentile 95: /`, and the status region announces exactly once. Rapid changes ([§5.3](#53-query-engine) item 2): from the loaded GS-0 state, after `performance.clearMarks()` and with a `MutationObserver` recording each non-empty text of the status region, one `page.evaluate` clicks the one-state population radio (GS-7) and then registers a `requestAnimationFrame` callback that clicks the all-stages radio — registered after the click's frame request, so it runs right after the scheduler's frame callback — so the second change is accepted after the first's frame commits and before that frame's announcement and mark tasks run; once the status region holds text, the observer has recorded exactly one text, the §5.11 "Results updated: {matching} matching records." with {matching} GS-0's reference `matching_records` by `formatCount`, and exactly one `egr:results-updated` mark exists, its `detail.seq` equal to that of the later of the two `egr:change-accepted` marks. Also the **Transient announcement guards** cases below. |
 | `keyboard-responsive.spec.ts` | "keyboard interaction and responsive layouts behave as PDD §9.2, PDD §9.3, and §7.2 specify" (the §7.2 is [HLDD §7.2 — Accessibility and supported environments](hldd.md#72-accessibility-and-supported-environments)) | Traverses the page by keyboard: every control reachable with visible focus, and operating a control by keyboard produces the same result update as the pointer path. Focus retention: a dip checkbox (Space), a population radio (ArrowDown), a panel view-switch radio (ArrowRight), the read-off input (`84`, Enter), the overlay switch (Space), and the slip maximum (`3`, Enter), each operated with `h = document.activeElement` stored first. After the update settles — for the dip checkbox, the population radio, the read-off, and the slip maximum, a status-region change; for the view-switch radio and the overlay switch, which are display-only and announce nothing ([§5.11](#511-accessibility-supported-environments-and-navigation-lifecycle)), the next replacement of the `.gre-chart` slot of the operated panel (for the overlay switch, of `#gre-scarp_height`), with the status region asserted unchanged — `h === document.activeElement && h.isConnected`. Mid-edit: with the field-export request held by `page.route`, switch the overlay on, focus the slip maximum, type `2.5` without Enter, release the request; marks then appear on the height and width panels with neither the Scenario nor the display state changed ([§5.3](#53-query-engine) item 3), while the value stays `2.5`, `selectionStart` is 3, focus, summary, and `aria-invalid` are unchanged; Enter then makes the summary read "slip 0–2.5 m". Empty-state focus: type `0` in the offset field and commit by clicking panel 1's Cumulative radio; `document.activeElement.id` is `gre-state`. In the `mobile` project the spec operates the view switch and the read-off with `tap()`; asserts no page-level horizontal scroll — `document.documentElement.scrollWidth` at most `window.innerWidth` — with every chart-data disclosure closed and again with every one open, each open table scrolling inside its `.gre-table-scroll` wrapper instead ([§5.11](#511-accessibility-supported-environments-and-navigation-lifecycle)); asserts `#gre-summary` in the viewport and its box clear of the focused control's, first with focus on the first fault-dip checkbox and then on Reset, each reached by Tab — the small-screen persistent summary of [§5.7](#57-scenario-controls) and WCAG 2.2 SC 2.4.11; and asserts no hover-dependent essentials. |
 | `site-regression.spec.ts` | the per-release regression checks of [§7.7](#77-site-validation-and-release-checklist) on existing surfaces | Visits the existing dashboard, navigation, and citation pages: embeds and links present and loading; the scenario bundle requested only on the scenario page; the site-wide Tableau embedding module never requested there (the [§6.1](#61-build-outputs-asset-paths-and-page-scaffold) exclusion, observed from each page's requests); each dashboard page entered both directly and by instant navigation from a non-dashboard page, the probe surviving, its `<tableau-viz>` upgrading on both paths (the §6.1 loader). Host fidelity of the served tree: `request.get('data', { maxRedirects: 0 })` gets 301 to `BASE_URL` + `data/`; `request.get('no-such-page/')` gets 404 `text/html`; a `.gz` data file comes back without `Content-Encoding`. |
 
@@ -11101,6 +11258,61 @@ test hook. Assert:
   stays until the first result commits; afterwards the status region
   records only the §5.10 restoration message, while the field-export
   response is held and after its release.
+
+**Transient announcement guards** (§5.11; `a11y.spec.ts`). The
+wrapper of Startup announcement ordering, armed instead for one
+commit, holds a transient announcement's write: one `page.evaluate`
+arms it, sets the field's value, dispatches the field's `change`
+event, and disarms it, so the held callback is the one zero-delay
+callback that commit schedules. Releasing, waiting, and observing
+follow Startup announcement ordering. From the loaded GS-0 state, in
+the `desktop` project, assert:
+
+- Disposal: commit `abc` in the slip maximum, holding its rejection
+  write; leave by the Glossary nav link; release. No write occurs,
+  even on the detached status element. Likewise with the height
+  panel switched to Cumulative: commit `95` in its read-off, hold,
+  leave, release; no write occurs.
+- Correction: commit `abc` in the slip maximum, holding its write;
+  commit `3` there, which is accepted and clears the marks; release.
+  The rejection line is never written, and the status region records
+  only the accepted change's "Results updated: …" text. Likewise in
+  the read-off: commit `95`, hold, commit `50`, release;
+  "Percentile 95: …" is never written and "Percentile 50: …" is
+  written once.
+- Reset: commit `abc` in the slip maximum, holding its write; click
+  Reset; release. The rejection line is never written.
+
+**Terminal state during startup** (§5.10;
+`failure-states.spec.ts`). A routed error is an `error` event that
+the test dispatches on `window`,
+`new ErrorEvent('error', { error: new Error('routed'), filename })`,
+`filename` being the `src` of `#gre-app` — the bundle's
+`import.meta.url` — so that Error routing
+([§5.10](#510-failure-states)) acts on it. In each case the error
+enters the unavailable state with the reason "an internal error
+stopped the calculation or display of results", and nothing commits
+over it, even once a held response is released: `#gre-panels` stays
+hidden, `#gre-state` keeps the notice, the alert region has announced
+it once, and no `egr:first-result` mark exists.
+
+- First startup: hold the artifact response; dispatch the error;
+  release.
+- Restored-offset loading: supply a valid restored offset Scenario,
+  as Startup announcement ordering does; let the artifact response
+  through and hold the regression response; dispatch the error once
+  the regression request arrives; release.
+- Resumed startup: supply an invalid recovery record (malformed
+  JSON) with the artifact response held; after its decision state
+  commits, choose **Start a new scenario**; dispatch the error while
+  the resumption waits; release. `#gre-recovery` no longer holds
+  **Start a new scenario**.
+- Decision state: supply an incompatible recovery record, decided
+  after the vintage loads; after its decision state commits, move
+  focus to **Start a new scenario**; dispatch the error.
+  `#gre-recovery` keeps the saved summary and holds neither
+  **Retry recovery** nor **Start a new scenario**, and focus is on
+  `#gre-state`.
 
 **Reload recovery cases** (MVP; §5.6/§5.10). These extend existing
 specs, not the browser-spec inventory. `failure-states.spec.ts` uses
@@ -11619,13 +11831,44 @@ the same context. Warm runs in two variants, each judged against the
 warm budget: *fresh*, within the host's max-age (the port-4173
 server, `max-age=600`); and *revalidating*, every request answered
 304 (the port-4174 server, `--max-age 0`) — the repeat visit more
-than ten minutes later on this host. Each warm repetition asserts
-from CDP `Network.responseReceived` that every content-hashed asset
-came from the disk or memory cache or with status 304; a
-re-downloaded content-hashed asset invalidates the repetition and
-fails the run. The revalidating variant runs only against the
-served preview tree, because the live host's max-age cannot be
-shortened.
+than ten minutes later on this host. Each warm repetition classifies
+every request for a content-hashed asset from the CDP events of its
+`requestId`, which the page's CDP session (Network, above) records from
+before navigation, in arrival order — `Network.responseReceived`,
+`Network.responseReceivedExtraInfo`, `Network.requestServedFromCache`,
+and `Network.loadingFinished` — with the pure `classifyWarm(events)` of
+`test/warm-cache.ts`, which takes one request's events, each
+`{ method, params }` as the session delivers it, and returns `'warm'`,
+`'cold'`, or `'pending'`. Extra information can arrive before or after
+its response event. A request is cache-served when its response event's
+`response.fromDiskCache` is true or a `Network.requestServedFromCache`
+event names it — the protocol's memory-cache signal, its `Response` type
+having no memory-cache member. A cache-served request is warm once its
+`loadingFinished` arrives, whatever `hasExtraInfo` says and without
+waiting for extra information, which Chromium may never send for a
+cached response that sets that flag (the pinned Playwright 1.47.2
+network manager likewise ignores the flag on a response served from
+cache). Any other request settles at its `loadingFinished` with the
+response event's `status` when `hasExtraInfo` is false, and otherwise
+once the `Network.responseReceivedExtraInfo` of its `requestId` has also
+arrived, with that event's `statusCode`, the wire status — 304 for a
+revalidated response whose response event reports 200. It is warm
+exactly when that status is 304 and cold otherwise, a 200 being a
+downloaded body. Until it settles it is pending. After the repetition's
+`egr:first-result` mark the spec waits until no content-hashed request
+is pending, at most 5,000 ms — a wait after the measured interval, which
+changes no sample; a cold request, or one still pending then,
+invalidates the repetition and fails the run, the failure naming its URL
+and class. `test/warm-cache.test.ts`, part of `webappTest`
+([§7.4](#74-application-tests)), holds the classifier's focused cases: a
+cache hit without extra information — `fromDiskCache`, and separately a
+`requestServedFromCache` event, each with `hasExtraInfo` true — warm at
+`loadingFinished`; a response event reporting 200 with `hasExtraInfo`
+true and extra information reporting 304, in both orders, warm, and
+pending while the extra information has not arrived; and a downloaded
+200 — extra information reporting 200, or `hasExtraInfo` false with
+status 200 — cold. The revalidating variant runs only against the served
+preview tree, because the live host's max-age cannot be shortened.
 
 **Workloads.** Load workloads measure the state the page opens
 with — the [§5.7](#57-scenario-controls) all-default scenario, whose
@@ -11676,9 +11919,10 @@ downloaded, and item 5 of the release checklist
 ([§7.7](#77-site-validation-and-release-checklist)) judges the
 release from the report's `within_budget` values (Report, below).
 The run fails — exits non-zero — only on an invalid repetition or a
-failed assertion: a mark with `detail.visible === false`, a
-re-downloaded content-hashed asset, a failed standing assertion of
-the payload scope, or a header drift on the published-site run.
+failed assertion: a mark with `detail.visible === false`, a cold or
+still-pending content-hashed request in a warm repetition (Cache,
+above), a failed standing assertion of the payload scope, or a
+header drift on the published-site run.
 
 **Instrumentation.** Five named marks ship with the application and
 are read by the specs through the User Timing API
@@ -11980,8 +12224,8 @@ file read as an empty state, and the read-only `status`;
 the release runs' reports enter [§3.8](#38-measured-sizes) and the
 release record of [§7.7](#77-site-validation-and-release-checklist)
 (items 5 and 15), with browser, device, version, and vintage named;
-`compat.test.ts` runs in the **Webapp checks** steps of
-[§6.3](#63-ci-workflows) on every matching trigger.
+`compat.test.ts` and `warm-cache.test.ts` run in the **Webapp
+checks** steps of [§6.3](#63-ci-workflows) on every matching trigger.
 
 References:
 

@@ -1,11 +1,15 @@
-# Checks relative links and heading anchors in the Markdown that GitHub
-# renders (docs/, the READMEs, notes/ — everything tracked outside the
-# MkDocs docs_dir). The strict site build never sees these files, so
-# without this job a renamed heading or a moved file breaks their links
-# silently. No paths filter: their links also point into subprojects/ and
-# dashboards/, so a rename anywhere can break them, and the job installs
-# nothing and runs in seconds. Kept separate from tests.yml, which
-# deliberately does not run on docs-only pushes.
+# Two check steps. "Check links and anchors" checks the relative links
+# and heading anchors of the Markdown that GitHub renders (docs/, the
+# READMEs, notes/ — everything tracked outside the MkDocs docs_dir):
+# the strict site build never sees these files, so without it a renamed
+# heading or a moved file breaks their links silently.
+# "Check traceability" runs .github/scripts/check_traceability.py, the
+# lint of the traceability matrices of DDD §8 (docs/app/ddd.md) and
+# IP §7 (docs/app/ip.md), which uses the Python standard library only.
+# No paths filter: the links also point into subprojects/ and
+# dashboards/, so a rename anywhere can break them, and the job
+# installs nothing and runs in seconds. Kept separate from tests.yml,
+# which deliberately does not run on docs-only pushes.
 
 name: Doc links
 
