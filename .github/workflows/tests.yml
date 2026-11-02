@@ -14,11 +14,18 @@ on:
     branches: [main, 'dev-v.*']
     paths:
       - 'subprojects/python/**'
+      - 'subprojects/webapp/**'
+      - '!subprojects/webapp/perf/**'
+      - 'subprojects/webapp/data/pointer.json'
+      - 'subprojects/mkdocs/build.gradle.kts'
+      - 'CITATION.cff'
+      - 'settings.gradle.kts'
+      - 'build.gradle.kts'
+      - 'deploy/terraform/build.gradle.kts'
+      - 'gradlew'
+      - 'gradle/wrapper/**'
       - '.github/workflows/tests.yml'
   pull_request:
-    paths:
-      - 'subprojects/python/**'
-      - '.github/workflows/tests.yml'
   workflow_dispatch:
 
 permissions:
@@ -63,3 +70,11 @@ jobs:
       - name: Check formatting (ruff format)
         working-directory: subprojects/python
         run: .venv/bin/python -m ruff format --check src tests
+
+  webapp-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Webapp checks
+        run: ./gradlew :subprojects:webapp:check
