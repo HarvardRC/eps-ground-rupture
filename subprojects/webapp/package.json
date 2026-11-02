@@ -1,5 +1,12 @@
 {
   "private": true,
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json",
+    "test": "node build.mjs --tests && node --test \"build/test/**/*.test.js\"",
+    "parity": "node build.mjs --tests && node build/test/parity.js",
+    "browser-install": "playwright install chromium",
+    "browser-test": "playwright test --project=desktop --project=mobile"
+  },
   "devDependencies": {
     "@axe-core/playwright": "4.10.0",
     "@playwright/test": "1.47.2",
