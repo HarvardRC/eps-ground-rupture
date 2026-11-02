@@ -12,6 +12,21 @@ hosting at a stable public URL, ideally rebuilt from the same commit as
 the pipeline that produced the numbers it cites. The repo is already
 public on GitHub.
 
+> **Amendment 2026-11-01 (prototype deployment).** For the
+> unadvertised prototype of
+> [ADR-0017 — An unadvertised prototype deployment precedes the public release](0017-unadvertised-prototype-before-public-release.md)
+> (amendment of the same date), the `github-pages` environment also
+> admits `dev-v.0.4.x`, from owner action OA-20 of
+> [IP §4 — Owner and research-group actions](../app/ip.md#4-owner-and-research-group-actions)
+> until owner action OA-21, and the owner deploys the prototype by
+> manual runs (`workflow_dispatch`) of the workflow on that branch.
+> Pushes still deploy only from `main`, and manual publishes from
+> `main` remain; pushes to `dev-v.*` branches that touch the site run
+> the same `--strict` build as pull requests, without deploying. Read
+> "the `github-pages` environment itself restricts deploys to `main`"
+> under Decision, below, with this exception; outside it, the
+> environment admits `main` alone.
+
 ## Decision
 
 **GitHub Pages, deployed by GitHub Actions** from this repo:

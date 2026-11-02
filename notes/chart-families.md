@@ -121,6 +121,9 @@ schematics, particle-mechanics diagrams, DEM simulation snapshots.
 Not data charts — embedded on the companion site since 2026-08-26
 (`figures.md`, accepted-manuscript originals under the publisher's
 sharing terms — see Roadmap #6 and `subprojects/mkdocs/DEPLOY.md`).
+Figs. 1–2 are withheld since 2026-10-12 while the author team confirms
+the third-party photo terms: the page describes them and keeps their
+anchors, but no longer reproduces them (Roadmap, "Decisions made").
 
 ## Cross-reference: families ↔ legacy roadmap themes
 
@@ -134,4 +137,4 @@ The Roadmap originally used themes A–E; this taxonomy refines them:
 | 4. Mean ± σ summary | — (new) | ✅ Dashboard 5 built |
 | 5. Per-event boxplots | C (implicit) | ✅ Dashboard 3 built |
 | 6. Regression + inference | E | ✅ Dashboard 4 built |
-| Illustrations | — (new) | ✅ on the site (Figs. 1–5, 7; 2026-08-26) |
+| Illustrations | — (new) | ✅ on the site 2026-08-26; Figs. 1–2 withheld 2026-10-12 |

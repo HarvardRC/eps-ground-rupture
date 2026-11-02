@@ -2,7 +2,8 @@
 # --strict, so a dead internal link or a bad config fails the run instead
 # of publishing a damaged site. See subprojects/mkdocs/DEPLOY.md.
 #
-# Publishing model: only pushes to main deploy. Pull requests touching the
+# Publishing model: only main deploys, on a push that touches the paths
+# below or a manual run (workflow_dispatch). Pull requests touching the
 # site run the same strict build as a validation check, without deploying.
 
 name: Companion site
@@ -77,7 +78,8 @@ jobs:
           path: subprojects/mkdocs/site
 
   deploy:
-    # PRs only validate the build; publishing happens on push to main.
+    # PRs only validate the build; publishing happens on a push to main
+    # or a manual run (the github-pages environment allows main only).
     if: github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest

@@ -23,7 +23,7 @@ families plus non-chart illustrations. Summary:
 | 4. Mean ± σ summary | Typical values and spreads per scarp class at a glance? | ✅ built (Dashboard 5) |
 | 5. Per-event boxplots | How variable are field measurements within each event? | ✅ built (Dashboard 3) |
 | 6. Regression + inference | What slip would produce an observed displacement? | ✅ built (Dashboard 4) |
-| Illustrations (static images) | Context: photos, schematics, model snapshots | ✅ on the site 2026-08-26 (Figs. 1–5, 7; build order #6) |
+| Illustrations (static images) | Context: photos, schematics, model snapshots | ✅ on the site 2026-08-26; Figs. 1–2 withheld 2026-10-12 (build order #6) |
 
 (The earlier A–E "theme" taxonomy is superseded by the families; the
 mapping is at the bottom of `chart-families.md`.)
@@ -146,12 +146,14 @@ mapping is at the bottom of `chart-families.md`.)
      Distributions page. Figure 8 itself (and Fig. 15, whose Kern needles
      D5 follows) sit in the local `legacy/` folder as the visual check.
 6. ~~**Static-image embedding**~~ — **done 2026-08-26**: the six
-   illustrations are on `figures.md` with the Sage-form citation and a
+   illustrations went on `figures.md` with the Sage-form citation and a
    figures-specific reuse notice, linked from the crosswalk on `paper.md`;
    the site's open-access framing was narrowed to the typeset article.
-   Open remainder: confirm the third-party photographs inside Figs. 1–2
-   with Kristen (`DEPLOY.md`); Andreas's light-adaptation idea stays
-   deferred. The plan as it stood on 2026-08-20 is kept below.
+   **Amended 2026-10-12**: Figures 1–2 embed third-party photographs and
+   are withheld while the author team confirms the terms — the page
+   describes them and keeps their anchors; Figs. 3–5, 7 stay up. State
+   and restore recipe under "Decisions made". Andreas's light-adaptation
+   idea stays deferred. The plan as it stood on 2026-08-20 is kept below.
    (Was lowest priority while rights were unknown.)
    - **Rights: granted, with conditions.** Kristen established from Sage's
      Green Open Access policy that figures from the **Accepted Manuscript**
@@ -289,10 +291,11 @@ belongs in the same plan.
   source for anything currently on the site. Kristen, 2026-08-20: "maybe
   also list the SRL paper as additional information for now until we decide
   whether or not to post the 3D Case 1–3 models."
-- **DOI for the code and site — approved in principle, route not final.**
+- **DOI for the code and site — approved in principle; route decided
+  2026-10-12: Zenodo, fed by a GitHub release (see "Decisions made").**
   Kristen: "I think it would be valuable to add a doi to cite this code so
   users have full access for reproducibility and to set up their own
-  interpretations." Two routes on the table:
+  interpretations." The two routes that were on the table:
   - **Zenodo** — Andreas's stated preference ("if RC can manage the
     setup"), and Michael's; mints a DOI from a GitHub release, which suits
     a repo that already builds the site and the data. Gives a concept DOI
@@ -301,17 +304,256 @@ belongs in the same plan.
     Kristen flags it is "really slow to push an update or new version now
     due to the large volumes of data we posted previously". She offered to
     follow up on either route.
-  Practical prerequisites either way: **there are no releases and no tags
-  yet**, so the first release is the trigger — decide its contents and
-  version before cutting it. Worth adding a `CITATION.cff` at the repo root
-  (GitHub renders it, Zenodo reads it) so the citation metadata is
-  machine-readable and matches the site's modal.
-- **Hosting the processed tables** (Andreas's answer) — he agrees "the
-  plotting data should be hosted in a more addressable space in addition to
-  Tableau", all options acceptable, **Zenodo preferred**. Raw modelling data
-  stays on DesignSafe. This dovetails with the standing `TODO.md` item about
-  automating raw-input fetching ("mirror the inputs on Zenodo, or script the
-  UCLA Dataverse download") — one decision could close both.
+  Practical prerequisites: tags v0.2.0–v0.2.2 exist, but **there is no
+  GitHub release yet**, so the first release is the trigger — decide its
+  contents and version before cutting it. `CITATION.cff` and `.zenodo.json`
+  are at the repo root since the software-citation decision of 2026-10-12
+  (GitHub renders the first, Zenodo reads both).
+- **Hosting the processed tables — decided in substance 2026-08-20 (see
+  "Decisions made", Release data: the plotting CSVs ship in the GitHub
+  release).** Andreas's answer stands: he agrees "the plotting data should
+  be hosted in a more addressable space in addition to Tableau", all
+  options acceptable, **Zenodo preferred**. Raw modelling data stays on
+  DesignSafe. What remains open is the deposit step that gets the released
+  CSVs into Zenodo itself (the GitHub integration archives only the source
+  archive) — the preferred answer is a Zenodo dataset record, decided with
+  the first release. The standing `TODO.md` item about automating raw-input
+  fetching ("mirror the inputs on Zenodo, or script the UCLA Dataverse
+  download") stays open and separate; raw data staying on DesignSafe pulls
+  toward the scripted-download option.
+
+## Ground Rupture Explorer — owner actions (opened 2026-10-30)
+
+The owner's to-do list for the Ground Rupture Explorer, the scenario
+explorer that `docs/app/` specifies (updated 2026-11-01). The work
+runs in the two phases of
+[ADR-0017](../docs/adr/0017-unadvertised-prototype-before-public-release.md):
+**Phase 1** builds the application and deploys it, with
+its first data vintage, as an unlisted prototype at the site's final
+address for the research group to try, under the current licensing
+stated as an assumption; **Phase 2** records their approvals and
+decisions, the deferred licensing decision among them, activates the
+page and cuts the v0.4 release — v0.4.0, the explorer's first
+software release. By your decisions of 2026-11-01, `dev-v.0.3.x`
+carries the design only and, after your commit accepting the DDD and
+the IP, merges into `main` as the design state, tagged `v0.3.0` with
+no GitHub release (OA-18); the implementation then runs on
+`dev-v.0.4.x`, created from `main` (OA-19): every task pull request,
+and your commits for the actions below, land there, and `main`
+receives the implementation once, with the release merge (T-65).
+Pull requests and pushes to `dev-v.0.4.x` build and check without
+deploying; you deploy it by manual runs of the Companion site
+workflow while the `github-pages` environment admits it, from OA-20
+— the first run is T-54's — until OA-21, just before OA-3's commit,
+so from T-54's run until the release the live site serves its build
+while `main` stays at the design state. After the release,
+`dev-v.0.5.x`, created from `main`, takes every later change.
+Each bullet gives the action's ID, phase, what it is, the task it must
+precede, and its status. The record each action leaves and the check
+the tasks run on it are in
+[IP §4 — Owner and research-group actions](../docs/app/ip.md#4-owner-and-research-group-actions).
+Task statuses follow the IP's Task format: the owner's commit
+accepting the DDD and the IP sets `Accepted (YYYY-MM-DD)` on each body
+it accepts, and a task's `Done (YYYY-MM-DD)` rides in its last pull
+request — in the next one merged when its Done-when ends after that
+merge — recorded by the owner's merge into `dev-v.0.4.x`, or for T-65
+into `dev-v.0.5.x` (OA-9), with no separate commit.
+The step-by-step walkthroughs are the owner's dated notes, local and
+not committed: `notes/2026-10-30/aws-terraform-walkthrough.md` for
+the AWS and Terraform steps and
+`notes/2026-10-30/owner-actions-walkthrough.md` for the owner
+actions. OA-15, a private scratch repository for the publication
+drills, is retired: the drills run against a stub `gh` instead.
+
+- ~~**OA-11 — Release immutability**~~ (Phase 1; before T-18, the
+  first data publication) — **done 2026-10-30**:
+  `gh api repos/HarvardRC/eps-ground-rupture/immutable-releases`
+  returns `{"enabled":true,"enforced_by_owner":false}`.
+- ~~**OA-17 — Accept ADR-0017**~~ (Phase 1; before T-18 and T-54, the
+  prototype deployment) — **approved 2026-10-31**, recorded by your
+  commit `78e2d35` of the ADR's status and its index row on
+  `dev-v.0.3.x`, which reaches `main` with the design-state merge
+  (OA-18) and `dev-v.0.4.x` with its creation (OA-19). The sweep of
+  its other Proposed mentions, its "(Proposed)" labels included, is
+  made in the HLDD, `docs/adr/README.md`, the DDD, the IP,
+  `docs/app/ddd-review.md`, and this file.
+- **OA-18 — Design state on `main`** (Phase 1; once your commit
+  accepting the DDD and the IP is on `dev-v.0.3.x`, before OA-19 and
+  every task) — open. Merge `dev-v.0.3.x`, which carries the design
+  only, into `main` by a merge commit, as `dev-v.0.2.x` was merged,
+  and tag that commit `v0.3.0` — a plain git tag, no GitHub release.
+  No page, site configuration, or docs-toolchain pin changes, so the
+  push run it starts republishes the same site; `CITATION.cff` and
+  `.zenodo.json` keep 0.2.0 until v0.4.0. `main` then takes no other
+  merge until the release.
+- **OA-19 — Create `dev-v.0.4.x`** (Phase 1; after OA-18, before
+  every task) — open. Create `dev-v.0.4.x` from `main` and push it;
+  every task branch starts there, and every task pull request targets
+  it.
+- **OA-1 — Data-terms record** (Phase 1, then Phase 2; before T-18,
+  then T-63) — open. Phase 1: commit, on `dev-v.0.4.x`,
+  `data/REDISTRIBUTION.md` stating that the licensing decision is
+  deferred to Phase 2 (ADR-0017; OA-13)
+  and, as an assumption, the current terms — code Apache-2.0, prose
+  CC BY 4.0, derived data exports CC BY 4.0 with per-source
+  attribution — with this one line, exactly, as `docs/app/ddd.md` §4.2
+  step 1 spells it out:
+  `Assumed YYYY-MM-DD: code Apache-2.0, prose CC BY 4.0, derived data exports CC BY 4.0 with per-source attribution — pending research-group confirmation`;
+  and add lines naming the file to `README.md` and `LICENSE-docs`.
+  The file also holds one terms line per source — DEM, FDHI, SURE,
+  Kern County — in the form of `docs/app/ddd.md` §4.4 (Vintage
+  terms), recording only what is known: the license or written
+  permission found, with the `https://` URL of the page that states
+  it, or `not established (checked YYYY-MM-DD)` with the source's DOI
+  URL. As found on 2026-10-31: SURE 2.0 is CC BY 4.0
+  ([10.5281/zenodo.7020265](https://doi.org/10.5281/zenodo.7020265));
+  the DEM experiments are under the Open Data Commons Attribution
+  License (ODC-By), which DesignSafe states for both publications
+  ([10.17603/ds2-xpq0-gw80](https://doi.org/10.17603/ds2-xpq0-gw80),
+  [10.17603/ds2-gfsj-pp60](https://doi.org/10.17603/ds2-gfsj-pp60));
+  Kern County has the compiler's written permission of 2026-09-18,
+  which [`docs/datasets.md`](../docs/datasets.md) records; and the
+  FDHI flatfile
+  ([10.25346/S6/Y4F9LJ](https://doi.org/10.25346/S6/Y4F9LJ)) is under
+  CC0 1.0, as its UCLA Dataverse dataset page states. No source is
+  excluded: a missing line stops T-18's upload, a `not established`
+  line does not. Phase 2: once the
+  research group confirms, replace the `Assumed` record line by
+  `Confirmed: YYYY-MM-DD` (with OA-13).
+- **OA-10 — Ruleset on `dev-v.0.4.x` and `main`** (Phase 1; after
+  T-23 has run once, before T-54) — open. One ruleset targeting
+  exactly `dev-v.0.4.x` and `main`, never a `dev-v.*` pattern:
+  required checks `pytest`, `webapp-test`, `webapp-bundle`, `build`
+  and `links`; not strict; admins may bypass, in the bypass mode
+  Always allow, so your record commits may land directly on
+  `dev-v.0.4.x`; no linear-history rule, since the pointer merges into
+  `dev-v.0.4.x` and the release merge into `main` are merge commits.
+  After the release, `dev-v.0.5.x` joins its targets.
+- **OA-20 — Let `dev-v.0.4.x` deploy** (Phase 1; before T-54) — open.
+  Add `dev-v.0.4.x` to the deployment branches of the `github-pages`
+  environment, which admitted `main` alone on 2026-11-01. Pull
+  requests and pushes still never deploy from it; a manual run of
+  Companion site on `dev-v.0.4.x` does, the first being T-54's.
+- **OA-9 — Owner-run tasks** (both phases) — open. Phase 1: run T-18,
+  merge T-54 and deploy it with a manual run of Companion site on
+  `dev-v.0.4.x`, then share the page's address with the research
+  group. Phase 2: run T-63 (release vintage), T-64 (rollback
+  rehearsal) and T-65 (the release, which ends by creating
+  `dev-v.0.5.x`). In both, merge every task's pull request into
+  `dev-v.0.4.x`, whose push runs build and check without deploying;
+  the merge that carries a task's Done cell records it. Only T-65's
+  release merge goes into `main`.
+- **OA-8 — Photograph permissions** (either phase; before any
+  third-party photograph enters a deploy or the release archive) —
+  open; the MVP ships none (the media index is P2).
+- **OA-21 — Stop deploying `dev-v.0.4.x`** (Phase 2; after T-64, just
+  before OA-3's commit) — open. Remove `dev-v.0.4.x` from the
+  deployment branches of the `github-pages` environment, so that no
+  run deploys the release-order commits — the D-10 text, the glossary
+  additions, the activation, the release commit — before the release
+  merge. An emergency data withdrawal in that interval never
+  re-admits it: a manual run on `main` deploys the design-state site,
+  which takes the scenario page and its data off the site until the
+  release.
+- **OA-3 — Liability text** (Phase 2; after OA-21, before T-52 and
+  T-55) — open. Author or source the text of
+  [D-10](../docs/app/pdd.md#1-decision-register) (Liability-limitation
+  text referenced by CR-4) and land it in one dated commit on
+  `dev-v.0.4.x`, the first of the release-branch order, replacing the
+  PDD §5.1 placeholder in the PDD and in `scenario.md`.
+- **OA-2 — Kern County decision** (Phase 2; research group; before
+  T-63, the release vintage, and T-48, the Kern preset) — open:
+  [D-6](../docs/app/pdd.md#1-decision-register) (Kern County
+  field-data group and principal-width rule), recorded in a dated PDD
+  commit that sets the D-6 row to `Decided (YYYY-MM-DD)`. The release
+  waits for it. Taking the preset out of this release is not a D-6
+  decision but a release-scope amendment of the PRD and the PDD, yours
+  as product owner, for which D-6 may give the reason; its record and
+  check are in
+  [IP §3 — Gates and release sequence](../docs/app/ip.md#3-gates-and-release-sequence),
+  and only once the IP cites it does T-48 leave the dependencies of
+  T-65, the release.
+- **OA-14 — Field-overlay default set** (Phase 2; with the research
+  group; before T-55 and T-63) — open. Record per field source the
+  members of [D-18](../docs/app/pdd.md#1-decision-register)
+  (Field-overlay default set and per-source analogue map) as Decided
+  in a dated PDD commit.
+- **OA-13 — Final licensing texts** (Phase 2; with the research group;
+  before T-63) — open. The licensing decision that ADR-0017 defers:
+  the terms under which the project offers the derived data exports,
+  and whether each source's terms permit redistributing data derived
+  from it, one named input being §4.2(a) of ODC-By 1.0, the DEM
+  experiments' license, which asks that a publicly conveyed derivative
+  database be conveyed only under the terms of that license, against
+  the assumed CC BY 4.0 of the derived data exports. It lands as the
+  final per-source terms and attributions for DEM, FDHI, SURE and Kern
+  County in `data/REDISTRIBUTION.md`, and the final `README.md` and
+  `LICENSE-docs` wording, replacing the Phase-1 texts.
+- ~~**OA-12 — Accept ADR-0016**~~ (Phase 2; before T-59, the reference
+  measurement environment) — **approved 2026-10-31**: the on-demand AWS
+  VM of
+  [ADR-0016](../docs/adr/0016-performance-reference-environment.md);
+  your commit `78e2d35` of the ADR's status and its index row on
+  `dev-v.0.3.x` is the record, which reaches `main` with OA-18. Its
+  sweep is made in the same files as OA-17's.
+- ~~**OA-16 — Reference image ID**~~ (Phase 2; before T-59 completes)
+  — **done 2026-10-31**: `ami-0d6dd9e8265d48906`, Canonical's
+  `ubuntu-noble-24.04-amd64-server-20261023`, read with the `egr-perf`
+  profile; T-59 writes it as the `ami_id` default.
+- **OA-4 — Text approval** (Phase 2; research group; after T-55's
+  activation commit and once `dev-v.0.4.x` carries every task T-65
+  needs, before T-65's release merge) — open. Commit
+  the dated record `docs/app/approvals/sc7-YYYY-MM-DD.md` of
+  [SC-7](../docs/app/pdd.md#101-success-criteria) (scientific
+  sign-off), naming the approved texts, the `data_tag`, and the
+  `app.js` and `app.css` SHA-256s; a later change to any of them needs
+  a new record.
+- **OA-5 — Release-time checks** (Phase 2; T-61's budget evidence and
+  T-65) — open. Run the browser lane, the reference measurement on the
+  AWS VM, the manual engine and mobile pass, and the walkthroughs with
+  human reviewers, a product-naive engineer among them. Their scripts,
+  T-62, wait for your product decision under
+  [D-21](../docs/app/pdd.md#1-decision-register) (Success criteria and
+  acceptance walkthroughs), recorded in
+  [PDD §10.3 — Acceptance walkthroughs](../docs/app/pdd.md#103-acceptance-walkthroughs):
+  the scenario each walkthrough of
+  [US-2](../docs/app/prd.md#us-2-pipeline-crossing) (Pipeline crossing)
+  and [US-3](../docs/app/prd.md#us-3-design-review) (Design review)
+  drives, and the consultant's reported scarp height for US-3. The
+  measurement needs the AWS setup that exists since 2026-10-31, made
+  by Claude at your request in the account of the parked Athena work:
+  the `egr-perf` identity with the policy `egr-perf-reference`, its
+  local profile, `egr.perf.awsProfile` in
+  `~/.gradle/gradle.properties`, and the reference network of
+  `docs/app/ddd.md` §7.6, every resource tagged
+  `Purpose=perf-reference`, `School=EPS`,
+  `Project=eps-ground-rupture`, and `Stakeholder=John Shaw` (inventory:
+  Part A of `notes/2026-10-30/aws-terraform-walkthrough.md`); a run
+  that completes destroys its VM, pass or miss, and a failed run keeps
+  it until `webappMeasureDestroy`. Claude runs the reference
+  measurements and their cleanup when you ask, with your `egr-perf`
+  profile; the records and checks stay as IP §4 defines them. A run
+  that misses a budget, its VM destroyed all the same, is recorded as
+  a failure of release-checklist item 5 and reported to you at once;
+  an obvious improvement that sacrifices no functionality is made by
+  default, before any other remedy and also when every budget is met,
+  and one that would change specified behavior or a DDD decision comes
+  to you as a proposal.
+- **OA-6 — Zenodo** (Phase 2; before T-65) — open. Two decisions,
+  each its own line in `docs/app/approvals/zenodo-YYYY-MM-DD.md`,
+  which T-65 checks before it cuts the release: software archiving —
+  enable the Zenodo GitHub app (needs HarvardRC org-admin) or defer
+  it, with a reason — and the data deposit — a Zenodo dataset record,
+  or defer it, with a reason (see "Publication, citation and
+  hosting").
+- **OA-7 — First release** (Phase 2; before T-65) — open. Its version
+  is decided: 0.4.0 (2026-11-01). Decide its contents, and commit both
+  on `dev-v.0.4.x` as `docs/app/approvals/release-YYYY-MM-DD.md`, with
+  the line `Version: 0.4.0`, before T-65 begins: its step (1) checks
+  the record. If GitHub refuses to reuse the software tag after a
+  deleted draft release, a new record names the next patch version.
+  Tags v0.2.0–v0.2.2 exist, and OA-18 adds the plain tag `v0.3.0`; no
+  GitHub release yet.
 
 ## Decisions made
 
@@ -387,6 +629,28 @@ belongs in the same plan.
   ("might have been cleaned from the dataset… could also just be a typo,
   let's leave it for now"). Still pending: the 3D decision (with John, by
   ~08-28) and a Zoom pass over the plots (she is free next week).
+- **Release data (2026-08-20, author review; recorded 2026-10-27)**: the
+  dashboards' plotting data — the exported CSVs — ships in the GitHub
+  release that Zenodo archives, giving the data an addressable, citable
+  home beside Tableau (Andreas's ask, supported by Kristen for
+  reproducibility). The raw modelling inputs (FDHI, DEM, SURE) stay on
+  DesignSafe and are cited by DOI. A release therefore carries the code,
+  the plotting CSVs and `CITATION.cff`, and Zenodo mints the DOI from it;
+  no release has been cut yet. The 3D tables are excluded for now: Cases
+  1–3 are held pending Kristen and John's decision, and Case 4 is
+  excluded as unpublished. One mechanic is open: the Zenodo GitHub
+  integration archives only the tag's source archive — release assets
+  are not picked up (zenodo/zenodo#1235) — and the plotting CSVs are not
+  in the repository (`dist/csv/` is gitignored, ADR-0006), so CSVs
+  attached as release assets reach GitHub but not the Zenodo record.
+  Meeting the intent needs a deposit step of its own, most naturally the
+  Zenodo **dataset record** already preferred under "Hosting the
+  processed tables" — decide with the first release. The webapp's
+  application exports live in release assets themselves, pinned from
+  the repository by a committed manifest (ADR-0014, reworked
+  2026-10-28; ADR-0012; `docs/app/hldd.md` §5.4, §10), and each
+  software release attaches the current exports as its data asset
+  beside the plotting CSVs.
 - **Companion site (2026-08)**: MkDocs Material on GitHub Pages
   (ADR-0008, ADR-0009) embeds the published dashboards, so each
   workbook carries (or simply is) a vertically-laid ~800 px-wide
@@ -416,6 +680,10 @@ belongs in the same plan.
   work yet, and avoid choices that would make adding the 3D arm expensive
   later. Her answer is expected ~2026-08-28 and also governs whether the
   SRL paper becomes a source rather than related work.
+  **2026-10-27 — still held.** Per the author review (recorded under
+  "Decisions made", Release data): Cases 1–3 stay held pending Kristen
+  and John's decision, and Case 4 is excluded as unpublished; the 3D
+  lane itself is on hold (2026-10-12, "Decisions made").
 - [x] **Magnitude in `unified_observations`**: done (2026-07-31) — the
   view carries event `magnitude` (FDHI per measurement, Kern pinned,
   SURE via `config.SURE_EVENT_MAGNITUDES`), enabling magnitude filters
