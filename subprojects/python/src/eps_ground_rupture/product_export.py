@@ -921,6 +921,26 @@ def write_pointer(root: Path, pointer: dict[str, object]) -> None:
     path.write_bytes(canonical_json(pointer))
 
 
+def print_source_lines(commit: str, clean: bool) -> None:
+    """The report's first two lines (§4.1, step 1)."""
+    print(f"source_commit: {commit}")
+    print(f"source_tree_clean: {'true' if clean else 'false'}")
+
+
+def size_report(out_dir: Path, names: list[str]) -> list[str]:
+    """The closing size report (§4.1): one line per vintage file sorted by
+    file name, `size: <name> <bytes>`, and for a `.gz` file
+    `size: <name> <bytes> <decompressed bytes>`, re-measured from disk."""
+    lines = []
+    for name in sorted(names):
+        data = (out_dir / name).read_bytes()
+        if name.endswith(".gz"):
+            lines.append(f"size: {name} {len(data)} {len(gzip.decompress(data))}")
+        else:
+            lines.append(f"size: {name} {len(data)}")
+    return lines
+
+
 def export_vintage(ctx: RunContext) -> Vintage:
     """Steps 2 onward of §4.1."""
     vintage = write_data_files(ctx)
@@ -933,6 +953,7 @@ def run(root: Path, data_tag: str) -> None:
     export_date = export_date_now()
     commit = source_commit(root)
     clean = tree_is_clean(root)
+    print_source_lines(commit, clean)
     paths = discover_inputs(root)
     check_inputs_present(root, data_tag, paths)
     out_dir = root / DIST_APP_DIR / data_tag
@@ -947,6 +968,8 @@ def run(root: Path, data_tag: str) -> None:
     )
     vintage = export_vintage(ctx)
     write_pointer(root, build_pointer(ctx, vintage))
+    for line in size_report(out_dir, list(vintage.written)):
+        print(line)
 
 
 def main(argv: list[str] | None = None, *, root: Path | None = None) -> int:
