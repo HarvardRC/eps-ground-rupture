@@ -26,9 +26,10 @@ document, its register rows with it, together with the implementation
 plan on 2026-11-02; the task bodies that carry the corrections of
 CF-1 to CF-5 of
 [Consistency, ambiguity, and feasibility review (2026-11-01)](ddd-review.md#consistency-ambiguity-and-feasibility-review-2026-11-01)
-and the owner's decisions of 2026-11-02 on them stay Draftable until
-the owner accepts them. The record of each task's state is its Status
-cell in [IP §2 — Task graph](ip.md#2-task-graph)
+and the owner's decisions of 2026-11-02 on them were accepted on
+2026-11-02 by the owner's second acceptance commit. The record of
+each task's state is its Status cell in
+[IP §2 — Task graph](ip.md#2-task-graph)
 ([Task format](ip.md#task-format)). Every *Verification (planned):*
 line names a planned check; whether a check has run is recorded by
 the Done record of the task that runs it. The external
