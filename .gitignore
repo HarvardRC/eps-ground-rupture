@@ -259,6 +259,11 @@ dashboards/duckdb/*.duckdb.wal
 # Gradle local cache (per-machine; build outputs use the existing `build/` rule)
 .gradle/
 
+# Webapp npm packages — installed from the committed package-lock.json, never
+# committed (docs/app/ddd.md §2). The module's build output and the Node.js
+# runtime the node-gradle plugin downloads are covered by `build/` and `.gradle/`.
+subprojects/webapp/node_modules/
+
 # Terraform — local state and provider caches stay out of VCS.
 # (.terraform.lock.hcl and deploy/terraform/tables.json ARE committed.)
 **/.terraform/

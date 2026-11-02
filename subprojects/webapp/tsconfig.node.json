@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ES2020"],
+    "types": ["node"]
+  },
+  "include": ["src/**/*.ts", "test/**/*.ts"],
+  "exclude": [
+    "src/main.ts",
+    "src/recovery.ts",
+    "src/views/dom/**",
+    "src/overlay/field-overlay.ts",
+    "src/download/deliver.ts",
+    "src/a11y/**"
+  ]
+}
