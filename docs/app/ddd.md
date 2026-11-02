@@ -2339,8 +2339,8 @@ Every measured figure in this section is a drafting measurement on
 `data/processed/dem/data.parquet` (SHA-256
 `6a6e9149066f503588e09ecb6772a8392685716672e298d75aa925e7826eb303`),
 taken by a drafting battery that is not in the repository, unless it
-is labeled as measured on the `data-v0-test` export (T-11) of that
-same input. The text names, for each figure, the repository check that reproduces it —
+is labeled as measured on the `data-v0-test` export (T-11). The text
+names, for each figure, the repository check that reproduces it —
 the size report near the end of every successful export run
 ([§4.1](#41-export-task-and-validation) fixes its line format; task
 T-11 of the [implementation plan](ip.md#2-task-graph)), the payload
