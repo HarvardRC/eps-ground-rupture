@@ -23,6 +23,7 @@ import hashlib
 import json
 import platform
 import shutil
+import struct
 import subprocess
 import sys
 import tempfile
@@ -36,8 +37,8 @@ import numpy as np
 import pandas as pd
 import pyarrow
 
-from . import io, views
-from .config import REPO_ROOT
+from . import __version__, io, views
+from .config import REPO_ROOT, SCARP_CLASSES
 
 # --------------------------------------------------------------------------
 # Run inputs and repository paths (§4.1 step 1; §3.2 `provenance`)
@@ -257,6 +258,518 @@ def export_date_now() -> str:
     return datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+# --------------------------------------------------------------------------
+# Step 2: the scenario artifact (§3.1) and its manifest figures (§3.2)
+# --------------------------------------------------------------------------
+
+SCHEMA_VERSION = 1
+
+#: The maximum unsigned 32-bit header count, U of the §3.2 Count contract.
+U32_MAX = 4_294_967_295
+
+MAGIC = b"GRXA"
+HEADER_BYTES = 16
+
+#: The pipeline column naming a trial.
+TRIAL_SOURCE_COLUMN = "Trial"
+
+#: The trial table's column order under schema version 1 (§3.1).
+TRIAL_TABLE_COLUMNS: tuple[str, ...] = (
+    "fault_dip",
+    "sediment_strength",
+    "cohesion",
+    "set",
+    "depth",
+    "density",
+    "model_family",
+)
+
+#: The `dem` view column behind each trial-table column but `model_family`.
+TRIAL_SOURCE_COLUMNS: dict[str, str] = {
+    "fault_dip": "Fault_Dip",
+    "sediment_strength": "Sediment_Strength",
+    "cohesion": "Cohesion",
+    "set": "Set",
+    "depth": "Depth",
+    "density": "Density",
+}
+
+#: Trial-table columns whose dictionaries hold integers (ascending); the
+#: others hold strings in Python `sorted()` code-point order (§3.2).
+INTEGER_TRIAL_COLUMNS: tuple[str, ...] = ("fault_dip", "depth")
+
+#: The `model_family` dictionary: 0 is the published 2D ensemble (§3.1).
+MODEL_FAMILIES: tuple[str, ...] = ("2D",)
+
+#: The `dem` view column behind each stage array.
+STAGE_SOURCE_COLUMNS: dict[str, str] = {
+    "slip": "Slip",
+    "scarp_height": "Scarp_Height",
+    "dzw": "DZW",
+    "scarp_dip": "Scarp_Dip",
+    "scarp_class": "Scarp_Class",
+}
+
+#: The scaled columns' `decimals` and `offset_steps` (§3.1, Restoring values).
+SCALED_COLUMNS: dict[str, tuple[int, int]] = {
+    "slip": (4, 0),
+    "scarp_height": (3, -182),
+    "dzw": (3, 0),
+}
+
+#: The dip dictionary holds thousandths of a degree (DD-1).
+DIP_DECIMALS = 3
+
+UINT16_NULL = 65535
+UINT8_NULL = 255
+INT32_MIN = -(2**31)
+INT32_MAX = 2**31 - 1
+
+#: The blocks in physical order, with their dtypes (§3.1, §3.2 `blocks`).
+BLOCK_DTYPES: dict[str, str] = {
+    "trial_table": "uint8",
+    "slip": "uint16",
+    "scarp_height": "uint16",
+    "dzw": "uint16",
+    "scarp_dip": "uint16",
+    "scarp_class": "uint8",
+    "dip_dictionary": "int32",
+}
+BLOCK_ORDER: tuple[str, ...] = tuple(BLOCK_DTYPES)
+
+#: The nine selectable arm-and-strength states, in display order: the
+#: uniform arm (`Homogeneous`) first, then the layered arm
+#: (`Heterogeneous`); within an arm the order of PDD §3.2 — Sediment
+#: strength and structure (FR-S2): Weak, Moderate, Strong, Random
+#: Heterogeneous, Cohesive Top Unit, Alternating Strong-Weak — in data
+#: spellings (docs/app/ddd.md §3.2, `arm_strength_states`).
+ARM_STRENGTH_STATES: tuple[tuple[str, str], ...] = (
+    ("Homogeneous", "Weak"),
+    ("Homogeneous", "Moderate"),
+    ("Homogeneous", "Strong"),
+    ("Heterogeneous", "Weak"),
+    ("Heterogeneous", "Moderate"),
+    ("Heterogeneous", "Strong"),
+    ("Heterogeneous", "Random Heterogeneous"),
+    ("Heterogeneous", "Cohesive Top Unit"),
+    ("Heterogeneous", "Alternating Strong-Weak"),
+)
+
+#: The storage grid of recorded slip, metres (§3.2 `slip_window_bounds`).
+SLIP_RECORDING_STEP = 0.0001
+
+
+def align4(n: int) -> int:
+    return (n + 3) & ~3
+
+
+def check_counts(trials: object, stages_per_trial: object, records: object) -> None:
+    """The Count contract of §3.2: returns None or raises ``ValueError``
+    naming the count and the violated bound or identity.
+
+    T, N, and R are integers with 1 <= T <= U, 2 <= N <= U, and 2 <= R <= U;
+    T <= floor(U / N) is checked before multiplying, then R = T * N.
+    """
+    named = (
+        ("trials", trials, 1),
+        ("stages_per_trial", stages_per_trial, 2),
+        ("records", records, 2),
+    )
+    for name, value, _ in named:
+        if isinstance(value, bool) or not isinstance(value, int | np.integer):
+            raise ValueError(f"{name} {value!r} is not an integer")
+    for name, value, low in named:
+        if not low <= value <= U32_MAX:
+            raise ValueError(f"{name} {value} breaks the bound {low} <= {name} <= {U32_MAX}")
+    t, n, r = int(trials), int(stages_per_trial), int(records)  # type: ignore[call-overload]
+    if t > U32_MAX // n:
+        raise ValueError(
+            f"trials {t} breaks the bound trials <= floor({U32_MAX} / stages_per_trial) "
+            f"= {U32_MAX // n}"
+        )
+    if r != t * n:
+        raise ValueError(
+            f"records {r} breaks the identity records = trials * stages_per_trial = {t * n}"
+        )
+
+
+def check_source_counts(trial_ids: list[str]) -> tuple[list[str], int]:
+    """The source checks of rule `counts`, in the order of §4.1 step 2, run
+    before any buffer is allocated, `stage_spacing` computed, or header
+    packed: at least one trial; every trial with at least two stages; every
+    trial with the first trial's stage count N; then :func:`check_counts`.
+
+    Returns the trials in artifact order (ascending code point) and N.
+    """
+    per_trial: dict[str, int] = {}
+    for trial in trial_ids:
+        per_trial[trial] = per_trial.get(trial, 0) + 1
+    trials = sorted(per_trial)
+    if not trials:
+        raise ExportFailure("counts", f"trials 0 breaks the bound 1 <= trials <= {U32_MAX}")
+    for trial in trials:
+        if per_trial[trial] < 2:
+            raise ExportFailure(
+                "counts", f"Trial {trial} has {per_trial[trial]} stage, fewer than 2"
+            )
+    n = per_trial[trials[0]]
+    for trial in trials:
+        if per_trial[trial] != n:
+            raise ExportFailure(
+                "counts",
+                f"Trial {trial} has {per_trial[trial]} stages, not the first trial's N = {n}",
+            )
+    try:
+        check_counts(len(trials), n, len(trial_ids))
+    except ValueError as exc:
+        raise ExportFailure("counts", str(exc)) from exc
+    return trials, n
+
+
+def _float_values(frame: pd.DataFrame, column: str) -> tuple[np.ndarray, np.ndarray]:
+    """A float column's values and validity mask (a null reads as invalid)."""
+    values = frame[column].to_numpy(dtype=np.float64, na_value=np.nan)
+    valid = ~np.isnan(values)
+    if not np.isfinite(values[valid]).all():
+        raise ValueError(f"the dem view's {column} holds an infinite value")
+    return values, valid
+
+
+def _encode_scaled(
+    name: str, values: np.ndarray, valid: np.ndarray, decimals: int, offset_steps: int
+) -> np.ndarray:
+    """`stored = round(v * 10^d) - offset_steps` as uint16, nulls on the sentinel."""
+    stored = np.full(values.shape, UINT16_NULL, dtype=np.uint16)
+    steps = np.rint(values[valid] * 10**decimals).astype(np.int64) - offset_steps
+    if steps.size and (steps.min() < 0 or steps.max() > UINT16_NULL):
+        raise ValueError(
+            f"{name}: stored values {steps.min()}..{steps.max()} do not fit uint16 "
+            f"with decimals {decimals} and offset_steps {offset_steps}"
+        )
+    stored[valid] = steps
+    return stored
+
+
+def _encode_dip(values: np.ndarray, valid: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """The DD-1 encoding: a uint16 index into the ascending int32 dictionary
+    of every distinct recorded dip in thousandths of a degree."""
+    thousandths = np.rint(values[valid] * 10**DIP_DECIMALS).astype(np.int64)
+    dictionary = np.unique(thousandths)
+    if dictionary.size and (dictionary[0] < INT32_MIN or dictionary[-1] > INT32_MAX):
+        raise ValueError("scarp_dip: a dictionary entry does not fit int32")
+    if dictionary.size > UINT16_NULL + 1:
+        raise ValueError(f"scarp_dip: {dictionary.size} distinct dips do not fit a uint16 index")
+    stored = np.full(values.shape, UINT16_NULL, dtype=np.uint16)
+    stored[valid] = np.searchsorted(dictionary, thousandths)
+    return stored, dictionary.astype(np.int32)
+
+
+def _encode_classes(series: pd.Series) -> tuple[np.ndarray, int]:
+    """Class codes indexing `config.SCARP_CLASSES`, null as 255."""
+    codes = np.full(len(series), UINT8_NULL, dtype=np.uint8)
+    for code, name in enumerate(SCARP_CLASSES):
+        codes[(series == name).to_numpy(dtype=bool, na_value=False)] = code
+    present = series.notna().to_numpy()
+    unknown = present & (codes == UINT8_NULL)
+    if unknown.any():
+        names = sorted({str(v) for v in series[unknown]})
+        raise ValueError(f"Scarp_Class holds values outside config.SCARP_CLASSES: {names}")
+    return codes, int((~present).sum())
+
+
+def _trial_value(column: str, value: object) -> object:
+    """A trial-table source value, typed as its dictionary holds it."""
+    if column in INTEGER_TRIAL_COLUMNS:
+        if isinstance(value, bool) or not isinstance(value, int | float | np.number):
+            raise ValueError(f"{TRIAL_SOURCE_COLUMNS[column]} holds a non-integer value {value!r}")
+        if not float(value).is_integer():
+            raise ValueError(f"{TRIAL_SOURCE_COLUMNS[column]} holds a non-integer value {value!r}")
+        return int(value)
+    if not isinstance(value, str):
+        raise ValueError(f"{TRIAL_SOURCE_COLUMNS[column]} holds a non-string value {value!r}")
+    return value
+
+
+def _scaled_column(
+    decimals: int, offset_steps: int, values: np.ndarray, valid: np.ndarray, encoding: str
+) -> dict[str, object]:
+    """A `columns` record (§3.2) of a scaled or dictionary column."""
+    scale = 1 / 10**decimals
+    has_values = bool(valid.any())
+    return {
+        "encoding": encoding,
+        "decimals": decimals,
+        "offset_steps": offset_steps,
+        "scale": scale,
+        "offset": offset_steps / 10**decimals,
+        "physical_min": float(values[valid].min()) if has_values else None,
+        "physical_max": float(values[valid].max()) if has_values else None,
+        "recording_step": scale,
+        "null_sentinel": UINT16_NULL,
+        "null_count": int((~valid).sum()),
+    }
+
+
+def stage_spacing(slip: np.ndarray, trials: int, stages_per_trial: int) -> dict[str, float]:
+    """`stage_spacing` (§3.2): the consecutive within-trial slip differences
+    of the trial-major slip array, in metres."""
+    diffs = np.diff(slip.reshape(trials, stages_per_trial), axis=1)
+    return {
+        "min": float(diffs.min()),
+        "max": float(diffs.max()),
+        "mean": float(diffs.mean()),
+    }
+
+
+@dataclass
+class ScenarioPack:
+    """The packed scenario artifact and the decode information the run
+    holds in memory for the manifest and the step-3 checks."""
+
+    artifact: bytes
+    """The decompressed artifact: header and aligned blocks."""
+    frame: pd.DataFrame
+    """The `dem` rows in artifact order (trial-major, ascending slip)."""
+    trials: list[str]
+    stages_per_trial: int
+    trial_table: np.ndarray
+    stored: dict[str, np.ndarray]
+    dip_dictionary: np.ndarray
+    counts: dict[str, int]
+    blocks: dict[str, dict[str, object]]
+    columns: dict[str, dict[str, object]]
+    trial_columns: dict[str, list[object]]
+    arm_strength_states: list[dict[str, str]]
+    stage_spacing: dict[str, float]
+    slip_window_bounds: dict[str, float]
+
+
+def pack_scenario(dem: pd.DataFrame) -> ScenarioPack:
+    """Pack the `dem` view's rows exactly per §3.1 (DD-1 dictionary layout)."""
+    trial_ids = dem[TRIAL_SOURCE_COLUMN].tolist()
+    if not all(isinstance(t, str) for t in trial_ids):
+        raise ValueError("the dem view's Trial column holds a null or non-string value")
+    trials, n = check_source_counts(trial_ids)
+    t_count, r_count = len(trials), len(trial_ids)
+
+    # Trial-major, each trial's stages in ascending slip.
+    position = {trial: i for i, trial in enumerate(trials)}
+    trial_index = np.fromiter((position[t] for t in trial_ids), dtype=np.int64, count=r_count)
+    slip_source = dem[STAGE_SOURCE_COLUMNS["slip"]].to_numpy(dtype=np.float64, na_value=np.nan)
+    frame = dem.iloc[np.lexsort((slip_source, trial_index))].reset_index(drop=True)
+
+    stored: dict[str, np.ndarray] = {}
+    columns: dict[str, dict[str, object]] = {}
+    float_values: dict[str, tuple[np.ndarray, np.ndarray]] = {}
+    for name, (decimals, offset_steps) in SCALED_COLUMNS.items():
+        values, valid = _float_values(frame, STAGE_SOURCE_COLUMNS[name])
+        float_values[name] = (values, valid)
+        stored[name] = _encode_scaled(name, values, valid, decimals, offset_steps)
+        columns[name] = _scaled_column(decimals, offset_steps, values, valid, "scaled")
+    dip_values, dip_valid = _float_values(frame, STAGE_SOURCE_COLUMNS["scarp_dip"])
+    stored["scarp_dip"], dip_dictionary = _encode_dip(dip_values, dip_valid)
+    columns["scarp_dip"] = _scaled_column(DIP_DECIMALS, 0, dip_values, dip_valid, "dict")
+    stored["scarp_class"], class_nulls = _encode_classes(frame[STAGE_SOURCE_COLUMNS["scarp_class"]])
+    columns["scarp_class"] = {
+        "encoding": "code",
+        "decimals": None,
+        "offset_steps": None,
+        "scale": None,
+        "offset": None,
+        "physical_min": None,
+        "physical_max": None,
+        "recording_step": None,
+        "null_sentinel": UINT8_NULL,
+        "null_count": class_nulls,
+    }
+
+    # The trial table: one row per trial, each cell an index into its
+    # column's dictionary; a trial's site conditions are read from its
+    # first record.
+    first = frame.iloc[np.arange(t_count) * n]
+    trial_table = np.zeros((t_count, len(TRIAL_TABLE_COLUMNS)), dtype=np.uint8)
+    trial_columns: dict[str, list[object]] = {}
+    site: dict[str, list[object]] = {}
+    for j, column in enumerate(TRIAL_TABLE_COLUMNS):
+        if column == "model_family":
+            dictionary: list[object] = list(MODEL_FAMILIES)
+            cells = [0] * t_count
+        else:
+            site[column] = [
+                _trial_value(column, v) for v in first[TRIAL_SOURCE_COLUMNS[column]].tolist()
+            ]
+            dictionary = sorted(set(site[column]))  # type: ignore[type-var]
+            if len(dictionary) > UINT8_NULL + 1:
+                raise ValueError(f"{column}: {len(dictionary)} values do not fit a uint8 cell")
+            index = {value: i for i, value in enumerate(dictionary)}
+            cells = [index[value] for value in site[column]]
+        trial_table[:, j] = cells
+        trial_columns[column] = dictionary
+
+    rank = {pair: i for i, pair in enumerate(ARM_STRENGTH_STATES)}
+    pairs = set(zip(site["set"], site["sediment_strength"], strict=True))
+    unknown = sorted(pair for pair in pairs if pair not in rank)  # type: ignore[misc]
+    if unknown:
+        raise ValueError(f"set and sediment_strength pairs outside ARM_STRENGTH_STATES: {unknown}")
+    arm_strength_states = [
+        {"set": arm, "sediment_strength": strength}
+        for arm, strength in sorted(pairs, key=rank.__getitem__)  # type: ignore[arg-type]
+    ]
+
+    payloads = {
+        "trial_table": trial_table.tobytes(),
+        "slip": stored["slip"].astype("<u2").tobytes(),
+        "scarp_height": stored["scarp_height"].astype("<u2").tobytes(),
+        "dzw": stored["dzw"].astype("<u2").tobytes(),
+        "scarp_dip": stored["scarp_dip"].astype("<u2").tobytes(),
+        "scarp_class": stored["scarp_class"].tobytes(),
+        "dip_dictionary": dip_dictionary.astype("<i4").tobytes(),
+    }
+    buffer = bytearray(MAGIC + struct.pack("<III", SCHEMA_VERSION, r_count, t_count))
+    blocks: dict[str, dict[str, object]] = {}
+    for name in BLOCK_ORDER:
+        offset = align4(len(buffer))
+        buffer.extend(bytes(offset - len(buffer)))
+        blocks[name] = {
+            "offset": offset,
+            "length": len(payloads[name]),
+            "dtype": BLOCK_DTYPES[name],
+        }
+        buffer.extend(payloads[name])
+    buffer.extend(bytes(align4(len(buffer)) - len(buffer)))
+
+    slip_values, slip_valid = float_values["slip"]
+    return ScenarioPack(
+        artifact=bytes(buffer),
+        frame=frame,
+        trials=trials,
+        stages_per_trial=n,
+        trial_table=trial_table,
+        stored=stored,
+        dip_dictionary=dip_dictionary,
+        counts={"records": r_count, "trials": t_count, "stages_per_trial": n},
+        blocks=blocks,
+        columns=columns,
+        trial_columns=trial_columns,
+        arm_strength_states=arm_strength_states,
+        stage_spacing=stage_spacing(slip_values, t_count, n),
+        slip_window_bounds={
+            "min": 0.0,
+            "max": float(slip_values[slip_valid].max()),
+            "recording_step": SLIP_RECORDING_STEP,
+        },
+    )
+
+
+# --------------------------------------------------------------------------
+# Step 2: the field export (§3.4) and the regression export (§3.5)
+# --------------------------------------------------------------------------
+
+#: The row record of the field export, in the `field_export` view's names.
+FIELD_ROW_FIELDS: tuple[str, ...] = (
+    "source",
+    "eq_name",
+    "magnitude",
+    "analogue",
+    "source_quantity",
+    "value",
+    "limited_comparison",
+    "criterion_sub50",
+    "labeled_set",
+    "kern_field_group",
+)
+
+#: The approved offset-to-slip relationship in words (§3.5), ASCII only.
+REGRESSION_RELATIONSHIP: dict[str, object] = {
+    "y": {
+        "name": "vd_hw",
+        "description": "vertical displacement on the hanging wall",
+        "unit": "m",
+    },
+    "x": {"name": "slip", "description": "fault slip at depth", "unit": "m"},
+    "form": "vd_hw = slope * slip + intercept",
+    "fit": (
+        "ordinary least squares of vd_hw on slip per fault_dip over all dem records with "
+        "both vd_hw and slip present; intercept fitted, not constrained through zero; "
+        "DuckDB regr_slope, regr_intercept, and regr_r2 in the view dem_regression"
+    ),
+    "back_projection": "slip = (vd_hw - intercept) / slope",
+}
+
+
+def field_export_rows(con: duckdb.DuckDBPyConnection) -> list[dict[str, object]]:
+    """The `field_export` view's rows in the §3.4 order: ascending by
+    (source, analogue, eq_name, source_quantity, value), rows equal on all
+    five ordered by their canonical serialization."""
+    result = con.execute(f"SELECT {', '.join(FIELD_ROW_FIELDS)} FROM field_export").fetchall()
+    rows = [dict(zip(FIELD_ROW_FIELDS, record, strict=True)) for record in result]
+    for row in rows:
+        if row["magnitude"] is not None:
+            row["magnitude"] = float(row["magnitude"])  # type: ignore[arg-type]
+        row["value"] = float(row["value"])  # type: ignore[arg-type]
+    rows.sort(
+        key=lambda row: (
+            row["source"],
+            row["analogue"],
+            row["eq_name"],
+            row["source_quantity"],
+            row["value"],
+            canonical_json(row),
+        )
+    )
+    return rows
+
+
+def regression_coefficients(con: duckdb.DuckDBPyConnection) -> list[dict[str, object]]:
+    """`dem_regression`'s rows ascending by `fault_dip`, at full precision."""
+    result = con.execute(
+        "SELECT fault_dip, n, slope, intercept, r2 FROM dem_regression ORDER BY fault_dip"
+    ).fetchall()
+    return [
+        {
+            "fault_dip": int(fault_dip),
+            "n": int(n),
+            "slope": float(slope),
+            "intercept": float(intercept),
+            "r2": float(r2),
+        }
+        for fault_dip, n, slope, intercept, r2 in result
+    ]
+
+
+# --------------------------------------------------------------------------
+# Vintage file names (§4.1 step 2)
+# --------------------------------------------------------------------------
+
+#: One name pattern per role: `<prefix><h12><suffix>`.
+ROLE_PATTERNS: dict[str, tuple[str, str]] = {
+    "scenario_artifact": ("scenario-", ".bin.gz"),
+    "manifest": ("manifest-", ".json"),
+    "field_export": ("field-", ".json.gz"),
+    "regression_export": ("regression-", ".json.gz"),
+    "reference_results": ("references-", ".json.gz"),
+    "data_terms": ("data-terms-", ".txt"),
+    "media_index": ("media-", ".json"),
+}
+
+
+def vintage_name(role: str, data: bytes) -> str:
+    """The content-hashed name of a vintage file over its exact bytes."""
+    prefix, suffix = ROLE_PATTERNS[role]
+    return f"{prefix}{sha256_hex(data)[:12]}{suffix}"
+
+
+def write_vintage_file(out_dir: Path, role: str, data: bytes) -> str:
+    name = vintage_name(role, data)
+    (out_dir / name).write_bytes(data)
+    return name
+
+
+# --------------------------------------------------------------------------
+# The run
+# --------------------------------------------------------------------------
+
+
 @dataclass
 class RunContext:
     """What every step of one run needs."""
@@ -267,9 +780,31 @@ class RunContext:
     provenance: dict[str, object]
     out_dir: Path
 
+    def envelope(self) -> dict[str, object]:
+        """The envelope members every JSON export shares (§3.2, §3.4, §3.5)."""
+        return {
+            "schema_version": SCHEMA_VERSION,
+            "export_version": self.data_tag,
+            "export_date": self.export_date,
+            "pipeline_version": __version__,
+        }
 
-def export_vintage(ctx: RunContext) -> None:
-    """Steps 2 onward of §4.1, from the run-private views."""
+
+@dataclass
+class Vintage:
+    """What one run has written, by role."""
+
+    pack: ScenarioPack
+    files: dict[str, str]
+    """Manifest `files` key -> written file name."""
+    field_rows: list[dict[str, object]]
+    coefficients: list[dict[str, object]]
+
+
+def write_data_files(ctx: RunContext) -> Vintage:
+    """§4.1 step 2: the data files, from the run-private views."""
+    dem_columns = [TRIAL_SOURCE_COLUMN, *TRIAL_SOURCE_COLUMNS.values()]
+    dem_columns += list(STAGE_SOURCE_COLUMNS.values())
     with tempfile.TemporaryDirectory() as tmp:
         duckdb_path = views.build_duckdb_views(
             processed_dir=ctx.root / "data" / "processed",
@@ -277,13 +812,48 @@ def export_vintage(ctx: RunContext) -> None:
         )
         con = duckdb.connect(str(duckdb_path), read_only=True)
         try:
-            pass
+            quoted = ", ".join(f'"{c}"' for c in dem_columns)
+            dem = con.execute(f"SELECT {quoted} FROM dem").df()
+            pack = pack_scenario(dem)
+            field_rows = field_export_rows(con)
+            coefficients = regression_coefficients(con)
         finally:
             con.close()
+
+    files = {
+        "scenario_artifact": write_vintage_file(
+            ctx.out_dir, "scenario_artifact", gzip_bytes(pack.artifact)
+        ),
+        "field_export": write_vintage_file(
+            ctx.out_dir,
+            "field_export",
+            gzip_bytes(canonical_json({**ctx.envelope(), "rows": field_rows})),
+        ),
+        "regression_export": write_vintage_file(
+            ctx.out_dir,
+            "regression_export",
+            gzip_bytes(
+                canonical_json(
+                    {
+                        **ctx.envelope(),
+                        "relationship": REGRESSION_RELATIONSHIP,
+                        "coefficients": coefficients,
+                    }
+                )
+            ),
+        ),
+    }
+    return Vintage(pack=pack, files=files, field_rows=field_rows, coefficients=coefficients)
+
+
+def export_vintage(ctx: RunContext) -> Vintage:
+    """Steps 2 onward of §4.1."""
+    return write_data_files(ctx)
 
 
 def run(root: Path, data_tag: str) -> None:
     """One ordinary export run."""
+    export_date = export_date_now()
     commit = source_commit(root)
     clean = tree_is_clean(root)
     paths = discover_inputs(root)
@@ -294,7 +864,7 @@ def run(root: Path, data_tag: str) -> None:
     ctx = RunContext(
         root=root,
         data_tag=data_tag,
-        export_date=export_date_now(),
+        export_date=export_date,
         provenance=provenance,
         out_dir=out_dir,
     )
