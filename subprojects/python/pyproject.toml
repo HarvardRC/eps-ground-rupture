@@ -48,6 +48,7 @@ seaborn = "^0.13"
 egr-build = "eps_ground_rupture.cli:main"
 egr-push-sheets = "eps_ground_rupture.cli:push_sheets_main"
 egr-csv = "eps_ground_rupture.cli:csv_main"
+egr-export-app = "eps_ground_rupture.product_export:main"
 
 [build-system]
 requires = ["poetry-core>=1.8.0"]

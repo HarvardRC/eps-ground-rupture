@@ -105,6 +105,29 @@ val egrBuild by tasks.registering(Exec::class) {
     dependsOn(poetryInstall)
 }
 
+// The scenario page's data vintage (docs/app/ddd.md §4.1): one run writes
+// dist/app/<data-tag>/ and the working-tree pointer manifest
+// subprojects/webapp/data/pointer.json, which it never commits. NOT wired
+// into any lifecycle task — it needs the local research data and rewrites
+// the working-tree pointer. Run it explicitly with the required property:
+//   ./gradlew :subprojects:python:exportApp -Pdata.tag=data-v0-test
+val exportApp by tasks.registering(Exec::class) {
+    group = "build"
+    description =
+        "Export a data vintage to dist/app/<data-tag>/ and write the working-tree pointer " +
+            "manifest (egr-export-app). Requires -Pdata.tag=<tag> (data-vN, or data-v0-test)."
+    workingDir = projectDir
+    useVenv()
+    val dataTag = findProperty("data.tag")?.toString()
+    commandLine(poetryBin, "run", "egr-export-app", "--data-tag", dataTag ?: "")
+    doFirst {
+        if (dataTag.isNullOrBlank()) {
+            throw GradleException("exportApp requires the property -Pdata.tag=<tag> (data-vN, or data-v0-test).")
+        }
+    }
+    dependsOn(poetryInstall)
+}
+
 /**
  * Resolve the Google service-account key-file path for the push, in order:
  *   1. `-Pgoogle.sheets.keyfile=...` Gradle property
