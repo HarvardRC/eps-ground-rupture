@@ -4,7 +4,7 @@
 - **Date**: 2026-10-30 (the owner's decision of the same day; drafted
   with the DDD correction pass); 2026-10-31, the deferral of the
   licensing decision made explicit after an external review of the
-  implementation plan; accepted 2026-10-31
+  implementation plan; accepted 2026-10-31; amended 2026-11-01 (the amendment precedes References)
 - **Deciders**: Michael Bouzinier (project owner)
 
 ## Context
@@ -127,6 +127,48 @@ prototype notice, and its data under the stated assumption.
 - HLDD's definition of a public release, its D-10 row, and its two
   rules that redistribution permission is confirmed before an export's
   first public upload are amended to cite this ADR.
+
+> **Amendment 2026-11-01 (owner decision on versions and branches).**
+> `dev-v.0.3.x`, which holds the design only, merges into `main` as
+> the design state, changing no page of the site, tagged `v0.3.0` by a
+> plain git tag — not a GitHub release, so not a public release. The
+> implementation proceeds on `dev-v.0.4.x`, created from `main` after
+> that merge, and reaches `main` only at the first software release,
+> v0.4.0, by the release merge (a merge commit). Before that merge,
+> the prototype reaches the live site only by the owner's manual runs
+> (`workflow_dispatch`) of the Companion site workflow
+> (`.github/workflows/mkdocs.yml`) on `dev-v.0.4.x`, its first
+> deployment and every later update alike, each deploying the site as
+> built from that branch, its other changes included; until the
+> first, `main`'s design state stays live. Pull requests and pushes to
+> `dev-v.*` branches build and check the site without deploying; only
+> a push to `main` or a manual run deploys, and a manual run only from
+> a branch that the `github-pages` environment's deployment-branch
+> policy admits. That policy admits `main` always and `dev-v.0.4.x`
+> from owner action OA-20 of
+> [IP §4 — Owner and research-group actions](../app/ip.md#4-owner-and-research-group-actions),
+> taken before the first prototype deployment, until owner action
+> OA-21, taken just before the first commit of the release-branch
+> order of
+> [IP §3 — Gates and release sequence](../app/ip.md#3-gates-and-release-sequence),
+> the D-10 text. From then on nothing deploys from `dev-v.0.4.x`, so
+> the commits of that order — the D-10 text, the glossary additions,
+> and the activation among them — reach the live site only with the
+> release merge. An emergency data withdrawal between OA-21 and the
+> release merge does not re-admit `dev-v.0.4.x`: it reaches the live
+> site by a manual run on `main`, which deploys the design state and
+> so takes the scenario page and its data off the site until the
+> release merge. After the release only `main` deploys; every later
+> change is a pull request into `dev-v.0.5.x`, created from `main`
+> after the release, and reaches `main` by that branch's merges into
+> `main`. The public release is still published from `main`, as
+> [NFR-2 — Static-site hosting](../app/prd.md#nfr-2-static-site-hosting)
+> requires; the manual runs on `dev-v.0.4.x` deploy the unlisted
+> prototype, which is not a public release (Decision, above), so
+> NFR-2 is not amended.
+> [ADR-0009 — GitHub Pages (via Actions) as site hosting](0009-github-pages-hosting.md)
+> records the admission of `dev-v.0.4.x` in its amendment of this
+> date. Every other decision of this ADR stands.
 
 ## References
 

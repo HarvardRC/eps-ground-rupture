@@ -456,7 +456,7 @@ produced by the computer simulations.
 
 ### 2.2 MVP and delivery priorities
 
-The proposed **minimum viable product (MVP)** is P1, targeted as v0.3.
+The proposed **minimum viable product (MVP)** is P1, targeted as v0.4.
 It must support the complete core workflow: an engineer defines a
 plausible scenario, examines the matching simulated surface-rupture
 measurements, understands the result's limits, and downloads the
@@ -469,7 +469,7 @@ Measurable success criteria and acceptance walkthroughs for the MVP
 are defined in the product definition document (PDD), derived from US-1
 through US-3 and the requirements below.
 
-- **P1 / MVP (v0.3):** scenario inputs; distributions and statistics for
+- **P1 / MVP (v0.4):** scenario inputs; distributions and statistics for
   scarp height, deformation-zone width, and scarp dip; optional
   real-earthquake measurement context; downloadable simulation subsets
   and summary statistics; citations; and links to the paper and full

@@ -325,7 +325,7 @@ belongs in the same plan.
 ## Ground Rupture Explorer — owner actions (opened 2026-10-30)
 
 The owner's to-do list for the Ground Rupture Explorer, the scenario
-explorer that `docs/app/` specifies (updated 2026-10-31). The work
+explorer that `docs/app/` specifies (updated 2026-11-01). The work
 runs in the two phases of
 [ADR-0017](../docs/adr/0017-unadvertised-prototype-before-public-release.md):
 **Phase 1** builds the application and deploys it, with
@@ -333,7 +333,21 @@ its first data vintage, as an unlisted prototype at the site's final
 address for the research group to try, under the current licensing
 stated as an assumption; **Phase 2** records their approvals and
 decisions, the deferred licensing decision among them, activates the
-page and cuts the v0.3 release.
+page and cuts the v0.4 release — v0.4.0, the explorer's first
+software release. By your decisions of 2026-11-01, `dev-v.0.3.x`
+carries the design only and, after your commit accepting the DDD and
+the IP, merges into `main` as the design state, tagged `v0.3.0` with
+no GitHub release (OA-18); the implementation then runs on
+`dev-v.0.4.x`, created from `main` (OA-19): every task pull request,
+and your commits for the actions below, land there, and `main`
+receives the implementation once, with the release merge (T-65).
+Pull requests and pushes to `dev-v.0.4.x` build and check without
+deploying; you deploy it by manual runs of the Companion site
+workflow while the `github-pages` environment admits it, from OA-20
+— the first run is T-54's — until OA-21, just before OA-3's commit,
+so from T-54's run until the release the live site serves its build
+while `main` stays at the design state. After the release,
+`dev-v.0.5.x`, created from `main`, takes every later change.
 Each bullet gives the action's ID, phase, what it is, the task it must
 precede, and its status. The record each action leaves and the check
 the tasks run on it are in
@@ -342,7 +356,8 @@ Task statuses follow the IP's Task format: the owner's commit
 accepting the DDD and the IP sets `Accepted (YYYY-MM-DD)` on each body
 it accepts, and a task's `Done (YYYY-MM-DD)` rides in its last pull
 request — in the next one merged when its Done-when ends after that
-merge — recorded by the owner's merge (OA-9), with no separate commit.
+merge — recorded by the owner's merge into `dev-v.0.4.x`, or for T-65
+into `dev-v.0.5.x` (OA-9), with no separate commit.
 The step-by-step walkthroughs are the owner's dated notes, local and
 not committed: `notes/2026-10-30/aws-terraform-walkthrough.md` for
 the AWS and Terraform steps and
@@ -355,15 +370,30 @@ drills, is retired: the drills run against a stub `gh` instead.
   `gh api repos/HarvardRC/eps-ground-rupture/immutable-releases`
   returns `{"enabled":true,"enforced_by_owner":false}`.
 - ~~**OA-17 — Accept ADR-0017**~~ (Phase 1; before T-18 and T-54, the
-  prototype deployment) — **approved 2026-10-31**: the ADR's status
-  and its index row read Accepted in the working tree; your commit of
-  them is the record. The sweep of its other Proposed mentions, its
-  "(Proposed)" labels included, is made in the HLDD and
-  `docs/adr/README.md` in the working tree and in the DDD, the IP,
+  prototype deployment) — **approved 2026-10-31**, recorded by your
+  commit `78e2d35` of the ADR's status and its index row on
+  `dev-v.0.3.x`, which reaches `main` with the design-state merge
+  (OA-18) and `dev-v.0.4.x` with its creation (OA-19). The sweep of
+  its other Proposed mentions, its "(Proposed)" labels included, is
+  made in the HLDD, `docs/adr/README.md`, the DDD, the IP,
   `docs/app/ddd-review.md`, and this file.
+- **OA-18 — Design state on `main`** (Phase 1; once your commit
+  accepting the DDD and the IP is on `dev-v.0.3.x`, before OA-19 and
+  every task) — open. Merge `dev-v.0.3.x`, which carries the design
+  only, into `main` by a merge commit, as `dev-v.0.2.x` was merged,
+  and tag that commit `v0.3.0` — a plain git tag, no GitHub release.
+  No page, site configuration, or docs-toolchain pin changes, so the
+  push run it starts republishes the same site; `CITATION.cff` and
+  `.zenodo.json` keep 0.2.0 until v0.4.0. `main` then takes no other
+  merge until the release.
+- **OA-19 — Create `dev-v.0.4.x`** (Phase 1; after OA-18, before
+  every task) — open. Create `dev-v.0.4.x` from `main` and push it;
+  every task branch starts there, and every task pull request targets
+  it.
 - **OA-1 — Data-terms record** (Phase 1, then Phase 2; before T-18,
-  then T-63) — open. Phase 1: commit `data/REDISTRIBUTION.md` stating
-  that the licensing decision is deferred to Phase 2 (ADR-0017; OA-13)
+  then T-63) — open. Phase 1: commit, on `dev-v.0.4.x`,
+  `data/REDISTRIBUTION.md` stating that the licensing decision is
+  deferred to Phase 2 (ADR-0017; OA-13)
   and, as an assumption, the current terms — code Apache-2.0, prose
   CC BY 4.0, derived data exports CC BY 4.0 with per-source
   attribution — with this one line, exactly, as `docs/app/ddd.md` §4.2
@@ -390,26 +420,47 @@ drills, is retired: the drills run against a stub `gh` instead.
   line does not. Phase 2: once the
   research group confirms, replace the `Assumed` record line by
   `Confirmed: YYYY-MM-DD` (with OA-13).
-- **OA-10 — `main` ruleset** (Phase 1; after T-23 has run once, before
-  T-54) — open. Required checks `pytest`, `webapp-test`,
-  `webapp-bundle`, `build` and `links`; not strict; admins may bypass,
-  in the bypass mode Always allow; no linear-history rule, since pointer
-  and release-branch merges into `main` are merge commits.
-- **OA-9 — Owner-run tasks** (both phases) — open. Phase 1: run T-18
-  and merge T-54, then share the page's address with the research
+- **OA-10 — Ruleset on `dev-v.0.4.x` and `main`** (Phase 1; after
+  T-23 has run once, before T-54) — open. One ruleset targeting
+  exactly `dev-v.0.4.x` and `main`, never a `dev-v.*` pattern:
+  required checks `pytest`, `webapp-test`, `webapp-bundle`, `build`
+  and `links`; not strict; admins may bypass, in the bypass mode
+  Always allow, so your record commits may land directly on
+  `dev-v.0.4.x`; no linear-history rule, since the pointer merges into
+  `dev-v.0.4.x` and the release merge into `main` are merge commits.
+  After the release, `dev-v.0.5.x` joins its targets.
+- **OA-20 — Let `dev-v.0.4.x` deploy** (Phase 1; before T-54) — open.
+  Add `dev-v.0.4.x` to the deployment branches of the `github-pages`
+  environment, which admitted `main` alone on 2026-11-01. Pull
+  requests and pushes still never deploy from it; a manual run of
+  Companion site on `dev-v.0.4.x` does, the first being T-54's.
+- **OA-9 — Owner-run tasks** (both phases) — open. Phase 1: run T-18,
+  merge T-54 and deploy it with a manual run of Companion site on
+  `dev-v.0.4.x`, then share the page's address with the research
   group. Phase 2: run T-63 (release vintage), T-64 (rollback
-  rehearsal) and T-65 (the release). In both, merge every task's pull
-  request into `main`, since a merge can deploy the site; the merge
-  that carries a task's Done cell records it.
+  rehearsal) and T-65 (the release, which ends by creating
+  `dev-v.0.5.x`). In both, merge every task's pull request into
+  `dev-v.0.4.x`, whose push runs build and check without deploying;
+  the merge that carries a task's Done cell records it. Only T-65's
+  release merge goes into `main`.
 - **OA-8 — Photograph permissions** (either phase; before any
   third-party photograph enters a deploy or the release archive) —
   open; the MVP ships none (the media index is P2).
-- **OA-3 — Liability text** (Phase 2; before T-52 and T-55) — open.
-  Author or source the text of
+- **OA-21 — Stop deploying `dev-v.0.4.x`** (Phase 2; after T-64, just
+  before OA-3's commit) — open. Remove `dev-v.0.4.x` from the
+  deployment branches of the `github-pages` environment, so that no
+  run deploys the release-order commits — the D-10 text, the glossary
+  additions, the activation, the release commit — before the release
+  merge. An emergency data withdrawal in that interval never
+  re-admits it: a manual run on `main` deploys the design-state site,
+  which takes the scenario page and its data off the site until the
+  release.
+- **OA-3 — Liability text** (Phase 2; after OA-21, before T-52 and
+  T-55) — open. Author or source the text of
   [D-10](../docs/app/pdd.md#1-decision-register) (Liability-limitation
-  text referenced by CR-4) and land it in one dated commit, the first
-  on the release branch, replacing the PDD §5.1 placeholder in the PDD
-  and in `scenario.md`.
+  text referenced by CR-4) and land it in one dated commit on
+  `dev-v.0.4.x`, the first of the release-branch order, replacing the
+  PDD §5.1 placeholder in the PDD and in `scenario.md`.
 - **OA-2 — Kern County decision** (Phase 2; research group; before
   T-63, the release vintage, and T-48, the Kern preset) — open:
   [D-6](../docs/app/pdd.md#1-decision-register) (Kern County
@@ -442,16 +493,16 @@ drills, is retired: the drills run against a stub `gh` instead.
   measurement environment) — **approved 2026-10-31**: the on-demand AWS
   VM of
   [ADR-0016](../docs/adr/0016-performance-reference-environment.md);
-  the ADR's status and its index row read Accepted in the working
-  tree; your commit of them is the record. Its sweep is made in the
-  same files as OA-17's.
+  your commit `78e2d35` of the ADR's status and its index row on
+  `dev-v.0.3.x` is the record, which reaches `main` with OA-18. Its
+  sweep is made in the same files as OA-17's.
 - ~~**OA-16 — Reference image ID**~~ (Phase 2; before T-59 completes)
   — **done 2026-10-31**: `ami-0d6dd9e8265d48906`, Canonical's
   `ubuntu-noble-24.04-amd64-server-20261023`, read with the `egr-perf`
   profile; T-59 writes it as the `ami_id` default.
 - **OA-4 — Text approval** (Phase 2; research group; after T-55's
-  activation commit and once the release branch contains `main` with
-  every task T-65 needs, before T-65's release merge) — open. Commit
+  activation commit and once `dev-v.0.4.x` carries every task T-65
+  needs, before T-65's release merge) — open. Commit
   the dated record `docs/app/approvals/sc7-YYYY-MM-DD.md` of
   [SC-7](../docs/app/pdd.md#101-success-criteria) (scientific
   sign-off), naming the approved texts, the `data_tag`, and the
@@ -495,13 +546,14 @@ drills, is retired: the drills run against a stub `gh` instead.
   it, with a reason — and the data deposit — a Zenodo dataset record,
   or defer it, with a reason (see "Publication, citation and
   hosting").
-- **OA-7 — First release** (Phase 2; before T-65) — open. Decide its
-  version and contents, and commit them on the release branch as
-  `docs/app/approvals/release-YYYY-MM-DD.md`, with the line
-  `Version: X.Y.Z`, before T-65 begins: its step (1) checks the
-  record. If GitHub refuses to reuse the software tag after a deleted
-  draft release, a new record names the next patch version. Tags
-  v0.2.0–v0.2.2 exist, no GitHub release yet.
+- **OA-7 — First release** (Phase 2; before T-65) — open. Its version
+  is decided: 0.4.0 (2026-11-01). Decide its contents, and commit both
+  on `dev-v.0.4.x` as `docs/app/approvals/release-YYYY-MM-DD.md`, with
+  the line `Version: 0.4.0`, before T-65 begins: its step (1) checks
+  the record. If GitHub refuses to reuse the software tag after a
+  deleted draft release, a new record names the next patch version.
+  Tags v0.2.0–v0.2.2 exist, and OA-18 adds the plain tag `v0.3.0`; no
+  GitHub release yet.
 
 ## Decisions made
 

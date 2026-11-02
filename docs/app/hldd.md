@@ -125,7 +125,7 @@ approves it, incorporating any amendments agreed during review.
 | [ADR-0014](../adr/0014-committed-content-hashed-artifacts.md), amended by [ADR-0019](../adr/0019-release-based-data-identity.md) | **Data publication and versioning.** Store the application data files as GitHub release assets; commit only a pointer manifest that selects a published data release and its exact asset checksums. Publish compressed simulation data and use filenames that change when file content changes. Deploy only the pinned data vintage; retain earlier vintages as release assets. Derived data keeps its source terms: it never enters the repository, and each release carries it as a data asset. | [§5.4 Pinned, versioned artifacts](#54-pinned-versioned-artifacts-adr-0014), [§7.3 Delivery and caching](#73-delivery-and-caching) |
 | [ADR-0015](../adr/0015-golden-scenario-parity.md) | **Data and calculation verification.** Verify two things separately: that the exported application data preserves the pipeline's approved records and values, and that the application's filtering and statistics reproduce independently calculated pipeline results for predefined test scenarios. The pipeline also supplies the surface-offset-to-slip conversion coefficients, so the application does not maintain a separate copy of those numbers. | [§5.6 Reference results and verification](#56-reference-results-and-verification-adr-0015), [§5.7 Conversion coefficients](#57-conversion-coefficients-adr-0015), [§9 Testing and release architecture](#9-testing-and-release-architecture) |
 | [ADR-0016](../adr/0016-performance-reference-environment.md) | **Performance reference environment.** Measure the performance budgets on an AWS virtual machine of fixed specification, defined by a Terraform configuration in the repository: each measurement run creates it if it does not exist, runs against the locally built site, and destroys it when the run succeeds. Each time budget is judged at the 95th percentile of 30 measured runs. | [Performance budgets](#performance-budgets), [§7.1 Performance estimates and verification](#71-performance-estimates-and-verification) |
-| [ADR-0017](../adr/0017-unadvertised-prototype-before-public-release.md) | **Prototype before public release.** Deploy the application first as an unadvertised prototype — no navigation entry, excluded from site search and the sitemap, marked as a prototype, with the licensing decision deferred and the current licensing stated as an assumption — so the research group can review it; approvals, the D-10 text and the licensing decision are required at activation and at the first software release, not at the prototype deployment. | [Licensing and media permissions](#licensing-and-media-permissions), [§9 Testing and release architecture](#9-testing-and-release-architecture) |
+| [ADR-0017](../adr/0017-unadvertised-prototype-before-public-release.md) | **Prototype before public release.** Deploy the application first as an unadvertised prototype — no navigation entry, excluded from site search and the sitemap, marked as a prototype, with the licensing decision deferred and the current licensing stated as an assumption — so the research group can review it; approvals, the D-10 text and the licensing decision are required at activation and at the first software release, not at the prototype deployment. Its amendment of 2026-11-01 deploys the prototype by the owner's manual runs of the site workflow on the development branch, `dev-v.0.4.x`, until the release sequence begins; pushes deploy only from `main`, which alone deploys after the first release. | [Static hosting](#static-hosting), [Licensing and media permissions](#licensing-and-media-permissions), [§9 Testing and release architecture](#9-testing-and-release-architecture) |
 | [ADR-0018](../adr/0018-manifest-defined-stage-count.md) | **Uniform stage count per vintage.** The manifest records a measured count N shared by every trial, and queries use N as their stride. Schema 1 requires at least two stages per trial; the current dataset's 101 stages remain a completeness check, not a universal format constant. | [§5.2 Simulation data organization](#52-simulation-data-organization-adr-0013), [§5.3 Records rather than precomputed summaries](#53-records-rather-than-precomputed-summaries-adr-0013) |
 | [ADR-0019](../adr/0019-release-based-data-identity.md) | **Data identity.** Pin data by the published dedicated data release and its exact filenames and SHA-256 checksums. A bare tag, a draft release, or a release not marked as a prerelease is insufficient. Exporter commits identify code provenance only. | [§5.4 Pinned, versioned artifacts](#54-pinned-versioned-artifacts-adr-0014), [Data refresh and deployment](#data-refresh-and-deployment) |
 
@@ -152,9 +152,19 @@ arrangements.
 
 The site is published on GitHub Pages by
 [`.github/workflows/mkdocs.yml`](../../.github/workflows/mkdocs.yml).
-Only the repository's `main` branch is deployed, either by a push that
+The repository's `main` branch is deployed, either by a push that
 changes the files the workflow watches or by a manual run of the
-workflow.
+workflow. The implementation is developed on a development branch,
+`dev-v.0.4.x` up to the first software release (v0.4.0), whose
+pushes and pull requests run the workflow's build and checks without
+deploying; a release merges that branch into `main`. Before that
+release the owner also deploys the unadvertised prototype of
+[ADR-0017](../adr/0017-unadvertised-prototype-before-public-release.md)
+(amendment of 2026-11-01) from `dev-v.0.4.x`, by manual runs of the
+workflow, from the prototype deployment until the changes that
+prepare the release begin to land on that branch; meanwhile the live
+site serves that branch's build, while `main` holds none of the
+implementation. After the first release, only `main` is deployed.
 
 The minimum viable product (MVP) must not require server-side
 computation, a database service, or a private backend.
@@ -165,7 +175,10 @@ visitor tracking.
 
 References:
 
-- [ADR-0009 — GitHub Pages (via Actions) as site hosting](../adr/0009-github-pages-hosting.md).
+- [ADR-0009 — GitHub Pages (via Actions) as site hosting](../adr/0009-github-pages-hosting.md)
+  (amendment of 2026-11-01).
+- [ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md)
+  (amendment of 2026-11-01).
 - [Deployment documentation](../../subprojects/mkdocs/DEPLOY.md).
 - [NFR-1 — Free public access](prd.md#nfr-1-free-public-access).
 - [NFR-2 — Static-site hosting](prd.md#nfr-2-static-site-hosting).
@@ -414,9 +427,10 @@ Local Python data pipeline
       ▼
 Versioned exports in release assets, pinned from the repository
       │
-      │ Pull request: tests, application build,
-      │ and strict site-build validation
-      │ Merge to main: application build, site build, deployment
+      │ Pull request or push to the development branch: tests,
+      │ application build, and strict site-build validation
+      │ Release merge into main: application build, site build,
+      │ deployment
       ▼
 Existing MkDocs site published on GitHub Pages
 ```
@@ -467,8 +481,12 @@ application is never committed
 ([§4.3](#43-language-toolchain-and-repository-structure-adr-0011)).
 Pull-request (PR) checks run the tests and the strict MkDocs build, and
 §4.3 widens both workflows' path filters so that application and data
-changes trigger them. After changes are merged to `main`, the deployment
-workflow builds and publishes the site through GitHub Pages.
+changes trigger them. Changes merge into the development branch,
+where these checks run without deploying; when a release merges that
+branch into `main`, the deployment workflow builds and publishes the
+site through GitHub Pages. Before the first release, the owner's
+manual runs of that workflow on the development branch publish the
+unadvertised prototype ([Static hosting](#static-hosting)).
 
 ### Interactive use in the browser
 
@@ -588,7 +606,7 @@ following table records how each surface is implemented.
 | Surface | Implementation | Rationale |
 |---|---|---|
 | Scenario page | **Native client-side application** within the existing site. | The combined scenario query is the documented gap. The existing dashboards do not provide it. |
-| Five published dashboards | **Links to the existing site pages**, which already embed Tableau Public. | These dashboards continue to serve their existing uses. No additional native full-dataset panel is justified for v0.3, the MVP release target ([PRD §2.2](prd.md#22-mvp-and-delivery-priorities)). |
+| Five published dashboards | **Links to the existing site pages**, which already embed Tableau Public. | These dashboards continue to serve their existing uses. No additional native full-dataset panel is justified for v0.4, the MVP release target ([PRD §2.2](prd.md#22-mvp-and-delivery-priorities)). |
 | Morphology page (P2) | **Static site page with a small page-local script** for grouping collapse variants with their base types. | The content is explanatory. Its family-grouping control does not require the scenario application's data or calculation code. |
 | How the measurements are made (P2) | **Static site page** with approved figures and optional animation. | The page explains the measurement process; it does not perform scenario calculations. |
 | Contact and requests (P3, the third delivery priority — [PRD §2.2](prd.md#22-mvp-and-delivery-priorities)) | **Static site page** containing approved contact details and links. | No application calculation or persistent user state is needed. |
@@ -609,7 +627,7 @@ References:
 - [NFR-8 — Architecture decision record](prd.md#nfr-8-architecture-decision-record).
 - [PDD §1 — Decision register](pdd.md#1-decision-register): D-13
   (Scarp-family view availability and label) and D-19 (Native
-  full-dataset exploration panel in v0.3).
+  full-dataset exploration panel in v0.4).
 - [PDD §2.1 — Page inventory](pdd.md#21-page-inventory).
 - [PDD §8 — Education and media surfaces](pdd.md#8-education-and-media-surfaces).
 - [PDD §5.11 — Labels, units, and glossary links](pdd.md#511-labels-units-and-glossary-links-fr-g3-cr-3-cr-7).
@@ -765,7 +783,8 @@ gate them. These include:
 A webapp-only change must trigger application tests and site validation.
 A data refresh must trigger data-integrity checks, the pipeline
 comparison tests, and site validation. Both must trigger deployment when
-merged to `main`.
+a release merges them into `main`; on the development branch they
+trigger validation only ([Static hosting](#static-hosting)).
 
 Tests must use the exact data files identified by the committed
 pointer manifest, not an independently selected or latest available
@@ -2247,8 +2266,11 @@ and the other build inputs identified in §4.3. In particular:
 - pointer-manifest changes trigger retrieval and verification of the
   selected data vintage, calculation-comparison tests, and site
   validation; and
-- accepted changes deploy through the existing workflow after merging
-  to `main`.
+- accepted changes merge into the development branch and deploy
+  through the existing workflow when a release merges that branch
+  into `main`; before the first release, the owner's manual runs on
+  the development branch deploy the unadvertised prototype
+  ([Static hosting](#static-hosting)).
 
 Validation must cover the assembled site, including the generated
 application assets and retrieved data files, rather than only the
@@ -2476,12 +2498,20 @@ without publication permission is absent from the publication output
 ([§6.2](#62-media-architecture-adr-0012)).
 
 Deployment remains restricted to `main`, following
-[ADR-0009](../adr/0009-github-pages-hosting.md).
+[ADR-0009](../adr/0009-github-pages-hosting.md) as amended on
+2026-11-01, with one exception: before the first release, the owner
+deploys the unadvertised prototype by manual runs of the workflow on
+the development branch
+([ADR-0017](../adr/0017-unadvertised-prototype-before-public-release.md),
+amendment of 2026-11-01; [Static hosting](#static-hosting)). Pushes
+to that branch never deploy.
 
 References:
 
-- [ADR-0009 — GitHub Pages (via Actions) as site
-  hosting](../adr/0009-github-pages-hosting.md).
+- [ADR-0009 — GitHub Pages (via Actions) as site hosting](../adr/0009-github-pages-hosting.md)
+  (amendment of 2026-11-01).
+- [ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md)
+  (amendment of 2026-11-01).
 - [§4.3 — Language, toolchain, and repository
   structure](#43-language-toolchain-and-repository-structure-adr-0011).
 - [§6.2 — Media architecture](#62-media-architecture-adr-0012).
@@ -2543,18 +2573,26 @@ A data refresh follows this sequence:
    release and its assets
    ([§5.4](#54-pinned-versioned-artifacts-adr-0014)).
 5. The owner commits the updated pointer manifest and opens a pull
-   request.
+   request into the development branch, where it merges without
+   deploying ([Static hosting](#static-hosting)).
 6. CI retrieves the pinned files, verifies their checksums, runs the
    fixture-based pipeline tests, the parity harness, and the
    application-specific tests, and validates the assembled site.
-7. Before the merge that releases the change, the owner runs the
-   browser tests against the locally assembled site and the acceptance
-   checks of this section — a data refresh changes the product, so
-   these release checks apply
-   ([PDD §9.4](pdd.md#94-releases) Releases).
-8. After approval and merge to `main`, CI builds the application,
+7. Before the merge that releases the change (the merge of the
+   development branch into `main`), the owner runs the browser tests
+   against the locally assembled site and the acceptance checks of
+   this section — a data refresh changes the product, so these
+   release checks apply ([PDD §9.4](pdd.md#94-releases) Releases).
+8. After approval and that merge, CI builds the application,
    retrieves and verifies the pinned data, builds the site, and deploys
    it to GitHub Pages.
+
+Before the first release, a vintage pinned on the development branch
+reaches the live site only with the unadvertised prototype, by the
+owner's manual run of the workflow on that branch
+([Static hosting](#static-hosting)); that deployment is not a release
+([ADR-0017](../adr/0017-unadvertised-prototype-before-public-release.md)),
+so step 7's checks do not gate it.
 
 A software-only change uses the currently pinned data vintage unless
 the change explicitly requires a new one. It does not regenerate or
@@ -2769,7 +2807,8 @@ The ten decisions supporting this design are:
   time budget at the 95th percentile of 30 measured runs.
 - **[ADR-0017](../adr/0017-unadvertised-prototype-before-public-release.md):**
   the unadvertised prototype deployment that precedes the public
-  release.
+  release, deployed by the owner's manual runs on the development
+  branch under its amendment of 2026-11-01.
 - **[ADR-0018](../adr/0018-manifest-defined-stage-count.md):**
   one uniform stage count per data vintage, measured by the export,
   recorded in the artifact manifest, validated before use, and used

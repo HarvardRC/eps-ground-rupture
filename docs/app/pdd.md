@@ -100,7 +100,7 @@ named in the last column carry the detail.
 
 | ID | Decision | Source (PRD) | Owner | Status | Resolution / proposal |
 |---|---|---|---|---|---|
-| D-1 | P1 is the MVP and release target (v0.3). | §2.2, §9.5-1 | Product owner | Decided (2026-10-15) | Yes. |
+| D-1 | P1 is the MVP and release target (v0.4). | §2.2, §9.5-1 | Product owner | Decided (2026-10-15) | Yes. Release target renumbered from v0.3 by the owner's decision of 2026-11-01. |
 | D-2 | Site entry point (the name is decided: Ground Rupture Explorer, 2026-10-15). | §9.5-2, R-11 | Owner + research group | Decided (2026-10-28) | §2.2; decided by the product owner alone, taking responsibility. |
 | D-3 | Multi-dip behavior of the offset-to-slip assist. | FR-S5, §9.5-3 | Owner, research-group review | Proposed | Per-dip converted windows; §3.6. |
 | D-4 | Low-slip measurement-reliability policy. | DR-4, R-3, §9.5-4 | Research group | Interim | Document, do not filter; caveat in §4.6 and §5.9. |
@@ -118,7 +118,7 @@ named in the last column carry the detail.
 | D-16 | Browser and mobile baseline. | NFR-4 | Product owner | Proposed | Evergreen 12-month window; 360 px floor; §9.2. Browser window amended at owner review, 2026-11-01. |
 | D-17 | Accessibility conformance target. | NFR-5 | Product owner | Proposed | WCAG 2.2 AA for new pages; §9.3. |
 | D-18 | Field-overlay default set and per-source analogue map. | FR-O5 | Owner, research-group review | Proposed | §4.4. |
-| D-19 | Native full-dataset exploration panel in v0.3. | FR-G5, C8 | Product owner | Proposed | None — no documented gap; the five dashboards serve C8; recorded gap process in §2.4. |
+| D-19 | Native full-dataset exploration panel in v0.4. | FR-G5, C8 | Product owner | Proposed | None — no documented gap; the five dashboards serve C8; recorded gap process in §2.4. |
 | D-20 | Us − Ud as a fourth displayed measurement. | FR-O1, R-10 | Owner + research group | Open | Out of the MVP; the results page reserves the slot; §4.1. |
 | D-21 | Success criteria and acceptance walkthroughs. | §2.2 | Product owner | Proposed | §10. |
 | D-22 | Default displacement-window state. | FR-S5, FR-S6, FR-S8 | Product owner | Proposed | No active window by default ("slip: any"); GS-0 and GS-7 pin it; §3.4. |
@@ -168,7 +168,7 @@ existing site.
 
 ### 2.4 Future native panels (D-19)
 
-v0.3 ships no native full-dataset exploration panel: C8's uses are
+v0.4 ships no native full-dataset exploration panel: C8's uses are
 served by the five published dashboards, and no documented gap exists.
 A future proposal for one must add a register row naming the gap, the
 dashboard that fails to meet it, and the user evidence — the "named
@@ -228,7 +228,7 @@ says so ("Strong — uniform and layered"). Helper text states that the
 same word means different built profiles in the two arms. The
 letter-coded profile refinement (five uniform values, lettered layered
 profiles) is reserved as a collapsed "Advanced" group, disabled in
-v0.3 pending R-2.
+v0.4 pending R-2.
 
 ### 3.3 Sediment depth (FR-S3) and density (FR-S4)
 
@@ -464,7 +464,7 @@ earthquakes)." On:
   tests whether relaxing that condition alone yields matches, and
   names those that do ("Relaxing sediment depth alone would produce
   matches."). Diagnosing combinations beyond single conditions is out
-  of scope for v0.3 and recorded here as the PDD-defined rule.
+  of scope for v0.4 and recorded here as the PDD-defined rule.
 - **Matching records, but no valid measurement** in the displayed
   panel (reachable: a slip window topping out below the first
   recorded nonzero stage — first stages sit at ≈0.052–0.057 m, so a

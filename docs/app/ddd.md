@@ -13,6 +13,14 @@ and
 ADR-0019 and ADR-0018, which record the DF-3 and DF-5 decisions,
 were accepted that day
 ([Authority and change control](#authority-and-change-control)).
+It was then revised for the owner's decisions of the same day on
+versions and branches — v0.3.x holds the design only, the
+implementation lands on `dev-v.0.4.x`, and the explorer's first
+software release is v0.4.0 ([§6.3](#63-ci-workflows), Branches) —
+and for three findings of that day's implementation-readiness audit:
+the `playwright-core` pin and the stylesheet build of
+[§2](#2-repository-structure-naming-and-toolchain), and the
+fresh-clone skip count of [§7.3](#73-pipeline-and-export-tests).
 Every section is drafted and normative; every register row is Proposed.
 Nothing it specifies has been built in the project yet, and none of
 the checks it introduces has run there: every
@@ -163,8 +171,8 @@ independently redefine scientific or statistical behavior.
   replacement of software releases in steps 2 and 5 of the
   withdrawal procedure
   ([§4.3](#43-retention-rollback-recovery-and-withdrawal); an owner
-  decision, Proposed); and the `main` ruleset of
-  [§6.3](#63-ci-workflows), its reading of
+  decision, Proposed); and the ruleset of [§6.3](#63-ci-workflows)
+  on `main` and the release branch, its reading of
   [ADR-0015](../adr/0015-golden-scenario-parity.md)'s "a parity
   failure blocks merge" under the admin bypass included (owner
   action OA-10, Proposed).
@@ -182,7 +190,9 @@ independently redefine scientific or statistical behavior.
   and
   [ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md),
   whose two phases — an unlisted prototype for the research group's
-  review, then the public release — are publication states of
+  review, deployed from `dev-v.0.4.x` by the owner's manual runs
+  under the ADR's amendment of 2026-11-01, then the public release —
+  are publication states of
   [§6.1](#61-build-outputs-asset-paths-and-page-scaffold). A change,
   or a new decision such as these, completes the repository's ADR
   process before dependent work proceeds. For ADR-0016 and ADR-0017
@@ -927,20 +937,29 @@ therefore runs the same runtime, and no workflow step installs Node.js
 
 Development dependencies, each listed at an exact version in
 `package.json` (no `^` or `~` range): `typescript 5.5.4`,
-`esbuild 0.24.0`, `@playwright/test 1.47.2`, `@types/node 22.10.2`
-(the Node.js 22 typings that `tsconfig.node.json` and the tests'
-`node:test` imports need — they also declare the `fetch`,
-`performance`, and `DecompressionStream` globals that `decode/`
-calls in both environments — released alongside the runtime pin),
+`esbuild 0.24.0`, `@playwright/test 1.47.2`, `playwright-core 1.47.2`
+(below), `@types/node 22.10.2` (the Node.js 22 typings that
+`tsconfig.node.json` and the tests' `node:test` imports need — they
+also declare the `fetch`, `performance`, and `DecompressionStream`
+globals that `decode/` calls in both environments — released
+alongside the runtime pin),
 `@axe-core/playwright 4.10.0` (the accessibility engine of
 [§7.5](#75-browser-test-lane), contemporary with the other pins; the
-lockfile resolves its `axe-core` dependency to one exact version, and
-`@playwright/test` satisfies its `playwright-core` peer), and
+lockfile resolves its `axe-core` dependency to one exact version), and
 `caniuse-lite 1.0.30001820` (the browser-support dataset of the
 compatibility test of
 [§7.6](#76-performance-and-compatibility-measurements), which states
 when the dataset is upgraded). The list is complete: another package
-joins only by amending it. The shipped bundle has zero runtime
+joins only by amending it. `playwright-core` is pinned, at the version
+that `@playwright/test` 1.47.2 installs through `playwright`, because
+`@axe-core/playwright` declares it as a peer with the open range
+`>= 1.0.0`: in a trial install of the other six pins on 2026-11-01,
+outside the repository, npm met that peer with the newest release,
+1.64.1, at the top level, nested 1.47.2 under `playwright`, and the
+`new AxeBuilder({ page })` call of §7.5 failed the type check
+(TS2740), its `page` typed by the other copy. With the pin,
+`package-lock.json` must record `node_modules/playwright-core` at
+1.47.2. The shipped bundle has zero runtime
 dependencies, so `dependencies` stays empty. The committed
 `package-lock.json` pins the whole tree; builds install with
 `npm ci`, and `npm install` runs only to create the lockfile or
@@ -990,7 +1009,10 @@ compiled parity harness included. Run without flags, `build.mjs`
 builds the page assets: it bundles `src/main.ts` into
 `build/dist/app.js` with `bundle: true`, `format: "esm"`,
 `platform: "browser"`, `target: "es2020"`, `minify: true`, and no
-source map, and it builds `src/app.css` into `build/dist/app.css`.
+source map, and it builds `src/app.css` into `build/dist/app.css`
+with the same `bundle: true` and `minify: true` and no source map,
+setting none of the bundle's other options (`format`, `platform`,
+`target`).
 The format is ESM because esbuild's browser default, `iife`, empties
 `import.meta`, and the navigation lifecycle of
 [§5.11](#511-accessibility-supported-environments-and-navigation-lifecycle)
@@ -1190,8 +1212,9 @@ specifies it, with the DOM appliers kept apart from the pure builders
 in `src/views/dom/`.
 
 *Closes:* DD-10. *Verification (planned):* the pins are read from the
-committed `build.gradle.kts`, `package.json`, and `package-lock.json`
-(T-01), and from `perf/versions.tf` and `perf/.terraform.lock.hcl`
+committed `build.gradle.kts`, `package.json`, and `package-lock.json`,
+whose `node_modules/playwright-core` entry must read 1.47.2 (T-01),
+and from `perf/versions.tf` and `perf/.terraform.lock.hcl`
 (T-59); `test/toolchain.test.ts` fails any `webappTest` run on
 another runtime; the `run.mjs` command line and its
 destroy-on-completion rule are exercised by the `--dry-run` and
@@ -3055,11 +3078,13 @@ line; `T` is empty when no such tag exists:
     vintage, whose pointer is untracked, and is harmless later), and
     checks that `git rev-parse HEAD^` prints `S` and that
     `git diff --name-only HEAD^ HEAD` prints only that path. The
-    commit then takes the normal pull-request path, where CI's
-    fetch-and-verify validates the published state independently
-    ([§6.3](#63-ci-workflows)), and the vintage becomes current when
-    that pull request is merged into `main`, by a merge commit (§6.3,
-    Required checks). The first vintage's pointer pull request runs
+    commit then takes the normal pull-request path into the release
+    branch ([§6.3](#63-ci-workflows), Branches), where CI's
+    fetch-and-verify validates the published state independently, and
+    the release branch pins the vintage when that pull request is
+    merged, by a merge commit (§6.3, Required checks); the vintage
+    reaches the live site with that branch's next deployment (§6.3,
+    Branches). The first vintage's pointer pull request runs
     without that fetch-and-verify: **Stage scenario assets** and both
     **Parity** steps read the committed pointer, so they join the
     workflows only after that pull request's merge, and until then
@@ -3165,10 +3190,11 @@ References:
 and no other release ever reuses its name; release immutability
 ([§4.2](#42-publication-of-a-data-vintage)) keeps the release's
 assets unchanged for as long as it exists. The data release is never
-deleted while any supported repository state — the current pointer
-or any rollback target — references the vintage, except by withdrawal
-(below). A vintage counts as retained when its data release is
-published
+deleted while any supported repository state — the pointer manifest
+on `main` or on the release branch ([§6.3](#63-ci-workflows),
+Branches), or any rollback target — references the vintage, except
+by withdrawal (below). A vintage counts as retained when its data
+release is published
 (`gh release view data-vN --repo HarvardRC/eps-ground-rupture --json isDraft,isPrerelease`
 reports `isDraft` false and `isPrerelease` true) and
 `gh release download data-vN --repo HarvardRC/eps-ground-rupture --dir <empty temporary directory>`
@@ -3195,8 +3221,10 @@ The tag's commit is exporter provenance, not a substitute for the
 release.
 
 **Rollback** is a revert of the pointer-manifest commit
-(`git revert <pointer commit>`), merged like any other change, and
-taken only when the conditions of
+(`git revert <pointer commit>`), merged into the release branch like
+any other change and reaching the live site with that branch's next
+deployment ([§6.3](#63-ci-workflows), Branches), and taken only when
+the conditions of
 [HLDD §5.4 — Pinned, versioned artifacts
 (ADR-0014)](hldd.md#54-pinned-versioned-artifacts-adr-0014) hold: the
 retention check finds the target vintage retained, and the current
@@ -3335,8 +3363,16 @@ licensing problem for instance. The owner:
    reason, the withdrawn `data-vN`, and the range of commits whose
    pointer names `data-vN` — the site builds and parity runs that can
    no longer be reproduced from retained assets;
-4. merges that commit, whose deploy replaces the site-published
-   copies (the Pages artifact carries only the current build).
+4. merges that commit into the release branch, when step 3 made one,
+   and replaces the site-published copies by a deployment whose build
+   carries none of the withdrawn files (the Pages artifact carries
+   only the current build): after the first software release, the
+   release branch's next merge into `main`; before it, a manual run
+   on `dev-v.0.4.x` while the `github-pages` environment admits that
+   branch and its build carries no withdrawn file, and otherwise a
+   manual run on `main`, which deploys the design state and so takes
+   the scenario page and its data off the site until the release
+   merge ([§6.3](#63-ci-workflows), Branches).
    Staging is a sync
    ([§6.1](#61-build-outputs-asset-paths-and-page-scaffold)), so the
    next `scenarioAssets` run on any working tree removes the
@@ -3346,7 +3382,7 @@ licensing problem for instance. The owner:
 5. *(owner decision, Proposed)* when step 2 deleted a software
    release, publishes a replacement software release — the next patch
    version after the newest software tag, cut from `main` once step
-   4's merge is in it (at once when steps 3 and 4 do not apply),
+   4's merge into `main` is in it (at once when step 4 deploys nothing),
    under the release checklist of
    [§7.7](#77-site-validation-and-release-checklist) and the
    attachment procedure of §4.4 — whose notes carry, after its own
@@ -3361,11 +3397,14 @@ licensing problem for instance. The owner:
    deleted no software release, the owner records the same notice in
    the release notes of the next software release.
 
-Steps 3 and 4 apply only when the current pointer (the pointer
-manifest on `main`) names `data-vN`. When it names another vintage,
-no pointer commit follows — the site built from `main` carries none
-of the withdrawn files — and the notice of step 3 goes in the
-release notes of step 5 alone.
+Step 3 applies only when the pointer manifest on the release branch
+names `data-vN`. Step 4 merges whenever step 3 made a commit, and
+deploys only when the build that the live site serves carries the
+withdrawn files: after the first software release, the build of
+`main`; before it, the build of `dev-v.0.4.x` that the owner's last
+manual run deployed ([§6.3](#63-ci-workflows), Branches). When
+step 3 does not apply, no pointer commit follows, and the notice of
+step 3 goes in the release notes of step 5 alone.
 
 Steps 2 and 5 are an owner decision (Proposed): deleting a published
 software release also removes its release record
@@ -8942,9 +8981,17 @@ allowlist.
 The **prototype deployment** (draft → unlisted prototype) is one
 commit to `subprojects/mkdocs/mkdocs.yml`: remove `scenario.md` and
 `assets/scenario/` from `draft_docs`, leaving `media/dev/`, and keep
-the `not_in_nav` block and the `hooks` entry; its merge into `main`
-deploys the unlisted page with the staged bundle and the
-checksum-verified data.
+the `not_in_nav` block and the `hooks` entry. Its pull request merges
+into `dev-v.0.4.x`, whose push run builds without deploying; the owner's
+first manual run of Companion site on `dev-v.0.4.x` then deploys the
+unlisted page with the staged bundle and the checksum-verified data, and
+each later prototype update is another such run until owner action
+[OA-21](ip.md#4-owner-and-research-group-actions) ends them
+([§6.3](#63-ci-workflows), Branches;
+[ADR-0017](../adr/0017-unadvertised-prototype-before-public-release.md),
+amendment of 2026-11-01). Until the release merge the live site serves
+the build of `dev-v.0.4.x` that the last such run deployed, while `main`
+stays at the design state.
 
 **Activation** (unlisted prototype → activated) of the scenario page
 is one commit: delete the `not_in_nav` block, whose only line is
@@ -8961,12 +9008,16 @@ delete the front matter of `scenario.md`, whose only key is
 prototype notice ([§5.8](#58-view-layer)).
 The release run of the browser lane
 ([§7.7](#77-site-validation-and-release-checklist), item 4) is taken
-on the release branch, which carries the activation commit — the
-branch on which §7.7 runs its pre-merge checks — "Before the merge
-that releases the change"
+on the release branch, `dev-v.0.4.x`, which carries the activation
+commit — the branch on which §7.7 runs its pre-merge checks —
+"Before the merge that releases the change"
 ([Data refresh and deployment](hldd.md#data-refresh-and-deployment),
-step 7). From that commit on, the page participates in the site's
-navigation, search, sitemap, and strict build like every other page
+step 7). The activation commit reaches the live site only with the
+release merge: owner action OA-21, taken before the release
+sequence, ends every deployment from `dev-v.0.4.x`
+([§6.3](#63-ci-workflows), Branches). From that commit on, the page
+participates in the site's navigation, search, sitemap, and strict
+build like every other page
 ([Existing-site integration](hldd.md#existing-site-integration)).
 Each later surface ships through the same three states
 ([§6.4](#64-product-pages-beyond-the-scenario-page-p2p3)).
@@ -9207,12 +9258,12 @@ under the new stamp. A missing attribute is a startup failure under
 [§5.10](#510-failure-states), never a silently unlabeled result.
 
 A release commit that changes only the version — `CITATION.cff`,
-with `.zenodo.json` — still runs both path-filtered workflows,
-because both push filters name `CITATION.cff`
-([§6.3](#63-ci-workflows)); on `main` the Companion site deploy it
-triggers re-stamps the footer, as
-[PDD §9.4 — Releases](pdd.md#94-releases) requires: "each one
-updates the displayed software version".
+with `.zenodo.json` — still runs both path-filtered workflows on its
+push to the release branch, because both push filters name
+`CITATION.cff` ([§6.3](#63-ci-workflows)); the release merge's push
+to `main` runs them again, and its Companion site deploy re-stamps
+the footer, as [PDD §9.4 — Releases](pdd.md#94-releases) requires:
+"each one updates the displayed software version".
 
 **Runtime check.** The application compares the loaded artifact
 manifest's `export_version` ([§3.2](#32-artifact-manifest)) for
@@ -9300,6 +9351,58 @@ exactly `webapp`: GitHub identifies a required status check by job
 name, so a name two workflows share makes the check ambiguous
 (GitHub documentation, troubleshooting required status checks).
 
+**Branches.** `main`, the default branch, holds the design state: once
+the owner has accepted this document and the implementation plan,
+`dev-v.0.3.x` merges into `main`, changing no page of the site, and the
+merge is tagged `v0.3.0` — a plain git tag, never a GitHub release
+(owner action OA-18 of the
+[implementation plan, §4](ip.md#4-owner-and-research-group-actions)), so
+`CITATION.cff` and `.zenodo.json`, the version sources of
+[§6.2](#62-software-and-data-version-stamps), keep their version until
+v0.4.0. The *release branch* is the development branch of the release
+line: `dev-v.0.4.x`, created from `main` after that merge (OA-19), up to
+v0.4.0, the explorer's first software release; after it, `dev-v.0.5.x`,
+created from `main` at the end of
+[IP T-65 — v0.4 release (owner)](ip.md#t-65--v04-release-owner), while
+`dev-v.0.4.x` takes no further pull request and is never fast-forwarded
+on `origin`. Every task branch starts at the release branch on `origin`,
+and every pull request — a task's, a pointer commit's
+([§4.2](#42-publication-of-a-data-vintage) step 11), a revert's
+([§4.3](#43-retention-rollback-recovery-and-withdrawal)) — targets the
+release branch; the owner merges each. `main` takes the release branch
+only by its *release merge*: the release branch's pull request into
+`main`, merged by a merge commit, whose push run deploys the site.
+Pushes to a `dev-v.*` branch, like pull requests, run the workflows
+below for validation and never deploy.
+
+Before v0.4.0 the unlisted prototype of
+[§6.1](#61-build-outputs-asset-paths-and-page-scaffold) reaches the live
+site only by the owner's manual runs of Companion site on `dev-v.0.4.x`
+(`gh workflow run mkdocs.yml --ref dev-v.0.4.x`), which the
+`github-pages` environment admits from owner action OA-20, taken before
+the prototype deployment, until owner action OA-21
+([ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md),
+amendment of 2026-11-01). No such run precedes the prototype deployment,
+so `main`'s design state stays live until then; from it until the
+release merge the live site serves the build of `dev-v.0.4.x` that the
+last such run deployed — the unlisted page and every other site change
+of the branch. OA-21 removes `dev-v.0.4.x` from the environment's policy
+just before the first commit of the release-branch order of
+[IP §3 — Gates and release sequence](ip.md#3-gates-and-release-sequence),
+owner action OA-3's commit of the [D-10](pdd.md#1-decision-register)
+(Liability-limitation text referenced by CR-4) text, so that commit, the
+glossary commit of
+[§6.4](#64-product-pages-beyond-the-scenario-page-p2p3), and the
+activation commit of §6.1 stay unpublished until the release merge, as
+[§7.7](#77-site-validation-and-release-checklist) (SC-7 approval record)
+requires. A data withdrawal in that interval reaches the live site by a
+manual run on `main`
+([§4.3](#43-retention-rollback-recovery-and-withdrawal), Withdrawal,
+step 4), which deploys the design state and so takes the scenario page
+and its data off the site until the release merge. After the release
+only `main` deploys: no later release branch is admitted to the
+environment.
+
 **Tests workflow (`tests.yml`).** Today: triggers on push to `main`
 and `dev-v.*` and on pull requests, both path-filtered to
 `subprojects/python/**` and `.github/workflows/tests.yml`, plus
@@ -9361,8 +9464,10 @@ trigger drops its `paths` list and runs on every pull request
 Path filters select workflows, not jobs, so a push matching the
 filter runs both jobs; on a webapp-only change the `pytest` job
 re-runs with its data-dependent tests skipped, as on any fresh clone
-(the workflow header's "34 skips on a fresh clone"). The `pytest`
-job itself is unchanged.
+— 39 skips at this document's revision; the workflow header's
+"34 skips on a fresh clone" is stale
+([§7.3](#73-pipeline-and-export-tests)). The `pytest` job itself is
+unchanged.
 
 **Companion site workflow (`mkdocs.yml`).** Today: triggers on push
 to `main` only and on pull requests, both path-filtered to
@@ -9372,8 +9477,9 @@ to `main` only and on pull requests, both path-filtered to
 permissions `contents: read`; `concurrency` group `pages` with
 `cancel-in-progress: false`; jobs `build` (checkout, Python setup,
 docs-group install, strict MkDocs build, `upload-pages-artifact`)
-and `deploy` (the committed workflow file). The `push` filter, its
-branches still `[main]`, becomes:
+and `deploy` (the committed workflow file). The `push` trigger's
+branches become `[main, 'dev-v.*']`, as in Tests (Branches, above),
+and its filter becomes:
 
 ```yaml
 paths:
@@ -9395,20 +9501,24 @@ paths:
 ```
 
 The `pull_request` trigger drops its `paths` list, as in Tests. The
-workflow-level `concurrency` is keyed so that pull-request runs
-never share the deploy queue:
+workflow-level `concurrency` is keyed so that only the runs whose
+`deploy` job runs — a push to `main` and every manual run — share
+the deploy queue:
 
 ```yaml
 concurrency:
-  group: "${{ github.event_name == 'pull_request' && format('pages-pr-{0}', github.event.pull_request.number) || 'pages' }}"
+  group: "${{ (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')) && 'pages' || format('pages-{0}-{1}', github.event_name, github.ref) }}"
   cancel-in-progress: false
 ```
 
 GitHub cancels a pending run when a newer run joins its concurrency
 group, and `cancel-in-progress: false` protects only a running one;
-under the committed single `pages` group, a pull-request run queued
-behind a running `main` run would cancel a pending `main` deploy.
-The jobs:
+under the committed single `pages` group, a pull-request run or a
+push run on a `dev-v.*` branch queued behind a running deploy would
+cancel a pending deploy. Every other run joins a group named by its
+event and ref: one per pull request, whose `github.ref` is
+`refs/pull/<number>/merge`, and one per `dev-v.*` branch for its
+push runs. The jobs:
 
 - `webapp-bundle` — the webapp build job
   [ADR-0011](../adr/0011-webapp-toolchain.md) prescribes, "separate
@@ -9460,13 +9570,23 @@ The jobs:
   scenario page, bundle, or data file; from the prototype deployment
   on it carries the scenario page, unlisted until activation, the
   staged assets, and the checksum-verified data.
-- `deploy` is unchanged, with its three-layer main-only gating as
-  committed: the `push` trigger is restricted to `branches: [main]`;
-  the job runs only `if: github.event_name != 'pull_request'`, so
-  pull requests get the same strict builds as validation without
-  deploying; and the `github-pages` environment itself only permits
-  deploys from `main`. Only this job holds `pages: write` and
-  `id-token: write`; every other job keeps `contents: read`.
+- `deploy` is gated by its job condition and by the `github-pages`
+  environment, the `push` trigger no longer restricting it to `main`.
+  The condition becomes
+  `if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')`,
+  so pull requests and pushes to a `dev-v.*` branch get the same strict
+  builds as validation without deploying, a push to `main` deploys, and
+  a manual run deploys from the branch it runs on; and the environment's
+  deployment-branch policy admits `main` always and `dev-v.0.4.x` from
+  owner action OA-20 until owner action OA-21 (Branches, above;
+  [ADR-0009](../adr/0009-github-pages-hosting.md) and
+  [ADR-0017](../adr/0017-unadvertised-prototype-before-public-release.md),
+  amendments of 2026-11-01), so a manual run on any other branch fails
+  at the environment and deploys nothing. The workflow's header comment,
+  its comments at `workflow_dispatch` and `deploy`, and the Publishing
+  model list of `subprojects/mkdocs/DEPLOY.md` are rewritten to state
+  this. Only this job holds `pages: write` and `id-token: write`; every
+  other job keeps `contents: read`.
 
 Each artifact action is pinned at its latest major release on
 2026-10-30, read with
@@ -9488,22 +9608,26 @@ Every job of a run checks out the same commit, so a deploy — from a
 push to `main` or from `workflow_dispatch` — publishes only a commit
 whose type check, unit tests, and parity succeeded in that run. The
 concurrency key above lets an in-flight deploy finish rather than be
-replaced mid-publication, and keeps pull-request runs from
-cancelling a pending deploy.
+replaced mid-publication, and keeps pull-request runs and push runs
+on `dev-v.*` branches from cancelling a pending deploy.
 
 **Required checks.** Blocking a merge is a repository setting, not
-workflow text. The owner's ruleset on `main` — owner action OA-10 of
-the [implementation plan, §4](ip.md#4-owner-and-research-group-actions),
+workflow text. The owner's ruleset on `main` and the release branch
+(Branches, above; `dev-v.0.5.x` joins it when that branch is created) —
+owner action OA-10 of the
+[implementation plan, §4](ip.md#4-owner-and-research-group-actions),
 Proposed — requires the status checks `pytest` and `webapp-test`
 (Tests), `webapp-bundle` and `build` (Companion site), and `links`
-(Doc links). It is not strict — a branch need not be up to date with
-`main`, because the push run on `main` re-validates the merged
-commit before deploying — and repository admins may bypass it,
-because the `webapp-bundle` coupling still keeps a failing commit
-off the site.
+(Doc links), so it holds every pull request into the release branch
+and the release branch's pull request into `main`. It is not strict
+— a branch need not be up to date with its base, because every run
+that deploys validates, in that run, the commit it deploys — and
+repository admins may bypass it, because the `webapp-bundle`
+coupling still keeps a failing commit off the site.
 The bypass mode is Always allow (`bypass_mode` `always`), which covers
-an admin's direct push to `main` as well as a pull-request merge, not
-For pull requests only (`pull_request`).
+an admin's direct push to a branch the ruleset covers — the owner's
+record commits on the release branch among them — as well as a
+pull-request merge, not For pull requests only (`pull_request`).
 Two consequences shape the workflows above. A workflow
 skipped by path filtering leaves its required checks Pending, which
 blocks merging, so the `pull_request` triggers of Tests and
@@ -9519,30 +9643,32 @@ and blocks deployment through
 Companion site / `webapp-bundle` / **Parity**.
 Pull requests that change the pointer manifest — the pointer commit of
 [§4.2](#42-publication-of-a-data-vintage) step 11, or a revert of
-[§4.3](#43-retention-rollback-recovery-and-withdrawal) — and the release
-branch's pull request of
-[§7.7](#77-site-validation-and-release-checklist) merge into `main` by a
-merge commit, never by a squash or a rebase, which would put new commits
-in place of the pull request's own and so leave the pointer commit, the
-child of `S`, or the release commit out of `main`'s history; the ruleset
-therefore does not require linear history, which would forbid those
-merge commits.
+[§4.3](#43-retention-rollback-recovery-and-withdrawal) — merge into the
+release branch, and the release branch's pull request of
+[§7.7](#77-site-validation-and-release-checklist) into `main`, each
+by a merge commit, never by a squash or a rebase, which would put new
+commits in place of the pull request's own and so leave the pointer
+commit, the child of `S`, out of the release branch's history, or the
+release commit out of `main`'s; the ruleset therefore requires linear
+history on no branch, which would forbid those merge commits.
 
 **Trigger matrix.** The rows are the trigger obligations of
 [CI triggers and validation](hldd.md#ci-triggers-and-validation),
 plus the version stamp and the documents the Doc links checks read.
 Every pull request runs all three workflows in full, so each row's
 validation runs before merge whatever files the pull request
-touches; the push filters decide what re-runs on a pushed commit,
+touches; the push filters decide what re-runs on a commit pushed to
+`main` or a `dev-v.*` branch, where only a push to `main` deploys;
 and `workflow_dispatch` on all three workflows is the manual
-backstop.
+backstop, a manual run of Companion site deploying only from a
+branch the `github-pages` environment admits (Branches, above).
 
 | Trigger | Reaches CI as | Validation before merge | On push |
 |---|---|---|---|
-| Webapp-only change (HLDD §4.3) | `subprojects/webapp/**` except `subprojects/webapp/perf/**` (filter rule below) | Application tests: `webapp-test` and `webapp-bundle` (**Webapp checks**, **Parity**); site validation: `build` (**Build site**, **Build preview site**). | Tests re-runs; on `main`, Companion site re-runs and `deploy` publishes. |
-| Data refresh (HLDD §4.3) | the pointer-manifest commit, `subprojects/webapp/data/pointer.json` | Data integrity: both **Parity** steps and **Stage scenario assets** fetch and checksum-verify the newly pinned vintage; pipeline comparison: both **Parity** steps; site validation: `build`. | Tests re-runs; on `main`, `deploy` publishes the site carrying the new vintage. |
+| Webapp-only change (HLDD §4.3) | `subprojects/webapp/**` except `subprojects/webapp/perf/**` (filter rule below) | Application tests: `webapp-test` and `webapp-bundle` (**Webapp checks**, **Parity**); site validation: `build` (**Build site**, **Build preview site**). | Tests and Companion site re-run; on `main`, `deploy` publishes. |
+| Data refresh (HLDD §4.3) | the pointer-manifest commit, `subprojects/webapp/data/pointer.json` | Data integrity: both **Parity** steps and **Stage scenario assets** fetch and checksum-verify the newly pinned vintage; pipeline comparison: both **Parity** steps; site validation: `build`. | Tests and Companion site re-run; on `main`, `deploy` publishes the site carrying the new vintage. |
 | Pipeline source change (HLDD §4.3) | `subprojects/python/**` | Fixture contracts: `pytest`; `webapp-test` re-verifies the pinned vintage. | Tests re-runs; Companion site re-runs only for the four `subprojects/python` files its filter names — published results change only when a new vintage is pinned. |
-| Site pages and configuration (HLDD §4.3) | `subprojects/mkdocs/**`; the docs-toolchain pins `subprojects/python/pyproject.toml` and `subprojects/python/poetry.lock` | Site validation: `build` (both strict builds, the site checks hook). | On `main`, Companion site re-runs and `deploy` publishes; a docs-pin change also re-runs Tests. |
+| Site pages and configuration (HLDD §4.3) | `subprojects/mkdocs/**`; the docs-toolchain pins `subprojects/python/pyproject.toml` and `subprojects/python/poetry.lock` | Site validation: `build` (both strict builds, the site checks hook). | Companion site re-runs, and on `main` `deploy` publishes; a docs-pin change also re-runs Tests. |
 | Shared build configuration (HLDD §4.3) | `settings.gradle.kts`, `build.gradle.kts`, `gradlew`, `gradle/wrapper/**`, and the four modules' `build.gradle.kts` | Every job. | Both workflows re-run; on `main`, `deploy` publishes. |
 | Version stamp | `CITATION.cff` | Site validation: `build` builds both trees with the re-stamped `scenario-head.html` ([§6.2](#62-software-and-data-version-stamps)). | Both workflows re-run; on `main`, `deploy` publishes the new footer stamp. |
 | PDD and DDD edits | `docs/app/pdd.md`, `docs/app/ddd.md` | Doc links: `links` (**Check PDD agreement**). | Doc links re-runs (it has no path filter); neither path-filtered workflow does, since none of their jobs reads these files. |
@@ -9654,11 +9780,15 @@ and `deploy` do not run; in a run whose `webapp-bundle` job has no
 build; a link from a published page to the scenario page, drafted
 or unlisted, or an image under `docs/images/` that the allowlist
 does not list, must fail **Build site**; no failing run may upload
-anything. Once OA-10 is in place, a pull request touching only
-`docs/` must report all five required checks, none Pending. A push
-to a `dev-v.*` branch that changes only a file under
-`subprojects/webapp/perf/` must start no Tests run, and one that
-changes a file under `subprojects/webapp/src/` must start one.
+anything. Once OA-10 is in place, a pull request into the release
+branch touching only `docs/` must report all five required checks,
+none Pending. A push to a `dev-v.*` branch that changes only a file
+under `subprojects/webapp/perf/` must start no Tests and no
+Companion site run, and one that changes a file under
+`subprojects/webapp/src/` must start both, its Companion site run
+skipping `deploy`; and a manual run of Companion site on a branch
+the `github-pages` environment does not admit must fail at `deploy`
+without deploying.
 
 References:
 
@@ -9673,7 +9803,9 @@ References:
   [ADR-0014](../adr/0014-committed-content-hashed-artifacts.md);
   [ADR-0015](../adr/0015-golden-scenario-parity.md);
   [ADR-0016](../adr/0016-performance-reference-environment.md);
-  [ADR-0009](../adr/0009-github-pages-hosting.md).
+  [ADR-0009](../adr/0009-github-pages-hosting.md) and
+  [ADR-0017](../adr/0017-unadvertised-prototype-before-public-release.md)
+  (amendments of 2026-11-01).
 - [NFR-7 — Build and data-quality
   gates](prd.md#nfr-7-build-and-data-quality-gates).
 - [Implementation plan, §4](ip.md#4-owner-and-research-group-actions)
@@ -9962,7 +10094,10 @@ the research group's record under owner action OA-4 of the
 back, so the two entries become public with the release merge that
 activates the scenario page
 ([§6.1](#61-build-outputs-asset-paths-and-page-scaffold)), after
-that approval and never before it.
+that approval and never before it: their commit lands on `dev-v.0.4.x`
+after owner action [OA-21](ip.md#4-owner-and-research-group-actions) has
+ended the manual prototype runs ([§6.3](#63-ci-workflows), Branches), so
+no such run deploys them.
 
 *Verification (planned):* the site checks hook of
 [§6.1](#61-build-outputs-asset-paths-and-page-scaffold) — the
@@ -10119,7 +10254,7 @@ task `webappParity`
 `webapp-test` and Companion site / `webapp-bundle`. A parity failure
 therefore fails the Tests run, blocks deployment — `webapp-bundle`
 fails, so `build` and `deploy` never run for that commit — and blocks
-merge under the owner's `main` ruleset
+merge under the owner's ruleset on `main` and the release branch
 ([OA-10](ip.md#4-owner-and-research-group-actions)), which requires
 the `webapp-test` and `webapp-bundle` checks. The harness
 implements [Calculation parity](hldd.md#calculation-parity): it
@@ -10333,9 +10468,13 @@ machine, which the implementation plan's
 never publication evidence. CI — the `pytest` job of
 `.github/workflows/tests.yml` ([§6.3](#63-ci-workflows)) — therefore
 runs the fixture lane only: the full-data tests skip there under the
-file-existence convention, and the change that adds full-data tests
-updates the workflow header's fresh-clone skip count ("34 skips on a
-fresh clone" today).
+file-existence convention. The workflow header's fresh-clone skip
+count, "34 skips on a fresh clone", is stale: a fresh clone skips 39
+tests at this document's revision. Each change that adds full-data
+tests, first
+[IP T-14 — Required full-data checks](ip.md#t-14--required-full-data-checks),
+sets that count to the number of tests a fresh clone of its own
+commit skips, the skip count its pull request's `pytest` job reports.
 
 **The flag that makes "a skipped check is not a pass" executable.**
 [HLDD §9 — Testing and release architecture](hldd.md#9-testing-and-release-architecture)
@@ -11926,28 +12065,31 @@ versions with their results, and the approval references, and it
 ends with the evidence ledger below; the implementation plan's gate
 section ([`docs/app/ip.md`, §3](ip.md#3-gates-and-release-sequence))
 carries this enumeration identically and schedules the checks. The
-checks run on the release branch — for the release that activates
-the scenario page, the branch carrying the activation commit of
+checks run on the release branch ([§6.3](#63-ci-workflows),
+Branches) — for v0.4.0, the release that activates the scenario
+page, `dev-v.0.4.x`, which carries the activation commit of
 [§6.1](#61-build-outputs-asset-paths-and-page-scaffold) — before the
-merge that releases the change (HLDD §9, Data refresh and
-deployment, step 7), except the published-site measurement of
-item 5, which follows the deployment, and items 10 and 11, which run
-on the software release's tag while its release is still a draft
+merge that releases the change, its release merge into `main` (HLDD
+§9, Data refresh and deployment, step 7), except the published-site
+measurement of item 5, which follows the deployment, and items 10
+and 11, which run on the software release's tag while its release is
+still a draft
 ([§4.4](#44-licensing-archival-distribution-and-release-attachments)).
 
 **Phases.** The checklist gates public releases. The prototype
 deployment of [§6.1](#61-build-outputs-asset-paths-and-page-scaffold)
 — Phase 1 of
 [ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md),
-not a public release — is gated by the deployment
-safeguards that stand from the first deployment: the CI gates of
-[§6.3](#63-ci-workflows), which keep a commit that fails them from
+not a public release, deployed by the owner's manual runs on
+`dev-v.0.4.x` ([§6.3](#63-ci-workflows), Branches) — is gated by the
+deployment safeguards that stand from the first deployment: the CI
+gates of §6.3, which keep a commit that fails them from
 `deploy`; the `site_checks` hook arms (a)–(e) in both strict builds,
 arm (d) checking the unlisted state; and the media rule of item 9,
 under which no third-party photograph is deployed without documented
 permission. Every item of the table applies at activation and at the
-first software release — one release, the one that activates the
-scenario page — and at every release after it.
+first software release, v0.4.0 — one release, the one that activates
+the scenario page — and at every release after it.
 
 | # | Check | Applies to | Evidence recorded |
 |---|---|---|---|
@@ -11955,7 +12097,7 @@ scenario page — and at every release after it.
 | 2 | Full-data run: `pytestFullData`, run by `publishVintage` against the staged vintage, exits 0 with zero skips and every `full_data_required.txt` test collected and passed ([§7.3](#73-pipeline-and-export-tests)). | Vintage release | The pytest summary line in the publication record. |
 | 3 | Publication: `publishVintage` completed ([§4.2](#42-publication-of-a-data-vintage)) — the data tag peels to the source commit, the release's asset names and SHA-256s equal the pointer exactly, the release is published — which locks it, the repository's releases being immutable (§4.2 step 1 re-checks this) — and the owner's pointer commit sits directly on the source commit. | Vintage release | The publication record `dist/app/data-vN.publication.json` and its copy in the data release's body. |
 | 4 | Browser lane: `webappBrowserTest` (projects `desktop` and `mobile`) exits 0 on the release branch, its `playwrightInstall` dependency first installing the pinned Chromium build ([§7.5](#75-browser-test-lane)). | Every release | `subprojects/webapp/build/playwright/report.json` and the traces, attached. |
-| 5 | Measurements ([§7.6](#76-performance-and-compatibility-measurements)) against [PDD §9.1 — Performance budgets (D-9, Proposed)](pdd.md#91-performance-budgets-d-9-proposed): (a) before the merge, `webappMeasureReference` on the release branch completes — its measure run exiting 0, its report downloaded, and the VM destroyed (§7.6 step 7) — with a report recording `environment.kind` `aws-ec2`, the instance type, region, and AMI of [DD-12](#1-ddd-decision-register) (Performance reference environment), the DD-12 `network` values, its `terraform_version`, and `source_tree_clean` true; the release is then accepted on that report, a decision separate from the run's completion, only when every workload reads `within_budget` true: nearest-rank 95th percentiles of 30 runs (`sorted[28]`: at least 29 of the 30 observed runs within budget, a sample-based acceptance rule) at most 2.0 s cold, 1.0 s warm in both variants, and 200 ms for each interaction workload, with every cold run's data payload at most 4 MB compressed; (b) after the release's deployment, fast-forward the clean local release branch to `<main sha>`, the merge commit that deploys the release (Evidence ledger, below), and require `HEAD` to equal it ([IP T-65 — v0.3 release (owner)](ip.md#t-65--v03-release-owner), step (4)); from the repository root, the published-site run (`-Pegr.perf.target=published`) completes, its measure run exiting 0, so the header sets match, with a report recording `environment.kind` `aws-ec2`, the instance type, region, and AMI of DD-12, the DD-12 `network` values, `source_commit` equal to `<main sha>`, and `source_tree_clean` true, and its cold and fresh-warm workloads read `within_budget` true — a miss reopens the release. | Every release | The report directories `subprojects/webapp/build/perf/<run_id>/`, attached, with browser, device, version, vintage, revision, and Terraform version named. |
+| 5 | Measurements ([§7.6](#76-performance-and-compatibility-measurements)) against [PDD §9.1 — Performance budgets (D-9, Proposed)](pdd.md#91-performance-budgets-d-9-proposed): (a) before the merge, `webappMeasureReference` on the release branch completes — its measure run exiting 0, its report downloaded, and the VM destroyed (§7.6 step 7) — with a report recording `environment.kind` `aws-ec2`, the instance type, region, and AMI of [DD-12](#1-ddd-decision-register) (Performance reference environment), the DD-12 `network` values, its `terraform_version`, and `source_tree_clean` true; the release is then accepted on that report, a decision separate from the run's completion, only when every workload reads `within_budget` true: nearest-rank 95th percentiles of 30 runs (`sorted[28]`: at least 29 of the 30 observed runs within budget, a sample-based acceptance rule) at most 2.0 s cold, 1.0 s warm in both variants, and 200 ms for each interaction workload, with every cold run's data payload at most 4 MB compressed; (b) after the release's deployment, fast-forward the clean local release branch to `<main sha>`, the merge commit that deploys the release (Evidence ledger, below), and require `HEAD` to equal it ([IP T-65 — v0.4 release (owner)](ip.md#t-65--v04-release-owner), step (4)); from the repository root, the published-site run (`-Pegr.perf.target=published`) completes, its measure run exiting 0, so the header sets match, with a report recording `environment.kind` `aws-ec2`, the instance type, region, and AMI of DD-12, the DD-12 `network` values, `source_commit` equal to `<main sha>`, and `source_tree_clean` true, and its cold and fresh-warm workloads read `within_budget` true — a miss reopens the release. | Every release | The report directories `subprojects/webapp/build/perf/<run_id>/`, attached, with browser, device, version, vintage, revision, and Terraform version named. |
 | 6 | Success criteria: each row of the table below verified by its named artifact. | Every release | Per row. |
 | 7 | [D-10](pdd.md#1-decision-register) (Liability-limitation text referenced by CR-4) gate: the standing disclaimer in `scenario.md`'s `#gre-disclaimer` is the owner-sourced text, and the item-7 search below prints nothing. Until the text is approved PDD §5.1's bracketed slot "[the project's liability limitations — text pending, D-10]" stands in `#gre-disclaimer` verbatim, as the unlisted prototype of [§6.1](#61-build-outputs-asset-paths-and-page-scaffold) shows it, and the bundle carries no PDD §5.1 text ([§5.8](#58-view-layer)). No placeholder liability text ships in a public release. | Every release | The empty search output and the sourcing record. |
 | 8 | Glossary: every first-use glossary anchor of [PDD §5.11 — Labels, units, and glossary links (FR-G3, CR-3, CR-7)](pdd.md#511-labels-units-and-glossary-links-fr-g3-cr-3-cr-7) resolves in both built trees (the lane's `render` spec asserts the application's links; the strict builds check the authored pages); the pre-launch additions are present — the PFDHA and engineer-of-record glossary entries of [§6.4](#64-product-pages-beyond-the-scenario-page-p2p3), the copy-marked `glossary.md` block that step 7 of `check_pdd_agreement.py` compares with §6.4 and step 8 lists ([§5.13](#513-application-configuration)); and the FDHI entry's spelling is aligned to the singular "Fault Displacement Hazard Initiative": the item-8 search below prints nothing. | Every release | The search output and the step-8 list of item 1's **Check PDD agreement** run. |
@@ -12127,9 +12269,11 @@ identity. The publication run must still have `source_tree_clean`
 true under §4.2 step 4.
 
 The release revision is the release commit — the release-branch
-head that item 1's runs check. The release branch contains `main`
-when it is merged, so the merge commit that deploys the release has
-the release commit's tree
+head that item 1's runs check. Each release branch starts at `main`
+— `dev-v.0.4.x` at its design state, `dev-v.0.5.x` after v0.4.0 —
+and, while it is the release branch, `main` takes nothing but its
+merges ([§6.3](#63-ci-workflows), Branches), so the merge commit that
+deploys the release has the release commit's tree
 (`git diff --quiet <release sha> <main sha>` exits 0), and the
 software tag names that `main` commit. A release record is complete
 only when every ledger row reads `pass` and its subjects and
@@ -12161,7 +12305,7 @@ mismatched asset, an uncovered new or strengthened requirement, a
 data-evidence row in place of a current-software check, and a
 historical retention result in place of a fresh one; the owner
 applies that contract when completing each release record
-([IP T-65 — v0.3 release (owner)](ip.md#t-65--v03-release-owner),
+([IP T-65 — v0.4 release (owner)](ip.md#t-65--v04-release-owner),
 step (6)). A contract file's full-data lane and its fixture lane
 occupy separate rows.
 
@@ -12205,11 +12349,15 @@ release-branch order of
 the D-10 commit, the glossary commit, and the activation commit,
 which removes the prototype notice of [§5.8](#58-view-layer),
 precede it — and the release merge, which deploys the activated
-page, follows it. The release commit between them changes only the
-version, which enters none of the listing, the pointer, or the
-bundle ([§6.2](#62-software-and-data-version-stamps)), so one record
-covers the release; a later change to a listed text, the pinned
-vintage, or the bundle needs a new OA-4 record.
+page, follows it; owner action
+[OA-21](ip.md#4-owner-and-research-group-actions), taken just before the
+first of those commits, keeps every run from deploying the release
+branch until that merge ([§6.3](#63-ci-workflows), Branches). The
+release commit between them changes only the version, which enters none
+of the listing, the pointer, or the bundle
+([§6.2](#62-software-and-data-version-stamps)), so one record covers the
+release; a later change to a listed text, the pinned vintage, or the
+bundle needs a new OA-4 record.
 
 *Verification (planned):* the strict builds' exit status on both
 trees, the `site_checks` hook included; the checklist itself is the
@@ -12261,9 +12409,9 @@ Kind, Check, and Status columns against the corrected document on
 every row but those added by hand, the Source and Obligation cells
 are the sweep's extraction, unchanged. The sweep has not run again
 since `36abc56`, and until it does, rows added by hand, the one
-exception to that rule, carry what seven later source changes direct
+exception to that rule, carry what eight later source changes direct
 at this document and the implementation plan: the row whose Source
-reads `HLDD §2 L222-233 (amended 2026-10-30)`, for the HLDD's amended
+reads `HLDD §2 L235-246 (amended 2026-10-30)`, for the HLDD's amended
 Performance budgets constraint; the two `PDD §4.1` rows on the
 cumulative curve's drawing error and on reader-selected cumulative-curve
 accuracy, for the amendment of 2026-11-01 to
@@ -12279,7 +12427,9 @@ Source names
 or
 [ADR-0019 — Release-based data identity](../adr/0019-release-based-data-identity.md),
 all accepted, each row with the line numbers its source has at
-this document's revision. ADR-0018 amends
+this document's revision; ADR-0017's rows include one for its
+amendment of 2026-11-01, the owner's decision of that day on
+versions and branches. ADR-0018 amends
 [ADR-0013 — Row-level, trial-major columnar scenario artifact](../adr/0013-row-level-scenario-artifact.md),
 replacing its fixed 101-stage stride. Two ADR-0018 rows succeed the
 ADR-0013 Decision rows (L88-94 and L137-142) whose obligations named
@@ -12302,13 +12452,20 @@ the release-based data identity and evidence-subject obligations, which
 include that of ADR-0014's amendment. The amendment of 2026-10-30 to
 PDD §9.1 falls within the PDD §9.1 rows, while the passages of the HLDD,
 `notes/Roadmap.md`, and `docs/adr/README.md` that cite these four ADRs,
-the README's rule of 2026-11-01 on dated amendments, and two passages of
-ADR-0017 as amended on 2026-10-31 — its
+the README's rule of 2026-11-01 on dated amendments, the amendment of
+that day to
+[ADR-0009 — GitHub Pages (via Actions) as site hosting](../adr/0009-github-pages-hosting.md),
+whose obligation the ADR-0017 amendment's row carries, and two passages
+of ADR-0017 as amended on 2026-10-31 — its
 paragraph Implementation sequencing only (L81-86) and its withdrawal
 consequence (L113-122) — have no rows of their own until the sweep runs
-again. The lint of §8.4 checks each row's form and citations and its
-IP twin, never that the matrix is complete. The rows that direct an
-obligation at the implementation plan recur, equal cell for cell, in
+again. By the owner's decision of 2026-11-01 the release that three
+extracted Obligation cells call v0.3 — those of the rows `PDD §1 D-1`,
+`PDD §2.4`, and `ADR-0012 Decision (L116-120)` — is v0.4.0; the cells
+keep the sweep's wording until it runs again. The lint of §8.4 checks
+each row's form and citations and its IP twin, never that the matrix is
+complete. The rows that direct an obligation at the implementation plan
+recur, equal cell for cell, in
 [IP §7 — Traceability](ip.md#7-traceability).
 
 Each table has six columns. **Source** names the approved document
@@ -12407,7 +12564,7 @@ deliberately keeps.
 | HLDD Intro L72-76 | IP execution brief | IP §2 task graph | text | IP Introduction | designed |
 | HLDD Intro L66-67 | where code references belong | Introduction | text | Introduction; §2; §5.1; §6.1 | designed |
 | HLDD Intro L93-97 | ADRs constrain DDD/IP | Introduction | text | Introduction; IP Introduction; IP §8 | designed |
-| HLDD §2 L222-233 (amended 2026-10-30) | reference environment for the budgets: a fixed-specification AWS VM from Terraform, each time budget at the 95th percentile of 30 runs; the DDD fixes machine specification and run procedure | §1 DD-12, §7.6, §2 | text+measure+owner | §1 DD-12; §7.6; §2; ADR-0016; §7.6 report: environment (T-59, T-61); §7.6 report: workloads (T-61); OA-12 | owner-pending |
+| HLDD §2 L235-246 (amended 2026-10-30) | reference environment for the budgets: a fixed-specification AWS VM from Terraform, each time budget at the 95th percentile of 30 runs; the DDD fixes machine specification and run procedure | §1 DD-12, §7.6, §2 | text+measure+owner | §1 DD-12; §7.6; §2; ADR-0016; §7.6 report: environment (T-59, T-61); §7.6 report: workloads (T-61); OA-12 | owner-pending |
 | HLDD §4.3 L637-639 | state/view lifecycle responsibilities | §5.1, §5.10, §5.11 | text+test | §5.1; §5.3; §5.10; §5.11; subprojects/webapp/playwright/specs/mount.spec.ts (T-60); subprojects/webapp/playwright/specs/navigation-lifecycle.spec.ts (T-60) | planned |
 | HLDD §4.3 L654-656 | chart behaviors and tests | §5.12, §5.11 | text+test | §5.11; §5.12; subprojects/webapp/test/charts.test.ts (T-41); subprojects/webapp/test/histogram.test.ts (T-32); subprojects/webapp/test/chart-text.test.ts (T-41); subprojects/webapp/playwright/specs/render.spec.ts (T-60); subprojects/webapp/playwright/specs/interactions.spec.ts (T-60); subprojects/webapp/playwright/specs/a11y.spec.ts (T-60); subprojects/webapp/playwright/specs/keyboard-responsive.spec.ts (T-60) | planned |
 | HLDD §4.3 L662-663 | bundle size measurement | §7.6, §3.8 | measure | §3.8: pending item 4 (T-61); §7.6 report: workloads.samples.files (T-61) | planned |
@@ -12696,7 +12853,7 @@ deliberately keeps.
 | PRD §6.3 DR-6 | payload ceiling: no 73 MB flat export (or comparably large payload) on initial load; no prolonged repeat-visit loading | §3.8, §7.6 | measure+release+text | §3.8: Selected row (T-11, T-17); §7.6 report: workloads (T-61); §7.6 report: environment (T-59, T-61); §7.7 item 5; §5.2 (Lazy exports) | planned |
 | PRD §6.3 DR-6 | initial-payload budget — PDD owns the number; export format/caching/precomputation — HLDD owns; DDD works inside both | §7.6, §3.1, §6.1 | text | §7.6 (budgets quoted from PDD §9.1); §3.1 (HLDD §5.2 and ADR-0013 format); §6.1 (HLDD §7.3 delivery and caching, by citation); §5.3 (combined filtering kept) | designed |
 | PRD §6.3 DR-7 | export schema carries source/model-family/case dimension; no hard-coded 2D-only assumptions | §3.1, §3.2 | text+test | §3.1 (model_family column, schema_version); §3.2 (reserved scenario_artifact_<family> keys); §4.1 step 5 rule format-spec (T-12); §9 | planned |
-| PRD §8.1 NFR-2 | static-site constraint: no backend; deploy from main via existing GitHub Pages site/build/URL space | §6.1, §6.3 | text | §6.3 (deploy: three-layer main-only gating); §6.1 (Transport contract: own-origin fetch, the shared URL space and build); §5.3; §5.9 (client-side engine and downloads) | designed |
+| PRD §8.1 NFR-2 | static-site constraint: no backend; deploy from main via existing GitHub Pages site/build/URL space | §6.1, §6.3 | text | §6.3 (deploy: a push deploys only from main, and each public release deploys from main by its release merge, the unlisted prototype, not a public release under ADR-0017, deploying from dev-v.0.4.x by the owner's manual runs under that ADR's amendment of 2026-11-01); §6.1 (Transport contract: own-origin fetch, the shared URL space and build); §5.3; §5.9 (client-side engine and downloads) | designed |
 | PRD §8.2 NFR-3 | performance budgets and their test conditions come from the PDD; implementation must be benchmarked against them | §7.6 | text+measure+release | §7.6 (budgets and reference conditions quoted from PDD §9.1); §1 DD-12 (the reference environment PDD §9.1 leaves to this document); §7.6 report: workloads (T-61); §7.6 report: network (T-61); §7.6 report: environment (T-59, T-61); §7.7 item 5 | planned |
 | PRD §8.3 NFR-5 | failure/version-mismatch behavior: page-vs-export expected-version check and plain failure reporting | §5.10, §6.2, §5.2 | text+test | §6.2 (Runtime check); §5.2 step 1 (kind 'data-version'); §5.10; subprojects/webapp/test/decode.test.ts (T-36); subprojects/webapp/playwright/specs/failure-states.spec.ts (T-60); subprojects/webapp/playwright/specs/navigation-lifecycle.spec.ts::stamp change (T-60) | planned |
 | PRD §8.4 NFR-6 | licensing model preserved (Apache-2.0 / CC BY 4.0 / publisher terms); third-party media release-gated on permissions held elsewhere | §4.4, §7.7 | text+test+release+owner | §4.4 (Vintage terms: the README and LICENSE-docs wording); subprojects/mkdocs/hooks/site_checks.py arms (a), (b) (T-03); §7.7 item 9; §7.7 item 10; G-6; OA-8 | owner-pending |
@@ -12861,6 +13018,7 @@ deliberately keeps.
 | ADR-0017 Decision, Licensing deferred (L64-79) | the licensing decision deferred to Phase 2; until then the exports carry the stated assumption in data/REDISTRIBUTION.md, beside each source's terms and attribution, and in the record line the publication tool checks before every upload; the confirmation precedes activation and the first software release, whose pinned vintage carries the confirmed terms | §4.2, §4.4, §7.7, IP §3 G-1, IP §4 OA-1, IP §4 OA-13, IP §2 T-63 | text+owner+schedule+release | §4.2 step 1 (the OA-1 record gate); §4.4 (Vintage terms); G-1; OA-1; OA-13; T-63; §7.7 item 17 | owner-pending |
 | ADR-0017 Decision, Four authorizations (L88-95) | sharing the prototype, the owner's decision, stands for none of the three authorizations the review supplies: the research group's text approval (SC-7), the D-10 text, and the licensing decision, source by source | IP §4 OA-17, IP §3 G-4, IP §3 G-5, IP §4 OA-13 | owner | OA-17; G-4; OA-4; G-5; OA-3; OA-13 | owner-pending |
 | ADR-0017 Consequences (L123-126) | three publication states of the scenario page — draft, unlisted prototype, activated — and the release checklist applied at activation and at the software release | §6.1, §7.7 | text+test | §6.1 (the three publication states); subprojects/mkdocs/hooks/site_checks.py arm (d) (T-03); §7.7 (Phases) | planned |
+| ADR-0017 amendment 2026-11-01 (L131-171) | the unlisted prototype deploys from dev-v.0.4.x only by the owner's manual runs of the site workflow, which the github-pages environment admits from before the prototype deployment until just before the release sequence begins; pushes deploy only from main, pull-request and push runs on other branches validating without deploying; the public release deploys from main by the release merge, and after it only main deploys | §6.3, §6.1, §4.3, IP §2 T-22, IP §2 T-54, IP §2 T-65, IP §4 OA-20, IP §4 OA-21 | text+test+schedule+owner | §6.3 (Branches, the push trigger, the deploy condition, the concurrency key, the github-pages branch policy); §6.1 (the prototype deployment); §4.3 (Withdrawal, step 4); .github/workflows/mkdocs.yml::deploy (T-22); T-22; T-54; T-65; OA-20; OA-21 | owner-pending |
 
 *Verification (planned):* `.github/scripts/check_traceability.py`,
 which uses the Python standard library only, lints the matrix tables
@@ -12941,15 +13099,17 @@ References:
   rows of ADR-0016 and ADR-0017; and those of 2026-11-01 added the two
   `PDD §4.1` rows and the `PDD §7.3` row, replaced the two fixed-stride
   ADR-0013 rows with ADR-0018 rows that name the ADR-0013 lines they
-  amend, added ADR-0018's count-validation and completeness rows and
-  ADR-0019's two rows, and renumbered the HLDD §2 row's Source to the
-  amended HLDD's lines.
+  amend, added ADR-0018's count-validation and completeness rows,
+  ADR-0019's two rows, and the row of ADR-0017's amendment of that
+  day, and renumbered the HLDD §2 row's Source to the amended HLDD's
+  lines.
 - [HLDD §2 — Architectural constraints](hldd.md#2-architectural-constraints)
   (Performance budgets, amended 2026-10-30);
   [PDD §9.1 — Performance budgets (D-9, Proposed)](pdd.md#91-performance-budgets-d-9-proposed)
   (amended 2026-10-30);
   [ADR-0016 — Performance reference environment — an on-demand AWS VM defined by Terraform](../adr/0016-performance-reference-environment.md);
-  [ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md);
+  [ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md)
+  (amended 2026-11-01);
   [ADR-0018 — Manifest-defined uniform stage count](../adr/0018-manifest-defined-stage-count.md);
   [ADR-0019 — Release-based data identity](../adr/0019-release-based-data-identity.md).
 - `.github/scripts/check_traceability.py`;
@@ -13049,7 +13209,7 @@ authority that owns it:
   encoding decision and a new vintage (§3.1). No native full-dataset
   exploration panel is designed, per
   [D-19](pdd.md#1-decision-register) (Native full-dataset exploration
-  panel in v0.3). The derived-magnitude display
+  panel in v0.4). The derived-magnitude display
   ([C10](prd.md#24-capability-map), View slip and derived magnitude
   together where appropriate; P2) is not designed in this revision.
 - **Open decisions.** Decisions owned by the research group or the
