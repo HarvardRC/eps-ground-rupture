@@ -78,6 +78,25 @@ val pytest by tasks.registering(Exec::class) {
     dependsOn(poetryInstall)
 }
 
+// The full-data run (docs/app/ddd.md §7.3): `pytest` with
+// EGR_REQUIRE_FULL_DATA=1, under which tests/conftest.py turns every skip,
+// every xfail, and every required full-data test that did not run into a
+// failure — a skipped check is never a pass. NOT wired into any lifecycle
+// task: it needs the local research data and the staged vintage that
+// exportApp writes; CI never sets the variable. publishVintage runs it
+// against the vintage its own run staged; any other run is a precheck.
+val pytestFullData by tasks.registering(Exec::class) {
+    group = "verification"
+    description =
+        "Run the Python test suite with EGR_REQUIRE_FULL_DATA=1: any skip, xfail, or required " +
+            "full-data test not run fails. Needs the research data and a staged vintage (exportApp)."
+    workingDir = projectDir
+    useVenv()
+    environment("EGR_REQUIRE_FULL_DATA", "1")
+    commandLine(poetryBin, "run", "pytest")
+    dependsOn(poetryInstall)
+}
+
 val ruffCheck by tasks.registering(Exec::class) {
     group = "verification"
     description = "Lint the Python sources with ruff (E, F, I, B, UP, SIM)."
