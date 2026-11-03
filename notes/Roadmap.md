@@ -555,6 +555,32 @@ drills, is retired: the drills run against a stub `gh` instead.
   Tags v0.2.0–v0.2.2 exist, and OA-18 adds the plain tag `v0.3.0`; no
   GitHub release yet.
 
+## Ground Rupture Explorer — P2 display preferences (decided 2026-11-03)
+
+- **Display preferences** — scope decided; detailed behavior and
+  implementation pending. A standalone reader setting controls what
+  is shown and the display size and layout it should fit. It serves
+  small laptop windows as well as later tablet and phone views in
+  the existing application. It is independent of scenario selection
+  and does not change scientific precision or chart-image export
+  resolution. There is no decision limiting it to two fixed views
+  or requiring automatic device selection. The product requirement
+  is [PRD FR-G6](../docs/app/prd.md#fr-g6-display-preferences-p2);
+  [PDD §4.9](../docs/app/pdd.md#49-display-preferences-fr-g6-p2)
+  records the agreed behavior and remaining choices. P2 is the
+  priority after the MVP, distinct from its Phase-2 public release.
+  The design and execution prerequisites are recorded in
+  [DDD §9](../docs/app/ddd.md#9-deferred-and-out-of-scope) and
+  [IP §5](../docs/app/ip.md#5-parked-capabilities-p2p3).
+- **Temporary measurement window** — retain 1280 × 1080 CSS px so
+  the current first-result measurement includes both chart and
+  statistics table, as
+  [PDD §9.1](../docs/app/pdd.md#91-performance-budgets-d-9-proposed)
+  and [DDD §7.6](../docs/app/ddd.md#76-performance-and-compatibility-measurements)
+  specify. This does not raise the supported minimum window size or
+  demonstrate that the current view fits a small laptop. The P2
+  views must be accepted at their own declared target sizes.
+
 ## Decisions made
 
 - **DOI route (2026-10-12, author team)**: **Zenodo, fed by a GitHub

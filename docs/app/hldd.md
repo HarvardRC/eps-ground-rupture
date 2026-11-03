@@ -245,6 +245,13 @@ it does not exist, runs the measurements against the locally built
 site, and destroys it when the run succeeds. The DDD fixes the
 machine specification and the run procedure.
 
+The temporary taller measurement window of
+[PDD §9.1](pdd.md#91-performance-budgets-d-9-proposed) lets the current
+chart and statistics table appear together. It does not establish
+that the same view fits a small laptop window. The P2 display choices
+of [PDD §4.9](pdd.md#49-display-preferences-fr-g6-p2) need their own
+acceptance conditions at their intended window sizes.
+
 References:
 
 - [PDD §9.1 — Performance budgets](pdd.md#91-performance-budgets-d-9-proposed).
@@ -262,6 +269,14 @@ the same window.
 
 It must remain fully usable at a viewport width of 360 CSS pixels.
 Essential controls and information must not depend on hover.
+
+The P2 display preferences of
+[FR-G6](prd.md#fr-g6-display-preferences-p2) let readers choose the
+content and layout size of the existing scenario page. Small laptop
+windows are an explicit use case; later tablet and phone views use
+the same capability. Its behavior belongs to
+[PDD §4.9](pdd.md#49-display-preferences-fr-g6-p2). The temporary
+measurement window does not raise the minimum supported window size.
 
 The accessibility target for new product pages is Web Content
 Accessibility Guidelines (WCAG) 2.2 Level AA. The PRD's own
@@ -2044,6 +2059,21 @@ alone.
 The layout must remain usable at the PDD's 360 CSS-pixel viewport
 baseline and under the resizing and reflow conditions required by the
 accessibility target.
+
+**P2 display preferences.** Under
+[ADR-0010](../adr/0010-native-client-side-scenario-app.md), these
+preferences belong to the existing scenario application and its
+view layer. They control presentation independently of the selected
+scenario: choosing content or a layout size leaves the data,
+matching records, calculations, and scientific precision unchanged.
+The view layer continues to consume the same query results.
+
+The DDD will define how these preferences join display state after
+the remaining product choices in
+[PDD §4.9](pdd.md#49-display-preferences-fr-g6-p2) are settled. That
+design must preserve applicable warnings, scenario context, and
+accessible text alternatives when optional components are hidden.
+The current automatic resizing behavior remains the MVP baseline.
 
 #### Charts and text alternatives
 

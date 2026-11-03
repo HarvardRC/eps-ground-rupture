@@ -70,6 +70,7 @@
     + [FR-G3. Reader-facing labels and data-driven text](#fr-g3-reader-facing-labels-and-data-driven-text)
     + [FR-G4. Citation, disclaimer, and version information](#fr-g4-citation-disclaimer-and-version-information)
     + [FR-G5. Reuse of existing full-dataset dashboards (C8)](#fr-g5-reuse-of-existing-full-dataset-dashboards-c8)
+    + [FR-G6. Display preferences (P2)](#fr-g6-display-preferences-p2)
 - [6. Data requirements](#6-data-requirements)
   * [6.1 Data provenance and calculation integrity](#61-data-provenance-and-calculation-integrity)
     + [DR-1. Controlled data source](#dr-1-controlled-data-source)
@@ -477,8 +478,9 @@ through US-3 and the requirements below.
 
 - **P2:** shareable scenario URLs, inverse search, plot exports,
   animations and morphology education, the derived-magnitude display
-  aid (C10), and only those additional exploration features that
-  address a documented gap in the existing dashboards (C8).
+  aid (C10), reader-selected result content and display size (C12),
+  and only those additional exploration features that address a
+  documented gap in the existing dashboards (C8).
 
 - **P3:** contact and request features.
 
@@ -540,6 +542,7 @@ product.
 | **C9** | **Learn about scarp morphologies** through descriptions, model snapshots, photographs where permitted, and animations. | Morphologies tab | Existing glossary and figures; author-supplied media are a pending deliverable (R-13). | Morphology page and animation library; public use of third-party photographs remains permission-dependent. | P2 |
 | **C10** | **View slip and derived magnitude together** where appropriate. | Full-dataset and Advanced Search views | Existing response-curves dashboard formula and warning. | Reuse the derived display and its warning; magnitude remains a display aid, not an input, unless separately approved. | P2 |
 | **C11** | **Contact or request materials** such as data formats or animations. | Contact tab | Existing project and repository links. | Small contact/request page. | P3 |
+| **C12** | **Choose what result information to show and the display size and layout it should fit**, including a small laptop window and later tablet and phone views. | Advanced Search results panel | The scenario page's existing results and controls. | Independent display preferences within the scenario page; FR-G6. | P2 |
 
 ### 2.5 Out of scope
 
@@ -587,6 +590,15 @@ this product:
   new native display.
 
 ## 3. Users and personas
+
+**Shared display context.** The engineer, reviewer, and researcher
+described below directly operate the scenario page in a browser.
+The assumption behind C12 is that they may need to inspect the same
+results in a restricted window, including on a small laptop. They
+need to choose the information and layout that suit that space
+while retaining the
+result's meaning and limitations. Later tablet and phone views
+serve these same needs; device names do not define new personas.
 
 ### 3.1 Primary persona: the practicing engineer
 
@@ -1547,6 +1559,31 @@ That implementation decision must be recorded in the high-level design
 and associated architecture decision record. This PRD defines the user
 need and reuse-first rule, not the technical platform choice.
 
+#### FR-G6. Display preferences (P2)
+
+The reader must be able to choose which result components to show
+and the display size and layout they should fit. This is a P2
+capability, after the MVP, agreed by the owner on 2026-11-03.
+
+It is an independent setting within the existing scenario page,
+available for a small laptop window as well as larger displays.
+Later tablet and phone views use the same capability. The choice
+must not depend solely on automatic detection of a device type or
+require a separate application.
+
+Display size means the available screen space and arrangement of
+content. Changing it must leave scenario inputs, the matching
+records, calculated results, scientific and stored-data precision,
+and data provenance unchanged. Chart-image export resolution and
+cumulative-curve accuracy remain separate capabilities and
+decisions.
+
+A chosen view must retain the counts, context, applicable warnings,
+and accessible alternatives needed to interpret the results it
+shows, under FR-O3, FR-O4, FR-G3, FR-G4, CR-8, and NFR-5. The PDD
+must define the available content choices, display sizes and
+layouts, defaults, and acceptance conditions before implementation.
+
 ## 6. Data requirements
 
 The product must use controlled, versioned data exports derived from the
@@ -1925,6 +1962,10 @@ It must remain usable on small screens and on a laptop in a
 field-office setting. Essential information and controls must not rely
 on hover alone.
 
+The P2 display preferences of FR-G6 address constrained windows,
+including small laptops. Small-screen usability is required in the
+MVP as well as P2.
+
 The PDD must define the exact supported-browser baseline and the
 supported mobile baseline.
 
@@ -2080,9 +2121,10 @@ This appendix is a non-normative index. The section text of each
 requirement is authoritative; this table restates nothing and only
 locates. Titles are the requirements' own headings. Functional
 requirements take their priority from their section or an inline
-statement; shared display rules (FR-G) and the data, content, and
-non-functional requirements bind whenever the feature they govern
-ships, so they carry no priority of their own (—).
+statement. FR-G6 is explicitly a P2 capability; the other shared
+display rules (FR-G) and the data, content, and non-functional
+requirements bind whenever the feature they govern ships, so they
+carry no priority of their own (—).
 
 | ID | Requirement | Priority | Capability | Section |
 |---|---|---|---|---|
@@ -2114,6 +2156,7 @@ ships, so they carry no priority of their own (—).
 | [FR-G3](#fr-g3-reader-facing-labels-and-data-driven-text) | Reader-facing labels and data-driven text | — | — | §5.6 |
 | [FR-G4](#fr-g4-citation-disclaimer-and-version-information) | Citation, disclaimer, and version information | — | — | §5.6 |
 | [FR-G5](#fr-g5-reuse-of-existing-full-dataset-dashboards-c8) | Reuse of existing full-dataset dashboards (C8) | — | C8 | §5.6 |
+| [FR-G6](#fr-g6-display-preferences-p2) | Display preferences (P2) | P2 | C12 | §5.6 |
 | [DR-1](#dr-1-controlled-data-source) | Controlled data source | — | — | §6.1 |
 | [DR-2](#dr-2-versioned-exports) | Versioned exports | — | — | §6.1 |
 | [DR-3](#dr-3-one-state-per-trial-population) | One-state-per-trial population | — | — | §6.2 |
