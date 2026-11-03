@@ -1162,6 +1162,125 @@
     "slots": ["L"]
   },
   {
+    "key": "ddd5.9.labelPaperCitation",
+    "source": "docs/app/ddd.md#59-downloads",
+    "part": 0,
+    "text": "Paper citation",
+    "slots": []
+  },
+  {
+    "key": "ddd5.9.labelDesignSafeDois",
+    "source": "docs/app/ddd.md#59-downloads",
+    "part": 1,
+    "text": "DesignSafe DOIs",
+    "slots": []
+  },
+  {
+    "key": "ddd5.9.labelSoftwareVersion",
+    "source": "docs/app/ddd.md#59-downloads",
+    "part": 2,
+    "text": "Software version",
+    "slots": []
+  },
+  {
+    "key": "ddd5.9.labelDataExport",
+    "source": "docs/app/ddd.md#59-downloads",
+    "part": 3,
+    "text": "Data-export version and date",
+    "slots": []
+  },
+  {
+    "key": "ddd5.9.dataExportLine",
+    "source": "docs/app/ddd.md#59-downloads",
+    "part": 4,
+    "text": "{export_version} ({export_date})",
+    "slots": ["export_version", "export_date"]
+  },
+  {
+    "key": "ddd5.9.labelScenarioSettings",
+    "source": "docs/app/ddd.md#59-downloads",
+    "part": 5,
+    "text": "Scenario settings",
+    "slots": []
+  },
+  {
+    "key": "ddd5.9.labelPopulation",
+    "source": "docs/app/ddd.md#59-downloads",
+    "part": 6,
+    "text": "Population",
+    "slots": []
+  },
+  {
+    "key": "ddd5.9.labelCounts",
+    "source": "docs/app/ddd.md#59-downloads",
+    "part": 7,
+    "text": "Counts",
+    "slots": []
+  },
+  {
+    "key": "ddd5.9.countsMatchingLine",
+    "source": "docs/app/ddd.md#59-downloads",
+    "part": 8,
+    "text": "matching records: {count}",
+    "slots": ["count"]
+  },
+  {
+    "key": "ddd5.9.countsPanelLine",
+    "source": "docs/app/ddd.md#59-downloads",
+    "part": 9,
+    "text": "{label}: N = {N}",
+    "slots": ["label", "N"]
+  },
+  {
+    "key": "ddd5.9.labelGenerated",
+    "source": "docs/app/ddd.md#59-downloads",
+    "part": 10,
+    "text": "Generated (UTC)",
+    "slots": []
+  },
+  {
+    "key": "ddd5.9.labelCaveats",
+    "source": "docs/app/ddd.md#59-downloads",
+    "part": 11,
+    "text": "Caveats",
+    "slots": []
+  },
+  {
+    "key": "ddd5.9.noCaveats",
+    "source": "docs/app/ddd.md#59-downloads",
+    "part": 12,
+    "text": "none",
+    "slots": []
+  },
+  {
+    "key": "ddd5.9.paperCitation",
+    "source": "docs/app/ddd.md#59-downloads",
+    "part": 13,
+    "text": "Chiama, K., Bednarz, W., Moss, R., Plesch, A., and Shaw, J. H. (2025). \"Quantifying relationships between fault parameters and rupture characteristics associated with thrust and reverse fault earthquakes.\" Earthquake Spectra, 41(5), 3977–4014. DOI: 10.1177/87552930251346434",
+    "slots": []
+  },
+  {
+    "key": "ddd5.9.doiHomogeneous",
+    "source": "docs/app/ddd.md#59-downloads",
+    "part": 14,
+    "text": "Chiama, K., W. Bednarz, R. Moss, A. Plesch, and J. Shaw (2024a). \"Homogeneous 2D DEM Experiments,\" in Influence of sediment depth, sediment strength, fault dip, and slip on fault scarp morphology, DesignSafe-CI. DOI: 10.17603/ds2-xpq0-gw80",
+    "slots": []
+  },
+  {
+    "key": "ddd5.9.doiHeterogeneous",
+    "source": "docs/app/ddd.md#59-downloads",
+    "part": 15,
+    "text": "Chiama, K., W. Bednarz, R. Moss, A. Plesch, and J. Shaw (2024b). \"Heterogeneous 2D DEM Experiments,\" in Influence of sediment depth, sediment strength, fault dip, and slip on fault scarp morphology, DesignSafe-CI. DOI: 10.17603/ds2-gfsj-pp60",
+    "slots": []
+  },
+  {
+    "key": "pdd6.1.downloadButton",
+    "source": "docs/app/pdd.md#61-download-package-fr-d1",
+    "part": 0,
+    "text": "Download this result",
+    "slots": []
+  },
+  {
     "key": "ddd5.10.capabilityNotice",
     "source": "docs/app/ddd.md#510-failure-states",
     "part": 0,

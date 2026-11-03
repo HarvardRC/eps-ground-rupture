@@ -1481,6 +1481,42 @@ are recorded at the end of
   glossary linker also skips text inside an `<a>`, where a link would
   nest one link in another, so the field-source terms inside the
   overlay legend's source links stay unlinked there.
+- **T-32 follow-up: the sort of `validValues`.** On 2026-11-03 the
+  owner adopted a speedup that preserves the function: `validValues`
+  of [T-32](ip.md#t-32--statistics-module) (Statistics module) builds
+  `sorted` by a counting sort of the integer steps, each then divided
+  by `D`, instead of the typed-array numeric sort of the restored
+  values, as
+  [DDD §5.4 — Statistics](ddd.md#54-statistics) (Gather) now states.
+  The output is bit-identical. In the spot timing of
+  [T-37](ip.md#t-37--early-feasibility-diagnostic) (Early feasibility
+  diagnostic) on [GS-0](pdd.md#102-golden-scenarios) (Empty scenario
+  (no active slip window), default population), a diagnostic and never
+  acceptance evidence, four runs of each build alternated on one
+  heavily loaded machine, where decode and query took about twice
+  their lighter-load times; the median selection-and-statistics
+  interval was 76–83 ms after the change against 185–200 ms before,
+  2.4–2.5 times shorter in each pair. At the lighter load, earlier,
+  the build before the change had a median of 92–94 ms.
+- **T-15 review.** On 2026-11-03 the owner had `publishVintage`
+  refuse, before any push, a local tag `data-vN` that is not an
+  annotated tag (step 5) and, before any upload or publication, an
+  existing draft that is not a prerelease (step 6), each printing its
+  repair, and kept the drill override's extra refusals — a failing
+  `gh repo view`, a name compared ignoring letter case, an override
+  naming `HarvardRC/eps-ground-rupture`, and a malformed
+  `<owner>/<name>` — all recorded in
+  [DDD §4.2 — Publication of a data vintage](ddd.md#42-publication-of-a-data-vintage).
+- **T-44 review erratum.** DDD §5.10's skeleton committed before the
+  first commit, which a recovery decision also uses, now leaves out
+  the overlay switch and the download button: both are built with the
+  mount's `Wiring`, and a download button in a decision state could
+  neither work nor be disabled under §5.9. A resumption inserts both
+  before `#gre-recovery`, creating no other skeleton element. From the
+  T-45 review, §5.8's fixed-here index and T-45's step (8) name the
+  provenance block-4 and block-7 line templates that the registry
+  holds, and §5.9 states that `statistics.csv` takes the line ends and
+  quoting of `records.csv`.
 
 ## References
 

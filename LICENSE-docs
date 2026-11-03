@@ -27,5 +27,9 @@ This licence does NOT cover:
     modification only. Each figure carries the citation required
     alongside it.
 
+  * The derived data exports published as assets of this repository's
+    data releases (data-vN). Their terms, and the attribution each
+    source requires, are in data/REDISTRIBUTION.md.
+
   * The published article itself, and the input datasets, neither of
     which is redistributed here. See the "Licensing" section of README.md.

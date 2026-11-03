@@ -3087,8 +3087,10 @@ line; `T` is empty when no such tag exists:
    [§4.1](#41-export-task-and-validation), as an array of strings in
    printed order), and `size_report` (its `size:` lines, likewise).
 5. **Tag.** `git tag -a data-vN -m 'Data vintage data-vN' S`, skipped
-   when the local tag already points to `S`; a local tag pointing
-   elsewhere is refused, with `git tag -d data-vN` printed. Then
+   when the local tag already points to `S`; a local tag that is not
+   an annotated tag (`git cat-file -t refs/tags/data-vN` does not
+   print `tag`), or that points elsewhere, is refused before any push,
+   with `git tag -d data-vN` printed. Then
    `git push origin refs/tags/data-vN`, skipped when `T` equals `S`.
    The task then requires
    `git ls-remote origin 'refs/tags/data-vN^{}'` to print `S`. The
@@ -3099,6 +3101,10 @@ line; `T` is empty when no such tag exists:
    `gh release create data-vN --repo HarvardRC/eps-ground-rupture --verify-tag --draft --prerelease --title 'Data vintage data-vN' --notes-file dist/app/data-vN/data-terms-<h12>.txt`,
    the terms file the pointer names — its text is the release body
    ([§4.4](#44-licensing-archival-distribution-and-release-attachments)).
+   An existing draft whose `isPrerelease` is false is refused before
+   any upload or publication, with
+   `gh release edit data-vN --repo HarvardRC/eps-ground-rupture --prerelease`
+   printed, after which a rerun continues.
 7. **Upload.** For each file the pointer names: when the release has
    no asset of that name,
    `gh release upload data-vN dist/app/data-vN/<name> --repo HarvardRC/eps-ground-rupture`;
@@ -3239,7 +3245,11 @@ data, is replaced by recording `pytest_full_data` as
 `drill: not run`. Step 1 refuses the option while
 `gh repo view --json nameWithOwner --jq .nameWithOwner`, which reads
 the working tree's own repository, prints
-`HarvardRC/eps-ground-rupture`. The drills: a fresh run publishes,
+`HarvardRC/eps-ground-rupture`, compared ignoring letter case, or
+exits non-zero, and when the option names
+`HarvardRC/eps-ground-rupture`, likewise ignoring case; an option
+value that does not match `[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+` is
+refused before step 1. The drills: a fresh run publishes,
 its tag peeling to `S` and its asset set exact; a run stopped by
 `-Ppublish.failAfterUploads=1` resumes with `export_date` unchanged;
 a planted extra draft asset is deleted; a tag at another commit is
@@ -4379,7 +4389,13 @@ expected difference is zero and agreement does not rest on the
    (`Uint8Array`) in artifact order, the divisor `D` of
    [§5.2](#52-artifact-loading-and-decoding) (1000 for all three
    measurements), and `sorted`: the restored values `x = s / D` in a
-   `Float64Array` sorted ascending by the typed-array numeric sort.
+   `Float64Array`, ascending. `validValues` builds `sorted` by a
+   counting sort of the integer steps over their range, from the
+   least to the greatest, each step then divided by `D`. This equals
+   bit for bit the restored values sorted by the typed-array numeric
+   sort, since `s ↦ s / D` is monotone for `D > 0` and no −0 arises
+   (`0 / D` is +0); by the bound of the Mean step below, the range
+   spans fewer than 2^19 integers.
 2. **Extremes.** `min` and `max` are `sorted[0]` and
    `sorted[n − 1]`.
 3. **Percentiles.** `median`, `p16`, and `p84` are
@@ -5979,7 +5995,7 @@ defined where it is used:
 | [§5.5](#55-offset-to-slip-conversion-assist) | the assist panel's window line and provenance line |
 | [§5.7](#57-scenario-controls) | the dip-range label, echo, and Apply; the slip-field labels (the offset field reuses "Maximum (m)"), helper line, and rejection line; the entry-mode legend; the population explainer's summary; the dip and depth option formats; the arm helper text; the summary tokens and joiners |
 | [§5.8](#58-view-layer) (this section) | the prototype notice, until activation; the product footer; the N line; the view-switch labels and legend; the log-scale toggle label; the chart-data disclosure label; the statistics row labels and null mark; the condition names and their joiner; the height show-all label, limited-comparison form, and field-export line |
-| [§5.9](#59-downloads) | the provenance labels, citation and DOI texts, and empty-caveat line |
+| [§5.9](#59-downloads) | the provenance labels, the block-4 and block-7 line templates, citation and DOI texts, and empty-caveat line |
 | [§5.10](#510-failure-states) | the no-JS fallback body and its `<noscript>` sentence, in `scenario.md`'s `#gre-root` between copy markers citing §5.10, not in `copy.json`; the capability notice; both unavailable-notice variants and their reasons; recovery messages, action labels, and saved-settings heading |
 | [§5.11](#511-accessibility-supported-environments-and-navigation-lifecycle) | the announcement templates; the chart label, caption, and chart-data table templates |
 | [§5.12](#512-charts) | the axis titles, pre-mark labels, read-off strings, segment title, the "below 0.1 m" label, and both info-note sentences |
@@ -6386,7 +6402,8 @@ computed ([SC-2](pdd.md#101-success-criteria), download
 reproducibility) (fixed here). Counts
 are plain decimal digits, without the table's thousands separators;
 a null statistic ([§5.4](#54-statistics)) is an empty field in both
-of its columns.
+of its columns. Line ends and quoting are those of `records.csv`: LF
+line ends and RFC 4180 quoting.
 
 **`provenance.txt`.** UTF-8 plain text with LF line ends: nine
 blocks in exactly the order of PDD §6.1, each a label line (labels
@@ -6811,7 +6828,9 @@ counts as `'read'`. The state is one presentation, built by
   below);
 - before the first commit, `notices.ts` commits that same skeleton
   through `#gre-root.replaceChildren(…)` with `#gre-controls` and
-  `#gre-panels` empty and `hidden`: this path reads nothing from the
+  `#gre-panels` empty and `hidden`, and without the overlay switch
+  `#gre-overlay` and the download button `#gre-download`, which are
+  built with the mount's `Wiring`: this path reads nothing from the
   vintage, so it cannot fail for the reason the startup did.
 
 `{reason}` names the failed step in one fixed-here phrase; a failed
@@ -6930,10 +6949,11 @@ permits the explicit choices above to resume startup in the same mount;
 only its root commit is the mount's first commit. Build that minimal
 skeleton without reading the vintage, as for pre-load failure. On
 resumption, populate the previously empty stable controls/panels and
-other slots; do not replace `#gre-root` or recreate the skeleton or live
-regions. The first actual result still has sequence 0 and receives the
-first-result mark. A failure after resumption still follows ordinary
-unavailable-state handling.
+other slots, and insert the overlay switch and the download button
+before `#gre-recovery`; do not replace `#gre-root` or recreate the
+skeleton or live regions. The first actual result still has sequence
+0 and receives the first-result mark. A failure after resumption still
+follows ordinary unavailable-state handling.
 
 Entering the unavailable state while a recovery-decision state is
 shown, whether or not its resumption is pending, removes that state's
@@ -10994,7 +11014,7 @@ confuse.
 | `recovery.test.ts` | The pure §5.6 recovery envelope: round-trip accepted Scenario and every DisplayState member, including accepted offset input and overlay on; exact keys/version/type checks; invalid JSON, unknown versions, missing keys, and bad display maps return invalid-record; unchanged inputs pass through `parseScenario` against the new manifest; removed vocabulary, reordered canonical arrays, a reduced slip maximum, and incompatible family view return incompatible without partial restoration. Added dictionary members do not expand old explicit selections; saved effective endpoints and canonical decimal strings remain unchanged; same-version records are validated too; a changed coefficient file is not stored in or read from the record. No storage or DOM access in this test. |
 | `scenario-json.test.ts` | `src/state/scenario-json.ts` ([§5.6](#56-scenario-state-and-url-encoding); [DD-11](#1-ddd-decision-register)): `serializeScenario` of [GS-1](pdd.md#102-golden-scenarios) equals the §5.6 golden bytes; round trips for the default scenario, GS-1, A, B, a lone minimum, a lone maximum, and offset mode; the canonical-decimal cases (`03.50` → `3.5`, `0.000` → `0`); an offset-mode Scenario whose maximum was entered as `.12345678901234` serializes `offset_max` as `0.12345678901234`, `parseScenario` returns a Scenario deep-equal to it, and grammar G reads that decimal back unchanged; an otherwise valid offset-mode object whose `offset_max` is the 17-character `0.123456789012345` makes `parseScenario` throw `ScenarioInputError` whose `path` names `offset_max`; A and B serialize differently; an unknown key or an out-of-vocabulary value makes `parseScenario` throw `ScenarioInputError`, whose `path` names the offending key or element ([§5.10](#510-failure-states)). |
 | `summary.test.ts` | `summaryText(state, counts)` ([§5.7](#57-scenario-controls)): the PDD tokens verbatim — `Strong (uniform)`, `Strong — uniform and layered`, `slip: any` for the inactive window, `all recorded stages` for the all-stages population without a window; `any sediment` for all nine pairs; A → `Weak (layered) or Strong (uniform)` and B → `Weak (uniform) or Strong (layered)`, as the §5.7 grammar spells them; 512 distinct tokens over all 512 sediment subsets; each checkbox group's empty-group token; the offset-mode window token. |
-| `histogram.test.ts` | `histogram()` and `histogramLog()` mechanics ([§5.12](#512-charts)) only. Linear: the cap loop ends with at most 60 bins; edges ascend; the counts sum to n; valid 0 returns null. Logarithmic, with `logScaleOfferRatio()` as `offerRatio`: every edge is twice the one before, the first being 100 · 2^k recording steps; each edge value from 100 to 100 · 2^20 lands in the bin that starts at it, and the value one step below it in the bin before (below 100, in `below_counts`); the counts and `below_counts` together sum to n; no positive value returns null. Both: identical inputs give identical output. Rules, edges, counts, and whether the log histogram is offered — among them the `synthetic.histograms` threshold pair, `maxpos_s = 100 · minpos_s` not offered and `maxpos_s = 100 · minpos_s + 1` offered — are checked against the references in [§7.2](#72-calculation-parity-tests) steps 3 and 5. |
+| `histogram.test.ts` | `histogram()` and `histogramLog()` mechanics ([§5.12](#512-charts)) only. Linear: the cap loop ends with at most 60 bins; edges ascend; the counts sum to n; valid 0 returns null. Logarithmic, with `logScaleOfferRatio()` as `offerRatio`: every edge is twice the one before, the first being 100 · 2^k recording steps; each edge value from 100 to 100 · 2^20 lands in the bin that starts at it, and the value one step below it in the bin before (below 100, in `below_counts`); the counts and `below_counts` together sum to n; no positive value returns null. Both: identical inputs give identical output. Rules, edges, counts, and whether the log histogram is offered — among them the `synthetic.histograms` threshold pair, `maxpos_s = 100 · minpos_s` not offered and `maxpos_s = 100 · minpos_s + 1` offered — are checked against the references in [§7.2](#72-calculation-parity-tests) steps 3 and 5. Besides the mechanics, the order of the `sorted` input of `histogram()`, an agreement of two sorts of the same restored values and not a calculation answer: the counting sort of `validValues` ([§5.4](#54-statistics), Gather) equals byte for byte the typed-array numeric sort of the restored values, on steps with negative values, duplicates, one value, and wide ranges, and through `validValues` on the N = 2, 100, 101, and 102 fixtures. |
 | `scenario-controls.test.ts` | `controlModel(manifest, state)` and `dipRangeEcho(entry, dips)` ([§5.7](#57-scenario-controls)): every option list equals its fixture-manifest dictionary in dictionary order — the sediment pairs in `arm_strength_states` order, uniform arm first ([§3.2](#32-artifact-manifest)) — never hardcoded; defaults equal the manifest-derived values; disabled flags (family view disabled unless all six types are selected); the display label of data `Alternating Strong-Weak` is `Alternating Strong–Weak`; `dipRangeEcho` returns the modeled dips an entry includes. Rendering the echo is [§7.5](#75-browser-test-lane)'s. |
 | `charts.test.ts` | `histogramSvg(spec, width)` and `ecdfSvg(spec, width)` ([§5.12](#512-charts)): two independently built specs from the same inputs serialize identically through `serializeSvg`, on a linear and on a logarithmic value axis; tick labels equal `displayRound` at the [D-23](pdd.md#1-decision-register) (Reader-facing display precision per quantity) decimals; each segment's `<title>` equals `segmentTitle`; `ecdfSteps(sorted)` drawing mechanics on injected arrays: `[1, 1, 2, 2, 2, 5]` gives x `[1, 2, 5]` and c `[2, 5, 6]`, `[3, 3, 3]` gives x `[3]` and c `[3]` (and `ecdfSvg` draws that two-vertex rise at the plot's horizontal center), and the values 0 … m − 1, one each, give all 511 points for m = 511, all 512 for m = 512, and for m = 513 the 257 even-indexed points 0, 2, …, 512. Heavy tie: values 0 … 512 once except 256 appears 45 times (n = 557) retain the same 257 x values, with c = 301 at x = 256 and maximum omitted-count deficit 1; the old index-spaced rule would omit that jump. Threshold equality: values 0 … 1021 once (n = 1022) retain x = 0, 3, …, 1020, 1021 (342 points), with c = x + 1 and maximum deficit 2; equality in `511 * delta == n` omits an interior candidate. Cap: values 0 … 1531 once retain x = 0, 3, …, 1530, 1531 (512 points). On every fixture, assert ascending retained values, exact cumulative counts, both endpoints, M ≤ 512, and `0 ≤ 511 * (exactCount - drawnCount) ≤ n` at every original distinct value, which checks the error bound on every interval; `ecdfSvg` draws 2M vertices for M points; no table, list, or text alternative sits inside the `<svg>` (alternatives are its siblings, [§5.11](#511-accessibility-supported-environments-and-navigation-lifecycle)). |
 | `chart-text.test.ts` | `chartLabel(state)`, `binTableSpec(binsByGroup, groups, edges)`, `fieldTableSpec(rows, order)`, and `segmentTitle` ([§5.11](#511-accessibility-supported-environments-and-navigation-lifecycle)) with injected counts: the header order is canonical; the six-to-three family fold keeps row totals; the group cells of each row sum to its Total; field rows follow the PDD §4.4 source order, ascending value, ties broken by `eq_name`; one distinct `chartLabel` per combination of chart kind and field ticks, and, for the histogram only, family view and log scale; on the logarithmic axis the bin table's first row is `below 0.1 m` exactly when the below counts are not all zero. |
