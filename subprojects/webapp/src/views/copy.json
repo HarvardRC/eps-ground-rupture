@@ -539,6 +539,174 @@
     "slots": []
   },
   {
+    "key": "ddd5.8.prototypeNotice",
+    "source": "docs/app/ddd.md#58-view-layer",
+    "part": 0,
+    "text": "Prototype — shared for the research team's review; not yet released.",
+    "slots": []
+  },
+  {
+    "key": "ddd5.8.conditionFaultDip",
+    "source": "docs/app/ddd.md#58-view-layer",
+    "part": 18,
+    "text": "fault dip",
+    "slots": []
+  },
+  {
+    "key": "ddd5.8.conditionSediment",
+    "source": "docs/app/ddd.md#58-view-layer",
+    "part": 19,
+    "text": "sediment strength",
+    "slots": []
+  },
+  {
+    "key": "ddd5.8.conditionDepth",
+    "source": "docs/app/ddd.md#58-view-layer",
+    "part": 20,
+    "text": "sediment depth",
+    "slots": []
+  },
+  {
+    "key": "ddd5.8.conditionDensity",
+    "source": "docs/app/ddd.md#58-view-layer",
+    "part": 21,
+    "text": "sediment density",
+    "slots": []
+  },
+  {
+    "key": "ddd5.8.conditionWindow",
+    "source": "docs/app/ddd.md#58-view-layer",
+    "part": 22,
+    "text": "displacement window",
+    "slots": []
+  },
+  {
+    "key": "ddd5.8.conditionScarpClass",
+    "source": "docs/app/ddd.md#58-view-layer",
+    "part": 23,
+    "text": "resulting scarp type",
+    "slots": []
+  },
+  {
+    "key": "ddd5.8.conditionJoiner",
+    "source": "docs/app/ddd.md#58-view-layer",
+    "part": 24,
+    "text": ", ",
+    "slots": []
+  },
+  {
+    "key": "ddd5.8.conditionFinalJoiner",
+    "source": "docs/app/ddd.md#58-view-layer",
+    "part": 25,
+    "text": " and ",
+    "slots": []
+  },
+  {
+    "key": "pdd5.11.glossaryScarpHeight",
+    "source": "docs/app/pdd.md#511-labels-units-and-glossary-links-fr-g3-cr-3-cr-7",
+    "part": 10,
+    "text": "scarp height `#scarp-height`",
+    "slots": []
+  },
+  {
+    "key": "pdd5.11.glossaryDzw",
+    "source": "docs/app/pdd.md#511-labels-units-and-glossary-links-fr-g3-cr-3-cr-7",
+    "part": 11,
+    "text": "deformation-zone width `#dzw`",
+    "slots": []
+  },
+  {
+    "key": "pdd5.11.glossaryScarpDip",
+    "source": "docs/app/pdd.md#511-labels-units-and-glossary-links-fr-g3-cr-3-cr-7",
+    "part": 12,
+    "text": "scarp dip `#scarp-dip`",
+    "slots": []
+  },
+  {
+    "key": "pdd5.11.glossaryFaultDip",
+    "source": "docs/app/pdd.md#511-labels-units-and-glossary-links-fr-g3-cr-3-cr-7",
+    "part": 13,
+    "text": "fault dip `#fault-dip`",
+    "slots": []
+  },
+  {
+    "key": "pdd5.11.glossarySlip",
+    "source": "docs/app/pdd.md#511-labels-units-and-glossary-links-fr-g3-cr-3-cr-7",
+    "part": 14,
+    "text": "fault slip `#slip`",
+    "slots": []
+  },
+  {
+    "key": "pdd5.11.glossarySedimentStrengthCohesion",
+    "source": "docs/app/pdd.md#511-labels-units-and-glossary-links-fr-g3-cr-3-cr-7",
+    "part": 15,
+    "text": "sediment strength and cohesion `#sediment-strength`, `#cohesion`",
+    "slots": []
+  },
+  {
+    "key": "pdd5.11.glossaryScarpClasses",
+    "source": "docs/app/pdd.md#511-labels-units-and-glossary-links-fr-g3-cr-3-cr-7",
+    "part": 16,
+    "text": "scarp types `#scarp-classes`",
+    "slots": []
+  },
+  {
+    "key": "pdd5.11.glossaryBackProjection",
+    "source": "docs/app/pdd.md#511-labels-units-and-glossary-links-fr-g3-cr-3-cr-7",
+    "part": 17,
+    "text": "back-projection `#back-projection`",
+    "slots": []
+  },
+  {
+    "key": "pdd5.11.glossaryDem",
+    "source": "docs/app/pdd.md#511-labels-units-and-glossary-links-fr-g3-cr-3-cr-7",
+    "part": 18,
+    "text": "DEM `#dem`",
+    "slots": []
+  },
+  {
+    "key": "pdd5.11.glossaryMagnitude",
+    "source": "docs/app/pdd.md#511-labels-units-and-glossary-links-fr-g3-cr-3-cr-7",
+    "part": 19,
+    "text": "derived magnitude `#magnitude`",
+    "slots": []
+  },
+  {
+    "key": "pdd5.11.glossaryVerticalSeparation",
+    "source": "docs/app/pdd.md#511-labels-units-and-glossary-links-fr-g3-cr-3-cr-7",
+    "part": 20,
+    "text": "vertical separation `#vertical-separation`",
+    "slots": []
+  },
+  {
+    "key": "pdd5.11.glossaryFzw",
+    "source": "docs/app/pdd.md#511-labels-units-and-glossary-links-fr-g3-cr-3-cr-7",
+    "part": 21,
+    "text": "fault-zone width `#fzw`",
+    "slots": []
+  },
+  {
+    "key": "pdd5.11.glossaryFnc",
+    "source": "docs/app/pdd.md#511-labels-units-and-glossary-links-fr-g3-cr-3-cr-7",
+    "part": 22,
+    "text": "fault-normal component `#fnc`",
+    "slots": []
+  },
+  {
+    "key": "pdd5.11.glossarySure",
+    "source": "docs/app/pdd.md#511-labels-units-and-glossary-links-fr-g3-cr-3-cr-7",
+    "part": 23,
+    "text": "SURE `#sure`",
+    "slots": []
+  },
+  {
+    "key": "pdd5.11.glossaryKernCounty",
+    "source": "docs/app/pdd.md#511-labels-units-and-glossary-links-fr-g3-cr-3-cr-7",
+    "part": 24,
+    "text": "Kern County `#kern-county-1952`",
+    "slots": []
+  },
+  {
     "key": "pdd3.2.armUniform",
     "source": "docs/app/pdd.md#32-sediment-strength-and-structure-fr-s2",
     "part": 0,
