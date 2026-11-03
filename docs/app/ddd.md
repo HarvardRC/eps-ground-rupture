@@ -419,7 +419,7 @@ runs.
    (expected 0) as a diagnostic; the two named full-data tests
    reproduce the tie share and the evaluation-order effect.
 3. **DD-3 — browser-testing tool.** Playwright (`@playwright/test`
-   1.47.2) driving the Chromium build it pins — one evergreen engine,
+   1.64.1) driving the Chromium build it pins — one evergreen engine,
    per the second amendment of 2026-10-29 to
    [ADR-0015](../adr/0015-golden-scenario-parity.md) — with
    `@axe-core/playwright` 4.10.0 as its one accessibility engine, both
@@ -948,29 +948,39 @@ therefore runs the same runtime, and no workflow step installs Node.js
 
 Development dependencies, each listed at an exact version in
 `package.json` (no `^` or `~` range): `typescript 5.5.4`,
-`esbuild 0.24.0`, `@playwright/test 1.47.2`, `playwright-core 1.47.2`
-(below), `@types/node 22.10.2` (the Node.js 22 typings that
+`esbuild 0.24.0`, `@playwright/test 1.64.1`, `playwright-core 1.64.1`
+(below; raised on 2026-11-03 from 1.47.2, whose `playwright install`
+downloads browsers without verifying the SSL certificate —
+[GHSA-7mvr-c777-76hp](https://github.com/advisories/GHSA-7mvr-c777-76hp),
+fixed in 1.55.1 — to the newest release, which pins the newest
+browser build), `@types/node 22.10.2` (the Node.js 22 typings that
 `tsconfig.node.json` and the tests' `node:test` imports need — they
 also declare the `fetch`, `performance`, and `DecompressionStream`
 globals that `decode/` calls in both environments — released
 alongside the runtime pin),
 `@axe-core/playwright 4.10.0` (the accessibility engine of
-[§7.5](#75-browser-test-lane), contemporary with the other pins; the
-lockfile resolves its `axe-core` dependency to one exact version), and
+[§7.5](#75-browser-test-lane), contemporary with the other pins but
+Playwright's; the lockfile resolves its `axe-core` dependency to one
+exact version), and
 `caniuse-lite 1.0.30001820` (the browser-support dataset of the
 compatibility test of
 [§7.6](#76-performance-and-compatibility-measurements), which states
 when the dataset is upgraded). The list is complete: another package
 joins only by amending it. `playwright-core` is pinned, at the version
-that `@playwright/test` 1.47.2 installs through `playwright`, because
+that `@playwright/test` 1.64.1 installs through `playwright`, because
 `@axe-core/playwright` declares it as a peer with the open range
-`>= 1.0.0`: in a trial install of the other six pins on 2026-11-01,
-outside the repository, npm met that peer with the newest release,
-1.64.1, at the top level, nested 1.47.2 under `playwright`, and the
-`new AxeBuilder({ page })` call of §7.5 failed the type check
-(TS2740), its `page` typed by the other copy. With the pin,
+`>= 1.0.0`, which npm meets with the newest release: when that is
+not the version `playwright` installs, the tree holds two copies, and
+the `new AxeBuilder({ page })` call of §7.5 fails the type check, its
+`page` typed by the other copy. In a trial install on 2026-11-03,
+outside the repository, of the other six pins with `@playwright/test`
+at 1.64.0, npm placed the newest release, 1.64.1, at the top level
+and nested 1.64.0 under `playwright`, and that call failed (TS2322),
+as it had failed with 1.47.2 on 2026-11-01 (TS2740). With the pin,
 `package-lock.json` must record `node_modules/playwright-core` at
-1.47.2. The shipped bundle has zero runtime
+1.64.1, its only copy: on 2026-11-03 the lockfile that `npmInstall`
+wrote under the pinned runtime held that one entry, and the call
+passed `tscCheck`. The shipped bundle has zero runtime
 dependencies, so `dependencies` stays empty. The committed
 `package-lock.json` pins the whole tree; builds install with
 `npm ci`, and `npm install` runs only to create the lockfile or
@@ -1011,7 +1021,12 @@ the Gradle tasks run:
 `npm ci` installs `@playwright/test` but downloads no browser, so
 `browser-install` downloads the Chromium build that the locked
 `@playwright/test` pins, unless that build is already present, into
-Playwright's per-user browser cache outside the repository.
+Playwright's per-user browser cache outside the repository. Since
+Playwright 1.57 that build is a Chrome for Testing build of Chromium:
+for 1.64.1, Chrome for Testing 156.0.8078.4 (Playwright's `chromium`
+revision 1248), which headed runs such as the `measure` project of
+§7.5 use, and Chrome Headless Shell of the same version, which
+headless runs use.
 
 `node --test` receives the quoted glob unexpanded and runs only the
 compiled test files; without the pattern, Node 22's default discovery
@@ -1224,7 +1239,8 @@ in `src/views/dom/`.
 
 *Closes:* DD-10. *Verification (planned):* the pins are read from the
 committed `build.gradle.kts`, `package.json`, and `package-lock.json`,
-whose `node_modules/playwright-core` entry must read 1.47.2 (T-01),
+whose `node_modules/playwright-core` entry must read 1.64.1 (T-01,
+which checked 1.47.2, the pin of its revision),
 and from `perf/versions.tf` and `perf/.terraform.lock.hcl`
 (T-59); `test/toolchain.test.ts` fails any `webappTest` run on
 another runtime; the `run.mjs` command line and its
@@ -11217,9 +11233,9 @@ upgrade of the pinned package (§2).
     or the P2 display preference of
     [PDD §4.9](pdd.md#49-display-preferences-fr-g6-p2). The desktop
     and mobile functional projects retain their own viewports.
-    Playwright 1.47.2
-    has no per-project `workers`, so every invocation of this project
-    carries `--workers=1` (§7.6).
+    It sets no per-project `workers`, which Playwright has had since
+    1.52; every invocation of this project carries `--workers=1`
+    instead (§7.6).
 - **Invocation.** `webappBrowserTest` runs, from
   `subprojects/webapp`, the npm script `browser-test` of
   [§2](#2-repository-structure-naming-and-toolchain),
@@ -11944,7 +11960,7 @@ event names it — the protocol's memory-cache signal, its `Response` type
 having no memory-cache member. A cache-served request is warm once its
 `loadingFinished` arrives, whatever `hasExtraInfo` says and without
 waiting for extra information, which Chromium may never send for a
-cached response that sets that flag (the pinned Playwright 1.47.2
+cached response that sets that flag (the pinned Playwright 1.64.1
 network manager likewise ignores the flag on a response served from
 cache). Any other request settles at its `loadingFinished` with the
 response event's `status` when `hasExtraInfo` is false, and otherwise
