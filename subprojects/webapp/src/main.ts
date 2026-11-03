@@ -1205,6 +1205,3 @@ const ready = (window as unknown as { document$?: { subscribe(next: () => void):
 if (ready && typeof ready.subscribe === 'function') ready.subscribe(onPageReady);   // the replay covers late evaluation
 else if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', onPageReady, { once: true });
 else onPageReady();
-
-const t22Drill: number = 'drill';
-console.log(t22Drill);
