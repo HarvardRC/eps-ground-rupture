@@ -1507,6 +1507,16 @@ are recorded at the end of
   naming `HarvardRC/eps-ground-rupture`, and a malformed
   `<owner>/<name>` — all recorded in
   [DDD §4.2 — Publication of a data vintage](ddd.md#42-publication-of-a-data-vintage).
+- **T-44 review erratum.** DDD §5.10's skeleton committed before the
+  first commit, which a recovery decision also uses, now leaves out
+  the overlay switch and the download button: both are built with the
+  mount's `Wiring`, and a download button in a decision state could
+  neither work nor be disabled under §5.9. A resumption inserts both
+  before `#gre-recovery`, creating no other skeleton element. From the
+  T-45 review, §5.8's fixed-here index and T-45's step (8) name the
+  provenance block-4 and block-7 line templates that the registry
+  holds, and §5.9 states that `statistics.csv` takes the line ends and
+  quoting of `records.csv`.
 
 ## References
 

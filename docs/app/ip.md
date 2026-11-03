@@ -3115,7 +3115,8 @@ added with `{ signal: wiring.signal }` of the `Wiring` it receives
 `wiring.signal`'s `abort` event
 ([§5.10](ddd.md#510-failure-states), rules binding `start`). (8)
 `copy.json` gains the §5.9 fixed-here entries (the provenance labels,
-the citation and DOI texts, and the empty-caveat line) and the PDD §6.1
+the block-4 and block-7 line templates, the citation and DOI texts,
+and the empty-caveat line) and the PDD §6.1
 button label. (9) Tests per [DDD §7.4](ddd.md#74-application-tests):
 `test/downloads.test.ts`, the §7.4 row in full; `test/file-name.test.ts`
 (the former `slug.test.ts`); and `test/zip.test.ts` with its independent
