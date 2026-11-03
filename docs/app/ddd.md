@@ -3087,8 +3087,10 @@ line; `T` is empty when no such tag exists:
    [§4.1](#41-export-task-and-validation), as an array of strings in
    printed order), and `size_report` (its `size:` lines, likewise).
 5. **Tag.** `git tag -a data-vN -m 'Data vintage data-vN' S`, skipped
-   when the local tag already points to `S`; a local tag pointing
-   elsewhere is refused, with `git tag -d data-vN` printed. Then
+   when the local tag already points to `S`; a local tag that is not
+   an annotated tag (`git cat-file -t refs/tags/data-vN` does not
+   print `tag`), or that points elsewhere, is refused before any push,
+   with `git tag -d data-vN` printed. Then
    `git push origin refs/tags/data-vN`, skipped when `T` equals `S`.
    The task then requires
    `git ls-remote origin 'refs/tags/data-vN^{}'` to print `S`. The
@@ -3099,6 +3101,10 @@ line; `T` is empty when no such tag exists:
    `gh release create data-vN --repo HarvardRC/eps-ground-rupture --verify-tag --draft --prerelease --title 'Data vintage data-vN' --notes-file dist/app/data-vN/data-terms-<h12>.txt`,
    the terms file the pointer names — its text is the release body
    ([§4.4](#44-licensing-archival-distribution-and-release-attachments)).
+   An existing draft whose `isPrerelease` is false is refused before
+   any upload or publication, with
+   `gh release edit data-vN --repo HarvardRC/eps-ground-rupture --prerelease`
+   printed, after which a rerun continues.
 7. **Upload.** For each file the pointer names: when the release has
    no asset of that name,
    `gh release upload data-vN dist/app/data-vN/<name> --repo HarvardRC/eps-ground-rupture`;
@@ -3239,7 +3245,11 @@ data, is replaced by recording `pytest_full_data` as
 `drill: not run`. Step 1 refuses the option while
 `gh repo view --json nameWithOwner --jq .nameWithOwner`, which reads
 the working tree's own repository, prints
-`HarvardRC/eps-ground-rupture`. The drills: a fresh run publishes,
+`HarvardRC/eps-ground-rupture`, compared ignoring letter case, or
+exits non-zero, and when the option names
+`HarvardRC/eps-ground-rupture`, likewise ignoring case; an option
+value that does not match `[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+` is
+refused before step 1. The drills: a fresh run publishes,
 its tag peeling to `S` and its asset set exact; a run stopped by
 `-Ppublish.failAfterUploads=1` resumes with `export_date` unchanged;
 a planted extra draft asset is deleted; a tag at another commit is

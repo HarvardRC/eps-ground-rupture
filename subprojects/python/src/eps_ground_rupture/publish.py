@@ -629,8 +629,16 @@ def step4_export(run: Run) -> None:
 
 def step5_tag(run: Run) -> None:
     say("step 5: tag")
+    ref = f"refs/tags/{run.tag}"
+    exists = git(run, "rev-parse", "-q", "--verify", ref, step="5", check=False).stdout.strip()
+    if exists and git(run, "cat-file", "-t", ref, step="5").stdout.strip() != "tag":
+        raise PublishStop(
+            "5",
+            f"the local tag {run.tag} is not an annotated tag; delete it:",
+            [f"git tag -d {run.tag}"],
+        )
     local = git(
-        run, "rev-parse", "-q", "--verify", f"refs/tags/{run.tag}^{{commit}}", step="5", check=False
+        run, "rev-parse", "-q", "--verify", f"{ref}^{{commit}}", step="5", check=False
     ).stdout.strip()
     if not local:
         git(run, "tag", "-a", run.tag, "-m", f"Data vintage {run.tag}", run.source, step="5")
@@ -661,6 +669,12 @@ def step5_tag(run: Run) -> None:
 def step6_draft(run: Run, pointer: dict) -> None:
     say("step 6: draft prerelease")
     release = view_release(run, "isDraft,isPrerelease", "6")
+    if release is not None and release["isDraft"] and not release["isPrerelease"]:
+        raise PublishStop(
+            "6",
+            f"the draft {run.tag} is not a prerelease; restore its flag, then rerun:",
+            [" ".join(release_command(run, "edit", run.tag, "--prerelease"))],
+        )
     if release is not None and release["isDraft"]:
         say(f"step 6: a draft of {run.tag} exists")
         return

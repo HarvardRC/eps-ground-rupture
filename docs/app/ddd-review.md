@@ -1473,6 +1473,15 @@ are recorded at the end of
   the owner's. The
   [Task format](ip.md#task-format) of the implementation plan records
   the rule.
+- **T-15 review.** On 2026-11-03 the owner had `publishVintage`
+  refuse, before any push, a local tag `data-vN` that is not an
+  annotated tag (step 5) and, before any upload or publication, an
+  existing draft that is not a prerelease (step 6), each printing its
+  repair, and kept the drill override's extra refusals — a failing
+  `gh repo view`, a name compared ignoring letter case, an override
+  naming `HarvardRC/eps-ground-rupture`, and a malformed
+  `<owner>/<name>` — all recorded in
+  [DDD §4.2 — Publication of a data vintage](ddd.md#42-publication-of-a-data-vintage).
 
 ## References
 
