@@ -1049,6 +1049,9 @@ def _inputs_missing_reproduce(tmp_path, monkeypatch):
     """The same in a `--reproduce` run, whose rebuild command names
     `--fdhi-flatfile` and the recorded flatfile path."""
     root, given = _exported_repo(tmp_path)
+    # A newer flatfile that discovery would pick: the command must still
+    # name the recorded one.
+    (root / NEWER_FLATFILE).write_bytes(f"stub {NEWER_FLATFILE}\n".encode())
     (root / FDHI_CLEANED).unlink()
     pointer = root / pe.POINTER_PATH
     before = (pointer.read_bytes(), _snapshot(root / "dist"))
