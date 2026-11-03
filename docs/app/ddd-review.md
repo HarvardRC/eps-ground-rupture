@@ -1517,6 +1517,55 @@ are recorded at the end of
   provenance block-4 and block-7 line templates that the registry
   holds, and §5.9 states that `statistics.csv` takes the line ends and
   quoting of `records.csv`.
+- **T-46 review erratum.** The `egr:first-result` mark requires the
+  initial selected measurement's chart and statistics table to
+  intersect the viewport (§7.6). At Chromium's default 1280 × 720,
+  which the `measure` project used, the table sits below the fold
+  after the at-mount scroll, so every load repetition would fail. The
+  `measure` project now sets a 1280 × 1080 CSS px viewport (§7.5), and
+  §7.6 names it; the requirement's "table and chart on screen" is
+  unchanged. The initial note described the later product change as
+  a compact phone view in Phase 2; the owner's clarification below
+  replaces that description.
+
+## Display-preference scope correction (2026-11-03)
+
+The owner clarified that the agreed P2 feature is a standalone
+reader setting for what is shown and the display size and layout
+it should fit. Small laptop windows are an explicit use case;
+tablet and phone views follow as applications of the same setting.
+The earlier note's restriction to two views and its phone-only scope
+were not the decision. P2 is a delivery priority after the MVP, not
+its Phase-2 public release. In this decision, resolution means
+display size and layout, not scientific precision or exported-image
+resolution.
+
+The requirement is now in
+[PRD FR-G6](prd.md#fr-g6-display-preferences-p2), with agreed behavior
+and remaining P2 choices in
+[PDD §4.9](pdd.md#49-display-preferences-fr-g6-p2). The HLDD keeps it
+in the existing application's view layer; DDD §5.8 and §9 and IP §5
+record the further design and execution prerequisites. The Roadmap
+points to those authorities. The temporary 1280 × 1080 measurement
+window is recorded in PDD §9.1 as well as DDD §7.5–§7.6;
+it preserves the current chart-and-table first-result endpoint and
+does not change the 360 CSS-pixel usability floor or prove that the
+current view fits a small laptop. No application code or P2
+implementation was added by this correction.
+
+The follow-up review kept T-61's accepted task body unchanged,
+removed measurement details from the PRD, and used the register's
+standard `Decided (2026-11-03)` status for D-24, with the agreed
+scope and remaining choices in its last column. PDD §4.9 states
+the remaining product choices; DDD §5.8 records the P2 setting
+after its existing view-layer description.
+
+At verification, relative links and PDD agreement passed, and
+traceability lint accepted 447 DDD rows and 44 IP mirrors with zero
+gaps. All 19 documentation-script tests passed. The diff passed
+whitespace checks, and new prose met the 72-column convention except
+tables and links. These checks verify the documentation change;
+they supply no browser-fit or performance measurements.
 
 ## References
 
