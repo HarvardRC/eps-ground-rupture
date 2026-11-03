@@ -181,8 +181,11 @@ def gh(run: Run, *args: str, step: str, check: bool = True) -> subprocess.Comple
 
 
 def release_command(run: Run, verb: str, *args: str) -> list[str]:
-    """A `gh release` command naming the run's repository with `--repo`."""
-    return ["gh", "release", verb, *args, "--repo", run.repository]
+    """A `gh release` command naming the run's repository with `--repo`,
+    placed after the positional arguments as §4.2 writes its commands
+    (`gh release edit data-vN --repo <repository> --prerelease`)."""
+    split = next((i for i, a in enumerate(args) if a.startswith("-")), len(args))
+    return ["gh", "release", verb, *args[:split], "--repo", run.repository, *args[split:]]
 
 
 def stream(args: Sequence[str], *, cwd: Path, env: dict[str, str], step: str) -> list[str]:
