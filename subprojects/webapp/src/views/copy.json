@@ -1160,5 +1160,194 @@
     "part": 41,
     "text": "{L} (layered)",
     "slots": ["L"]
+  },
+  {
+    "key": "ddd5.10.capabilityNotice",
+    "source": "docs/app/ddd.md#510-failure-states",
+    "part": 0,
+    "text": "This browser cannot run Ground Rupture Explorer because required browser features are unavailable ({apis}). Update Chrome, Edge, Firefox, or Safari to the latest stable version, then reload this page. For Safari on iPhone or iPad, update iOS or iPadOS. Supported browsers are versions released within the 12 months before this application release.",
+    "slots": ["apis"]
+  },
+  {
+    "key": "ddd5.10.unavailableNotice",
+    "source": "docs/app/ddd.md#510-failure-states",
+    "part": 1,
+    "text": "Results are unavailable: {reason}. Reload the page to try again.",
+    "slots": ["reason"]
+  },
+  {
+    "key": "ddd5.10.unavailablePreservingNotice",
+    "source": "docs/app/ddd.md#510-failure-states",
+    "part": 2,
+    "text": "Results are unavailable: {reason}. Use Reload and restore settings to retry with your accepted settings.",
+    "slots": ["reason"]
+  },
+  {
+    "key": "ddd5.10.reasonRetrieval",
+    "source": "docs/app/ddd.md#510-failure-states",
+    "part": 3,
+    "text": "the simulation data could not be downloaded",
+    "slots": []
+  },
+  {
+    "key": "ddd5.10.reasonRead",
+    "source": "docs/app/ddd.md#510-failure-states",
+    "part": 4,
+    "text": "the simulation data could not be read",
+    "slots": []
+  },
+  {
+    "key": "ddd5.10.reasonSchemaVersion",
+    "source": "docs/app/ddd.md#510-failure-states",
+    "part": 5,
+    "text": "the simulation data has a format version this application does not support",
+    "slots": []
+  },
+  {
+    "key": "ddd5.10.reasonDataVersion",
+    "source": "docs/app/ddd.md#510-failure-states",
+    "part": 6,
+    "text": "this page expects data version {expected}, but the loaded data is version {loaded}",
+    "slots": ["expected", "loaded"]
+  },
+  {
+    "key": "ddd5.10.reasonMissingAttribute",
+    "source": "docs/app/ddd.md#510-failure-states",
+    "part": 7,
+    "text": "the page is missing information it needs to load the data",
+    "slots": []
+  },
+  {
+    "key": "ddd5.10.reasonCoefficients",
+    "source": "docs/app/ddd.md#510-failure-states",
+    "part": 8,
+    "text": "the conversion coefficients could not be loaded",
+    "slots": []
+  },
+  {
+    "key": "ddd5.10.reasonInternal",
+    "source": "docs/app/ddd.md#510-failure-states",
+    "part": 9,
+    "text": "an internal error stopped the calculation or display of results",
+    "slots": []
+  },
+  {
+    "key": "ddd5.10.recoveryLoadFailed",
+    "source": "docs/app/ddd.md#510-failure-states",
+    "part": 10,
+    "text": "Some required data could not be loaded. Reload to retry while keeping your accepted settings.",
+    "slots": []
+  },
+  {
+    "key": "ddd5.10.actionReloadRestore",
+    "source": "docs/app/ddd.md#510-failure-states",
+    "part": 11,
+    "text": "Reload and restore settings",
+    "slots": []
+  },
+  {
+    "key": "ddd5.10.actionReloadFresh",
+    "source": "docs/app/ddd.md#510-failure-states",
+    "part": 12,
+    "text": "Reload without restoring settings",
+    "slots": []
+  },
+  {
+    "key": "ddd5.10.recoverySaveFailed",
+    "source": "docs/app/ddd.md#510-failure-states",
+    "part": 13,
+    "text": "Your browser could not save your settings. The page has not been reloaded. Reloading without restoration will reset your settings.",
+    "slots": []
+  },
+  {
+    "key": "ddd5.10.recoveryReloadFailed",
+    "source": "docs/app/ddd.md#510-failure-states",
+    "part": 14,
+    "text": "The page could not be reloaded. Your current settings are still on this page. Try again or reload using your browser.",
+    "slots": []
+  },
+  {
+    "key": "ddd5.10.recoveryStorageUnavailable",
+    "source": "docs/app/ddd.md#510-failure-states",
+    "part": 15,
+    "text": "Saved reload settings could not be checked because browser storage is unavailable.",
+    "slots": []
+  },
+  {
+    "key": "ddd5.10.recoveryDefaultStarted",
+    "source": "docs/app/ddd.md#510-failure-states",
+    "part": 16,
+    "text": "The page started with default settings.",
+    "slots": []
+  },
+  {
+    "key": "ddd5.10.recoveryClearFailed",
+    "source": "docs/app/ddd.md#510-failure-states",
+    "part": 17,
+    "text": "Saved reload settings could not be cleared. They have not been applied, and the page has not been reloaded.",
+    "slots": []
+  },
+  {
+    "key": "ddd5.10.actionRetryRecovery",
+    "source": "docs/app/ddd.md#510-failure-states",
+    "part": 18,
+    "text": "Retry recovery",
+    "slots": []
+  },
+  {
+    "key": "ddd5.10.actionStartNew",
+    "source": "docs/app/ddd.md#510-failure-states",
+    "part": 19,
+    "text": "Start a new scenario",
+    "slots": []
+  },
+  {
+    "key": "ddd5.10.recoveryDiscardFailed",
+    "source": "docs/app/ddd.md#510-failure-states",
+    "part": 20,
+    "text": "Saved reload settings could not be cleared. The page has not been reloaded; your current settings are unchanged.",
+    "slots": []
+  },
+  {
+    "key": "ddd5.10.recoveryInvalidRecord",
+    "source": "docs/app/ddd.md#510-failure-states",
+    "part": 21,
+    "text": "Saved reload settings could not be read by this version of the application. No scenario has been applied.",
+    "slots": []
+  },
+  {
+    "key": "ddd5.10.recoveryIncompatible",
+    "source": "docs/app/ddd.md#510-failure-states",
+    "part": 22,
+    "text": "Your saved settings cannot be used with data version {current}. No scenario has been applied. Start a new scenario to continue.",
+    "slots": ["current"]
+  },
+  {
+    "key": "ddd5.10.savedSettingsLabel",
+    "source": "docs/app/ddd.md#510-failure-states",
+    "part": 23,
+    "text": "Saved scenario settings",
+    "slots": []
+  },
+  {
+    "key": "ddd5.10.recoveryRestored",
+    "source": "docs/app/ddd.md#510-failure-states",
+    "part": 24,
+    "text": "Your settings were restored and results recalculated using data version {current}.",
+    "slots": ["current"]
+  },
+  {
+    "key": "ddd5.10.recoveryRestoredChanged",
+    "source": "docs/app/ddd.md#510-failure-states",
+    "part": 25,
+    "text": "Your settings were restored. Data version changed from {previous} to {current}; results have been recalculated using {current}.",
+    "slots": ["previous", "current"]
+  },
+  {
+    "key": "ddd5.10.recoveryLogScaleOff",
+    "source": "docs/app/ddd.md#510-failure-states",
+    "part": 26,
+    "text": "Logarithmic scale is unavailable for these results and has been turned off.",
+    "slots": []
   }
 ]
