@@ -1415,6 +1415,24 @@ are recorded at the end of
   is worded, its file-name items count as rules, so the entry
   `§4.1 step 2 rule scenario-<h12>.bin.gz` passes; and (c) an empty
   Check cell or an empty entry passes as `text`/`designed`.
+- **T-11 review.** On the independent review of T-11's pull request,
+  the owner decided four more questions the same day. The export
+  checks its tag against `^data-v(0-test|[1-9][0-9]*)$` before it
+  deletes or writes anything, a plain diagnostic until T-12's rule
+  `data-tag` takes it over, so that no tag reaches the reset of
+  `dist/app/`. The report's first two lines read
+  `source_commit: <sha>` and `source_tree_clean: true|false`, which
+  [DDD §4.1 — Export task and validation](ddd.md#41-export-task-and-validation)
+  left open. The `stage_spacing` arithmetic was a numerical
+  specification gap: rule `manifest-figures` requires exact equality,
+  so [DDD §3.2 — Artifact manifest](ddd.md#32-artifact-manifest) now
+  fixes it — binary64 differences of the decoded slips, `min`, `max`,
+  and a `math.fsum` mean — and T-12 applies it to the decoded
+  artifact; T-12's body, changed for it, returned to Draftable. Float64
+  subtraction is acceptable; that readers see the mean rounded to
+  0.05 does not settle the stored figures. T-11's Done-when now states
+  that §3.8 item 2's raw figure is the sum of two `size:` figures, as
+  its step (7) defines it — an erratum that adds no requirement.
 
 ## References
 
