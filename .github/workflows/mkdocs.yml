@@ -15,13 +15,19 @@ on:
       - 'subprojects/mkdocs/**'
       - 'subprojects/python/pyproject.toml'
       - 'subprojects/python/poetry.lock'
+      - 'subprojects/python/poetry.toml'
+      - 'subprojects/python/build.gradle.kts'
+      - 'subprojects/webapp/**'
+      - '!subprojects/webapp/perf/**'
+      - 'subprojects/webapp/data/pointer.json'
+      - 'CITATION.cff'
+      - 'settings.gradle.kts'
+      - 'build.gradle.kts'
+      - 'deploy/terraform/build.gradle.kts'
+      - 'gradlew'
+      - 'gradle/wrapper/**'
       - '.github/workflows/mkdocs.yml'
   pull_request:
-    paths:
-      - 'subprojects/mkdocs/**'
-      - 'subprojects/python/pyproject.toml'
-      - 'subprojects/python/poetry.lock'
-      - '.github/workflows/mkdocs.yml'
   # Manual publish without waiting for a push. NB: the github-pages
   # environment only permits deploys from main, so dispatch from another
   # branch will build but not deploy.
@@ -32,11 +38,31 @@ permissions:
   contents: read
 
 concurrency:
-  group: pages
+  group: "${{ (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')) && 'pages' || format('pages-{0}-{1}', github.event_name, github.ref) }}"
   cancel-in-progress: false
 
 jobs:
+  # The webapp build job, separate from the MkDocs job (ADR-0011;
+  # docs/app/ddd.md §6.3): type check and unit tests, then the bundle,
+  # handed to `build` as the workflow artifact webapp-dist.
+  webapp-bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Webapp checks
+        run: ./gradlew :subprojects:webapp:check
+
+      - name: Build bundle
+        run: ./gradlew :subprojects:webapp:webappBundle
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: webapp-dist
+          path: subprojects/webapp/build/dist/
+
   build:
+    needs: webapp-bundle
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -66,12 +92,36 @@ jobs:
           source .venv/bin/activate
           poetry install --only docs --no-root
 
+      - name: Download webapp bundle
+        uses: actions/download-artifact@v8
+        with:
+          name: webapp-dist
+          path: subprojects/webapp/build/dist/
+
+      # Stages the bundle under content-hashed names and the pinned data
+      # vintage into docs/assets/scenario/ (docs/app/ddd.md §6.1):
+      # fetchVintage runs first, checking that the pointer's data release is
+      # a published prerelease, downloading its files with gh, and verifying
+      # every SHA-256. The bundle task is excluded because the webapp-bundle
+      # job's artifact already populates its output.
+      - name: Stage scenario assets
+        run: ./gradlew :subprojects:mkdocs:scenarioAssets -x :subprojects:webapp:webappBundle
+        env:
+          GH_TOKEN: ${{ github.token }}
+
       # Run from the mkdocs directory, not via `mkdocs -f`: pymdownx.snippets
       # resolves base_path from the working directory, so building from
       # elsewhere cannot find docs/includes/abbreviations.md.
       - name: Build site
         working-directory: subprojects/mkdocs
         run: ../python/.venv/bin/mkdocs build --strict
+
+      # The preview configuration (mkdocs.preview.yml): every product draft
+      # included, into site-preview/, which is validated here and never
+      # uploaded or deployed.
+      - name: Build preview site
+        working-directory: subprojects/mkdocs
+        run: ../python/.venv/bin/mkdocs build --strict -f mkdocs.preview.yml
 
       - uses: actions/upload-pages-artifact@v3
         with:

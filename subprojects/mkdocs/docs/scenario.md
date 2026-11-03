@@ -47,3 +47,7 @@ professionals using appropriate site investigation, applicable
 regulations, and relevant engineering guidance.
 <!-- /copy -->
 </div>
+
+<div markdown="0">
+--8<-- "includes/scenario-head.html"
+</div>
