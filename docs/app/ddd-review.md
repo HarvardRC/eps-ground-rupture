@@ -1498,6 +1498,15 @@ are recorded at the end of
   interval was 76–83 ms after the change against 185–200 ms before,
   2.4–2.5 times shorter in each pair. At the lighter load, earlier,
   the build before the change had a median of 92–94 ms.
+- **T-15 review.** On 2026-11-03 the owner had `publishVintage`
+  refuse, before any push, a local tag `data-vN` that is not an
+  annotated tag (step 5) and, before any upload or publication, an
+  existing draft that is not a prerelease (step 6), each printing its
+  repair, and kept the drill override's extra refusals — a failing
+  `gh repo view`, a name compared ignoring letter case, an override
+  naming `HarvardRC/eps-ground-rupture`, and a malformed
+  `<owner>/<name>` — all recorded in
+  [DDD §4.2 — Publication of a data vintage](ddd.md#42-publication-of-a-data-vintage).
 - **T-44 review erratum.** DDD §5.10's skeleton committed before the
   first commit, which a recovery decision also uses, now leaves out
   the overlay switch and the download button: both are built with the
