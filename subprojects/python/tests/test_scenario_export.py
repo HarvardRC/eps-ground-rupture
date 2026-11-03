@@ -33,7 +33,7 @@ def _git(root, *args):
 
 @pytest.fixture(scope="module")
 def repo_root(tmp_path_factory):
-    """The temporary repository root of §7.3: one commit, its `.gitignore`
+    """A temporary repository root in the §7.3 form: one commit, its `.gitignore`
     covering the synthetic `data/` files and `dist/`, and the nine export
     inputs present as stub files."""
     root = tmp_path_factory.mktemp("repo")
