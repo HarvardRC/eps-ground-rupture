@@ -141,11 +141,42 @@ export function validValues(vintage: Vintage, selection: Selection, measurement:
     j++;
   }
 
-  const sorted = new Float64Array(n);
-  for (let k = 0; k < n; k++) sorted[k] = steps[k] / divisor;
-  sorted.sort();
+  return { steps, classes, divisor, sorted: restoredAscending(steps, divisor) };
+}
 
-  return { steps, classes, divisor, sorted };
+/**
+ * The restored values `s / D` of `steps` in a `Float64Array`, ascending
+ * (§5.4, Gather): a counting sort of the integer steps over their range
+ * `min..max`, each bucket's step then divided by `D` once. For `D > 0`
+ * the map `s ↦ s / D` is monotone and no −0 arises (`0 / D` is +0), so
+ * the result is bit for bit the restored values sorted by the
+ * typed-array numeric sort. The range is below 2^19 buckets: every step
+ * is below 2^18 in magnitude (§5.4, Mean).
+ */
+export function restoredAscending(steps: Int32Array, divisor: number): Float64Array {
+  const n = steps.length;
+  const sorted = new Float64Array(n);
+  if (n === 0) return sorted;
+
+  let lo = steps[0];
+  let hi = steps[0];
+  for (let k = 1; k < n; k++) {
+    const s = steps[k];
+    if (s < lo) lo = s;
+    else if (s > hi) hi = s;
+  }
+
+  const counts = new Uint32Array(hi - lo + 1);
+  for (let k = 0; k < n; k++) counts[steps[k] - lo]++;
+
+  let k = 0;
+  for (let b = 0; b < counts.length; b++) {
+    const c = counts[b];
+    if (c === 0) continue;
+    const x = (b + lo) / divisor;
+    for (const end = k + c; k < end; k++) sorted[k] = x;
+  }
+  return sorted;
 }
 
 // --------------------------------------------------------------------
