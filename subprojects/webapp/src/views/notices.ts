@@ -82,7 +82,7 @@ export interface NoticePlan {
   readonly caveats: readonly NoticeRef[];
 }
 
-/** A planned text filled exactly as it renders (the plain text: `**` markers kept as the registry holds them). */
+/** A planned text filled exactly as it renders; none of these texts carries `**` markers. */
 export function noticeText(ref: NoticeRef): string {
   return fillCopy(ref.key, ref.slots);
 }
