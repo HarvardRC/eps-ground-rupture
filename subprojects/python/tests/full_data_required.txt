@@ -1,0 +1,30 @@
+# The required-test manifest of the full-data gate (docs/app/ddd.md §7.3):
+# one pytest node id per line, every full-data test (`test_full_*`) of the
+# four contract files. Under EGR_REQUIRE_FULL_DATA=1 (Gradle task
+# pytestFullData) each must have a successful call-phase report, or the run
+# fails. tests/test_full_data_gate.py::test_manifest_matches_suite keeps
+# this list equal to the suite's `test_full_*` functions.
+tests/test_scenario_export.py::test_full_counts
+tests/test_scenario_export.py::test_full_bitwise_restore
+tests/test_scenario_export.py::test_full_no_slip_ties
+tests/test_scenario_export.py::test_full_unclassified_has_no_valid_measurement
+tests/test_scenario_export.py::test_full_final_stage_slip_envelope
+tests/test_field_export.py::test_full_per_arm_row_counts
+tests/test_field_export.py::test_full_labeled_set_membership
+tests/test_reference_results.py::test_full_gs0_full_ensemble_counts
+tests/test_reference_results.py::test_full_gs1_per_dip_range_flags
+tests/test_reference_results.py::test_full_gs2_warning_tier
+tests/test_reference_results.py::test_full_gs4_empty_result_diagnostic
+tests/test_reference_results.py::test_full_gs5_suppression_tier
+tests/test_reference_results.py::test_full_gs6_count_validity_split
+tests/test_reference_results.py::test_full_gs7_one_state_per_trial
+tests/test_reference_results.py::test_full_boundary_cases_discriminate
+tests/test_reference_results.py::test_full_quantile_cont_agrees_within_one_ulp
+tests/test_reference_results.py::test_full_display_tie_census
+tests/test_reference_results.py::test_full_evaluation_order_effect
+tests/test_manifests.py::test_full_required_fields
+tests/test_manifests.py::test_full_counts_agree_with_packed_geometry
+tests/test_manifests.py::test_full_checksum_sets_cross_check
+tests/test_manifests.py::test_full_reference_results_version
+tests/test_manifests.py::test_full_provenance
+tests/test_manifests.py::test_full_file_names
