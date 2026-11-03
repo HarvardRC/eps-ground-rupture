@@ -2355,7 +2355,8 @@ References:
 Every measured figure in this section is a drafting measurement on
 `data/processed/dem/data.parquet` (SHA-256
 `6a6e9149066f503588e09ecb6772a8392685716672e298d75aa925e7826eb303`),
-taken by a drafting battery that is not in the repository. The text
+taken by a drafting battery that is not in the repository, unless it
+is labeled as measured on the `data-v0-test` export (T-11). The text
 names, for each figure, the repository check that reproduces it —
 the size report near the end of every successful export run
 ([§4.1](#41-export-task-and-validation) fixes its line format; task
@@ -2381,7 +2382,11 @@ header, 4-byte-aligned blocks, the five stage arrays, the
 layout, the 143,416-byte dip dictionary. For the selected layout,
 the size report reproduces the raw size as the artifact's
 decompressed byte count, equal to the length its `blocks` declare,
-and the gzip −9 size as its file byte count (T-11). The artifact's
+and the gzip −9 size as its file byte count (T-11). Measured on the
+`data-v0-test` export of 2026-11-02, the size report gives the
+selected layout 3,288,980 bytes raw — the artifact's decompressed byte
+count — and 944,325 bytes gzip −9 — its file byte count — the
+figures of the table. The artifact's
 bytes carry no tag, date, or `provenance`, so the `data-v0-test`
 export that T-11 runs reproduces them for any vintage built from the
 same `dem` view and zlib build.
@@ -2429,7 +2434,8 @@ recorded so far stand in the item.
 
 1. the artifact manifest's byte count — from the size report (T-11)
    — and its compressed size as served — from the measurement suite
-   (T-61);
+   (T-61); the byte count measured on the `data-v0-test` export:
+   123,420 bytes;
 2. the complete size of the selected representation, which
    [HLDD §5.2 — Simulation data organization
    (ADR-0013)](hldd.md#52-simulation-data-organization-adr-0013) and
@@ -2440,11 +2446,17 @@ recorded so far stand in the item.
    figure, the artifact's decompressed byte count plus item 1's byte
    count, from the size report (T-11), and its compressed figure, the
    artifact's file byte count plus item 1's compressed size as
-   served, from the measurement suite (T-61);
+   served, from the measurement suite (T-61); the raw figure measured
+   on the `data-v0-test` export: 3,288,980 + 123,420 = 3,412,400
+   bytes;
 3. the field-data, regression, reference-results, and vintage-terms
    files' byte counts and, for the `.gz` files, decompressed byte
    counts — from the size report (T-11; the reference-results
-   file's once T-13 joins the run);
+   file's once T-13 joins the run); measured on the `data-v0-test`
+   export: the field-data file 6,914 bytes (730,645 decompressed),
+   the regression file 698 bytes (1,427 decompressed), and the
+   vintage-terms file 0 bytes, the export having run without
+   `data/REDISTRIBUTION.md`;
 4. the JavaScript bundle and stylesheet sizes, and the compressed
    total over the full payload scope of
    [§7.6](#76-performance-and-compatibility-measurements) — from the
