@@ -2164,6 +2164,29 @@ def size_report(out_dir: Path, names: list[str]) -> list[str]:
     return lines
 
 
+#: The compressed-payload budget of PDD §9.1 (D-9, Proposed), 4 MB read as
+#: 4,000,000 B as docs/app/ddd.md §7.6 reads it.
+PAYLOAD_BUDGET_BYTES = 4_000_000
+
+
+def payload_diagnostic(artifact_bytes: int) -> str:
+    """The payload diagnostic line (docs/app/ddd.md §4.1, end of section;
+    §3.8): the scenario artifact's file byte count against the 4 MB
+    compressed-payload budget. A diagnostic, never a gate: a count above
+    the budget changes only the printed figure."""
+    return f"payload diagnostic: {artifact_bytes} of 4 MB ({PAYLOAD_BUDGET_BYTES:,} B) budget"
+
+
+def print_closing_report(out_dir: Path, vintage: Vintage) -> None:
+    """The run's closing lines: the size report, then, as the run's last
+    line, the payload diagnostic over the scenario artifact's file byte
+    count, re-measured from disk."""
+    for line in size_report(out_dir, list(vintage.written)):
+        print(line)
+    artifact = out_dir / vintage.files["scenario_artifact"]
+    print(payload_diagnostic(artifact.stat().st_size))
+
+
 def export_vintage(ctx: RunContext) -> Vintage:
     """Steps 2 onward of §4.1."""
     vintage = write_data_files(ctx)
@@ -2192,8 +2215,7 @@ def run(root: Path, data_tag: str) -> None:
     )
     vintage = export_vintage(ctx)
     write_pointer(root, build_pointer(ctx, vintage))
-    for line in size_report(out_dir, list(vintage.written)):
-        print(line)
+    print_closing_report(out_dir, vintage)
 
 
 # --------------------------------------------------------------------------
@@ -2329,8 +2351,7 @@ def reproduce(root: Path, pointer_path: Path, allow_drift: bool) -> None:
     )
     vintage = export_vintage(ctx)
     compare_with_pointer(vintage.written, pointer["files"])
-    for line in size_report(out_dir, list(vintage.written)):
-        print(line)
+    print_closing_report(out_dir, vintage)
 
 
 def main(argv: list[str] | None = None, *, root: Path | None = None) -> int:

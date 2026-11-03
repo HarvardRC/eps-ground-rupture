@@ -2411,7 +2411,9 @@ as `payload diagnostic: <bytes> of 4 MB (4,000,000 B) budget`, with
 `<bytes>` that count as a plain decimal integer and the 4 MB read as
 4,000,000 B as §7.6 reads it. A count above the budget changes only
 the printed figure, and the run continues: the line is a diagnostic,
-never a gate.
+never a gate. Measured on the `data-v0-test` export of 2026-11-02, the
+payload diagnostic line reads
+`payload diagnostic: 944325 of 4 MB (4,000,000 B) budget`.
 
 The artifact manifest's dominant content is measured: the
 3,434-entry `trials` array is 118,237 bytes in the canonical JSON
