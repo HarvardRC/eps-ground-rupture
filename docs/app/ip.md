@@ -41,7 +41,9 @@ bodies that carry the corrections of CF-1 to CF-5 of
 and the owner's decisions of 2026-11-02 on them — T-11, T-12, T-16,
 T-35, T-40, T-41, T-44, T-46, T-60, and T-61, T-60's again after its
 change — were accepted on 2026-11-02 by the owner's second
-acceptance commit.
+acceptance commit; T-12's body, changed after that acceptance for the
+owner's decision of the same day on the `stage_spacing` arithmetic,
+returned to Draftable.
 
 This implementation plan (IP) is the last of the project's staged
 documents (PRD → PDD → HLDD → DDD → IP). It adds no design content:
@@ -792,7 +794,7 @@ command; and the pull request's Doc links run shows
 |---|---|---|---|---|---|---|
 | T-10 | The field-export product view `field_export` of DDD §3.4 in `views.py`, beside the dashboard views — the one new view the research-data exports need: the artifact and the reference results read the existing `dem` view, the regression export reads `dem_regression` — with its `labeled_set` taken from the new constant `LABELED_FIELD_EVENTS` of `config.py`, which holds the Proposed reading until [OA-14](#4-owner-and-research-group-actions) records the [D-18](pdd.md#1-decision-register) (Field-overlay default set and per-source analogue map) membership; the task completes with the Proposed reading. | OA-19 | [DDD §3.4](ddd.md#34-field-data-export), [§3.5](ddd.md#35-regression-export), [§4.1](ddd.md#41-export-task-and-validation); [ADR-0012](../adr/0012-product-data-exports.md); [PDD §4.4 — Field overlay (FR-O5, D-18 Proposed)](pdd.md#44-field-overlay-fr-o5-d-18-proposed). | M | agent | Done (2026-11-02) |
 | T-11 | Export task `exportApp` (`egr-export-app`): one run writes `dist/app/<data-tag>/` — the artifact in the [DD-1](ddd.md#1-ddd-decision-register) (Scarp-dip column encoding) dictionary layout, the field and regression exports, the vintage-terms file, the artifact manifest with its `provenance` — and the working-tree pointer manifest; the size report and the DDD §3.8 figures it supplies; the `--reproduce` regeneration. The terms source `data/REDISTRIBUTION.md` — committed by the owner with the assumed terms under [OA-1](#4-owner-and-research-group-actions) in Phase 1, its texts replaced by OA-13's final ones in Phase 2 — is required by every run whose tag is not `data-v0-test`; development exports run without it. | T-10 | [DDD §3.1](ddd.md#31-scenario-artifact-binary-layout)–[§3.5](ddd.md#35-regression-export), [§3.8](ddd.md#38-measured-sizes), [§4.1](ddd.md#41-export-task-and-validation), [§4.3](ddd.md#43-retention-rollback-recovery-and-withdrawal), [§4.4](ddd.md#44-licensing-archival-distribution-and-release-attachments). | L | agent | Accepted (2026-11-02) |
-| T-12 | Export validation: every named rule of DDD §4.1 inside the export run — the preconditions, the decode checks (bitwise restore, sentinels, slip order, dictionary orders, view re-read, coefficient reach, reference invariants), the manifest cross-checks, and the pointer checks — each printing its rule's line; a `--reproduce` run runs every rule but `retained-copy`, the pointer checks against the pointer it was given. | T-11, T-13 | [DDD §4.1](ddd.md#41-export-task-and-validation), [§3.1](ddd.md#31-scenario-artifact-binary-layout)–[§3.6](ddd.md#36-reference-results), [§4.3](ddd.md#43-retention-rollback-recovery-and-withdrawal). | M | agent | Accepted (2026-11-02) |
+| T-12 | Export validation: every named rule of DDD §4.1 inside the export run — the preconditions, the decode checks (bitwise restore, sentinels, slip order, dictionary orders, view re-read, coefficient reach, reference invariants), the manifest cross-checks, and the pointer checks — each printing its rule's line; a `--reproduce` run runs every rule but `retained-copy`, the pointer checks against the pointer it was given. | T-11, T-13 | [DDD §4.1](ddd.md#41-export-task-and-validation), [§3.1](ddd.md#31-scenario-artifact-binary-layout)–[§3.6](ddd.md#36-reference-results), [§4.3](ddd.md#43-retention-rollback-recovery-and-withdrawal). | M | agent | Draftable |
 | T-13 | Reference-results generator, its file joining the T-11 export run: golden-scenario counts, statistics, percentiles, linear and logarithmic histograms, display strings, selections with classes, converted windows and range flags, diagnosed conditions, and the boundary and synthetic cases, including four uniform stage counts. [GS-3](pdd.md#102-golden-scenarios) (Kern preset (after D-6)) joins when [D-6](pdd.md#1-decision-register) (Kern County field-data group and principal-width rule) is decided ([PDD §10.2 — Golden scenarios](pdd.md#102-golden-scenarios)). | T-10, T-11 | [DDD §3.6](ddd.md#36-reference-results), [§3.8](ddd.md#38-measured-sizes), [§4.1](ddd.md#41-export-task-and-validation), [§5.3](ddd.md#53-query-engine), [§5.4](ddd.md#54-statistics), [§5.5](ddd.md#55-offset-to-slip-conversion-assist), [§5.6](ddd.md#56-scenario-state-and-url-encoding), [§5.8](ddd.md#58-view-layer), [§5.12](ddd.md#512-charts), [§7.3](ddd.md#73-pipeline-and-export-tests); [PDD §10.2 — Golden scenarios](pdd.md#102-golden-scenarios). | L | agent | Accepted (2026-11-02) |
 | T-14 | Required full-data checks: the `EGR_REQUIRE_FULL_DATA` conftest, the required-test manifest, `pytestFullData`, the full-data lanes of the four §7.3 contract files, and the gate self-tests — a skipped check is never a pass. | T-12, T-13 | [DDD §7.3](ddd.md#73-pipeline-and-export-tests), [§4.1](ddd.md#41-export-task-and-validation), [§4.2](ddd.md#42-publication-of-a-data-vintage). | M | agent | Accepted (2026-11-02) |
 | T-15 | Publication tooling `publishVintage`: the terms-record gate (exactly one [OA-1](#4-owner-and-research-group-actions) record line — the assumed record in Phase 1, the confirmed record from Phase 2 — the `README.md` and `LICENSE-docs` wording naming the terms file, and release immutability), the clean tree, resumable states, the export and full-data checks inside the run, the annotated tag, the draft prerelease, upload, read-back, publication, and the publication record; the drill override; the owner's pointer commit follows — one task, one run, one commit per vintage ([ADR-0014](../adr/0014-committed-content-hashed-artifacts.md)). Tooling only, drilled against a synthetic fixture in a local drill clone with a stub `gh` that models releases, drafts, tags, and immutability, so no drill reaches GitHub; executions are T-18, the end-to-end run, and T-63. | T-11, T-12, T-14, T-16 | [DDD §4.2](ddd.md#42-publication-of-a-data-vintage), [§4.1](ddd.md#41-export-task-and-validation), [§4.3](ddd.md#43-retention-rollback-recovery-and-withdrawal), [§4.4](ddd.md#44-licensing-archival-distribution-and-release-attachments), [§7.3](ddd.md#73-pipeline-and-export-tests), [§3.1](ddd.md#31-scenario-artifact-binary-layout), [§3.2](ddd.md#32-artifact-manifest). | L | agent | Accepted (2026-11-02) |
@@ -978,9 +980,12 @@ prints 1 — the artifact's decompressed byte count, the length its
 `cp subprojects/webapp/data/pointer.json "$tmp/"; (cd subprojects/python && poetry run egr-export-app --reproduce "$tmp/pointer.json")`
 exits 0, every file of `dist/app/data-v0-test.reproduced/` matching the
 pointer's SHA-256;
-and every figure the run adds to §3.8 equals a `size:` line of
-`"$tmp/run.txt"` and is labeled as measured on the `data-v0-test`
-export. Before T-12 the run prints no rule line, and before T-13 its
+and every figure the run adds to §3.8 equals a `size:` line's figure
+of `"$tmp/run.txt"` — item 2's raw figure the sum, as step (7)
+defines it, of the artifact's decompressed byte count and the
+manifest's byte count from those lines — and is labeled as measured
+on the `data-v0-test` export. Before T-12 the run prints no rule
+line, and before T-13 its
 pointer omits the reference-results file; the complete §3.3 file set
 and all 23 rule lines close with T-12's Done-when, which runs after
 T-13 — the later integration check of this task's export foundation.
@@ -1015,8 +1020,13 @@ trial's N when the counts differ, and otherwise the count and the
 rule hardcodes no count. Rule `manifest-figures` also passes the
 manifest's `counts` through T-11's `check_counts` and requires `trials`
 to equal the `dem` view's distinct `Trial` strings in ascending
-code-point order, exactly `counts.trials` of them. The shipped dataset's
-counts (346,834, 3,434, 101) stay T-14's full-data completeness checks.
+code-point order, exactly `counts.trials` of them. It recomputes
+`stage_spacing` by the arithmetic of
+[DDD §3.2](ddd.md#32-artifact-manifest) — T-11's function — from the
+`slip` block decoded from the written artifact, and requires each of
+`min`, `max`, and `mean` to equal the manifest's value exactly. The
+shipped dataset's counts (346,834, 3,434, 101) stay T-14's full-data
+completeness checks.
 `inputs-present` checks all nine data files before provenance hashing
 or view construction, including the shared builder's `fdhi_cleaned`
 dependency, and its missing-processed-file diagnostic names the path
