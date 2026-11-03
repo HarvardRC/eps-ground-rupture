@@ -2454,8 +2454,9 @@ recorded so far stand in the item.
    counts — from the size report (T-11; the reference-results
    file's once T-13 joins the run); measured on the `data-v0-test`
    export: the field-data file 6,914 bytes (730,645 decompressed),
-   the regression file 698 bytes (1,427 decompressed), and the
-   vintage-terms file 0 bytes, the export having run without
+   the regression file 698 bytes (1,427 decompressed), the
+   reference-results file 111,252 bytes (1,577,792 decompressed), and
+   the vintage-terms file 0 bytes, the export having run without
    `data/REDISTRIBUTION.md`;
 4. the JavaScript bundle and stylesheet sizes, and the compressed
    total over the full payload scope of
