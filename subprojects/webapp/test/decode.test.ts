@@ -99,7 +99,8 @@ function stubFetch(served: ReadonlyMap<string, Uint8Array>, status = 200): void 
     fetched.push(url);
     const bytes = served.get(url);
     if (bytes === undefined) return new Response(null, { status: 404 });
-    return new Response(bytes, { status });
+    // A null-body status (304) admits no body in the Response constructor.
+    return new Response(status === 304 ? null : bytes, { status });
   };
 }
 
@@ -295,6 +296,8 @@ describe('buildFixture', () => {
 interface CountCase {
   readonly name: string;
   readonly corrupt: (m: ManifestJson) => void;
+  /** The bound or identity the rejection must name (§5.2: field, value, and bound). */
+  readonly message?: RegExp;
 }
 
 const COUNT_CASES: readonly CountCase[] = [
@@ -311,12 +314,18 @@ const COUNT_CASES: readonly CountCase[] = [
     corrupt: (m) => void (m.counts.stages_per_trial = U32_MAX + 1),
   },
   {
-    // T and N each within bounds, R = U within bounds, but T > floor(U / N).
+    // One property: N = U leaves T > floor(U / N); the bound, not R = T * N, names it.
     name: 'trials * N above 4,294,967,295',
+    corrupt: (m) => void (m.counts.stages_per_trial = U32_MAX),
+    message: /floor\(4294967295/,
+  },
+  {
+    // T = N = 65537: T * N wraps to 131073 under 32-bit arithmetic, never here.
+    name: 'trials * N wrapping under 32-bit arithmetic',
     corrupt: (m) => {
-      m.counts.trials = 65536;
-      m.counts.stages_per_trial = 65536;
-      m.counts.records = U32_MAX;
+      m.counts.trials = 65537;
+      m.counts.stages_per_trial = 65537;
+      m.counts.records = 131073;
     },
   },
   { name: 'records one above trials * N', corrupt: (m) => void (m.counts.records += 1) },
@@ -333,7 +342,8 @@ describe('manifest-only count cases reject with read before readFile', () => {
       c.corrupt(manifest);
       const before = process.memoryUsage().arrayBuffers;
       const { reader, result } = decode(fixture, manifest);
-      await rejectsWith(result, 'read');
+      const error = await rejectsWith(result, 'read');
+      if (c.message !== undefined) assert.match(error.message, c.message);
       assert.deepEqual(reader.calls, [], 'readFile was called');
       const grown = process.memoryUsage().arrayBuffers - before;
       assert.ok(grown < 1 << 20, `${grown} bytes of ArrayBuffer were allocated`);
