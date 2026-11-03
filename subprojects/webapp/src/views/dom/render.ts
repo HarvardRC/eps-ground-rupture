@@ -127,9 +127,12 @@ export function render(t: RenderTargets, input: RenderInput, current: AppState, 
     const manifest = input.vintage.manifest;
     t.summary.replaceChildren(summaryText({ scenario: input.scenario, manifest }, input.selection));
     t.assistBody.replaceChildren(...paragraphs(doc, assistLines(input) ?? []));
-    t.panels.render(input, display);
+    // The plan first: it shows or hides `#gre-panels`, so the panels then
+    // draw each chart at its slot's laid-out width (§5.12), never inside a
+    // hidden container.
     plan = selectNotices(input, config);
     applyNotices(plan, { panels: { element: t.panelsElement, slot: t.panels.slot }, caveats: t.caveats, state: t.state });
+    t.panels.render(input, display);
     for (const m of MEASUREMENT_NAMES) {
       applyStatsTable(
         t.panels.slot(m, 'table'),
