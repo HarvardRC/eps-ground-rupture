@@ -270,8 +270,9 @@ function withId<K extends keyof HTMLElementTagNameMap>(doc: Document, tag: K, id
  * `hidden`, the results header holding the prototype notice while its
  * entry exists, `#gre-caveats` with the short disclaimer, and the empty
  * `#gre-recovery`. The results header's overlay switch and download
- * button are built from the mounted vintage and its `Wiring` (T-49,
- * T-45), so they are not part of it.
+ * button are built with the mount's `Wiring` (T-49, T-45) and inserted
+ * before `#gre-recovery` on resumption, so they are not part of it
+ * (§5.10).
  */
 export function buildMinimalSkeleton(doc: Document = document): MinimalSkeleton {
   const summary = withId(doc, 'div', 'gre-summary');
