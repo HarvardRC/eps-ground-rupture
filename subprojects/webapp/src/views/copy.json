@@ -453,5 +453,89 @@
     "part": 10,
     "text": "On the logarithmic scale, bins double in width from 0.1 m (0.1–0.2, 0.2–0.4, … m); widths below 0.1 m, including 0 m, are counted in the first bar.",
     "slots": []
+  },
+  {
+    "key": "pdd4.4.overlaySwitch",
+    "source": "docs/app/pdd.md#44-field-overlay-fr-o5-d-18-proposed",
+    "part": 0,
+    "text": "Compare with field measurements (past earthquakes)",
+    "slots": []
+  },
+  {
+    "key": "pdd4.4.analogousLabel",
+    "source": "docs/app/pdd.md#44-field-overlay-fr-o5-d-18-proposed",
+    "part": 1,
+    "text": "Analogous, not identical",
+    "slots": []
+  },
+  {
+    "key": "pdd4.4.fdhiVerticalSeparation",
+    "source": "docs/app/pdd.md#44-field-overlay-fr-o5-d-18-proposed",
+    "part": 2,
+    "text": "FDHI vertical separation",
+    "slots": []
+  },
+  {
+    "key": "pdd4.4.sureScarpHeight",
+    "source": "docs/app/pdd.md#44-field-overlay-fr-o5-d-18-proposed",
+    "part": 3,
+    "text": "SURE's scarp-height measurement",
+    "slots": []
+  },
+  {
+    "key": "pdd4.4.kernVerticalScarpHeight",
+    "source": "docs/app/pdd.md#44-field-overlay-fr-o5-d-18-proposed",
+    "part": 4,
+    "text": "Kern County's vertical scarp-height values",
+    "slots": []
+  },
+  {
+    "key": "pdd4.4.fdhiFaultZoneWidth",
+    "source": "docs/app/pdd.md#44-field-overlay-fr-o5-d-18-proposed",
+    "part": 5,
+    "text": "FDHI fault-zone width",
+    "slots": []
+  },
+  {
+    "key": "pdd4.4.kernDeformationZoneWidth",
+    "source": "docs/app/pdd.md#44-field-overlay-fr-o5-d-18-proposed",
+    "part": 6,
+    "text": "Kern County deformation-zone width",
+    "slots": []
+  },
+  {
+    "key": "pdd4.4.sureFaultNormalComponent",
+    "source": "docs/app/pdd.md#44-field-overlay-fr-o5-d-18-proposed",
+    "part": 7,
+    "text": "SURE fault-normal component",
+    "slots": []
+  },
+  {
+    "key": "pdd4.4.scarpDipNote",
+    "source": "docs/app/pdd.md#44-field-overlay-fr-o5-d-18-proposed",
+    "part": 8,
+    "text": "Field sources provide no comparable scarp-dip measurement.",
+    "slots": []
+  },
+  {
+    "key": "ddd5.8.limitedComparison",
+    "source": "docs/app/ddd.md#58-view-layer",
+    "part": 26,
+    "text": " (limited comparison: a displacement quantity, not a width)",
+    "slots": []
+  },
+  {
+    "key": "ddd5.8.showAllMeasurements",
+    "source": "docs/app/ddd.md#58-view-layer",
+    "part": 27,
+    "text": "Show all field measurements",
+    "slots": []
+  },
+  {
+    "key": "ddd5.8.fieldExportLine",
+    "source": "docs/app/ddd.md#58-view-layer",
+    "part": 28,
+    "text": "Field measurements could not be loaded. The simulation results are unaffected.",
+    "slots": []
   }
 ]
