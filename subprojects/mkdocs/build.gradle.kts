@@ -198,6 +198,37 @@ val fetchVintage by tasks.registering {
 
 val scenarioHead: File = file("docs/includes/scenario-head.html")
 
+/** The root `CITATION.cff`, the software-version record (docs/app/ddd.md §6.2, Sources). */
+val citationFile: File = rootProject.file("CITATION.cff")
+
+/**
+ * The software version: the value of the top-level `version` key of
+ * `CITATION.cff`, without the quotes of a quoted YAML scalar; empty when
+ * the key is absent, which the application reports as a missing stamp
+ * (docs/app/ddd.md §5.10).
+ */
+fun readSoftwareVersion(): String {
+    val line = citationFile.readLines().firstOrNull { it.startsWith("version:") } ?: return ""
+    val value = line.removePrefix("version:").trim()
+    val quoted = value.length >= 2 && value.first() == value.last() && value.first() in "\"'"
+    return if (quoted) value.substring(1, value.length - 1) else value
+}
+
+/**
+ * The data-export version: the pointer's `export_version`
+ * (docs/app/ddd.md §3.3); empty when it is absent or not a string, which
+ * the application reports as a missing stamp (§5.10).
+ */
+fun readDataVersion(): String {
+    @Suppress("UNCHECKED_CAST")
+    val json = JsonSlurper().parse(pointerFile) as Map<String, Any?>
+    return json["export_version"] as? String ?: ""
+}
+
+/** `value` escaped for a double-quoted HTML attribute. */
+fun htmlAttribute(value: String): String =
+    value.replace("&", "&amp;").replace("\"", "&quot;").replace("<", "&lt;").replace(">", "&gt;")
+
 val scenarioAssets by tasks.registering(Sync::class) {
     group = "documentation"
     description =
@@ -205,7 +236,7 @@ val scenarioAssets by tasks.registering(Sync::class) {
             "docs/assets/scenario/, and write docs/includes/scenario-head.html."
     dependsOn(":subprojects:webapp:webappBundle", fetchVintage)
     inputs.file(pointerFile)
-    inputs.file(rootProject.file("CITATION.cff"))
+    inputs.file(citationFile)
     outputs.file(scenarioHead)
     into("docs/assets/scenario")
     // Gradle ignores files that something else adds to an output directory,
@@ -256,16 +287,20 @@ val scenarioAssets by tasks.registering(Sync::class) {
                 "scenarioAssets: the pointer must list exactly one manifest-<h12>.json; it lists $manifests.",
             )
         }
-        // The generated tag block of docs/app/ddd.md §6.1. The two version
-        // values stay empty here: their sourcing and writing (§6.2) is T-50's.
+        // The generated tag block of docs/app/ddd.md §6.1, stamped at staging
+        // time with the two versions of §6.2: the CITATION.cff `version` and
+        // the pointer's `export_version`, both declared inputs, so a changed
+        // value re-runs this task. No version value enters the bundle.
+        val softwareVersion = htmlAttribute(readSoftwareVersion())
+        val dataVersion = htmlAttribute(readDataVersion())
         scenarioHead.parentFile.mkdirs()
         scenarioHead.writeText(
             """
             |<link rel="stylesheet" href="../assets/scenario/$css">
             |<script type="module" id="gre-app"
             |        src="../assets/scenario/$js"
-            |        data-software-version=""
-            |        data-data-version=""
+            |        data-software-version="$softwareVersion"
+            |        data-data-version="$dataVersion"
             |        data-manifest="data/${manifests.single()}"></script>
             |""".trimMargin(),
         )
