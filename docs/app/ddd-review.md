@@ -1473,6 +1473,20 @@ are recorded at the end of
   the owner's. The
   [Task format](ip.md#task-format) of the implementation plan records
   the rule.
+- **T-32 follow-up: the sort of `validValues`.** On 2026-11-03 the
+  owner adopted a speedup that preserves the function: `validValues`
+  of [T-32](ip.md#t-32--statistics-module) (Statistics module) builds
+  `sorted` by a counting sort of the integer steps, each then divided
+  by `D`, instead of the typed-array numeric sort of the restored
+  values, as
+  [DDD §5.4 — Statistics](ddd.md#54-statistics) (Gather) now states.
+  The output is bit-identical. The spot timing of
+  [T-37](ip.md#t-37--early-feasibility-diagnostic) (Early feasibility
+  diagnostic) on [GS-0](pdd.md#102-golden-scenarios) (Empty scenario
+  (no active slip window), default population), run alternately
+  before and after the change on the same loaded machine, put the
+  median selection-and-statistics interval at 76–83 ms, against
+  185–200 ms before.
 
 ## References
 
