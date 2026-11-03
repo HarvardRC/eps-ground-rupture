@@ -26,6 +26,13 @@
   #gre-controls ~ * {
     margin-left: calc(32% + 1.5rem);
   }
+
+  /* While #gre-controls is hidden — the unavailable state committed
+     before any result, and a recovery decision (§5.10) — no rail stands
+     beside the results, so nothing keeps clear of it. */
+  #gre-controls[hidden] ~ * {
+    margin-left: 0;
+  }
 }
 
 /* Small screens: the stacked layout with the sticky summary. */
@@ -40,4 +47,90 @@
   #gre-root * {
     scroll-margin-top: calc(2.4rem + var(--gre-summary-block, 0px));
   }
+}
+
+/* Accessibility and supported environments (§5.11). */
+
+/* The `hidden` attribute always hides, whatever display a rule below
+   gives the element (a hidden label or fieldset of §5.7 and §5.8). */
+#gre-root [hidden] {
+  display: none !important;
+}
+
+/* The visually-hidden utility: the standard clip pattern, used by the two
+   live regions (§5.11, Live announcements). */
+.gre-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Every scrollIntoView() of §5.11 stops below Material's sticky header
+   (.md-header, 2.4rem tall): the margin mkdocs-material 9.7.7 gives a
+   :target inside .md-typeset, here for every element with an id —
+   #gre-disclaimer included — because the same-page link guard writes no
+   history entry and so sets no :target. Below the 768 px breakpoint the
+   #gre-root * rule above outranks it inside #gre-root. */
+.md-typeset [id] {
+  scroll-margin-top: 3.6rem;
+}
+
+/* Focus outlines are never removed: :focus-visible is styled. */
+#gre-root :focus-visible {
+  outline: 2px solid var(--md-accent-fg-color, currentColor);
+  outline-offset: 2px;
+}
+
+/* Pointer targets of at least 24 x 24 CSS px (WCAG 2.2 SC 2.5.8): each
+   checkbox and radio inside its <label>, whose box is part of the target;
+   buttons, text and number inputs, and disclosure summaries. */
+#gre-root label:has(> input[type="checkbox"]),
+#gre-root label:has(> input[type="radio"]) {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  min-height: 24px;
+  min-width: 24px;
+  margin-right: 0.75em;
+}
+
+#gre-root button,
+#gre-root input:not([type="checkbox"]):not([type="radio"]),
+#gre-root summary {
+  min-height: 24px;
+  min-width: 24px;
+}
+
+/* Usable at 360 CSS px with no page-level horizontal scrolling: fieldsets
+   may shrink below their content's min-content width, long words wrap,
+   and the results column, its panels, and its chart slots may shrink, so
+   each chart re-renders at its slot's width (§5.12, Resizing). */
+#gre-root {
+  overflow-wrap: break-word;
+}
+
+#gre-root fieldset,
+#gre-panels,
+#gre-panels > section,
+.gre-chart {
+  min-width: 0;
+}
+
+.gre-chart figure {
+  margin: 0;
+}
+
+.gre-chart svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* A chart-data table wider than its panel scrolls inside its wrapper,
+   never the page (§5.11, Markup). */
+.gre-table-scroll {
+  overflow-x: auto;
+  max-width: 100%;
 }
