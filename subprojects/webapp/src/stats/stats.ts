@@ -59,19 +59,16 @@ export interface Stats {
 const UNCLASSIFIED = 255;
 
 /**
- * The divisor `D` of the §5.2 restore rule for a column's `decimals`:
- * the integer literal 1000 for 3 and 10000 for 4, never a computed power
- * of ten.
+ * The divisor `D` of the §5.2 restore rule for a measurement: every
+ * measurement's `decimals` is 3 (§5.12), so `D` is the integer literal
+ * 1000 for all three (§5.4), never a computed power of ten. Any other
+ * `decimals` is an internal failure (§5.10).
  */
-function restoreDivisor(decimals: number | null): number {
-  switch (decimals) {
-    case 3:
-      return 1000;
-    case 4:
-      return 10000;
-    default:
-      throw new Error(`stats: no restore divisor for decimals ${decimals}`);
+function measurementDivisor(measurement: MeasurementName, decimals: number | null): number {
+  if (decimals !== 3) {
+    throw new Error(`stats: ${measurement} decimals ${decimals}, expected 3`);
   }
+  return 1000;
 }
 
 /**
@@ -114,7 +111,7 @@ function storedArray(vintage: Vintage, m: MeasurementName): Uint16Array {
  */
 export function validValues(vintage: Vintage, selection: Selection, measurement: MeasurementName): ValidValues {
   const column = vintage.manifest.columns[measurement];
-  const divisor = restoreDivisor(column.decimals);
+  const divisor = measurementDivisor(measurement, column.decimals);
   const sentinel = column.nullSentinel;
   const stored = storedArray(vintage, measurement);
   const step = stepReader(vintage, measurement);
