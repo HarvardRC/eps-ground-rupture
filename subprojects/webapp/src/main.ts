@@ -1105,8 +1105,10 @@ async function start(a: Active, tag: HTMLScriptElement): Promise<void> {
         console.debug(error);
         return;
       }
-      const failure: UnavailableFailure = error instanceof MissingAttributeError ? { error, step: 'attributes' } : { error };
-      fail(failure, loading && retained !== null ? 'retained' : null);
+      const missing = error instanceof MissingAttributeError;
+      const failure: UnavailableFailure = missing ? { error, step: 'attributes' } : { error };
+      // A missing stamp is no load failure: it keeps the ordinary reload instruction, with no preserving action (§5.10).
+      fail(failure, loading && !missing && retained !== null ? 'retained' : null);
     }
   }
 
