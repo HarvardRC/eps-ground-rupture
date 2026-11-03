@@ -10,9 +10,19 @@ Public, so the richer original stays one click away.
 
 The shared parts are single-sourced:
 
-- **The Embedding API v3 module script** is declared once in `mkdocs.yml`
-  under `extra_javascript`, so it loads site-wide and every page gets the
-  `<tableau-viz>` custom element. No page carries a `<script>` tag.
+- **The Embedding API v3 module script** is injected by one loader,
+  `docs/javascripts/tableau-loader.js`, declared once in `mkdocs.yml` under
+  `extra_javascript` in the API's former place. On every page — and after
+  every instant navigation, through Material's `document$` — the loader
+  looks for a `<tableau-viz>` element or a `.tableau-fit` container and, on
+  the first page that has one, appends the API's `<script type="module">`
+  to `<head>`, once per document. A page without an embed, the scenario
+  page among them, never downloads the API
+  ([DDD §6.1 — Build outputs, asset paths, and page scaffold](../../docs/app/ddd.md#61-build-outputs-asset-paths-and-page-scaffold),
+  Tableau exclusion). No embed page carries its own
+  `<script>` tag, and the API never returns to `extra_javascript`: the
+  site checks hook (`hooks/site_checks.py`, arm (e)) fails a build whose
+  pages carry the API's `<script>` tag or lack the loader's.
 - **The scale-to-fit behaviour** lives once in
   `docs/javascripts/tableau-fit.js`.
 - **The container styling** lives once in `docs/stylesheets/extra.css` as
