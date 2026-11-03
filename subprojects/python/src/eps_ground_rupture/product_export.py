@@ -3290,9 +3290,8 @@ def rule_dictionary_order(s3: StepThree, vintage: Vintage) -> None:
             )
     rank = {pair: i for i, pair in enumerate(ARM_STRENGTH_STATES)}
     states = [(s["set"], s["sediment_strength"]) for s in pack.arm_strength_states]
-    if any(pair not in rank for pair in states) or [rank[p] for p in states] != sorted(
-        {rank[p] for p in states}
-    ):
+    known = [p for p in states if p in rank]  # unknown pairs: the pair-set check below
+    if [rank[p] for p in known] != sorted({rank[p] for p in known}):
         raise ExportFailure(
             "dictionary-order",
             f"arm_strength_states {states} are not in the display order of ARM_STRENGTH_STATES",
