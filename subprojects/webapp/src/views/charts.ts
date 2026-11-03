@@ -393,7 +393,8 @@ export function histogramSvg(spec: HistogramSpec, width: number): SvgNode {
       const below = copyText('ddd5.12.belowLabel');
       bars.push({ x1: MARGIN_LEFT, x2: MARGIN_LEFT + b, counts: spec.bins[0], range: below });
       segments.push([MARGIN_LEFT, MARGIN_LEFT + b]);
-      extra.push(text(MARGIN_LEFT + b / 2, AXIS_Y + 16, 'middle', below));
+      // Beneath the band, one line below the tick labels, so it never meets the first decade label.
+      extra.push(text(MARGIN_LEFT + b / 2, AXIS_Y + 28, 'middle', below));
     }
     for (let j = 0; j < K; j++) {
       bars.push({
