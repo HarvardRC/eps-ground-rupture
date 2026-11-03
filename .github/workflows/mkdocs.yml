@@ -2,15 +2,28 @@
 # --strict, so a dead internal link or a bad config fails the run instead
 # of publishing a damaged site. See subprojects/mkdocs/DEPLOY.md.
 #
-# Publishing model: only main deploys, on a push that touches the paths
-# below or a manual run (workflow_dispatch). Pull requests touching the
-# site run the same strict build as a validation check, without deploying.
+# Publishing model (docs/app/ddd.md §6.3):
+# - A push to main that touches the paths below builds, checks, and
+#   deploys.
+# - A push to a dev-v.* branch that touches the same paths, and every pull
+#   request (unfiltered), run the same checks and strict builds as
+#   validation, without deploying.
+# - A manual run (workflow_dispatch) deploys from a branch the github-pages
+#   environment admits: main always, dev-v.0.4.x from owner action OA-20
+#   until OA-21. On any other branch it builds, then fails at the
+#   environment in `deploy` and deploys nothing.
+# deploy runs only after webapp-bundle and build succeed on the same
+# commit, so a failed check, bundle build, data retrieval, or site build
+# fails the run and leaves the published site as it was. Only the runs
+# whose deploy job runs — a push to main and every manual run — share the
+# `pages` concurrency group, so a pull-request run or a push run on a
+# dev-v.* branch never cancels a pending deploy.
 
 name: Companion site
 
 on:
   push:
-    branches: [main]
+    branches: [main, 'dev-v.*']
     paths:
       - 'subprojects/mkdocs/**'
       - 'subprojects/python/pyproject.toml'
@@ -28,9 +41,10 @@ on:
       - 'gradle/wrapper/**'
       - '.github/workflows/mkdocs.yml'
   pull_request:
-  # Manual publish without waiting for a push. NB: the github-pages
-  # environment only permits deploys from main, so dispatch from another
-  # branch will build but not deploy.
+  # Manual run: builds, checks, and deploys from the branch it runs on, if
+  # the github-pages environment admits that branch — main always,
+  # dev-v.0.4.x from OA-20 until OA-21. On any other branch `deploy` fails
+  # at the environment and nothing is deployed.
   workflow_dispatch:
 
 # Least privilege: only the deploy job gets Pages write access.
@@ -43,8 +57,8 @@ concurrency:
 
 jobs:
   # The webapp build job, separate from the MkDocs job (ADR-0011;
-  # docs/app/ddd.md §6.3): type check and unit tests, then the bundle,
-  # handed to `build` as the workflow artifact webapp-dist.
+  # docs/app/ddd.md §6.3): type check and unit tests, parity, then the
+  # bundle, handed to `build` as the workflow artifact webapp-dist.
   webapp-bundle:
     runs-on: ubuntu-latest
     steps:
@@ -52,6 +66,13 @@ jobs:
 
       - name: Webapp checks
         run: ./gradlew :subprojects:webapp:check
+
+      # The parity harness (docs/app/ddd.md §7.2), as in tests.yml: a plain
+      # HTTPS fetch of the pinned vintage with no token, every SHA-256
+      # verified before replay. It runs here too because only a job that
+      # `deploy` depends on can keep a commit failing parity off the site.
+      - name: Parity
+        run: ./gradlew :subprojects:webapp:webappParity
 
       - name: Build bundle
         run: ./gradlew :subprojects:webapp:webappBundle
@@ -128,9 +149,13 @@ jobs:
           path: subprojects/mkdocs/site
 
   deploy:
-    # PRs only validate the build; publishing happens on a push to main
-    # or a manual run (the github-pages environment allows main only).
-    if: github.event_name != 'pull_request'
+    # Publishes only on a push to main or a manual run; pull requests and
+    # pushes to a dev-v.* branch skip this job and validate only. A manual
+    # run deploys only from a branch the github-pages environment admits
+    # (main always, dev-v.0.4.x from OA-20 until OA-21) and fails here on
+    # any other. `needs: build`, which needs webapp-bundle, keeps a commit
+    # that failed any check in this run off the site.
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     needs: build
     runs-on: ubuntu-latest
     # configure-pages runs here rather than in `build` because it calls the

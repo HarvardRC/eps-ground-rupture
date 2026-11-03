@@ -11,18 +11,38 @@ same commit as the pipeline that produced its data.
 
 ## Publishing model
 
-- **Push or merge to `main`** touching `subprojects/mkdocs/**`, the
-  poetry files, or the workflow itself → strict build → deploy.
-- **Pull requests** touching the same paths run the same `--strict`
-  build as a validation check — **no deploy**.
+As [DDD §6.3 — CI workflows](../../docs/app/ddd.md#63-ci-workflows)
+specifies:
+
+- **Push or merge to `main`** touching a path in the workflow's `push`
+  filter (the site, the docs-toolchain and Gradle build files, the
+  webapp except `subprojects/webapp/perf/`, the pointer manifest,
+  `CITATION.cff`, or the workflow itself) → webapp checks and bundle →
+  staged scenario assets → strict builds → **deploy**.
+- **Push to a `dev-v.*` branch** touching the same paths runs the same
+  checks and strict builds as validation — **no deploy**.
+- **Pull requests** — every one, with no path filter — run the same
+  checks and strict builds as validation — **no deploy**.
 - **Manual**: `workflow_dispatch` (Actions → "Companion site" → Run
-  workflow). The `github-pages` environment only permits deploys from
-  `main`, so a dispatch from another branch builds without deploying.
+  workflow) deploys from the branch it runs on, if the `github-pages`
+  environment admits that branch: `main` always, and `dev-v.0.4.x` (the
+  unlisted prototype) from owner action
+  [OA-20 — `dev-v.0.4.x` admitted to deploy](../../docs/app/ip.md#4-owner-and-research-group-actions)
+  until
+  [OA-21 — `dev-v.0.4.x` removed from the deployments](../../docs/app/ip.md#4-owner-and-research-group-actions).
+  A manual run on any other branch builds, then fails at the environment
+  in `deploy` and deploys nothing.
 - Pushes to other branches trigger nothing.
 
-The `--strict` build is the gate: a broken internal link or a bad config
-fails the run rather than publishing a damaged site. The workflow grants
-`pages: write` / `id-token: write` to the deploy job only.
+`deploy` runs only when `webapp-bundle` and `build` succeed in the same
+run, on the same commit: a failed check, bundle build, data retrieval,
+or site build fails the run, and the published site stays as it was. The
+`--strict` builds are the gate: a broken internal link or a bad config
+fails the run rather than publishing a damaged site. Only the runs whose
+`deploy` job runs — a push to `main` and every manual run — share the
+`pages` concurrency group, so a pull-request run or a push run on a
+`dev-v.*` branch never cancels a pending deploy. The workflow grants `pages: write` / `id-token: write`
+to the deploy job only.
 
 ## Fallback: manual `gh-deploy`
 
