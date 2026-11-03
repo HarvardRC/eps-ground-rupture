@@ -126,6 +126,16 @@ async function retained(page: Page, focus: string, keys: readonly string[], sett
   const status = await page.locator('#gre-root [role=status]').textContent();
   await page.locator(focus).focus();
   await storeActive(page);
+  // A radio group: h is the radio the arrow key moves focus to and checks — the next one of the
+  // group in DOM order (the DDD erratum on the radio steps, pending the owner).
+  await page.evaluate(() => {
+    const w = window as unknown as { __h: Element | null };
+    const r = w.__h;
+    if (r instanceof HTMLInputElement && r.type === 'radio') {
+      const group = Array.from(document.querySelectorAll<HTMLInputElement>(`input[type=radio][name="${r.name}"]`));
+      w.__h = group[(group.indexOf(r) + 1) % group.length];
+    }
+  });
   if (settled !== 'status') await watchChart(page, settled.chart);
   for (const key of keys) await page.keyboard.press(key);
   if (settled === 'status') {
