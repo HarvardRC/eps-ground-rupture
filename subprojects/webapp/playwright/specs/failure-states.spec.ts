@@ -28,6 +28,7 @@ import {
   installRecorder,
   manifest,
   mounted,
+  oneZeroTimer,
   pointer,
   provenanceBlock,
   recorded,
@@ -996,4 +997,34 @@ test('a failed overlay load after a successful restoration: the ordinary nonbloc
   await expect(page.locator('#gre-panels')).toBeVisible();
   await expect(messages(page)).toHaveText([restoredSame(V()), copyText('ddd5.10.recoveryLoadFailed')]);
   await expect(action(page, 'reload-restore')).toHaveCount(1);
+});
+
+test('a reload exception: its exact message, no navigation, the key removed', async ({ page }) => {
+  await installRecorder(page);
+  // Chromium's location.reload is an unforgeable own property, so the bundle is routed with every
+  // location.reload() call replaced by a throwing one (the DDD erratum for the owner).
+  await page.route(`${BASE_URL}assets/scenario/app-*.js`, async (route) => {
+    const response = await route.fetch();
+    const source = await response.text();
+    expect(source).toContain('location.reload()');
+    const body = source.split('location.reload()').join('(()=>{throw new DOMException("blocked","SecurityError")})()');
+    await route.fulfill({ status: 200, contentType: 'application/javascript; charset=utf-8', body });
+  });
+  const net = await new Net(page).install();
+  await gotoScenario(page);
+  const failed = copyText('ddd5.10.recoveryReloadFailed');
+  for (const a of ['reload-restore', 'reload-fresh']) {
+    await fieldFailure(page, net);
+    await clearRecorded(page);
+    await armProbe(page);
+    await action(page, a).click();
+    await expect(messages(page), a).toContainText([failed]);
+    await settle(page);
+    await oneZeroTimer(page);
+    await expectProbe(page);
+    expect((await recorded(page, 'alert')).filter((t) => t === failed), a).toHaveLength(1);
+    expect(await page.evaluate((k) => Object.keys(sessionStorage).includes(k), RECOVERY_KEY), a).toBe(false);
+    await expect(action(page, a)).toBeEnabled();
+    await page.locator('#gre-overlay').uncheck();
+  }
 });
