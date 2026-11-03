@@ -19,7 +19,7 @@ The shared parts are single-sourced:
   to `<head>`, once per document. A page without an embed, the scenario
   page among them, never downloads the API
   ([DDD §6.1 — Build outputs, asset paths, and page scaffold](../../docs/app/ddd.md#61-build-outputs-asset-paths-and-page-scaffold),
-  Tableau exclusion). No page carries a
+  Tableau exclusion). No embed page carries its own
   `<script>` tag, and the API never returns to `extra_javascript`: the
   site checks hook (`hooks/site_checks.py`, arm (e)) fails a build whose
   pages carry the API's `<script>` tag or lack the loader's.

@@ -135,6 +135,11 @@ criteria are
 | [SC-6 (site integrity)](pdd.md#101-success-criteria) | The strict builds' exit status on both trees, the `site_checks` hook included, the lane's `site-regression` spec, and the acceptance confirmation that the existing dashboards, navigation, citation pages, and deployment are unaffected. |
 | [SC-7 (scientific sign-off)](pdd.md#101-success-criteria) | The recorded research-group approval ([OA-4](ip.md#4-owner-and-research-group-actions)) of the reader-facing texts — the [PDD §5 — Copy deck](pdd.md#5-copy-deck) texts and every fixed-here text `check_pdd_agreement.py` lists, in `copy.json` or between copy markers ([§5.13](ddd.md#513-application-configuration)), the glossary additions of [§6.4](ddd.md#64-product-pages-beyond-the-scenario-page-p2p3) among them — as the SC-7 approval record below, referenced from the release record: the newest record's listing, `data_tag`, and bundle digests equal the step-8 listing printed at the release commit, its pointer's `data_tag`, and its build's digests, and the record follows the activation commit of [§6.1](ddd.md#61-build-outputs-asset-paths-and-page-scaffold) and precedes the release merge that deploys the activated page. |
 
+The SC-7 approval record that the SC-7 row names is the dated file
+`docs/app/approvals/sc7-YYYY-MM-DD.md` that
+[DDD §7.7 — Site validation and release checklist](ddd.md#77-site-validation-and-release-checklist)
+specifies (SC-7 approval record).
+
 ## Software-release attachments
 
 Item 11 runs this command block of
