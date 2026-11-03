@@ -11,7 +11,7 @@
 // A browser-and-Node file (§5.1): no DOM global, no DOM type.
 
 import type { FieldRow } from '../decode/fields';
-import type { MeasurementName, PanelView } from '../state/state';
+import { compareCodePoints, type MeasurementName, type PanelView } from '../state/state';
 import { copyEntry, copyText } from './copy';
 import { displayRound, formatCount } from './format';
 
@@ -244,16 +244,6 @@ export interface FieldOrder {
   readonly groups: readonly FieldGroup[];
   /** The §5.8 limited-comparison wording that follows a group label when `limited_comparison` is true. */
   readonly limitedComparison: string;
-}
-
-/** Code-point order of two strings (the `eq_name` tie-break of §5.11). */
-function compareCodePoints(a: string, b: string): number {
-  const x = Array.from(a, (ch) => ch.codePointAt(0)!);
-  const y = Array.from(b, (ch) => ch.codePointAt(0)!);
-  for (let k = 0; k < Math.min(x.length, y.length); k++) {
-    if (x[k] !== y[k]) return x[k] - y[k];
-  }
-  return x.length - y.length;
 }
 
 const fieldTables = new WeakMap<readonly FieldRow[], WeakMap<FieldOrder, TableSpec>>();

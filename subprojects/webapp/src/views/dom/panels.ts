@@ -437,6 +437,7 @@ export function buildPanels(manifest: Manifest, wiring: Wiring): Panels {
     const logShown = m === 'dzw' && logToggleShown(input, display);
     if (panel.log !== null) {
       panel.log.label.hidden = !logShown;
+      panel.log.input.hidden = !logShown;
       panel.log.input.checked = display.logScale && input.histogramLog !== null;
     }
 
