@@ -74,16 +74,35 @@ def test_payload_diagnostic_above_the_budget_is_printed_and_the_run_succeeds(
     artifact = _gzip_of_size(ABOVE_BUDGET)
 
     def export_vintage(ctx):
+        """Steps 2-5 stubbed: the oversized artifact, with a manifest naming
+        it, a reference-results file, and a terms file, so that the step-6
+        rules `pointer-exact` and `file-names` hold for the run's pointer."""
         written: dict[str, str] = {}
         name = pe.write_vintage_file(ctx.out_dir, "scenario_artifact", artifact, written)
+        references_name = pe.write_vintage_file(
+            ctx.out_dir, "reference_results", pe.gzip_bytes(pe.canonical_json({})), written
+        )
+        manifest = {
+            **ctx.envelope(),
+            "provenance": ctx.provenance,
+            "files": {"scenario_artifact": name},
+            "checksums": {name: written[name]},
+        }
+        manifest_name = pe.write_vintage_file(
+            ctx.out_dir, "manifest", pe.canonical_json(manifest), written
+        )
+        terms_name = pe.write_vintage_file(ctx.out_dir, "data_terms", b"", written)
         return pe.Vintage(
             pack=None,
             files={"scenario_artifact": name},
             field_rows=[],
             coefficients=[],
             references={},
-            references_name="",
+            references_name=references_name,
             written=written,
+            manifest=manifest,
+            manifest_name=manifest_name,
+            terms_name=terms_name,
         )
 
     monkeypatch.setattr(pe, "export_vintage", export_vintage)
