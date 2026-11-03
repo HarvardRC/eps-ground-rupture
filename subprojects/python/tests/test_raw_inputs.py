@@ -166,3 +166,33 @@ def test_egr_build_fails_fast_without_writing_anything(tmp_path, monkeypatch, ca
     assert "Missing required raw input" in capsys.readouterr().err
     assert tables_json.read_text() == '{"committed": "unchanged"}'
     assert not (tmp_path / "sql").exists()
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        pytest.param("data/raw/02_FDHI_FLATFILE_MEASUREMENTS_19000101.csv", id="missing"),
+        pytest.param("data/README.md", id="unmatched"),
+    ],
+)
+def test_egr_build_rejects_a_bad_fdhi_flatfile_path(tmp_path, monkeypatch, capsys, path):
+    """`--fdhi-flatfile` (docs/app/ddd.md §4.1 step 1, §7.3) takes only an
+    existing file matching the FDHI flatfile pattern: given a path that
+    matches it and does not exist, or an existing file that does not match
+    it, `egr-build` exits 2 naming the path and writes nothing. The four raw
+    inputs are present as stubs, so only the option can fail; no research
+    data is read and no build is reached."""
+    assert (cli.REPO_ROOT / path).is_file() == (path == "data/README.md")
+    raw = tmp_path / "raw"
+    _populate(raw, *ALL_REQUIRED)
+    monkeypatch.setattr(io, "RAW_DIR", raw)
+
+    tables_json = tmp_path / "tables.json"
+    tables_json.write_text('{"committed": "unchanged"}')
+    monkeypatch.setattr(cli, "TERRAFORM_TABLES_JSON", tables_json)
+    monkeypatch.setattr(cli, "SQL_OUT_DIR", tmp_path / "sql")
+
+    assert cli.main(["--fdhi-flatfile", path]) == 2
+    assert path in capsys.readouterr().err
+    assert tables_json.read_text() == '{"committed": "unchanged"}'
+    assert not (tmp_path / "sql").exists()
