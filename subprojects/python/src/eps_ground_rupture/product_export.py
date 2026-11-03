@@ -2,10 +2,13 @@
 
 One run writes one complete data vintage for the scenario page into
 `dist/app/<data-tag>/` — the scenario artifact, the field and regression
-exports, the vintage-terms file, and the artifact manifest — and the
-working-tree pointer manifest `subprojects/webapp/data/pointer.json`,
-which it never commits (docs/app/ddd.md §4.1, Export task and
-validation; the formats are §3.1-§3.5).
+exports, the reference results, the vintage-terms file, and the artifact
+manifest — and the working-tree pointer manifest
+`subprojects/webapp/data/pointer.json`, which it never commits
+(docs/app/ddd.md §4.1, Export task and validation; the formats are
+§3.1-§3.6). The reference generator computes the reference results from
+the view rows, never from the decoded artifact (§3.6); its synthetic
+cases' inputs come from `reference_cases.py`.
 
 The run builds its own DuckDB views in a temporary directory, never
 `dashboards/duckdb/eps.duckdb`, so every export comes from the running
@@ -16,6 +19,7 @@ its pointer into `dist/app/<data-tag>.reproduced/` (§4.3, Regeneration).
 from __future__ import annotations
 
 import argparse
+import bisect
 import datetime
 import fnmatch
 import gzip
@@ -33,6 +37,8 @@ import traceback
 import zlib
 from collections.abc import Sequence
 from dataclasses import dataclass
+from decimal import ROUND_HALF_UP, Decimal
+from fractions import Fraction
 from pathlib import Path, PurePosixPath
 
 import duckdb
@@ -40,7 +46,7 @@ import numpy as np
 import pandas as pd
 import pyarrow
 
-from . import __version__, io, views
+from . import __version__, io, reference_cases, views
 from .config import REPO_ROOT, SCARP_CLASS_PALETTE, SCARP_CLASSES
 
 # --------------------------------------------------------------------------
@@ -111,10 +117,20 @@ class ExportFailure(Exception):
     ``rule`` names the §4.1 rule the check belongs to.
     """
 
-    def __init__(self, rule: str, detail: str) -> None:
+    def __init__(self, rule: str, detail: str, *, prints_rule_line: bool = False) -> None:
         super().__init__(detail)
         self.rule = rule
         self.detail = detail
+        self.prints_rule_line = prints_rule_line
+        """Whether the run prints `<rule>: FAILED — <detail>` rather than the
+        detail alone: true for the reference generator's assertion
+        `finite-reference-values` (§3.6 step 9)."""
+
+    def report(self) -> str:
+        """What the run prints for this failure."""
+        if self.prints_rule_line:
+            return f"{self.rule}: FAILED — {self.detail}"
+        return self.detail
 
 
 #: The vintage tags an export accepts: `data-vN` (N ≥ 1, no leading zero)
@@ -783,6 +799,1144 @@ def regression_coefficients(con: duckdb.DuckDBPyConnection) -> list[dict[str, ob
 
 
 # --------------------------------------------------------------------------
+# Step 2: the reference results (§3.6)
+# --------------------------------------------------------------------------
+
+#: The number of decades in the logarithmic-scale offer rule (§5.12): the
+#: "more than two decades" of PDD §4.1 — Measurement views (FR-O1). The
+#: envelope records it as `log_scale_min_decades` (§3.6).
+LOG_SCALE_MIN_DECADES = 2
+
+#: The offer ratio R of each decade count, as integer literals — the
+#: literal table of `logScaleOfferRatio()` (§5.13), never ``10 **``.
+LOG_SCALE_OFFER_RATIOS: dict[int, int] = {1: 10, 2: 100, 3: 1000}
+
+#: The D-23 display decimals per quantity (§3.6 envelope `display_decimals`).
+DISPLAY_DECIMALS: dict[str, int] = {"slip": 2, "scarp_height": 2, "dzw": 1, "scarp_dip": 0}
+
+#: The measurements of a scenario entry's maps, in panel order.
+MEASUREMENTS: tuple[str, ...] = ("scarp_height", "dzw", "scarp_dip")
+
+#: The recording-step divisor D of every measurement (§5.4) and of slip.
+MEASUREMENT_DIVISOR = 1000
+
+#: One display step u in recording steps, and 10^dd, per display decimals
+#: dd (§5.12, Histogram): integer literals, never computed.
+DISPLAY_STEP_UNITS: dict[int, int] = {2: 10, 1: 100, 0: 1000}
+DISPLAY_SCALE: dict[int, int] = {2: 100, 1: 10, 0: 1}
+
+#: The most bins a linear histogram may have (§5.12 step (c)).
+MAX_BINS = 60
+
+#: The lowest logarithmic edge, 0.1 m in recording steps (§5.12).
+LOG_FIRST_EDGE = 100
+
+#: The selection bound of §3.6: identities up to it, a signature above.
+IDENTITY_LIMIT = 10_000
+
+#: The class code of an unclassified record (§3.1).
+UNCLASSIFIED = UINT8_NULL
+
+#: The stored-bounds guard of §5.3, in stored units.
+STORED_BOUNDS_GUARD = 1e-9
+
+#: The diagnosed-condition groups of §5.3, in their fixed order, each with
+#: the DD-11 keys it resets.
+CONDITION_GROUPS: tuple[tuple[str, tuple[str, ...]], ...] = (
+    ("fault_dip", ("fault_dip",)),
+    ("sediment", ("sediment",)),
+    ("depth", ("depth",)),
+    ("density", ("density",)),
+    ("window", ("entry_mode", "slip_window", "offset_max")),
+    ("scarp_class", ("scarp_class",)),
+)
+
+#: The view column of each scaled measurement read by the generator.
+MEASUREMENT_SOURCE_COLUMNS: dict[str, str] = {
+    "scarp_height": "Scarp_Height",
+    "dzw": "DZW",
+    "scarp_dip": "Scarp_Dip",
+}
+
+#: The golden scenarios of PDD §10.2 — Golden scenarios, ascending, each
+#: as its changes to the vintage's default scenario (§5.6); GS-3, the Kern
+#: preset, joins once D-6 is decided.
+GOLDEN_SCENARIOS: tuple[tuple[str, dict[str, object]], ...] = (
+    # Empty scenario (no active slip window), default population.
+    ("GS-0", {}),
+    # US-1: dips {30°, 40°}, Strong (uniform and layered), offset mode 3 m.
+    (
+        "GS-1",
+        {
+            "fault_dip": [30, 40],
+            "sediment": [("Homogeneous", "Strong"), ("Heterogeneous", "Strong")],
+            "entry_mode": "offset",
+            "slip_window": None,
+            "offset_max": "3",
+        },
+    ),
+    # Moderate strength (both arms), dip 20°, depth 3 m, Dense, one state
+    # per trial.
+    (
+        "GS-2",
+        {
+            "fault_dip": [20],
+            "sediment": [("Homogeneous", "Moderate"), ("Heterogeneous", "Moderate")],
+            "depth": [3],
+            "density": ["Dense"],
+            "population": "one_state_per_trial",
+        },
+    ),
+    # Alternating Strong–Weak + depth 3 m.
+    (
+        "GS-4",
+        {"sediment": [("Heterogeneous", "Alternating Strong-Weak")], "depth": [3]},
+    ),
+    # Alternating Strong–Weak, one state per trial.
+    (
+        "GS-5",
+        {
+            "sediment": [("Heterogeneous", "Alternating Strong-Weak")],
+            "population": "one_state_per_trial",
+        },
+    ),
+    # Slip window 0–0.04 m, all other controls default.
+    ("GS-6", {"slip_window": {"min": "0", "max": "0.04"}}),
+    # One state per simulation trial, no active slip window.
+    ("GS-7", {"population": "one_state_per_trial"}),
+)
+
+#: The boundary battery's perturbations (§3.6, Boundary cases), in order.
+BOUNDARY_PERTURBATIONS: tuple[str, ...] = (
+    "exact",
+    "ulp-",
+    "ulp+",
+    "in-",
+    "in+",
+    "out-",
+    "out+",
+    "step-",
+    "step+",
+    "roundtrip",
+)
+
+#: The offset-path populations and their case-name spellings.
+BOUNDARY_POPULATIONS: tuple[tuple[str, str], ...] = (
+    ("all_stages", "allstages"),
+    ("one_state_per_trial", "onestate"),
+)
+
+_GRAMMAR_G = re.compile(r"(\d+(\.\d*)?|\.\d+)")
+
+
+def canonical_decimal(text: str) -> str:
+    """Grammar G's canonical form (§5.7) of a decimal text: leading zeros of
+    the integer digits dropped (``0`` when none remain), trailing zeros of
+    the fraction dropped, and the point kept only before remaining digits."""
+    if _GRAMMAR_G.fullmatch(text) is None:
+        raise ValueError(f"{text!r} is not a grammar-G decimal")
+    whole, _, frac = text.partition(".")
+    whole = whole.lstrip("0") or "0"
+    frac = frac.rstrip("0")
+    return f"{whole}.{frac}" if frac else whole
+
+
+def float_decimal(value: float) -> str:
+    """The canonical decimal of a float: Python ``repr`` with grammar G's
+    canonical form applied, so ``5.0`` gives ``5`` (§3.2
+    `slip_window_bounds`)."""
+    return canonical_decimal(repr(value))
+
+
+def canonical_scenario(
+    *,
+    fault_dip: Sequence[int],
+    sediment: Sequence[tuple[str, str]],
+    depth: Sequence[int],
+    density: Sequence[str],
+    entry_mode: str,
+    slip_window: dict[str, str] | None,
+    offset_max: str | None,
+    population: str,
+    scarp_class: Sequence[str],
+    density_order: Sequence[str],
+) -> dict[str, object]:
+    """The canonical scenario object of DD-11 (§5.6): `fault_dip` and
+    `depth` ascending; `sediment` as {`set`, `sediment_strength`} objects
+    sorted by `set`, then `sediment_strength`, in code-point order;
+    `density` in ``density_order``, the `trial_columns.density` dictionary
+    order; `slip_window` null or the canonical endpoints, null in offset
+    mode; `offset_max` the canonical offset entry, non-null exactly in
+    offset mode; `scarp_class` in `config.SCARP_CLASSES` order."""
+    if entry_mode not in ("slip", "offset"):
+        raise ValueError(f"entry_mode {entry_mode!r}")
+    if population not in ("all_stages", "one_state_per_trial"):
+        raise ValueError(f"population {population!r}")
+    if (offset_max is not None) != (entry_mode == "offset"):
+        raise ValueError("offset_max must be non-null exactly in offset mode")
+    if entry_mode == "offset" and slip_window is not None:
+        raise ValueError("slip_window must be null in offset mode")
+    unknown = [c for c in scarp_class if c not in SCARP_CLASSES]
+    if unknown:
+        raise ValueError(f"scarp_class outside config.SCARP_CLASSES: {unknown}")
+    rank = {value: i for i, value in enumerate(density_order)}
+    return {
+        "fault_dip": sorted({int(d) for d in fault_dip}),
+        "sediment": [
+            {"set": arm, "sediment_strength": strength} for arm, strength in sorted(set(sediment))
+        ],
+        "depth": sorted({int(d) for d in depth}),
+        "density": sorted(set(density), key=rank.__getitem__),
+        "entry_mode": entry_mode,
+        "slip_window": (
+            None
+            if slip_window is None
+            else {
+                "min": canonical_decimal(slip_window["min"]),
+                "max": canonical_decimal(slip_window["max"]),
+            }
+        ),
+        "offset_max": None if offset_max is None else canonical_decimal(offset_max),
+        "population": population,
+        "scarp_class": [c for c in SCARP_CLASSES if c in set(scarp_class)],
+    }
+
+
+def _canonical_inputs(spec: dict[str, object], density_order: Sequence[str]) -> dict[str, object]:
+    return canonical_scenario(**spec, density_order=density_order)  # type: ignore[arg-type]
+
+
+# -- §5.4 statistics: the Python twins ------------------------------------
+
+
+def quantile_linear(v: Sequence[float], p: float) -> float:
+    """NumPy's ``'linear'`` method with its endpoint branch (§5.4), the twin
+    of `quantileLinear`; ``v`` ascending, ``len(v) >= 1``."""
+    n = len(v)
+    h = (n - 1) * p
+    if h >= n - 1:
+        return v[n - 1]
+    i = math.floor(h)
+    t = h - i
+    a = v[i]
+    b = v[i + 1]
+    d = b - a
+    return a + d * t if t < 0.5 else b - d * (1 - t)
+
+
+def mean_from_steps(steps: Sequence[int], divisor: int) -> float:
+    """The Mean step of §5.4: the exact integer sum S of the recording steps,
+    then one correctly rounded division ``S / (n · D)``."""
+    total = 0
+    for s in steps:
+        total += int(s)
+    return total / (len(steps) * divisor)
+
+
+def sample_sd(sorted_values: Sequence[float], mean: float) -> float:
+    """The Standard deviation step of §5.4: an explicit loop over the
+    ascending values accumulating ``(x − mean) · (x − mean)``, then
+    ``sqrt(acc / (n − 1))`` — no builtin ``sum``, NumPy reduction, or ``**``."""
+    acc = 0.0
+    for x in sorted_values:
+        acc += (x - mean) * (x - mean)
+    return math.sqrt(acc / (len(sorted_values) - 1))
+
+
+def summarize(
+    steps: Sequence[int], divisor: int
+) -> tuple[dict[str, float | None] | None, list[float]]:
+    """The FR-O2 statistics of one measurement's valid values (§3.6 steps
+    2–5) and the ascending restored values ``x = s / D``. With no value the
+    statistics are None; with one, `sd` is None."""
+    x = sorted(int(s) / divisor for s in steps)
+    n = len(x)
+    if n == 0:
+        return None, x
+    mean = mean_from_steps(steps, divisor)
+    stats: dict[str, float | None] = {
+        "median": quantile_linear(x, 50 / 100),
+        "p16": quantile_linear(x, 16 / 100),
+        "p84": quantile_linear(x, 84 / 100),
+        "min": x[0],
+        "max": x[n - 1],
+        "mean": mean,
+        "sd": sample_sd(x, mean) if n >= 2 else None,
+    }
+    return stats, x
+
+
+def percentiles(x: Sequence[float]) -> list[float]:
+    """`quantile_linear(v, q/100)` for q = 0 … 100 (§3.6 step 2)."""
+    return [quantile_linear(x, q / 100) for q in range(101)]
+
+
+# -- §5.12 histograms -------------------------------------------------------
+
+
+def _check_classes(classes: Sequence[int]) -> None:
+    if any(int(c) == UNCLASSIFIED for c in classes):
+        raise ValueError("a valid value has class code 255 (unclassified-has-no-valid-measurement)")
+
+
+def histogram(
+    steps: Sequence[int], classes: Sequence[int], sorted_x: Sequence[float], display_decimals: int
+) -> dict[str, object] | None:
+    """The DD-5 bin rule of §5.12 over integer recording steps, their class
+    codes, the same values ascending as float64, and the panel's display
+    decimals; None with no value."""
+    n = len(steps)
+    if n == 0:
+        return None
+    _check_classes(classes)
+    s_min, s_max = min(steps), max(steps)
+    u = DISPLAY_STEP_UNITS[display_decimals]
+    if s_min == s_max:
+        rule, k = "single", 1
+    else:
+        iqr = quantile_linear(sorted_x, 0.75) - quantile_linear(sorted_x, 0.25)
+        if iqr > 0:
+            rule = "fd"
+            x_width = 2 * iqr * DISPLAY_SCALE[display_decimals]
+        else:
+            rule = "scott"
+            mean = mean_from_steps(steps, MEASUREMENT_DIVISOR)
+            x_width = 3.49 * sample_sd(sorted_x, mean) * DISPLAY_SCALE[display_decimals]
+        x_cubed = x_width * x_width * x_width
+
+        def cube_n(k: int) -> float:
+            kf = float(k)
+            return kf * kf * kf * n
+
+        k = max(1, math.ceil(x_width / math.cbrt(n)))
+        while k > 1 and cube_n(k - 1) >= x_cubed:
+            k -= 1
+        while cube_n(k) < x_cubed:
+            k += 1
+    while True:
+        width = k * u
+        e0 = width * (s_min // width)
+        bins = (s_max - e0) // width + 1
+        if bins <= MAX_BINS:
+            break
+        k += 1
+    counts = [[0] * len(SCARP_CLASSES) for _ in range(bins)]
+    for s, c in zip(steps, classes, strict=True):
+        counts[(int(s) - e0) // width][int(c)] += 1
+    return {"rule": rule, "width_units": k, "first_edge": e0, "bins": bins, "counts": counts}
+
+
+def histogram_log(
+    steps: Sequence[int], classes: Sequence[int], offer_ratio: int
+) -> dict[str, object] | None:
+    """The width panel's logarithmic histogram (§5.12, Logarithmic scale),
+    its offer rule included: None exactly when the axis is not offered."""
+    positive = [int(s) for s in steps if s > 0]
+    if not positive:
+        return None
+    min_pos, max_pos = min(positive), max(positive)
+    if not max_pos > offer_ratio * min_pos:
+        return None
+    _check_classes(classes)
+    first = LOG_FIRST_EDGE
+    if min_pos >= LOG_FIRST_EDGE:
+        while first * 2 <= min_pos:
+            first *= 2
+    edges = [first]
+    while edges[-1] <= max_pos:
+        edges.append(edges[-1] * 2)
+    bins = len(edges) - 1
+    counts = [[0] * len(SCARP_CLASSES) for _ in range(bins)]
+    below = [0] * len(SCARP_CLASSES)
+    for s, c in zip(steps, classes, strict=True):
+        if s < LOG_FIRST_EDGE:
+            below[int(c)] += 1
+        else:
+            counts[bisect.bisect_right(edges, int(s)) - 1][int(c)] += 1
+    return {"first_edge": first, "bins": bins, "counts": counts, "below_counts": below}
+
+
+# -- §5.8 display rounding ----------------------------------------------------
+
+
+def display_round(value: float, decimals: int) -> str:
+    """The display rounding of §5.8: half away from zero on the shortest
+    round-trip decimal of |v|, no sign on a zero result, exactly
+    ``decimals`` fraction digits, no grouping."""
+    if not math.isfinite(value):
+        raise ValueError(f"display_round of a non-finite value {value!r}")
+    rounded = Decimal(repr(abs(value))).quantize(
+        Decimal(1).scaleb(-decimals), rounding=ROUND_HALF_UP
+    )
+    text = format(rounded, "f")
+    return f"-{text}" if rounded != 0 and value < 0 else text
+
+
+def _display_record(stats: dict[str, float | None], decimals: int) -> dict[str, str | None]:
+    return {
+        key: None if value is None else display_round(value, decimals)
+        for key, value in stats.items()
+    }
+
+
+# -- §5.3 stored bounds and §5.5 conversion ------------------------------------
+
+
+def stored_bounds_from_decimal(minimum: str, maximum: str) -> tuple[int, int]:
+    """Slip-mode stored bounds (§5.3), exactly from the canonical decimal
+    strings: ``lo_s = ⌈min · 10^4⌉``, ``hi_s = ⌊max · 10^4⌋`` — the twin of
+    `storedBoundsFromDecimal`, integer arithmetic, never a float."""
+    lo = Fraction(canonical_decimal(minimum)) * SLIP_DECODE_DIVISOR
+    hi = Fraction(canonical_decimal(maximum)) * SLIP_DECODE_DIVISOR
+    return math.ceil(lo), math.floor(hi)
+
+
+def _stored_bounds(lo: float, hi: float, scale: float = SLIP_RECORDING_STEP) -> tuple[int, int]:
+    """Offset-mode stored bounds (§5.3), the twin of `storedBounds`:
+    ``[⌈lo / scale − 1e-9⌉, ⌊hi / scale + 1e-9⌋]``, a −0 result as 0."""
+    return (
+        int(math.ceil(lo / scale - STORED_BOUNDS_GUARD)),
+        int(math.floor(hi / scale + STORED_BOUNDS_GUARD)),
+    )
+
+
+def js_round(value: float) -> int:
+    """ECMAScript ``Math.round``: the nearest integer, a tie toward +∞."""
+    floor = math.floor(value)
+    return int(floor + 1 if value - floor >= 0.5 else floor)
+
+
+def range_flag(lo: float, hi: float, bounds_max: float, recording_step: float) -> str:
+    """The stored-space range flag of §5.5."""
+    lo_s, hi_s = _stored_bounds(lo, hi, recording_step)
+    max_s = js_round(bounds_max / recording_step)
+    if lo_s >= 0 and hi_s <= max_s:
+        return "in_range"
+    if hi_s < 0 or lo_s > max_s:
+        return "out_of_range"
+    return "partly_out"
+
+
+def convert_windows(
+    o_max: float, dips: Sequence[int], coefficients: Sequence[dict[str, object]]
+) -> dict[int, tuple[float, float]]:
+    """The back-projection of §5.5 for every given dip:
+    ``window_lo = (0 − intercept) / slope`` and
+    ``window_hi = (o_max − intercept) / slope`` in float64, as written."""
+    rows = {int(row["fault_dip"]): row for row in coefficients}  # type: ignore[call-overload]
+    windows: dict[int, tuple[float, float]] = {}
+    for dip in dips:
+        row = rows.get(int(dip))
+        if row is None:
+            raise ValueError(f"no coefficient row for fault_dip {dip}")
+        slope = float(row["slope"])  # type: ignore[arg-type]
+        intercept = float(row["intercept"])  # type: ignore[arg-type]
+        if not slope > 0:
+            raise ValueError(f"fault_dip {dip}: slope {slope!r} is not positive")
+        lo = (0.0 - intercept) / slope
+        hi = (o_max - intercept) / slope
+        if not (math.isfinite(lo) and math.isfinite(hi)):
+            raise ValueError(f"fault_dip {dip}: a converted window end is not finite")
+        windows[int(dip)] = (lo, hi)
+    return windows
+
+
+def converted_window_records(
+    windows: dict[int, tuple[float, float]], dips: Sequence[int], bounds: dict[str, float]
+) -> list[dict[str, object]]:
+    """A scenario entry's `converted_windows`: one record per selected dip,
+    ascending, with its range flag and display strings."""
+    records = []
+    for dip in sorted(dips):
+        lo, hi = windows[dip]
+        records.append(
+            {
+                "fault_dip": int(dip),
+                "window_lo": lo,
+                "window_hi": hi,
+                "range_flag": range_flag(lo, hi, bounds["max"], bounds["recording_step"]),
+                "window_lo_display": display_round(lo, DISPLAY_DECIMALS["slip"]),
+                "window_hi_display": display_round(hi, DISPLAY_DECIMALS["slip"]),
+            }
+        )
+    return records
+
+
+# -- The record table and the §5.3 selection ------------------------------------
+
+
+@dataclass
+class RecordTable:
+    """A vintage's records as the generator reads them from the rows: in
+    artifact order (trials ascending by code point, each trial's stages
+    ascending by slip), with each record's `stage_index` its position in
+    its trial's ascending-slip run, taken from the rows grouped by `Trial`."""
+
+    trials: list[str]
+    trial_dip: np.ndarray
+    trial_pair: list[tuple[str, str]]
+    trial_depth: np.ndarray
+    trial_density: list[str]
+    trial_index: np.ndarray
+    stage_index: np.ndarray
+    slip: np.ndarray
+    slip_step: np.ndarray
+    class_code: np.ndarray
+    steps: dict[str, np.ndarray]
+    valid: dict[str, np.ndarray]
+
+
+def _recording_steps(name: str, values: np.ndarray, valid: np.ndarray, divisor: int) -> np.ndarray:
+    """``s = round(v · D)`` with ``s / D == v`` asserted for every valid value
+    (§3.6 step 1; rule `bitwise-restore`); 0 where the value is null."""
+    steps = np.zeros(values.shape, dtype=np.int64)
+    steps[valid] = np.rint(values[valid] * divisor).astype(np.int64)
+    restored = steps[valid] / divisor
+    if not np.array_equal(restored, values[valid]):
+        bad = int(np.flatnonzero(restored != values[valid])[0])
+        raise ExportFailure(
+            "bitwise-restore",
+            f"{name}: {float(values[valid][bad])!r} is not an exact multiple of 1/{divisor}",
+        )
+    return steps
+
+
+def build_record_table(rows: pd.DataFrame) -> RecordTable:
+    """The record table of a frame with the `dem` view's columns `Trial`,
+    the site columns, and the stage columns (`STAGE_SOURCE_COLUMNS`)."""
+    trial_ids = rows[TRIAL_SOURCE_COLUMN].tolist()
+    if not all(isinstance(t, str) for t in trial_ids):
+        raise ValueError("Trial holds a null or non-string value")
+    trials = sorted(set(trial_ids))
+    rank = {trial: i for i, trial in enumerate(trials)}
+    trial_rank = np.fromiter((rank[t] for t in trial_ids), dtype=np.int64, count=len(trial_ids))
+    slip_source = rows[STAGE_SOURCE_COLUMNS["slip"]].to_numpy(dtype=np.float64, na_value=np.nan)
+    if np.isnan(slip_source).any():
+        raise ValueError("Slip holds a null value")
+    frame = rows.iloc[np.lexsort((slip_source, trial_rank))].reset_index(drop=True)
+    stage_index = frame.groupby(TRIAL_SOURCE_COLUMN, sort=False).cumcount().to_numpy(np.int64)
+    trial_index = np.fromiter(
+        (rank[t] for t in frame[TRIAL_SOURCE_COLUMN].tolist()), dtype=np.int64, count=len(frame)
+    )
+
+    first = frame.groupby(TRIAL_SOURCE_COLUMN, sort=False).head(1).reset_index(drop=True)
+    columns = TRIAL_SOURCE_COLUMNS
+    slip = frame[STAGE_SOURCE_COLUMNS["slip"]].to_numpy(dtype=np.float64)
+    codes, _ = _encode_classes(frame[STAGE_SOURCE_COLUMNS["scarp_class"]])
+    steps: dict[str, np.ndarray] = {}
+    valid: dict[str, np.ndarray] = {}
+    for m in MEASUREMENTS:
+        values = frame[MEASUREMENT_SOURCE_COLUMNS[m]].to_numpy(dtype=np.float64, na_value=np.nan)
+        valid[m] = ~np.isnan(values)
+        if not np.isfinite(values[valid[m]]).all():
+            raise ValueError(f"{MEASUREMENT_SOURCE_COLUMNS[m]} holds an infinite value")
+        steps[m] = _recording_steps(
+            MEASUREMENT_SOURCE_COLUMNS[m], values, valid[m], MEASUREMENT_DIVISOR
+        )
+    return RecordTable(
+        trials=trials,
+        trial_dip=np.array(
+            [_trial_value("fault_dip", v) for v in first[columns["fault_dip"]].tolist()],
+            dtype=np.int64,
+        ),
+        trial_pair=list(
+            zip(
+                [_trial_value("set", v) for v in first[columns["set"]].tolist()],
+                [
+                    _trial_value("sediment_strength", v)
+                    for v in first[columns["sediment_strength"]].tolist()
+                ],
+                strict=True,
+            )
+        ),  # type: ignore[arg-type]
+        trial_depth=np.array(
+            [_trial_value("depth", v) for v in first[columns["depth"]].tolist()], dtype=np.int64
+        ),
+        trial_density=[_trial_value("density", v) for v in first[columns["density"]].tolist()],  # type: ignore[misc]
+        trial_index=trial_index,
+        stage_index=stage_index,
+        slip=slip,
+        slip_step=_recording_steps("Slip", slip, np.ones(slip.shape, dtype=bool), 10**4),
+        class_code=codes.astype(np.int64),
+        steps=steps,
+        valid=valid,
+    )
+
+
+def select(
+    table: RecordTable,
+    inputs: dict[str, object],
+    windows: dict[int, tuple[float, float]] | None,
+) -> np.ndarray:
+    """The §5.3 selection, in its order (§3.6 step 8): the trial conditions;
+    the window, comparing each record's slip step with the inclusive stored
+    bounds; the DR-3 one-state rule; only then the scarp-type filter.
+    Returns the selected records' positions in artifact order.
+
+    ``windows`` holds every dip's converted window in offset mode — every
+    dip the selection masks in must have one — and is None otherwise."""
+    dips = set(inputs["fault_dip"])  # type: ignore[call-overload]
+    pairs = {(s["set"], s["sediment_strength"]) for s in inputs["sediment"]}  # type: ignore[attr-defined, index]
+    depths = set(inputs["depth"])  # type: ignore[call-overload]
+    densities = set(inputs["density"])  # type: ignore[call-overload]
+    trial_in = np.array(
+        [
+            int(table.trial_dip[t]) in dips
+            and table.trial_pair[t] in pairs
+            and int(table.trial_depth[t]) in depths
+            and table.trial_density[t] in densities
+            for t in range(len(table.trials))
+        ],
+        dtype=bool,
+    )
+    candidate = trial_in[table.trial_index]
+    window_active = False
+    if inputs["entry_mode"] == "offset":
+        if windows is None:
+            raise ValueError("offset mode needs per-dip windows")
+        window_active = True
+        lo_t = np.zeros(len(table.trials), dtype=np.int64)
+        hi_t = np.full(len(table.trials), -1, dtype=np.int64)
+        for t in np.flatnonzero(trial_in):
+            dip = int(table.trial_dip[t])
+            if dip not in windows:
+                raise ValueError(f"no window for masked-in fault_dip {dip}")
+            lo_t[t], hi_t[t] = _stored_bounds(*windows[dip])
+        lo_r, hi_r = lo_t[table.trial_index], hi_t[table.trial_index]
+        candidate &= (table.slip_step >= lo_r) & (table.slip_step <= hi_r)
+    elif inputs["slip_window"] is not None:
+        if windows is not None:
+            raise ValueError("slip mode takes no per-dip windows")
+        window_active = True
+        bounds: dict = inputs["slip_window"]  # type: ignore[assignment]
+        lo_s, hi_s = stored_bounds_from_decimal(bounds["min"], bounds["max"])
+        candidate &= (table.slip_step >= lo_s) & (table.slip_step <= hi_s)
+    chosen = np.flatnonzero(candidate)
+    if inputs["population"] == "one_state_per_trial" and chosen.size:
+        # Per trial, the last candidate: the highest slip within the window,
+        # or with no active window the trial's final recorded state.
+        trial_of = table.trial_index[chosen]
+        last = np.append(trial_of[1:] != trial_of[:-1], True)
+        chosen = chosen[last]
+        if not window_active:
+            final = np.append(table.trial_index[1:] != table.trial_index[:-1], True)
+            if not final[chosen].all():
+                raise AssertionError("one-state without a window picked a non-final stage")
+    if list(inputs["scarp_class"]) != list(SCARP_CLASSES):  # type: ignore[call-overload]
+        allowed = [SCARP_CLASSES.index(c) for c in inputs["scarp_class"]]  # type: ignore[attr-defined]
+        chosen = chosen[np.isin(table.class_code[chosen], allowed)]
+    return chosen
+
+
+def selection_counts(table: RecordTable, chosen: np.ndarray) -> dict[str, object]:
+    """`counts` of §3.6: matching, unclassified, and the two-count model."""
+    matching = int(chosen.size)
+    per_measurement = {}
+    for m in MEASUREMENTS:
+        valid = int(table.valid[m][chosen].sum())
+        per_measurement[m] = {"valid": valid, "excluded_null": matching - valid}
+    return {
+        "matching_records": matching,
+        "unclassified": int((table.class_code[chosen] == UNCLASSIFIED).sum()),
+        "per_measurement": per_measurement,
+    }
+
+
+def selection_identities(table: RecordTable, chosen: np.ndarray) -> list[list[object]]:
+    """`[trial, stage_index, class_code]` per selected record, artifact order."""
+    return [
+        [
+            table.trials[int(table.trial_index[i])],
+            int(table.stage_index[i]),
+            int(table.class_code[i]),
+        ]
+        for i in chosen
+    ]
+
+
+def selection_record(table: RecordTable, chosen: np.ndarray) -> dict[str, object]:
+    """`selection` of §3.6: identities up to 10,000 records, otherwise the
+    SHA-256 signature of the `trial;stage_index;class_code` lines."""
+    identities = selection_identities(table, chosen)
+    if len(identities) <= IDENTITY_LIMIT:
+        return {"identities": identities}
+    text = "\n".join(f"{trial};{stage};{code}" for trial, stage, code in identities)
+    return {"signature": sha256_hex(text.encode("utf-8")), "count": len(identities)}
+
+
+def measurement_values(
+    table: RecordTable, chosen: np.ndarray, m: str
+) -> tuple[list[int], list[int]]:
+    """The valid recording steps and class codes of measurement m among the
+    selected records, artifact order."""
+    kept = chosen[table.valid[m][chosen]]
+    return [int(s) for s in table.steps[m][kept]], [int(c) for c in table.class_code[kept]]
+
+
+def _window_key(inputs: dict[str, object]) -> tuple[object, ...]:
+    return (inputs["entry_mode"], canonical_json(inputs["slip_window"]), inputs["offset_max"])
+
+
+def diagnosed_conditions(
+    table: RecordTable,
+    inputs: dict[str, object],
+    windows: dict[int, tuple[float, float]] | None,
+    default: dict[str, object],
+) -> list[str]:
+    """The empty-result diagnostic of §5.3: each condition group whose value
+    differs from its default, reset alone to its default; the groups whose
+    relaxation yields matches, in the fixed order. The population is never
+    relaxed; the window relaxes to the inactive slip-mode window."""
+    found = []
+    for key, members in CONDITION_GROUPS:
+        if key == "window":
+            differs = _window_key(inputs) != _window_key(default)
+        else:
+            differs = inputs[key] != default[key]
+        if not differs:
+            continue
+        relaxed = dict(inputs)
+        for member in members:
+            relaxed[member] = default[member]
+        relaxed_windows = None if key == "window" else windows
+        if select(table, relaxed, relaxed_windows).size:
+            found.append(key)
+    return found
+
+
+def _measurement_statistics(
+    table: RecordTable, chosen: np.ndarray
+) -> dict[str, tuple[dict[str, float | None] | None, list[float], list[int], list[int]]]:
+    out = {}
+    for m in MEASUREMENTS:
+        steps, classes = measurement_values(table, chosen, m)
+        stats, x = summarize(steps, MEASUREMENT_DIVISOR)
+        out[m] = (stats, x, steps, classes)
+    return out
+
+
+# -- The envelope's parts ----------------------------------------------------------
+
+
+@dataclass
+class ReferenceVintage:
+    """What the generator reads of the vintage: the record table from the
+    `dem` view's rows and the view-derived dictionaries, bounds, and
+    regression coefficients."""
+
+    table: RecordTable
+    trial_columns: dict[str, list[object]]
+    arm_strength_states: list[dict[str, str]]
+    slip_window_bounds: dict[str, float]
+    coefficients: list[dict[str, object]]
+
+    @property
+    def modeled_dips(self) -> list[int]:
+        return [int(d) for d in self.trial_columns["fault_dip"]]  # type: ignore[call-overload]
+
+    @property
+    def density_order(self) -> list[str]:
+        return [str(d) for d in self.trial_columns["density"]]
+
+    def default_spec(self) -> dict[str, object]:
+        """The default scenario of §5.6 from the vintage's dictionaries."""
+        return {
+            "fault_dip": self.modeled_dips,
+            "sediment": [(p["set"], p["sediment_strength"]) for p in self.arm_strength_states],
+            "depth": [int(d) for d in self.trial_columns["depth"]],  # type: ignore[call-overload]
+            "density": self.density_order,
+            "entry_mode": "slip",
+            "slip_window": None,
+            "offset_max": None,
+            "population": "all_stages",
+            "scarp_class": list(SCARP_CLASSES),
+        }
+
+    def canonical(self, spec: dict[str, object]) -> dict[str, object]:
+        return _canonical_inputs(spec, self.density_order)
+
+    def windows_for(self, inputs: dict[str, object]) -> dict[int, tuple[float, float]] | None:
+        """Every modeled dip's converted window in offset mode (§5.3)."""
+        if inputs["entry_mode"] != "offset":
+            return None
+        return convert_windows(float(inputs["offset_max"]), self.modeled_dips, self.coefficients)  # type: ignore[arg-type]
+
+
+def scenario_entry(
+    vintage: ReferenceVintage, gs_id: str, changes: dict[str, object]
+) -> dict[str, object]:
+    """One golden scenario's entry (§3.6, Scenario entry)."""
+    default = vintage.canonical(vintage.default_spec())
+    inputs = vintage.canonical({**vintage.default_spec(), **changes})
+    windows = vintage.windows_for(inputs)
+    table = vintage.table
+    chosen = select(table, inputs, windows)
+    counts = selection_counts(table, chosen)
+    per_m = _measurement_statistics(table, chosen)
+    statistics: dict[str, object] = {}
+    percentile_map: dict[str, object] = {}
+    histograms: dict[str, object] = {}
+    display: dict[str, object] = {}
+    for m in MEASUREMENTS:
+        stats, x, steps, classes = per_m[m]
+        statistics[m] = stats
+        percentile_map[m] = percentiles(x) if stats is not None else None
+        histograms[m] = histogram(steps, classes, x, DISPLAY_DECIMALS[m])
+        display[m] = None if stats is None else _display_record(stats, DISPLAY_DECIMALS[m])
+    _, _, dzw_steps, dzw_classes = per_m["dzw"]
+    matching = counts["matching_records"]
+    return {
+        "id": gs_id,
+        "inputs": inputs,
+        "counts": counts,
+        "statistics": statistics,
+        "percentiles": percentile_map,
+        "histogram": histograms,
+        "histogram_log": {
+            "dzw": histogram_log(
+                dzw_steps, dzw_classes, LOG_SCALE_OFFER_RATIOS[LOG_SCALE_MIN_DECADES]
+            )
+        },
+        "display": display,
+        "selection": selection_record(table, chosen),
+        "converted_windows": (
+            None
+            if windows is None
+            else converted_window_records(
+                windows,
+                inputs["fault_dip"],  # type: ignore[arg-type]
+                vintage.slip_window_bounds,
+            )
+        ),
+        "diagnosed_conditions": (
+            diagnosed_conditions(table, inputs, windows, default) if matching == 0 else None
+        ),
+    }
+
+
+def _perturb(r: float, perturbation: str, slope: float, intercept: float) -> float:
+    """The boundary-case endpoint of §3.6 for recorded slip r."""
+    if perturbation == "exact":
+        return r
+    if perturbation == "ulp-":
+        return math.nextafter(r, -math.inf)
+    if perturbation == "ulp+":
+        return math.nextafter(r, math.inf)
+    if perturbation == "in-":
+        return r - 1e-14
+    if perturbation == "in+":
+        return r + 1e-14
+    if perturbation == "out-":
+        return r - 1e-12
+    if perturbation == "out+":
+        return r + 1e-12
+    if perturbation == "step-":
+        return r - SLIP_RECORDING_STEP
+    if perturbation == "step+":
+        return r + SLIP_RECORDING_STEP
+    if perturbation == "roundtrip":
+        return ((r * slope + intercept) - intercept) / slope
+    raise ValueError(perturbation)
+
+
+def _boundary_record(
+    case_id: str,
+    base: str,
+    inputs: dict[str, object],
+    windows: dict[int, tuple[float, float]] | None,
+    stored_bounds: dict[str, list[int]],
+    table: RecordTable,
+) -> dict[str, object]:
+    chosen = select(table, inputs, windows)
+    return {
+        "id": case_id,
+        "base": base,
+        "inputs": inputs,
+        "windows": (
+            None
+            if windows is None
+            else {str(dip): {"lo": lo, "hi": hi} for dip, (lo, hi) in sorted(windows.items())}
+        ),
+        "expected": {
+            "stored_bounds": stored_bounds,
+            "counts": selection_counts(table, chosen),
+            "selection": selection_record(table, chosen),
+        },
+    }
+
+
+def boundary_cases(vintage: ReferenceVintage) -> list[dict[str, object]]:
+    """The selection-boundary battery of §3.6: 80 offset-path cases on base
+    GS-1 and 6 slip-path cases on bases GS-7 and GS-0."""
+    golden = dict(GOLDEN_SCENARIOS)
+    table = vintage.table
+    rows = {int(row["fault_dip"]): row for row in vintage.coefficients}  # type: ignore[call-overload]
+    cases: list[dict[str, object]] = []
+
+    # Offset path: base GS-1, either population.
+    for population, spelled in BOUNDARY_POPULATIONS:
+        inputs = vintage.canonical(
+            {**vintage.default_spec(), **golden["GS-1"], "population": population}
+        )
+        converted = vintage.windows_for(inputs)
+        assert converted is not None
+        chosen = select(table, inputs, converted)
+        for dip in inputs["fault_dip"]:  # type: ignore[attr-defined]
+            slips = table.slip[chosen[table.trial_dip[table.trial_index[chosen]] == dip]]
+            lo, hi = converted[dip]
+            slope = float(rows[dip]["slope"])  # type: ignore[arg-type]
+            intercept = float(rows[dip]["intercept"])  # type: ignore[arg-type]
+            for side in ("lo", "hi"):
+                inside = slips[slips >= lo] if side == "lo" else slips[slips <= hi]
+                if inside.size == 0:
+                    raise ValueError(f"GS-1 selects no dip-{dip} slip inside its {side} end")
+                r = float(inside.min() if side == "lo" else inside.max())
+                for perturbation in BOUNDARY_PERTURBATIONS:
+                    endpoint = _perturb(r, perturbation, slope, intercept)
+                    windows = dict(converted)
+                    windows[dip] = (endpoint, hi) if side == "lo" else (lo, endpoint)
+                    stored = {str(d): list(_stored_bounds(*windows[d])) for d in sorted(windows)}
+                    cases.append(
+                        _boundary_record(
+                            f"B-GS1-{spelled}-d{dip}-{side}-{perturbation}",
+                            "GS-1",
+                            inputs,
+                            windows,
+                            stored,
+                            table,
+                        )
+                    )
+
+    # Slip path: M the canonical decimal of slip_window_bounds.max; exact
+    # decimal arithmetic on the endpoints.
+    m_text = float_decimal(vintage.slip_window_bounds["max"])
+    m = Decimal(m_text)
+
+    def dec(value: Decimal) -> str:
+        return canonical_decimal(format(value, "f"))
+
+    slip_cases = (
+        ("GS-7", "0", m_text),
+        ("GS-7", "0", dec(m - Decimal("0.0001"))),
+        ("GS-0", "0", m_text),
+        ("GS-0", "0.0001", m_text),
+        ("GS-7", "0.00005", dec(m - Decimal("0.00001"))),
+        ("GS-0", "0.00005", dec(m - Decimal("0.00001"))),
+    )
+    for base, low, high in slip_cases:
+        inputs = vintage.canonical(
+            {**vintage.default_spec(), **golden[base], "slip_window": {"min": low, "max": high}}
+        )
+        bounds = list(stored_bounds_from_decimal(low, high))
+        stored = {str(d): bounds for d in vintage.modeled_dips}
+        cases.append(
+            _boundary_record(
+                f"B-{base.replace('-', '')}-slip-{low}-{high}", base, inputs, None, stored, table
+            )
+        )
+    return cases
+
+
+# -- Synthetic cases ------------------------------------------------------------
+
+
+def _ensemble_frame(ensemble: dict[str, object]) -> pd.DataFrame:
+    """The ensemble's declarative spec as rows in the `dem` view's columns:
+    slip restored from 1e-4 m steps, the measurements from 1e-3 steps."""
+    n = int(ensemble["stages_per_trial"])  # type: ignore[call-overload]
+    trials: list[list[object]] = ensemble["trials"]  # type: ignore[assignment]
+    stages: dict[str, list[object]] = ensemble["stages"]  # type: ignore[assignment]
+    if any(len(values) != len(trials) * n for values in stages.values()):
+        raise ValueError(f"{ensemble['id']}: a stage array is not len(trials) * N long")
+    site = ("fault_dip", "sediment_strength", "cohesion", "set", "depth", "density")
+    data: dict[str, list[object]] = {TRIAL_SOURCE_COLUMN: []}
+    for column in site:
+        data[TRIAL_SOURCE_COLUMNS[column]] = []
+    for row in trials:
+        for _ in range(n):
+            data[TRIAL_SOURCE_COLUMN].append(row[0])
+            for j, column in enumerate(site, start=1):
+                data[TRIAL_SOURCE_COLUMNS[column]].append(row[j])
+    data[STAGE_SOURCE_COLUMNS["slip"]] = [int(s) / 10**4 for s in stages["slip"]]  # type: ignore[call-overload]
+    for m in MEASUREMENTS:
+        data[MEASUREMENT_SOURCE_COLUMNS[m]] = [
+            np.nan if s is None else int(s) / MEASUREMENT_DIVISOR  # type: ignore[call-overload]
+            for s in stages[m]
+        ]
+    data[STAGE_SOURCE_COLUMNS["scarp_class"]] = list(stages["scarp_class"])
+    frame = pd.DataFrame(data)
+    frame[STAGE_SOURCE_COLUMNS["scarp_class"]] = frame[STAGE_SOURCE_COLUMNS["scarp_class"]].astype(
+        "object"
+    )
+    return frame
+
+
+def synthetic_ensemble(ensemble: dict[str, object]) -> dict[str, object]:
+    """One `synthetic.ensembles` record: the spec with each case's
+    `expected` {`counts`, `selection`, `statistics`, `diagnosed_conditions`}
+    and its `inputs` written by `canonical_scenario()`."""
+    trials: list[list[object]] = ensemble["trials"]  # type: ignore[assignment]
+    table = build_record_table(_ensemble_frame(ensemble))
+    density_order = sorted({str(row[6]) for row in trials})
+    default_spec = {
+        "fault_dip": sorted({int(row[1]) for row in trials}),  # type: ignore[call-overload]
+        "sediment": sorted({(str(row[4]), str(row[2])) for row in trials}),
+        "depth": sorted({int(row[5]) for row in trials}),  # type: ignore[call-overload]
+        "density": density_order,
+        "entry_mode": "slip",
+        "slip_window": None,
+        "offset_max": None,
+        "population": "all_stages",
+        "scarp_class": list(SCARP_CLASSES),
+    }
+    default = _canonical_inputs(default_spec, density_order)
+    cases = []
+    for case in ensemble["cases"]:  # type: ignore[attr-defined]
+        if not str(case["id"]).startswith(f"{ensemble['id']}-"):
+            raise ValueError(f"case {case['id']} does not begin with {ensemble['id']}-")
+        inputs = _canonical_inputs(case["inputs"], density_order)
+        given = case["windows"]
+        windows = (
+            None
+            if given is None
+            else {int(dip): (float(w["lo"]), float(w["hi"])) for dip, w in given.items()}
+        )
+        chosen = select(table, inputs, windows)
+        counts = selection_counts(table, chosen)
+        stats = {
+            m: summarize(measurement_values(table, chosen, m)[0], MEASUREMENT_DIVISOR)[0]
+            for m in MEASUREMENTS
+        }
+        cases.append(
+            {
+                "id": case["id"],
+                "inputs": inputs,
+                "windows": given,
+                "expected": {
+                    "counts": counts,
+                    "selection": {"identities": selection_identities(table, chosen)},
+                    "statistics": stats,
+                    "diagnosed_conditions": (
+                        diagnosed_conditions(table, inputs, windows, default)
+                        if counts["matching_records"] == 0
+                        else None
+                    ),
+                },
+            }
+        )
+    return {**ensemble, "cases": cases}
+
+
+def synthetic_cases() -> dict[str, object]:
+    """The `synthetic` record of §3.6 from `reference_cases.py`'s inputs."""
+    offer_ratio = LOG_SCALE_OFFER_RATIOS[LOG_SCALE_MIN_DECADES]
+    statistics = []
+    for case in reference_cases.STATISTICS_CASES:
+        divisor = 10 ** int(case["decimals"])  # type: ignore[call-overload]
+        stats, x = summarize(case["steps"], divisor)  # type: ignore[arg-type]
+        statistics.append(
+            {
+                **case,
+                "expected": {
+                    "statistics": stats,
+                    "percentiles": percentiles(x) if stats is not None else None,
+                },
+            }
+        )
+    histograms = []
+    for case in reference_cases.HISTOGRAM_CASES:
+        steps: list[int] = case["steps"]  # type: ignore[assignment]
+        codes: list[int] = case["class_codes"]  # type: ignore[assignment]
+        dd = int(case["display_decimals"])  # type: ignore[call-overload]
+        x = sorted(s / MEASUREMENT_DIVISOR for s in steps)
+        histograms.append(
+            {
+                **case,
+                "expected": {
+                    "histogram": histogram(steps, codes, x, dd),
+                    "histogram_log": histogram_log(steps, codes, offer_ratio) if dd == 1 else None,
+                },
+            }
+        )
+    rounding = [
+        {
+            "id": f"round-{decimals}-{value!r}",
+            "value": value,
+            "decimals": decimals,
+            "expected": display_round(value, decimals),
+        }
+        for value, decimals in reference_cases.DISPLAY_ROUNDING_VECTORS
+    ]
+    conversion = []
+    for case in reference_cases.CONVERSION_CASES:
+        bounds: dict[str, float] = case["slip_window_bounds"]  # type: ignore[assignment]
+        rows: list[dict[str, object]] = case["coefficients"]  # type: ignore[assignment]
+        dips = [int(row["fault_dip"]) for row in rows]  # type: ignore[call-overload]
+        windows = convert_windows(float(case["offset_max"]), dips, rows)  # type: ignore[arg-type]
+        conversion.append(
+            {
+                **case,
+                "expected": {"converted_windows": converted_window_records(windows, dips, bounds)},
+            }
+        )
+    return {
+        "ensembles": [synthetic_ensemble(e) for e in reference_cases.ensembles()],
+        "statistics": statistics,
+        "histograms": histograms,
+        "display_rounding": rounding,
+        "conversion": conversion,
+    }
+
+
+def assert_finite_reference_values(obj: object, path: str = "references") -> None:
+    """Rule `finite-reference-values` (§3.6 step 9): `math.isfinite` on every
+    number the generator writes. An assertion inside the generator: no `ok`
+    line; on failure `finite-reference-values: FAILED — <detail>`."""
+    if isinstance(obj, bool) or obj is None or isinstance(obj, str):
+        return
+    if isinstance(obj, int | float):
+        if not math.isfinite(obj):
+            raise ExportFailure(
+                "finite-reference-values", f"{path} is {obj!r}", prints_rule_line=True
+            )
+        return
+    if isinstance(obj, dict):
+        for key, value in obj.items():
+            assert_finite_reference_values(value, f"{path}.{key}")
+        return
+    if isinstance(obj, list | tuple):
+        for i, value in enumerate(obj):
+            assert_finite_reference_values(value, f"{path}[{i}]")
+        return
+    raise ExportFailure(
+        "finite-reference-values",
+        f"{path} holds a {type(obj).__name__}, not a JSON value",
+        prints_rule_line=True,
+    )
+
+
+def build_reference_results(
+    envelope: dict[str, object], vintage: ReferenceVintage
+) -> dict[str, object]:
+    """The reference-results object of §3.6, computed from the pipeline
+    views, never from the decoded artifact, with every number asserted
+    finite."""
+    references = {
+        **envelope,
+        "reference_version": envelope["export_version"],
+        "display_decimals": dict(DISPLAY_DECIMALS),
+        "log_scale_min_decades": LOG_SCALE_MIN_DECADES,
+        "scenarios": [
+            scenario_entry(vintage, gs_id, changes) for gs_id, changes in GOLDEN_SCENARIOS
+        ],
+        "boundary_cases": boundary_cases(vintage),
+        "synthetic": synthetic_cases(),
+    }
+    assert_finite_reference_values(references)
+    return references
+
+
+# --------------------------------------------------------------------------
 # Vintage file names (§4.1 step 2)
 # --------------------------------------------------------------------------
 
@@ -847,6 +2001,11 @@ class Vintage:
     """Manifest `files` key -> written file name."""
     field_rows: list[dict[str, object]]
     coefficients: list[dict[str, object]]
+    references: dict[str, object]
+    """The reference-results object as the generator built it (§3.6)."""
+    references_name: str
+    """The reference-results file's name; the pointer names it, the
+    artifact manifest does not (§3.3)."""
     written: dict[str, str]
     """Every file the run has written: name -> SHA-256 of its bytes."""
     manifest: dict[str, object] | None = None
@@ -872,6 +2031,18 @@ def write_data_files(ctx: RunContext) -> Vintage:
             coefficients = regression_coefficients(con)
         finally:
             con.close()
+
+    # The reference generator reads the view rows, never the decoded artifact.
+    references = build_reference_results(
+        ctx.envelope(),
+        ReferenceVintage(
+            table=build_record_table(dem),
+            trial_columns=pack.trial_columns,
+            arm_strength_states=pack.arm_strength_states,
+            slip_window_bounds=pack.slip_window_bounds,
+            coefficients=coefficients,
+        ),
+    )
 
     written: dict[str, str] = {}
     files = {
@@ -899,11 +2070,16 @@ def write_data_files(ctx: RunContext) -> Vintage:
             written,
         ),
     }
+    references_name = write_vintage_file(
+        ctx.out_dir, "reference_results", gzip_bytes(canonical_json(references)), written
+    )
     return Vintage(
         pack=pack,
         files=files,
         field_rows=field_rows,
         coefficients=coefficients,
+        references=references,
+        references_name=references_name,
         written=written,
     )
 
@@ -947,8 +2123,8 @@ def write_manifest_and_terms(ctx: RunContext, vintage: Vintage) -> None:
 
 def build_pointer(ctx: RunContext, vintage: Vintage) -> dict[str, object]:
     """The pointer manifest of §3.3: its `files` name exactly the files this
-    run writes — the artifact manifest, every file the manifest names, and
-    the terms file; the reference-results file joins with T-13."""
+    run writes — the artifact manifest, every file the manifest names, the
+    reference-results file, and the terms file."""
     return {
         "schema_version": SCHEMA_VERSION,
         "data_tag": ctx.data_tag,
@@ -1195,7 +2371,7 @@ def main(argv: list[str] | None = None, *, root: Path | None = None) -> int:
         else:
             run(root, args.data_tag)
     except ExportFailure as exc:
-        print(exc.detail)
+        print(exc.report())
         return 1
     except Exception as exc:  # noqa: BLE001 — any other error ends the run, printed
         traceback.print_exc(file=sys.stderr)
