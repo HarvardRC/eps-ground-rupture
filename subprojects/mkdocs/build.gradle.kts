@@ -208,6 +208,22 @@ val scenarioAssets by tasks.registering(Sync::class) {
     inputs.file(rootProject.file("CITATION.cff"))
     outputs.file(scenarioHead)
     into("docs/assets/scenario")
+    // Gradle ignores files that something else adds to an output directory,
+    // so a stray file alone would leave this task UP-TO-DATE. The task is
+    // up to date only when the destination holds exactly the files it
+    // copies, so the Sync always removes strays.
+    outputs.upToDateWhen {
+        val pointer = readPointer()
+        val expected = pointer.files.keys.map { "data/$it" }.toMutableSet()
+        for (asset in listOf("app.js", "app.css")) {
+            val source = File(webappDist, asset)
+            if (!source.isFile) return@upToDateWhen false
+            expected += hashedName(source)
+        }
+        val destination = file("docs/assets/scenario")
+        val actual = fileTree(destination).files.map { it.relativeTo(destination).invariantSeparatorsPath }.toSet()
+        actual == expected
+    }
 
     from(webappDist) {
         include("app.js", "app.css")
