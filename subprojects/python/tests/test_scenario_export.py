@@ -81,6 +81,8 @@ def test_payload_diagnostic_above_the_budget_is_printed_and_the_run_succeeds(
             files={"scenario_artifact": name},
             field_rows=[],
             coefficients=[],
+            references={},
+            references_name="",
             written=written,
         )
 
