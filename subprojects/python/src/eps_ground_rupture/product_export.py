@@ -10,6 +10,12 @@ manifest — and the working-tree pointer manifest
 the view rows, never from the decoded artifact (§3.6); its synthetic
 cases' inputs come from `reference_cases.py`.
 
+Every named rule of §4.1 runs inside the run, in the §4.1 order: the
+preconditions of step 1, the decode checks of step 3, the manifest
+cross-checks of step 5, and the pointer checks of step 6. Each prints
+`<rule>: ok`; the first failure prints `<rule>: FAILED — <detail>` and ends
+the run non-zero, before step 6 writes the pointer.
+
 The run builds its own DuckDB views in a temporary directory, never
 `dashboards/duckdb/eps.duckdb`, so every export comes from the running
 code. `--reproduce <pointer>` regenerates a vintage byte for byte from
@@ -20,6 +26,7 @@ from __future__ import annotations
 
 import argparse
 import bisect
+import contextlib
 import datetime
 import fnmatch
 import gzip
@@ -35,7 +42,7 @@ import sys
 import tempfile
 import traceback
 import zlib
-from collections.abc import Sequence
+from collections.abc import Iterator, Sequence
 from dataclasses import dataclass
 from decimal import ROUND_HALF_UP, Decimal
 from fractions import Fraction
@@ -112,25 +119,25 @@ COMPRESSION: dict[str, object] = {
 
 
 class ExportFailure(Exception):
-    """A check of the run failed; ``detail`` is what the run prints.
+    """A named rule of the run failed (docs/app/ddd.md §4.1): ``rule`` names
+    it and ``detail`` says what failed. The run prints
+    `<rule>: FAILED — <detail>` and ends non-zero — the validation report's
+    rules and the reference generator's assertion `finite-reference-values`
+    (§3.6 step 9) alike."""
 
-    ``rule`` names the §4.1 rule the check belongs to.
-    """
-
-    def __init__(self, rule: str, detail: str, *, prints_rule_line: bool = False) -> None:
+    def __init__(self, rule: str, detail: str) -> None:
         super().__init__(detail)
         self.rule = rule
         self.detail = detail
-        self.prints_rule_line = prints_rule_line
-        """Whether the run prints `<rule>: FAILED — <detail>` rather than the
-        detail alone: true for the reference generator's assertion
-        `finite-reference-values` (§3.6 step 9)."""
 
     def report(self) -> str:
         """What the run prints for this failure."""
-        if self.prints_rule_line:
-            return f"{self.rule}: FAILED — {self.detail}"
-        return self.detail
+        return f"{self.rule}: FAILED — {self.detail}"
+
+
+def report_ok(rule: str) -> None:
+    """A passing rule's line of the validation report (§4.1)."""
+    print(f"{rule}: ok")
 
 
 #: The vintage tags an export accepts: `data-vN` (N ≥ 1, no leading zero)
@@ -143,6 +150,20 @@ def check_data_tag(data_tag: str) -> None:
     before the run deletes or writes anything."""
     if DATA_TAG_PATTERN.fullmatch(data_tag) is None:
         raise ExportFailure("data-tag", f"{data_tag!r} does not match ^{DATA_TAG_PATTERN.pattern}$")
+
+
+def check_retained_copy(root: Path, data_tag: str) -> None:
+    """Rule `retained-copy` (§4.1 step 1): refuse while
+    `dist/app/<data-tag>.publication.json` exists, because
+    `dist/app/<data-tag>/` then holds a staged or published vintage — the
+    retained copy of §4.3."""
+    record = f"{DIST_APP_DIR}/{data_tag}.publication.json"
+    if (root / record).exists():
+        raise ExportFailure(
+            "retained-copy",
+            f"{record} exists, so {DIST_APP_DIR}/{data_tag}/ holds a staged or published "
+            "vintage (its retained copy); the run changes nothing",
+        )
 
 
 # --------------------------------------------------------------------------
@@ -601,6 +622,8 @@ class ScenarioPack:
     columns: dict[str, dict[str, object]]
     trial_columns: dict[str, list[object]]
     arm_strength_states: list[dict[str, str]]
+    scarp_classes: list[str]
+    """The class names the class codes index, as the manifest carries them."""
     stage_spacing: dict[str, float]
     slip_window_bounds: dict[str, float]
 
@@ -667,14 +690,17 @@ def pack_scenario(dem: pd.DataFrame) -> ScenarioPack:
         trial_table[:, j] = cells
         trial_columns[column] = dictionary
 
+    # The measured pairs in display order; a pair outside
+    # ARM_STRENGTH_STATES sorts last, and rule `dictionary-order` (step 3)
+    # fails the run on it before any manifest is written.
     rank = {pair: i for i, pair in enumerate(ARM_STRENGTH_STATES)}
     pairs = set(zip(site["set"], site["sediment_strength"], strict=True))
-    unknown = sorted(pair for pair in pairs if pair not in rank)  # type: ignore[misc]
-    if unknown:
-        raise ValueError(f"set and sediment_strength pairs outside ARM_STRENGTH_STATES: {unknown}")
     arm_strength_states = [
         {"set": arm, "sediment_strength": strength}
-        for arm, strength in sorted(pairs, key=rank.__getitem__)  # type: ignore[arg-type]
+        for arm, strength in sorted(
+            pairs,
+            key=lambda pair: (rank.get(pair, len(rank)), pair),  # type: ignore[arg-type]
+        )
     ]
 
     payloads = {
@@ -713,6 +739,7 @@ def pack_scenario(dem: pd.DataFrame) -> ScenarioPack:
         columns=columns,
         trial_columns=trial_columns,
         arm_strength_states=arm_strength_states,
+        scarp_classes=list(SCARP_CLASSES),
         stage_spacing=stage_spacing(stored["slip"], t_count, n),
         slip_window_bounds={
             "min": 0.0,
@@ -1076,7 +1103,10 @@ def percentiles(x: Sequence[float]) -> list[float]:
 
 def _check_classes(classes: Sequence[int]) -> None:
     if any(int(c) == UNCLASSIFIED for c in classes):
-        raise ValueError("a valid value has class code 255 (unclassified-has-no-valid-measurement)")
+        raise ExportFailure(
+            "unclassified-has-no-valid-measurement",
+            "a valid value has class code 255 (an unclassified record)",
+        )
 
 
 def histogram(
@@ -1898,9 +1928,7 @@ def assert_finite_reference_values(obj: object, path: str = "references") -> Non
         return
     if isinstance(obj, int | float):
         if not math.isfinite(obj):
-            raise ExportFailure(
-                "finite-reference-values", f"{path} is {obj!r}", prints_rule_line=True
-            )
+            raise ExportFailure("finite-reference-values", f"{path} is {obj!r}")
         return
     if isinstance(obj, dict):
         for key, value in obj.items():
@@ -1913,7 +1941,6 @@ def assert_finite_reference_values(obj: object, path: str = "references") -> Non
     raise ExportFailure(
         "finite-reference-values",
         f"{path} holds a {type(obj).__name__}, not a JSON value",
-        prints_rule_line=True,
     )
 
 
@@ -1970,6 +1997,737 @@ def write_vintage_file(out_dir: Path, role: str, data: bytes, written: dict[str,
 
 
 # --------------------------------------------------------------------------
+# Closed format specs (§3 "Closed specs"; rules `format-spec` and
+# `dd10-names` of §4.1 step 5)
+# --------------------------------------------------------------------------
+
+#: The thirteen pipeline-column names of the DD-10 closure note: every name
+#: that denotes a pipeline column is one of them (rule `dd10-names`).
+DD10_COLUMN_NAMES: frozenset[str] = frozenset(
+    {
+        "trial",
+        "fault_dip",
+        "sediment_strength",
+        "cohesion",
+        "set",
+        "depth",
+        "density",
+        "slip",
+        "scarp_height",
+        "dzw",
+        "scarp_dip",
+        "scarp_class",
+        "us_ud",
+    }
+)
+
+
+class SpecError(Exception):
+    """A JSON value breaks its closed spec: ``path`` locates it."""
+
+    def __init__(self, path: str, message: str) -> None:
+        super().__init__(f"{path}: {message}")
+
+
+def _json_type(value: object) -> str:
+    if value is None:
+        return "null"
+    if isinstance(value, bool):
+        return "bool"
+    if isinstance(value, int):
+        return "int"
+    if isinstance(value, float):
+        return "number"
+    if isinstance(value, str):
+        return "string"
+    if isinstance(value, list):
+        return "array"
+    if isinstance(value, dict):
+        return "object"
+    return type(value).__name__
+
+
+class Spec:
+    """One node of a closed format spec. ``check`` raises :class:`SpecError`
+    on the first member that breaks it; ``column_names`` yields every name
+    the node marks as denoting a pipeline column, with its path, from a
+    value that passed ``check``."""
+
+    def check(self, value: object, path: str) -> None:
+        raise NotImplementedError
+
+    def column_names(self, value: object, path: str) -> Iterator[tuple[str, str]]:
+        return iter(())
+
+
+class IntSpec(Spec):
+    """A JSON integer (no fraction, no exponent), optionally one value."""
+
+    def __init__(self, const: int | None = None) -> None:
+        self.const = const
+
+    def check(self, value: object, path: str) -> None:
+        if isinstance(value, bool) or not isinstance(value, int):
+            raise SpecError(path, f"expected an integer, found {_json_type(value)}")
+        if self.const is not None and value != self.const:
+            raise SpecError(path, f"expected {self.const}, found {value}")
+
+
+class NumSpec(Spec):
+    """A finite number."""
+
+    def check(self, value: object, path: str) -> None:
+        if isinstance(value, bool) or not isinstance(value, int | float):
+            raise SpecError(path, f"expected a number, found {_json_type(value)}")
+        if not math.isfinite(value):
+            raise SpecError(path, f"{value!r} is not finite")
+
+
+class BoolSpec(Spec):
+    def check(self, value: object, path: str) -> None:
+        if not isinstance(value, bool):
+            raise SpecError(path, f"expected a bool, found {_json_type(value)}")
+
+
+class StrSpec(Spec):
+    """A string, optionally of a format (``pattern``, matched in full) or
+    one of ``values``; ``column`` marks a value that denotes a pipeline
+    column."""
+
+    def __init__(
+        self,
+        pattern: str | None = None,
+        values: Sequence[str] | None = None,
+        *,
+        column: bool = False,
+    ) -> None:
+        self.pattern = re.compile(pattern) if pattern is not None else None
+        self.values = tuple(values) if values is not None else None
+        self.column = column
+
+    def check(self, value: object, path: str) -> None:
+        if not isinstance(value, str):
+            raise SpecError(path, f"expected a string, found {_json_type(value)}")
+        if self.pattern is not None and self.pattern.fullmatch(value) is None:
+            raise SpecError(path, f"{value!r} does not match ^{self.pattern.pattern}$")
+        if self.values is not None and value not in self.values:
+            raise SpecError(path, f"{value!r} is not one of {list(self.values)}")
+
+    def column_names(self, value: object, path: str) -> Iterator[tuple[str, str]]:
+        if self.column:
+            yield path, str(value)
+
+
+class NullableSpec(Spec):
+    """Its inner spec's type "or null"."""
+
+    def __init__(self, inner: Spec) -> None:
+        self.inner = inner
+
+    def check(self, value: object, path: str) -> None:
+        if value is not None:
+            self.inner.check(value, path)
+
+    def column_names(self, value: object, path: str) -> Iterator[tuple[str, str]]:
+        if value is not None:
+            yield from self.inner.column_names(value, path)
+
+
+class ArraySpec(Spec):
+    """An array of one item spec, optionally of a fixed length."""
+
+    def __init__(self, item: Spec, length: int | None = None) -> None:
+        self.item = item
+        self.length = length
+
+    def check(self, value: object, path: str) -> None:
+        if not isinstance(value, list):
+            raise SpecError(path, f"expected an array, found {_json_type(value)}")
+        if self.length is not None and len(value) != self.length:
+            raise SpecError(path, f"expected {self.length} items, found {len(value)}")
+        for i, item in enumerate(value):
+            self.item.check(item, f"{path}[{i}]")
+
+    def column_names(self, value: object, path: str) -> Iterator[tuple[str, str]]:
+        for i, item in enumerate(value):  # type: ignore[arg-type]
+            yield from self.item.column_names(item, f"{path}[{i}]")
+
+
+class TupleSpec(Spec):
+    """An array with one spec per position."""
+
+    def __init__(self, *items: Spec) -> None:
+        self.items = items
+
+    def check(self, value: object, path: str) -> None:
+        if not isinstance(value, list):
+            raise SpecError(path, f"expected an array, found {_json_type(value)}")
+        if len(value) != len(self.items):
+            raise SpecError(path, f"expected {len(self.items)} items, found {len(value)}")
+        for i, (item, spec) in enumerate(zip(value, self.items, strict=True)):
+            spec.check(item, f"{path}[{i}]")
+
+    def column_names(self, value: object, path: str) -> Iterator[tuple[str, str]]:
+        for i, (item, spec) in enumerate(zip(value, self.items, strict=True)):  # type: ignore[call-overload]
+            yield from spec.column_names(item, f"{path}[{i}]")
+
+
+class RecordSpec(Spec):
+    """A record whose keys are exactly ``fields`` — no required member
+    missing, no unknown member — plus any of ``optional`` and any key
+    matching ``extra`` (a pattern with its value spec). ``column_fields``
+    are the member names that denote pipeline columns."""
+
+    def __init__(
+        self,
+        fields: dict[str, Spec],
+        *,
+        optional: dict[str, Spec] | None = None,
+        extra: tuple[str, Spec] | None = None,
+        column_fields: Sequence[str] = (),
+    ) -> None:
+        self.fields = fields
+        self.optional = optional or {}
+        self.extra = (re.compile(extra[0]), extra[1]) if extra is not None else None
+        self.column_fields = tuple(column_fields)
+
+    def _spec_of(self, key: str) -> Spec | None:
+        if key in self.fields:
+            return self.fields[key]
+        if key in self.optional:
+            return self.optional[key]
+        if self.extra is not None and self.extra[0].fullmatch(key):
+            return self.extra[1]
+        return None
+
+    def check(self, value: object, path: str) -> None:
+        if not isinstance(value, dict):
+            raise SpecError(path, f"expected an object, found {_json_type(value)}")
+        missing = [key for key in self.fields if key not in value]
+        if missing:
+            raise SpecError(path, f"required member {missing[0]!r} is missing")
+        for key, item in value.items():
+            spec = self._spec_of(key)
+            if spec is None:
+                raise SpecError(path, f"unknown member {key!r}")
+            spec.check(item, f"{path}.{key}")
+
+    def column_names(self, value: object, path: str) -> Iterator[tuple[str, str]]:
+        for name in self.column_fields:
+            yield f"{path} member", name
+        for key, item in value.items():  # type: ignore[attr-defined]
+            yield from self._spec_of(key).column_names(item, f"{path}.{key}")  # type: ignore[union-attr]
+
+
+class MapSpec(Spec):
+    """A map keyed by data values: exactly ``keys`` when given, else any key
+    matching ``key_pattern`` (any string when None), each value of
+    ``value`` — or, with ``values``, of its key's own spec. ``columns``
+    marks keys that denote pipeline columns, but those in ``not_columns``."""
+
+    def __init__(
+        self,
+        value: Spec | None = None,
+        *,
+        keys: Sequence[str] | None = None,
+        values: dict[str, Spec] | None = None,
+        key_pattern: str | None = None,
+        columns: bool = False,
+        not_columns: Sequence[str] = (),
+    ) -> None:
+        if values is not None:
+            keys = tuple(values)
+        self.value = value
+        self.values = values
+        self.keys = tuple(keys) if keys is not None else None
+        self.key_pattern = re.compile(key_pattern) if key_pattern is not None else None
+        self.columns = columns
+        self.not_columns = tuple(not_columns)
+
+    def _spec_of(self, key: str) -> Spec:
+        return self.values[key] if self.values is not None else self.value  # type: ignore[return-value]
+
+    def check(self, value: object, path: str) -> None:
+        if not isinstance(value, dict):
+            raise SpecError(path, f"expected an object, found {_json_type(value)}")
+        if self.keys is not None and set(value) != set(self.keys):
+            raise SpecError(path, f"keys {sorted(value)} are not exactly {sorted(self.keys)}")
+        for key, item in value.items():
+            if self.key_pattern is not None and self.key_pattern.fullmatch(key) is None:
+                raise SpecError(path, f"key {key!r} does not match ^{self.key_pattern.pattern}$")
+            self._spec_of(key).check(item, f"{path}.{key}")
+
+    def column_names(self, value: object, path: str) -> Iterator[tuple[str, str]]:
+        for key, item in value.items():  # type: ignore[attr-defined]
+            if self.columns and key not in self.not_columns:
+                yield f"{path} key", key
+            yield from self._spec_of(key).column_names(item, f"{path}.{key}")
+
+
+class OneOfSpec(Spec):
+    """Exactly one of several record shapes."""
+
+    def __init__(self, *options: Spec) -> None:
+        self.options = options
+
+    def _matching(self, value: object, path: str) -> list[Spec]:
+        matching = []
+        for option in self.options:
+            try:
+                option.check(value, path)
+            except SpecError:
+                continue
+            matching.append(option)
+        return matching
+
+    def check(self, value: object, path: str) -> None:
+        matching = self._matching(value, path)
+        if len(matching) != 1:
+            raise SpecError(
+                path, f"matches {len(matching)} of its {len(self.options)} shapes, not 1"
+            )
+
+    def column_names(self, value: object, path: str) -> Iterator[tuple[str, str]]:
+        yield from self._matching(value, path)[0].column_names(value, path)
+
+
+def _name_pattern(role: str) -> str:
+    prefix, suffix = ROLE_PATTERNS[role]
+    return re.escape(prefix) + "[0-9a-f]{12}" + re.escape(suffix)
+
+
+_TAG = StrSpec(DATA_TAG_PATTERN.pattern)
+_DATE = StrSpec(r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z")
+_SHA256 = StrSpec(r"[0-9a-f]{64}")
+_INT = IntSpec()
+_NUM = NumSpec()
+_STR = StrSpec()
+#: A canonical decimal of grammar G (§5.7): no leading zero but a lone 0,
+#: no trailing fraction zero, a point only before digits.
+_DECIMAL = StrSpec(r"(0|[1-9][0-9]*)(\.[0-9]*[1-9])?")
+#: A dip written as a decimal string, as a map key.
+_DIP_KEY = r"0|[1-9][0-9]*"
+
+#: The envelope members every JSON export shares (§3.2, §3.4, §3.5, §3.7).
+_ENVELOPE: dict[str, Spec] = {
+    "schema_version": IntSpec(SCHEMA_VERSION),
+    "export_version": _TAG,
+    "export_date": _DATE,
+    "pipeline_version": _STR,
+}
+
+PROVENANCE_SPEC = RecordSpec(
+    {
+        "source_commit": StrSpec(r"[0-9a-f]{40}"),
+        "source_tree_clean": BoolSpec(),
+        "inputs": ArraySpec(RecordSpec({"path": _STR, "sha256": _SHA256, "bytes": _INT})),
+        "environment": RecordSpec(
+            {
+                key: _STR
+                for key in ("python", "duckdb", "numpy", "pandas", "pyarrow", "zlib", "platform")
+            }
+        ),
+        "compression": RecordSpec(
+            {
+                "format": StrSpec(values=("gzip",)),
+                "call": StrSpec(values=("gzip.compress",)),
+                "compresslevel": IntSpec(9),
+                "mtime": IntSpec(0),
+            }
+        ),
+    }
+)
+
+_COLUMN_RECORD = RecordSpec(
+    {
+        "encoding": StrSpec(values=("scaled", "dict", "code")),
+        "decimals": NullableSpec(_INT),
+        "offset_steps": NullableSpec(_INT),
+        "scale": NullableSpec(_NUM),
+        "offset": NullableSpec(_NUM),
+        "physical_min": NullableSpec(_NUM),
+        "physical_max": NullableSpec(_NUM),
+        "recording_step": NullableSpec(_NUM),
+        "null_sentinel": _INT,
+        "null_count": _INT,
+    }
+)
+
+#: The artifact manifest (§3.2).
+MANIFEST_SPEC = RecordSpec(
+    {
+        **_ENVELOPE,
+        "provenance": PROVENANCE_SPEC,
+        "counts": RecordSpec({"records": _INT, "trials": _INT, "stages_per_trial": _INT}),
+        "blocks": MapSpec(
+            values={
+                name: RecordSpec(
+                    {"offset": _INT, "length": _INT, "dtype": StrSpec(values=(dtype,))}
+                )
+                for name, dtype in BLOCK_DTYPES.items()
+            }
+        ),
+        "columns": MapSpec(_COLUMN_RECORD, keys=tuple(STAGE_SOURCE_COLUMNS), columns=True),
+        "trial_columns": MapSpec(
+            values={
+                column: ArraySpec(_INT if column in INTEGER_TRIAL_COLUMNS else _STR)
+                for column in TRIAL_TABLE_COLUMNS
+            },
+            columns=True,
+            # The reserved trial-table column (§3.1) has no pipeline column.
+            not_columns=("model_family",),
+        ),
+        "arm_strength_states": ArraySpec(
+            RecordSpec(
+                {"set": _STR, "sediment_strength": _STR},
+                column_fields=("set", "sediment_strength"),
+            )
+        ),
+        "scarp_classes": ArraySpec(_STR),
+        "scarp_class_palette": MapSpec(StrSpec(r"#[0-9a-f]{6}"), keys=SCARP_CLASSES),
+        "trials": ArraySpec(_STR),
+        "stage_spacing": RecordSpec({"min": _NUM, "max": _NUM, "mean": _NUM}),
+        "slip_window_bounds": RecordSpec({"min": _NUM, "max": _NUM, "recording_step": _NUM}),
+        "files": RecordSpec(
+            {
+                "scenario_artifact": StrSpec(_name_pattern("scenario_artifact")),
+                "field_export": StrSpec(_name_pattern("field_export")),
+                "regression_export": StrSpec(_name_pattern("regression_export")),
+            },
+            optional={"media_index": StrSpec(_name_pattern("media_index"))},
+            extra=(r"scenario_artifact_[a-z0-9]+", StrSpec(_name_pattern("scenario_artifact"))),
+        ),
+        "reference_results_version": _TAG,
+        "checksums": MapSpec(_SHA256),
+    }
+)
+
+#: The pointer manifest (§3.3).
+POINTER_SPEC = RecordSpec(
+    {
+        "schema_version": IntSpec(SCHEMA_VERSION),
+        "data_tag": _TAG,
+        "export_version": _TAG,
+        "export_date": _DATE,
+        "provenance": PROVENANCE_SPEC,
+        "files": MapSpec(_SHA256),
+    }
+)
+
+#: The field-data export (§3.4).
+FIELD_EXPORT_SPEC = RecordSpec(
+    {
+        **_ENVELOPE,
+        "rows": ArraySpec(
+            RecordSpec(
+                {
+                    "source": StrSpec(values=("FDHI", "SURE", "Kern")),
+                    "eq_name": _STR,
+                    "magnitude": NullableSpec(_NUM),
+                    "analogue": StrSpec(values=("scarp_height", "dzw"), column=True),
+                    "source_quantity": StrSpec(
+                        values=(
+                            "vs_central_meters",
+                            "SH",
+                            "Vertical",
+                            "fzw_central_meters",
+                            "FNC",
+                            "DZW",
+                        )
+                    ),
+                    "value": _NUM,
+                    "limited_comparison": BoolSpec(),
+                    "criterion_sub50": StrSpec(values=("met", "not_met", "not_applicable")),
+                    "labeled_set": BoolSpec(),
+                    "kern_field_group": NullableSpec(_STR),
+                }
+            )
+        ),
+    }
+)
+
+_TEXT_VARIABLE = RecordSpec({"name": _STR, "description": _STR, "unit": _STR})
+
+#: The regression export (§3.5).
+REGRESSION_EXPORT_SPEC = RecordSpec(
+    {
+        **_ENVELOPE,
+        "relationship": RecordSpec(
+            {
+                "y": _TEXT_VARIABLE,
+                "x": _TEXT_VARIABLE,
+                "form": _STR,
+                "fit": _STR,
+                "back_projection": _STR,
+            }
+        ),
+        "coefficients": ArraySpec(
+            RecordSpec(
+                {"fault_dip": _INT, "n": _INT, "slope": _NUM, "intercept": _NUM, "r2": _NUM},
+                column_fields=("fault_dip",),
+            )
+        ),
+    }
+)
+
+#: The canonical scenario object of DD-11 (§5.6), a §3.6 `inputs` record.
+_SCENARIO_INPUTS = RecordSpec(
+    {
+        "fault_dip": ArraySpec(_INT),
+        "sediment": ArraySpec(
+            RecordSpec(
+                {"set": _STR, "sediment_strength": _STR},
+                column_fields=("set", "sediment_strength"),
+            )
+        ),
+        "depth": ArraySpec(_INT),
+        "density": ArraySpec(_STR),
+        "entry_mode": StrSpec(values=("slip", "offset")),
+        "slip_window": NullableSpec(RecordSpec({"min": _DECIMAL, "max": _DECIMAL})),
+        "offset_max": NullableSpec(_DECIMAL),
+        "population": StrSpec(values=("all_stages", "one_state_per_trial")),
+        "scarp_class": ArraySpec(StrSpec(values=SCARP_CLASSES)),
+    },
+    column_fields=("fault_dip", "depth", "density", "scarp_class"),
+)
+
+_COUNTS = RecordSpec(
+    {
+        "matching_records": _INT,
+        "unclassified": _INT,
+        "per_measurement": MapSpec(
+            RecordSpec({"valid": _INT, "excluded_null": _INT}), keys=MEASUREMENTS, columns=True
+        ),
+    }
+)
+_STATISTICS = RecordSpec(
+    {
+        **{key: _NUM for key in ("median", "p16", "p84", "min", "max", "mean")},
+        "sd": NullableSpec(_NUM),
+    }
+)
+_PERCENTILES = ArraySpec(_NUM, 101)
+_CLASS_COUNTS = ArraySpec(_INT, len(SCARP_CLASSES))
+_HISTOGRAM = RecordSpec(
+    {
+        "rule": StrSpec(values=("fd", "scott", "single")),
+        "width_units": _INT,
+        "first_edge": _INT,
+        "bins": _INT,
+        "counts": ArraySpec(_CLASS_COUNTS),
+    }
+)
+_HISTOGRAM_LOG = RecordSpec(
+    {
+        "first_edge": _INT,
+        "bins": _INT,
+        "counts": ArraySpec(_CLASS_COUNTS),
+        "below_counts": _CLASS_COUNTS,
+    }
+)
+_DISPLAY = RecordSpec(
+    {
+        **{key: _STR for key in ("median", "p16", "p84", "min", "max", "mean")},
+        "sd": NullableSpec(_STR),
+    }
+)
+_IDENTITIES = RecordSpec({"identities": ArraySpec(TupleSpec(_STR, _INT, _INT))})
+_SELECTION = OneOfSpec(_IDENTITIES, RecordSpec({"signature": _SHA256, "count": _INT}))
+_CONVERTED_WINDOW = RecordSpec(
+    {
+        "fault_dip": _INT,
+        "window_lo": _NUM,
+        "window_hi": _NUM,
+        "range_flag": StrSpec(values=("in_range", "partly_out", "out_of_range")),
+        "window_lo_display": _STR,
+        "window_hi_display": _STR,
+    },
+    column_fields=("fault_dip",),
+)
+_DIAGNOSED = NullableSpec(ArraySpec(StrSpec(values=tuple(key for key, _ in CONDITION_GROUPS))))
+_STATISTICS_MAP = MapSpec(NullableSpec(_STATISTICS), keys=MEASUREMENTS, columns=True)
+_WINDOWS = NullableSpec(MapSpec(RecordSpec({"lo": _NUM, "hi": _NUM}), key_pattern=_DIP_KEY))
+
+_SCENARIO_ENTRY = RecordSpec(
+    {
+        "id": StrSpec(r"GS-[0-9]+"),
+        "inputs": _SCENARIO_INPUTS,
+        "counts": _COUNTS,
+        "statistics": _STATISTICS_MAP,
+        "percentiles": MapSpec(NullableSpec(_PERCENTILES), keys=MEASUREMENTS, columns=True),
+        "histogram": MapSpec(NullableSpec(_HISTOGRAM), keys=MEASUREMENTS, columns=True),
+        "histogram_log": MapSpec(NullableSpec(_HISTOGRAM_LOG), keys=("dzw",), columns=True),
+        "display": MapSpec(NullableSpec(_DISPLAY), keys=MEASUREMENTS, columns=True),
+        "selection": _SELECTION,
+        "converted_windows": NullableSpec(ArraySpec(_CONVERTED_WINDOW)),
+        "diagnosed_conditions": _DIAGNOSED,
+    }
+)
+
+_BOUNDARY_CASE = RecordSpec(
+    {
+        "id": _STR,
+        "base": StrSpec(values=("GS-0", "GS-1", "GS-7")),
+        "inputs": _SCENARIO_INPUTS,
+        "windows": _WINDOWS,
+        "expected": RecordSpec(
+            {
+                "stored_bounds": MapSpec(TupleSpec(_INT, _INT), key_pattern=_DIP_KEY),
+                "counts": _COUNTS,
+                "selection": _SELECTION,
+            }
+        ),
+    }
+)
+
+_ENSEMBLE = RecordSpec(
+    {
+        "id": _STR,
+        "purpose": _STR,
+        "stages_per_trial": _INT,
+        "scarp_classes": ArraySpec(_STR),
+        "trials": ArraySpec(TupleSpec(_STR, _INT, _STR, _STR, _STR, _INT, _STR)),
+        "stages": MapSpec(
+            values={
+                "slip": ArraySpec(_INT),
+                "scarp_height": ArraySpec(NullableSpec(_INT)),
+                "dzw": ArraySpec(NullableSpec(_INT)),
+                "scarp_dip": ArraySpec(NullableSpec(_INT)),
+                "scarp_class": ArraySpec(NullableSpec(_STR)),
+            },
+            columns=True,
+        ),
+        "cases": ArraySpec(
+            RecordSpec(
+                {
+                    "id": _STR,
+                    "inputs": _SCENARIO_INPUTS,
+                    "windows": _WINDOWS,
+                    "expected": RecordSpec(
+                        {
+                            "counts": _COUNTS,
+                            "selection": _IDENTITIES,
+                            "statistics": _STATISTICS_MAP,
+                            "diagnosed_conditions": _DIAGNOSED,
+                        }
+                    ),
+                }
+            )
+        ),
+    }
+)
+
+#: The reference results (§3.6).
+REFERENCE_RESULTS_SPEC = RecordSpec(
+    {
+        **_ENVELOPE,
+        "reference_version": _TAG,
+        "display_decimals": MapSpec(
+            _INT, keys=("slip", "scarp_height", "dzw", "scarp_dip"), columns=True
+        ),
+        "log_scale_min_decades": _INT,
+        "scenarios": ArraySpec(_SCENARIO_ENTRY),
+        "boundary_cases": ArraySpec(_BOUNDARY_CASE),
+        "synthetic": RecordSpec(
+            {
+                "ensembles": ArraySpec(_ENSEMBLE),
+                "statistics": ArraySpec(
+                    RecordSpec(
+                        {
+                            "id": _STR,
+                            "decimals": _INT,
+                            "steps": ArraySpec(_INT),
+                            "expected": RecordSpec(
+                                {
+                                    "statistics": NullableSpec(_STATISTICS),
+                                    "percentiles": NullableSpec(_PERCENTILES),
+                                }
+                            ),
+                        }
+                    )
+                ),
+                "histograms": ArraySpec(
+                    RecordSpec(
+                        {
+                            "id": _STR,
+                            "display_decimals": _INT,
+                            "steps": ArraySpec(_INT),
+                            "class_codes": ArraySpec(_INT),
+                            "expected": RecordSpec(
+                                {
+                                    "histogram": NullableSpec(_HISTOGRAM),
+                                    "histogram_log": NullableSpec(_HISTOGRAM_LOG),
+                                }
+                            ),
+                        }
+                    )
+                ),
+                "display_rounding": ArraySpec(
+                    RecordSpec({"id": _STR, "value": _NUM, "decimals": _INT, "expected": _STR})
+                ),
+                "conversion": ArraySpec(
+                    RecordSpec(
+                        {
+                            "id": _STR,
+                            "slip_window_bounds": RecordSpec({"max": _NUM, "recording_step": _NUM}),
+                            "coefficients": ArraySpec(
+                                RecordSpec(
+                                    {"fault_dip": _INT, "slope": _NUM, "intercept": _NUM},
+                                    column_fields=("fault_dip",),
+                                )
+                            ),
+                            "offset_max": _DECIMAL,
+                            "expected": RecordSpec(
+                                {"converted_windows": ArraySpec(_CONVERTED_WINDOW)}
+                            ),
+                        }
+                    )
+                ),
+            }
+        ),
+    }
+)
+
+#: The media index (§3.7), from P2; no MVP run writes one.
+MEDIA_INDEX_SPEC = RecordSpec(
+    {
+        **_ENVELOPE,
+        "entries": ArraySpec(
+            RecordSpec(
+                {
+                    "id": _STR,
+                    "kind": StrSpec(values=("animation", "photograph")),
+                    "file": _STR,
+                    "purpose": StrSpec(values=("morphology", "measurement", "offer")),
+                    "scarp_class": NullableSpec(StrSpec(values=SCARP_CLASSES)),
+                    "caption": _STR,
+                    "attribution": _STR,
+                    "permission": RecordSpec(
+                        {
+                            "status": StrSpec(values=("granted", "pending", "internal_only")),
+                            "record": _STR,
+                        }
+                    ),
+                    "available": BoolSpec(),
+                },
+                column_fields=("scarp_class",),
+            )
+        ),
+    }
+)
+
+#: The closed spec of each JSON role.
+FORMAT_SPECS: dict[str, Spec] = {
+    "manifest": MANIFEST_SPEC,
+    "field_export": FIELD_EXPORT_SPEC,
+    "regression_export": REGRESSION_EXPORT_SPEC,
+    "reference_results": REFERENCE_RESULTS_SPEC,
+    "media_index": MEDIA_INDEX_SPEC,
+    "pointer": POINTER_SPEC,
+}
+
+
+# --------------------------------------------------------------------------
 # The run
 # --------------------------------------------------------------------------
 
@@ -1983,6 +2741,12 @@ class RunContext:
     export_date: str
     provenance: dict[str, object]
     out_dir: Path
+    input_paths: list[str]
+    """The nine data paths of step 1: discovered, or in a `--reproduce` run
+    the pointer's recorded paths (rules `inputs-present` and `provenance`)."""
+    given_pointer: dict[str, object] | None = None
+    """The pointer a `--reproduce` run was given, against which steps 5 and
+    6 apply the pointer rules (§4.3); None in an ordinary run."""
 
     def envelope(self) -> dict[str, object]:
         """The envelope members every JSON export shares (§3.2, §3.4, §3.5)."""
@@ -2013,38 +2777,46 @@ class Vintage:
     manifest: dict[str, object] | None = None
     manifest_name: str | None = None
     terms_name: str | None = None
+    reference_vintage: ReferenceVintage | None = None
+    """What the reference generator read of the vintage (§3.6)."""
 
 
-def write_data_files(ctx: RunContext) -> Vintage:
-    """§4.1 step 2: the data files, from the run-private views."""
-    dem_columns = [TRIAL_SOURCE_COLUMN, *TRIAL_SOURCE_COLUMNS.values()]
-    dem_columns += list(STAGE_SOURCE_COLUMNS.values())
+@contextlib.contextmanager
+def run_private_views(root: Path) -> Iterator[duckdb.DuckDBPyConnection]:
+    """The run's own DuckDB views (§4.1 step 1, Views), built in a temporary
+    directory — never `dashboards/duckdb/eps.duckdb` — and open read-only
+    for steps 2 and 3."""
     with tempfile.TemporaryDirectory() as tmp:
         duckdb_path = views.build_duckdb_views(
-            processed_dir=ctx.root / "data" / "processed",
+            processed_dir=root / "data" / "processed",
             duckdb_path=Path(tmp, "views.duckdb"),
         )
         con = duckdb.connect(str(duckdb_path), read_only=True)
         try:
-            quoted = ", ".join(f'"{c}"' for c in dem_columns)
-            dem = con.execute(f"SELECT {quoted} FROM dem").df()
-            pack = pack_scenario(dem)
-            field_rows = field_export_rows(con)
-            coefficients = regression_coefficients(con)
+            yield con
         finally:
             con.close()
 
+
+def write_data_files(ctx: RunContext, con: duckdb.DuckDBPyConnection) -> Vintage:
+    """§4.1 step 2: the data files, from the run-private views."""
+    dem_columns = [TRIAL_SOURCE_COLUMN, *TRIAL_SOURCE_COLUMNS.values()]
+    dem_columns += list(STAGE_SOURCE_COLUMNS.values())
+    quoted = ", ".join(f'"{c}"' for c in dem_columns)
+    dem = con.execute(f"SELECT {quoted} FROM dem").df()
+    pack = pack_scenario(dem)
+    field_rows = field_export_rows(con)
+    coefficients = regression_coefficients(con)
+
     # The reference generator reads the view rows, never the decoded artifact.
-    references = build_reference_results(
-        ctx.envelope(),
-        ReferenceVintage(
-            table=build_record_table(dem),
-            trial_columns=pack.trial_columns,
-            arm_strength_states=pack.arm_strength_states,
-            slip_window_bounds=pack.slip_window_bounds,
-            coefficients=coefficients,
-        ),
+    reference_vintage = ReferenceVintage(
+        table=build_record_table(dem),
+        trial_columns=pack.trial_columns,
+        arm_strength_states=pack.arm_strength_states,
+        slip_window_bounds=pack.slip_window_bounds,
+        coefficients=coefficients,
     )
+    references = build_reference_results(ctx.envelope(), reference_vintage)
 
     written: dict[str, str] = {}
     files = {
@@ -2083,6 +2855,7 @@ def write_data_files(ctx: RunContext) -> Vintage:
         references=references,
         references_name=references_name,
         written=written,
+        reference_vintage=reference_vintage,
     )
 
 
@@ -2098,7 +2871,7 @@ def build_manifest(ctx: RunContext, vintage: Vintage) -> dict[str, object]:
         "columns": pack.columns,
         "trial_columns": pack.trial_columns,
         "arm_strength_states": pack.arm_strength_states,
-        "scarp_classes": list(SCARP_CLASSES),
+        "scarp_classes": pack.scarp_classes,
         "scarp_class_palette": {name: SCARP_CLASS_PALETTE[name] for name in SCARP_CLASSES},
         "trials": pack.trials,
         "stage_spacing": pack.stage_spacing,
@@ -2137,11 +2910,1015 @@ def build_pointer(ctx: RunContext, vintage: Vintage) -> dict[str, object]:
     }
 
 
+def checked_pointer(ctx: RunContext, vintage: Vintage) -> dict[str, object]:
+    """The pointer that rules `format-spec` (step 5) and `pointer-exact` and
+    `file-names` (step 6) check: the one the run builds in memory, or in a
+    `--reproduce` run the one it was given (§4.3)."""
+    if ctx.given_pointer is not None:
+        return ctx.given_pointer
+    return build_pointer(ctx, vintage)
+
+
 def write_pointer(root: Path, pointer: dict[str, object]) -> None:
     """§4.1 step 6: write the working-tree pointer; the run never commits it."""
     path = root / POINTER_PATH
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(canonical_json(pointer))
+
+
+# --------------------------------------------------------------------------
+# Validation helpers
+# --------------------------------------------------------------------------
+
+#: The NumPy dtype of each manifest `dtype` (little-endian, §3).
+NUMPY_DTYPES: dict[str, str] = {"uint8": "<u1", "uint16": "<u2", "int32": "<i4"}
+
+#: The restore divisor of each `decimals` value, as integer literals — the
+#: §3.1 restore rule's `10000` and `1000`, never ``10 **``.
+RESTORE_DIVISORS: dict[int, int] = {4: 10000, 3: 1000}
+
+#: The stage arrays, in physical block order (§3.1).
+STAGE_BLOCKS: tuple[str, ...] = ("slip", "scarp_height", "dzw", "scarp_dip", "scarp_class")
+
+#: The largest dip-dictionary magnitude, 180° in thousandths (§3.1).
+DIP_DICTIONARY_LIMIT = 180_000
+
+#: The stage arrays a null `scarp_class` requires null (§3.1, Unclassified
+#: records).
+UNCLASSIFIED_NULL_COLUMNS: tuple[str, ...] = ("scarp_height", "dzw", "scarp_dip")
+
+#: File-name endings that MkDocs would render as a page (§4.1 step 6).
+MARKDOWN_SUFFIXES: tuple[str, ...] = (".md", ".markdown", ".mdown", ".mkdn", ".mkd")
+
+
+def decode_block(artifact: bytes, block: dict[str, object]) -> np.ndarray:
+    """One block of a decompressed artifact as its little-endian dtype: the
+    whole items within its declared `offset` and `length`."""
+    dtype = np.dtype(NUMPY_DTYPES[str(block["dtype"])])
+    start = int(block["offset"])  # type: ignore[call-overload]
+    segment = artifact[start : start + int(block["length"])]  # type: ignore[call-overload]
+    usable = len(segment) - len(segment) % dtype.itemsize
+    return np.frombuffer(segment[:usable], dtype=dtype)
+
+
+def read_json_file(path: Path) -> object:
+    """A written JSON file, gunzipped first when it is a `.gz` file."""
+    data = path.read_bytes()
+    if path.name.endswith(".gz"):
+        data = gzip.decompress(data)
+    return json.loads(data.decode("utf-8"))
+
+
+def first_difference(a: object, b: object, path: str) -> str | None:
+    """Where two JSON values first differ, floats compared by
+    `float.hex()` and every other leaf by type and value; None when equal."""
+    if isinstance(a, float) or isinstance(b, float):
+        if type(a) is float and type(b) is float and a.hex() == b.hex():
+            return None
+        shown = [x.hex() if isinstance(x, float) else repr(x) for x in (a, b)]
+        return f"{path}: {shown[0]} against {shown[1]}"
+    if isinstance(a, dict) and isinstance(b, dict):
+        if list(a) != list(b) and set(a) != set(b):
+            return f"{path}: members {sorted(a)} against {sorted(b)}"
+        for key in a:
+            found = first_difference(a[key], b[key], f"{path}.{key}")
+            if found:
+                return found
+        return None
+    if isinstance(a, list | tuple) and isinstance(b, list | tuple):
+        if len(a) != len(b):
+            return f"{path}: {len(a)} items against {len(b)}"
+        for i, (x, y) in enumerate(zip(a, b, strict=True)):
+            found = first_difference(x, y, f"{path}[{i}]")
+            if found:
+                return found
+        return None
+    if type(a) is type(b) and a == b:
+        return None
+    return f"{path}: {a!r} against {b!r}"
+
+
+def _float_bits(values: np.ndarray) -> np.ndarray:
+    """The IEEE 754 bit patterns of float64 values: equal bits are equal
+    `float.hex()` strings."""
+    return np.ascontiguousarray(values, dtype=np.float64).view(np.uint64)
+
+
+@dataclass
+class DecodedArtifact:
+    """The written scenario artifact, gunzipped from disk and split into its
+    blocks by a block map — the run's in-memory one (step 3) or the written
+    manifest's (step 5)."""
+
+    raw: bytes
+    blocks: dict[str, np.ndarray]
+
+
+def decode_written_artifact(path: Path, blocks: dict[str, dict[str, object]]) -> DecodedArtifact:
+    raw = gzip.decompress(path.read_bytes())
+    return DecodedArtifact(
+        raw=raw, blocks={name: decode_block(raw, blocks[name]) for name in BLOCK_ORDER}
+    )
+
+
+# --------------------------------------------------------------------------
+# Step 3: validate from in-memory decode information
+# --------------------------------------------------------------------------
+
+
+@dataclass
+class StepThree:
+    """What the step-3 rules read: the `dem` rows in artifact order, the
+    measured counts, and the artifact decoded with the in-memory block map."""
+
+    frame: pd.DataFrame
+    trials: list[str]
+    stages_per_trial: int
+    records: int
+    decoded: DecodedArtifact
+
+    def where(self, record: int) -> str:
+        n = self.stages_per_trial
+        return f"Trial {self.trials[record // n]} stage {record % n}"
+
+
+def rule_counts(vintage: Vintage, decoded: DecodedArtifact) -> StepThree:
+    """Rule `counts`, step 3: measure the records, the trials, and every
+    trial's count from the `dem` view; require the source checks of step 2
+    and agreement with the written header and stage-array lengths."""
+    frame = vintage.pack.frame
+    trial_ids = frame[TRIAL_SOURCE_COLUMN].tolist()
+    trials, n = check_source_counts(trial_ids)
+    t_count, r_count = len(trials), len(trial_ids)
+    header = decoded.raw[:HEADER_BYTES]
+    if len(header) < HEADER_BYTES or header[:4] != MAGIC:
+        raise ExportFailure("counts", f"the written artifact does not start with {MAGIC!r}")
+    schema, header_records, header_trials = struct.unpack("<III", header[4:])
+    if schema != SCHEMA_VERSION:
+        raise ExportFailure("counts", f"the written header's schema version is {schema}")
+    if header_records != r_count:
+        raise ExportFailure(
+            "counts", f"the written header counts {header_records} records, the view {r_count}"
+        )
+    if header_trials != t_count:
+        raise ExportFailure(
+            "counts", f"the written header counts {header_trials} trials, the view {t_count}"
+        )
+    for name in STAGE_BLOCKS:
+        length = len(decoded.blocks[name])
+        if length != r_count:
+            raise ExportFailure(
+                "counts", f"the written {name} array holds {length} entries, not {r_count} records"
+            )
+    return StepThree(
+        frame=frame, trials=trials, stages_per_trial=n, records=r_count, decoded=decoded
+    )
+
+
+def rule_slip_order(s3: StepThree) -> None:
+    """Rule `slip-order`: slip strictly ascends within every trial, with no
+    ties."""
+    x = s3.decoded.blocks["slip"].astype(np.int64) / RESTORE_DIVISORS[SCALED_COLUMNS["slip"][0]]
+    per_trial = x.reshape(len(s3.trials), s3.stages_per_trial)
+    bad = np.argwhere(~(np.diff(per_trial, axis=1) > 0))
+    if bad.size:
+        t, k = (int(v) for v in bad[0])
+        raise ExportFailure(
+            "slip-order",
+            f"Trial {s3.trials[t]}: slip {float(per_trial[t, k + 1])!r} at stage {k + 1} "
+            f"does not exceed {float(per_trial[t, k])!r} at stage {k}",
+        )
+
+
+def rule_site_constancy(s3: StepThree) -> None:
+    """Rule `site-constancy`: the site conditions are constant within every
+    trial."""
+    grouped = s3.frame.groupby(TRIAL_SOURCE_COLUMN, sort=False)
+    for column, source in TRIAL_SOURCE_COLUMNS.items():
+        distinct = grouped[source].nunique(dropna=False)
+        varying = [trial for trial in s3.trials if distinct[trial] != 1]
+        if varying:
+            raise ExportFailure(
+                "site-constancy",
+                f"Trial {varying[0]} has {distinct[varying[0]]} distinct {source} values "
+                f"({column})",
+            )
+
+
+def rule_bitwise_restore(s3: StepThree, vintage: Vintage) -> None:
+    """Rule `bitwise-restore`: every value decodes back to its source — a
+    scaled or dictionary value, restored by the §3.1 restore rule, has the
+    `float.hex()` of the view value it was packed from; a class code or a
+    trial-table index maps back, through its dictionary, to the view's value
+    (class code 255 to null).
+
+    It compares every record where both the view and the artifact hold a
+    value; where only one of them does, rule `sentinel-collision` (a view
+    value stored as the null sentinel) or rule `null-counts` (a view null
+    stored as a value) fails."""
+    pack, frame, blocks = vintage.pack, s3.frame, s3.decoded.blocks
+    for name, (decimals, offset_steps) in SCALED_COLUMNS.items():
+        values, valid = _float_values(frame, STAGE_SOURCE_COLUMNS[name])
+        stored = blocks[name].astype(np.int64)
+        both = valid & (stored != UINT16_NULL)
+        restored = (stored[both] + offset_steps) / RESTORE_DIVISORS[decimals]
+        _require_restored(s3, name, values, both, restored)
+    dip_values, dip_valid = _float_values(frame, STAGE_SOURCE_COLUMNS["scarp_dip"])
+    dictionary = blocks["dip_dictionary"].astype(np.int64)
+    indices = blocks["scarp_dip"].astype(np.int64)
+    both = dip_valid & (indices != UINT16_NULL)
+    beyond = np.flatnonzero(both & (indices >= len(dictionary)))
+    if beyond.size:
+        i = int(beyond[0])
+        raise ExportFailure(
+            "bitwise-restore",
+            f"scarp_dip at {s3.where(i)}: index {indices[i]} is beyond the "
+            f"{len(dictionary)}-entry dip dictionary",
+        )
+    restored = dictionary[indices[both]] / RESTORE_DIVISORS[DIP_DECIMALS]
+    _require_restored(s3, "scarp_dip", dip_values, both, restored)
+
+    codes = blocks["scarp_class"].tolist()
+    view_classes = frame[STAGE_SOURCE_COLUMNS["scarp_class"]].tolist()
+    for i, (code, value) in enumerate(zip(codes, view_classes, strict=True)):
+        if code == UINT8_NULL or pd.isna(value):
+            continue
+        decoded = pack.scarp_classes[code] if code < len(pack.scarp_classes) else None
+        if decoded != value:
+            raise ExportFailure(
+                "bitwise-restore",
+                f"scarp_class at {s3.where(i)}: code {code} maps to {decoded!r}, "
+                f"the view holds {value!r}",
+            )
+
+    t_count, n = len(s3.trials), s3.stages_per_trial
+    cells = blocks["trial_table"]
+    if len(cells) != t_count * len(TRIAL_TABLE_COLUMNS):
+        raise ExportFailure(
+            "bitwise-restore",
+            f"the trial table holds {len(cells)} cells, not {t_count} trials x "
+            f"{len(TRIAL_TABLE_COLUMNS)} columns",
+        )
+    table = cells.reshape(t_count, len(TRIAL_TABLE_COLUMNS))
+    for j, column in enumerate(TRIAL_TABLE_COLUMNS):
+        dictionary_values = pack.trial_columns[column]
+        if column == "model_family":
+            sources: list[object] = [None] * t_count
+        else:
+            first = frame[TRIAL_SOURCE_COLUMNS[column]].iloc[np.arange(t_count) * n].tolist()
+            sources = [_trial_value(column, value) for value in first]
+        for t in range(t_count):
+            cell = int(table[t, j])
+            if cell >= len(dictionary_values):
+                raise ExportFailure(
+                    "bitwise-restore",
+                    f"trial table, Trial {s3.trials[t]}, {column}: index {cell} is beyond its "
+                    f"{len(dictionary_values)}-entry dictionary",
+                )
+            if column != "model_family" and dictionary_values[cell] != sources[t]:
+                raise ExportFailure(
+                    "bitwise-restore",
+                    f"trial table, Trial {s3.trials[t]}, {column}: index {cell} maps to "
+                    f"{dictionary_values[cell]!r}, the view holds {sources[t]!r}",
+                )
+
+
+def _require_restored(
+    s3: StepThree, name: str, values: np.ndarray, valid: np.ndarray, restored: np.ndarray
+) -> None:
+    source = values[valid]
+    differ = np.flatnonzero(_float_bits(restored) != _float_bits(source))
+    if differ.size:
+        k = int(differ[0])
+        i = int(np.flatnonzero(valid)[k])
+        raise ExportFailure(
+            "bitwise-restore",
+            f"{name} at {s3.where(i)}: restores to {float(restored[k]).hex()}, packed from "
+            f"{float(source[k]).hex()}",
+        )
+
+
+def _view_valid(frame: pd.DataFrame, name: str) -> np.ndarray:
+    """Where the `dem` view holds a value of a stage column."""
+    source = STAGE_SOURCE_COLUMNS[name]
+    if name == "scarp_class":
+        return frame[source].notna().to_numpy()
+    return _float_values(frame, source)[1]
+
+
+def _sentinel(name: str) -> int:
+    return UINT8_NULL if BLOCK_DTYPES[name] == "uint8" else UINT16_NULL
+
+
+def rule_sentinel_collision(s3: StepThree) -> None:
+    """Rule `sentinel-collision`: no valid stored value — a `scarp_dip`
+    dictionary index included — equals its column's null sentinel."""
+    for name in STAGE_BLOCKS:
+        valid = _view_valid(s3.frame, name)
+        hit = np.flatnonzero(valid & (s3.decoded.blocks[name] == _sentinel(name)))
+        if hit.size:
+            i = int(hit[0])
+            raise ExportFailure(
+                "sentinel-collision",
+                f"{name} at {s3.where(i)}: a valid value is stored as the null sentinel "
+                f"{_sentinel(name)}",
+            )
+
+
+def rule_null_counts(s3: StepThree) -> None:
+    """Rule `null-counts`: every column's null count equals the view's."""
+    for name in STAGE_BLOCKS:
+        decoded = int((s3.decoded.blocks[name] == _sentinel(name)).sum())
+        view = int((~_view_valid(s3.frame, name)).sum())
+        if decoded != view:
+            raise ExportFailure(
+                "null-counts", f"{name}: {decoded} nulls decoded, {view} in the view"
+            )
+
+
+def rule_unclassified(s3: StepThree) -> None:
+    """Rule `unclassified-has-no-valid-measurement`: every record whose
+    `scarp_class` is null has null `scarp_height`, `dzw`, and `scarp_dip`."""
+    unclassified = s3.decoded.blocks["scarp_class"] == UINT8_NULL
+    for name in UNCLASSIFIED_NULL_COLUMNS:
+        hit = np.flatnonzero(unclassified & (s3.decoded.blocks[name] != UINT16_NULL))
+        if hit.size:
+            i = int(hit[0])
+            raise ExportFailure(
+                "unclassified-has-no-valid-measurement",
+                f"{s3.where(i)} has a null scarp_class and a valid {name}",
+            )
+
+
+def rule_dictionary_order(s3: StepThree, vintage: Vintage) -> None:
+    """Rule `dictionary-order`: `scarp_classes`, each `trial_columns`
+    dictionary, and `arm_strength_states`, as the run holds them for the
+    manifest, are in their §3.2 orders; the `dip_dictionary` block decoded
+    from the written artifact is strictly ascending with every magnitude at
+    most 180,000; and the measured (`set`, `sediment_strength`) pair set
+    equals the nine-pair constant."""
+    pack = vintage.pack
+    if list(pack.scarp_classes) != list(SCARP_CLASSES):
+        raise ExportFailure(
+            "dictionary-order",
+            f"scarp_classes {pack.scarp_classes} are not config.SCARP_CLASSES "
+            f"{list(SCARP_CLASSES)}",
+        )
+    if list(pack.trial_columns) != list(TRIAL_TABLE_COLUMNS):
+        raise ExportFailure(
+            "dictionary-order",
+            f"trial_columns holds {list(pack.trial_columns)}, not {list(TRIAL_TABLE_COLUMNS)}",
+        )
+    for column, dictionary in pack.trial_columns.items():
+        if column == "model_family":
+            ordered = list(MODEL_FAMILIES)
+        elif column in INTEGER_TRIAL_COLUMNS:
+            if not all(isinstance(v, int) and not isinstance(v, bool) for v in dictionary):
+                raise ExportFailure(
+                    "dictionary-order", f"trial_columns.{column} holds a non-integer"
+                )
+            ordered = sorted(set(dictionary))  # type: ignore[type-var]
+        else:
+            if not all(isinstance(v, str) for v in dictionary):
+                raise ExportFailure(
+                    "dictionary-order", f"trial_columns.{column} holds a non-string"
+                )
+            ordered = sorted(set(dictionary))  # type: ignore[type-var]
+        if list(dictionary) != ordered:
+            raise ExportFailure(
+                "dictionary-order", f"trial_columns.{column} {dictionary} is not in order {ordered}"
+            )
+    rank = {pair: i for i, pair in enumerate(ARM_STRENGTH_STATES)}
+    states = [(s["set"], s["sediment_strength"]) for s in pack.arm_strength_states]
+    known = [p for p in states if p in rank]  # unknown pairs: the pair-set check below
+    if [rank[p] for p in known] != sorted({rank[p] for p in known}):
+        raise ExportFailure(
+            "dictionary-order",
+            f"arm_strength_states {states} are not in the display order of ARM_STRENGTH_STATES",
+        )
+    dips = s3.decoded.blocks["dip_dictionary"].astype(np.int64)
+    if dips.size and not (np.diff(dips) > 0).all():
+        k = int(np.flatnonzero(~(np.diff(dips) > 0))[0])
+        raise ExportFailure(
+            "dictionary-order",
+            f"dip_dictionary entry {k + 1} ({dips[k + 1]}) does not exceed entry {k} ({dips[k]})",
+        )
+    too_large = np.flatnonzero(np.abs(dips) > DIP_DICTIONARY_LIMIT)
+    if too_large.size:
+        k = int(too_large[0])
+        raise ExportFailure(
+            "dictionary-order",
+            f"dip_dictionary entry {k} ({dips[k]}) has a magnitude above {DIP_DICTIONARY_LIMIT}",
+        )
+    n = s3.stages_per_trial
+    first = s3.frame.iloc[np.arange(len(s3.trials)) * n]
+    measured = set(
+        zip(
+            first[TRIAL_SOURCE_COLUMNS["set"]].tolist(),
+            first[TRIAL_SOURCE_COLUMNS["sediment_strength"]].tolist(),
+            strict=True,
+        )
+    )
+    if measured != set(ARM_STRENGTH_STATES):
+        missing = sorted(set(ARM_STRENGTH_STATES) - measured)
+        extra = sorted(measured - set(ARM_STRENGTH_STATES))  # type: ignore[type-var]
+        raise ExportFailure(
+            "dictionary-order",
+            f"the measured set x sediment_strength pairs differ from ARM_STRENGTH_STATES: "
+            f"missing {missing}, unexpected {extra}",
+        )
+
+
+def rule_view_reread(ctx: RunContext, vintage: Vintage, con: duckdb.DuckDBPyConnection) -> None:
+    """Rule `view-reread`: the field and regression exports, re-read from
+    the written files, equal the rows the run-private views return — row for
+    row in the §3.4 and §3.5 orders, floats compared by `float.hex()`."""
+    field = read_json_file(ctx.out_dir / vintage.files["field_export"])
+    found = first_difference(field["rows"], field_export_rows(con), "field export rows")  # type: ignore[index]
+    if found:
+        raise ExportFailure("view-reread", f"{found} (file against the field_export view)")
+    regression = read_json_file(ctx.out_dir / vintage.files["regression_export"])
+    found = first_difference(
+        regression["coefficients"],  # type: ignore[index]
+        regression_coefficients(con),
+        "regression coefficients",
+    )
+    if found:
+        raise ExportFailure("view-reread", f"{found} (file against the dem_regression view)")
+
+
+def rule_coefficient_reach(ctx: RunContext, vintage: Vintage) -> None:
+    """Rule `coefficient-reach`: every regression row has `slope > 0`,
+    `intercept <= 0`, and `-intercept / slope <= slip_window_bounds.max` in
+    float64."""
+    regression = read_json_file(ctx.out_dir / vintage.files["regression_export"])
+    bound = float(vintage.pack.slip_window_bounds["max"])
+    for row in regression["coefficients"]:  # type: ignore[index]
+        dip, slope, intercept = row["fault_dip"], float(row["slope"]), float(row["intercept"])
+        if not slope > 0:
+            raise ExportFailure("coefficient-reach", f"fault_dip {dip}: slope {slope!r} is not > 0")
+        if not intercept <= 0:
+            raise ExportFailure(
+                "coefficient-reach", f"fault_dip {dip}: intercept {intercept!r} is not <= 0"
+            )
+        reach = -intercept / slope
+        if not reach <= bound:
+            raise ExportFailure(
+                "coefficient-reach",
+                f"fault_dip {dip}: -intercept / slope = {reach!r} exceeds "
+                f"slip_window_bounds.max {bound!r}",
+            )
+
+
+def _is_log_first_edge(value: int) -> bool:
+    """Whether a value is 100 · 2^i recording steps for an integer i >= 0."""
+    if value < LOG_FIRST_EDGE or value % LOG_FIRST_EDGE:
+        return False
+    octave = value // LOG_FIRST_EDGE
+    return octave & (octave - 1) == 0
+
+
+def rule_reference_invariants(ctx: RunContext, vintage: Vintage) -> None:
+    """Rule `reference-invariants` (§4.1 step 3) over the reference file,
+    gunzipped and parsed."""
+    rule = "reference-invariants"
+    references = read_json_file(ctx.out_dir / vintage.references_name)
+    if canonical_json(references) != canonical_json(vintage.references):
+        found = first_difference(references, json.loads(canonical_json(vintage.references)), "")
+        raise ExportFailure(
+            rule, f"the reference file differs from the generator's object at {found}"
+        )
+    offer_ratio = LOG_SCALE_OFFER_RATIOS[LOG_SCALE_MIN_DECADES]
+    reference_vintage = vintage.reference_vintage
+    for entry in references["scenarios"]:  # type: ignore[index]
+        sid = entry["id"]
+        matching = entry["counts"]["matching_records"]
+        valid_of: dict[str, int] = {}
+        for m in MEASUREMENTS:
+            counts = entry["counts"]["per_measurement"][m]
+            valid = counts["valid"]
+            valid_of[m] = valid
+            if valid + counts["excluded_null"] != matching:
+                raise ExportFailure(
+                    rule,
+                    f"{sid} {m}: valid {valid} + excluded_null {counts['excluded_null']} is not "
+                    f"matching_records {matching}",
+                )
+            for key in ("statistics", "percentiles", "histogram", "display"):
+                if (entry[key][m] is None) != (valid == 0):
+                    raise ExportFailure(
+                        rule,
+                        f"{sid} {key}.{m} is {'null' if entry[key][m] is None else 'not null'} "
+                        f"with valid {valid}",
+                    )
+            for key in ("statistics", "display"):
+                record = entry[key][m]
+                if record is not None and (record["sd"] is None) != (valid == 1):
+                    raise ExportFailure(
+                        rule,
+                        f"{sid} {key}.{m}.sd is {'null' if record['sd'] is None else 'not null'} "
+                        f"with valid {valid}",
+                    )
+            table = entry["histogram"][m]
+            if table is not None:
+                total = sum(sum(row) for row in table["counts"])
+                if total != valid:
+                    raise ExportFailure(
+                        rule, f"{sid} histogram.{m} counts sum to {total}, not valid {valid}"
+                    )
+        log = entry["histogram_log"]["dzw"]
+        offered = False
+        if valid_of["dzw"] and reference_vintage is not None:
+            table_ = reference_vintage.table
+            chosen = select(table_, entry["inputs"], reference_vintage.windows_for(entry["inputs"]))
+            positive = [s for s in measurement_values(table_, chosen, "dzw")[0] if s > 0]
+            offered = bool(positive) and max(positive) > offer_ratio * min(positive)
+        if (log is not None) != offered:
+            raise ExportFailure(
+                rule,
+                f"{sid} histogram_log.dzw is {'null' if log is None else 'not null'}, but the "
+                f"width panel {'offers' if offered else 'does not offer'} the logarithmic axis",
+            )
+        if log is not None:
+            total = sum(sum(row) for row in log["counts"]) + sum(log["below_counts"])
+            if total != valid_of["dzw"]:
+                raise ExportFailure(
+                    rule,
+                    f"{sid} histogram_log.dzw counts and below_counts sum to {total}, not valid "
+                    f"{valid_of['dzw']}",
+                )
+            if not _is_log_first_edge(log["first_edge"]):
+                raise ExportFailure(
+                    rule,
+                    f"{sid} histogram_log.dzw first_edge {log['first_edge']} is not 100 * 2^i",
+                )
+        selection = entry["selection"]
+        if matching <= IDENTITY_LIMIT:
+            if "identities" not in selection or len(selection["identities"]) != matching:
+                raise ExportFailure(
+                    rule,
+                    f"{sid} selection does not hold {matching} identities "
+                    f"(matching_records <= {IDENTITY_LIMIT})",
+                )
+        elif "count" not in selection or selection["count"] != matching:
+            raise ExportFailure(
+                rule,
+                f"{sid} selection does not hold a count of {matching} "
+                f"(matching_records > {IDENTITY_LIMIT})",
+            )
+
+
+def validate_step3(ctx: RunContext, vintage: Vintage, con: duckdb.DuckDBPyConnection) -> None:
+    """§4.1 step 3: decode the files just written with the in-memory decode
+    information, before any manifest exists, each rule printing its line."""
+    decoded = decode_written_artifact(
+        ctx.out_dir / vintage.files["scenario_artifact"], vintage.pack.blocks
+    )
+    s3 = rule_counts(vintage, decoded)
+    report_ok("counts")
+    rule_slip_order(s3)
+    report_ok("slip-order")
+    rule_site_constancy(s3)
+    report_ok("site-constancy")
+    rule_bitwise_restore(s3, vintage)
+    report_ok("bitwise-restore")
+    rule_sentinel_collision(s3)
+    report_ok("sentinel-collision")
+    rule_null_counts(s3)
+    report_ok("null-counts")
+    rule_unclassified(s3)
+    report_ok("unclassified-has-no-valid-measurement")
+    rule_dictionary_order(s3, vintage)
+    report_ok("dictionary-order")
+    rule_view_reread(ctx, vintage, con)
+    report_ok("view-reread")
+    rule_coefficient_reach(ctx, vintage)
+    report_ok("coefficient-reach")
+    rule_reference_invariants(ctx, vintage)
+    report_ok("reference-invariants")
+
+
+# --------------------------------------------------------------------------
+# Step 5: cross-check the manifest against the written files
+# --------------------------------------------------------------------------
+
+
+def _block_data_length(name: str, counts: dict[str, object], length: int) -> int | None:
+    """The data length §3.2 gives a block from the manifest's counts; None
+    for `dip_dictionary`, whose entry count no other figure fixes."""
+    records, trials = int(counts["records"]), int(counts["trials"])  # type: ignore[call-overload]
+    if name == "trial_table":
+        return trials * len(TRIAL_TABLE_COLUMNS)
+    if name == "dip_dictionary":
+        return None
+    return records * np.dtype(NUMPY_DTYPES[BLOCK_DTYPES[name]]).itemsize
+
+
+def rule_block_tiling(manifest: dict[str, object], raw: bytes) -> None:
+    """Rule `block-tiling`: the block offsets and lengths satisfy the §3.1
+    alignment rule against the artifact actually written — each block at
+    the next 4-byte boundary after its predecessor from offset 16, its
+    length the data length, the gap bytes zero, and the decompressed length
+    `align4(last offset + last length)`."""
+    blocks: dict = manifest["blocks"]  # type: ignore[assignment]
+    if set(blocks) != set(BLOCK_ORDER):
+        raise ExportFailure(
+            "block-tiling", f"blocks {sorted(blocks)} are not exactly {list(BLOCK_ORDER)}"
+        )
+    expected_offset = HEADER_BYTES
+    end = HEADER_BYTES
+    for name in BLOCK_ORDER:
+        offset, length = int(blocks[name]["offset"]), int(blocks[name]["length"])
+        if offset != expected_offset:
+            raise ExportFailure(
+                "block-tiling", f"{name} starts at {offset}, not at {expected_offset}"
+            )
+        if any(raw[end:offset]):
+            raise ExportFailure("block-tiling", f"a gap byte before {name} is not zero")
+        data_length = _block_data_length(name, manifest["counts"], length)  # type: ignore[arg-type]
+        itemsize = np.dtype(NUMPY_DTYPES[BLOCK_DTYPES[name]]).itemsize
+        if (data_length is not None and length != data_length) or length % itemsize:
+            raise ExportFailure(
+                "block-tiling",
+                f"{name} declares {length} bytes, not its data length "
+                f"{data_length if data_length is not None else f'(a multiple of {itemsize})'}",
+            )
+        if offset + length > len(raw):
+            raise ExportFailure(
+                "block-tiling",
+                f"{name} ends at {offset + length}, beyond the artifact's {len(raw)} bytes",
+            )
+        end = offset + length
+        expected_offset = align4(end)
+    if len(raw) != align4(end):
+        raise ExportFailure(
+            "block-tiling",
+            f"the decompressed artifact is {len(raw)} bytes, not align4({end}) = {align4(end)}",
+        )
+
+
+def _figure_difference(name: str, manifest_value: object, measured: object) -> None:
+    found = first_difference(manifest_value, measured, name)
+    if found:
+        raise ExportFailure("manifest-figures", f"{found} (manifest against the packed artifact)")
+
+
+def rule_manifest_figures(manifest: dict[str, object], raw: bytes, view_trials: list[str]) -> None:
+    """Rule `manifest-figures`: every data-derived manifest figure equals its
+    value re-measured from the packed artifact; `counts` passes
+    `check_counts`; and `trials` equals the `dem` view's distinct `Trial`
+    strings in ascending code-point order, exactly `counts.trials` of them."""
+    rule = "manifest-figures"
+    counts: dict = manifest["counts"]  # type: ignore[assignment]
+    try:
+        check_counts(counts["trials"], counts["stages_per_trial"], counts["records"])
+    except ValueError as exc:
+        raise ExportFailure(rule, f"counts: {exc}") from exc
+    blocks = {name: decode_block(raw, manifest["blocks"][name]) for name in BLOCK_ORDER}  # type: ignore[index]
+
+    # counts: the header's record and trial counts and the trial-major stride.
+    _, header_records, header_trials = struct.unpack("<III", raw[4:HEADER_BYTES])
+    measured_counts = {
+        "records": header_records,
+        "trials": header_trials,
+        "stages_per_trial": header_records // header_trials if header_trials else 0,
+    }
+    if header_trials and header_records % header_trials:
+        raise ExportFailure(
+            rule,
+            f"the header's {header_records} records are no whole number of stages for its "
+            f"{header_trials} trials",
+        )
+    _figure_difference("counts", counts, measured_counts)
+    t_count, n = int(counts["trials"]), int(counts["stages_per_trial"])
+
+    # columns: restored from the stored values by the §3.1 restore rule.
+    columns: dict[str, object] = {}
+    for name, (decimals, offset_steps) in SCALED_COLUMNS.items():
+        stored = blocks[name].astype(np.int64)
+        valid = stored != UINT16_NULL
+        values = np.full(stored.shape, np.nan)
+        values[valid] = (stored[valid] + offset_steps) / RESTORE_DIVISORS[decimals]
+        columns[name] = _scaled_column(decimals, offset_steps, values, valid, "scaled")
+    indices = blocks["scarp_dip"].astype(np.int64)
+    dictionary = blocks["dip_dictionary"].astype(np.int64)
+    dip_valid = indices != UINT16_NULL
+    if dip_valid.any() and int(indices[dip_valid].max()) >= len(dictionary):
+        raise ExportFailure(rule, "a scarp_dip index is beyond the dip dictionary")
+    dip_values = np.full(indices.shape, np.nan)
+    dip_values[dip_valid] = dictionary[indices[dip_valid]] / RESTORE_DIVISORS[DIP_DECIMALS]
+    columns["scarp_dip"] = _scaled_column(DIP_DECIMALS, 0, dip_values, dip_valid, "dict")
+    columns["scarp_class"] = {
+        "encoding": "code",
+        "decimals": None,
+        "offset_steps": None,
+        "scale": None,
+        "offset": None,
+        "physical_min": None,
+        "physical_max": None,
+        "recording_step": None,
+        "null_sentinel": UINT8_NULL,
+        "null_count": int((blocks["scarp_class"] == UINT8_NULL).sum()),
+    }
+    _figure_difference("columns", manifest["columns"], columns)
+
+    # trial_columns and arm_strength_states: the trial table's cells mapped
+    # through the manifest's dictionaries.
+    dictionaries: dict = manifest["trial_columns"]  # type: ignore[assignment]
+    cells = blocks["trial_table"]
+    if len(cells) != t_count * len(TRIAL_TABLE_COLUMNS):
+        raise ExportFailure(rule, f"the trial table holds {len(cells)} cells, not {t_count} x 7")
+    table = cells.reshape(t_count, len(TRIAL_TABLE_COLUMNS))
+    decoded_values: dict[str, list[object]] = {}
+    for j, column in enumerate(TRIAL_TABLE_COLUMNS):
+        dictionary_values = dictionaries.get(column, [])
+        used = [int(c) for c in table[:, j]]
+        if used and max(used) >= len(dictionary_values):
+            raise ExportFailure(
+                rule, f"a trial-table {column} index is beyond its manifest dictionary"
+            )
+        decoded_values[column] = [dictionary_values[c] for c in used]
+    trial_columns = {
+        column: sorted(set(values))  # type: ignore[type-var]
+        for column, values in decoded_values.items()
+    }
+    _figure_difference("trial_columns", dictionaries, trial_columns)
+    rank = {pair: i for i, pair in enumerate(ARM_STRENGTH_STATES)}
+    pairs = set(zip(decoded_values["set"], decoded_values["sediment_strength"], strict=True))
+    unknown = [pair for pair in pairs if pair not in rank]
+    if unknown:
+        raise ExportFailure(rule, f"arm_strength_states: {unknown} are outside ARM_STRENGTH_STATES")
+    states = [
+        {"set": arm, "sediment_strength": strength}
+        for arm, strength in sorted(pairs, key=rank.__getitem__)  # type: ignore[arg-type]
+    ]
+    _figure_difference("arm_strength_states", manifest["arm_strength_states"], states)
+
+    # stage_spacing: the §3.2 arithmetic over the decoded slip block.
+    slip = blocks["slip"]
+    try:
+        spacing = stage_spacing(slip, t_count, n)
+    except ValueError as exc:
+        raise ExportFailure(rule, f"stage_spacing: {exc}") from exc
+    _figure_difference("stage_spacing", manifest["stage_spacing"], spacing)
+
+    slip_steps = slip.astype(np.int64)
+    bounds = {
+        "min": 0.0,
+        "max": int(slip_steps.max()) / RESTORE_DIVISORS[SCALED_COLUMNS["slip"][0]],
+        "recording_step": SLIP_RECORDING_STEP,
+    }
+    _figure_difference("slip_window_bounds", manifest["slip_window_bounds"], bounds)
+
+    trials = manifest["trials"]
+    if trials != view_trials or len(trials) != t_count:  # type: ignore[arg-type]
+        raise ExportFailure(
+            rule,
+            f"trials ({len(trials)}) are not the dem view's {len(view_trials)} distinct Trial "  # type: ignore[arg-type]
+            f"strings in ascending code-point order, counts.trials {t_count} of them",
+        )
+
+
+def rule_checksums(manifest: dict[str, object], out_dir: Path) -> None:
+    """Rule `checksums`: every manifest checksum, one per file `files`
+    names, equals the SHA-256 recomputed from the written file."""
+    checksums: dict = manifest["checksums"]  # type: ignore[assignment]
+    named = set(manifest["files"].values())  # type: ignore[attr-defined]
+    if set(checksums) != named:
+        raise ExportFailure(
+            "checksums",
+            f"checksums names {sorted(checksums)}, not exactly the files {sorted(named)}",
+        )
+    for name, sha in sorted(checksums.items()):
+        path = out_dir / name
+        actual = sha256_hex(path.read_bytes()) if path.is_file() else "no written file"
+        if actual != sha:
+            raise ExportFailure(
+                "checksums", f"{name}: the manifest records {sha}, written {actual}"
+            )
+
+
+def rule_format_spec(documents: dict[str, tuple[str, object]]) -> None:
+    """Rule `format-spec`: every JSON file of the vintage, and the pointer
+    manifest, matches its closed spec. ``documents`` maps a label to its
+    role and parsed content."""
+    for label, (role, document) in documents.items():
+        try:
+            FORMAT_SPECS[role].check(document, label)
+        except SpecError as exc:
+            raise ExportFailure("format-spec", str(exc)) from exc
+
+
+def rule_dd10_names(documents: dict[str, tuple[str, object]]) -> None:
+    """Rule `dd10-names`: every name denoting a pipeline column is one of
+    the thirteen names of the DD-10 closure note."""
+    for label, (role, document) in documents.items():
+        for where, name in FORMAT_SPECS[role].column_names(document, label):
+            if name not in DD10_COLUMN_NAMES:
+                raise ExportFailure(
+                    "dd10-names",
+                    f"{where} {name!r} denotes a pipeline column but is not one of the DD-10 names",
+                )
+
+
+def rule_envelope_agreement(manifest: dict[str, object], envelopes: dict[str, object]) -> None:
+    """Rule `envelope-agreement`: every JSON envelope's `export_version`,
+    `export_date`, and `pipeline_version` equal the artifact manifest's, and
+    the manifest's `reference_results_version` and the reference file's
+    `reference_version` both equal `export_version`."""
+    for label, document in envelopes.items():
+        for key in ("export_version", "export_date", "pipeline_version"):
+            if document[key] != manifest[key]:  # type: ignore[index]
+                raise ExportFailure(
+                    "envelope-agreement",
+                    f"{label} {key} {document[key]!r} is not the manifest's {manifest[key]!r}",  # type: ignore[index]
+                )
+    version = manifest["export_version"]
+    if manifest["reference_results_version"] != version:
+        raise ExportFailure(
+            "envelope-agreement",
+            f"reference_results_version {manifest['reference_results_version']!r} is not "
+            f"export_version {version!r}",
+        )
+    references = envelopes["reference results"]
+    if references["reference_version"] != version:  # type: ignore[index]
+        raise ExportFailure(
+            "envelope-agreement",
+            f"reference_version {references['reference_version']!r} is not export_version "  # type: ignore[index]
+            f"{version!r}",
+        )
+
+
+#: The members of `provenance` (§3.2).
+PROVENANCE_MEMBERS: tuple[str, ...] = (
+    "source_commit",
+    "source_tree_clean",
+    "inputs",
+    "environment",
+    "compression",
+)
+
+
+def rule_provenance(ctx: RunContext, manifest: dict[str, object]) -> None:
+    """Rule `provenance`: the object has exactly the §3.2 members;
+    `source_commit` is 40 lowercase hex digits and still `git rev-parse
+    HEAD`; a recorded clean tree is still clean; `inputs` is sorted by path
+    with no path repeated, holds exactly the nine data paths of step 1, and
+    every input re-hashes to its recorded `sha256` and `bytes`."""
+    rule = "provenance"
+    provenance = manifest["provenance"]
+    if not isinstance(provenance, dict) or set(provenance) != set(PROVENANCE_MEMBERS):
+        members = sorted(provenance) if isinstance(provenance, dict) else provenance
+        raise ExportFailure(rule, f"members {members} are not {sorted(PROVENANCE_MEMBERS)}")
+    commit = provenance["source_commit"]
+    if not isinstance(commit, str) or re.fullmatch(r"[0-9a-f]{40}", commit) is None:
+        raise ExportFailure(rule, f"source_commit {commit!r} is not 40 lowercase hex digits")
+    head = source_commit(ctx.root)
+    if commit != head:
+        raise ExportFailure(rule, f"source_commit {commit} is not HEAD {head}")
+    if provenance["source_tree_clean"] is True and not tree_is_clean(ctx.root):
+        raise ExportFailure(
+            rule, "source_tree_clean is true, but the clean-tree command now prints output"
+        )
+    paths = [str(record["path"]) for record in provenance["inputs"]]
+    if paths != sorted(paths) or len(set(paths)) != len(paths):
+        raise ExportFailure(rule, f"inputs are not sorted by path without repeats: {paths}")
+    expected = set(ctx.input_paths)
+    if set(paths) != expected:
+        raise ExportFailure(
+            rule,
+            f"inputs miss {sorted(expected - set(paths))} and add {sorted(set(paths) - expected)}",
+        )
+    for record in provenance["inputs"]:
+        sha, size = hash_file(ctx.root / record["path"])
+        if sha != record["sha256"] or size != record["bytes"]:
+            raise ExportFailure(
+                rule,
+                f"{record['path']} now has SHA-256 {sha} and {size} bytes, recorded "
+                f"{record['sha256']} and {record['bytes']} bytes",
+            )
+
+
+def validate_step5(ctx: RunContext, vintage: Vintage) -> None:
+    """§4.1 step 5: cross-check the manifest, as written, against the
+    written files, each rule printing its line."""
+    out_dir = ctx.out_dir
+    manifest: dict = read_json_file(out_dir / str(vintage.manifest_name))  # type: ignore[assignment]
+    raw = gzip.decompress((out_dir / vintage.files["scenario_artifact"]).read_bytes())
+    rule_block_tiling(manifest, raw)
+    report_ok("block-tiling")
+    view_trials = sorted(set(vintage.pack.frame[TRIAL_SOURCE_COLUMN].tolist()))
+    rule_manifest_figures(manifest, raw, view_trials)
+    report_ok("manifest-figures")
+    rule_checksums(manifest, out_dir)
+    report_ok("checksums")
+    documents: dict[str, tuple[str, object]] = {"artifact manifest": ("manifest", manifest)}
+    labels = {
+        "field_export": "field export",
+        "regression_export": "regression export",
+        "media_index": "media index",
+    }
+    for key, label in labels.items():
+        if key in manifest["files"]:
+            documents[label] = (key, read_json_file(out_dir / manifest["files"][key]))
+    documents["reference results"] = (
+        "reference_results",
+        read_json_file(out_dir / vintage.references_name),
+    )
+    rule_format_spec({**documents, "pointer manifest": ("pointer", checked_pointer(ctx, vintage))})
+    report_ok("format-spec")
+    rule_dd10_names(documents)
+    report_ok("dd10-names")
+    rule_envelope_agreement(
+        manifest, {label: doc for label, (role, doc) in documents.items() if role != "manifest"}
+    )
+    report_ok("envelope-agreement")
+    rule_provenance(ctx, manifest)
+    report_ok("provenance")
+
+
+# --------------------------------------------------------------------------
+# Step 6: the pointer rules
+# --------------------------------------------------------------------------
+
+
+def rule_pointer_exact(pointer: dict[str, object], vintage: Vintage, out_dir: Path) -> None:
+    """Rule `pointer-exact`: the pointer lists precisely the artifact
+    manifest, every file it names, the reference-results file, and the terms
+    file — each with the SHA-256 of the written file, equal to the manifest's
+    checksum wherever the manifest names the file; its `data_tag` and
+    `export_version` equal the manifest's `export_version`, its
+    `export_date` the manifest's, and its `provenance` deep-equals the
+    manifest's. Every file that differs is named."""
+    manifest: dict = vintage.manifest  # type: ignore[assignment]
+    expected = {
+        str(vintage.manifest_name),
+        *manifest["files"].values(),
+        vintage.references_name,
+        str(vintage.terms_name),
+    }
+    listed: dict = pointer["files"]  # type: ignore[assignment]
+    problems: list[str] = []
+    for name in sorted(set(listed) | expected):
+        if name not in expected:
+            problems.append(f"{name}: in the pointer, not written by this run")
+            continue
+        path = out_dir / name
+        written = sha256_hex(path.read_bytes()) if path.is_file() else None
+        if name not in listed:
+            problems.append(f"{name}: written by this run, not in the pointer")
+        elif listed[name] != written:
+            problems.append(f"{name}: the pointer records {listed[name]}, written {written}")
+        elif name in manifest["checksums"] and listed[name] != manifest["checksums"][name]:
+            problems.append(f"{name}: the pointer's SHA-256 is not the manifest's checksum")
+    for key in ("data_tag", "export_version"):
+        if pointer[key] != manifest["export_version"]:
+            problems.append(f"{key} {pointer[key]!r} is not the manifest's export_version")
+    if pointer["export_date"] != manifest["export_date"]:
+        problems.append(f"export_date {pointer['export_date']!r} is not the manifest's")
+    if canonical_json(pointer["provenance"]) != canonical_json(manifest["provenance"]):
+        found = first_difference(pointer["provenance"], manifest["provenance"], "provenance")
+        problems.append(f"provenance differs from the manifest's: {found}")
+    if problems:
+        raise ExportFailure("pointer-exact", "\n".join(problems))
+
+
+#: The full-name pattern of each role (§4.1 step 2).
+ROLE_NAME_PATTERNS: dict[str, re.Pattern[str]] = {
+    role: re.compile(re.escape(prefix) + "([0-9a-f]{12})" + re.escape(suffix))
+    for role, (prefix, suffix) in ROLE_PATTERNS.items()
+}
+
+
+def rule_file_names(pointer: dict[str, object]) -> None:
+    """Rule `file-names`: every pointer name matches its role's step-2
+    pattern with `<h12>` the first 12 digits of its SHA-256, and no name
+    ends in a Markdown suffix."""
+    for name, sha in sorted(pointer["files"].items()):  # type: ignore[attr-defined]
+        if name.endswith(MARKDOWN_SUFFIXES):
+            raise ExportFailure("file-names", f"{name} ends in a Markdown suffix")
+        matches = [p.fullmatch(name) for p in ROLE_NAME_PATTERNS.values()]
+        match = next((m for m in matches if m is not None), None)
+        if match is None:
+            raise ExportFailure("file-names", f"{name} matches no vintage file pattern")
+        if not isinstance(sha, str) or match.group(1) != sha[:12]:
+            raise ExportFailure(
+                "file-names", f"{name}: <h12> {match.group(1)} is not the start of {sha}"
+            )
+
+
+def check_pointer(ctx: RunContext, vintage: Vintage, pointer: dict[str, object]) -> None:
+    """§4.1 step 6's rules, before a pointer is written — or, in a
+    `--reproduce` run, against the pointer it was given."""
+    rule_pointer_exact(pointer, vintage, ctx.out_dir)
+    report_ok("pointer-exact")
+    rule_file_names(pointer)
+    report_ok("file-names")
+
+
+# --------------------------------------------------------------------------
+# The report and the run
+# --------------------------------------------------------------------------
 
 
 def print_source_lines(commit: str, clean: bool) -> None:
@@ -2188,9 +3965,13 @@ def print_closing_report(out_dir: Path, vintage: Vintage) -> None:
 
 
 def export_vintage(ctx: RunContext) -> Vintage:
-    """Steps 2 onward of §4.1."""
-    vintage = write_data_files(ctx)
+    """Steps 2 to 5 of §4.1: the data files, the step-3 rules, the artifact
+    manifest and the terms file, and the step-5 rules."""
+    with run_private_views(ctx.root) as con:
+        vintage = write_data_files(ctx, con)
+        validate_step3(ctx, vintage, con)
     write_manifest_and_terms(ctx, vintage)
+    validate_step5(ctx, vintage)
     return vintage
 
 
@@ -2200,9 +3981,13 @@ def run(root: Path, data_tag: str) -> None:
     commit = source_commit(root)
     clean = tree_is_clean(root)
     print_source_lines(commit, clean)
-    paths = discover_inputs(root)
     check_data_tag(data_tag)
+    report_ok("data-tag")
+    check_retained_copy(root, data_tag)
+    report_ok("retained-copy")
+    paths = discover_inputs(root)
     check_inputs_present(root, data_tag, paths)
+    report_ok("inputs-present")
     out_dir = root / DIST_APP_DIR / data_tag
     reset_dir(out_dir)
     provenance = build_provenance(commit, clean, hash_inputs(root, paths))
@@ -2212,9 +3997,12 @@ def run(root: Path, data_tag: str) -> None:
         export_date=export_date,
         provenance=provenance,
         out_dir=out_dir,
+        input_paths=paths,
     )
     vintage = export_vintage(ctx)
-    write_pointer(root, build_pointer(ctx, vintage))
+    pointer = build_pointer(ctx, vintage)
+    check_pointer(ctx, vintage, pointer)
+    write_pointer(root, pointer)
     print_closing_report(out_dir, vintage)
 
 
@@ -2308,34 +4096,20 @@ def check_reproducible(
         raise ExportFailure("provenance", "\n".join(problems))
 
 
-def compare_with_pointer(written: dict[str, str], recorded: dict[str, str]) -> None:
-    """Every output file's SHA-256 against the pointer's, naming every
-    file that differs."""
-    problems = [
-        f"{name}: in the pointer, not reproduced"
-        for name, sha in sorted(recorded.items())
-        if written.get(name) != sha
-    ]
-    problems += [
-        f"{name}: reproduced, not in the pointer"
-        for name, sha in sorted(written.items())
-        if recorded.get(name) != sha
-    ]
-    if problems:
-        raise ExportFailure("pointer-exact", "\n".join(problems))
-
-
 def reproduce(root: Path, pointer_path: Path, allow_drift: bool) -> None:
     """Regenerate a vintage from its pointer into
-    `dist/app/<data-tag>.reproduced/`, writing no pointer (§4.3)."""
+    `dist/app/<data-tag>.reproduced/`, writing no pointer (§4.3): every rule
+    of §4.1 but `retained-copy`, step 6's rules against the given pointer."""
     pointer = json.loads(pointer_path.read_text(encoding="utf-8"))
     data_tag = str(pointer["data_tag"])
     commit = source_commit(root)
     clean = tree_is_clean(root)
     print_source_lines(commit, clean)
-    paths, flatfile = recorded_inputs(pointer)
     check_data_tag(data_tag)
+    report_ok("data-tag")
+    paths, flatfile = recorded_inputs(pointer)
     check_inputs_present(root, data_tag, paths, flatfile=flatfile)
+    report_ok("inputs-present")
     check_reproducible(root, pointer, commit, clean, allow_drift)
     provenance = dict(pointer["provenance"])
     if allow_drift:
@@ -2348,9 +4122,11 @@ def reproduce(root: Path, pointer_path: Path, allow_drift: bool) -> None:
         export_date=str(pointer["export_date"]),
         provenance=provenance,
         out_dir=out_dir,
+        input_paths=paths,
+        given_pointer=pointer,
     )
     vintage = export_vintage(ctx)
-    compare_with_pointer(vintage.written, pointer["files"])
+    check_pointer(ctx, vintage, pointer)
     print_closing_report(out_dir, vintage)
 
 
