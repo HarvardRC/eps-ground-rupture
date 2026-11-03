@@ -155,8 +155,6 @@ exclude_docs: |
 # fails every build whose output crosses the boundary.
 draft_docs: |
   media/dev/
-  scenario.md
-  assets/scenario/
 not_in_nav: |
   scenario.md
 hooks:
