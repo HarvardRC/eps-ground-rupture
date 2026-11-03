@@ -286,10 +286,11 @@ function compareSelection(
     if (at >= 0) {
       const app = at < indices.length ? identityOf(vintage, n, indices[at]) : null;
       const ref = at < expected.length ? expected[at] : null;
-      cmp.exact(
+      cmp.rule(
         `${path}.identities`,
         new Text(`${indices.length} identities, [${at}] ${JSON.stringify(app)}`),
         new Text(`${expected.length} identities, [${at}] ${JSON.stringify(ref)}`),
+        'exact',
       );
     }
     return;
@@ -653,6 +654,8 @@ function goldenScenarios(run: Run, summaries: string[]): void {
       cmp.rule('inputs', new Text(`rejected: ${e instanceof Error ? e.message : String(e)}`), entry.inputs, 'inputs-roundtrip');
       report.all(cmp.differences);
       summaries.push(`summary: ${entry.id}: not replayed, inputs rejected`);
+      // GS-0 not replayed: nothing was injected, so every injected difference is missing.
+      if (entry.id === 'GS-0') report.all(selfCheck([]).missing.map((d) => selfCheckDifference(d, 'missing')));
       continue;
     }
     const roundTrip: unknown = JSON.parse(serializeScenario(scenario, vintage.manifest));
