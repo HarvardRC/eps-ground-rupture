@@ -1541,6 +1541,52 @@ are recorded at the end of
   residual case needs no design change: only the owner starts manual
   runs, and does not start one on another branch while a deploy is
   pending.
+- **Playwright pin raised before T-59 and T-60.** For the open item
+  of the npm audit decision above,
+  [DDD §2](ddd.md#2-repository-structure-naming-and-toolchain) now
+  pins `@playwright/test` and `playwright-core` at 1.64.1 instead of
+  1.47.2, and `subprojects/webapp/package.json` and
+  `package-lock.json` change with it; `esbuild` 0.24.0 and its
+  accepted advisory are unchanged. 1.64.1 is the newest release
+  (2026-10-14). GHSA-7mvr-c777-76hp is the only advisory that the
+  GitHub advisory database lists for `playwright`, `playwright-core`,
+  or `@playwright/test`, and it does not affect 1.55.1 or later. The
+  newest release pins the newest browser build, Chrome for Testing
+  156.0.8078.4, where 1.55.1, released 2025-09-23, pins Chromium
+  140.0.7339.186, older than the twelve-month window of
+  [PDD §9.2 — Browser and mobile baseline (D-16, Proposed)](pdd.md#92-browser-and-mobile-baseline-d-16-proposed)
+  for a release from late September 2026 on. 1.64.1 also fixes a
+  1.64.0 regression in which Chromium 155 and later abort a
+  preflighted cross-origin redirect whenever a route is registered.
+  It requires Node.js 20 or later, which the 22.12.0 runtime meets,
+  and the breaking changes that the release notes of 1.48 to 1.64
+  list touch no API or setting that the DDD names. A trial on
+  2026-11-03, in a worktree of `dev-v.0.4.x`: `npmInstall` under the
+  pinned runtime changed only the three Playwright packages in the
+  lockfile and dropped `fsevents`, which `playwright` 1.64.1 no longer
+  lists; `npm ls` showed one `playwright-core`, 1.64.1, deduplicated
+  under `@axe-core/playwright` and `playwright`;
+  `./gradlew :subprojects:webapp:check` passed, `webappTest` with 376
+  tests and no failure; a scratch spec calling
+  `new AxeBuilder({ page })` passed the type check; `playwright install
+  chromium` into a scratch browser cache downloaded Chrome for Testing
+  and Chrome Headless Shell 156.0.8078.4; a headless launch ran
+  axe-core 4.10.3 on a test page; and
+  `Network.emulateNetworkConditions` of
+  [DDD §7.6](ddd.md#76-performance-and-compatibility-measurements),
+  which the protocol now marks deprecated in favor of
+  `Network.emulateNetworkConditionsByRule`, still throttled a
+  2,500,000-byte download to 2,054 ms at 1,250,000 bytes/s. `npm audit`
+  now reports only the `esbuild` advisory. Playwright has had a
+  per-project `workers` since 1.52; the `measure` project keeps
+  `--workers=1` on every invocation, and
+  [DDD §7.5](ddd.md#75-browser-test-lane) and the body of
+  [T-60](ip.md#t-60--browser-test-lane) (Browser test lane) no longer
+  say that Playwright lacks it — an erratum that adds no
+  requirement. The body of
+  [T-01](ip.md#t-01--gradle-webapp-subproject) (Gradle webapp
+  subproject) keeps 1.47.2, the pins it installed and checked for its
+  Done record; DDD §2 governs the pins from this revision.
 
 ## Display-preference scope correction (2026-11-03)
 
