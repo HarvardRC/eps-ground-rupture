@@ -1480,13 +1480,16 @@ are recorded at the end of
   by `D`, instead of the typed-array numeric sort of the restored
   values, as
   [DDD §5.4 — Statistics](ddd.md#54-statistics) (Gather) now states.
-  The output is bit-identical. The spot timing of
+  The output is bit-identical. In the spot timing of
   [T-37](ip.md#t-37--early-feasibility-diagnostic) (Early feasibility
   diagnostic) on [GS-0](pdd.md#102-golden-scenarios) (Empty scenario
-  (no active slip window), default population), run alternately
-  before and after the change on the same loaded machine, put the
-  median selection-and-statistics interval at 76–83 ms, against
-  185–200 ms before.
+  (no active slip window), default population), a diagnostic and never
+  acceptance evidence, four runs of each build alternated on one
+  heavily loaded machine, where decode and query took about twice
+  their lighter-load times; the median selection-and-statistics
+  interval was 76–83 ms after the change against 185–200 ms before,
+  2.4–2.5 times shorter in each pair. At the lighter load, earlier,
+  the build before the change had a median of 92–94 ms.
 
 ## References
 
