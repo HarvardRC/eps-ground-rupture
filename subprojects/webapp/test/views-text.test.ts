@@ -13,6 +13,10 @@ import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
 import { displayRound } from '../src/views/format';
+import * as config from '../src/config';
+import type { Stats } from '../src/stats/stats';
+import { formatCount } from '../src/views/format';
+import { chartSummary } from '../src/views/summary';
 
 /** The §7.3 display-rounding vectors, in that order: `[value, decimals, expected]`. */
 const DISPLAY_ROUNDING_VECTORS: readonly (readonly [number, number, string])[] = [
@@ -44,4 +48,37 @@ describe('displayRound', () => {
       assert.equal(displayRound(value, decimals), expected);
     });
   }
+});
+
+// --------------------------------------------------------------------
+// chartSummary (T-41): the caption sentence's N is `formatCount(counts.valid)`.
+// --------------------------------------------------------------------
+
+describe('chartSummary', () => {
+  const stats: Stats = { median: 1.235, p16: 0.5, p84: 2.004, min: 0.1, max: 4, mean: 1.3, sd: 0.7 };
+
+  test('prints N as formatCount(counts.valid) and the statistics as quantities', () => {
+    assert.equal(
+      chartSummary(stats, { valid: 1234, excludedNull: 7 }, 'scarp_height', config),
+      `Scarp height (m): ${formatCount(1234)} valid measurements, median 1.24 m, 16th–84th percentile range 0.50 m to 2.00 m.`,
+    );
+    assert.equal(
+      chartSummary(stats, { valid: 30, excludedNull: 0 }, 'scarp_dip', config),
+      'Scarp dip (°): 30 valid measurements, median 1°, 16th–84th percentile range 1° to 2°.',
+    );
+  });
+
+  test('is unchanged when only counts.excludedNull changes', () => {
+    assert.equal(
+      chartSummary(stats, { valid: 1234, excludedNull: 0 }, 'dzw', config),
+      chartSummary(stats, { valid: 1234, excludedNull: 99 }, 'dzw', config),
+    );
+  });
+
+  test('changes when counts.valid changes', () => {
+    assert.notEqual(
+      chartSummary(stats, { valid: 1234, excludedNull: 0 }, 'dzw', config),
+      chartSummary(stats, { valid: 1235, excludedNull: 0 }, 'dzw', config),
+    );
+  });
 });

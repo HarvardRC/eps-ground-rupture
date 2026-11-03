@@ -117,5 +117,264 @@
     "part": 0,
     "text": "Your window includes very small slip values, where automated measurements can be less reliable. The research group is reviewing measurement reliability at low slip; treat results near zero slip with extra caution.",
     "slots": []
+  },
+  {
+    "key": "pdd4.1.cumulativeAccuracy",
+    "source": "docs/app/pdd.md#41-measurement-views-fr-o1",
+    "part": 0,
+    "text": "The curve may be simplified for display. Simplification changes cumulative percentages by less than 0.2 percentage points. Statistics and percentile read-offs use all matching valid measurements.",
+    "slots": []
+  },
+  {
+    "key": "pdd5.11.scarpHeightLabel",
+    "source": "docs/app/pdd.md#511-labels-units-and-glossary-links-fr-g3-cr-3-cr-7",
+    "part": 0,
+    "text": "Scarp height (m)",
+    "slots": []
+  },
+  {
+    "key": "pdd5.11.dzwLabel",
+    "source": "docs/app/pdd.md#511-labels-units-and-glossary-links-fr-g3-cr-3-cr-7",
+    "part": 1,
+    "text": "Deformation-zone width (m)",
+    "slots": []
+  },
+  {
+    "key": "pdd5.11.scarpDipLabel",
+    "source": "docs/app/pdd.md#511-labels-units-and-glossary-links-fr-g3-cr-3-cr-7",
+    "part": 2,
+    "text": "Scarp dip (°)",
+    "slots": []
+  },
+  {
+    "key": "ddd5.8.nLine",
+    "source": "docs/app/ddd.md#58-view-layer",
+    "part": 2,
+    "text": "N = {N} valid measurements",
+    "slots": ["N"]
+  },
+  {
+    "key": "ddd5.8.viewHistogram",
+    "source": "docs/app/ddd.md#58-view-layer",
+    "part": 3,
+    "text": "Histogram",
+    "slots": []
+  },
+  {
+    "key": "ddd5.8.viewCumulative",
+    "source": "docs/app/ddd.md#58-view-layer",
+    "part": 4,
+    "text": "Cumulative",
+    "slots": []
+  },
+  {
+    "key": "ddd5.8.viewLegend",
+    "source": "docs/app/ddd.md#58-view-layer",
+    "part": 5,
+    "text": "Chart view",
+    "slots": []
+  },
+  {
+    "key": "ddd5.8.logScaleLabel",
+    "source": "docs/app/ddd.md#58-view-layer",
+    "part": 6,
+    "text": "Logarithmic scale",
+    "slots": []
+  },
+  {
+    "key": "ddd5.8.chartDataLabel",
+    "source": "docs/app/ddd.md#58-view-layer",
+    "part": 7,
+    "text": "Chart data",
+    "slots": []
+  },
+  {
+    "key": "ddd5.11.histogramLabel",
+    "source": "docs/app/ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle",
+    "part": 4,
+    "text": "{label}: histogram of {N} valid measurements",
+    "slots": ["label", "N"]
+  },
+  {
+    "key": "ddd5.11.stackedByType",
+    "source": "docs/app/ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle",
+    "part": 5,
+    "text": ", stacked by scarp type",
+    "slots": []
+  },
+  {
+    "key": "ddd5.11.stackedByFamily",
+    "source": "docs/app/ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle",
+    "part": 6,
+    "text": ", stacked by scarp family",
+    "slots": []
+  },
+  {
+    "key": "ddd5.11.logAxisClause",
+    "source": "docs/app/ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle",
+    "part": 7,
+    "text": ", logarithmic value axis",
+    "slots": []
+  },
+  {
+    "key": "ddd5.11.cumulativeLabel",
+    "source": "docs/app/ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle",
+    "part": 8,
+    "text": "{label}: cumulative distribution of {N} valid measurements",
+    "slots": ["label", "N"]
+  },
+  {
+    "key": "ddd5.11.fieldMarkedClause",
+    "source": "docs/app/ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle",
+    "part": 9,
+    "text": ", with field measurements marked",
+    "slots": []
+  },
+  {
+    "key": "ddd5.11.chartCaption",
+    "source": "docs/app/ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle",
+    "part": 10,
+    "text": "{label}: {N} valid measurements, median {median}, 16th–84th percentile range {p16} to {p84}.",
+    "slots": ["label", "N", "median", "p16", "p84"]
+  },
+  {
+    "key": "ddd5.11.binTableCaption",
+    "source": "docs/app/ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle",
+    "part": 11,
+    "text": "{label}: valid measurements per bin, by scarp type",
+    "slots": ["label"]
+  },
+  {
+    "key": "ddd5.11.binTableCaptionFamily",
+    "source": "docs/app/ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle",
+    "part": 12,
+    "text": "{label}: valid measurements per bin, by scarp family",
+    "slots": ["label"]
+  },
+  {
+    "key": "ddd5.11.binTableTotal",
+    "source": "docs/app/ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle",
+    "part": 13,
+    "text": "Total",
+    "slots": []
+  },
+  {
+    "key": "ddd5.11.binRowHeader",
+    "source": "docs/app/ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle",
+    "part": 14,
+    "text": "{lo}–{hi}",
+    "slots": ["lo", "hi"]
+  },
+  {
+    "key": "ddd5.11.fieldTableCaption",
+    "source": "docs/app/ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle",
+    "part": 15,
+    "text": "{label}: field measurements marked on the chart",
+    "slots": ["label"]
+  },
+  {
+    "key": "ddd5.11.fieldSourceColumn",
+    "source": "docs/app/ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle",
+    "part": 16,
+    "text": "Source and measure",
+    "slots": []
+  },
+  {
+    "key": "ddd5.11.fieldEventColumn",
+    "source": "docs/app/ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle",
+    "part": 17,
+    "text": "Event",
+    "slots": []
+  },
+  {
+    "key": "ddd5.11.fieldEvent",
+    "source": "docs/app/ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle",
+    "part": 18,
+    "text": "{eq_name} (M {magnitude})",
+    "slots": ["eq_name", "magnitude"]
+  },
+  {
+    "key": "ddd5.11.fieldValueColumn",
+    "source": "docs/app/ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle",
+    "part": 19,
+    "text": "Value ({unit})",
+    "slots": ["unit"]
+  },
+  {
+    "key": "ddd5.12.countAxisTitle",
+    "source": "docs/app/ddd.md#512-charts",
+    "part": 0,
+    "text": "Valid measurements",
+    "slots": []
+  },
+  {
+    "key": "ddd5.12.cumulativeAxisTitle",
+    "source": "docs/app/ddd.md#512-charts",
+    "part": 1,
+    "text": "Cumulative share of valid measurements (%)",
+    "slots": []
+  },
+  {
+    "key": "ddd5.12.binRule",
+    "source": "docs/app/ddd.md#512-charts",
+    "part": 2,
+    "text": "Bins: Freedman–Diaconis width (Scott's rule when the interquartile range is zero), rounded up to the display precision and widened if needed to keep at most 60 bins; each bin includes its lower edge.",
+    "slots": []
+  },
+  {
+    "key": "ddd5.12.segmentTitle",
+    "source": "docs/app/ddd.md#512-charts",
+    "part": 3,
+    "text": "{group}: {count} of {total} ({range})",
+    "slots": ["group", "count", "total", "range"]
+  },
+  {
+    "key": "ddd5.12.medianMark",
+    "source": "docs/app/ddd.md#512-charts",
+    "part": 4,
+    "text": "Median {value}",
+    "slots": ["value"]
+  },
+  {
+    "key": "ddd5.12.p84Mark",
+    "source": "docs/app/ddd.md#512-charts",
+    "part": 5,
+    "text": "84th percentile {value}",
+    "slots": ["value"]
+  },
+  {
+    "key": "ddd5.12.readoffLabel",
+    "source": "docs/app/ddd.md#512-charts",
+    "part": 6,
+    "text": "Percentile",
+    "slots": []
+  },
+  {
+    "key": "ddd5.12.readoffHint",
+    "source": "docs/app/ddd.md#512-charts",
+    "part": 7,
+    "text": "Enter a whole number from 0 to 100.",
+    "slots": []
+  },
+  {
+    "key": "ddd5.12.readoffOutput",
+    "source": "docs/app/ddd.md#512-charts",
+    "part": 8,
+    "text": "Percentile {q}: {value}",
+    "slots": ["q", "value"]
+  },
+  {
+    "key": "ddd5.12.belowLabel",
+    "source": "docs/app/ddd.md#512-charts",
+    "part": 9,
+    "text": "below 0.1 m",
+    "slots": []
+  },
+  {
+    "key": "ddd5.12.logScaleNote",
+    "source": "docs/app/ddd.md#512-charts",
+    "part": 10,
+    "text": "On the logarithmic scale, bins double in width from 0.1 m (0.1–0.2, 0.2–0.4, … m); widths below 0.1 m, including 0 m, are counted in the first bar.",
+    "slots": []
   }
 ]
