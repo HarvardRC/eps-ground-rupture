@@ -57,8 +57,8 @@ concurrency:
 
 jobs:
   # The webapp build job, separate from the MkDocs job (ADR-0011;
-  # docs/app/ddd.md §6.3): type check and unit tests, then the bundle,
-  # handed to `build` as the workflow artifact webapp-dist.
+  # docs/app/ddd.md §6.3): type check and unit tests, parity, then the
+  # bundle, handed to `build` as the workflow artifact webapp-dist.
   webapp-bundle:
     runs-on: ubuntu-latest
     steps:
@@ -66,6 +66,13 @@ jobs:
 
       - name: Webapp checks
         run: ./gradlew :subprojects:webapp:check
+
+      # The parity harness (docs/app/ddd.md §7.2), as in tests.yml: a plain
+      # HTTPS fetch of the pinned vintage with no token, every SHA-256
+      # verified before replay. It runs here too because only a job that
+      # `deploy` depends on can keep a commit failing parity off the site.
+      - name: Parity
+        run: ./gradlew :subprojects:webapp:webappParity
 
       - name: Build bundle
         run: ./gradlew :subprojects:webapp:webappBundle
