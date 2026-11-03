@@ -78,3 +78,11 @@ jobs:
 
       - name: Webapp checks
         run: ./gradlew :subprojects:webapp:check
+
+      # The parity harness (docs/app/ddd.md §7.2): downloads the files the
+      # committed pointer manifest names by plain HTTPS with no token (the
+      # repository is public), verifies every SHA-256, then replays the
+      # pipeline's reference results. After Webapp checks, whose type check
+      # and unit tests need no network or pinned data.
+      - name: Parity
+        run: ./gradlew :subprojects:webapp:webappParity
