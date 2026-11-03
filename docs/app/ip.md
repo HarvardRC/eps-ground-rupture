@@ -311,9 +311,15 @@ request only when the owner asks); and **Status**:
   the [Scheduling model](#scheduling-model). The cell's change rides
   in the task's last pull request when the task is complete before
   that pull request merges, and otherwise in the first pull request
-  merged after it is complete; the owner merges every task pull
-  request into `dev-v.0.4.x`, and the merge that carries the change
-  is the record, with no separate owner commit. A Done record means
+  merged after it is complete. Every task pull request merges into
+  `dev-v.0.4.x` with a merge commit: by the agent, under the owner's
+  standing permission of 2026-11-03, once its CI is green, its
+  independent review has passed, no owner question is open on it,
+  and its branch is current with `dev-v.0.4.x`; otherwise by the
+  owner. A pull request that changes the DDD, this plan, the review
+  ledger, or an ADR beyond a task's own Status cell is the owner's to
+  merge. The merge that carries the change is the record, with no
+  separate owner commit. A Done record means
   that the task's implementation is on `dev-v.0.4.x`, not only its
   Status cell; `main` receives the implementation once, with T-65's
   release merge ([§3](#3-gates-and-release-sequence), Branches), and
@@ -5074,8 +5080,8 @@ a merge commit tagged `v0.3.0` — a plain git tag, with no GitHub
 release — which changes no page of the site (OA-18). `dev-v.0.4.x`,
 created from that merge (OA-19), is the owner's development branch
 for v0.4 and the release branch: every task branch starts at
-`origin/dev-v.0.4.x`, every task pull request targets it, and the
-owner merges each ([Task format](#task-format), Executor and Done);
+`origin/dev-v.0.4.x`, every task pull request targets it, and each
+merges under the rule of [Task format](#task-format), Done;
 the owner's own record commits of
 [§4](#4-owner-and-research-group-actions) land on it too, directly
 under the ruleset's bypass (OA-10) or through a pull request. `main`,
