@@ -147,6 +147,37 @@ val exportApp by tasks.registering(Exec::class) {
     dependsOn(poetryInstall)
 }
 
+// Publication of a data vintage (docs/app/ddd.md §4.2), run by the owner:
+// the terms-record gate, the clean tree, the state cases, the export and the
+// full-data checks, the annotated tag, the draft prerelease, upload,
+// read-back, publication, and the publication record — steps 1-10. It
+// prints the step-11 pointer commit and never commits. NOT wired into any
+// lifecycle task: it pushes a tag and publishes a GitHub release. Run it
+// explicitly with the required property:
+//   ./gradlew :subprojects:python:publishVintage -Pdata.tag=data-vN
+// -Ppublish.failAfterUploads=<k> is the test hook of step 7; a real
+// publication never sets it.
+val publishVintage by tasks.registering(Exec::class) {
+    group = "deployment"
+    description =
+        "Publish a data vintage as a GitHub prerelease on its annotated tag (egr-publish-vintage, " +
+            "docs/app/ddd.md §4.2). Requires -Pdata.tag=data-vN."
+    workingDir = projectDir
+    useVenv()
+    val dataTag = findProperty("data.tag")?.toString()
+    val args = mutableListOf(poetryBin, "run", "egr-publish-vintage", "--data-tag", dataTag ?: "")
+    findProperty("publish.failAfterUploads")?.toString()?.let {
+        args += listOf("--fail-after-uploads", it)
+    }
+    commandLine(args)
+    doFirst {
+        if (dataTag.isNullOrBlank()) {
+            throw GradleException("publishVintage requires the property -Pdata.tag=data-vN.")
+        }
+    }
+    dependsOn(poetryInstall)
+}
+
 /**
  * Resolve the Google service-account key-file path for the push, in order:
  *   1. `-Pgoogle.sheets.keyfile=...` Gradle property
