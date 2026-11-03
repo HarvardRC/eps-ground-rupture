@@ -43,7 +43,9 @@ T-35, T-40, T-41, T-44, T-46, T-60, and T-61, T-60's again after its
 change — were accepted on 2026-11-02 by the owner's second
 acceptance commit; T-12's body, changed after that acceptance for the
 owner's decision of the same day on the `stage_spacing` arithmetic,
-returned to Draftable and was accepted again on 2026-11-02.
+returned to Draftable and was accepted again on 2026-11-02; T-16's
+body, changed for the owner's decision of the same day on the
+`dd10-names` corruption, returned to Draftable.
 
 This implementation plan (IP) is the last of the project's staged
 documents (PRD → PDD → HLDD → DDD → IP). It adds no design content:
@@ -798,7 +800,7 @@ command; and the pull request's Doc links run shows
 | T-13 | Reference-results generator, its file joining the T-11 export run: golden-scenario counts, statistics, percentiles, linear and logarithmic histograms, display strings, selections with classes, converted windows and range flags, diagnosed conditions, and the boundary and synthetic cases, including four uniform stage counts. [GS-3](pdd.md#102-golden-scenarios) (Kern preset (after D-6)) joins when [D-6](pdd.md#1-decision-register) (Kern County field-data group and principal-width rule) is decided ([PDD §10.2 — Golden scenarios](pdd.md#102-golden-scenarios)). | T-10, T-11 | [DDD §3.6](ddd.md#36-reference-results), [§3.8](ddd.md#38-measured-sizes), [§4.1](ddd.md#41-export-task-and-validation), [§5.3](ddd.md#53-query-engine), [§5.4](ddd.md#54-statistics), [§5.5](ddd.md#55-offset-to-slip-conversion-assist), [§5.6](ddd.md#56-scenario-state-and-url-encoding), [§5.8](ddd.md#58-view-layer), [§5.12](ddd.md#512-charts), [§7.3](ddd.md#73-pipeline-and-export-tests); [PDD §10.2 — Golden scenarios](pdd.md#102-golden-scenarios). | L | agent | Done (2026-11-02) |
 | T-14 | Required full-data checks: the `EGR_REQUIRE_FULL_DATA` conftest, the required-test manifest, `pytestFullData`, the full-data lanes of the four §7.3 contract files, and the gate self-tests — a skipped check is never a pass. | T-12, T-13 | [DDD §7.3](ddd.md#73-pipeline-and-export-tests), [§4.1](ddd.md#41-export-task-and-validation), [§4.2](ddd.md#42-publication-of-a-data-vintage). | M | agent | Accepted (2026-11-02) |
 | T-15 | Publication tooling `publishVintage`: the terms-record gate (exactly one [OA-1](#4-owner-and-research-group-actions) record line — the assumed record in Phase 1, the confirmed record from Phase 2 — the `README.md` and `LICENSE-docs` wording naming the terms file, and release immutability), the clean tree, resumable states, the export and full-data checks inside the run, the annotated tag, the draft prerelease, upload, read-back, publication, and the publication record; the drill override; the owner's pointer commit follows — one task, one run, one commit per vintage ([ADR-0014](../adr/0014-committed-content-hashed-artifacts.md)). Tooling only, drilled against a synthetic fixture in a local drill clone with a stub `gh` that models releases, drafts, tags, and immutability, so no drill reaches GitHub; executions are T-18, the end-to-end run, and T-63. | T-11, T-12, T-14, T-16 | [DDD §4.2](ddd.md#42-publication-of-a-data-vintage), [§4.1](ddd.md#41-export-task-and-validation), [§4.3](ddd.md#43-retention-rollback-recovery-and-withdrawal), [§4.4](ddd.md#44-licensing-archival-distribution-and-release-attachments), [§7.3](ddd.md#73-pipeline-and-export-tests), [§3.1](ddd.md#31-scenario-artifact-binary-layout), [§3.2](ddd.md#32-artifact-manifest). | L | agent | Accepted (2026-11-02) |
-| T-16 | Pipeline fixture tests: the fixture lanes of the four DDD §7.3 contract files, CI-sized, with valid uniform stage counts, one corruption per rule of DDD §4.1 steps 3 and 5, and the non-finite cases. | T-11, T-12 | [DDD §7.3](ddd.md#73-pipeline-and-export-tests), [§3.1](ddd.md#31-scenario-artifact-binary-layout)–[§3.6](ddd.md#36-reference-results), [§4.1](ddd.md#41-export-task-and-validation), [§5.6](ddd.md#56-scenario-state-and-url-encoding). | M | agent | Accepted (2026-11-02) |
+| T-16 | Pipeline fixture tests: the fixture lanes of the four DDD §7.3 contract files, CI-sized, with valid uniform stage counts, one corruption per rule of DDD §4.1 steps 3 and 5, and the non-finite cases. | T-11, T-12 | [DDD §7.3](ddd.md#73-pipeline-and-export-tests), [§3.1](ddd.md#31-scenario-artifact-binary-layout)–[§3.6](ddd.md#36-reference-results), [§4.1](ddd.md#41-export-task-and-validation), [§5.6](ddd.md#56-scenario-state-and-url-encoding). | M | agent | Draftable |
 | T-17 | Early payload diagnostic: the generated artifact's compressed size printed against the budget of [PDD §9.1 — Performance budgets (D-9, Proposed)](pdd.md#91-performance-budgets-d-9-proposed) as soon as T-11 produces it ([R-19](prd.md#94-delivery-and-technical-risks) asks for early validation against the budget; [R-16](prd.md#94-delivery-and-technical-risks) is the payload-budget risk it tests early). A diagnostic lower bound — the full payload scope is T-61's; [DDD §3.8](ddd.md#38-measured-sizes) records the figure from the line. | T-11 | [PDD §9.1 — Performance budgets (D-9, Proposed)](pdd.md#91-performance-budgets-d-9-proposed); [DDD §3.8](ddd.md#38-measured-sizes), [§4.1](ddd.md#41-export-task-and-validation), [§7.6](ddd.md#76-performance-and-compatibility-measurements). | S | agent | Done (2026-11-02) |
 | T-18 | First publication, the end-to-end run of the T-15 tooling: the owner runs `publishVintage` for `data-v1` — export, full-data checks (T-14) against the staged vintage, draft-first publication — and commits the pointer, merged into `dev-v.0.4.x`, producing the first pinned vintage, which the unlisted prototype serves; gated by [G-1](#3-gates-and-release-sequence) in its Phase-1 form — the owner's `data/REDISTRIBUTION.md` with the assumed terms, the assumed [OA-1](#4-owner-and-research-group-actions) record, and one terms line per source, and `README.md` and `LICENSE-docs` naming it, before the first vintage upload — by release immutability (OA-11, done), and by the owner's acceptance of ADR-0017 ([OA-17](#4-owner-and-research-group-actions)). A failure that leaves a published release failing its checks is retried with the next tag number, unless only its prerelease flag is missing, which the repair printed by state (d) restores in place. | T-13, T-14, T-15, T-20, OA-1, OA-17 | [DDD §4.2](ddd.md#42-publication-of-a-data-vintage), [§4.1](ddd.md#41-export-task-and-validation), [§4.3](ddd.md#43-retention-rollback-recovery-and-withdrawal), [§4.4](ddd.md#44-licensing-archival-distribution-and-release-attachments), [§7.3](ddd.md#73-pipeline-and-export-tests); [HLDD §9 — Testing and release architecture](hldd.md#9-testing-and-release-architecture). | — | owner | Accepted (2026-11-02) |
 
@@ -1377,7 +1379,8 @@ printed before. The end-to-end run against GitHub is T-18's.
 
 **Steps.** Create the four
 [DDD §7.3](ddd.md#73-pipeline-and-export-tests) contract files —
-extending any file T-14 has already created — with their fixture lanes,
+extending any file T-14 or T-17 has already created — with their
+fixture lanes,
 implementing each row's fixture column in the suite's conventions:
 module-scoped fixtures defined per test file, no custom marker,
 synthetic frames, and no pytest-configuration change.
@@ -1390,7 +1393,10 @@ each round-tripping unchanged, parametrized with the ids `stages-2`,
 corruption per rule of [DDD §4.1](ddd.md#41-export-task-and-validation)
 steps 3 and 5, each asserting that rule's `<rule>: FAILED` line,
 parametrized with the id `corrupt-<rule>`, and a rule's further
-corruptions with `corrupt-<rule>-<k>` — for `counts`, an empty frame, a
+corruptions with `corrupt-<rule>-<k>` — for `dd10-names`, one column
+renamed consistently in the export's writer and in its closed format
+spec, the run printing `format-spec: ok` before
+`dd10-names: FAILED`; for `counts`, an empty frame, a
 one-stage trial, and unequal trial lengths, each failing `counts` before
 packing with no `scenario-*.bin.gz` written; the §7.3
 arithmetic-boundary cases — a count above 4,294,967,295, `trials * N`
