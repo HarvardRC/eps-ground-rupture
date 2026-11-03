@@ -44,7 +44,7 @@ export class LoadError extends Error {
   static dataVersion(what: string, expected: string, loaded: string): LoadError {
     return new LoadError(
       'data-version',
-      `${what}: this page expects data version ${expected}, but the loaded data is version ${loaded}`,
+      `${what}: export_version ${loaded} differs from the expected ${expected}`,
       undefined,
       { expected, loaded },
     );

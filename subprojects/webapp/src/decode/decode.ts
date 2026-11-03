@@ -370,7 +370,7 @@ function validateStructure(bytes: Uint8Array, manifest: Manifest): void {
  * over at an offset that is not a multiple of 4.
  */
 function buildViews(bytes: Uint8Array, manifest: Manifest): Vintage {
-  const aligned = bytes.byteOffset % 4 === 0 ? bytes : bytes.slice();
+  const aligned = bytes.byteOffset % 4 === 0 ? bytes : new Uint8Array(bytes);
   const { buffer, byteOffset } = aligned;
   const at = (name: BlockName): number => byteOffset + manifest.blocks[name].offset;
   const len = (name: BlockName, width: number): number => manifest.blocks[name].length / width;
