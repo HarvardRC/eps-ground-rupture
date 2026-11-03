@@ -4,7 +4,7 @@
 #
 # Tests that need the gitignored inputs or build artifacts (data/raw,
 # data/processed, dashboards/duckdb/eps.duckdb, dashboards/sql/*.sql) skip
-# when those are absent — 34 skips on a fresh clone — so this job exercises
+# when those are absent — 63 skips on a fresh clone — so this job exercises
 # exactly what a fresh clone can: the fixture-driven contracts.
 
 name: Tests

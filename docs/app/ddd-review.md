@@ -1446,6 +1446,24 @@ are recorded at the end of
   research data, the scenario binary stays unchanged for the same data
   and compression environment, and a strict `--reproduce` run must
   reproduce every file byte for byte.
+- **T-12, T-30, and T-36 reviews.** Rule `dd10-names` cannot fail in a
+  run through a bad name alone, because `format-spec`'s closed lists
+  reject that name first; what it alone catches is a column renamed
+  consistently in the writer and in its closed spec. By the owner's
+  decision, T-16's `dd10-names` corruption is that consistent rename,
+  in a full run printing `format-spec: ok` before
+  `dd10-names: FAILED`, rather than a direct call of the rule; T-16's
+  body, changed for it, returned to Draftable. The owner also had
+  [DDD §5.2 — Artifact loading and decoding](ddd.md#52-artifact-loading-and-decoding)
+  key `trial_columns` by the seven trial-table names, the reserved
+  `model_family` among them, instead of the 13 DD-10 names, and
+  [DDD §3.5 — Regression export](ddd.md#35-regression-export) state that
+  its `relationship` texts are copy, outside `dd10-names`. The
+  `decode.test.ts` row's "dictionary extents" now reads as T-30 and
+  T-36 implement it — the `dip_dictionary` length a whole number of
+  int32 entries within the file — and the
+  [DDD §7.6](ddd.md#76-performance-and-compatibility-measurements)
+  `ReadableStream` row names the loader's three Streams surfaces.
 
 ## References
 
