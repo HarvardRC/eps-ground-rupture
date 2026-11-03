@@ -456,7 +456,7 @@ test.describe('startup announcement ordering', () => {
     await mounted(page);
     const message = fillCopy('ddd5.10.recoveryIncompatible', { current: V() });
     await expect(page.locator('#gre-state')).toHaveText(message);
-    await releaseHeld(page);
+    expect(await releaseHeld(page)).toBe(true);
     await oneZeroTimer(page);
     expect(await loadingWrites(page)).toBe(0);
     await page.locator('#gre-recovery button[data-gre-action="start-new"]').click();
@@ -477,7 +477,7 @@ test.describe('startup announcement ordering', () => {
     await mounted(page);
     const message = copyText('ddd5.10.recoveryInvalidRecord');
     await expect(page.locator('#gre-state')).toHaveText(message);
-    await releaseHeld(page);
+    expect(await releaseHeld(page)).toBe(true);
     await oneZeroTimer(page);
     expect(await loadingWrites(page)).toBe(0);
     await page.locator('#gre-recovery button[data-gre-action="start-new"]').click();

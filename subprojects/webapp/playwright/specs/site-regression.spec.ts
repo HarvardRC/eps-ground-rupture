@@ -34,7 +34,7 @@ const isBundle = (url: string): boolean => url.startsWith(`${BASE_URL}assets/sce
 /** Every <tableau-viz> on the page upgraded (the Embedding API defined it) and holding its loading iframe. */
 async function expectEmbedsUpgraded(page: Page): Promise<void> {
   const vizzes = page.locator('tableau-viz');
-  expect(await vizzes.count()).toBeGreaterThan(0);
+  await expect(vizzes).not.toHaveCount(0, { timeout: 30_000 });
   await expect(page.locator('tableau-viz:not(:defined)')).toHaveCount(0, { timeout: 60_000 });
   await expect
     .poll(

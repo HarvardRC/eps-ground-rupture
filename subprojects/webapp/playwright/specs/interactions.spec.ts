@@ -202,7 +202,12 @@ test('mode switch: values never convert across modes, and a switch back judges t
   await offset.fill('3');
   await offset.press('Enter');
   await expect(summary(page)).toContainText(' · offset 0–3 m (converted to slip per dip) · ');
-  await expect(page.locator('#gre-assist-body')).toContainText(/20°: fault slip [\d.]+–[\d.]+ m, (in-range|partly-out-of-range|out-of-range)/);
+  // One window line per selected dip (all of them), each carrying its range flag.
+  const flagTerms = [copyText('pdd3.5.flagInRange'), copyText('pdd3.5.flagPartlyOutOfRange'), copyText('pdd3.5.flagOutOfRange')].join('|');
+  const windowLines = (await page.locator('#gre-assist-body > p').allInnerTexts()).filter((l) => /^\d+°: fault slip /.test(l));
+  const dips = manifest().trial_columns.fault_dip;
+  expect(windowLines).toHaveLength(dips.length);
+  dips.forEach((d, i) => expect(windowLines[i]).toMatch(new RegExp(`^${d}°: fault slip [\\d.]+–[\\d.]+ m, (${flagTerms})$`)));
   const offsetSummary = await summary(page).innerText();
   // Slip mode again: the fields 0 and 3, the summary "slip 0–3 m".
   await page.locator('input[name="gre-entry-mode"][value="slip"]').check();

@@ -134,3 +134,14 @@
   overflow-x: auto;
   max-width: 100%;
 }
+
+/* Material styles every class-less .md-typeset table as its own scroll
+   box (inline-block, max-width 100%, overflow auto), which would make the
+   table, not its focusable wrapper, the scroll container. Inside the
+   wrapper the table lays out at its full width and the wrapper scrolls
+   (docs/app/ddd.md §5.11, Markup). */
+#gre-root .gre-table-scroll > table {
+  display: table;
+  max-width: none;
+  overflow: visible;
+}

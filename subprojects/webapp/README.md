@@ -25,7 +25,8 @@ installs the pinned Chromium (`playwrightInstall`, the npm script
 `browser-install`), then runs the npm script `browser-test`,
 `playwright test --project=desktop --project=mobile`. The JSON report is
 written to `build/playwright/report.json` and the traces to
-`build/playwright/test-results/`.
+`build/playwright/test-results/`. The lane needs internet access to
+`public.tableau.com`: `site-regression.spec.ts` loads the dashboards' embeds.
 
 ## Measurement diagnostic
 

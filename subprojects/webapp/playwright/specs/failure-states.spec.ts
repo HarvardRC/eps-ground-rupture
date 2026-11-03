@@ -488,13 +488,23 @@ test('field failure across a replaced vintage: one preserving action, the click-
   await installRecorder(page);
   const { net, r2, replace } = await withFixture(page);
   await gotoScenario(page);
-  // Display settings to restore: the width panel cumulative with read-off 84; the scarp-dip disclosure open.
-  await page.locator('input[name="gre-dzw-view"][value="cumulative"]').check();
-  await page.locator('#gre-dzw-pct').fill('84');
-  await page.locator('#gre-dzw-pct').press('Enter');
-  await expect(page.locator('#gre-dzw-pct-out')).toHaveText(/^Percentile 84: /);
-  await page.locator('#gre-scarp_dip-data > summary').click();
-  await expect(page.locator('#gre-scarp_dip-bins')).toHaveCount(1);
+  // Every display setting this mount offers before the failure, set off its default (§5.6 DisplayState):
+  // view and read-off (height and scarp dip cumulative, read-offs 84 and 16), chartDataOpen (width),
+  // logScale (width histogram), familyView, and, below, overlay. The selected measurement has no MVP
+  // control, and the show-all toggles exist only once the field export has loaded — the regression
+  // case below restores them.
+  for (const [m, q] of [['scarp_height', '84'], ['scarp_dip', '16']] as const) {
+    await page.locator(`input[name="gre-${m}-view"][value="cumulative"]`).check();
+    await page.locator(`#gre-${m}-pct`).fill(q);
+    await page.locator(`#gre-${m}-pct`).press('Enter');
+    await expect(page.locator(`#gre-${m}-pct-out`)).toHaveText(new RegExp(`^Percentile ${q}: `));
+  }
+  await page.locator('#gre-dzw-data > summary').click();
+  await expect(page.locator('#gre-dzw-bins')).toHaveCount(1);
+  await page.locator('#gre-dzw-log').check();
+  await expect(page.locator('#gre-dzw .gre-chart svg[role="img"]')).toHaveAttribute('aria-label', /logarithmic value axis/);
+  await page.locator('#gre-family-view').check();
+  await expect(page.locator('#gre-dzw .gre-chart svg[role="img"]')).toHaveAttribute('aria-label', /stacked by scarp family/);
   // The served vintage is replaced while this page stays open; its first old field URL returns 404.
   replace();
   net.fail404(manifest().files.field_export, 1);
@@ -503,9 +513,13 @@ test('field failure across a replaced vintage: one preserving action, the click-
   await expect(page.locator('#gre-panels')).toBeVisible();
   await expect(action(page, 'reload-restore')).toHaveCount(1);
   await expect(messages(page)).toHaveText([copyText('ddd5.10.recoveryLoadFailed')]);
-  // A scenario change after the failure, before the click: the click-time Scenario is the one restored.
-  await page.locator('input[name="gre-population"][value="one_state_per_trial"]').check();
-  await expectCount(page, gs('GS-7').counts.matching_records);
+  // A scenario change after the failure, before the click, one that keeps the log scale offered:
+  // the click-time Scenario is the one restored.
+  await checkbox(page, 'fieldset.gre-depth', '3 m').uncheck();
+  await expect(page.locator('#gre-summary')).toContainText(' · depth 5 or 10 m · ');
+  await settle(page);
+  await expect(page.locator('#gre-dzw-log')).toBeVisible();
+  await expect(page.locator('#gre-dzw-log')).toBeChecked();
   const clickTime = await page.locator('#gre-summary').innerText();
   const newField = net.hold(r2.fieldName);
   await reloadBy(page, 'reload-restore');
@@ -513,10 +527,19 @@ test('field failure across a replaced vintage: one preserving action, the click-
   // The field request is the new manifest's, and starts after the first result.
   expect(await page.evaluate(() => document.querySelector('#gre-root[data-gre-mounted] #gre-panels') !== null)).toBe(true);
   await expect(page.locator('#gre-summary')).toHaveText(clickTime);
+  // Every accepted display setting restored, the overlay on.
   await expect(page.locator('#gre-overlay')).toBeChecked();
-  await expect(page.locator('input[name="gre-dzw-view"][value="cumulative"]')).toBeChecked();
-  await expect(page.locator('#gre-dzw-pct-out')).toHaveText(/^Percentile 84: /);
-  expect(await page.locator('#gre-scarp_dip-data').evaluate((d) => (d as HTMLDetailsElement).open)).toBe(true);
+  for (const [m, q] of [['scarp_height', '84'], ['scarp_dip', '16']] as const) {
+    await expect(page.locator(`input[name="gre-${m}-view"][value="cumulative"]`)).toBeChecked();
+    await expect(page.locator(`#gre-${m}-pct-out`)).toHaveText(new RegExp(`^Percentile ${q}: `));
+  }
+  await expect(page.locator('input[name="gre-dzw-view"][value="histogram"]')).toBeChecked();
+  expect(await page.locator('#gre-dzw-data').evaluate((d) => (d as HTMLDetailsElement).open)).toBe(true);
+  expect(await page.locator('#gre-scarp_height-data').evaluate((d) => (d as HTMLDetailsElement).open)).toBe(false);
+  await expect(page.locator('#gre-dzw-log')).toBeChecked();
+  await expect(page.locator('#gre-dzw .gre-chart svg[role="img"]')).toHaveAttribute('aria-label', /logarithmic value axis/);
+  await expect(page.locator('#gre-family-view')).toBeChecked();
+  await expect(page.locator('#gre-dzw .gre-chart svg[role="img"]')).toHaveAttribute('aria-label', /stacked by scarp family/);
   await expect(page.locator('#gre-versions')).toContainText(r2.exportVersion);
   const message = restoredChanged(V(), r2.exportVersion);
   await expect(messages(page)).toHaveText([message]);
@@ -536,6 +559,9 @@ test('regression failure across a replaced vintage: the accepted offset Scenario
   }, RECOVERY_KEY);
   const oldRegression = manifest().files.regression_export;
   await gotoScenario(page);
+  // The show-all display state (offered once the field export has loaded): on for both overlay panels.
+  await page.locator('#gre-overlay').check();
+  await showAllOn(page);
   await page.locator('input[name="gre-population"][value="one_state_per_trial"]').check();
   await expectCount(page, gs('GS-7').counts.matching_records);
   const slipSummary = await page.locator('#gre-summary').innerText();
@@ -573,15 +599,27 @@ test('regression failure across a replaced vintage: the accepted offset Scenario
   expect(stored.sourceExportVersion).toBe(V());
   newRegression.release();
   await mounted(page);
+  await settle(page);
+  await settle(page);
+  // No default or old result before the restored one: one first-result mark, no settled update.
+  expect(await page.evaluate(() => performance.getEntriesByName('egr:first-result').length)).toBe(1);
+  expect(await page.evaluate(() => performance.getEntriesByName('egr:results-updated').length)).toBe(0);
+  expect((await recorded(page, 'status')).filter((t) => t.startsWith('Results updated'))).toEqual([]);
   await expect(page.locator('#gre-summary')).toContainText(' · offset 0–3 m (converted to slip per dip) · ');
   await expect(page.locator('#gre-summary')).toContainText('one state per simulation trial');
   await expect(messages(page)).toHaveText([restoredChanged(V(), r2.exportVersion)]);
+  await expect(page.locator('#gre-overlay')).toBeChecked();
+  for (const m of ['scarp_height', 'dzw']) {
+    await expect(page.locator(`#gre-${m} .gre-overlay-legend button[aria-pressed]`)).toHaveAttribute('aria-pressed', 'true', { timeout: 30_000 });
+  }
   const restoredPanels = await page.locator('#gre-panels').innerText();
   const restoredDownload = await captureDownload(page, testInfo, 'restored');
   // A fresh page, independently set to the same inputs on the new vintage.
   const fresh = await freshOn(browser, r2);
   const count = Number(/matching records: ([\d,]+)$/.exec(await page.locator('#gre-summary').innerText())![1].replace(/,/g, ''));
   await applyInputs(fresh, stored.scenario, count);
+  await fresh.locator('#gre-overlay').check();
+  await showAllOn(fresh);
   expect(await fresh.locator('#gre-panels').innerText()).toBe(restoredPanels);
   const freshDownload = await captureDownload(fresh, testInfo, 'fresh');
   for (const member of ['records.csv', 'statistics.csv', 'scenario.json']) {
@@ -589,6 +627,17 @@ test('regression failure across a replaced vintage: the accepted offset Scenario
   }
   await fresh.context().close();
 });
+
+/** Waits for the overlay legends and turns each panel's show-all toggle on. */
+async function showAllOn(page: Page): Promise<void> {
+  for (const m of ['scarp_height', 'dzw']) {
+    const toggle = page.locator(`#gre-${m} .gre-overlay-legend button[aria-pressed]`);
+    await expect(toggle).toHaveAttribute('aria-pressed', 'false', { timeout: 30_000 });
+    await toggle.click();
+    await expect(page.locator(`#gre-${m} .gre-overlay-legend button[aria-pressed]`)).toHaveAttribute('aria-pressed', 'true');
+  }
+  await settle(page);
+}
 
 /** A fresh page serving the replacement vintage, at its default state. */
 async function freshOn(browser: Browser, r2: FixtureVintage): Promise<Page> {
