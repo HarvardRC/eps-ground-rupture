@@ -482,7 +482,7 @@ class Checker:
 
         for message in self.failures:
             print(f"FAIL {message}")
-        print("SC-7 listing (SHA-256 of the UTF-8 text, lowercase hex):")
+        # step 8: the SC-7 listing, one SHA-256 (lowercase hex) per text
         for entry in sorted(
             (e for e in entries if self.is_file(e["source"], DDD)), key=lambda e: e["key"]
         ):

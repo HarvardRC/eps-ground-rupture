@@ -20,7 +20,11 @@ export interface CopyEntry {
   readonly part: number;
   /** The text verbatim, its `{…}` slots and `**` markers as the source writes them. */
   readonly text: string;
-  /** The names of the text's `{…}` slots, in order of first occurrence. */
+  /**
+   * The names of the placeholders the views fill — each `{…}` name without its
+   * braces, and the bare `X` of PDD §4.3 — in order of first occurrence; a
+   * bracketed `[…]` text is not a slot.
+   */
   readonly slots: readonly string[];
 }
 
