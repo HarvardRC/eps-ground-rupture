@@ -705,5 +705,460 @@
     "part": 24,
     "text": "Kern County `#kern-county-1952`",
     "slots": []
+  },
+  {
+    "key": "pdd3.2.armUniform",
+    "source": "docs/app/pdd.md#32-sediment-strength-and-structure-fr-s2",
+    "part": 0,
+    "text": "Uniform",
+    "slots": []
+  },
+  {
+    "key": "pdd3.2.armLayered",
+    "source": "docs/app/pdd.md#32-sediment-strength-and-structure-fr-s2",
+    "part": 1,
+    "text": "Layered",
+    "slots": []
+  },
+  {
+    "key": "pdd3.2.alternatingStrongWeak",
+    "source": "docs/app/pdd.md#32-sediment-strength-and-structure-fr-s2",
+    "part": 2,
+    "text": "Alternating Strong–Weak",
+    "slots": []
+  },
+  {
+    "key": "pdd3.2.advanced",
+    "source": "docs/app/pdd.md#32-sediment-strength-and-structure-fr-s2",
+    "part": 3,
+    "text": "Advanced",
+    "slots": []
+  },
+  {
+    "key": "pdd3.4.descriptiveLabel",
+    "source": "docs/app/pdd.md#34-displacement-window-fr-s5",
+    "part": 0,
+    "text": "approximately 0–5 m",
+    "slots": []
+  },
+  {
+    "key": "pdd3.5.flagInRange",
+    "source": "docs/app/pdd.md#35-offset-entry-mode-and-conversion-assist-fr-s5",
+    "part": 0,
+    "text": "in-range",
+    "slots": []
+  },
+  {
+    "key": "pdd3.5.flagPartlyOutOfRange",
+    "source": "docs/app/pdd.md#35-offset-entry-mode-and-conversion-assist-fr-s5",
+    "part": 1,
+    "text": "partly-out-of-range",
+    "slots": []
+  },
+  {
+    "key": "pdd3.5.flagOutOfRange",
+    "source": "docs/app/pdd.md#35-offset-entry-mode-and-conversion-assist-fr-s5",
+    "part": 2,
+    "text": "out-of-range",
+    "slots": []
+  },
+  {
+    "key": "pdd3.7.populationLegend",
+    "source": "docs/app/pdd.md#37-population-scarp-filter-family-view-reset",
+    "part": 0,
+    "text": "Population",
+    "slots": []
+  },
+  {
+    "key": "pdd3.7.populationAllStages",
+    "source": "docs/app/pdd.md#37-population-scarp-filter-family-view-reset",
+    "part": 1,
+    "text": "All model stages in the slip window",
+    "slots": []
+  },
+  {
+    "key": "pdd3.7.populationOneState",
+    "source": "docs/app/pdd.md#37-population-scarp-filter-family-view-reset",
+    "part": 2,
+    "text": "One state per simulation trial",
+    "slots": []
+  },
+  {
+    "key": "pdd3.7.scarpFilterLabel",
+    "source": "docs/app/pdd.md#37-population-scarp-filter-family-view-reset",
+    "part": 3,
+    "text": "Resulting scarp type (a model output, not a site input)",
+    "slots": []
+  },
+  {
+    "key": "pdd3.7.familyToggleLabel",
+    "source": "docs/app/pdd.md#37-population-scarp-filter-family-view-reset",
+    "part": 4,
+    "text": "Group collapse variants",
+    "slots": []
+  },
+  {
+    "key": "pdd3.7.familyNote",
+    "source": "docs/app/pdd.md#37-population-scarp-filter-family-view-reset",
+    "part": 5,
+    "text": "Family grouping needs all six types",
+    "slots": []
+  },
+  {
+    "key": "pdd3.7.resetLabel",
+    "source": "docs/app/pdd.md#37-population-scarp-filter-family-view-reset",
+    "part": 6,
+    "text": "Reset",
+    "slots": []
+  },
+  {
+    "key": "pdd5.11.faultDipLabel",
+    "source": "docs/app/pdd.md#511-labels-units-and-glossary-links-fr-g3-cr-3-cr-7",
+    "part": 3,
+    "text": "Fault dip (°)",
+    "slots": []
+  },
+  {
+    "key": "pdd5.11.slipLabel",
+    "source": "docs/app/pdd.md#511-labels-units-and-glossary-links-fr-g3-cr-3-cr-7",
+    "part": 4,
+    "text": "Fault slip at depth (m)",
+    "slots": []
+  },
+  {
+    "key": "pdd5.11.offsetLabel",
+    "source": "docs/app/pdd.md#511-labels-units-and-glossary-links-fr-g3-cr-3-cr-7",
+    "part": 5,
+    "text": "Anticipated vertical surface offset (m)",
+    "slots": []
+  },
+  {
+    "key": "pdd5.11.depthLabel",
+    "source": "docs/app/pdd.md#511-labels-units-and-glossary-links-fr-g3-cr-3-cr-7",
+    "part": 6,
+    "text": "Sediment depth (m)",
+    "slots": []
+  },
+  {
+    "key": "pdd5.11.densityLabel",
+    "source": "docs/app/pdd.md#511-labels-units-and-glossary-links-fr-g3-cr-3-cr-7",
+    "part": 7,
+    "text": "Sediment density",
+    "slots": []
+  },
+  {
+    "key": "pdd5.11.strengthLabel",
+    "source": "docs/app/pdd.md#511-labels-units-and-glossary-links-fr-g3-cr-3-cr-7",
+    "part": 8,
+    "text": "Sediment strength",
+    "slots": []
+  },
+  {
+    "key": "ddd5.5.windowLine",
+    "source": "docs/app/ddd.md#55-offset-to-slip-conversion-assist",
+    "part": 0,
+    "text": "{Dip}°: fault slip {lo}–{hi} m, {flag}",
+    "slots": ["Dip", "lo", "hi", "flag"]
+  },
+  {
+    "key": "ddd5.5.provenanceLine",
+    "source": "docs/app/ddd.md#55-offset-to-slip-conversion-assist",
+    "part": 1,
+    "text": "{Dip}° — {back_projection}, inverting {form} with slope {slope} and intercept {intercept} m.",
+    "slots": ["Dip", "back_projection", "form", "slope", "intercept"]
+  },
+  {
+    "key": "ddd5.7.entryModeLegend",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 0,
+    "text": "Enter displacement as",
+    "slots": []
+  },
+  {
+    "key": "ddd5.7.populationExplainerSummary",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 1,
+    "text": "What do the two populations mean?",
+    "slots": []
+  },
+  {
+    "key": "ddd5.7.dipOption",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 2,
+    "text": "{d}°",
+    "slots": ["d"]
+  },
+  {
+    "key": "ddd5.7.depthOption",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 3,
+    "text": "{d} m",
+    "slots": ["d"]
+  },
+  {
+    "key": "ddd5.7.slipRejection",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 4,
+    "text": "Enter slip values from 0 to {max} m, the minimum not above the maximum. The results still show the last valid scenario.",
+    "slots": ["max"]
+  },
+  {
+    "key": "ddd5.7.dipRangeLabel",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 5,
+    "text": "Fault dip range",
+    "slots": []
+  },
+  {
+    "key": "ddd5.7.dipEchoIncluded",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 6,
+    "text": "{list} only",
+    "slots": ["list"]
+  },
+  {
+    "key": "ddd5.7.dipEchoSeparator",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 7,
+    "text": ", ",
+    "slots": []
+  },
+  {
+    "key": "ddd5.7.dipEchoLastSeparator",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 8,
+    "text": " and ",
+    "slots": []
+  },
+  {
+    "key": "ddd5.7.dipEchoNone",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 9,
+    "text": "No modeled fault dip in this range.",
+    "slots": []
+  },
+  {
+    "key": "ddd5.7.dipEchoUnreadable",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 10,
+    "text": "Enter one fault dip or a range such as 30–40.",
+    "slots": []
+  },
+  {
+    "key": "ddd5.7.dipRangeApply",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 11,
+    "text": "Apply",
+    "slots": []
+  },
+  {
+    "key": "ddd5.7.armHelper",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 12,
+    "text": "The same word means different built profiles in the two arms.",
+    "slots": []
+  },
+  {
+    "key": "ddd5.7.slipMinLabel",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 13,
+    "text": "Minimum (m)",
+    "slots": []
+  },
+  {
+    "key": "ddd5.7.slipMaxLabel",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 14,
+    "text": "Maximum (m)",
+    "slots": []
+  },
+  {
+    "key": "ddd5.7.slipHelp",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 15,
+    "text": "Recorded range: {min}–{max} m. Recording step: about {step} m.",
+    "slots": ["min", "max", "step"]
+  },
+  {
+    "key": "ddd5.7.summaryJoiner",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 16,
+    "text": " · ",
+    "slots": []
+  },
+  {
+    "key": "ddd5.7.summaryListJoiner",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 17,
+    "text": " or ",
+    "slots": []
+  },
+  {
+    "key": "ddd5.7.tokenAnyDip",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 18,
+    "text": "any dip",
+    "slots": []
+  },
+  {
+    "key": "ddd5.7.tokenNoDip",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 19,
+    "text": "no fault dip selected",
+    "slots": []
+  },
+  {
+    "key": "ddd5.7.tokenDip",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 20,
+    "text": "dip {dips}",
+    "slots": ["dips"]
+  },
+  {
+    "key": "ddd5.7.tokenAnySediment",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 21,
+    "text": "any sediment",
+    "slots": []
+  },
+  {
+    "key": "ddd5.7.tokenNoSediment",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 22,
+    "text": "no sediment strength selected",
+    "slots": []
+  },
+  {
+    "key": "ddd5.7.tokenAnyDepth",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 23,
+    "text": "any depth",
+    "slots": []
+  },
+  {
+    "key": "ddd5.7.tokenNoDepth",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 24,
+    "text": "no sediment depth selected",
+    "slots": []
+  },
+  {
+    "key": "ddd5.7.tokenDepth",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 25,
+    "text": "depth {depths} m",
+    "slots": ["depths"]
+  },
+  {
+    "key": "ddd5.7.tokenAnyDensity",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 26,
+    "text": "any density",
+    "slots": []
+  },
+  {
+    "key": "ddd5.7.tokenNoDensity",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 27,
+    "text": "no sediment density selected",
+    "slots": []
+  },
+  {
+    "key": "ddd5.7.tokenDensity",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 28,
+    "text": "density {densities}",
+    "slots": ["densities"]
+  },
+  {
+    "key": "ddd5.7.tokenSlipAny",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 29,
+    "text": "slip: any",
+    "slots": []
+  },
+  {
+    "key": "ddd5.7.tokenSlipWindow",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 30,
+    "text": "slip {min}–{max} m",
+    "slots": ["min", "max"]
+  },
+  {
+    "key": "ddd5.7.tokenOffsetWindow",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 31,
+    "text": "offset 0–{X} m (converted to slip per dip)",
+    "slots": ["X"]
+  },
+  {
+    "key": "ddd5.7.tokenAllStagesInWindow",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 32,
+    "text": "all stages in window",
+    "slots": []
+  },
+  {
+    "key": "ddd5.7.tokenAllRecordedStages",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 33,
+    "text": "all recorded stages",
+    "slots": []
+  },
+  {
+    "key": "ddd5.7.tokenOneState",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 34,
+    "text": "one state per simulation trial",
+    "slots": []
+  },
+  {
+    "key": "ddd5.7.tokenAllScarpTypes",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 35,
+    "text": "all scarp types (no filter)",
+    "slots": []
+  },
+  {
+    "key": "ddd5.7.tokenNoScarpType",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 36,
+    "text": "no resulting scarp type selected",
+    "slots": []
+  },
+  {
+    "key": "ddd5.7.tokenScarpType",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 37,
+    "text": "scarp type {classes}",
+    "slots": ["classes"]
+  },
+  {
+    "key": "ddd5.7.tokenCount",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 38,
+    "text": "matching records: {count}",
+    "slots": ["count"]
+  },
+  {
+    "key": "ddd5.7.sedimentBothArms",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 39,
+    "text": "{L} — uniform and layered",
+    "slots": ["L"]
+  },
+  {
+    "key": "ddd5.7.sedimentUniform",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 40,
+    "text": "{L} (uniform)",
+    "slots": ["L"]
+  },
+  {
+    "key": "ddd5.7.sedimentLayered",
+    "source": "docs/app/ddd.md#57-scenario-controls",
+    "part": 41,
+    "text": "{L} (layered)",
+    "slots": ["L"]
   }
 ]

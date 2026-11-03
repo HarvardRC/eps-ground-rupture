@@ -1,0 +1,43 @@
+/* The scenario page's stylesheet (docs/app/ddd.md §6.1), bundled by
+   build.mjs into build/dist/app.css.
+
+   Layout and scenario summary (§5.7): one stylesheet breakpoint at
+   768 CSS px. At and above it, #gre-controls is an input rail beside the
+   results; below it, the controls stack above the results and
+   #gre-summary, the skeleton's first element (§5.8 region model), is the
+   sticky "persistent summary of the active scenario" (PDD §3) under
+   Material's 2.4rem sticky header, and every element inside #gre-root
+   takes a scroll margin that clears both. The ResizeObserver that writes
+   --gre-summary-block on #gre-root is the mount's (§5.7, §5.11). */
+
+/* Wide screens: the input rail beside the results. The rail floats at
+   the start of the skeleton, after #gre-summary; every later sibling
+   keeps clear of it, and #gre-root contains the float. */
+@media (width >= 768px) {
+  #gre-root {
+    display: flow-root;
+  }
+
+  #gre-controls {
+    float: left;
+    width: 32%;
+  }
+
+  #gre-controls ~ * {
+    margin-left: calc(32% + 1.5rem);
+  }
+}
+
+/* Small screens: the stacked layout with the sticky summary. */
+@media (width < 768px) {
+  #gre-summary {
+    position: sticky;
+    top: 2.4rem;
+    z-index: 1;
+    background: var(--md-default-bg-color);
+  }
+
+  #gre-root * {
+    scroll-margin-top: calc(2.4rem + var(--gre-summary-block, 0px));
+  }
+}
