@@ -10,8 +10,8 @@
 //   the PDD §4.2 order, values by `displayRound` at the D-23 decimals of
 //   config.ts, counts by `formatCount`, the null mark for a null
 //   statistic, and the PDD §4.3 line.
-//
-// The `chartSummary` cases of the same row join this file with T-41.
+// - `chartSummary` (src/views/summary.ts): the caption sentence's N is
+//   `formatCount(counts.valid)`, unchanged by `counts.excludedNull`.
 
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
@@ -22,6 +22,7 @@ import { MEASUREMENT_NAMES } from '../src/state/state';
 import type { Stats } from '../src/stats/stats';
 import { displayRound, formatCount } from '../src/views/format';
 import { statsRows, unclassifiedLine } from '../src/views/stats-table';
+import { chartSummary } from '../src/views/summary';
 
 /** The §7.3 display-rounding vectors, in that order: `[value, decimals, expected]`. */
 const DISPLAY_ROUNDING_VECTORS: readonly (readonly [number, number, string])[] = [
@@ -180,6 +181,39 @@ describe('unclassifiedLine', () => {
     assert.equal(
       unclassifiedLine(3434),
       'Unclassified records excluded from scarp-type views: 3,434 (zero-slip initial stages).',
+    );
+  });
+});
+
+// --------------------------------------------------------------------
+// chartSummary (T-41): the caption sentence's N is `formatCount(counts.valid)`.
+// --------------------------------------------------------------------
+
+describe('chartSummary', () => {
+  const stats: Stats = { median: 1.235, p16: 0.5, p84: 2.004, min: 0.1, max: 4, mean: 1.3, sd: 0.7 };
+
+  test('prints N as formatCount(counts.valid) and the statistics as quantities', () => {
+    assert.equal(
+      chartSummary(stats, { valid: 1234, excludedNull: 7 }, 'scarp_height', config),
+      `Scarp height (m): ${formatCount(1234)} valid measurements, median 1.24 m, 16th–84th percentile range 0.50 m to 2.00 m.`,
+    );
+    assert.equal(
+      chartSummary(stats, { valid: 30, excludedNull: 0 }, 'scarp_dip', config),
+      'Scarp dip (°): 30 valid measurements, median 1°, 16th–84th percentile range 1° to 2°.',
+    );
+  });
+
+  test('is unchanged when only counts.excludedNull changes', () => {
+    assert.equal(
+      chartSummary(stats, { valid: 1234, excludedNull: 0 }, 'dzw', config),
+      chartSummary(stats, { valid: 1234, excludedNull: 99 }, 'dzw', config),
+    );
+  });
+
+  test('changes when counts.valid changes', () => {
+    assert.notEqual(
+      chartSummary(stats, { valid: 1234, excludedNull: 0 }, 'dzw', config),
+      chartSummary(stats, { valid: 1235, excludedNull: 0 }, 'dzw', config),
     );
   });
 });

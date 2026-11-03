@@ -1473,6 +1473,14 @@ are recorded at the end of
   the owner's. The
   [Task format](ip.md#task-format) of the implementation plan records
   the rule.
+- **Errata from the T-40 and T-43 reviews.** T-40's Done-when counted
+  "approximately 0–5 m" in `copy.json` once, but T-47's verbatim PDD
+  §5.6 entry already contains it, and T-40 adds the separate PDD §3.4
+  entry; the check now matches that entry's JSON string. DDD §5.6
+  names `settingsText(state)`, as §5.1, §5.7, and §5.9 do. DDD §5.8's
+  glossary linker also skips text inside an `<a>`, where a link would
+  nest one link in another, so the field-source terms inside the
+  overlay legend's source links stay unlinked there.
 - **T-32 follow-up: the sort of `validValues`.** On 2026-11-03 the
   owner adopted a speedup that preserves the function: `validValues`
   of [T-32](ip.md#t-32--statistics-module) (Statistics module) builds
