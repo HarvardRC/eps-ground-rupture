@@ -1,11 +1,20 @@
-# Two check steps. "Check links and anchors" checks the relative links
-# and heading anchors of the Markdown that GitHub renders (docs/, the
-# READMEs, notes/ — everything tracked outside the MkDocs docs_dir):
-# the strict site build never sees these files, so without it a renamed
-# heading or a moved file breaks their links silently.
+# Four steps, in the order of DDD §6.3 (docs/app/ddd.md). "Check links
+# and anchors" checks the relative links and heading anchors of the
+# Markdown that GitHub renders (docs/, the READMEs, notes/ — everything
+# tracked outside the MkDocs docs_dir): the strict site build never sees
+# these files, so without it a renamed heading or a moved file breaks
+# their links silently.
+# "Check PDD agreement" runs .github/scripts/check_pdd_agreement.py, the
+# check of DDD §5.13 that the settings and copy registries of the web
+# application and the copy-marked blocks of scenario.md and glossary.md
+# agree with the PDD and DDD sections they cite, so a PDD-only or
+# DDD-only edit re-runs it; it prints the SC-7 listing.
 # "Check traceability" runs .github/scripts/check_traceability.py, the
 # lint of the traceability matrices of DDD §8 (docs/app/ddd.md) and
-# IP §7 (docs/app/ip.md), which uses the Python standard library only.
+# IP §7 (docs/app/ip.md).
+# "Self-test doc scripts" runs every test_*.py self-test of
+# .github/scripts/. Every script there uses the Python standard
+# library only.
 # No paths filter: the links also point into subprojects/ and
 # dashboards/, so a rename anywhere can break them, and the job
 # installs nothing and runs in seconds. Kept separate from tests.yml,
@@ -35,5 +44,11 @@ jobs:
       - name: Check links and anchors
         run: python .github/scripts/check_doc_links.py
 
+      - name: Check PDD agreement
+        run: python .github/scripts/check_pdd_agreement.py
+
       - name: Check traceability
         run: python .github/scripts/check_traceability.py
+
+      - name: Self-test doc scripts
+        run: python -m unittest discover -s .github/scripts -p 'test_*.py'

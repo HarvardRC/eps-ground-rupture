@@ -1,0 +1,121 @@
+[
+  {
+    "key": "pdd5.2.shortDisclaimer",
+    "source": "docs/app/pdd.md#52-short-disclaimer",
+    "part": 0,
+    "text": "Research tool: simulated results, not site predictions. Interpret with professional judgment. [Full disclaimer →]",
+    "slots": []
+  },
+  {
+    "key": "pdd5.3.populationExplainer",
+    "source": "docs/app/pdd.md#53-population-explainer-fr-s6",
+    "part": 0,
+    "text": "**All model stages in the slip window** counts every recorded stage of every matching simulation inside your slip range — the measurements recorded at any stage within the range; with no slip window set, it counts every recorded stage. **One state per trial** counts only the last stage inside the window for each simulation — the measurements at the upper end of your range. With no slip window set, one state per trial is each simulation's final recorded state (approximately 5 m of slip). The two populations answer different questions and are never mixed.",
+    "slots": []
+  },
+  {
+    "key": "pdd5.4.scarpDipNotice",
+    "source": "docs/app/pdd.md#54-scarp-dip-provisional-notice-fr-o4-d-5",
+    "part": 0,
+    "text": "Provisional data: scarp-dip values await a correction from the research group; the largest errors are concentrated in the Simple scarp types. Treat scarp-dip results as provisional.",
+    "slots": []
+  },
+  {
+    "key": "pdd5.5.statisticsFraming",
+    "source": "docs/app/pdd.md#55-statistics-framing-cr-5",
+    "part": 0,
+    "text": "These are statistics of the matching simulation records. The median is a typical result among them; the 84th percentile is a commonly used higher fractile in deterministic engineering practice. No statistic here is a recommended design value — selecting a design value remains the responsibility of the engineer of record.",
+    "slots": []
+  },
+  {
+    "key": "pdd5.6.assistText",
+    "source": "docs/app/pdd.md#56-conversion-assist-fr-s5-d-3",
+    "part": 0,
+    "text": "You entered an anticipated vertical surface offset of {X} m. For each selected fault dip, this converts to the fault slip at depth shown here, using the ensemble's tested dip-specific relationship. The conversion assumes scarp height is approximately equal to vertical surface displacement — closest for Simple and Monoclinal scarps; Pressure Ridge scarps stand higher than the fault's vertical displacement, so the conversion tends to overstate slip where they dominate.",
+    "slots": ["X"]
+  },
+  {
+    "key": "pdd5.6.perDipLine",
+    "source": "docs/app/pdd.md#56-conversion-assist-fr-s5-d-3",
+    "part": 1,
+    "text": "{Dip}°: converted slip ≈ {Y} m — beyond the modeled range (approximately 0–5 m). Coverage for this dip is partial; matching simulations exist only up to the modeled maximum (≈5 m of slip).",
+    "slots": ["Dip", "Y"]
+  },
+  {
+    "key": "pdd5.6.rejectedEntryLine",
+    "source": "docs/app/pdd.md#56-conversion-assist-fr-s5-d-3",
+    "part": 2,
+    "text": "Enter the anticipated vertical surface offset (m) as a non-negative number — for example, 3 or 0.5. The value typed could not be read as one; the results still show the last valid scenario.",
+    "slots": []
+  },
+  {
+    "key": "pdd5.7.overlayFraming",
+    "source": "docs/app/pdd.md#57-field-overlay-framing-cr-6-fr-o5",
+    "part": 0,
+    "text": "Field measurements (black): **analogous, not identical.** Field and simulated values represent related but non-identical quantities; each field source is named with its own measure.",
+    "slots": []
+  },
+  {
+    "key": "pdd5.7.widthDefault",
+    "source": "docs/app/pdd.md#57-field-overlay-framing-cr-6-fr-o5",
+    "part": 1,
+    "text": "Width overlays default to measurements under the paper's 50 m criterion; larger field widths may include distributed, multi-strand deformation the model does not represent.",
+    "slots": []
+  },
+  {
+    "key": "pdd5.7.showAllWidths",
+    "source": "docs/app/pdd.md#57-field-overlay-framing-cr-6-fr-o5",
+    "part": 2,
+    "text": "[Show all field widths]",
+    "slots": []
+  },
+  {
+    "key": "pdd5.7.widthScopeNote",
+    "source": "docs/app/pdd.md#57-field-overlay-framing-cr-6-fr-o5",
+    "part": 3,
+    "text": "Deformation-zone width measures the main modeled rupture zone. Real earthquakes can also produce separate deformation away from the main trace, which the model does not represent.",
+    "slots": []
+  },
+  {
+    "key": "pdd5.8.smallResultWarning",
+    "source": "docs/app/pdd.md#58-small-and-empty-results-fr-o3-d-11",
+    "part": 0,
+    "text": "Only {N} valid measurements match this scenario — too few for a reliable distribution. Interpret with caution.",
+    "slots": ["N"]
+  },
+  {
+    "key": "pdd5.8.suppressionNotice",
+    "source": "docs/app/pdd.md#58-small-and-empty-results-fr-o3-d-11",
+    "part": 1,
+    "text": "Fewer than 10 valid measurements match — too few for a reliable distribution. Showing the statistics table only; interpret with caution.",
+    "slots": []
+  },
+  {
+    "key": "pdd5.8.noValidMeasurement",
+    "source": "docs/app/pdd.md#58-small-and-empty-results-fr-o3-d-11",
+    "part": 2,
+    "text": "{X} simulation records match this scenario, but none has a valid {measurement} value — no distribution can be computed. The records appear in the excluded count of the statistics table.",
+    "slots": ["X", "measurement"]
+  },
+  {
+    "key": "pdd5.8.emptyExplainer",
+    "source": "docs/app/pdd.md#58-small-and-empty-results-fr-o3-d-11",
+    "part": 3,
+    "text": "No simulations match this scenario.",
+    "slots": []
+  },
+  {
+    "key": "pdd5.8.emptyRelaxation",
+    "source": "docs/app/pdd.md#58-small-and-empty-results-fr-o3-d-11",
+    "part": 4,
+    "text": "Relaxing any one of {condition(s)} alone would produce matches.",
+    "slots": ["condition(s)"]
+  },
+  {
+    "key": "pdd5.9.lowSlipCaveat",
+    "source": "docs/app/pdd.md#59-low-slip-caveat-d-4-interim",
+    "part": 0,
+    "text": "Your window includes very small slip values, where automated measurements can be less reliable. The research group is reviewing measurement reliability at low slip; treat results near zero slip with extra caution.",
+    "slots": []
+  }
+]

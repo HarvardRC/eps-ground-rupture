@@ -1,0 +1,82 @@
+{
+  "smallResultWarnBelow": {
+    "value": 30,
+    "governs": "the valid-measurement count below which a measurement panel shows the small-result warning",
+    "decision": "D-11",
+    "source": "docs/app/pdd.md#45-small-empty-and-partial-results-fr-o3-d-11-proposed",
+    "quote": "N < 30 valid",
+    "quoted": "30"
+  },
+  "chartFloorBelow": {
+    "value": 10,
+    "governs": "the valid-measurement count below which a measurement panel's distribution chart is suppressed",
+    "decision": "D-11",
+    "source": "docs/app/pdd.md#45-small-empty-and-partial-results-fr-o3-d-11-proposed",
+    "quote": "N < 10 valid",
+    "quoted": "10"
+  },
+  "lowSlipCaveatBelowMetres": {
+    "value": 0.5,
+    "governs": "the slip, in metres, below which an active window that includes it carries the low-slip caveat",
+    "decision": "D-4",
+    "source": "docs/app/pdd.md#46-low-slip-caveat-d-4-interim",
+    "quote": "includes slip below 0.5 m",
+    "quoted": "0.5"
+  },
+  "displayPrecision.scarp_height": {
+    "value": 0.01,
+    "governs": "the display precision of scarp height, in metres",
+    "decision": "D-23",
+    "source": "docs/app/pdd.md#42-statistics-table-fr-o2",
+    "quote": "scarp height and fault slip 0.01 m",
+    "quoted": "0.01"
+  },
+  "displayPrecision.slip": {
+    "value": 0.01,
+    "governs": "the display precision of fault slip, in metres",
+    "decision": "D-23",
+    "source": "docs/app/pdd.md#42-statistics-table-fr-o2",
+    "quote": "scarp height and fault slip 0.01 m",
+    "quoted": "0.01"
+  },
+  "displayPrecision.dzw": {
+    "value": 0.1,
+    "governs": "the display precision of deformation-zone width, in metres",
+    "decision": "D-23",
+    "source": "docs/app/pdd.md#42-statistics-table-fr-o2",
+    "quote": "deformation-zone width 0.1 m",
+    "quoted": "0.1"
+  },
+  "displayPrecision.scarp_dip": {
+    "value": 1,
+    "governs": "the display precision of scarp dip, in degrees",
+    "decision": "D-23",
+    "source": "docs/app/pdd.md#42-statistics-table-fr-o2",
+    "quote": "scarp dip 1°",
+    "quoted": "1"
+  },
+  "displayPrecision.counts": {
+    "value": "exact",
+    "governs": "the display precision of counts",
+    "decision": "D-23",
+    "source": "docs/app/pdd.md#42-statistics-table-fr-o2",
+    "quote": "counts exact",
+    "quoted": "exact"
+  },
+  "displayPrecision.shares": {
+    "value": "whole percentages",
+    "governs": "the display precision of shares",
+    "decision": "D-23",
+    "source": "docs/app/pdd.md#42-statistics-table-fr-o2",
+    "quote": "shares whole percentages",
+    "quoted": "whole percentages"
+  },
+  "logScaleMinDecades": {
+    "value": 2,
+    "governs": "the number of decades the matched deformation-zone-width range must exceed for the panel to offer the logarithmic-scale toggle",
+    "decision": null,
+    "source": "docs/app/pdd.md#41-measurement-views-fr-o1",
+    "quote": "more than two decades",
+    "quoted": "two"
+  }
+}
