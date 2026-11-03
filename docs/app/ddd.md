@@ -6250,6 +6250,22 @@ establishes verbatim
 reproduction, not that a fixed-here string is acceptable — that is
 the SC-7 review.
 
+**P2 display preferences.** The standalone reader setting of
+[PDD §4.9 — Display preferences (FR-G6, P2)](pdd.md#49-display-preferences-fr-g6-p2)
+controls which content is shown and its target display size and
+layout. It applies to small laptop windows as well as later tablet
+and phone views within this application. This revision records its
+scope; it does not add the setting to the MVP renderer or to
+`ScenarioDisplayState`. The P2 design must specify the preference
+schema, defaults, validation, rendering and focus behavior, and any
+persistence or recovery changes after the PDD settles their product
+behavior. The selected Scenario, data vintage, computed results,
+scientific precision, and cumulative-curve accuracy remain unchanged.
+The design and acceptance prerequisites are in
+[§9](#9-deferred-and-out-of-scope); the temporary measurement
+viewport of [§7.6](#76-performance-and-compatibility-measurements)
+implements none of this setting.
+
 References:
 
 - [HLDD §6 — Application architecture](hldd.md#6-application-architecture)
@@ -11192,8 +11208,16 @@ upgrade of the pinned package (§2).
     `testMatch: '*.measure.ts'` (the
     [§7.6](#76-performance-and-compatibility-measurements) suite),
     `fullyParallel: false`, `retries: 0`,
-    `use: { headless: false, trace: 'off', video: 'off', screenshot: 'off' }`
-    — headed, under `xvfb-run` on the reference VM. Playwright 1.47.2
+    `use: { headless: false, viewport: { width: 1280, height: 1080 }, trace: 'off', video: 'off', screenshot: 'off' }`
+    — headed, under `xvfb-run` on the reference VM, at the temporary
+    1280 × 1080 CSS px measurement viewport of
+    [PDD §9.1](pdd.md#91-performance-budgets-d-9-proposed), tall
+    enough for the first result's chart and statistics table (§7.6).
+    It is a measurement condition, not a minimum reader window size
+    or the P2 display preference of
+    [PDD §4.9](pdd.md#49-display-preferences-fr-g6-p2). The desktop
+    and mobile functional projects retain their own viewports.
+    Playwright 1.47.2
     has no per-project `workers`, so every invocation of this project
     carries `--workers=1` (§7.6).
 - **Invocation.** `webappBrowserTest` runs, from
@@ -12055,7 +12079,18 @@ when the selected measurement's statistics `<table>` and chart `<svg>`
 — or the notice standing in for its chart, or `#gre-state` when no record
 matches — are connected with a non-zero `getBoundingClientRect()`
 area; for `egr:first-result` use the initial selected measurement and
-require them also to intersect the viewport. A
+require them also to intersect the viewport — the `measure` project's
+temporary 1280 × 1080 CSS px viewport
+([PDD §9.1](pdd.md#91-performance-budgets-d-9-proposed),
+[§7.5](#75-browser-test-lane)). The T-46 review found the statistics
+table below the fold after the at-mount scroll at 1280 × 720. The
+taller measurement window preserves this first-result endpoint for
+the MVP; it supplies no evidence that both components fit a small
+laptop window. Before P2 implementation is scheduled, its target
+sizes and visible-content endpoints must be settled in
+[PDD §4.9](pdd.md#49-display-preferences-fr-g6-p2) and specified here
+([§9](#9-deferred-and-out-of-scope)). Before release, each implemented
+view must be measured against those conditions. A
 repetition whose mark carries `detail.visible === false` fails. In a
 browser without `MessageChannel` or the User Timing Level 3 options
 object, `markAfterPaint` records nothing and never throws: the marks
@@ -12732,7 +12767,7 @@ Kind, Check, and Status columns against the corrected document on
 every row but those added by hand, the Source and Obligation cells
 are the sweep's extraction, unchanged. The sweep has not run again
 since `36abc56`, and until it does, rows added by hand, the one
-exception to that rule, carry what eight later source changes direct
+exception to that rule, carry what later source changes direct
 at this document and the implementation plan: the row whose Source
 reads `HLDD §2 L235-246 (amended 2026-10-30)`, for the HLDD's amended
 Performance budgets constraint; the two `PDD §4.1` rows on the
@@ -12742,6 +12777,11 @@ accuracy, for the amendment of 2026-11-01 to
 the `PDD §7.3` row on one-shot reload recovery, for the section of
 2026-11-01
 [PDD §7.3 — Reload recovery (MVP)](pdd.md#73-reload-recovery-mvp);
+the rows for [PRD FR-G6](prd.md#fr-g6-display-preferences-p2),
+[PDD §4.9](pdd.md#49-display-preferences-fr-g6-p2), and the temporary
+measurement viewport of
+[PDD §9.1](pdd.md#91-performance-budgets-d-9-proposed), for the
+owner's display-preference clarification of 2026-11-03;
 and the rows of [§8.4](#84-from-the-adrs-and-the-adr-process) whose
 Source names
 [ADR-0016 — Performance reference environment — an on-demand AWS VM defined by Terraform](../adr/0016-performance-reference-environment.md),
@@ -13089,6 +13129,7 @@ deliberately keeps.
 | PDD §4.7 | Kern County preset contents and walkthrough steps | §5.8, §3.4 | text+owner+schedule | §5.8; §3.4; OA-2; T-48 | owner-pending |
 | PDD §4.7 | Kern preset ships only after D-6 (release sequencing) | IP §2 T-48, IP §3 sequence, IP §4 OA-2 | schedule+owner | T-48; OA-2 | owner-pending |
 | PDD §4.8 | inverse-mode results (P2): condition panels, N semantics, accessible table | §5.14 | text+schedule | §5.14; IP §5 | parked |
+| PDD §1 D-24 + §4.9 | P2 display preferences: reader-selected content and target display size/layout, including small laptops and later tablet/phone views; details and acceptance fixed before implementation | §5.8, §9, IP §5 | text+schedule | §5.8; §9; IP §5 | parked |
 | PDD §5 preamble | copy deck canonical; CR-10 approval gate | Introduction, §5.8 | text+test+owner | Introduction — Verification contract; §5.8; .github/scripts/check_pdd_agreement.py (T-47); G-4; OA-4 | owner-pending |
 | PDD §5.1 | standing disclaimer text and placement (D-10 placeholder pending) | §5.8, §6.1 | test+release+owner | .github/scripts/check_pdd_agreement.py::step 7 (T-47); subprojects/webapp/playwright/specs/render.spec.ts (T-60); subprojects/webapp/playwright/specs/mount.spec.ts (T-60); subprojects/webapp/playwright/specs/failure-states.spec.ts (T-60); §7.7 item 7; G-5; OA-3 | owner-pending |
 | PDD §5.2 | short disclaimer copy | §5.8 | test | .github/scripts/check_pdd_agreement.py::step 6 (T-47); subprojects/webapp/playwright/specs/failure-states.spec.ts (T-60); subprojects/webapp/playwright/specs/mount.spec.ts (T-60) | planned |
@@ -13122,6 +13163,7 @@ deliberately keeps.
 | PDD §8.4 | contact page content gated on research-group-approved URLs (R-15) | §6.4 | text+schedule | §6.4; IP §5 | parked |
 | PDD §9.1 | performance budgets and reference conditions (D-9) | §7.6, §1 DD-12, §2 | text+measure+owner | §7.6; §1 DD-12; ADR-0016; §7.6 report: workloads (T-61); §7.6 report: network (T-61); §7.6 report: environment (T-59, T-61); OA-12 | owner-pending |
 | PDD §9.1 | first-meaningful-render benchmark end point | §7.6 | text+measure | §7.6; §7.6 report: workloads (T-61) | planned |
+| PDD §9.1 (amended 2026-11-03) | temporary 1280 × 1080 measurement viewport preserves the MVP chart-and-table endpoint; it sets no minimum reader window size and supplies no small-laptop fit evidence | §7.5, §7.6 | text+measure | §7.5; §7.6; §7.6 report: workloads (T-61) | planned |
 | PDD §9.1 | budget means owned by HLDD; heavy-runtime ban | Introduction, §2 | text | Introduction — Authority and change control; §2 | designed |
 | PDD §9.2 | browser and mobile baseline (D-16) | §7.6, §5.11 | test+release | subprojects/webapp/test/compat.test.ts (T-61); subprojects/webapp/playwright/specs/keyboard-responsive.spec.ts (T-60); §7.7 item 1; §7.7 item 15 | planned |
 | PDD §9.3 | accessibility target and chart text alternatives (D-17) | §5.11 | test+release | subprojects/webapp/playwright/specs/a11y.spec.ts (T-60); subprojects/webapp/playwright/specs/keyboard-responsive.spec.ts (T-60); subprojects/webapp/test/chart-text.test.ts (T-41); §7.7 item 14 | planned |
@@ -13158,6 +13200,7 @@ deliberately keeps.
 | PRD §5 intro | decision split: product definition → PDD, technical platform → HLDD; DDD must not independently redefine either | Introduction | text | Introduction (Authority and change control) | designed |
 | PRD §5.1 FR-S5 | multi-dip converted-window behavior — PDD owns (see §9.5 row 3) | §5.5 | text+test | §5.5; §5.3 (each dip's own window); subprojects/webapp/test/parity.ts::GS-1 (T-35); subprojects/webapp/playwright/specs/interactions.spec.ts (T-60) | planned |
 | PRD §5.6 FR-G5 | dashboard-surface implementation decision recorded in HLDD + ADR; not DDD's to make | Introduction, §5.1 | text | Introduction (Authority and change control); §5.1 (HLDD §4.2 surface map, ADR-0010, cited) | designed |
+| PRD §5.6 FR-G6 | standalone display preferences are P2; presentation changes preserve scenario, results, scientific precision, provenance, and required context | §5.8, §9, IP §5 | text+schedule | §5.8; §9; IP §5 | parked |
 | PRD §6 intro | data design must preserve four-way distinction (simulation records / derived statistics / field measurements / reader-facing exports) | §3 | text | §3 (chapter introduction: the four-way distinction); §3.1; §3.4; §3.5; §3.6 | designed |
 | PRD §6.1 DR-1 | no displayed number outside pipeline-derived versioned exports (never hardcoded) | Introduction | text+test | Introduction (Verification contract); .github/scripts/check_pdd_agreement.py::step 5 (T-47); subprojects/webapp/test/parity.ts (T-35); subprojects/webapp/playwright/specs/golden-scenario.spec.ts (T-60) | planned |
 | PRD §6.1 DR-1 | dem.csv excluded as primary data source for the app | §3 | text | §3 (chapter introduction: dem.csv is not a product input); §4.1 step 1 (run-private views, provenance inputs) | designed |
@@ -13425,7 +13468,9 @@ References:
   amend, added ADR-0018's count-validation and completeness rows,
   ADR-0019's two rows, and the row of ADR-0017's amendment of that
   day, and renumbered the HLDD §2 row's Source to the amended HLDD's
-  lines.
+  lines. The correction of 2026-11-03 added the PRD FR-G6 and PDD
+  §4.9 display-preference rows and the PDD §9.1 temporary-viewport
+  row.
 - [HLDD §2 — Architectural constraints](hldd.md#2-architectural-constraints)
   (Performance budgets, amended 2026-10-30);
   [PDD §9.1 — Performance budgets (D-9, Proposed)](pdd.md#91-performance-budgets-d-9-proposed)
@@ -13461,8 +13506,28 @@ authority that owns it:
   serialization) object, `scenario.json` schema version 2, and
   `conditions.csv`), chart export, and the later product pages
   ([§6.4](#64-product-pages-beyond-the-scenario-page-p2p3)). Their
-  scheduling belongs to the implementation plan. Shared links are
-  the exception below.
+  scheduling belongs to the implementation plan. The shared-links
+  grammar and display preferences need the further design below.
+- **Display preferences (P2).** The owner decided the scope of
+  [FR-G6](prd.md#fr-g6-display-preferences-p2) on 2026-11-03:
+  a standalone setting for visible content and target display size
+  and layout, including small laptop windows; later tablet and phone
+  views use the same capability. This is P2 delivery priority, not
+  the Phase-2 publication of the MVP. The remaining product choices
+  are explicitly open in
+  [PDD §4.9](pdd.md#49-display-preferences-fr-g6-p2). Before an
+  executable P2 task is drafted, settle those choices there, then
+  specify the display-state schema and interfaces, component
+  visibility, layout behavior, focus and accessibility, persistence
+  and recovery, and the test matrix here. Keep scenario computation,
+  data identity, scientific precision, and the cumulative-curve
+  drawing bound unchanged. Acceptance must exercise the selected
+  content at each declared target size, including a small laptop
+  window, and the corresponding first-result endpoint and time
+  budgets; the temporary 1280 × 1080 measurement viewport cannot
+  stand in for that evidence. No exact control, preset dimensions,
+  or storage contract is chosen in this revision. Work is parked in
+  [IP §5](ip.md#5-parked-capabilities-p2p3).
 - **Shared links.** Only the parameter names are reserved; the value
   grammar is deferred
   ([§5.6](#56-scenario-state-and-url-encoding)) to the revision of
@@ -13557,7 +13622,8 @@ authority that owns it:
 *Verification (planned):* the owner's review of this section checks
 that every deferral sentence of
 [§1](#1-ddd-decision-register)–[§7](#7-testing-specification) — in
-§1, §2, §3.1, §3.4, §4.4, §5.6, §5.12, §5.13, §5.14, §6.4, and §7.6 —
+§1, §2, §3.1, §3.4, §4.4, §5.6, §5.8, §5.12, §5.13, §5.14, §6.4,
+and §7.6 —
 has its item above, and that each item names its owning authority.
 
 References:

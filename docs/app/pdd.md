@@ -31,6 +31,7 @@ staged documents (PRD → PDD → HLDD). It has two parts:
   * [4.6 Low-slip caveat (D-4, Interim)](#46-low-slip-caveat-d-4-interim)
   * [4.7 Kern County worked example (FR-O6, D-6 Open)](#47-kern-county-worked-example-fr-o6-d-6-open)
   * [4.8 Inverse-mode results (FR-X2, P2)](#48-inverse-mode-results-fr-x2-p2)
+  * [4.9 Display preferences (FR-G6, P2)](#49-display-preferences-fr-g6-p2)
 - [5. Copy deck](#5-copy-deck)
   * [5.1 Standing disclaimer (CR-4; D-10 Open)](#51-standing-disclaimer-cr-4-d-10-open)
   * [5.2 Short disclaimer](#52-short-disclaimer)
@@ -123,6 +124,7 @@ named in the last column carry the detail.
 | D-21 | Success criteria and acceptance walkthroughs. | §2.2 | Product owner | Proposed | §10. |
 | D-22 | Default displacement-window state. | FR-S5, FR-S6, FR-S8 | Product owner | Proposed | No active window by default ("slip: any"); GS-0 and GS-7 pin it; §3.4. |
 | D-23 | Reader-facing display precision per quantity. | FR-O2, §10.1 note | Product owner | Proposed | Scarp height and slip 0.01 m; width 0.1 m; scarp dip 1° (D-5 provisionality); counts exact; shares whole percent; §4.2. |
+| D-24 | Independent display preferences, including small laptop windows and later tablet and phone views. | FR-G6, C12, NFR-4 | Product owner | Decided (2026-11-03) | Scope agreed: P2 reader choice of visible result components and display size and layout within the existing application; §4.9. Until then, §9.1 uses a temporary 1280 × 1080 measurement window. The detailed P2 choices listed in §4.9 remain open before implementation. |
 
 ---
 
@@ -182,6 +184,9 @@ Serves: FR-S1–S8, C1. Layout: on wide screens, an input rail beside
 the results; on small screens, inputs stack above results with a
 persistent summary of the active scenario. Every control change
 updates results immediately (NFR-3); there is no "submit" step.
+P2 adds the independent display preferences of
+[§4.9](#49-display-preferences-fr-g6-p2); the current responsive
+layout remains the MVP behavior.
 
 A one-line **scenario summary** restates the active scenario in words
 above the results at all times (FR-G3: generated from state, never
@@ -385,7 +390,10 @@ when that work is opened, with performance verified for each option.
 
 Default measurement on load: scarp height; the other panels are one
 action away (tabs or stacked sections — final arrangement is visual
-design, not a product decision). The deformation-zone-width panel
+design, not a product decision). Choosing the visible result
+components and target display size is the separate P2 setting of
+[§4.9](#49-display-preferences-fr-g6-p2), not the cumulative-curve
+accuracy choice above. The deformation-zone-width panel
 always carries the width-scope note of §5.7. Binning: automatic bin
 width scaled to the matching range and count, with the bin rule stated in the
 panel's info note; axes linear by default; deformation-zone width may
@@ -525,6 +533,41 @@ alternative for condition charts is a per-value count-and-share
 table — FR-O2's statistic set applies to measurements, not
 conditions. No map from conditions back to "your site" is ever
 drawn.
+
+### 4.9 Display preferences (FR-G6, P2)
+
+Serves: [FR-G6 — Display preferences](prd.md#fr-g6-display-preferences-p2),
+C12, NFR-4, and NFR-5. The owner decided this scope on 2026-11-03
+(D-24). P2 means the delivery priority after the MVP, not the
+prototype-to-public-release phases of the MVP.
+
+Within the scenario page, the reader chooses which result
+components to show and the display size and layout they should
+fit. This setting is independent of device detection: a reader
+using a small laptop window can select a suitable view without
+being classified as a phone user. Tablet and phone views added
+later use the same setting. The capability is not limited to two
+views or to a switch between desktop and phone.
+
+Here, resolution means display size and layout, not chart-image
+export resolution, numeric display precision, or cumulative-curve
+accuracy. A change of view leaves the accepted scenario, matching
+records, calculated statistics and percentiles, scientific and
+stored-data precision, and data provenance unchanged. Applicable
+warnings, counts, population context, and accessible alternatives
+remain available as required for the results shown; the setting
+does not waive §5's copy rules, §9.3, or SC-5.
+
+**Remaining product choices.** The scope is agreed. The P2
+definition must fix the selectable content and combinations,
+layout choices and their target dimensions, defaults and reset
+behavior, whether preferences
+persist or travel in shared links, and behavior when the actual
+window differs from the selected size. It must also define the
+accessibility and performance acceptance matrix for those views,
+including a small laptop window and the tablet and phone views
+when each is introduced. No exact preset dimensions or storage
+behavior are implied by the temporary measurement window below.
 
 ---
 
@@ -885,6 +928,19 @@ table; with no matching records, the empty-state explainer replaces
 both. A heading, the controls, or a loading indicator alone does not
 count. The repeat-visit budget uses the same end point.
 
+**Temporary measurement window (D-24).** Until the P2 display
+preferences of [§4.9](#49-display-preferences-fr-g6-p2) ship, the
+reference measurement uses a 1280 × 1080 CSS-pixel browser content
+area. The owner accepted this increased height on 2026-11-03
+because the current chart and statistics table do not both fit
+after the initial scroll at 1280 × 720. The first-render endpoint
+still requires both, or their specified replacements, on screen.
+This is a temporary performance-test accommodation, not a minimum
+supported window height or evidence that the current view fits a
+small laptop without scrolling. P2 must define and measure each
+supported view at its target dimensions, with the first-render
+endpoint appropriate to that view's chosen content, before release.
+
 The budgets bind the product; how they are met (format, caching,
 precomputation) is the HLDD's problem (DR-6). No browser-based Python
 runtime or comparably heavy environment (NFR-3).
@@ -895,6 +951,11 @@ Evergreen Chrome, Edge, Firefox, and Safari versions released within
 12 months before each product release; iOS Safari and Android Chrome in
 the same window; no legacy-browser support. Mobile floor: fully
 usable at 360 px width, no hover-dependent essentials (NFR-4).
+The temporary height in §9.1 does not change this floor: smaller
+windows retain usable scrolling, resizing, and accessible reflow.
+P2's display preferences address what to show within constrained
+windows, including small laptops as well as later tablet and phone
+views (§4.9).
 
 The browser window was narrowed at the owner's review on 2026-11-01.
 When a required browser feature is unavailable, the page names the
@@ -914,6 +975,9 @@ statistics table is the canonical text alternative for every
 measurement chart; inverse-mode condition charts use §4.8's per-value
 count-and-share table. Chart colors follow FR-G2, including its
 never-color-alone rule.
+The P2 display choices of §4.9 must preserve an accessible way to
+obtain the information behind every shown chart; choosing a
+compact view does not remove that obligation.
 
 ### 9.4 Releases
 
@@ -952,6 +1016,13 @@ Serves: §2.2 (deferral), US-1–US-5, DR-1, NFR-7.
   unaffected by the release (NFR-7).
 - **SC-7 (scientific sign-off):** the research group has approved the
   reader-facing texts of §5 (CR-10).
+
+When P2 display preferences ship, acceptance also verifies that
+changing visible components or display size preserves the scenario
+and results, retains the context and accessible alternatives
+required for shown results, and meets the view-specific conditions
+defined in §4.9. The temporary measurement window alone supplies
+none of that evidence.
 
 > The pipeline's statistical definitions and full-precision reference
 values are authoritative. Product tests must reproduce reference values
