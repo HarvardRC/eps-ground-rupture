@@ -61,12 +61,11 @@ async function main(argv: readonly string[]): Promise<void> {
   const vintage = await decodeVintage(manifestBytes, read, { exportVersion, schemaVersions: [1] });
   const decodeMs = performance.now() - decodeStart;
 
-  const scenario = defaultScenario(vintage.manifest);
   const times: number[] = [];
   let records = 0;
   for (let run = 0; run < RUNS; run++) {
     const start = performance.now();
-    const selection = query(vintage, scenario);
+    const selection = query(vintage, defaultScenario(vintage.manifest));
     times.push(performance.now() - start);
     records = selection.matchingRecords;
   }
