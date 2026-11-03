@@ -162,13 +162,14 @@ Then:
 
 ## Licensing
 
-Three kinds of material live here under three different terms. Reuse the
+Four kinds of material are published here, under four different terms. Reuse the
 one that matches what you are taking.
 
 | Material | Terms |
 |---|---|
 | **Code** — the Python pipeline, the Tableau workbooks, the site's build configuration, scripts and styling | [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) — see `LICENSE` |
 | **Prose** — the companion site's written content and this repository's documentation | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) — see `LICENSE-docs` |
+| **Derived data exports** — the files of each data vintage, which the Ground Rupture Explorer loads, published as assets of this repository's `data-vN` prereleases | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), with attribution to each source — assumed until the research group confirms it; see [`data/REDISTRIBUTION.md`](data/REDISTRIBUTION.md) |
 | **Figures from the paper** — the pre-typeset originals shown on the companion site | © The Author(s) 2025. Shown under the publisher's author-sharing terms: **non-commercial use, no derivatives**, with the full citation alongside each figure. |
 
 Two things those terms do **not** cover:
@@ -179,7 +180,8 @@ Two things those terms do **not** cover:
   site.
 - **The input datasets.** The DEM experiments, the FDHI flatfile, the SURE
   database and the Kern County compilation are published elsewhere under
-  their own terms and are not redistributed here. `data/README.md` names
+  their own terms and are not redistributed here; only the derived
+  exports in the table above are. `data/README.md` names
   each source, and the companion site's
   [How to cite this data](https://harvardrc.github.io/eps-ground-rupture/data/#how-to-cite-this-data)
   lists them with DOIs.
