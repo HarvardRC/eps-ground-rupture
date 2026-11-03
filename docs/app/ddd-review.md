@@ -1587,6 +1587,23 @@ are recorded at the end of
   [T-01](ip.md#t-01--gradle-webapp-subproject) (Gradle webapp
   subproject) keeps 1.47.2, the pins it installed and checked for its
   Done record; DDD §2 governs the pins from this revision.
+- **T-60 review errata.** Two §7.5 sentences could not hold in the
+  pinned Chromium. The keyboard-responsive focus-retention check stored
+  `h = document.activeElement` before each operation, but a native
+  radio group moves focus to the radio its arrow key checks; for the
+  population radio and the view-switch radio, `h` is now that radio.
+  The reload-exception case of Reload recovery cannot replace
+  `location.reload`, an unforgeable own property; it is now driven by
+  serving the bundle through `page.route` with each `location.reload()`
+  call replaced by a throwing one, and the Routing bullet names that
+  substitution. The same review found that the accessibility engine
+  reports, on the scenario page, Material's footer text below the 4.5:1
+  contrast of WCAG 2.2 SC 1.4.3 and links told apart from body text by
+  colour alone (SC 1.4.1). The owner decided on 2026-11-03 to underline
+  links in body text site-wide, and the footer link, and to raise the
+  footer text to AA contrast, in the site stylesheet; and a
+  `.gre-table-scroll` rule makes each chart-data table scroll inside its
+  focusable wrapper, as §5.11 Markup states.
 
 ## Display-preference scope correction (2026-11-03)
 
