@@ -299,6 +299,12 @@ describe('selectNotices: the caveats in their order', () => {
       config,
     );
     assert.deepEqual(keys(inRange.caveats), [SCARP_DIP]);
+    // `out_of_range` has no copy (§5.5): no line for it either.
+    const outOfRange = selectNotices(
+      inputOf({ window: offset, faultDip: [40], windows, flags: [{ faultDip: 40, rangeFlag: 'out_of_range' }] }),
+      config,
+    );
+    assert.deepEqual(keys(outOfRange.caveats), [SCARP_DIP]);
     const slip = selectNotices(inputOf({ window: { mode: 'slip', min: at, max: '5' } }), config);
     assert.deepEqual(keys(slip.caveats), [SCARP_DIP]);
   });
