@@ -1113,7 +1113,7 @@ and `stages-102`, with their explicit `stages_per_trial`,
 [DDD §7.3](ddd.md#73-pipeline-and-export-tests), each record with its
 `id` `round-<decimals>-<value>`), and `conversion`. Once the file
 joins the run, record its byte count and decompressed byte count in
-[DDD §3.8](ddd.md#38-measured-sizes) item 3 from the size report,
+[DDD §3.8](ddd.md#38-measured-sizes) from the size report,
 labeled as measured on the `data-v0-test` export, as T-11 records the
 other files'. Each synthetic ensemble has 2 to 8 trials of exactly its N
 stages, the last stage of each trial differing from the first stage of
@@ -1155,7 +1155,7 @@ record with 2 to 8 `trials`, each of its five `stages` arrays holding
 an `id` beginning with its own `id` and a hyphen, and its
 `scarp_classes` equal to `list(config.SCARP_CLASSES)`; the T-11
 `--reproduce` command reproduces the file's SHA-256; and the figures
-§3.8 item 3 gains for the file equal its `size:` line in
+§3.8 gains for the file equal its `size:` line in
 `"$tmp/run.txt"`.
 
 #### T-14 — Required full-data checks
@@ -4455,8 +4455,8 @@ Gradle, `npx playwright test --project=measure --workers=1` — and
 from its report record in [DDD §3.8](ddd.md#38-measured-sizes) the
 figures the measurement suite supplies: item 1's compressed size as
 served, item 2's compressed figure (the artifact's file byte count
-plus item 1's compressed size as served), and item 4, moving items 1,
-2, and 4 out of the pending list — their size-report figures (T-11)
+plus item 1's compressed size as served), and item 3, moving items 1,
+2, and 3 out of the pending list — their size-report figures (T-11)
 are recorded by then — and updating the *Contributes to:* line. (5)
 Budget evidence is the owner's
 ([OA-5](#4-owner-and-research-group-actions)) and no part of this
