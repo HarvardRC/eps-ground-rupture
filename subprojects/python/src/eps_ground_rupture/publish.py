@@ -14,7 +14,13 @@ commands of step 4 run in `subprojects/python`, from the project
 virtualenv, as their Gradle tasks do.
 
 `--fail-after-uploads <k>` is the test hook of step 7: the run exits
-non-zero after its k-th upload. A real publication never sets it.
+non-zero after its k-th upload. `--drill-repository <owner>/<name>` is the
+drill override of the §4.2 *Verification* line: every `gh` call but the
+`gh repo view` check of step 1 targets that repository instead of
+HarvardRC/eps-ground-rupture, and step 4 runs no pytest, recording
+`pytest_full_data` as `drill: not run`; step 1 refuses it in the working
+tree of HarvardRC/eps-ground-rupture itself. This module is the only one
+that reads the override. A real publication sets neither option.
 """
 
 from __future__ import annotations
@@ -70,6 +76,25 @@ PYTHON_SUBPROJECT = "subprojects/python"
 #: What `gh release view` prints on standard error for a missing release.
 RELEASE_NOT_FOUND = "release not found"
 
+#: The form of the drill override's repository name, `<owner>/<name>`.
+DRILL_REPOSITORY_PATTERN = re.compile(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+")
+
+#: The check of step 1 that refuses the drill override in the working tree
+#: of the real repository: it reads the working tree's own repository.
+REPO_VIEW_COMMAND: tuple[str, ...] = (
+    "gh",
+    "repo",
+    "view",
+    "--json",
+    "nameWithOwner",
+    "--jq",
+    ".nameWithOwner",
+)
+
+#: What step 4 records as `pytest_full_data` in a drill, which runs no
+#: pytest: the full-data pins hold only for the research data.
+DRILL_PYTEST_FULL_DATA = "drill: not run"
+
 
 class PublishStop(Exception):
     """The run stops at ``step``: a refusal of §4.2 or a failed check. The
@@ -97,6 +122,8 @@ class Run:
     number: int
     repository: str
     fail_after_uploads: int | None = None
+    drill: bool = False
+    """Whether the drill override `--drill-repository` is set."""
     source: str = ""
     """`S`: the commit at `HEAD` when the run starts."""
     uploads: int = 0
@@ -320,8 +347,38 @@ def immutability_command(run: Run) -> list[str]:
     return ["gh", "api", f"repos/{run.repository}/immutable-releases", "--jq", ".enabled"]
 
 
+def check_drill_override(run: Run) -> None:
+    """Step 1's refusal of the drill override: while `gh repo view` reads the
+    working tree's own repository as HarvardRC/eps-ground-rupture — or
+    cannot read it — the override is refused, as is an override naming
+    HarvardRC/eps-ground-rupture itself."""
+    if run.repository.lower() == REPOSITORY.lower():
+        raise PublishStop(
+            "1", f"the drill override --drill-repository names {REPOSITORY} itself; refused"
+        )
+    view = run_command(run, REPO_VIEW_COMMAND, step="1", check=False)
+    name = view.stdout.strip()
+    if view.returncode != 0:
+        raise PublishStop(
+            "1",
+            f"the drill override --drill-repository {run.repository} is refused: "
+            f"`{' '.join(REPO_VIEW_COMMAND)}` exited {view.returncode} "
+            f"({(view.stderr or view.stdout).strip()})",
+        )
+    if name.lower() == REPOSITORY.lower():
+        raise PublishStop(
+            "1",
+            f"the drill override --drill-repository {run.repository} is refused: "
+            f"`{' '.join(REPO_VIEW_COMMAND)}` prints {name}, so this working tree is the "
+            "real repository's",
+        )
+    say(f"step 1: drill override — every gh call targets {run.repository} (repo view: {name})")
+
+
 def step1_gate(run: Run) -> None:
     say("step 1: terms-record gate")
+    if run.drill:
+        check_drill_override(run)
     if PUBLISH_TAG_PATTERN.fullmatch(run.tag) is None:
         raise PublishStop(
             "1",
@@ -513,7 +570,11 @@ def last_line(lines: list[str]) -> str:
 
 
 def full_data_summary(run: Run, cwd: Path, env: dict[str, str]) -> str:
-    """`pytest` with `EGR_REQUIRE_FULL_DATA=1`: its final summary line."""
+    """`pytest` with `EGR_REQUIRE_FULL_DATA=1`: its final summary line; in a
+    drill, no pytest runs and the record says so."""
+    if run.drill:
+        say(f"step 4: the drill override runs no pytest ({DRILL_PYTEST_FULL_DATA})")
+        return DRILL_PYTEST_FULL_DATA
     lines = stream(
         [venv_script("pytest")], cwd=cwd, env={**env, "EGR_REQUIRE_FULL_DATA": "1"}, step="4"
     )
@@ -805,16 +866,29 @@ def main(argv: list[str] | None = None, *, root: Path | None = None) -> int:
         metavar="K",
         help="Test hook: exit non-zero after the K-th upload. A real publication never sets it.",
     )
+    parser.add_argument(
+        "--drill-repository",
+        metavar="OWNER/NAME",
+        help=(
+            "The drill override: every gh call but the repo-view check targets OWNER/NAME, and "
+            "step 4 runs no pytest. Refused in the real repository; a real publication never "
+            "sets it."
+        ),
+    )
     args = parser.parse_args(argv)
     if args.fail_after_uploads is not None and args.fail_after_uploads < 1:
         parser.error("--fail-after-uploads takes a positive integer")
+    drill = args.drill_repository is not None
+    if drill and DRILL_REPOSITORY_PATTERN.fullmatch(args.drill_repository) is None:
+        parser.error("--drill-repository takes <owner>/<name>")
     match = PUBLISH_TAG_PATTERN.fullmatch(args.data_tag)
     run = Run(
         root=root or REPO_ROOT,
         tag=args.data_tag,
         number=int(match[1]) if match else 0,
-        repository=REPOSITORY,
+        repository=args.drill_repository if drill else REPOSITORY,
         fail_after_uploads=args.fail_after_uploads,
+        drill=drill,
     )
     try:
         publish(run)

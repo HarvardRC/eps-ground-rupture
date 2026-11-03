@@ -155,8 +155,11 @@ val exportApp by tasks.registering(Exec::class) {
 // lifecycle task: it pushes a tag and publishes a GitHub release. Run it
 // explicitly with the required property:
 //   ./gradlew :subprojects:python:publishVintage -Pdata.tag=data-vN
-// -Ppublish.failAfterUploads=<k> is the test hook of step 7; a real
-// publication never sets it.
+// -Ppublish.failAfterUploads=<k> is the test hook of step 7, and
+// -Ppublish.drillRepository=<owner>/<name> the drill override of the §4.2
+// Verification line (every gh call targets that repository, no pytest runs;
+// refused in the real repository's working tree); a real publication never
+// sets either.
 val publishVintage by tasks.registering(Exec::class) {
     group = "deployment"
     description =
@@ -168,6 +171,9 @@ val publishVintage by tasks.registering(Exec::class) {
     val args = mutableListOf(poetryBin, "run", "egr-publish-vintage", "--data-tag", dataTag ?: "")
     findProperty("publish.failAfterUploads")?.toString()?.let {
         args += listOf("--fail-after-uploads", it)
+    }
+    findProperty("publish.drillRepository")?.toString()?.let {
+        args += listOf("--drill-repository", it)
     }
     commandLine(args)
     doFirst {
