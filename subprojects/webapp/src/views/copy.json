@@ -574,6 +574,13 @@
     "slots": []
   },
   {
+    "key": "ddd5.8.versionFooter",
+    "source": "docs/app/ddd.md#58-view-layer",
+    "part": 1,
+    "text": "Software version {software} · Data-export version {data}",
+    "slots": ["software", "data"]
+  },
+  {
     "key": "ddd5.8.conditionFaultDip",
     "source": "docs/app/ddd.md#58-view-layer",
     "part": 18,
