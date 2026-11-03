@@ -46,6 +46,8 @@ owner's decision of the same day on the `stage_spacing` arithmetic,
 returned to Draftable and was accepted again on 2026-11-02; T-16's
 body, changed for the owner's decision of the same day on the
 `dd10-names` corruption, returned to Draftable and was accepted
+again on 2026-11-03; T-22's body, changed for the T-22 review's
+concurrency-wording erratum, returned to Draftable and was accepted
 again on 2026-11-03.
 
 This implementation plan (IP) is the last of the project's staged
@@ -4288,10 +4290,9 @@ port 4173, and port 4174 with `--max-age 0` — each with
 of the `sitemap.xml` served on port 4173 starts with `BASE_URL`; the
 projects `desktop`, `mobile`, and `measure` carry exactly the
 settings §7.5 lists for each — the `measure` project without a
-per-project `workers`, which Playwright 1.47.2 does not have, so
-every invocation of it carries `--workers=1` (the `measure` specs are
-T-61's); the reporters are `list` and `json`
-(`build/playwright/report.json`), with `outputDir`
+per-project `workers`, so every invocation of it carries
+`--workers=1` (the `measure` specs are T-61's); the reporters are
+`list` and `json` (`build/playwright/report.json`), with `outputDir`
 `build/playwright/test-results/`. (2) Write
 `subprojects/webapp/playwright/serve.mjs` per §7.5 (Static server):
 Node.js built-in modules only, no package; the flags `--root`,
