@@ -6941,8 +6941,8 @@ resumption, populate the previously empty stable controls/panels and
 other slots, and insert the overlay switch and the download button
 before `#gre-recovery`; do not replace `#gre-root` or recreate the
 skeleton or live regions. The first actual result still has sequence
-0 and receives the first-result mark. A failure after resumption still follows ordinary
-unavailable-state handling.
+0 and receives the first-result mark. A failure after resumption still
+follows ordinary unavailable-state handling.
 
 Entering the unavailable state while a recovery-decision state is
 shown, whether or not its resumption is pending, removes that state's
