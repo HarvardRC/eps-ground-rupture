@@ -5995,7 +5995,7 @@ defined where it is used:
 | [§5.5](#55-offset-to-slip-conversion-assist) | the assist panel's window line and provenance line |
 | [§5.7](#57-scenario-controls) | the dip-range label, echo, and Apply; the slip-field labels (the offset field reuses "Maximum (m)"), helper line, and rejection line; the entry-mode legend; the population explainer's summary; the dip and depth option formats; the arm helper text; the summary tokens and joiners |
 | [§5.8](#58-view-layer) (this section) | the prototype notice, until activation; the product footer; the N line; the view-switch labels and legend; the log-scale toggle label; the chart-data disclosure label; the statistics row labels and null mark; the condition names and their joiner; the height show-all label, limited-comparison form, and field-export line |
-| [§5.9](#59-downloads) | the provenance labels, citation and DOI texts, and empty-caveat line |
+| [§5.9](#59-downloads) | the provenance labels, the block-4 and block-7 line templates, citation and DOI texts, and empty-caveat line |
 | [§5.10](#510-failure-states) | the no-JS fallback body and its `<noscript>` sentence, in `scenario.md`'s `#gre-root` between copy markers citing §5.10, not in `copy.json`; the capability notice; both unavailable-notice variants and their reasons; recovery messages, action labels, and saved-settings heading |
 | [§5.11](#511-accessibility-supported-environments-and-navigation-lifecycle) | the announcement templates; the chart label, caption, and chart-data table templates |
 | [§5.12](#512-charts) | the axis titles, pre-mark labels, read-off strings, segment title, the "below 0.1 m" label, and both info-note sentences |
@@ -6402,7 +6402,8 @@ computed ([SC-2](pdd.md#101-success-criteria), download
 reproducibility) (fixed here). Counts
 are plain decimal digits, without the table's thousands separators;
 a null statistic ([§5.4](#54-statistics)) is an empty field in both
-of its columns.
+of its columns. Line ends and quoting are those of `records.csv`: LF
+line ends and RFC 4180 quoting.
 
 **`provenance.txt`.** UTF-8 plain text with LF line ends: nine
 blocks in exactly the order of PDD §6.1, each a label line (labels
