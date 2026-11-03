@@ -127,13 +127,18 @@ def test_module_level_importorskip_is_a_collection_error(pytester, monkeypatch):
 
 
 def test_failing_xfail_fails(pytester, monkeypatch):
+    """The xfail test is not the required one, which passes, so only the
+    `wasxfail` deletion can fail the run."""
     _setup(pytester, monkeypatch, manifest=REQUIRED)
     pytester.makepyfile(
         test_a="""
         import pytest
 
-        @pytest.mark.xfail
         def test_full_req():
+            pass
+
+        @pytest.mark.xfail
+        def test_x():
             assert False
         """
     )
