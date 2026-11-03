@@ -1560,7 +1560,24 @@ keys are mapped by DD-10, so N is `counts.stagesPerTrial`.
 Every trial of the source view has exactly N stages, measured before
 packing ([§4.1](#41-export-task-and-validation) step 2). N ≥ 2 and
 T ≥ 1 keep the within-trial `stage_spacing` statistics defined. Equal
-stage counts do not require equal slip spacing. Empty query results
+stage counts do not require equal slip spacing.
+
+The `stage_spacing` figures follow one arithmetic, in IEEE 754
+binary64 throughout. Each stage's slip is the value the restore rule
+of [§3.1](#31-scenario-artifact-binary-layout) decodes from its stored
+integer, `x = stored / 10000` (`slip`'s `offset_steps` is 0). Within
+each trial, in stage order, each difference is the binary64
+subtraction `x[k + 1] − x[k]` of consecutive stages, giving T·(N − 1)
+differences. `min` and `max` are the smallest and the largest
+difference. `mean` is the exactly rounded sum of all differences —
+Python's `math.fsum` over them — divided in binary64 by the integer
+T·(N − 1), so it depends on no summation order. No other rounding
+applies: the manifest carries the three binary64 values as computed.
+The export computes them from its packed `slip` column before writing
+the manifest; rule `manifest-figures`
+([§4.1](#41-export-task-and-validation)) recomputes them the same way
+from the `slip` block decoded from the written artifact and requires
+each to equal the manifest's value exactly. Empty query results
 are valid; an empty vintage is not. The general format permits other
 uniform counts, while the full-data checks of
 [§7.3](#73-pipeline-and-export-tests) keep the current ensemble's
@@ -2725,7 +2742,10 @@ payload diagnostic line (end of this section).
    - `manifest-figures`: every data-derived manifest figure —
      `counts`, `columns`, `trial_columns`, `arm_strength_states`,
      `stage_spacing`, and `slip_window_bounds` — equals its value
-     re-measured from the packed artifact; `counts` also passes
+     re-measured from the packed artifact — `stage_spacing` by the
+     [§3.2](#32-artifact-manifest) arithmetic applied to the `slip`
+     block decoded from the written artifact, each of `min`, `max`,
+     and `mean` exactly equal; `counts` also passes
      `check_counts` of §3.2; and `trials` equals the `dem` view's
      distinct `Trial` strings in ascending code-point order, exactly
      `counts.trials` of them.
