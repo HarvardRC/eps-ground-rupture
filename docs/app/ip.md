@@ -5589,6 +5589,19 @@ schedules no parked work before v0.4; starting any of it earlier in
 parallel is the owner's scheduling choice, not a requirement of the
 sources. Each line names what unparks it.
 
+- Display preferences — P2, the owner-decided scope of
+  [FR-G6](prd.md#fr-g6-display-preferences-p2) and
+  [PDD §4.9](pdd.md#49-display-preferences-fr-g6-p2): a standalone
+  setting for visible content and target display size and layout,
+  serving small laptop windows and later tablet and phone views.
+  Unpark when the P2 lane opens, the remaining product choices are
+  settled in that PDD section, and the DDD revision required by
+  [DDD §9](ddd.md#9-deferred-and-out-of-scope) supplies the exact
+  interfaces, behavior, and acceptance matrix. Only then draft and
+  accept its execution tasks. This feature is separate from image
+  export and the P3 cumulative-curve accuracy choice. T-61's taller
+  MVP measurement viewport neither implements it nor establishes
+  acceptance at its target window sizes.
 - Media index and export — P2
   ([ADR-0012](../adr/0012-product-data-exports.md)); unparked by the
   P2 lane opening. When it ships, `mediaIncludes` joins `mkdocsBuild`,
@@ -5682,7 +5695,7 @@ independent scheduling authority.
 ## 7. Traceability
 
 The matrix below maps every obligation the approved documents place
-on the implementation plan — forty-two rows: the thirty rows the
+on the implementation plan — forty-four rows: the thirty rows the
 obligation sweep of 2026-10-29 directed at this plan, of the 420 it
 extracted from the PRD, PDD, HLDD, accepted ADRs, and
 `notes/Roadmap.md` at commit `36abc56`; the six rows added by hand
@@ -5703,7 +5716,11 @@ data-release identity and evidence subjects, added by hand for what
 [ADR-0019 — Release-based data identity](../adr/0019-release-based-data-identity.md),
 accepted the same day, directs at it; and the row added by hand for
 the amendment of 2026-11-01 to ADR-0017, which deploys the unlisted
-prototype by the owner's manual runs on `dev-v.0.4.x`
+prototype by the owner's manual runs on `dev-v.0.4.x`; and the two
+rows for [PRD FR-G6](prd.md#fr-g6-display-preferences-p2) and
+[PDD §4.9](pdd.md#49-display-preferences-fr-g6-p2), which park the
+owner-decided P2 display-preference scope of 2026-11-03 until its
+remaining choices and detailed design are settled
 ([DDD §8 — Traceability](ddd.md#8-traceability) holds the full
 register and states what the sweep has not covered since) — to its
 home in this plan and to the check planned to
@@ -5754,6 +5771,7 @@ the rows resolves to "not an IP obligation (stays with its source)".
 | PDD §2.1 surface table | surface priorities P1/P2/P3 (release sequencing) | IP §5 parked | text+schedule | §6.4; IP §5 | parked |
 | PDD §4.1 | reader-selected cumulative-curve accuracy considered for P3; options and limits await a product decision and performance validation | §9, IP §5 | schedule | §9; IP §5 | parked |
 | PDD §4.7 | Kern preset ships only after D-6 (release sequencing) | IP §2 T-48, IP §3 sequence, IP §4 OA-2 | schedule+owner | T-48; OA-2 | owner-pending |
+| PDD §1 D-24 + §4.9 | P2 display preferences: reader-selected content and target display size/layout, including small laptops and later tablet/phone views; details and acceptance fixed before implementation | §5.8, §9, IP §5 | text+schedule | §5.8; §9; IP §5 | parked |
 | PDD §5.11 | glossary additions before launch | §6.4, IP §2 T-52 | text+schedule+release+owner | §6.4 (Glossary additions); T-52; §7.7 item 8; G-4; OA-4 | owner-pending |
 | PDD §7.3 | one-shot reload recovery preserves accepted settings, validates current data, reports changed versions and storage/incompatibility failures without silent loss | §5.6, §5.10, IP §2 T-34, IP §2 T-46 | text+test+schedule | §5.6; §5.10; subprojects/webapp/test/recovery.test.ts (T-36); subprojects/webapp/playwright/specs/failure-states.spec.ts (T-60); subprojects/webapp/playwright/specs/navigation-lifecycle.spec.ts (T-60); subprojects/webapp/playwright/specs/a11y.spec.ts (T-60); T-34; T-44; T-46 | planned |
 | PDD §8.1 | third-party photos removed or cleared before public release | IP §3 G-6, IP §4 OA-8 | test+release+owner | subprojects/mkdocs/hooks/site_checks.py arms (a), (b) (T-03); §7.7 item 9; §7.7 item 10; G-6; OA-8 | owner-pending |
@@ -5764,6 +5782,7 @@ the rows resolves to "not an IP obligation (stays with its source)".
 
 | Source | Obligation | Home | Kind | Check | Status |
 |---|---|---|---|---|---|
+| PRD §5.6 FR-G6 | standalone display preferences are P2; presentation changes preserve scenario, results, scientific precision, provenance, and required context | §5.8, §9, IP §5 | text+schedule | §5.8; §9; IP §5 | parked |
 | PRD §9.4 R-19 | IP sequencing: validate client-side approach against MVP performance budget early; record platform ADR | IP §2 T-17, IP §2 T-37 | schedule+text | T-17; T-37; Introduction (Authority and change control: ADR-0010 and ADR-0011 accepted) | designed |
 | Roadmap 'Publication, citation and hosting' — DOI | first GitHub release: decide contents and version before cutting; tags v0.2.0–v0.2.2 exist, no release yet | IP §4 OA-7 | owner+schedule | OA-7; T-65 | owner-pending |
 | Roadmap 'Publication, citation and hosting' — Hosting the processed tables | Zenodo dataset-record deposit step — open; decided with the first release | IP §4 OA-6 | owner+text | OA-6; §4.4 (Archival distribution) | owner-pending |
