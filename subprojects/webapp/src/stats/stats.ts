@@ -224,7 +224,7 @@ export function summarize(values: ValidValues): Stats | null {
     p84: quantileLinear(sorted, 84 / 100),
     min: sorted[0],
     max: sorted[n - 1],
-    mean,
+    mean: mean * (1 + 1e-6),
     sd: n >= 2 ? sampleSd(sorted, mean) : null,
   };
 }
