@@ -1464,6 +1464,15 @@ are recorded at the end of
   int32 entries within the file — and the
   [DDD §7.6](ddd.md#76-performance-and-compatibility-measurements)
   `ReadableStream` row names the loader's three Streams surfaces.
+- **Merging task pull requests.** On 2026-11-03 the owner gave the
+  agent standing permission to merge task pull requests into
+  `dev-v.0.4.x` once CI is green, the independent review has passed,
+  no owner question is open, and the branch is current; pull requests
+  that change the design documents beyond a task's Status cell, the
+  owner's acceptances and actions, and every merge into `main` stay
+  the owner's. The
+  [Task format](ip.md#task-format) of the implementation plan records
+  the rule.
 
 ## References
 
