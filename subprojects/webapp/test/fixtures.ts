@@ -185,7 +185,10 @@ export const SCARP_CLASSES = [
   'Simple Collapse',
 ] as const;
 
-/** The nine `arm_strength_states` pairs in the §3.2 display order. */
+/**
+ * The nine `arm_strength_states` pairs in the §3.2 display order: the
+ * uniform arm first, then the layered arm, each in the PDD §3.2 order.
+ */
 export const ARM_STRENGTH_STATES: readonly (readonly [string, string])[] = [
   ['Homogeneous', 'Weak'],
   ['Homogeneous', 'Moderate'],
@@ -196,19 +199,6 @@ export const ARM_STRENGTH_STATES: readonly (readonly [string, string])[] = [
   ['Heterogeneous', 'Random Heterogeneous'],
   ['Heterogeneous', 'Cohesive Top Unit'],
   ['Heterogeneous', 'Alternating Strong-Weak'],
-];
-
-/** The §3.2 display order of arms: uniform first, then layered. */
-const ARM_ORDER = ['Homogeneous', 'Heterogeneous'];
-
-/** The PDD §3.2 order of strength labels within an arm (§3.2 `arm_strength_states`). */
-const STRENGTH_ORDER = [
-  'Weak',
-  'Moderate',
-  'Strong',
-  'Random Heterogeneous',
-  'Cohesive Top Unit',
-  'Alternating Strong-Weak',
 ];
 
 /** The §3.5 `relationship` texts, verbatim. */
@@ -532,18 +522,15 @@ export async function buildFixture(spec: FixtureSpec, options: FixtureOptions = 
     density: dictionary(byColumn(6) as string[]),
     model_family: ['2D'],
   };
-  const pairs = dictionary(spec.trials.map((row) => `${row[4]}\u0000${row[2]}`)).map((key) => {
-    const [set, strength] = key.split('\u0000');
-    if (!ARM_ORDER.includes(set) || !STRENGTH_ORDER.includes(strength)) {
-      fail(`(${set}, ${strength}) is not one of the nine arm-and-strength pairs`);
-    }
-    return { set, sediment_strength: strength };
-  });
-  pairs.sort(
-    (a, b) =>
-      ARM_ORDER.indexOf(a.set) - ARM_ORDER.indexOf(b.set) ||
-      STRENGTH_ORDER.indexOf(a.sediment_strength) - STRENGTH_ORDER.indexOf(b.sediment_strength),
-  );
+  // The nine pairs in the §3.2 display order, keeping only those present.
+  const rank = (set: string, strength: string): number =>
+    ARM_STRENGTH_STATES.findIndex(([a, s]) => a === set && s === strength);
+  for (const row of spec.trials) {
+    if (rank(row[4], row[2]) < 0) fail(`(${row[4]}, ${row[2]}) is not one of the nine arm-and-strength pairs`);
+  }
+  const pairs = ARM_STRENGTH_STATES.filter(([set, strength]) =>
+    spec.trials.some((row) => row[4] === set && row[2] === strength),
+  ).map(([set, strength]) => ({ set, sediment_strength: strength }));
 
   // Stage values to stored integers (§3.1, Restoring values).
   const { slip, scarp_height: height, dzw, scarp_dip: dip, scarp_class: cls } = spec.stages;
