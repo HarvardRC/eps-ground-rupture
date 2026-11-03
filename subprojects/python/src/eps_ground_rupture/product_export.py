@@ -21,7 +21,9 @@ import fnmatch
 import gzip
 import hashlib
 import json
+import math
 import platform
+import re
 import shutil
 import struct
 import subprocess
@@ -29,6 +31,7 @@ import sys
 import tempfile
 import traceback
 import zlib
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
 
@@ -112,6 +115,18 @@ class ExportFailure(Exception):
         super().__init__(detail)
         self.rule = rule
         self.detail = detail
+
+
+#: The vintage tags an export accepts: `data-vN` (N ≥ 1, no leading zero)
+#: or the development tag `data-v0-test`, matched in full.
+DATA_TAG_PATTERN = re.compile(r"data-v(0-test|[1-9][0-9]*)")
+
+
+def check_data_tag(data_tag: str) -> None:
+    """Refuse a tag that does not fully match :data:`DATA_TAG_PATTERN`,
+    before the run deletes or writes anything."""
+    if DATA_TAG_PATTERN.fullmatch(data_tag) is None:
+        raise ExportFailure("data-tag", f"{data_tag!r} does not match ^{DATA_TAG_PATTERN.pattern}$")
 
 
 # --------------------------------------------------------------------------
@@ -358,6 +373,10 @@ ARM_STRENGTH_STATES: tuple[tuple[str, str], ...] = (
 #: The storage grid of recorded slip, metres (§3.2 `slip_window_bounds`).
 SLIP_RECORDING_STEP = 0.0001
 
+#: The §3.1 restore rule for `slip` (`decimals` 4, `offset_steps` 0):
+#: ``x = stored / SLIP_DECODE_DIVISOR``, a division of two ints.
+SLIP_DECODE_DIVISOR = 10**4
+
 
 def align4(n: int) -> int:
     return (n + 3) & ~3
@@ -510,14 +529,40 @@ def _scaled_column(
     }
 
 
-def stage_spacing(slip: np.ndarray, trials: int, stages_per_trial: int) -> dict[str, float]:
-    """`stage_spacing` (§3.2): the consecutive within-trial slip differences
-    of the trial-major slip array, in metres."""
-    diffs = np.diff(slip.reshape(trials, stages_per_trial), axis=1)
+def stage_spacing(
+    slip_stored: Sequence[int] | np.ndarray, trials: int, stages_per_trial: int
+) -> dict[str, float]:
+    """`stage_spacing` (docs/app/ddd.md §3.2): {`min`, `max`, `mean`} of the
+    consecutive within-trial slip differences, in metres, from the stored
+    integers of a trial-major `slip` block — the export's packed column, or
+    the block that rule `manifest-figures` (§4.1) decodes from the written
+    artifact.
+
+    The arithmetic of §3.2, in IEEE 754 binary64 throughout: each stage's
+    slip is the value the §3.1 restore rule decodes, ``x = stored / 10000``
+    (Python division of two ints; `slip`'s `offset_steps` is 0); within each
+    trial, in stage order, each difference is the binary64 subtraction
+    ``x[k + 1] - x[k]``, giving T·(N − 1) differences; `min` and `max` are the
+    smallest and largest difference; `mean` is ``math.fsum`` of all
+    differences divided in binary64 by the integer T·(N − 1). No other
+    rounding applies.
+    """
+    stored = [int(value) for value in slip_stored]
+    if len(stored) != trials * stages_per_trial:
+        raise ValueError(
+            f"slip block holds {len(stored)} values, not trials * stages_per_trial = "
+            f"{trials * stages_per_trial}"
+        )
+    x = [value / SLIP_DECODE_DIVISOR for value in stored]
+    diffs = [
+        x[base + k + 1] - x[base + k]
+        for base in range(0, trials * stages_per_trial, stages_per_trial)
+        for k in range(stages_per_trial - 1)
+    ]
     return {
-        "min": float(diffs.min()),
-        "max": float(diffs.max()),
-        "mean": float(diffs.mean()),
+        "min": min(diffs),
+        "max": max(diffs),
+        "mean": math.fsum(diffs) / (trials * (stages_per_trial - 1)),
     }
 
 
@@ -652,7 +697,7 @@ def pack_scenario(dem: pd.DataFrame) -> ScenarioPack:
         columns=columns,
         trial_columns=trial_columns,
         arm_strength_states=arm_strength_states,
-        stage_spacing=stage_spacing(slip_values, t_count, n),
+        stage_spacing=stage_spacing(stored["slip"], t_count, n),
         slip_window_bounds={
             "min": 0.0,
             "max": float(slip_values[slip_valid].max()),
@@ -955,6 +1000,7 @@ def run(root: Path, data_tag: str) -> None:
     clean = tree_is_clean(root)
     print_source_lines(commit, clean)
     paths = discover_inputs(root)
+    check_data_tag(data_tag)
     check_inputs_present(root, data_tag, paths)
     out_dir = root / DIST_APP_DIR / data_tag
     reset_dir(out_dir)
@@ -1088,6 +1134,7 @@ def reproduce(root: Path, pointer_path: Path, allow_drift: bool) -> None:
     clean = tree_is_clean(root)
     print_source_lines(commit, clean)
     paths, flatfile = recorded_inputs(pointer)
+    check_data_tag(data_tag)
     check_inputs_present(root, data_tag, paths, flatfile=flatfile)
     check_reproducible(root, pointer, commit, clean, allow_drift)
     provenance = dict(pointer["provenance"])
