@@ -487,3 +487,21 @@ p.cite-open-row {
   line-height: 1.68;
   text-wrap: pretty;
 }
+
+/* Links are underlined so they are told apart by more than colour, and the
+ * footer's copyright line meets text contrast: WCAG 2.2 AA, 1.4.1 (Use of
+ * Color) and 1.4.3 (Contrast (Minimum)); owner decision of 2026-11-03.
+ * Material's non-text links stay undecorated: the heading permalinks (¶),
+ * buttons, the footnote back-reference arrows, and the footer's social
+ * icons. */
+.md-typeset a:not(.headerlink):not(.md-button):not(.footnote-backref):not(.md-social__link) {
+  text-decoration: underline;
+}
+
+.md-copyright {
+  color: var(--md-footer-fg-color--light);
+}
+
+.md-copyright a {
+  text-decoration: underline;
+}
