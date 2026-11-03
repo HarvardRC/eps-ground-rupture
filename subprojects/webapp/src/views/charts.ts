@@ -11,7 +11,8 @@
 // Geometry (fixed by §5.12): the `viewBox` is the panel's CSS width by
 // 300 CSS px — margins left 56, right 16, top 8, bottom 40; a 240 px
 // plot; and the 12 px overlay band directly above the value axis,
-// reserved in every chart of both views. Drawing uses presentation
+// reserved in every chart of both views, where the overlay's field
+// ticks are drawn (Overlay marks). Drawing uses presentation
 // attributes only. The chart is non-interactive: its text alternatives
 // are siblings of the `<svg>` (§5.11), never inside it.
 //
@@ -53,6 +54,9 @@ const LOG_GAP = 8;
 const PLOT_BOTTOM = MARGIN_TOP + PLOT_HEIGHT;
 /** The y of the value axis, the bottom of the overlay band. */
 const AXIS_Y = PLOT_BOTTOM + OVERLAY_BAND;
+
+/** The field marks' color: black, the field-mark convention of PDD §4.4 (§5.12, Overlay marks). */
+const FIELD_MARK = '#000000';
 
 /** The class fill opacity of §5.8 (Family view): 60 %. */
 const FILL_OPACITY = '0.6';
@@ -198,6 +202,84 @@ function root(pid: string, label: string, width: number, children: readonly SvgN
 }
 
 // --------------------------------------------------------------------
+// Overlay marks (§5.12, Overlay marks)
+// --------------------------------------------------------------------
+
+/**
+ * One overlay group's drawn field rows (§5.8, Field overlay): a
+ * (`source`, `source_quantity`) pair, never pooled with another pair's —
+ * `overlayGroups` of `overlay/model.ts` yields these.
+ */
+export interface FieldMarkGroup {
+  readonly source: string;
+  readonly sourceQuantity: string;
+  /** The rows the chart marks, one tick each at its `value` (m). */
+  readonly rows: readonly { readonly value: number }[];
+}
+
+const NO_MARKS: readonly FieldMarkGroup[] = [];
+
+/**
+ * A spec input's field marks, checked against its `fieldTicks`: the
+ * panel draws field ticks exactly while it marks at least one row.
+ */
+function marksOf(input: { readonly fieldTicks: boolean; readonly fieldMarks?: readonly FieldMarkGroup[] }): readonly FieldMarkGroup[] {
+  const marks = input.fieldMarks ?? NO_MARKS;
+  const any = marks.some((g) => g.rows.length > 0);
+  if (any !== input.fieldTicks) {
+    throw new Error(`charts: fieldTicks ${input.fieldTicks} with ${any ? 'some' : 'no'} field rows`);
+  }
+  return marks;
+}
+
+/** The drawn rows' value extent in recording steps (`value · 1000`), or null when nothing is marked. */
+function markExtent(marks: readonly FieldMarkGroup[], keep: (v: number) => boolean = () => true): { lo: number; hi: number } | null {
+  let lo = Infinity;
+  let hi = -Infinity;
+  for (const g of marks) {
+    for (const row of g.rows) {
+      if (!keep(row.value)) continue;
+      const s = row.value * 1000;
+      if (s < lo) lo = s;
+      if (s > hi) hi = s;
+    }
+  }
+  return lo <= hi ? { lo, hi } : null;
+}
+
+/**
+ * The overlay marks (§5.12): black vertical ticks spanning the 12 px
+ * overlay band, one per drawn row at `xOf(value)`, one `<g>` per
+ * (`source`, `source_quantity`) group; null when nothing is marked.
+ */
+function fieldLayer(marks: readonly FieldMarkGroup[], xOf: (value: number) => number): SvgNode | null {
+  if (!marks.some((g) => g.rows.length > 0)) return null;
+  return node(
+    'g',
+    [['data-layer', 'field']],
+    marks.map((g) =>
+      node(
+        'g',
+        [
+          ['data-source', g.source],
+          ['data-source-quantity', g.sourceQuantity],
+        ],
+        g.rows.map((row) => {
+          const x = num(xOf(row.value));
+          return node('line', [
+            ['x1', x],
+            ['y1', num(PLOT_BOTTOM)],
+            ['x2', x],
+            ['y2', num(AXIS_Y)],
+            ['stroke', FIELD_MARK],
+          ]);
+        }),
+      ),
+    ),
+  );
+}
+
+// --------------------------------------------------------------------
 // Histogram specs
 // --------------------------------------------------------------------
 
@@ -214,8 +296,10 @@ export interface HistogramSpecInput {
   readonly palette: { readonly [scarpClass: string]: string };
   /** The D-13 family view (§5.8). */
   readonly familyView: boolean;
-  /** Whether the panel draws field ticks (the overlay's, §5.12). */
+  /** Whether the panel draws field ticks (the overlay's, §5.12): exactly while `fieldMarks` holds a row. */
   readonly fieldTicks: boolean;
+  /** The drawn field rows per overlay group (§5.12, Overlay marks); none when absent. */
+  readonly fieldMarks?: readonly FieldMarkGroup[];
 }
 
 /** A histogram to draw (§5.12): bins as per-group count rows, edges, groups, and the chart label. */
@@ -229,6 +313,8 @@ export interface HistogramSpec {
   readonly bins: readonly (readonly number[])[];
   /** `chartLabel` of the chart (§5.11). */
   readonly label: string;
+  /** The drawn field rows per overlay group, ticked in the overlay band (§5.12). */
+  readonly fieldMarks: readonly FieldMarkGroup[];
 }
 
 /** The number of scarp classes (§3.1). */
@@ -298,6 +384,7 @@ export function histogramSpec(h: Histogram, input: HistogramSpecInput): Histogra
       logScale: false,
       fieldTicks: input.fieldTicks,
     }),
+    fieldMarks: marksOf(input),
   };
 }
 
@@ -326,6 +413,7 @@ export function histogramLogSpec(h: HistogramLog, input: HistogramSpecInput): Hi
       logScale: true,
       fieldTicks: input.fieldTicks,
     }),
+    fieldMarks: marksOf(input),
   };
 }
 
@@ -347,7 +435,13 @@ interface Bar {
  * first group at the bottom, a segment only for a nonzero count, filled
  * at 60 % opacity with no stroke, each carrying its `segmentTitle`
  * `<title>`; the count axis over every bar; the value axis linear, or
- * logarithmic with the leading band, gap, and decade ticks.
+ * logarithmic with the leading band, gap, and decade ticks; and the
+ * field ticks in the overlay band. Drawn field rows outside the bins'
+ * extent extend the value axis (§5.12, Overlay marks): on the linear
+ * axis to the extreme rows' values, on the logarithmic axis by whole
+ * octaves for rows of 0.1 m and above, a row below 0.1 m laying out the
+ * leading band, at whose center it is drawn. The bins keep their DD-5
+ * extent; the extension is empty plot with marks.
  */
 export function histogramSvg(spec: HistogramSpec, width: number): SvgNode {
   const { edges, groups } = spec;
@@ -364,11 +458,16 @@ export function histogramSvg(spec: HistogramSpec, width: number): SvgNode {
   const valueTicks: ValueTick[] = [];
   const segments: (readonly [number, number])[] = [];
   const extra: SvgNode[] = [];
+  const marks = spec.fieldMarks;
+  /** A drawn field row's x, set by the scale below. */
+  let markX: (value: number) => number;
 
   if (spec.scale === 'linear') {
-    const lo = edges.steps[0];
-    const hi = edges.steps[K];
+    const reach = markExtent(marks);
+    const lo = reach === null ? edges.steps[0] : Math.min(edges.steps[0], reach.lo);
+    const hi = reach === null ? edges.steps[K] : Math.max(edges.steps[K], reach.hi);
     const xOf = (s: number): number => MARGIN_LEFT + (P * (s - lo)) / (hi - lo);
+    markX = (value) => xOf(value * 1000);
     for (let j = 0; j < K; j++) {
       bars.push({
         x1: xOf(edges.steps[j]),
@@ -382,16 +481,26 @@ export function histogramSvg(spec: HistogramSpec, width: number): SvgNode {
       valueTicks.push({ x: xOf(t), label: displayRound(edgeValue(t), dd) });
     }
   } else {
+    // The band is laid out while the leading count is nonzero or a drawn
+    // field row lies below 0.1 m; the axis extends by whole octaves to
+    // cover drawn rows of 0.1 m and above.
+    const band = edges.below || marks.some((g) => g.rows.some((row) => row.value < 0.1));
+    let a = edges.steps[0];
+    let end = edges.steps[K];
+    const reach = markExtent(marks, (v) => v >= 0.1);
+    if (reach !== null) {
+      while (reach.lo < a) a /= 2;
+      while (reach.hi > end) end *= 2;
+    }
+    const O = Math.round(Math.log2(end / a));
     // Every octave one width b; the leading band one b wide, then an 8 px gap.
-    const band = edges.below;
-    const b = band ? (P - LOG_GAP) / (K + 1) : P / K;
+    const b = band ? (P - LOG_GAP) / (O + 1) : P / O;
     const x0 = band ? MARGIN_LEFT + b + LOG_GAP : MARGIN_LEFT;
-    const a = edges.steps[0];
-    const end = edges.steps[K];
     const xOf = (s: number): number => x0 + (b * Math.log10(s / a)) / Math.log10(2);
+    markX = (value) => (value < 0.1 ? MARGIN_LEFT + b / 2 : xOf(value * 1000));
     if (band) {
       const below = copyText('ddd5.12.belowLabel');
-      bars.push({ x1: MARGIN_LEFT, x2: MARGIN_LEFT + b, counts: spec.bins[0], range: below });
+      if (edges.below) bars.push({ x1: MARGIN_LEFT, x2: MARGIN_LEFT + b, counts: spec.bins[0], range: below });
       segments.push([MARGIN_LEFT, MARGIN_LEFT + b]);
       // Beneath the band, one line below the tick labels, so it never meets the first decade label.
       extra.push(text(MARGIN_LEFT + b / 2, AXIS_Y + 28, 'middle', below));
@@ -448,8 +557,10 @@ export function histogramSvg(spec: HistogramSpec, width: number): SvgNode {
     });
   });
 
+  const field = fieldLayer(marks, markX);
   return root(spec.pid, spec.label, width, [
     node('g', [['data-layer', 'bars']], rects),
+    ...(field === null ? [] : [field]),
     verticalAxis(axisTicks(0, maxTotal, 1), yOf, copyText('ddd5.12.countAxisTitle'), 'count'),
     valueAxis(segments, valueTicks, extra, m, width),
   ]);
@@ -518,8 +629,10 @@ export interface EcdfSpecInput {
   readonly valid: number;
   /** The committed read-off percentile, `readoff[measurement]`, or null (§5.6). */
   readonly readoff: number | null;
-  /** Whether the panel draws field ticks (the overlay's, §5.12). */
+  /** Whether the panel draws field ticks (the overlay's, §5.12): exactly while `fieldMarks` holds a row. */
   readonly fieldTicks: boolean;
+  /** The drawn field rows per overlay group (§5.12, Overlay marks); none when absent. */
+  readonly fieldMarks?: readonly FieldMarkGroup[];
 }
 
 /** A cumulative curve to draw (§5.12). */
@@ -533,6 +646,8 @@ export interface EcdfSpec {
   readonly readoff: number | null;
   /** `chartLabel` of the chart (§5.11). */
   readonly label: string;
+  /** The drawn field rows per overlay group, ticked in the overlay band (§5.12). */
+  readonly fieldMarks: readonly FieldMarkGroup[];
 }
 
 /** The cumulative-curve spec of the §5.4 `sorted` array. */
@@ -551,6 +666,7 @@ export function ecdfSpec(sorted: Float64Array, input: EcdfSpecInput): EcdfSpec {
       logScale: false,
       fieldTicks: input.fieldTicks,
     }),
+    fieldMarks: marksOf(input),
   };
 }
 
@@ -562,7 +678,9 @@ export function ecdfSpec(sorted: Float64Array, input: EcdfSpecInput): EcdfSpec {
  * "Median" and "84th percentile" pre-marks and the read-off marker at
  * (`quantileLinear(sorted, q / 100)`, q / 100) from the full array, each
  * with a guide from the cumulative axis to the point and from the point
- * down to the overlay band.
+ * down to the overlay band; and the field ticks in the overlay band,
+ * drawn field rows outside the value axis's span extending it to the
+ * extreme rows' values while the curve keeps [x_0, x_{m−1}].
  */
 export function ecdfSvg(spec: EcdfSpec, width: number): SvgNode {
   const { sorted, measurement: m, decimals: dd } = spec;
@@ -575,8 +693,11 @@ export function ecdfSvg(spec: EcdfSpec, width: number): SvgNode {
   // The value axis in recording steps (the divisor D is 1000, §5.4).
   const firstStep = Math.round(x[0] * 1000);
   const lastStep = Math.round(x[M - 1] * 1000);
-  const loS = M === 1 ? firstStep - u / 2 : firstStep;
-  const hiS = M === 1 ? firstStep + u / 2 : lastStep;
+  const reach = markExtent(spec.fieldMarks);
+  const curveLo = M === 1 ? firstStep - u / 2 : firstStep;
+  const curveHi = M === 1 ? firstStep + u / 2 : lastStep;
+  const loS = reach === null ? curveLo : Math.min(curveLo, reach.lo);
+  const hiS = reach === null ? curveHi : Math.max(curveHi, reach.hi);
   const xOf = (v: number): number => MARGIN_LEFT + (P * (v * 1000 - loS)) / (hiS - loS);
   const yOf = (pct: number): number => PLOT_BOTTOM - (PLOT_HEIGHT * pct) / 100;
 
@@ -629,9 +750,11 @@ export function ecdfSvg(spec: EcdfSpec, width: number): SvgNode {
     label: displayRound(edgeValue(t), dd),
   }));
 
+  const field = fieldLayer(spec.fieldMarks, xOf);
   return root(spec.pid, spec.label, width, [
     node('g', [['data-layer', 'curve']], [curve]),
     node('g', [['data-layer', 'marks']], marks),
+    ...(field === null ? [] : [field]),
     verticalAxis(axisTicks(0, 100, 1), yOf, copyText('ddd5.12.cumulativeAxisTitle'), 'cumulative'),
     valueAxis([[MARGIN_LEFT, MARGIN_LEFT + P]], valueTicks, [], m, width),
   ]);

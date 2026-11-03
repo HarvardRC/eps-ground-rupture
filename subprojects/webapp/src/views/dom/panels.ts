@@ -20,6 +20,8 @@
 import { announce } from '../../a11y/announce';
 import * as config from '../../config';
 import type { Manifest } from '../../decode/fields';
+import { fieldTable, overlayLegend, panelOverlay, wireShowAll } from '../../overlay/field-overlay';
+import { isOverlayMeasurement } from '../../overlay/model';
 import { readReadoff } from '../../state/parse';
 import { reduce, type DisplayAction, type DisplayState, type MeasurementName, type PanelView } from '../../state/state';
 import { quantileLinear } from '../../stats/quantile';
@@ -99,6 +101,13 @@ export interface Panels {
    * `views/dom/notices.ts` in place.
    */
   renderChart(m: MeasurementName, input: RenderInput, display: DisplayState): void;
+  /**
+   * Re-renders one panel's `.gre-legend` slot — the scarp-type legend and
+   * the overlay's part (`overlay/field-overlay.ts`) — as `render` does; with
+   * `renderChart`, the re-render of the slots that read `field` when the
+   * field export's state changes (§5.3 item 3).
+   */
+  renderLegend(m: MeasurementName, input: RenderInput, display: DisplayState): void;
 }
 
 // --------------------------------------------------------------------
@@ -249,6 +258,7 @@ export function buildPanels(manifest: Manifest, wiring: Wiring): Panels {
     // 3–5. The notice, legend, and chart slots; the chart slot keeps the chart's height.
     const notice = el('div', [['class', 'gre-notice']]);
     const legend = el('div', [['class', 'gre-legend']]);
+    if (isOverlayMeasurement(m)) wireShowAll(legend, m, manifest, wiring);
     const chart = el('div', [['class', 'gre-chart']]);
     chart.style.minHeight = `${CHART_HEIGHT}px`;
 
@@ -381,6 +391,9 @@ export function buildPanels(manifest: Manifest, wiring: Wiring): Panels {
     const decimals = config.displayDecimals(m);
     const width = chart.clientWidth;
     const view = display.view[m];
+    // The overlay's drawn rows, ticked in both views (§5.12, Overlay marks).
+    const overlay = panelOverlay(input, display, m);
+    const fieldTicks = overlay.rows.length > 0;
     const specInput: HistogramSpecInput = {
       measurement: m,
       decimals,
@@ -388,7 +401,8 @@ export function buildPanels(manifest: Manifest, wiring: Wiring): Panels {
       scarpClasses: input.vintage.manifest.scarpClasses,
       palette: input.vintage.manifest.scarpClassPalette,
       familyView: display.familyView,
-      fieldTicks: false,
+      fieldTicks,
+      fieldMarks: overlay.groups,
     };
     // The bin table follows the histogram's scale in both views: the disclosure belongs to the panel.
     const bins = logScaleDrawn(m, input, display)
@@ -403,7 +417,8 @@ export function buildPanels(manifest: Manifest, wiring: Wiring): Panels {
               decimals,
               valid: counts.valid,
               readoff: display.readoff[m],
-              fieldTicks: false,
+              fieldTicks,
+              fieldMarks: overlay.groups,
             }),
             width,
           );
@@ -419,9 +434,39 @@ export function buildPanels(manifest: Manifest, wiring: Wiring): Panels {
     if (open) {
       details.open = true;
       details.append(chartDataTable(binTableSpec(bins.bins, bins.groups, bins.edges), `${pid}-bins`));
+      // While the panel draws field ticks, the field table follows (§5.11, Markup).
+      const field = fieldTable(input, display, m);
+      if (field !== null) details.append(field);
     }
     chart.replaceChildren(figure, details);
     drawnWidth.set(m, width);
+  };
+
+  /**
+   * The `.gre-legend` slot, filled only while the chart renders (§5.8 panel
+   * contents 4): in histogram view the scarp-type legend; then, while the
+   * overlay is on, the overlay legend, the field-export line, or the
+   * scarp-dip note (`overlayLegend`).
+   */
+  const renderLegend = (m: MeasurementName, input: RenderInput, display: DisplayState): void => {
+    const { legend } = get(m);
+    if (!chartRenders(input, m)) {
+      legend.replaceChildren();
+      return;
+    }
+    const children: HTMLElement[] = [];
+    if (display.view[m] === 'histogram') {
+      const groups = stackGroups(input.vintage.manifest.scarpClasses, input.vintage.manifest.scarpClassPalette, display.familyView);
+      children.push(
+        el(
+          'ul',
+          [['class', 'gre-legend-types']],
+          groups.items.map((g) => el('li', [], [toSvgElement(swatchSvg(g.color)), ' ', g.label])),
+        ),
+      );
+    }
+    children.push(...overlayLegend(input, display, m));
+    legend.replaceChildren(...children);
   };
 
   const renderPanel = (m: MeasurementName, input: RenderInput, display: DisplayState): void => {
@@ -441,20 +486,7 @@ export function buildPanels(manifest: Manifest, wiring: Wiring): Panels {
       panel.log.input.checked = display.logScale && input.histogramLog !== null;
     }
 
-    // The scarp-type legend, in histogram view while the chart renders (§5.8 panel contents 4).
-    if (drawn && view === 'histogram') {
-      const groups = stackGroups(input.vintage.manifest.scarpClasses, input.vintage.manifest.scarpClassPalette, display.familyView);
-      panel.legend.replaceChildren(
-        el(
-          'ul',
-          [['class', 'gre-legend-types']],
-          groups.items.map((g) => el('li', [], [toSvgElement(swatchSvg(g.color)), ' ', g.label])),
-        ),
-      );
-    } else {
-      panel.legend.replaceChildren();
-    }
-
+    renderLegend(m, input, display);
     renderChart(m, input, display);
 
     // The read-off, in cumulative view while the chart renders (§5.8 panel contents 6).
@@ -487,5 +519,6 @@ export function buildPanels(manifest: Manifest, wiring: Wiring): Panels {
       for (const m of measurements) renderPanel(m, input, display);
     },
     renderChart,
+    renderLegend,
   };
 }
