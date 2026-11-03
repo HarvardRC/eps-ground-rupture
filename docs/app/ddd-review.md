@@ -1498,6 +1498,12 @@ are recorded at the end of
   interval was 76–83 ms after the change against 185–200 ms before,
   2.4–2.5 times shorter in each pair. At the lighter load, earlier,
   the build before the change had a median of 92–94 ms.
+- **T-44 review erratum.** DDD §5.10's skeleton committed before the
+  first commit, which a recovery decision also uses, now leaves out
+  the overlay switch and the download button: both are built with the
+  mount's `Wiring`, and a download button in a decision state could
+  neither work nor be disabled under §5.9. A resumption inserts both
+  before `#gre-recovery`, creating no other skeleton element.
 
 ## References
 

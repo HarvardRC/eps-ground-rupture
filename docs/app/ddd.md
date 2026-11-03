@@ -6817,7 +6817,9 @@ counts as `'read'`. The state is one presentation, built by
   below);
 - before the first commit, `notices.ts` commits that same skeleton
   through `#gre-root.replaceChildren(…)` with `#gre-controls` and
-  `#gre-panels` empty and `hidden`: this path reads nothing from the
+  `#gre-panels` empty and `hidden`, and without the overlay switch
+  `#gre-overlay` and the download button `#gre-download`, which are
+  built with the mount's `Wiring`: this path reads nothing from the
   vintage, so it cannot fail for the reason the startup did.
 
 `{reason}` names the failed step in one fixed-here phrase; a failed
@@ -6936,9 +6938,10 @@ permits the explicit choices above to resume startup in the same mount;
 only its root commit is the mount's first commit. Build that minimal
 skeleton without reading the vintage, as for pre-load failure. On
 resumption, populate the previously empty stable controls/panels and
-other slots; do not replace `#gre-root` or recreate the skeleton or live
-regions. The first actual result still has sequence 0 and receives the
-first-result mark. A failure after resumption still follows ordinary
+other slots, and insert the overlay switch and the download button
+before `#gre-recovery`; do not replace `#gre-root` or recreate the
+skeleton or live regions. The first actual result still has sequence
+0 and receives the first-result mark. A failure after resumption still follows ordinary
 unavailable-state handling.
 
 Entering the unavailable state while a recovery-decision state is
