@@ -519,6 +519,7 @@ export async function installRecorder(page: Page): Promise<void> {
       if (seen.has(el)) return;
       const index = next++;
       seen.set(el, index);
+      (el as unknown as { __greRegion: number }).__greRegion = index;
       new MutationObserver(() => {
         const text = el.textContent ?? '';
         if (text !== '') w.__greTexts!.push({ role: el.getAttribute('role') ?? '', text, region: index, connected: el.isConnected });
@@ -540,6 +541,10 @@ export async function recorded(page: Page, role?: 'status' | 'alert'): Promise<s
   const all = await page.evaluate(() => window.__greTexts ?? []);
   return all.filter((t) => role === undefined || t.role === role).map((t) => t.text);
 }
+
+/** The recorder's index of the current `#gre-root` region of `role`. */
+export const regionIndex = (page: Page, role: 'status' | 'alert'): Promise<number> =>
+  page.evaluate((r) => (document.querySelector(`#gre-root > [role=${r}]`) as unknown as { __greRegion: number }).__greRegion, role);
 
 /** The full recorded entries. */
 export const recordedEntries = (page: Page) => page.evaluate(() => window.__greTexts ?? []);
@@ -629,7 +634,7 @@ export async function installTimerWrapper(page: Page, armAtStart: boolean): Prom
 
 /** Awaits one zero-delay timer scheduled through the original `setTimeout`. */
 export async function oneZeroTimer(page: Page): Promise<void> {
-  await page.evaluate(() => new Promise<void>((done) => window.__greOrig!.setTimeout(() => done(), 0)));
+  await page.evaluate(() => new Promise<void>((done) => (window.__greOrig?.setTimeout ?? window.setTimeout)(() => done(), 0)));
 }
 
 /** Runs the held callback synchronously in one evaluate; true when one was held. */
@@ -780,6 +785,25 @@ export function provenanceBlock(provenance: string, label: string): string[] {
 /** The parsed `scenario.json` member. */
 export const scenarioJson = (d: CapturedDownload): { scenario: unknown; software_version: string; export_version: string; converted_windows: unknown } =>
   JSON.parse(d.members.get('scenario.json')!.toString('utf8'));
+
+/**
+ * The accessible description Chromium's own accessibility tree computes
+ * for the element `selector` names (CDP `Accessibility.getPartialAXTree`):
+ * what assistive technology reads. Playwright's own description matcher
+ * skips the text of an `<output>` (implicit role `status`) that
+ * `aria-describedby` references, which Chromium includes.
+ */
+export async function chromiumDescription(page: Page, selector: string): Promise<string> {
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    const { root } = await cdp.send('DOM.getDocument');
+    const { nodeId } = await cdp.send('DOM.querySelector', { nodeId: root.nodeId, selector });
+    const { nodes } = await cdp.send('Accessibility.getPartialAXTree', { nodeId, fetchRelatives: false });
+    return String(nodes[0]?.description?.value ?? '');
+  } finally {
+    await cdp.detach();
+  }
+}
 
 /** Errors the page reports (`pageerror`). */
 export function pageErrors(page: Page): string[] {
