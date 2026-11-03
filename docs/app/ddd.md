@@ -2424,6 +2424,21 @@ them. The rest of the manifest, `provenance` included, adds a few
 kilobytes, so the whole manifest is estimated near 125 KB raw and
 12 KB compressed — an estimate, not a measurement.
 
+The vintage's other files are measured on the `data-v0-test` export
+of 2026-11-02, from its size report (T-11; the reference-results
+file's since T-13 joined the run): the field-data file 6,914 bytes
+(730,645 decompressed), the regression file 698 bytes (1,427
+decompressed), the reference-results file 111,252 bytes (1,577,792
+decompressed), and the vintage-terms file 0 bytes, the export having
+run without `data/REDISTRIBUTION.md`.
+
+Sizes describe the measured export run. Fresh exports use a new
+`export_date`, so compressed JSON sizes may differ even when the
+research data is unchanged. The scenario binary remains unchanged for
+the same data and compression environment. A strict `--reproduce` run
+reuses the recorded metadata and must reproduce every file byte for
+byte.
+
 **Pending first generation**, each recorded here from the named
 check's report. The size report's figures are measured on a
 `data-v0-test` export (T-11), the only tag an agent exports from the
@@ -2451,24 +2466,16 @@ recorded so far stand in the item.
    served, from the measurement suite (T-61); the raw figure measured
    on the `data-v0-test` export: 3,288,980 + 123,420 = 3,412,400
    bytes;
-3. the field-data, regression, reference-results, and vintage-terms
-   files' byte counts and, for the `.gz` files, decompressed byte
-   counts — from the size report (T-11; the reference-results
-   file's once T-13 joins the run); measured on the `data-v0-test`
-   export: the field-data file 6,914 bytes (730,645 decompressed),
-   the regression file 698 bytes (1,427 decompressed), and the
-   vintage-terms file 0 bytes, the export having run without
-   `data/REDISTRIBUTION.md`;
-4. the JavaScript bundle and stylesheet sizes, and the compressed
+3. the JavaScript bundle and stylesheet sizes, and the compressed
    total over the full payload scope of
    [§7.6](#76-performance-and-compatibility-measurements) — from the
    measurement suite (T-61);
-5. from [P2](prd.md#22-mvp-and-delivery-priorities) (the second
+4. from [P2](prd.md#22-mvp-and-delivery-priorities) (the second
    delivery priority, after the MVP), the media index's size — from
    the size report.
 
 *Contributes to:* the size half of the R-16 feasibility
-measurements; with items 1, 2, and 4 pending, nothing here closes
+measurements; with items 1, 2, and 3 pending, nothing here closes
 R-16, whose gate the owner confirms
 ([HLDD §10 — Risks and open
 dependencies](hldd.md#10-risks-and-open-dependencies)).
@@ -12048,7 +12055,7 @@ the initial simulation result").
 **Bundle and host headers.** The load samples' itemized payload
 gives the bundle's and the stylesheet's compressed sizes as served,
 which [§3.8](#38-measured-sizes) records from the reports (its
-pending item 4), never by hand. The published-site run records the
+pending item 3), never by hand. The published-site run records the
 headers of every same-origin response under `BASE_PATH` —
 a cross-origin response, such as the theme's Google Fonts files,
 is another host's — and asserts that, per file class (`.html`,
@@ -12851,7 +12858,7 @@ deliberately keeps.
 | HLDD §2 L235-246 (amended 2026-10-30) | reference environment for the budgets: a fixed-specification AWS VM from Terraform, each time budget at the 95th percentile of 30 runs; the DDD fixes machine specification and run procedure | §1 DD-12, §7.6, §2 | text+measure+owner | §1 DD-12; §7.6; §2; ADR-0016; §7.6 report: environment (T-59, T-61); §7.6 report: workloads (T-61); OA-12 | owner-pending |
 | HLDD §4.3 L637-639 | state/view lifecycle responsibilities | §5.1, §5.10, §5.11 | text+test | §5.1; §5.3; §5.10; §5.11; subprojects/webapp/playwright/specs/mount.spec.ts (T-60); subprojects/webapp/playwright/specs/navigation-lifecycle.spec.ts (T-60) | planned |
 | HLDD §4.3 L654-656 | chart behaviors and tests | §5.12, §5.11 | text+test | §5.11; §5.12; subprojects/webapp/test/charts.test.ts (T-41); subprojects/webapp/test/histogram.test.ts (T-32); subprojects/webapp/test/chart-text.test.ts (T-41); subprojects/webapp/playwright/specs/render.spec.ts (T-60); subprojects/webapp/playwright/specs/interactions.spec.ts (T-60); subprojects/webapp/playwright/specs/a11y.spec.ts (T-60); subprojects/webapp/playwright/specs/keyboard-responsive.spec.ts (T-60) | planned |
-| HLDD §4.3 L662-663 | bundle size measurement | §7.6, §3.8 | measure | §3.8: pending item 4 (T-61); §7.6 report: workloads.samples.files (T-61) | planned |
+| HLDD §4.3 L662-663 | bundle size measurement | §7.6, §3.8 | measure | §3.8: pending item 3 (T-61); §7.6 report: workloads.samples.files (T-61) | planned |
 | HLDD §4.3 L673-675 | assets directory exact path | §6.1 | text+test | §6.1; subprojects/mkdocs/hooks/site_checks.py arm (c) (T-51) | planned |
 | HLDD §4.3 L692-694 | content-hashed filename injection | §6.1 | text+test | §6.1; subprojects/mkdocs/hooks/site_checks.py arm (c) (T-51); subprojects/webapp/playwright/specs/mount.spec.ts (T-60) | planned |
 | HLDD §4.3 L728-730 | workflow path-filter coverage | §6.3 | text | §6.3 push-filter rule (excludes subprojects/webapp/perf/**, which no CI step reads, so it affects neither the published application, its results, nor a gating check) | designed |
@@ -12912,7 +12919,7 @@ deliberately keeps.
 | HLDD §6.1 L1807-1808 | failure-state checks and messages | §5.10 | text+test+owner | §5.10; §5.8; subprojects/webapp/playwright/specs/failure-states.spec.ts (T-60); subprojects/webapp/test/decode.test.ts (T-36); subprojects/webapp/test/scenario-json.test.ts (T-36); .github/scripts/check_pdd_agreement.py (T-47); G-4; OA-4 | owner-pending |
 | HLDD §6.2 L1830-1837 | media-index fields (P2) | §3.7 | text+schedule | §3.7; IP §5 | parked |
 | HLDD §6.2 L1847-1851 | media-permission release check | §6.1, §6.4, §7.7 | test+release | subprojects/mkdocs/hooks/site_checks.py arm (a) (T-03); subprojects/mkdocs/hooks/site_checks.py arm (b) (T-03); §7.7 item 9 | planned |
-| HLDD §7.1 L1895 | payload verification | §7.6 | measure+release | §7.6 report: workloads.samples.files (T-61); §3.8: pending item 4 (T-61); §7.7 item 5 | planned |
+| HLDD §7.1 L1895 | payload verification | §7.6 | measure+release | §7.6 report: workloads.samples.files (T-61); §3.8: pending item 3 (T-61); §7.7 item 5 | planned |
 | HLDD §7.1 L1898 | interaction verification workloads | §7.6 | text+measure | §7.6; §7.6 report: workloads (T-61) | planned |
 | HLDD §7.1 L1902-1904 | payload measurement scope | §7.6 | text+measure | §7.6; §7.6 report: workloads.samples.files (T-61) | planned |
 | HLDD §7.1 L1910-1911 | reference results never downloaded | §5.2, §7.6 | text+measure | §5.2; §7.6; §7.6 report: workloads.samples.files (T-61) | planned |
@@ -12926,7 +12933,7 @@ deliberately keeps.
 | HLDD §7.2 L1996-1999 | rendered-app a11y checks | §7.5, §7.7 | test+release | subprojects/webapp/playwright/specs/a11y.spec.ts (T-60); subprojects/webapp/playwright/specs/keyboard-responsive.spec.ts (T-60); §7.7 item 14; §7.7 item 15 | planned |
 | HLDD §7.3 L2020-2022 | cache-behavior measurement | §7.6 | measure+release | §7.6 report: headers (T-61); §7.6 report: workloads (T-61); §7.6 report: environment (T-59, T-61); §7.7 item 5 | planned |
 | HLDD §7.3 L2030-2033 | compression format support and serving | §6.1, §5.2, §7.6 | text+test+measure+release | §6.1; §5.2; subprojects/webapp/test/compat.test.ts (T-61); subprojects/webapp/test/decode.test.ts (T-36); §7.6 report: headers (T-61); §7.7 item 15 | planned |
-| HLDD §7.3 L2036-2038 | download/decompression measurement | §7.6, §3.8 | measure | §7.6 report: decodeMs (T-61); §7.6 report: workloads.samples.files (T-61); §3.8: pending item 4 (T-61) | planned |
+| HLDD §7.3 L2036-2038 | download/decompression measurement | §7.6, §3.8 | measure | §7.6 report: decodeMs (T-61); §7.6 report: workloads.samples.files (T-61); §3.8: pending item 3 (T-61) | planned |
 | HLDD §7.3 L2059-2060 | site-regression checks | §7.5, §7.7 | test+release | subprojects/webapp/playwright/specs/site-regression.spec.ts (T-60); subprojects/mkdocs/hooks/site_checks.py arm (e) (T-51); §7.7 item 6 (SC-6) | planned |
 | HLDD §8 L2123-2125 | asset paths and insertion mechanism | §6.1 | text+test | §6.1; .github/workflows/mkdocs.yml::build / Build preview site (T-21); subprojects/mkdocs/hooks/site_checks.py arm (c) (T-51) | planned |
 | HLDD §8 L2150-2152 | runtime data-version verification | §6.2, §5.2 | text+test | §6.2; §5.2; subprojects/webapp/test/decode.test.ts (T-36); subprojects/webapp/playwright/specs/failure-states.spec.ts (T-60); subprojects/webapp/playwright/specs/navigation-lifecycle.spec.ts (T-60) | planned |
@@ -12964,7 +12971,7 @@ deliberately keeps.
 | HLDD §9 L2508-2510 | attachment file identity | §4.4, §7.7 | text+release | §4.4; §7.7 item 11 | planned |
 | HLDD §9 L2512-2513 | attachment manual vs automated | §1 DD-8, §4.4 | text | §1 DD-8; §4.4 | designed |
 | HLDD §9 L2530-2532 | rollback verification | §4.3 | text+test+schedule | §4.3; .github/workflows/mkdocs.yml::build / Stage scenario assets (T-21); subprojects/webapp/test/parity.ts::fetch (T-35); T-64 | planned |
-| HLDD §10 L2552 | R-16 feasibility measurements | §7.6, §3.8 | measure+release | §3.8: pending item 2 (T-11, T-61); §3.8: pending item 4 (T-61); §7.6 report: workloads (T-61); §7.6 report: environment (T-59, T-61); §7.7 item 5 | planned |
+| HLDD §10 L2552 | R-16 feasibility measurements | §7.6, §3.8 | measure+release | §3.8: pending item 2 (T-11, T-61); §3.8: pending item 3 (T-61); §7.6 report: workloads (T-61); §7.6 report: environment (T-59, T-61); §7.7 item 5 | planned |
 | HLDD §10 L2555 | R-19 remaining engines/mobile | §7.6 | test+measure+release | subprojects/webapp/test/compat.test.ts (T-61); §7.6 report: workloads (T-61); §7.7 item 15 | planned |
 | HLDD §10 L2557 | recovery/withdrawal procedures | §4.3 | text+release+schedule | §4.3; §7.7 item 12; T-64 | planned |
 | HLDD §10 L2559-2562 | complete-sequence feasibility | §7.6 | text+measure | §7.6; §7.6 report: workloads (T-61) | planned |

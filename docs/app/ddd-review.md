@@ -1433,6 +1433,19 @@ are recorded at the end of
   0.05 does not settle the stored figures. T-11's Done-when now states
   that §3.8 item 2's raw figure is the sum of two `size:` figures, as
   its step (7) defines it — an erratum that adds no requirement.
+- **T-13 review.** With the reference-results file's figures recorded,
+  item 3 of the pending list of
+  [DDD §3.8 — Measured sizes](ddd.md#38-measured-sizes) named no
+  unrecorded figure, so by §3.8's completion rule the owner had it
+  moved into the text above; items 4 and 5 became items 3 and 4, and
+  every citation of the old item 4 — §7.6, four §8 Check cells, and
+  T-61's body — and T-13's two references to item 3 were renumbered
+  with it, a change of numbering only. §3.8 now also states that sizes
+  describe the measured export run: a fresh export's new
+  `export_date` may change compressed JSON sizes with unchanged
+  research data, the scenario binary stays unchanged for the same data
+  and compression environment, and a strict `--reproduce` run must
+  reproduce every file byte for byte.
 
 ## References
 
