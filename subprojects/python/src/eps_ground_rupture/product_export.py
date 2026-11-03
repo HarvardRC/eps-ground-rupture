@@ -1356,7 +1356,9 @@ def build_record_table(rows: pd.DataFrame) -> RecordTable:
         trial_index=trial_index,
         stage_index=stage_index,
         slip=slip,
-        slip_step=_recording_steps("Slip", slip, np.ones(slip.shape, dtype=bool), 10**4),
+        slip_step=_recording_steps(
+            "Slip", slip, np.ones(slip.shape, dtype=bool), SLIP_DECODE_DIVISOR
+        ),
         class_code=codes.astype(np.int64),
         steps=steps,
         valid=valid,
@@ -1757,7 +1759,7 @@ def _ensemble_frame(ensemble: dict[str, object]) -> pd.DataFrame:
             data[TRIAL_SOURCE_COLUMN].append(row[0])
             for j, column in enumerate(site, start=1):
                 data[TRIAL_SOURCE_COLUMNS[column]].append(row[j])
-    data[STAGE_SOURCE_COLUMNS["slip"]] = [int(s) / 10**4 for s in stages["slip"]]  # type: ignore[call-overload]
+    data[STAGE_SOURCE_COLUMNS["slip"]] = [int(s) / SLIP_DECODE_DIVISOR for s in stages["slip"]]  # type: ignore[call-overload]
     for m in MEASUREMENTS:
         data[MEASUREMENT_SOURCE_COLUMNS[m]] = [
             np.nan if s is None else int(s) / MEASUREMENT_DIVISOR  # type: ignore[call-overload]
@@ -1832,7 +1834,7 @@ def synthetic_cases() -> dict[str, object]:
     offer_ratio = LOG_SCALE_OFFER_RATIOS[LOG_SCALE_MIN_DECADES]
     statistics = []
     for case in reference_cases.STATISTICS_CASES:
-        divisor = 10 ** int(case["decimals"])  # type: ignore[call-overload]
+        divisor = {3: MEASUREMENT_DIVISOR, 4: SLIP_DECODE_DIVISOR}[int(case["decimals"])]  # type: ignore[call-overload]
         stats, x = summarize(case["steps"], divisor)  # type: ignore[arg-type]
         statistics.append(
             {
