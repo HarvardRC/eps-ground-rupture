@@ -11,6 +11,10 @@
 //   in `belowCounts`); the counts and `belowCounts` together sum to n; no
 //   positive value returns null.
 // - Both: identical inputs give identical output.
+// - The `sorted` input of `histogram()`: `restoredAscending`, the
+//   counting sort of `validValues` (§5.4, Gather), equals byte for byte
+//   the restored values sorted by the typed-array numeric sort, directly
+//   and through `validValues` on the stage-count fixtures.
 //
 // Rules, edges, counts, and whether the logarithmic histogram is offered
 // are checked against the Python-generated references by the parity
@@ -21,7 +25,11 @@ import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
 import { logScaleOfferRatio } from '../src/config';
+import { query } from '../src/engine/query';
 import { histogram, histogramLog, type Histogram, type HistogramLog } from '../src/stats/histogram';
+import { restoredAscending, validValues } from '../src/stats/stats';
+import { defaultScenario, MEASUREMENT_NAMES } from '../src/state/state';
+import { buildFixture, decodeFixture, stageCountSpec } from './fixtures';
 
 /** One display step u in recording steps per display decimals (§5.12): integer literals. */
 const DISPLAY_STEP_UNITS: { readonly [dd: number]: number } = { 2: 10, 1: 100, 0: 1000 };
@@ -273,4 +281,79 @@ describe('histogramLog', () => {
       assert.deepEqual(a, b, c.name);
     }
   });
+});
+
+// --------------------------------------------------------------------
+// The sorted input: counting sort against the typed-array numeric sort
+// --------------------------------------------------------------------
+
+/** The bytes of a `Float64Array`, for a bit-for-bit comparison. */
+function bytesOf(a: Float64Array): Uint8Array {
+  return new Uint8Array(a.buffer, a.byteOffset, a.byteLength);
+}
+
+/** The restored values `s / D` sorted by the typed-array numeric sort. */
+function typedSortOf(steps: Int32Array, divisor: number): Float64Array {
+  return Float64Array.from(steps, (s) => s / divisor).sort();
+}
+
+/** Step arrays with negative values, duplicates, one value, and wide ranges. */
+function sortCases(): { readonly name: string; readonly steps: Int32Array }[] {
+  const next = lcg(91);
+  const wide = [];
+  for (let i = 0; i < 20000; i++) wide.push((next() % 360001) - 180000);
+  wide.push(-180000, 180000, 0, 0, -1, 1);
+  const duplicates = [];
+  for (let i = 0; i < 5000; i++) duplicates.push((next() % 7) - 3);
+  const heights = [];
+  for (let i = 0; i < 10000; i++) heights.push((next() % 65535) - 182);
+  return [
+    { name: 'empty', steps: new Int32Array(0) },
+    { name: 'one value', steps: Int32Array.from([777]) },
+    { name: 'one negative value', steps: Int32Array.from([-182]) },
+    { name: 'one zero', steps: Int32Array.from([0]) },
+    { name: 'constant', steps: Int32Array.from([1530, 1530, 1530]) },
+    { name: 'negative, zero, and positive, descending', steps: Int32Array.from([5, 3, 0, -1, -2, -182]) },
+    { name: 'duplicates over a narrow range', steps: Int32Array.from(duplicates) },
+    { name: 'two far values', steps: Int32Array.from([180000, -180000]) },
+    { name: 'wide range, ±180000', steps: Int32Array.from(wide) },
+    { name: 'height-like range, -182 to 65352', steps: Int32Array.from(heights) },
+  ];
+}
+
+describe('restoredAscending: the counting sort of validValues', () => {
+  test('equals the typed-array numeric sort of s / D byte for byte', () => {
+    for (const c of sortCases()) {
+      for (const divisor of [1000, 10000]) {
+        const got = restoredAscending(c.steps, divisor);
+        const want = typedSortOf(c.steps, divisor);
+        assert.equal(got.length, c.steps.length, `${c.name}, D = ${divisor}: length`);
+        assert.deepEqual(bytesOf(got), bytesOf(want), `${c.name}, D = ${divisor}`);
+      }
+    }
+  });
+
+  test('leaves its input steps unchanged', () => {
+    for (const c of sortCases()) {
+      const before = c.steps.slice();
+      restoredAscending(c.steps, 1000);
+      assert.deepEqual(c.steps, before, c.name);
+    }
+  });
+
+  for (const n of [2, 100, 101, 102]) {
+    test(`validValues on the N = ${n} fixture: sorted equals the typed-array sort of its steps`, async () => {
+      const vintage = await decodeFixture(await buildFixture(stageCountSpec(n)));
+      const base = defaultScenario(vintage.manifest);
+      for (const scenario of [base, { ...base, density: [] }]) {
+        const selection = query(vintage, scenario);
+        for (const m of MEASUREMENT_NAMES) {
+          const vv = validValues(vintage, selection, m);
+          const label = `N = ${n}, ${m}, ${selection.matchingRecords} records`;
+          assert.equal(vv.sorted.length, vv.steps.length, label);
+          assert.deepEqual(bytesOf(vv.sorted), bytesOf(typedSortOf(vv.steps, vv.divisor)), label);
+        }
+      }
+    });
+  }
 });

@@ -1481,6 +1481,23 @@ are recorded at the end of
   glossary linker also skips text inside an `<a>`, where a link would
   nest one link in another, so the field-source terms inside the
   overlay legend's source links stay unlinked there.
+- **T-32 follow-up: the sort of `validValues`.** On 2026-11-03 the
+  owner adopted a speedup that preserves the function: `validValues`
+  of [T-32](ip.md#t-32--statistics-module) (Statistics module) builds
+  `sorted` by a counting sort of the integer steps, each then divided
+  by `D`, instead of the typed-array numeric sort of the restored
+  values, as
+  [DDD §5.4 — Statistics](ddd.md#54-statistics) (Gather) now states.
+  The output is bit-identical. In the spot timing of
+  [T-37](ip.md#t-37--early-feasibility-diagnostic) (Early feasibility
+  diagnostic) on [GS-0](pdd.md#102-golden-scenarios) (Empty scenario
+  (no active slip window), default population), a diagnostic and never
+  acceptance evidence, four runs of each build alternated on one
+  heavily loaded machine, where decode and query took about twice
+  their lighter-load times; the median selection-and-statistics
+  interval was 76–83 ms after the change against 185–200 ms before,
+  2.4–2.5 times shorter in each pair. At the lighter load, earlier,
+  the build before the change had a median of 92–94 ms.
 
 ## References
 

@@ -2117,8 +2117,9 @@ height and width, the dictionary entry for scarp dip — with its class
 code, a kept class code 255 throwing (an internal failure,
 [§5.10](ddd.md#510-failure-states)); `ValidValues` holds `steps`
 (`Int32Array`), `classes` (`Uint8Array`), the divisor `D` (1000), and
-`sorted`, the values `s / D` in a `Float64Array` sorted by the
-typed-array numeric sort — the restore rule of
+`sorted`, the values `s / D` in a `Float64Array`, ascending, by a
+counting sort of the integer steps over their range, each step then
+divided by `D` — the restore rule of
 [§5.2](ddd.md#52-artifact-loading-and-decoding), with integer literals,
 never `10 **` or `Math.pow`. (2) `summarize(values) → Stats | null`:
 `min` and `max` the ends of `sorted`; `median`, `p16`, and `p84` by
