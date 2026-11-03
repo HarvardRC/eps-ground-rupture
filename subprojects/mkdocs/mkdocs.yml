@@ -113,12 +113,15 @@ markdown_extensions:
   - pymdownx.details
   - pymdownx.superfences
 
-# The Tableau Embedding API v3 is loaded once here rather than repeated in
-# every page, so the <tableau-viz> web component is defined site-wide.
-# See EMBEDS.md (alongside this file) for the markup pattern each page reuses.
+# The Tableau Embedding API v3 is not listed here: the loader below injects
+# it only into a page that carries an embed, so the scenario page never
+# loads it (docs/app/ddd.md §6.1, Tableau exclusion; the site checks hook's
+# arm (e) fails a build whose pages carry the API's <script> tag). See
+# EMBEDS.md (alongside this file) for the markup pattern each page reuses.
 extra_javascript:
-  - path: https://public.tableau.com/javascripts/api/tableau.embedding.3.latest.min.js
-    type: module
+  # Injects the Embedding API where a <tableau-viz> or .tableau-fit exists
+  # — see the file header.
+  - javascripts/tableau-loader.js
   # Scales each embed to the available column width — see the file header.
   - javascripts/tableau-fit.js
   # Turns the "How to cite" buttons into one shared modal — see the file

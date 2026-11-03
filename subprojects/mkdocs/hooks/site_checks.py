@@ -23,21 +23,29 @@ arms of §6.1:
     suffix is not .html, .js, .css, .map, .json, .xml, or .txt
     (sitemap.xml.gz excepted), referenced or not, unless its path matches
     a line of publication-allowlist.txt (fnmatch patterns, # comments);
+(c) application subtree: when assets/scenario/ exists in the output,
+    assets/scenario/data/ holds exactly the `files` keys of the committed
+    subprojects/webapp/data/pointer.json, each file's SHA-256 equal to the
+    pointer's, and assets/scenario/ holds at top level exactly data/ plus
+    the app-<hash>.js and app-<hash>.css that the built scenario/index.html
+    names (the #gre-app src and the stylesheet href);
 (d) publication boundary: for every drafted source file, its output path
     is absent from the output tree, its URL is absent from sitemap.xml
     and from search/search_index.json, and no href or src in a built page
     resolves to it; in a publication build, for every unlisted page, its
     URL is absent from sitemap.xml and from search/search_index.json, and
-    no href or src in any other built page resolves to it.
+    no href or src in any other built page resolves to it;
+(e) Tableau exclusion: no built page carries a <script> whose src begins
+    with https://public.tableau.com/javascripts/api/, and every built page
+    carries a <script> whose src ends with javascripts/tableau-loader.js.
 
-§6.1's arms (c), application subtree, and (e), Tableau exclusion, join
-with T-51 — Site validation additions (docs/app/ip.md), and arm (b)'s
-exception for granted media-index entries with P2.
+Arm (b)'s exception for granted media-index entries joins with P2.
 """
 
 from __future__ import annotations
 
 import fnmatch
+import hashlib
 import html
 import json
 import os
@@ -56,10 +64,16 @@ from mkdocs.structure.files import File, Files, InclusionLevel
 
 PREVIEW_CONFIG = "mkdocs.preview.yml"
 ALLOWLIST = Path(__file__).resolve().parent.parent / "publication-allowlist.txt"
+# The committed pointer manifest (docs/app/ddd.md §3.3), arm (c)'s reference.
+POINTER = Path(__file__).resolve().parents[2] / "webapp" / "data" / "pointer.json"
 
 DEV_MEDIA = "media/dev/"
 DEV_MEDIA_SCANNED = (".html", ".js", ".css")
 APP_SUBTREE = "assets/scenario/"
+APP_DATA = APP_SUBTREE + "data/"
+SCENARIO_PAGE = "scenario/index.html"
+TABLEAU_API = "https://public.tableau.com/javascripts/api/"
+TABLEAU_LOADER = "javascripts/tableau-loader.js"
 TEXT_SUFFIXES = (".html", ".js", ".css", ".map", ".json", ".xml", ".txt")
 SITEMAP = "sitemap.xml"
 SITEMAP_GZ = "sitemap.xml.gz"
@@ -69,7 +83,9 @@ SITEMAP_LOC = "{http://www.sitemaps.org/schemas/sitemap/0.9}loc"
 ARMS = {
     "a": "development media",
     "b": "publication inventory",
+    "c": "application subtree",
     "d": "publication boundary",
+    "e": "Tableau exclusion",
 }
 
 # One <url> element of the rendered sitemap, with its indentation and line
@@ -114,7 +130,9 @@ def on_post_build(*, config: MkDocsConfig) -> None:
     findings = sorted(
         [("a", *f) for f in _development_media(site, paths)]
         + [("b", *f) for f in _publication_inventory(paths)]
+        + [("c", *f) for f in _application_subtree(site, paths, config)]
         + [("d", *f) for f in _publication_boundary(site, paths, config)]
+        + [("e", *f) for f in _tableau_exclusion(site, paths)]
     )
     if findings:
         lines = [f"  ({arm}) {ARMS[arm]}: {path} — {why}" for arm, path, why in findings]
@@ -170,6 +188,94 @@ def _allowlist() -> list[str]:
             f"Site checks: the publication allowlist {ALLOWLIST} is missing"
         ) from None
     return [s for s in (line.strip() for line in lines) if s and not s.startswith("#")]
+
+
+def _application_subtree(
+    site: Path, paths: list[str], config: MkDocsConfig
+) -> Iterator[tuple[str, str]]:
+    """Arm (c)."""
+    subtree = site / APP_SUBTREE
+    if not subtree.is_dir():
+        return
+    pointer = _pointer_files()
+    staged = {path[len(APP_DATA) :]: path for path in paths if path.startswith(APP_DATA)}
+    for name, path in staged.items():
+        if name not in pointer:
+            yield path, f"not a files key of {POINTER.name}"
+        elif _sha256(site / path) != pointer[name]:
+            yield path, f"its SHA-256 differs from the one {POINTER.name} lists"
+    for name in pointer.keys() - staged.keys():
+        yield APP_DATA + name, f"a files key of {POINTER.name} that the output lacks"
+    named: set[str] = set()
+    page = site / SCENARIO_PAGE
+    if page.is_file():
+        root = _site_root(config.site_url)
+        tags = _tags(page)
+        scripts = {
+            _top_level_name(attrs.get("src"), root)
+            for tag, attrs in tags
+            if tag == "script" and attrs.get("id") == "gre-app"
+        } - {None}
+        sheets = {
+            _top_level_name(attrs.get("href"), root)
+            for tag, attrs in tags
+            if tag == "link" and "stylesheet" in (attrs.get("rel") or "").lower().split()
+        } - {None}
+        if not scripts:
+            yield SCENARIO_PAGE, f"its #gre-app src names no file directly under {APP_SUBTREE}"
+        if not sheets:
+            yield SCENARIO_PAGE, f"no stylesheet href names a file directly under {APP_SUBTREE}"
+        named = {name for name in scripts | sheets if name}
+    else:
+        yield SCENARIO_PAGE, "absent from the output, so no built page names the application assets"
+    expected = {"data/"} | named
+    actual = {entry.name + "/" if entry.is_dir() else entry.name for entry in subtree.iterdir()}
+    for name in sorted(actual - expected):
+        yield APP_SUBTREE + name, f"neither data/ nor an asset that {SCENARIO_PAGE} names"
+    for name in sorted(expected - actual):
+        yield APP_SUBTREE + name, "absent from the output"
+
+
+def _pointer_files() -> dict[str, str]:
+    """The `files` map (name -> SHA-256) of the committed pointer manifest."""
+    try:
+        files = json.loads(POINTER.read_text(encoding="utf-8"))["files"]
+    except (FileNotFoundError, json.JSONDecodeError, KeyError, TypeError) as e:
+        raise PluginError(
+            f"Site checks: the pointer manifest {POINTER} has no readable files map ({e!r})"
+        ) from None
+    return dict(files)
+
+
+def _sha256(path: Path) -> str:
+    """The lowercase hexadecimal SHA-256 of a file's bytes."""
+    digest = hashlib.sha256()
+    with path.open("rb") as f:
+        for block in iter(lambda: f.read(1 << 16), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def _top_level_name(ref: str | None, root: tuple[str, str]) -> str | None:
+    """The name of the file at the top level of assets/scenario/ that `ref`,
+    read in the built scenario page, addresses; None for any other target."""
+    target = _resolve(ref or "", SCENARIO_PAGE, root)
+    if target is None or not target.startswith(APP_SUBTREE):
+        return None
+    name = target[len(APP_SUBTREE) :]
+    return name if name and "/" not in name else None
+
+
+def _tableau_exclusion(site: Path, paths: list[str]) -> Iterator[tuple[str, str]]:
+    """Arm (e)."""
+    for page in (p for p in paths if p.endswith(".html")):
+        srcs = [
+            (attrs.get("src") or "").strip() for tag, attrs in _tags(site / page) if tag == "script"
+        ]
+        if any(src.startswith(TABLEAU_API) for src in srcs):
+            yield page, f"a <script> src begins with {TABLEAU_API}"
+        if not any(src.endswith(TABLEAU_LOADER) for src in srcs):
+            yield page, f"no <script> src ends with {TABLEAU_LOADER}"
 
 
 def _publication_boundary(
@@ -257,6 +363,23 @@ def _refs(page: Path) -> list[str]:
     parser.feed(page.read_text(encoding="utf-8", errors="replace"))
     parser.close()
     return parser.refs
+
+
+class _TagParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.tags: list[tuple[str, dict[str, str | None]]] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        self.tags.append((tag, dict(attrs)))
+
+
+def _tags(page: Path) -> list[tuple[str, dict[str, str | None]]]:
+    """Every start tag of a built page, with its attributes."""
+    parser = _TagParser()
+    parser.feed(page.read_text(encoding="utf-8", errors="replace"))
+    parser.close()
+    return parser.tags
 
 
 def _sitemap_paths(site: Path, root: tuple[str, str]) -> set[str]:
