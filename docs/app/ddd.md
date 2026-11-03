@@ -4851,7 +4851,8 @@ of an object with exactly these keys:
   a non-empty string;
 - `scenario`: `JSON.parse(serializeScenario(scenario, manifest))`;
 - `display`: the display record specified below;
-- `summary`: `settingsText(scenario)` supplied by the caller, a
+- `summary`: `settingsText(state)` ([§5.7](#57-scenario-controls)) of
+  the scenario and the loaded manifest, supplied by the caller, a
   non-empty string displayed as plain text if restoration is blocked.
   It is explanatory text only, never an input to parsing or calculation.
 
@@ -6034,9 +6035,10 @@ its site-glossary anchor, `href="../glossary/#{anchor}"` with
 plain — the first-use rule as a mechanism, not an editorial habit.
 It links the stable skeleton text once at mount and, on each render
 pass, only the terms whose first occurrence lies in a replaced slot.
-Text inside a `<label>`, `<summary>`, `<button>`, or `<svg>` is never
-linked: a link there would nest interactive content or vanish from
-the accessibility tree.
+Text inside an `<a>`, `<label>`, `<summary>`, `<button>`, or `<svg>`
+is never linked: a link there would nest interactive content or
+vanish from the accessibility tree; a term's first occurrence is its
+first occurrence outside them.
 
 PDD §5.11 also needs two glossary additions before launch: "PFDHA;
 engineer of record (or an in-context gloss)". The Glossary additions

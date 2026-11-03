@@ -2660,7 +2660,7 @@ sediment subsets, every empty-group token, and the offset-mode token;
 `subprojects/webapp/src/views/copy.json`,
 `grep -cF 'Enter displacement as'`,
 `grep -cF 'What do the two populations mean?'`, and
-`grep -cF 'approximately 0–5 m'` each print 1;
+`grep -cF '"approximately 0–5 m"'` each print 1;
 `grep -c 'position: sticky' subprojects/webapp/src/app.css` prints at
 least 1; `python3 .github/scripts/check_pdd_agreement.py` exits 0 with
 the new entries; the rendered controls, the descriptive label and the
