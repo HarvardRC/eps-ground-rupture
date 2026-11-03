@@ -11192,8 +11192,9 @@ upgrade of the pinned package (§2).
     `testMatch: '*.measure.ts'` (the
     [§7.6](#76-performance-and-compatibility-measurements) suite),
     `fullyParallel: false`, `retries: 0`,
-    `use: { headless: false, trace: 'off', video: 'off', screenshot: 'off' }`
-    — headed, under `xvfb-run` on the reference VM. Playwright 1.47.2
+    `use: { headless: false, viewport: { width: 1280, height: 1080 }, trace: 'off', video: 'off', screenshot: 'off' }`
+    — headed, at a 1280 × 1080 CSS px viewport tall enough for the
+    first result's chart and statistics table (§7.6), under `xvfb-run` on the reference VM. Playwright 1.47.2
     has no per-project `workers`, so every invocation of this project
     carries `--workers=1` (§7.6).
 - **Invocation.** `webappBrowserTest` runs, from
@@ -12055,7 +12056,10 @@ when the selected measurement's statistics `<table>` and chart `<svg>`
 — or the notice standing in for its chart, or `#gre-state` when no record
 matches — are connected with a non-zero `getBoundingClientRect()`
 area; for `egr:first-result` use the initial selected measurement and
-require them also to intersect the viewport. A
+require them also to intersect the viewport — the `measure` project's
+1280 × 1080 CSS px viewport ([§7.5](#75-browser-test-lane)); at
+Chromium's default 1280 × 720 the statistics table sits below the
+fold after the at-mount scroll. A
 repetition whose mark carries `detail.visible === false` fails. In a
 browser without `MessageChannel` or the User Timing Level 3 options
 object, `markAfterPaint` records nothing and never throws: the marks

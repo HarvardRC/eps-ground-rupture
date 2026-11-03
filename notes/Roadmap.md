@@ -555,6 +555,19 @@ drills, is retired: the drills run against a stub `gh` instead.
   Tags v0.2.0–v0.2.2 exist, and OA-18 adds the plain tag `v0.3.0`; no
   GitHub release yet.
 
+## Ground Rupture Explorer — product changes for Phase 2 (opened 2026-11-03)
+
+Product changes the owner decided to make in Phase 2. Each one starts
+as a PRD change and then follows the staged documents.
+
+- **Phone view setting** — open. A setting the reader switches between
+  two ways of showing a result: the chart with its statistics table
+  (today's view), and a compact view for small screens such as phones.
+  Until then, the speed measurement checks the first result with both
+  the chart and the table on screen, at a 1280 × 1080 window
+  (DDD §7.6); once the setting exists, each view is measured on its
+  own.
+
 ## Decisions made
 
 - **DOI route (2026-10-12, author team)**: **Zenodo, fed by a GitHub

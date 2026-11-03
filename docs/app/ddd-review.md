@@ -1517,6 +1517,15 @@ are recorded at the end of
   provenance block-4 and block-7 line templates that the registry
   holds, and §5.9 states that `statistics.csv` takes the line ends and
   quoting of `records.csv`.
+- **T-46 review erratum.** The `egr:first-result` mark requires the
+  initial selected measurement's chart and statistics table to
+  intersect the viewport (§7.6). At Chromium's default 1280 × 720,
+  which the `measure` project used, the table sits below the fold
+  after the at-mount scroll, so every load repetition would fail. The
+  `measure` project now sets a 1280 × 1080 CSS px viewport (§7.5), and
+  §7.6 names it; the requirement's "table and chart on screen" is
+  unchanged. A reader setting for a compact phone view is a Phase-2
+  product change (`notes/Roadmap.md`).
 
 ## References
 
