@@ -1527,6 +1527,20 @@ are recorded at the end of
   unchanged. The initial note described the later product change as
   a compact phone view in Phase 2; the owner's clarification below
   replaces that description.
+- **T-22 review erratum.** T-22's row and body said that only the
+  runs that can deploy share the `pages` concurrency group, so a run
+  that cannot deploy never cancels a pending deploy. Every manual run
+  joins that group, including one on a branch the `github-pages`
+  environment refuses, and GitHub cancels a pending run when a newer
+  run joins its group, so such a run could cancel a pending deploy
+  before it fails at the environment. Both now state DDD §6.3's own
+  claim: only the runs whose `deploy` job runs — a push to `main` and
+  every manual run — share the group, and a pull-request run or a push
+  run on a `dev-v.*` branch never cancels a pending deploy. T-22's
+  body returned to Draftable for the owner's re-acceptance. The
+  residual case needs no design change: only the owner starts manual
+  runs, and does not start one on another branch while a deploy is
+  pending.
 - **Playwright pin raised before T-59 and T-60.** For the open item
   of the npm audit decision above,
   [DDD §2](ddd.md#2-repository-structure-naming-and-toolchain) now
