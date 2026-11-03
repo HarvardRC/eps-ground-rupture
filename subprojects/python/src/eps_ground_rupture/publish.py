@@ -366,7 +366,7 @@ def check_drill_override(run: Run) -> None:
             "1",
             f"the drill override --drill-repository {run.repository} is refused: "
             f"`{' '.join(REPO_VIEW_COMMAND)}` exited {view.returncode} "
-            f"({(view.stderr or view.stdout).strip()})",
+            f"({next(iter((view.stderr or view.stdout).strip().splitlines()), '')})",
         )
     if name.lower() == REPOSITORY.lower():
         raise PublishStop(
@@ -797,9 +797,16 @@ def step10_record(run: Run, pointer: dict | None) -> None:
         raise PublishStop("10", f"the staged record {run.record_rel} of step 4 is missing")
     if pointer is None:
         raise PublishStop("10", f"{POINTER_PATH} is missing")
-    record["tag_object"] = git(run, "rev-parse", f"refs/tags/{run.tag}", step="10").stdout.strip()
-    record["gh_version"] = first_line(run, "gh", "--version")
-    record["git_version"] = first_line(run, "git", "--version")
+    # Step 10 completes the record: a field already present is kept, so a
+    # rerun never rewrites the tools that published the vintage.
+    if "tag_object" not in record:
+        record["tag_object"] = git(
+            run, "rev-parse", f"refs/tags/{run.tag}", step="10"
+        ).stdout.strip()
+    if "gh_version" not in record:
+        record["gh_version"] = first_line(run, "gh", "--version")
+    if "git_version" not in record:
+        record["git_version"] = first_line(run, "git", "--version")
     if "published_at" not in record:
         record["published_at"] = published_at(run, "10")
     write_record(run, record)
