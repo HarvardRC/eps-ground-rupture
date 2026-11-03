@@ -11,7 +11,10 @@
 //   recovery claim, the two `window` listeners of Error routing, then the
 //   load and the first render inside one `try`/`catch` — with the
 //   mount's terminal state, the recovery listeners and decisions, and
-//   the initial focus and scroll;
+//   the initial focus and scroll. The load reads the three `data-*`
+//   attributes of `#gre-app` and fails on a missing or empty one (§5.10
+//   step 2; §6.2), and every skeleton commit fills the version footer
+//   `#gre-versions` from the two stamps (§5.8);
 // - the per-mount scheduler of §5.3 behind the `Scheduler` type of
 //   `views/dom/wiring.ts`, whose frame callback computes the latest
 //   accepted Scenario's result, commits it through the render pass
@@ -570,6 +573,29 @@ function createScheduler(host: SchedulerHost, initial: AppState): MountScheduler
 // The mount (§5.10 startup sequence; §5.11 rules binding `start`)
 // --------------------------------------------------------------------
 
+/** The fixed-here registry entry of the version footer `#gre-versions` (§5.8, Region model; §6.2). */
+const VERSION_FOOTER_KEY = 'ddd5.8.versionFooter';
+
+/**
+ * A missing or empty `data-software-version`, `data-data-version`, or
+ * `data-manifest` of `#gre-app` (§5.10 step 2; §6.2): an internal
+ * failure, whose unavailable state takes the `'attributes'` reason row.
+ */
+class MissingAttributeError extends Error {}
+
+/**
+ * The text of the version footer `#gre-versions` (§5.8): "Software
+ * version {software} · Data-export version {data}" from the two stamps of
+ * `#gre-app`'s dataset, read now; empty when either stamp is missing or
+ * empty.
+ */
+function versionFooter(dataset: DOMStringMap): string {
+  const software = dataset.softwareVersion ?? '';
+  const data = dataset.dataVersion ?? '';
+  if (software === '' || data === '') return '';
+  return fillCopy(VERSION_FOOTER_KEY, { software, data });
+}
+
 /** A live region of class `gre-visually-hidden` (§5.11, Live announcements). */
 function liveRegion(role: 'status' | 'alert'): HTMLDivElement {
   const region = document.createElement('div');
@@ -668,9 +694,15 @@ async function start(a: Active, tag: HTMLScriptElement): Promise<void> {
     return element;
   };
 
-  /** Commits the minimal skeleton (§5.10) through `#gre-root.replaceChildren(…)`, with the two live regions after it. */
+  /**
+   * Commits the minimal skeleton (§5.10) through
+   * `#gre-root.replaceChildren(…)`, with the two live regions after it and
+   * the version footer filled from `tag`'s two stamps, read at this commit
+   * (§5.8; §6.2).
+   */
   function commitSkeleton(): void {
     const s = buildMinimalSkeleton(document);
+    s.versions.textContent = versionFooter(tag.dataset);
     root.replaceChildren(s.summary, s.controls, s.header, s.panels, s.state, s.versions, status, alert);
   }
 
@@ -993,7 +1025,9 @@ async function start(a: Active, tag: HTMLScriptElement): Promise<void> {
 
   /**
    * Steps 2 and 3: the load — the three `data-*` attributes of `#gre-app`
-   * read from `tag.dataset` now, the vintage from `vintageFor(tag)` — and
+   * read from `tag.dataset` now, a missing or empty one an internal failure
+   * with the `'attributes'` reason row (§5.10; §6.2), the vintage from
+   * `vintageFor(tag)` — and
    * the first result: the default Scenario and display, or `record`'s
    * after validation against this vintage, a restored offset Scenario
    * awaiting its regression export first. Any throw enters the
@@ -1005,8 +1039,17 @@ async function start(a: Active, tag: HTMLScriptElement): Promise<void> {
     let loading = true;
     try {
       const ds = tag.dataset;
-      const stamps: VersionStamps = { softwareVersion: ds.softwareVersion ?? '', dataVersion: ds.dataVersion ?? '' };
-      const manifestUrl = new URL(ds.manifest!, tag.src).href;
+      const softwareVersion = ds.softwareVersion ?? '';
+      const dataVersion = ds.dataVersion ?? '';
+      const manifestPath = ds.manifest ?? '';
+      const absent = [
+        ['data-software-version', softwareVersion],
+        ['data-data-version', dataVersion],
+        ['data-manifest', manifestPath],
+      ].filter(([, value]) => value === '').map(([name]) => name);
+      if (absent.length > 0) throw new MissingAttributeError(`main: #gre-app has no value for ${absent.join(', ')}`);
+      const stamps: VersionStamps = { softwareVersion, dataVersion };
+      const manifestUrl = new URL(manifestPath, tag.src).href;
       const pending = vintageFor(tag);
       const entry = cache!;
       const vintage = await pending;
@@ -1062,7 +1105,8 @@ async function start(a: Active, tag: HTMLScriptElement): Promise<void> {
         console.debug(error);
         return;
       }
-      fail({ error }, loading && retained !== null ? 'retained' : null);
+      const failure: UnavailableFailure = error instanceof MissingAttributeError ? { error, step: 'attributes' } : { error };
+      fail(failure, loading && retained !== null ? 'retained' : null);
     }
   }
 
