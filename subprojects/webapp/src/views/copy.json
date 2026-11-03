@@ -266,6 +266,34 @@
     "slots": []
   },
   {
+    "key": "ddd5.11.loadingAnnouncement",
+    "source": "docs/app/ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle",
+    "part": 0,
+    "text": "Loading simulation data…",
+    "slots": []
+  },
+  {
+    "key": "ddd5.11.resultsUpdated",
+    "source": "docs/app/ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle",
+    "part": 1,
+    "text": "Results updated: {matching} matching records.",
+    "slots": ["matching"]
+  },
+  {
+    "key": "ddd5.11.resultsUpdatedOne",
+    "source": "docs/app/ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle",
+    "part": 2,
+    "text": "Results updated: 1 matching record.",
+    "slots": []
+  },
+  {
+    "key": "ddd5.11.panelNoticeAnnouncement",
+    "source": "docs/app/ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle",
+    "part": 3,
+    "text": "{label}: {notice}",
+    "slots": ["label", "notice"]
+  },
+  {
     "key": "ddd5.11.histogramLabel",
     "source": "docs/app/ddd.md#511-accessibility-supported-environments-and-navigation-lifecycle",
     "part": 4,
