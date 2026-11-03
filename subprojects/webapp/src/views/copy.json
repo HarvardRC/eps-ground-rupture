@@ -1,5 +1,12 @@
 [
   {
+    "key": "pdd4.3.unclassifiedLine",
+    "source": "docs/app/pdd.md#43-unclassified-records-d-12-proposed",
+    "part": 0,
+    "text": "Unclassified records excluded from scarp-type views: X (zero-slip initial stages).",
+    "slots": ["X"]
+  },
+  {
     "key": "pdd5.2.shortDisclaimer",
     "source": "docs/app/pdd.md#52-short-disclaimer",
     "part": 0,
@@ -116,6 +123,76 @@
     "source": "docs/app/pdd.md#59-low-slip-caveat-d-4-interim",
     "part": 0,
     "text": "Your window includes very small slip values, where automated measurements can be less reliable. The research group is reviewing measurement reliability at low slip; treat results near zero slip with extra caution.",
+    "slots": []
+  },
+  {
+    "key": "ddd5.8.rowValidCount",
+    "source": "docs/app/ddd.md#58-view-layer",
+    "part": 8,
+    "text": "Valid count",
+    "slots": []
+  },
+  {
+    "key": "ddd5.8.rowExcludedNullCount",
+    "source": "docs/app/ddd.md#58-view-layer",
+    "part": 9,
+    "text": "Excluded null count",
+    "slots": []
+  },
+  {
+    "key": "ddd5.8.rowMedian",
+    "source": "docs/app/ddd.md#58-view-layer",
+    "part": 10,
+    "text": "Median",
+    "slots": []
+  },
+  {
+    "key": "ddd5.8.rowP16",
+    "source": "docs/app/ddd.md#58-view-layer",
+    "part": 11,
+    "text": "16th percentile",
+    "slots": []
+  },
+  {
+    "key": "ddd5.8.rowP84",
+    "source": "docs/app/ddd.md#58-view-layer",
+    "part": 12,
+    "text": "84th percentile",
+    "slots": []
+  },
+  {
+    "key": "ddd5.8.rowMinimum",
+    "source": "docs/app/ddd.md#58-view-layer",
+    "part": 13,
+    "text": "Minimum",
+    "slots": []
+  },
+  {
+    "key": "ddd5.8.rowMaximum",
+    "source": "docs/app/ddd.md#58-view-layer",
+    "part": 14,
+    "text": "Maximum",
+    "slots": []
+  },
+  {
+    "key": "ddd5.8.rowMean",
+    "source": "docs/app/ddd.md#58-view-layer",
+    "part": 15,
+    "text": "Mean",
+    "slots": []
+  },
+  {
+    "key": "ddd5.8.rowStandardDeviation",
+    "source": "docs/app/ddd.md#58-view-layer",
+    "part": 16,
+    "text": "Standard deviation",
+    "slots": []
+  },
+  {
+    "key": "ddd5.8.nullMark",
+    "source": "docs/app/ddd.md#58-view-layer",
+    "part": 17,
+    "text": "—",
     "slots": []
   }
 ]
