@@ -97,6 +97,9 @@ export function serializeRecovery(
   manifest: Manifest,
   summary: string,
 ): string {
+  if (summary === '' || manifest.exportVersion === '') {
+    throw new RangeError('serializeRecovery: summary and exportVersion must be non-empty');
+  }
   return canonicalJson({
     recoveryVersion: RECOVERY_VERSION,
     sourceExportVersion: manifest.exportVersion,

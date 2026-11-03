@@ -130,7 +130,7 @@ export function serializeScenario(s: Scenario, manifest: Manifest): string {
 export class ScenarioInputError extends Error {
   readonly path: string;
 
-  constructor(path: string, detail: string) {
+  constructor(path: string, detail = 'invalid scenario input') {
     super(`${path === '' ? 'scenario object' : path}: ${detail}`);
     this.name = 'ScenarioInputError';
     this.path = path;
