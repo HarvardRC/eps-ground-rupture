@@ -636,6 +636,8 @@ async function start(a: Active, tag: HTMLScriptElement): Promise<void> {
   // ---- Mount state ----------------------------------------------------
   /** Whether the mount's first commit — of results, the unavailable state, or a recovery decision — has happened. */
   let committed = false;
+  /** Whether the first-commit work (`afterFirstCommit`) has run: a throw after a first commit leaves it to `fail`. */
+  let hooked = false;
   /** The scheduler, once the first result is committed. */
   let scheduler: MountScheduler | null = null;
   /** The vintage the first result was computed over. */
@@ -693,6 +695,7 @@ async function start(a: Active, tag: HTMLScriptElement): Promise<void> {
    * element's `scrollIntoView()`; then the test hooks.
    */
   function afterFirstCommit(target: HTMLElement): void {
+    hooked = true;
     const summary = byId('gre-summary');
     const write = (height: number): void => root.style.setProperty('--gre-summary-block', `${height}px`);
     write(summary.getBoundingClientRect().height);
@@ -861,9 +864,10 @@ async function start(a: Active, tag: HTMLScriptElement): Promise<void> {
     listenRecovery();
     const text = enterUnavailable(root, regions, failure);
     announce(alert, text, () => !signal.aborted);
-    if (first) afterFirstCommit(byId('gre-state'));
+    const hook = !hooked;
+    if (hook) afterFirstCommit(byId('gre-state'));
     else unavailableFocus(root, wasInside);
-    if (first && persistent !== null) announceMessage(status, persistent, () => persistent);
+    if (hook && persistent !== null) announceMessage(status, persistent, () => persistent);
   }
 
   // ---- Recovery decisions (§5.10) -------------------------------------
@@ -980,7 +984,7 @@ async function start(a: Active, tag: HTMLScriptElement): Promise<void> {
 
     const selected = state0.display.measurement;
     const target = panelsElement.hidden ? targets.state : panels.section(selected);
-    if (first) afterFirstCommit(target);
+    if (!hooked) afterFirstCommit(target);
     else target.focus({ preventScroll: true });
     markAfterPaint('egr:first-result', 0, () => resultVisible(root, selected, true), () => created.isLatest(0));
     if (persistent !== null) announceMessage(status, persistent, () => persistent);
