@@ -10,7 +10,7 @@ import { readDecimal, compareDecimals } from '../state/parse';
 import { defaultDisplayState, type MeasurementName, type SedimentPair } from '../state/state';
 import { quantileLinear } from '../stats/quantile';
 import { binTableSpec, quantityText } from '../views/chart-text';
-import { histogramSpec, histogramSvg, ecdfSpec, ecdfSvg } from '../views/charts';
+import { histogramLogSpec, histogramSpec, histogramSvg, ecdfSpec, ecdfSvg } from '../views/charts';
 import { copyText } from '../views/copy';
 import { toSvgElement } from '../views/dom/svg';
 import { displayRound, formatCount } from '../views/format';
@@ -86,6 +86,8 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   let restoredNotice = false;
   let restoreTarget: Draft | null = null;
   let restoreError = '';
+  // The one-time width log-scale off-adjustment status (guided DDD §9.3).
+  let logOffNotice = false;
   let regression: Regression | null = null;
   let regressionPromise: Promise<boolean> | null = null;
   let regressionError = '';
@@ -364,7 +366,10 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     const canChart = count.valid >= config.chartFloorBelow() && statistics !== null;
     const statisticTable = `<section class="gx-statistics"><h4>Statistics</h4><p class="gx-hint">Matching simulation records.</p><table><caption class="gx-sr-only">${MEASURE_NAMES[m]} statistics</caption><thead><tr><th>Statistic</th><th>Value</th></tr></thead><tbody>${rows.map((row, i) => `<tr><th scope="row">${i === 2 ? term('median', row.label) : i === 3 || i === 4 ? term('percentile', row.label) : escape(row.label)}</th><td>${escape(row.value)}${i > 1 && row.value !== '—' ? unit : ''}</td></tr>`).join('')}</tbody></table>${unclassified ? `<p class="gx-hint">${escape(unclassified)}</p>` : ''}<p class="gx-hint">Missing values are excluded from this measurement's chart and statistics.</p></section>`;
     const selector = `<section class="gx-selector" aria-labelledby="gx-selector-heading"><div class="gx-selector-heading"><h3 id="gx-selector-heading">What would you like to examine?</h3>${button('guide-start', 'Walk me through results')}</div><div class="gx-measurement-cards" role="group" aria-label="Measurement">${MEASUREMENTS.map((measure, i) => `<button type="button" id="gx-measurement-${measure}" data-measurement="${measure}" aria-pressed="${m === measure}"><strong>${MEASURE_NAMES[measure]}</strong><span class="gx-card-question">${guidePrompts[i]}</span><span class="gx-card-status" ${m === measure ? '' : 'aria-hidden="true"'}>${m === measure ? '<span aria-hidden="true">✓</span> Viewing' : '&nbsp;'}</span></button>`).join('')}</div></section>`;
-    const measurement = plan.state === 'empty' ? `<section class="gx-measurement"><h3>${term(m, MEASURE_NAMES[m])}</h3><p class="gx-hint">${DESCRIPTIONS[m]} ${glossary(GLOSSARY[m], 'About this measurement')}</p>${m === 'dzw' ? `<p class="gx-warning">${escape(copyText('pdd5.7.widthScopeNote'))}</p>` : m === 'scarp_dip' ? `<p class="gx-warning">${escape(copyText('pdd5.4.scarpDipNotice'))}</p>` : ''}<section class="gx-empty"><h3>No matching simulation records</h3>${plan.explainer.map(ref => `<p>${escape(noticeText(ref))}</p>`).join('')}<p>Change a condition or movement range, then review the scenario again.</p></section></section>` : `<section class="gx-measurement"><div class="gx-section-head"><h3>${term(m, MEASURE_NAMES[m])}</h3><strong>${formatCount(count.valid)} valid measurements</strong></div><p class="gx-hint">${DESCRIPTIONS[m]} ${glossary(GLOSSARY[m], 'About this measurement')}</p>${m === 'dzw' ? `<p class="gx-warning">${escape(copyText('pdd5.7.widthScopeNote'))}</p>` : m === 'scarp_dip' ? `<p class="gx-warning">${escape(copyText('pdd5.4.scarpDipNotice'))}</p>` : ''}${warning ? `<p class="gx-warning">${escape(noticeText(warning))}</p>` : ''}<div class="gx-analysis${canChart ? '' : ' gx-table-only'}">${canChart ? `<section class="gx-chart-side"><div class="gx-chart-choices" role="group" aria-label="Chart view"><button type="button" id="gx-chart-histogram" data-chart="histogram" aria-pressed="${display.view[m] === 'histogram'}">Distribution</button><button type="button" id="gx-chart-cumulative" data-chart="cumulative" aria-pressed="${display.view[m] === 'cumulative'}">Cumulative</button></div><p class="gx-hint">${display.view[m] === 'histogram' ? 'How often each range appears among the matching measurements.' : 'The share of matching measurements at or below each value.'}</p><figure id="gx-chart"></figure><div id="gx-chart-legend" class="gx-chart-legend"></div>${display.view[m] === 'cumulative' ? `<div class="gx-percentile"><label for="gx-percentile">Percentile <output>${display.readoff[m] ?? 84}</output></label><input id="gx-percentile" type="range" min="0" max="100" step="1" value="${display.readoff[m] ?? 84}"><p id="gx-percentile-output" aria-live="polite"></p></div>` : ''}<div id="gx-chart-table"></div></section>` : ''}${statisticTable}</div><div class="gx-interpretation"><strong>Reading these results</strong><p>The median is the middle measurement; the 16th–84th percentile range describes the middle 68% of measurements. These summaries are not recommended design values. Choosing a design value requires engineering judgment.</p>${glossary('statistics-terms', 'Statistics explained')}</div></section>`;
+    // Width's Distribution view offers the logarithmic scale exactly when the confirmed result has one (§9.3).
+    const logOffered = m === 'dzw' && display.view[m] === 'histogram' && result.histogramLog !== null;
+    const logToggle = logOffered ? `<label class="gx-log" for="gx-dzw-log"><input type="checkbox" id="gx-dzw-log" ${display.logScale ? 'checked' : ''}> ${escape(copyText('ddd5.8.logScaleLabel'))}</label>` : '';
+    const measurement = plan.state === 'empty' ? `<section class="gx-measurement"><h3>${term(m, MEASURE_NAMES[m])}</h3><p class="gx-hint">${DESCRIPTIONS[m]} ${glossary(GLOSSARY[m], 'About this measurement')}</p>${m === 'dzw' ? `<p class="gx-warning">${escape(copyText('pdd5.7.widthScopeNote'))}</p>` : m === 'scarp_dip' ? `<p class="gx-warning">${escape(copyText('pdd5.4.scarpDipNotice'))}</p>` : ''}<section class="gx-empty"><h3>No matching simulation records</h3>${plan.explainer.map(ref => `<p>${escape(noticeText(ref))}</p>`).join('')}<p>Change a condition or movement range, then review the scenario again.</p></section></section>` : `<section class="gx-measurement"><div class="gx-section-head"><h3>${term(m, MEASURE_NAMES[m])}</h3><strong>${formatCount(count.valid)} valid measurements</strong></div><p class="gx-hint">${DESCRIPTIONS[m]} ${glossary(GLOSSARY[m], 'About this measurement')}</p>${m === 'dzw' ? `<p class="gx-warning">${escape(copyText('pdd5.7.widthScopeNote'))}</p>` : m === 'scarp_dip' ? `<p class="gx-warning">${escape(copyText('pdd5.4.scarpDipNotice'))}</p>` : ''}${warning ? `<p class="gx-warning">${escape(noticeText(warning))}</p>` : ''}<div class="gx-analysis${canChart ? '' : ' gx-table-only'}">${canChart ? `<section class="gx-chart-side"><div class="gx-chart-choices" role="group" aria-label="Chart view"><button type="button" id="gx-chart-histogram" data-chart="histogram" aria-pressed="${display.view[m] === 'histogram'}">Distribution</button><button type="button" id="gx-chart-cumulative" data-chart="cumulative" aria-pressed="${display.view[m] === 'cumulative'}">Cumulative</button></div>${logToggle}<p class="gx-hint">${display.view[m] === 'histogram' ? 'How often each range appears among the matching measurements.' : 'The share of matching measurements at or below each value.'}</p><figure id="gx-chart"></figure><div id="gx-chart-legend" class="gx-chart-legend"></div>${display.view[m] === 'cumulative' ? `<div class="gx-percentile"><label for="gx-percentile">Percentile <output>${display.readoff[m] ?? 84}</output></label><input id="gx-percentile" type="range" min="0" max="100" step="1" value="${display.readoff[m] ?? 84}"><p id="gx-percentile-output" aria-live="polite"></p></div>` : ''}<div id="gx-chart-table"></div></section>` : ''}${statisticTable}</div><div class="gx-interpretation"><strong>Reading these results</strong><p>The median is the middle measurement; the 16th–84th percentile range describes the middle 68% of measurements. These summaries are not recommended design values. Choosing a design value requires engineering judgment.</p>${glossary('statistics-terms', 'Statistics explained')}</div></section>`;
     const controls = guideIndex === null ? `${refinementDisclosure()}${caveats ? `<div class="gx-warning">${caveats}</div>` : ''}${selector}` : `${guideHeader()}${caveats ? `<div class="gx-warning">${caveats}</div>` : ''}`;
     return `<div class="gx-section-head"><div>${heading('Explore your scenario', 'See the range of simulated measurements for the scenario you confirmed.')}</div>${button('review', 'Review scenario')}</div><section class="gx-context"><div class="gx-section-head"><h3>Your confirmed scenario</h3><strong>${formatCount(result.selection.matchingRecords)} matching records</strong></div>${selectionSummary(confirmed)}<p><strong>Movement:</strong> ${movementSummary(confirmed)}</p><p><strong>Included:</strong> ${populationName(confirmed.population)} · ${typesSummary(confirmed)}</p><p class="gx-hint">${confirmed.population === 'one_state_per_trial' ? 'Charts and statistics use the last recorded stage within the slip range from each simulation. Each simulation contributes at most one record.' : 'Charts and statistics combine measurements from all included stages. One simulation may contribute several records.'}</p>${coverage(confirmed)}</section>${dirty() ? `<div class="gx-pending"><div><strong>You have unapplied changes</strong><p>These results still describe your confirmed scenario.</p></div><div>${button('review', 'Return to review')}${button('discard', 'Discard changes')}</div></div>` : ''}${controls}${guideIndex !== null && guideIndex >= 3 ? guideEditor() : measurement}<footer class="gx-footer"><div>${button('site', 'Change site conditions')}${button('movement', 'Change fault movement')}</div>${button('download', 'Download results', true)}</footer><p class="gx-research">This is a research tool; it does not predict what will happen at a particular site. ${link('../scenario/#gre-disclaimer', 'Full disclaimer')}</p><p class="gx-hint">The ${link('../dashboards/distributions/', 'Distributions')} and ${link('../dashboards/model-vs-reality/', 'Model vs reality')} dashboards show broader datasets rather than this confirmed scenario. The ${link('../scenario/', 'existing explorer')} also offers field comparisons and additional chart controls.</p>`;
   }
@@ -400,11 +405,14 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     if (!measurement.histogram || counts.valid < config.chartFloorBelow()) return;
     const width = Math.max(240, Math.floor(container.getBoundingClientRect().width));
     lastChartWidth = width;
-    const bins = histogramSpec(measurement.histogram, { measurement: m, decimals: config.displayDecimals(m), valid: counts.valid, scarpClasses: manifest.scarpClasses, palette: manifest.scarpClassPalette, familyView: false, fieldTicks: false });
+    const specInput = { measurement: m, decimals: config.displayDecimals(m), valid: counts.valid, scarpClasses: manifest.scarpClasses, palette: manifest.scarpClassPalette, familyView: false, fieldTicks: false };
+    // The log scale applies to width's Distribution view only, through the shared builders (§9.3).
+    const useLog = m === 'dzw' && display.view[m] === 'histogram' && display.logScale && result.histogramLog !== null;
+    const bins = useLog ? histogramLogSpec(result.histogramLog!, specInput) : histogramSpec(measurement.histogram, specInput);
     const q = display.readoff[m] ?? 84;
     const svg = display.view[m] === 'histogram' ? histogramSvg(bins, width) : ecdfSvg(ecdfSpec(measurement.values.sorted, { measurement: m, decimals: config.displayDecimals(m), valid: counts.valid, readoff: q, fieldTicks: false }), width);
     const caption = document.createElement('figcaption'); caption.id = `gre-${m}-cap`;
-    caption.textContent = display.view[m] === 'cumulative' ? copyText('pdd4.1.cumulativeAccuracy') : 'Histogram intervals follow the distribution of matching measurements; the chart-data table lists their exact boundaries and counts.';
+    caption.textContent = display.view[m] === 'cumulative' ? copyText('pdd4.1.cumulativeAccuracy') : useLog ? copyText('ddd5.12.logScaleNote') : 'Histogram intervals follow the distribution of matching measurements; the chart-data table lists their exact boundaries and counts.';
     const chartElement = toSvgElement(svg);
     // The guided page uses larger type than the shared chart's original
     // presentation. Adjust only its title ink, never data or geometry.
@@ -442,7 +450,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     const matchingControls = () => [...shell.querySelectorAll<HTMLElement>('button, input')].filter(node => controlKey(node) === activeKey);
     const activePosition = activeKey === null ? -1 : matchingControls().indexOf(active!);
     const views: Record<Step, () => string> = { intro: introView, site: siteView, movement: movementView, review: reviewView, results: () => result ? resultsView() : heading('Explore your scenario', 'See the range of simulated measurements for the scenario you confirmed.') };
-    shell.innerHTML = `<header class="gx-brand"><strong>Ground Rupture Explorer</strong><span>Research companion</span></header>${navigation()}<main class="gx-main">${restoredNotice ? '<p class="gx-restored" role="status">Restored the work in this tab.</p>' : ''}${generalError ? `<div class="gx-warning" role="alert">${escape(generalError)}</div>` : ''}${restorePanel()}${views[step]()}${step !== 'intro' ? `<div class="gx-restart">${button('new', 'Start a new scenario')}</div>` : ''}</main>${support()}`;
+    shell.innerHTML = `<header class="gx-brand"><strong>Ground Rupture Explorer</strong><span>Research companion</span></header>${navigation()}<main class="gx-main">${restoredNotice ? '<p class="gx-restored" role="status">Restored the work in this tab.</p>' : ''}${logOffNotice ? `<p class="gx-log-off" role="status">${escape(copyText('ddd5.10.recoveryLogScaleOff'))}</p>` : ''}${generalError ? `<div class="gx-warning" role="alert">${escape(generalError)}</div>` : ''}${restorePanel()}${views[step]()}${step !== 'intro' ? `<div class="gx-restart">${button('new', 'Start a new scenario')}</div>` : ''}</main>${support()}`;
     shell.querySelectorAll<HTMLInputElement>('input[data-mixed]').forEach(input => { input.indeterminate = input.dataset.mixed === 'true'; });
     refreshMovementFeedback();
     if (step === 'results') {
@@ -520,6 +528,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     try {
       const computed = computeResult(vintage, checked.scenario, sequence + 1, regression);
       confirmed = target; result = computed; sequence += 1; busy = false; restoreTarget = null; restoreError = '';
+      adjustLogScale(computed);
       restoredNotice = true;
       // Move focus only when the reader has not already moved it into the page.
       const focusFree = !shell.contains(document.activeElement);
@@ -529,6 +538,14 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       console.error('Guided restore:', error); busy = false;
       restoreError = 'The results of your confirmed scenario could not be recalculated.';
       render();
+    }
+  }
+
+  /** Turn the width log scale off, once reporting it, when a new result no longer offers it (§9.3; PDD §7.3). */
+  function adjustLogScale(computed: RenderInput): void {
+    if (display.logScale && computed.histogramLog === null) {
+      display = { ...display, logScale: false };
+      logOffNotice = true;
     }
   }
 
@@ -549,7 +566,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   function setStep(next: Step): void {
     if (next === 'results' && !result) return;
     if (next !== 'results') guideIndex = null;
-    navigationVersion += 1; restoredNotice = false;
+    navigationVersion += 1; restoredNotice = false; logOffNotice = false;
     step = next; reached.add(next); generalError = ''; alert.textContent = ''; render('gx-heading', true);
     if (next === 'movement' && draft.mode === 'offset') void ensureRegression();
   }
@@ -629,7 +646,8 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       if (!checked.scenario) { busy = false; showIssues(checked.issues); return; }
       const computed = computeResult(vintage, checked.scenario, sequence + 1, regression);
       confirmed = snapshot; result = computed; sequence += 1; busy = false; issues = []; refineOpen = false; guideIndex = null; alert.textContent = '';
-      restoreTarget = null; restoreError = ''; restoredNotice = false;
+      restoreTarget = null; restoreError = ''; restoredNotice = false; logOffNotice = false;
+      adjustLogScale(computed);
       step = 'results'; reached.add('results');
       render('gx-heading', true);
       status.textContent = `Results updated. ${formatCount(computed.selection.matchingRecords)} simulation records match your confirmed scenario.`;
@@ -705,8 +723,9 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       else showHelp(target, true);
       return;
     }
-    // The restore notice lasts until the next navigation or edit (§9.2).
-    restoredNotice = false;
+    // The restore notice lasts until the next navigation or edit (§9.2);
+    // the one-time log-scale status likewise.
+    restoredNotice = false; logOffNotice = false;
     try {
       const measurement = target.dataset.measurement as MeasurementName | undefined;
       if (measurement) { display = { ...display, measurement }; render(); return; }
@@ -760,7 +779,12 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   shell.addEventListener('change', event => {
     const input = event.target;
     if (!(input instanceof HTMLInputElement)) return;
-    navigationVersion += 1; restoredNotice = false;
+    if (input.id === 'gx-dzw-log') {
+      // Immediate presentation (D-34): never a draft edit or a navigation.
+      display = { ...display, logScale: input.checked }; restoredNotice = false; logOffNotice = false;
+      render(input.id); return;
+    }
+    navigationVersion += 1; restoredNotice = false; logOffNotice = false;
     if (input.name === 'gx-mode') { draft.mode = input.value as 'slip' | 'offset'; issues = issues.filter(item => item.step !== 'movement'); render(); if (draft.mode === 'offset') void ensureRegression(); return; }
     if (input.name === 'gx-population') { draft.population = input.value as Draft['population']; render(); return; }
     const field = input.dataset.all ?? input.dataset.choice;
