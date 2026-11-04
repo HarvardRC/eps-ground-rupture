@@ -533,7 +533,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       // Move focus only when the reader has not already moved it into the page.
       const focusFree = !shell.contains(document.activeElement);
       render(step === 'results' && focusFree ? 'gx-heading' : undefined);
-      status.textContent = `${formatCount(computed.selection.matchingRecords)} simulation records match your confirmed scenario.`;
+      status.textContent = `${formatCount(computed.selection.matchingRecords)} simulation records match your confirmed scenario.${logOffNotice ? ` ${copyText('ddd5.10.recoveryLogScaleOff')}` : ''}`;
     } catch (error) {
       console.error('Guided restore:', error); busy = false;
       restoreError = 'The results of your confirmed scenario could not be recalculated.';
@@ -650,7 +650,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       adjustLogScale(computed);
       step = 'results'; reached.add('results');
       render('gx-heading', true);
-      status.textContent = `Results updated. ${formatCount(computed.selection.matchingRecords)} simulation records match your confirmed scenario.`;
+      status.textContent = `Results updated. ${formatCount(computed.selection.matchingRecords)} simulation records match your confirmed scenario.${logOffNotice ? ` ${copyText('ddd5.10.recoveryLogScaleOff')}` : ''}`;
     } catch (error) {
       console.error('Guided calculation:', error); busy = false;
       generalError = 'The results could not be calculated. Your previous confirmed scenario and results have been kept. Try Show results again.';
@@ -814,6 +814,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       input.removeAttribute('aria-invalid'); const error = $(`#gx-error-${field}`); if (error) { error.hidden = true; error.textContent = ''; }
       refreshMovementFeedback();
       if (restoredNotice) { restoredNotice = false; $('.gx-restored')?.remove(); }
+      if (logOffNotice) { logOffNotice = false; $('.gx-log-off')?.remove(); }
       persist();
     } else if (input.id === 'gx-percentile') {
       const q = Number(input.value);

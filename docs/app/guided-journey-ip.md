@@ -549,14 +549,15 @@ wording; no product decision was changed.
 G-11 offers the native checkbox `gx-dzw-log`, labeled by
 `ddd5.8.logScaleLabel`, after the chart choices. It appears exactly
 when the confirmed result's `histogramLog` is non-null and width's
-Distribution view is shown. Turned on, the chart comes from the shared
+Distribution view is shown, which requires a drawn chart. Turned on, the chart comes from the shared
 `histogramLogSpec`/`histogramSvg` path. That spec's chart label
 appends `ddd5.11.logAxisClause` through the existing `chartLabel`
 option. The bin-rule hint becomes `ddd5.12.logScaleNote`, and the bin
 table is built from the displayed log bins. A confirmation, or a
 same-tab restore, whose result has no log histogram turns the scale off
 and shows `ddd5.10.recoveryLogScaleOff` once, as a `role="status"`
-line cleared by the next interaction. The toggle is presentation
+line cleared by the next navigation, edit, or display change. The
+persistent live region announces the same sentence. The toggle is presentation
 only. It does not change `navigationVersion` or the draft, and it is
 saved with the display choices. The Cumulative view and the other
 measurements are unchanged. The walkthrough's width stop shows the
@@ -568,7 +569,7 @@ At this verification, after rebasing onto the merged G-10:
 
 - The pinned Node suite passed all 417 tests; typechecking and the
   bundles passed. Strict publication and preview builds passed
-  with `explore-33b64b7b45d0.js` and `explore-69b62f926a7d.css`. The
+  with `explore-b81440e55cb3.js` and `explore-abe9a2aa7049.css`. The
   `/scenario/` bundles were unchanged. All 31 hook tests passed.
 - 5,498 relative links in 61 Markdown files resolved; PDD
   agreement passed; traceability linted 491 rows with no gaps.
