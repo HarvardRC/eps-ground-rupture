@@ -89,7 +89,8 @@ Decision statuses used throughout: **Decided** (recorded, with date
 and decider), **Proposed** (this draft's recommendation, awaiting the
 owner's confirmation), **Open** (waiting on the named owner, usually
 the research group), **Interim** (an explicit interim rule applies
-until the owner decides).
+until the owner decides), **Superseded** (a later decision replaces
+the earlier proposal or rule).
 
 ---
 
@@ -122,10 +123,16 @@ named in the last column carry the detail.
 | D-19 | Native full-dataset exploration panel in v0.4. | FR-G5, C8 | Product owner | Proposed | None — no documented gap; the five dashboards serve C8; recorded gap process in §2.4. |
 | D-20 | Us − Ud as a fourth displayed measurement. | FR-O1, R-10 | Owner + research group | Open | Out of the MVP; the results page reserves the slot; §4.1. |
 | D-21 | Success criteria and acceptance walkthroughs. | §2.2 | Product owner | Proposed | §10. |
-| D-22 | Default displacement-window state. | FR-S5, FR-S6, FR-S8 | Product owner | Proposed | No active window by default ("slip: any"); GS-0 and GS-7 pin it; §3.4. |
+| D-22 | Default displacement-window state. | FR-S5, FR-S6, FR-S8 | Product owner | Superseded (2026-11-03) | The earlier no-active-window default ("slip: any") is replaced by D-31's editable minimum 0 m and required maximum. The no-window numerical reference cases remain calculation baselines; §3.4 and §10.2. |
 | D-23 | Reader-facing display precision per quantity. | FR-O2, §10.1 note | Product owner | Proposed | Scarp height and slip 0.01 m; width 0.1 m; scarp dip 1° (D-5 provisionality); counts exact; shares whole percent; §4.2. |
 | D-24 | Independent display preferences, including small laptop windows and later tablet and phone views. | FR-G6, C12, NFR-4 | Product owner | Decided (2026-11-03) | Scope agreed: P2 reader choice of visible result components and display size and layout within the existing application; §4.9. Until then, §9.1 uses a temporary 1280 × 1080 measurement window. The detailed P2 choices listed in §4.9 remain open before implementation. |
-| D-25 | Guided first-use scenario journey. | §5.1, C1, CR-1 | Product owner | Decided (2026-11-03) | Sequence and introductory copy agreed: understand purpose → describe site conditions → choose assumed displacement → review scenario → explore and interpret matching results. MVP scope; §2.3 records the approved introduction and the remaining interaction and guidance choices. |
+| D-25 | Guided first-use scenario journey. | §5.1, C1, CR-1 | Product owner | Decided (2026-11-03) | Sequence and introductory copy agreed: understand purpose → describe site conditions → choose assumed displacement → review scenario → explore and interpret matching results. MVP scope; §2.3 records the approved introduction, D-26–D-31, and the remaining interaction and guidance choices. |
+| D-26 | Explicit site-condition selections. | FR-S1–S4, FR-S8 | Product owner | Decided (2026-11-03) | Fresh site conditions are unanswered and require one or more values. Select all selects every value as a convenience; it is not advice for uncertainty. Empty selections remain incomplete. §2.3. |
+| D-27 | Review before results change. | C1, FR-G3, NFR-3 | Product owner | Decided (2026-11-03) | Site-condition and displacement edits remain a draft until Review scenario → Show results. Retained results stay associated with the previously confirmed scenario. §2.3; step navigation follows D-30, while browser navigation, recovery, and refinement choices stay open. |
+| D-28 | Preserve entries across displacement-mode switches. | FR-S5 | Product owner | Decided (2026-11-03) | Keep fault-slip and surface-offset entries separately within the draft. Switching back restores that mode's entries; only the selected mode contributes to the scenario. No silent conversion or erasure. §3.5; restarting follows D-29 and recovery remains open. |
+| D-29 | Discard edits or start a new scenario. | FR-S8 | Product owner | Decided (2026-11-03) | Discard changes returns to the last confirmed scenario and its results, restoring both modes' entries as they stood at confirmation. Start a new scenario clears the reader's entries in both modes and current results, restores fresh defaults under D-31, then returns to unanswered site conditions. §2.3 and §3.7. |
+| D-30 | Preserve drafts while moving between steps. | C1, FR-G3 | Product owner | Decided (2026-11-03) | Back and revisiting input steps preserve the draft. Review requires complete, valid inputs. Returning to confirmed results preserves edits and shows You have unapplied changes with a return-to-review action while edits remain. §2.3; browser Back/Forward and recovery remain open. |
+| D-31 | Explicit movement entries, maximum shortcuts, and immediate range guidance. | FR-S5, FR-S8 | Product owner | Decided (2026-11-03) | Editable slip minimum 0 m; blank, required maxima; typing and mouse adjustment; slip shortcut sets exactly 5 m; immediate red slip guidance above 5 m; offset guidance and maximum shortcut use selected fault angles. Coverage warnings persist on review. §3.4–§3.5 distinguish the accepted examples from remaining step-size and multi-angle shortcut proposals. |
 
 ---
 
@@ -182,15 +189,136 @@ and selected **Focused steps** as the review variant. The
 screens and links to the saved clickable version. The alternative
 Guided page remains in that snapshot for comparison.
 
-**Definition still open.** Navigation and editing between stages,
-treatment of unknown conditions, when results first appear and
-update, and the remaining guidance and copy still need decisions.
-The selected review variant does not accept every detail of its
-behavior. The existing
-journey table and §3 describe the earlier filter-based experience;
-they are the baseline to revise, not a completed definition of D-25.
-The dependent design and implementation tasks need an amendment
-after these product choices are resolved.
+**Agreed site-condition behavior (D-26, 2026-11-03).** A fresh
+scenario leaves fault angle, sediment depth, sediment density, and
+sediment strength and structure unanswered. Each condition is
+marked **Required**. The instruction is:
+
+> Choose one or more values for each condition.
+
+- Each condition requires one or more selected values. An empty
+  condition shows **Choose one or more values to continue**.
+- **Select all** selects and highlights every available value in
+  that condition, exactly as individual selection would. It is a
+  convenience; do not recommend it because the reader is unsure,
+  or suggest that a broad selection is inherently useful.
+- The checkbox is unchecked for no selections, mixed for a subset,
+  and checked when every value is selected, including when the
+  reader selected them individually. Clicking an unchecked or
+  mixed checkbox selects all; unchecking it clears that condition.
+- Clicking a selected value removes only that value. Removing the
+  last value leaves an incomplete draft; it never selects all.
+- Sediment strength and structure is one required condition across
+  both visible groups. Uniform: Strong alone is valid; choosing a
+  value in each group is not required.
+- Continue remains available. If a required selection is missing,
+  it keeps the reader on the site-conditions stage, shows a specific
+  error beside each incomplete condition, and moves focus to the
+  first incomplete condition. No error appears before an attempt
+  to continue. Selecting a value clears that condition's error.
+  The error wording uses **Choose one or more**, rather than
+  recommending Select all as a way to proceed.
+
+**Agreed review and results behavior (D-27, 2026-11-03).** Site
+conditions and assumed displacement being edited form a draft.
+The scenario that produced the current
+results is the confirmed scenario. A draft becomes confirmed only
+through **Review scenario → Show results**, with the required
+selections and existing numeric validation satisfied. This applies
+to the first scenario and to edits after viewing results. Draft
+edits do not recalculate or relabel the previous results. If those
+results remain visible, their summary identifies the previously
+confirmed scenario, not the draft. In the remaining result
+sections, **active scenario** means this confirmed scenario.
+
+**Agreed displacement-mode behavior (D-28, 2026-11-03).** Switching
+between fault slip and surface offset preserves each mode's
+entries separately. Only the selected mode contributes to the
+draft scenario. [§3.5](#35-offset-entry-mode-and-conversion-assist-fr-s5)
+defines this behavior; mode switching does not bypass D-27's review.
+
+**Agreed discard and restart behavior (D-29, 2026-11-03).**
+**Discard changes** abandons the draft and returns to the last
+confirmed scenario and its results. It therefore requires a
+previously confirmed scenario. **Start a new scenario** clears the
+reader's scenario choices, including the entries retained for both
+displacement modes, and removes the current results. It restores
+the fresh defaults: slip minimum 0 m and blank maxima (D-31). It
+opens the site-conditions step with unanswered selections (D-26). A new
+scenario must pass through review and **Show results** before
+results appear again (D-27).
+
+When **Show results** confirms a scenario, remember the entries
+in both displacement modes as they stand at that point. **Discard
+changes** restores both sets of entries, including the inactive
+mode, together with the confirmed mode and site conditions. This
+abandons all later draft edits; it does not retain changes made to
+the inactive mode. Only the confirmed mode contributes to results
+(D-28). The placement of the two actions and presentation when no
+confirmed scenario exists remain to be defined.
+
+**Agreed step navigation (D-30, 2026-11-03).**
+
+- The journey's **Back** action and revisiting input steps preserve
+  the draft, including entries in both displacement modes. They
+  neither apply nor discard edits.
+- Every entry to **Review scenario**, including a previously
+  reached review step, requires complete site-condition selections
+  and valid entries for the selected displacement mode. If the
+  draft fails validation, open its first incomplete or invalid
+  input step and show the applicable errors. Inactive-mode entries
+  do not block review (D-28).
+- A reader may return to existing results even while the draft is
+  incomplete or invalid. Preserve that draft; show the confirmed
+  scenario's results and summary. While unapplied changes remain,
+  display **You have unapplied changes** with **Return to review**.
+  That action follows the same validation rule as any review entry.
+- The notice reflects differences from the last-confirmed draft
+  state, including remembered entries in the inactive mode (D-29).
+  Merely revisiting a step does not create a change. The order in
+  which site-condition values were selected does not matter.
+  Restoring all entries to their confirmed state removes the
+  notice, as do confirmation or discarding changes.
+- Navigating to results never confirms a draft or bypasses
+  **Show results**. Results are unavailable before first
+  confirmation and after **Start a new scenario** clears them.
+
+These rules cover navigation within the journey. Browser Back and
+Forward, leaving the page, and reload recovery remain separate
+decisions.
+
+**Agreed movement entry (D-31, 2026-11-03).** A fresh draft starts
+in fault-slip mode, with a visible, editable minimum of **0 m**
+and an unanswered maximum. Offset mode also starts with an
+unanswered maximum. The reader must choose a maximum in the active
+mode before review. Typing, mouse adjustment, maximum shortcuts,
+and immediate range guidance follow §3.4–§3.5. These decisions
+replace D-22's proposed no-window default. D-28 still preserves
+both modes' entries; D-29 restores the fresh defaults when starting
+again.
+
+**Next review-screen proposal, not yet accepted.** The proposed
+screen shows site conditions and fault movement with Edit actions,
+per-angle converted slip windows in offset mode, visible coverage
+warnings, and a plain explanation of which simulation records
+contribute. Its primary action is **Show results**. D-27 already
+defines confirmation, and D-31 already requires visible coverage
+warnings on review; the proposed arrangement and complete content
+still need review. Recording this proposal does not accept its
+layout or settle the result-refinement controls.
+
+**Definition still open.** Returning visits, sample-input
+replacement, browser Back and Forward,
+draft recovery, when population and scarp-type refinements take
+effect, their controls, the placement of retained results, and the
+remaining guidance and copy still need
+decisions. Movement-step details still proposed are listed in
+§3.4–§3.5. The selected review variant does not accept every
+detail of its behavior. D-26–D-31 supersede the corresponding
+behavior in the saved full-journey prototype; it is an earlier
+snapshot. The journey table and unaffected parts of §3 remain the
+baseline for the remaining definition. The dependent design and
+implementation tasks still need an amendment.
 
 **Approved introduction (product owner, 2026-11-03).**
 
@@ -226,14 +354,13 @@ gap and rationale" FR-G5 requires.
 
 ## 3. Scenario page: inputs
 
-Serves: FR-S1–S8, C1. Layout: on wide screens, an input rail beside
-the results; on small screens, inputs stack above results with a
-persistent summary of the active scenario. Every control change
-updates results immediately (NFR-3); there is no "submit" step.
-P2 adds the independent display preferences of
-[§4.9](#49-display-preferences-fr-g6-p2). This is the existing
-prototype layout; the first-use revision in
-[§2.3](#23-user-journeys) remains to be defined.
+Serves: FR-S1–S8, C1. The guided journey follows
+[§2.3](#23-user-journeys): site conditions require explicit
+selections (D-26), and draft changes update results only after
+review and **Show results** (D-27). The earlier prototype's input
+rail beside immediately updating results is superseded. Remaining
+layout choices are open. P2 adds the independent display
+preferences of [§4.9](#49-display-preferences-fr-g6-p2).
 
 A one-line **scenario summary** restates the active scenario in words
 above the results at all times (FR-G3: generated from state, never
@@ -255,7 +382,8 @@ valid count + excluded-null count).
 ### 3.1 Fault dip (FR-S1)
 
 Seven discrete selectable values: 20°, 30°, 40°, 45°, 50°, 60°, 70°.
-Multi-select; all selected by default. A range entry assist accepts
+Multi-select; initially unanswered and required (D-26).
+A range entry assist accepts
 "30–40" and echoes which modeled values that includes ("30° and 40°
 only") before applying. No continuous slider.
 
@@ -284,43 +412,109 @@ v0.4 pending R-2.
 
 ### 3.3 Sediment depth (FR-S3) and density (FR-S4)
 
-Depth: multi-select over 3 m, 5 m, 10 m (all by default). Density:
-multi-select over Dense, Medium, Loose (all by default).
+Depth: multi-select over 3 m, 5 m, 10 m. Density: multi-select over
+Dense, Medium, Loose. Both are initially unanswered and required;
+the shared selection rules of D-26 apply.
 
 ### 3.4 Displacement window (FR-S5)
 
 Primary mode: **Fault slip at depth (m)** — a min–max pair over the
 modeled range (approximately 0–5 m), inclusive at both ends, with the
 export's actual recorded range and recording step (~0.05 m) stated
-beside the control. Entering only a maximum sets the window to 0–max,
-matching the "up to X m" phrasing FR-S6's default rationale cites.
+beside the control.
 
-**Default: no active window (D-22, Proposed).** The default and reset
-state leaves the window inactive — the scenario summary reads "slip:
-any" — and matches every recorded stage (GS-0's 346,834). A window
-becomes active only when the user sets an endpoint or enters offset
-mode (whose converted windows are always active). An entered window
-applies literally: the recorded final states sit slightly above 5 m
-(≈5.013 m in the current export), so a hand-typed 0–5 m window
-excludes them. The control's maximum selectable value is therefore
-the export's actual recorded maximum slip (≈5.0135 m currently,
-data-version dependent) — entering it captures the final states —
-while FR-S5's "approximately 0–5 m" stays as the descriptive label
-beside the control. With no active window, one state per trial uses each trial's
-actual final recorded state, never an intersection with any window
-(FR-S6).
+**Fresh entries (D-31).** Show **Minimum (m)** with the actual
+editable value **0**, not a placeholder or a blank-to-zero rule.
+Show **Maximum (m)** marked **Required**, initially blank. A
+maximum is an explicit reader choice, including when selected by
+the shortcut below. A cleared minimum remains an unfinished draft;
+do not silently restore zero during editing or review. Review with
+a missing endpoint shows **Enter a minimum value.** or **Enter a
+maximum value.** beside the field and focuses the first invalid
+field. Existing numeric validation still applies, including the
+16-character limit before and after normalization. An explicitly
+entered zero is valid, and minimum and maximum may be equal.
+
+Each displacement field supports direct typing and adjacent
+**− / +** buttons. The example adjusts by 0.1 m per click while
+preserving the allowed precision of typed values. Mouse adjustment
+and typing are agreed; the 0.1 m increment and detailed behavior
+at the recording boundary remain proposed for the final product.
+The buttons are a convenience, not a restriction on typed decimals.
+
+The single **Set maximum to 5 m** shortcut changes only the slip
+maximum to exactly **5**. It preserves the minimum, the inactive
+offset entry, and all site conditions. It does not confirm the
+draft. A typed or shortcut-selected 0–5 m window applies literally:
+the final recorded stages sit slightly above 5 m (approximately
+5.0135 m at the current data maximum), so this shortcut does not
+mean all stages. Do not silently extend it to the actual maximum.
+
+**Immediate slip guidance.** When either active slip entry exceeds
+5 m, highlight that field in red and show a message beside it
+without waiting for Review. Preserve the entered value. Distinguish:
+
+- Above 5 m but within the actual recorded range: a warning, not
+  an invalid entry. Current example: **Above 5 m, but within the
+  recorded range, which ends at 5.0135 m.**
+- Above the actual recorded maximum: a blocking validation error.
+  Current example: **Above the recorded maximum of 5.0135 m.
+  Enter a smaller value.**
+
+The warning clears when the value returns to 5 m or below; other
+validation errors may still apply. Use the selected data release's
+actual limit, not a permanently fixed 5.0135 m. The rounded 5 m
+warning boundary and shortcut are the agreed current product
+choices; future data with a different descriptive range require
+their own product review. Neither boundary establishes physical
+plausibility at a particular site.
+
+**Earlier no-window baseline.** D-31 supersedes D-22's proposed
+fresh "slip: any" state. Blank maxima no longer request every
+stage. The no-window calculation behavior remains defined for
+existing numerical reference cases (§10.2): no slip restriction,
+or each trial's actual final state for one state per trial (FR-S6).
+This record does not change those reference populations or decide
+how older saved scenarios are recovered into the new journey.
 
 ### 3.5 Offset-entry mode and conversion assist (FR-S5)
 
 A clearly separated second mode: **Anticipated vertical surface
 offset (m)**. Switching modes never silently converts a typed value.
+Under D-28, the draft retains the fault-slip minimum and maximum
+separately from the surface-offset maximum. Switching back restores
+that mode's entries, including blanks and unfinished or invalid
+text. Switching alone neither clears entries nor
+replaces them with values calculated from the other mode.
+
+Only the selected mode's entries are validated for proceeding to
+review and used in the reviewed scenario and subsequent results.
+An unfinished or invalid entry in the inactive mode does not block
+the selected mode; switching back makes the existing validation
+rules applicable to that entry again. Retaining entries does not
+relax numeric limits, normalization, or conversion-coverage rules.
+The review identifies the selected mode and its entries, without
+presenting the inactive entries as additional scenario conditions.
+
+Mode switching is a draft edit and does not change previously
+confirmed results until **Review scenario → Show results** (D-27).
+D-28 covers switches within the draft. **Start a new scenario**
+clears both modes' reader entries and restores D-31's fresh
+defaults under D-29. Sample-input replacement,
+returning visits, and reload recovery remain separate decisions.
+
 In offset mode the assist panel shows, for each selected dip, the
 converted slip window, the regression used (the glossary's
 back-projection relationship), and an in-range / partly-out-of-range /
 out-of-range flag per dip. Copy in §5.6.
+These calculated windows do not overwrite the retained direct-slip
+entries. The conversion assist remains active in surface-offset
+mode; preserving entries does not disable it.
 
-Offset-entry mode accepts an anticipated maximum vertical surface offset.
-It represents an offset range from 0 m to the entered maximum. For
+Offset-entry mode starts with a blank **Maximum (m)** field marked
+**Required**. It accepts an anticipated maximum vertical surface
+offset, entered by typing, mouse adjustment, or its maximum
+shortcut. It represents an offset range from 0 m to that maximum. For
 each selected dip, the product converts both endpoints into that
 dip's fault-slip window.
 
@@ -332,6 +526,47 @@ appears in the active-scenario summary or in download provenance.
 Valid entries that convert partly or entirely outside the modeled
 range are not rejected for that reason: the conversion is shown with
 the per-dip coverage flags above.
+
+**Immediate offset guidance (D-31).** Use the fault angles selected
+in site conditions, not the retained direct-slip entries. Show the
+applicable offset coverage beside the input. As a readable value
+changes, show its corresponding slip and coverage for every
+selected angle. Highlight the offset field in red and show a
+warning if any converted range extends outside available data.
+Identify each affected angle and preserve the entered offset.
+Do not apply the direct-slip 5 m threshold to the offset value.
+Changing fault-angle selections updates this guidance without
+changing the offset entry or the confirmed results.
+
+Partial coverage remains a valid scenario. Review is available
+with the warning, and the warning remains visible on review and
+with the resulting coverage information. It must explain that
+results represent only the modeled part of the requested range.
+With a 30° fault angle, the current example shows coverage up to
+approximately 2.51 m offset. Entering 3 m converts to approximately
+5.99 m slip and warns; entering 2 m converts to approximately
+3.99 m slip and clears that coverage warning. These examples use
+the data release's fitted relationship, not a general limit on
+earthquake displacement.
+
+**Offset maximum shortcut (D-31).** Provide one button beside the
+offset field, labeled **Set maximum to {value} m**, with its value
+based on the selected fault angle and available data. It fills
+only the offset maximum, preserves both direct-slip entries, and
+does not confirm the draft. The accepted 30° example uses the
+label **Set maximum to 2.51 m** and enters exactly **2.51**, within
+coverage. Do not present a hidden, more precise value than the one
+the button names.
+
+**Shortcut details still proposed.** For multiple selected angles,
+use the largest offset covered for every selected angle: choose
+the smallest of their upper coverage limits. Round that value
+down to hundredths of a metre so the shortcut itself does not
+produce a partial-coverage warning. This general multi-angle and
+rounding rule was suggested, but has not been separately accepted;
+the demonstrated shortcut used only 30°. It does not change the
+per-angle conversion windows of §3.6. The exact decimal precision
+for other shortcut values remains part of this proposal.
 
 ### 3.6 Multi-dip conversion rule (D-3, Proposed)
 
@@ -350,7 +585,8 @@ one window applies to all dips.
 - **Population (FR-S6):** a two-option switch, "All model stages in
   the slip window" (default) / "One state per simulation trial," with
   the explainer of §5.3 one tap away. The active population is named
-  in the scenario summary, always; with no active window (§3.4) the
+  in the scenario summary, always; in the earlier no-window
+  calculation state (§3.4), the
   all-stages token reads "all recorded stages", since there is no
   window to cite. For one state per trial, the
   per-trial state is selected from the slip window alone — or, with
@@ -379,10 +615,20 @@ one window applies to all dips.
   white, overlay conventions — are adopted by citation from the
   dashboards' established visual-identity rules (ADR-0007 and the
   visual-identity note).
-- **Reset (FR-S8):** one action restoring every scenario control
-  (§3.1–§3.8) to the full-ensemble default — entry mode, population,
-  the window to its inactive state (§3.4) and, when inverse mode
-  ships, the inverse-mode switch.
+- **Discard changes (FR-S8, D-29):** abandon edits and return to the
+  last confirmed scenario and its results. Restore both displacement
+  modes' entries to what they held at confirmation (§2.3), including
+  the inactive mode. Do not substitute a fresh scenario or
+  recalculate results from the abandoned draft.
+- **Start a new scenario (FR-S8, D-29):** clear the reader's choices,
+  including both displacement modes' entries, and current results.
+  Restore D-31's fresh defaults: slip minimum 0 m, both maxima
+  blank. Return to unanswered site conditions, rather than all
+  selected. The previous full-ensemble reset is superseded.
+
+The existing prototype labels its single action **Reset**. D-29
+replaces that label and behavior with the two actions above; the
+prototype's copy and implementation await the journey amendment.
 
 ### 3.8 Inverse mode (FR-X2, P2)
 
@@ -468,8 +714,12 @@ Records without a scarp-type label — each trial's zero-slip initial
 stage, 3,434 in all — are ordinary members of the matching
 population: the default "all scarp types" selection applies no
 scarp-type filter (§3.7), so they count toward the matching records
-and are included in downloads (§6.1). The default empty scenario
-therefore matches the full 346,834-record ensemble (GS-0). In the
+and are included in downloads (§6.1). A scenario explicitly
+selecting all site-condition values, all scarp types, all stages,
+and no active slip window matches the full 346,834-record ensemble
+in the earlier calculation reference GS-0. D-31's guided builder
+requires an explicit maximum; this reference is not its initial
+state or a new completed draft. In the
 archive the zero-slip stages carry no valid scarp-height,
 deformation-zone-width, or scarp-dip measurement, so they never enter
 measurement statistics; they appear only in the matching-record count
@@ -543,10 +793,12 @@ warning.
 ### 4.6 Low-slip caveat (D-4, Interim)
 
 No automatic filtering. When an active window includes slip below
-0.5 m, the results carry the low-slip caveat of §5.9. The no-window
-default state (§3.4) does not fire the caveat: §5.9's copy presupposes
-a user-chosen window, and whether the full-ensemble view needs its own
-notice joins the open R-3 questions. The threshold
+0.5 m, the results carry the low-slip caveat of §5.9. This includes
+a D-31 scenario whose reader keeps the 0 m minimum and chooses a
+maximum. The earlier no-window calculation state (§3.4) does not
+fire the caveat: §5.9's copy presupposes a user-chosen window, and
+whether a full-ensemble view needs its own notice joins the open
+R-3 questions. The threshold
 and treatment are the research group's open decision (R-3); 0.5 m is
 an interim display trigger only. It covers the Monoclinal- and
 Pressure-Ridge-family plotting start values recovered from the paper
@@ -647,6 +899,14 @@ results (§5.2):
 > with professional judgment. [Full disclaimer →]
 
 ### 5.3 Population explainer (FR-S6)
+
+**Guided-copy amendment pending.** The copy below is the earlier
+baseline, including its no-window branches. D-31 requires a
+maximum in a new guided scenario; those branches are not current
+journey instructions. The guided explainer must describe records
+within the chosen window. The copy registry and its dependent
+implementation await that amendment; §10.2 preserves the separate
+no-window numerical reference cases.
 
 > **All model stages in the slip window** counts every recorded stage
 > of every matching simulation inside your slip range — the
@@ -880,6 +1140,15 @@ current Z / W."); nothing is recomputed against old versions.
 
 ### 7.3 Reload recovery (MVP)
 
+**Guided-journey amendment pending.** The rules below describe
+recovery of the earlier prototype's accepted scenario. D-27 now
+distinguishes a draft from the confirmed scenario. Returning
+visits, draft recovery, and how recovery offers the fresh-start
+action remain open under §2.3; the action itself follows D-29.
+References below to
+default results do not authorize results for unanswered site
+conditions. Reconcile these flows before implementation.
+
 An open scenario may still refer to files from an earlier data vintage.
 If field measurements or conversion coefficients cannot be loaded, the
 page offers **Reload and restore settings**. A load failure alone does
@@ -964,7 +1233,15 @@ Each time budget is judged at the 95th percentile of 30 measured runs.
 | Initial data payload for the scenario page | ≤ 4 MB compressed |
 | First meaningful render (scenario page, cold cache), 95th percentile | ≤ 2.0 s |
 | Repeat visit render (warm cache), 95th percentile | ≤ 1.0 s |
-| Scenario change → updated results, 95th percentile | ≤ 200 ms |
+| Confirmed scenario change → updated results, 95th percentile | ≤ 200 ms |
+
+For a change to an already displayed scenario, the update budget
+starts when the reader confirms it with **Show results** (D-27),
+not on each draft edit.
+The first- and repeat-render endpoints below describe the earlier
+prototype, which opened directly on results. Their adaptation to
+the guided journey remains open; this amendment does not change
+the numeric targets or silently substitute a new endpoint.
 
 **First meaningful render** is the point at which the results for the
 scenario the page opens with are on screen: for the measurement shown
@@ -1084,15 +1361,27 @@ Acceptance anchors, each pinned in the data pipeline's reference
 results (DR-1); the PDD fixes the scenarios, the pipeline fixes the
 numbers.
 
+For these reference scenarios, any site condition not explicitly
+narrowed in the row selects all its available values. This
+convention preserves the reference populations; it does not
+describe the guided builder's unanswered initial state.
+
+Likewise, an omitted displacement window retains the earlier
+no-window calculation case. D-31 changes the fresh journey, not
+these numerical baselines. GS-0 and GS-7 remain explicit no-window
+references; they are not instructions to let a new draft skip its
+required maximum. Updated journey walkthroughs must use complete
+entries and identify the resulting populations explicitly.
+
 | ID | Scenario | What it proves |
 |---|---|---|
-| GS-0 | Empty scenario (no active slip window), default population | Full-ensemble counts: 346,834 matching records including the 3,434 unclassified zero-slip stages ("all scarp types" = no filter, §4.3); per-measurement valid and excluded-null counts match the reference. |
+| GS-0 | Explicitly all site-condition values, no active slip window, default population and scarp-type filter | Full-ensemble counts: 346,834 matching records including the 3,434 unclassified zero-slip stages ("all scarp types" = no filter, §4.3); per-measurement valid and excluded-null counts match the reference. Earlier calculation baseline, not a completed D-31 draft. |
 | GS-1 | US-1: dips {30°, 40°}, Strong (uniform and layered), offset mode 3 m | Per-dip conversion (D-3): 30° flagged beyond the modeled range, 40° in range; counts and statistics match the reference. |
 | GS-2 | Moderate strength (both arms), dip 20°, depth 3 m, Dense, one state per trial | Warning tier: 18 valid measurements — the small-result warning fires while the chart still renders. |
 | GS-3 | Kern preset (after D-6) | The worked example reproduces the research group's chosen field group and filter. |
 | GS-4 | Alternating Strong–Weak + depth 3 m | Empty result: the diagnostic names both sediment strength and sediment depth — relaxing either alone yields matches. |
 | GS-5 | Alternating Strong–Weak, one state per trial | Suppression tier: 9 valid measurements — the chart is suppressed and the statistics table remains. |
-| GS-6 | Slip window 0–0.04 m, all other controls default | Count-vs-validity split (§4.5): 3,434 matching records — the zero-slip stages — with zero valid measurements in every panel; the no-valid-measurement notice appears, never the no-match diagnostic; statistics tables show valid 0, excluded-null 3,434. |
+| GS-6 | Slip window 0–0.04 m, explicitly all site-condition values, default population and scarp-type filter | Count-vs-validity split (§4.5): 3,434 matching records — the zero-slip stages — with zero valid measurements in every panel; the no-valid-measurement notice appears, never the no-match diagnostic; statistics tables show valid 0, excluded-null 3,434. |
 | GS-7 | One state per simulation trial, no active slip window | FR-S6's no-window rule: 3,434 matching records — each trial's actual final recorded state (slip ≈ 5.013 m), never an intersection with any window; per-measurement valid counts match the reference. |
 
 ### 10.3 Acceptance walkthroughs

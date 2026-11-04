@@ -1,12 +1,19 @@
 # Ground Rupture Explorer — implementation plan
 
 **Pending product amendment (2026-11-03).** The owner agreed the
-guided first-use sequence and introductory copy in
+guided first-use journey, introductory copy, and interaction
+decisions D-26–D-31 in
 [PDD §2.3](pdd.md#23-user-journeys).
 The existing task bodies describe the earlier prototype experience.
-They do not implement this new journey. Its interaction details and
-remaining guidance need product definition, followed by design and task
-amendments; implementing agents must not infer those choices.
+They do not implement this new journey, including D-26–D-31.
+The movement component now records explicit maxima, editable
+minimum 0 m, shortcuts, and immediate range guidance. See the
+[prototype record](scenario-journey-prototype.md) for the saved
+examples and which details remain proposals.
+The remaining interaction and guidance choices need product
+definition, followed by design and task amendments; implementing
+agents must not infer those choices. Accepted task bodies are
+unchanged by this decision record.
 
 **Status:** first full draft, corrected after external review and
 again after the adversarial review of the document pair (both

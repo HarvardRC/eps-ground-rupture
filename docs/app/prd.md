@@ -857,6 +857,24 @@ It is part of the MVP's core scenario capability, independent of
 the P2 display preferences. The PDD defines the journey and records
 the interaction choices that remain open.
 
+Site conditions must require explicit choices of one or more modeled
+values. A fresh scenario must not silently include every value for
+an unanswered condition. Selecting all values is a convenience,
+not guidance for a reader who is unsure what to choose.
+
+Changes to site conditions or assumed displacement remain a draft
+until the reader reviews and confirms them. Displayed results must
+remain associated with the scenario that produced them; draft
+inputs must not relabel or
+silently replace those results. These interaction requirements were
+agreed on 2026-11-03; the PDD defines their observable behavior.
+
+Moving between journey steps must preserve the draft. Review must
+require complete, valid scenario inputs. A reader must be able to
+return to existing confirmed results without applying or losing
+draft edits, with a clear notice when changes remain unapplied and
+a route back to review.
+
 #### Scenario-input controls
 
 | Input | User selects | Key rule |
@@ -868,7 +886,7 @@ the interaction choices that remain open.
 | Displacement window | Minimum and maximum fault slip at depth. | The product may assist users who instead have an anticipated vertical surface offset, but it must label the two quantities distinctly. |
 | Population | All model stages within the slip window, or one state per simulation trial. | The selected population must always be visible and must never be mixed silently. |
 | Scarp class | Optional filter by resulting modeled scarp type. | Present it as a filter on simulation output, not a site condition. |
-| Reset | Return all controls to their full-ensemble state. | An empty scenario represents the full ensemble. |
+| Start again or discard edits | Start a new scenario, or abandon edits to the last confirmed scenario. | Starting again clears inputs and results; discarding edits restores the last confirmed scenario and its results. |
 
 The scenario page must let users define a plausible site scenario using
 the modeled input values and ranges described below.
@@ -945,6 +963,21 @@ The product must label this input clearly as fault slip at depth and
 show its modeled range: approximately 0–5 m, recorded in approximately
 0.05 m stages.
 
+In a new scenario, the reader must explicitly choose a maximum
+displacement before review. The slip minimum starts at an editable
+0 m; an unfinished entry must not silently become a complete range.
+Readers must be able to type values or adjust them with a mouse,
+and have a shortcut for choosing an upper value within model
+coverage. The PDD defines the controls and their values.
+
+Range guidance must be visible while entering displacement. For
+direct slip, distinguish the rounded 5 m boundary from the data's
+actual limit. For surface offset, use the fault angles selected in
+the site-conditions step to explain coverage. Coverage warnings
+must remain visible during review. The controls must distinguish a value
+outside available data from one that is physically implausible;
+model coverage alone does not establish plausibility at a site.
+
 Because engineers may instead have an anticipated **vertical surface
 offset**, the product must provide an optional conversion assist. The
 assist must:
@@ -961,6 +994,14 @@ assist must:
   where they dominate; and
 - prominently warn when a converted slip value lies outside the modeled
   slip range.
+
+Switching between fault-slip and surface-offset entry must preserve
+the reader's entries separately for each mode. Switching back must
+restore that mode's entries; a switch must not silently erase them
+or replace them with converted values. Only the selected mode
+contributes to the scenario. This behavior was agreed on
+2026-11-03; reset follows FR-S8, and reload behavior remains a
+separate PDD decision.
 
 The product must never silently clip an out-of-range conversion. If part
 of a selected scenario falls outside the modeled range, the product must
@@ -1000,11 +1041,6 @@ matches the common engineering phrasing “up to X m of displacement.”
 The product must not silently combine or switch between these
 populations.
 
-If no slip window is active, the one-state-per-trial option must use the
-actual final state of each trial. The product must not attempt to
-intersect final states with a capped slip window, because the final state
-of each trial occurs at approximately 5 m of slip.
-
 #### FR-S7. Scarp-type filter
 
 The product must provide an optional filter for the six modeled scarp
@@ -1023,12 +1059,30 @@ slumped or crumbled.
 
 #### FR-S8. Default and reset state
 
-All scenario controls must default to the full ensemble. An empty
-scenario therefore shows results for all available simulation records,
-subject to the selected population and measurement-availability rules.
+A fresh scenario must start with unanswered site conditions. The
+reader must choose one or more values for each condition before
+continuing. Selecting all available values must be an explicit
+choice with the same effect as selecting them individually.
 
-The product must provide a reset action that returns every scenario
-control to this default state.
+An unanswered condition is an incomplete draft, not a request for
+the full ensemble. Initial results appear only after the reader
+has completed and reviewed a valid scenario and confirmed it.
+The population, displacement, and scarp-type rules remain separate
+from these site-condition requirements.
+
+The product must distinguish abandoning edits from starting again:
+
+- **Discard changes** returns to the last confirmed scenario and
+  its results, restoring both displacement modes' entries to what
+  they held when that scenario was confirmed.
+- **Start a new scenario** clears the reader's scenario choices,
+  including entries in both displacement modes, and current results.
+  It restores the fresh input defaults: unanswered site conditions,
+  slip minimum 0 m, and blank maxima in both displacement modes.
+  It returns to the site-conditions step.
+
+The owner agreed these two actions on 2026-11-03. They replace the
+former reset action that silently selected the full ensemble.
 
 ### 5.2 Results and field-data context (C2, C3, P1)
 
@@ -1945,8 +1999,10 @@ deployment process.
 
 #### NFR-3. Responsive interaction
 
-Changes to scenario controls must update the displayed results without a
-perceptible delay during normal use.
+Scenario controls must respond without a perceptible delay during
+normal use. Editing a draft must not update the displayed results.
+After the reader confirms the reviewed scenario, results must
+update without a perceptible delay.
 
 The product must avoid large initial downloads and prolonged visible
 loading phases, especially on repeat visits. It must not require users
@@ -1957,7 +2013,8 @@ The PDD must define numeric performance budgets for:
 
 - initial data payload;
 - first meaningful render; and
-- 95th-percentile time from a scenario change to updated results.
+- 95th-percentile time from confirmation of a reviewed scenario to
+  updated results.
 
 The product must meet those budgets under the test conditions defined in
 the PDD.
