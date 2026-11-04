@@ -35,13 +35,14 @@ supersedes legacy interaction design only for the new page.
 | G-09 | G-02 interfaces; PDD D-37 | Implement `sampleDraft` and the introduction's sample action, inline replacement confirmation, and site-conditions status line exactly to guided DDD §9.1, with state tests. | Fresh fill, both ask-before-replace outcomes, sample labeling, the deliberate 30° coverage warning, and untouched confirmed results verified; typecheck, tests, and builds pass; evidence recorded. |
 | G-10 | G-09 (shared files); PDD D-38 | Implement `session.ts` and the restore flow, the copy updates in `app.ts` and `explore.md`, and the §7 `pageshow` amendment exactly to guided DDD §9.2, with session tests. | Same-tab reload and back/forward restore the draft, confirmed settings, step, and display with the visible notice; invalid or mismatched records require the explicit fresh start; storage failure keeps the fresh behavior and wording; results recompute and are never stored; tests and builds pass; evidence recorded. |
 | G-11 | G-10 (shared files) | Implement the width log-scale offer exactly to guided DDD §9.3, reusing the registry texts and shared chart builders. | The toggle appears exactly when the log histogram exists, switches bins, caption, and note, reports the off-adjustment, never dirties the draft, and persists with display choices; tests and builds pass; evidence recorded. |
-| G-12 | Main-plan T-60 lane; G-08–G-11 | Implement the guided browser specs of guided DDD §9.5 inside the T-60 lane, running against the strict preview build. | All eleven guided specs pass in both lane projects, the race and continuity specs included; touch and cross-engine coverage recorded as outstanding; evidence recorded. |
+| G-12 | Main-plan T-60 lane (implemented); G-08–G-11 | Implement the guided browser specs of guided DDD §9.5 inside the T-60 lane, running against the strict preview build; extend the mobile project's spec filter to the guided spec files. | All eleven guided specs pass in the lane's desktop and mobile projects, the race and continuity specs included; physical-touch and cross-engine coverage recorded as outstanding; evidence recorded. |
 
 G-08 is independent of the application tasks. G-09–G-11 share
-`app.ts` and `state.ts` and run in order. G-12 waits for the main
-plan's accepted T-60 task to build the browser lane; implementing
-T-60 next is the recommended order for the same agent. The owner
-runs the deployment beside T-54 after G-08 lands. Nothing from the
+`app.ts` and `state.ts` and run in order. The main plan's T-60
+browser lane is already implemented on `dev-v.0.4.x`, so G-12 has
+no missing prerequisite beyond G-08–G-11; its specs join the
+lane's desktop and mobile projects. The owner reruns the T-54
+unlisted deployment after G-08 lands. Nothing from the
 [next phase](#next-phase-owner-instruction-2026-11-04) joins this
 kickoff.
 
@@ -101,14 +102,15 @@ deployments stay the owner's manual workflow runs.
 **Owner grant, 2026-11-04.** For this increment the implementing
 agent works autonomously: it stages, commits, pushes, opens, and
 merges its own pull requests into `dev-v.0.4.x` without per-task
-owner approval. The grant covers tasks G-08–G-12, the main plan's
-T-60 when executed under this kickoff, the doc-bearing evidence
-and ledger updates those tasks carry, and first bringing
-`dev-v.0.4.1-redesign` into `dev-v.0.4.x` by pull request so task
-branches start from the accepted candidate. The main contract's
-merge conditions still hold — CI green, independent review passed,
-no open owner question, branch current with `dev-v.0.4.x` — and
-everything outside this grant keeps the main plan's rules.
+owner approval. The grant covers tasks G-08–G-12 and the
+doc-bearing evidence and ledger updates those tasks carry. The
+owner merges `dev-v.0.4.1-redesign` into `dev-v.0.4.x` and pushes
+it before the kickoff, so task branches start from the accepted
+candidate beside the implemented T-54 deployment and T-60 lane.
+The main contract's merge conditions still hold — CI green,
+independent review passed, no open owner question, branch current
+with `dev-v.0.4.x` — and everything outside this grant keeps the
+main plan's rules.
 
 ## Next phase (owner instruction, 2026-11-04)
 

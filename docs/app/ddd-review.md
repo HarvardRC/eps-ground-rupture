@@ -1664,15 +1664,15 @@ The owner accepted the second-increment documents in `adf8fed`
 (2026-11-04) and issued three execution instructions:
 
 - **Autonomous execution.** The implementing agent stages, commits,
-  pushes, opens, and merges its own pull requests for G-08–G-12 and
-  for T-60 under the guided kickoff — the doc-bearing evidence
-  updates included — without per-task owner approval. The standing
-  merge conditions hold: green CI, independent review, no open
-  owner question, branch current with `dev-v.0.4.x`. Deployments
-  stay the owner's. The grant includes first bringing
-  `dev-v.0.4.1-redesign` into `dev-v.0.4.x` by pull request. It is
-  recorded in the guided plan's Commands section, with dated
-  exceptions in the main plan's contract prose.
+  pushes, opens, and merges its own pull requests for G-08–G-12 —
+  the doc-bearing evidence updates included — without per-task
+  owner approval. The standing merge conditions hold: green CI,
+  independent review, no open owner question, branch current with
+  `dev-v.0.4.x`. Deployments stay the owner's. The owner merges
+  `dev-v.0.4.1-redesign` into `dev-v.0.4.x` and pushes it before
+  the kickoff; T-54 and T-60 are already implemented there. The
+  grant is recorded in the guided plan's Commands section, with
+  dated exceptions in the main plan's contract prose.
 - **Next phase (D-41).** Every deliberate deferral is queued as the
   phase after the second increment: the D-39 reconciliation list,
   family view, shared links, between-visit recovery, scenario

@@ -307,7 +307,7 @@ request it opens — a task's, a scratch one, or a drill's — targets
 repository's default branch — and it pushes a branch or opens a pull
 request only when the owner asks, the owner's 2026-11-04 grant
 ([guided plan, Commands](guided-journey-ip.md#commands)) standing as
-that ask for the guided second increment and T-60); and **Status**:
+that ask for the guided second increment's tasks); and **Status**:
 
 - **Draftable** — every input is an accepted document or section, so
   the task body can be written now; during the full-draft campaign a
