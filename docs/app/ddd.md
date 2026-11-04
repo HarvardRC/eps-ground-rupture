@@ -1,28 +1,15 @@
 # Ground Rupture Explorer — detailed design document
 
-**Pending product amendment (updated 2026-11-04).** The owner agreed
-the guided first-use journey, introductory copy, and interaction
-decisions D-26–D-34 in
-[PDD §2.3](pdd.md#23-user-journeys).
-This document still specifies the earlier prototype experience.
-Returning visits, browser navigation, remaining refinement details,
-recovery, and guidance are still open. Its full-ensemble defaults,
-automatic result updates, and behavior when switching modes need
-alignment with D-26–D-34, including the discard, restart, and
-step-navigation actions. D-31 also replaces the fresh no-window
-state with an explicit maximum, and adds movement shortcuts and
-immediate range guidance. D-32 defines the review presentation.
-D-33 accepts the first results layout; its tabs and visible
-statistics supersede the earlier result arrangement at product
-level. D-34 includes refinements in the shared draft, confirmation,
-discard, and restart behavior; presentation changes are immediate.
-Detailed design and copy-registry amendments remain pending.
-The reviewed component examples are saved with the
-[prototype record](scenario-journey-prototype.md).
-Their illustrative increments and remaining shortcut proposals
-are not substitutes for accepted design decisions.
-The affected design needs revision once the remaining choices are
-defined.
+**Parallel guided implementation (2026-11-04).** This document
+continues to specify `/scenario/` and the shared scientific core.
+The new `/explore/` route follows the additive
+[guided detailed design](guided-journey-ddd.md), derived from
+[PDD §2.3](pdd.md#23-user-journeys), D-26–D-35, and the owner's
+separate-route implementation request. The
+[prototype record](scenario-journey-prototype.md) preserves the
+approved examples. The supplement fixes the candidate's remaining
+state, entry, navigation and integration choices without rewriting
+accepted legacy task bodies or numerical contracts.
 
 **Status:** first full draft, corrected after external review
 (2026-10-30) and again after the reviews of the implementation plan

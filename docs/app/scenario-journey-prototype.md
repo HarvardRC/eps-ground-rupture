@@ -11,14 +11,17 @@ and selected **Focused steps** in the prototype review.
 The journey, introduction, review variant, selection, review,
 displacement-mode, restart, step-navigation, movement-entry,
 review-screen, first results presentation, and result-refinement
-decisions below are agreed. Other detailed interactions remain
+decisions below are agreed. D-36 adds Choice cards for normal results
+browsing, clearer refinement controls, and an optional results
+walkthrough. Other detailed interactions remain
 proposals. The saved full-journey prototype is an earlier
 snapshot: its unspecified-condition, displacement-default, and
 result-update behavior is superseded by those decisions. The later
 component examples capture the site-selection, movement-entry,
-review-screen, and results discussions. None queries simulation
-records. The movement and review examples calculate illustrated
-conversions; the results example calculates charts and statistics
+review-screen, results, and refinement discussions. None queries
+simulation records. The movement and review examples calculate
+illustrated conversions; the results and refinement examples calculate
+statistics
 from invented measurements.
 These examples do not replace the product definition or
 implementation plan.
@@ -33,13 +36,15 @@ implementation plan.
 - [Scenario-review editable source](prototypes/scenario-review.fragment.html).
 - [Scenario-results example](prototypes/scenario-results.html).
 - [Scenario-results editable source](prototypes/scenario-results.fragment.html).
+- [Scenario-refinement example](prototypes/scenario-refinements.html).
+- [Refinement editable source](prototypes/scenario-refinements.fragment.html).
 - [Product definition and approved introduction](pdd.md#23-user-journeys).
 
 Open the clickable HTML file in a browser. When viewing it on
 GitHub, download the file first; the repository's source view does
 not run it. The saved page includes the prototype and its controls,
 with shared interface assets loaded from public content-delivery
-networks. These pages are not offline bundles. The five examples
+networks. These pages are not offline bundles. The six examples
 are separate pages; a selection made in one does not update another.
 
 ## Reader and purpose
@@ -96,7 +101,7 @@ setting.
 ## Agreed interaction decisions — through 2026-11-04
 
 [PDD §2.3](pdd.md#23-user-journeys) records the authoritative product
-definition in D-26–D-34.
+definition in D-26–D-36.
 
 **Required site conditions (D-26).** A fresh scenario starts with
 no values selected for fault angle, sediment depth, sediment
@@ -125,8 +130,9 @@ remain one draft. They affect results only after
 **Review scenario → Show results**, for both the first scenario
 and subsequent revisions. Any retained
 results, counts, and their summary remain associated with the
-previously confirmed scenario. The complete presentation of retained
-results, browser navigation, and recovery remain open. D-34 defines
+previously confirmed scenario. The complete retained-results flow
+still needs integration. The PDD supplement defines initial browser
+navigation without saved recovery. D-34 defines
 when population and scarp-type refinements take effect below.
 
 **Displacement-mode entries (D-28).** The draft preserves fault-slip
@@ -135,8 +141,8 @@ Switching back restores that mode's entries. Only the selected
 mode contributes to validation for review, the reviewed scenario,
 and its results. Switching does not silently convert or erase
 entries, and does not update previously confirmed results.
-Restarting follows D-29; sample replacement, returning visits,
-and recovery remain open.
+Restarting follows D-29; the PDD supplement excludes sample
+replacement and saved recovery from the first separate-route version.
 
 **Discard or start again (D-29).** **Discard changes** abandons the
 draft and returns to the last confirmed scenario and its results.
@@ -172,8 +178,8 @@ edits count as unapplied changes; population and scarp-type edits
 do too under D-34. Merely visiting a step does not create a change.
 Restoring the confirmed entries removes the notice. Visiting results
 never applies edits; no results are available before confirmation
-or after **Start a new scenario**. Browser Back and Forward and
-reload behavior remain open.
+or after **Start a new scenario**. The PDD supplement defines initial
+Browser Back and Forward and fresh-after-reload behavior.
 
 **Explicit movement entries and limits (D-31).** The fault-slip
 minimum starts at an editable **0**; both modes start with a blank,
@@ -210,8 +216,30 @@ movement. All pending changes take effect together only through
 **Review scenario → Show results**. Measurement and chart-view
 changes remain immediate presentation choices. The
 [results step below](#stage-5--explore-results) records the choices,
-defaults, discard/restart behavior, and details still open. The
-saved examples do not yet implement this refinement flow.
+defaults, discard/restart behavior, and the accepted presentation.
+The later refinement example demonstrates that flow with invented
+measurements; the earlier examples do not.
+
+**Refinement presentation and explanation (D-35).** On 2026-11-04,
+the owner approved the refinement layout, selection validation,
+review/discard flow, scarp descriptions and shape sketches, and
+the expanded explanation of simulation stages. The stage example
+compares all stages with the last stage using invented measurements.
+This accepts its first presentation, not scientific data or full
+accessibility certification. The owner then authorized autonomous
+implementation at a separate route alongside the existing scenario
+page. The [PDD implementation supplement](pdd.md#23-user-journeys)
+distinguishes the agent's first-version scope choices from the
+owner's accepted product decisions.
+
+**Results controls and optional walkthrough (D-36).** On 2026-11-04,
+the owner approved the shared results-controls direction and an
+optional five-stop walkthrough, then selected **Choice cards** for
+normal browsing, with a short explanatory question per measurement.
+[PDD §4.1](pdd.md#41-measurement-views-fr-o1) records the approved
+direction and separates delegated integration choices from owner
+decisions. The control sketch uses placeholders; it does not show
+real calculated charts or supersede scientific safeguards.
 
 These decisions supersede the corresponding behavior in the saved
 full-journey HTML snapshot. That snapshot still permits unspecified
@@ -320,8 +348,9 @@ All three fields support direct typing and adjacent **− / +**
 buttons. Typed decimals retain their permitted precision. The
 component adjusts by 0.1 m per click and says **Type a value or use
 − / + to change it by 0.1 m**. The mouse-and-typing interaction is
-agreed; 0.1 m is the demonstrated increment, not a separately
-approved product rule.
+agreed. The PDD supplement now selects this demonstrated increment
+for the first `/explore/` version under the owner's autonomous
+authorization, not as a separately approved permanent product rule.
 
 Clearing a field leaves an unfinished entry. Review reports **Enter
 a minimum value** or **Enter a maximum value**, as applicable,
@@ -377,10 +406,12 @@ The shortcut is a convenience, not a recommended site assumption.
 For this example, the shortcut's value is rounded downward to
 0.01 m from the converted coverage limit. The proposed rule for
 several selected angles is to use the largest offset covered for
-all of them, then round downward so the shortcut itself does not
-trigger partial coverage. The general rounding rule and this
-multi-angle shortcut policy remain proposals; approval of the
-single-angle example does not settle them.
+all of them, then round downward to avoid exceeding the upper
+coverage limit. A converted lower end below modeled slip may still
+need a coverage warning. The general rounding rule and this
+multi-angle shortcut policy were proposals at that review. The PDD
+supplement subsequently selects them for the first `/explore/`
+implementation, without representing them as prior owner decisions.
 
 The component's **Review scenario** action opens a movement-only
 summary of quantity, entered range, and any offset coverage warning.
@@ -471,9 +502,9 @@ simulation's corresponding range for its fault angle. Explain that
 a stage is a saved point as fault movement increases and that all
 resulting scarp types are included in the initial scenario. Under
 D-34, review must reflect the draft's chosen population and scarp
-types before confirming all pending changes. Exact placement and
-wording for refined choices still need definition. The saved review
-example retains the initial defaults and has no refinement controls.
+types before confirming all pending changes. D-35 supplies the later
+refinement review presentation. The separate saved review example
+retains the initial defaults and has no refinement controls.
 Neither presentation decision changes D-3's scientific-review status.
 
 **Illustrative completed scenario.** The saved review example opens
@@ -489,15 +520,54 @@ The saved example's Edit actions work, including required-condition
 validation. Its **Show results** action ends with a clearly labeled
 prototype acknowledgement; it calculates no results or match counts.
 That acknowledgement is outside the proposed product screen. The
-example includes the still-proposed 0.1 m mouse increment and general
-multi-angle offset-shortcut rule from D-31; accepting review does not
-settle those separate choices.
+example includes the 0.1 m mouse increment and general multi-angle
+offset-shortcut rule that remained proposals when review was
+accepted. The PDD supplement now selects them for the first guided
+implementation under the owner's autonomous authorization.
 
 The earlier full-journey snapshot retains superseded unspecified
 conditions, a no-window explanation, and **Explore matching results**
 wording. Use this later example for the accepted review presentation.
 
 ## Stage 5 — Explore results
+
+**Later controls direction (D-36, 2026-11-04).** Normal browsing
+separates a prominent **Refine results** disclosure, identified by
+**Simulation stages · Scarp types**, from the three measurement
+choices. Selection is clear, and plain questions explain height,
+width, and dip. The owner selected **Choice cards** under **What
+would you like to examine?**. Each card contains the measurement
+name and its question: **How high is the scarp?**, **How wide is the
+disturbed ground?**, or **How steep is the scarp face?**. The selected
+card has a visible marker in addition to its color. Cards sit side
+by side in a wide window and stack in a narrow one. Compact selector
+was the unselected alternative. These choices change the displayed
+measurement immediately and do not apply scenario edits.
+
+The optional **Walk me through results** sequence visits height,
+width, dip, simulation stages, then scarp types. Its progress and
+Back/Next controls replace the normal measurement selector. The
+first three stops show the real confirmed measurement; the last two
+show the corresponding existing editor alone. The earlier saved
+results and refinement examples do not implement this walkthrough.
+
+The PDD records delegated details: start the guide at height, retain
+chart choices and all draft edits, and never calculate from guide
+navigation. **Browse freely** always exits, even with no scarp types
+selected, retaining the current measurement and opening normal
+refinements when leaving an editor stop. At the last stop, a changed
+draft offers **Review changes**; otherwise **Finish walkthrough**
+returns to normal browsing. Review exits before the existing full
+validation, so an empty selection uses the normal error and focus
+path. **Discard changes** ends the guide and restores confirmed
+choices while retaining the measurement. Leaving the results step
+also ends the guide; a fresh scenario starts with it off.
+
+Confirmed context, notices, and unapplied-change information remain
+visible. Empty, small, and zero-valid results keep their real states
+and chart-suppression rules. These integration details were selected
+under the owner's implementation delegation, not individually
+approved in the sketch. D-27–D-35 still govern review and confirmation.
 
 **First version accepted (D-33, 2026-11-04).** The owner approved
 the later results example with the qualification, “at least as the
@@ -587,10 +657,55 @@ measurement tabs or chart views immediately changes the presentation
 of the confirmed results; it does not require scenario confirmation
 or apply draft edits.
 
-The precise refinement layout, explanations and illustrations,
-selection-error presentation, and keyboard focus still need
-definition. The saved examples have no interactive D-34 refinement
-flow and are not implementation evidence for it.
+**Accepted refinement presentation (D-35, 2026-11-04).** The later
+refinement example opens the controls beneath the confirmed summary.
+**Refine results** and **Hide refinements** expand or hide that
+section. It labels editable controls **Draft choices** and reminds
+the reader that the results change only after review. Population
+and scarp-type controls sit beside one another when space permits
+and stack in narrower windows.
+
+The population explanation says that a simulation saves the ground's
+shape as slip increases; each saved point is a stage with its own
+measurements. It distinguishes exploring measurements throughout the
+range from comparing the last recorded stage within it. That stage
+can fall below the range's maximum. The selection can change counts,
+chart shapes, medians, and percentiles.
+
+**See how stages change the results** expands an example of one
+simulation with three stages and invented heights. Changing the
+population choice updates the included-stage indicators and example
+median immediately, while actual displayed results retain confirmed
+settings. The example explains that all stages gives more influence
+to simulations with more measurements; last stage contributes at
+most one per simulation. Neither guarantees larger or smaller
+results. The example's numbers are illustrations, not sample data.
+
+Each of the six scarp types has a checkbox, a short description, and
+a schematic shape sketch. **Select all** is unchecked for none,
+mixed for a subset, and checked for all. Selecting it from none or
+some includes every type; clearing it leaves the draft empty.
+On any attempt to review an empty scarp selection, open the section,
+show **Select one or more scarp types before review.**, and focus
+Select all. Choosing a type clears the error. The review actions
+remain available for the attempt; they do not silently select types.
+
+The unapplied-changes notice sits above the controls with **Return
+to review** and **Discard changes**. **Review changes** also opens
+review through the same validation. Review identifies the draft's
+population and included types and offers **Edit refinements**, which
+returns to the open controls and focuses the selected population.
+**Back to results** preserves this draft and shows the confirmed
+results. That return applies when reviewing an existing result;
+the fresh journey still uses D-32's Back action. **Show results**
+confirms the draft and returns to results.
+
+This example demonstrates refinement confirmation, discard, and
+presentation changes with invented records. Its site/movement edit
+and download actions still show prototype-boundary notices. It
+does not implement the complete fresh journey or validate real
+scientific results. Sketches are schematic; the approved layout is
+not a claim of research-group or accessibility certification.
 
 **Illustrative data and prototype limits.** The results example
 uses the same illustrative complete scenario as the review example.
@@ -604,10 +719,11 @@ they do not connect the separate examples or generate a result
 package. Those notices and the invented-data label belong to the
 review environment, not the product.
 
-Empty results, small populations, zero valid measurements, remaining
-refinement details, field comparisons, retained draft workflows, and
-actual downloads remain open. The first-version approval is not
-accessibility or viewport acceptance.
+Empty results, small populations, zero valid measurements, field
+comparisons, integrated retained-draft workflows, and actual downloads
+remain beyond the accepted results example. D-35 supplies the later
+refinement presentation. Neither approval establishes accessibility
+or viewport acceptance.
 
 **Earlier snapshot.** The original full-journey prototype showed
 fixed illustrative charts with dashes for statistics, a **Your
@@ -617,54 +733,85 @@ screen is historical. Use the later results example for D-33's
 accepted first presentation; it does not authorize hiding required
 context, statistics, or warnings in a disclosure.
 
-## Choices still to resolve before implementation
+## First implementation scope and later decisions
 
-The selected visual direction does not settle the following details:
+The owner has now authorized autonomous implementation on a separate
+route. The implementing agent selected `/explore/`, leaving
+`/scenario/` available. The authoritative
+[PDD supplement](pdd.md#23-user-journeys) records the first-version
+scope: no sample presets, import, or between-visit recovery; a fresh
+scenario after reload; app-local step navigation; 0.1 m mouse steps;
+and an offset shortcut using the smallest selected-angle coverage
+limit rounded down to 0.01 m. These are agent-selected initial
+implementation choices under that authorization, not earlier owner
+decisions. Start new and discard retain the agreed behaviors.
+
+The owner also requested contextual glossary and dashboard links.
+Short hover help must also work through keyboard focus and touch;
+essential instructions and warnings remain visible. The PDD records
+these requirements without changing the existing copy registry or
+accepted implementation task bodies. The owner requested the missing
+floating explanations during the 2026-11-04 walkthrough, bringing
+them into the candidate alongside the longer expandable help and
+glossary links. Mouse hover, keyboard focus, and touch must all work.
+
+The candidate implements the bounded journey in the
+[guided design](guided-journey-ddd.md). Its
+[execution record](guided-journey-ip.md#execution-evidence) distinguishes
+actual checks from saved-example behavior and pending verification.
+The implementation does not settle all later product choices:
 
 1. **Guidance.** Explain how to choose site-condition values without
    recommending Select all as a substitute for understanding them.
    Resolve explanations, diagrams, and the worked-example inputs.
-   Settle the movement-button increment and general offset-shortcut
-   rounding and multi-angle policy described under D-31 above.
-2. **Entry and revision.** Define returning visits,
-   sample-input replacement, and the treatment of an unfinished
-   draft outside the mode switches and discard/restart actions
-   already decided by D-28 and D-29.
+   D-35 supplies the initial refinement explanations. The PDD
+   supplement fixes movement increments and shortcuts for the first
+   separate-route version; later revisions may reconsider them.
+2. **Entry and revision.** Define later returning-visit recovery,
+   sample-input replacement, and restoration of an unfinished draft.
+   The candidate starts afresh on return and retains the mode-switch,
+   discard, and restart actions already decided by D-28 and D-29.
 3. **Presentation around results.** D-27, D-30, and D-32 define review,
    step navigation, and the unapplied-changes notice. D-33 places
    review and edit actions; D-34 includes refinements in the same
-   draft. Complete the retained-draft presentation, including the
-   notice and discard/restart actions. Define how draft recovery and
-   performance endpoints fit the revised journey. The examples do
-   not model these flows.
+   draft. The candidate supplies the retained-draft notice and
+   discard/restart actions. Define how later draft recovery and
+   performance endpoints fit the revised journey. The saved examples
+   do not establish those integrated flows' correctness.
 4. **Complete results.** D-33 establishes a normal populated result's
-   first presentation. Define empty results, small populations, and
-   measurements with no valid values, while preserving required
-   context and warnings. The accepted example does not authorize
+   first presentation. The candidate retains the existing safeguards
+   for empty results, small populations, and measurements with no
+   valid values. Later presentation changes must preserve required
+   context and warnings; the accepted example does not authorize
    hiding information that the PRD and PDD require to remain visible.
-5. **Refinements and downloads.** D-34 defines the refinement choices
-   and when they take effect. Resolve their layout, explanations,
-   illustrations, selection errors, and focus. Define remaining
-   chart alternatives, field comparison, and real downloads while
-   retaining the scientific rules.
-6. **Navigation and access.** Define browser Back and Forward,
-   persistence and recovery, keyboard focus and announcements, and
-   behavior at ordinary laptop and narrow-window sizes. The saved
-   prototype is not accessibility or viewport acceptance evidence.
+5. **Refinements and downloads.** D-34 and D-35 define the choices,
+   activation, first layout, explanations, illustrations, validation,
+   and focus. The candidate integrates those controls and real
+   downloads from confirmed results. Define later chart alternatives
+   and field comparison while retaining the scientific rules.
+6. **Navigation and access.** The first separate-route version uses
+   the PDD supplement's app-local navigation and fresh reload.
+   Define later persistence and recovery, and verify keyboard
+   focus, announcements, and ordinary laptop and narrow-window
+   operation. The examples are not accessibility or viewport
+   acceptance evidence.
 
 The current decimal-validation requirements, conversion rules, and
 scientific safeguards remain authoritative except for the explicit
-product amendments recorded in the PDD. D-26–D-34 amend site-condition
+product amendments recorded in the PDD. D-26–D-36 amend site-condition
 and displacement defaults, result-update timing, mode preservation,
 discard/restart behavior, step navigation, and movement-entry
-feedback, review and results presentation, and result refinements.
-The dependent design and implementation plan still need revision.
-Fixed example values,
+feedback, review and results presentation, result refinements, and
+optional guidance through results.
+The additive [guided detailed design](guided-journey-ddd.md) and
+[implementation plan](guided-journey-ip.md) now define the bounded
+first implementation at `/explore/`. Fixed example values,
 omitted controls, and simplified validation are not instructions to
 change unrelated scientific rules or to treat remaining proposals
 as agreed.
 
-After the remaining product choices are resolved, amend the PDD and
-the dependent design and task bodies. A realistic scenario walkthrough
+The additive plan records implementation and verification separately
+from the accepted legacy tasks. Later product choices remain
+separate. A realistic scenario walkthrough
 should establish whether a new reader can complete the journey and
 explain the results without being told which controls to operate.

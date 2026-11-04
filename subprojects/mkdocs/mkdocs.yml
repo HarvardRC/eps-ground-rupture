@@ -157,8 +157,11 @@ draft_docs: |
   media/dev/
   scenario.md
   assets/scenario/
+  explore.md
+  assets/explore/
 not_in_nav: |
   scenario.md
+  explore.md
 hooks:
   - hooks/site_checks.py
 

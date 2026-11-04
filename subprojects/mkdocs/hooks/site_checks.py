@@ -38,6 +38,10 @@ arms of §6.1:
 (e) Tableau exclusion: no built page carries a <script> whose src begins
     with https://public.tableau.com/javascripts/api/, and every built page
     carries a <script> whose src ends with javascripts/tableau-loader.js.
+(f) guided explorer: its page names exactly one hashed module and
+    stylesheet in assets/explore/, the subtree contains exactly those
+    files, and its mount and version stamps reference the shared pinned
+    manifest under assets/scenario/data/.
 
 Arm (b)'s exception for granted media-index entries joins with P2.
 """
@@ -72,6 +76,8 @@ DEV_MEDIA_SCANNED = (".html", ".js", ".css")
 APP_SUBTREE = "assets/scenario/"
 APP_DATA = APP_SUBTREE + "data/"
 SCENARIO_PAGE = "scenario/index.html"
+EXPLORE_SUBTREE = "assets/explore/"
+EXPLORE_PAGE = "explore/index.html"
 TABLEAU_API = "https://public.tableau.com/javascripts/api/"
 TABLEAU_LOADER = "javascripts/tableau-loader.js"
 TEXT_SUFFIXES = (".html", ".js", ".css", ".map", ".json", ".xml", ".txt")
@@ -86,6 +92,7 @@ ARMS = {
     "c": "application subtree",
     "d": "publication boundary",
     "e": "Tableau exclusion",
+    "f": "guided explorer",
 }
 
 # One <url> element of the rendered sitemap, with its indentation and line
@@ -133,6 +140,7 @@ def on_post_build(*, config: MkDocsConfig) -> None:
         + [("c", *f) for f in _application_subtree(site, paths, config)]
         + [("d", *f) for f in _publication_boundary(site, paths, config)]
         + [("e", *f) for f in _tableau_exclusion(site, paths)]
+        + [("f", *f) for f in _explore_subtree(site, paths, config)]
     )
     if findings:
         lines = [f"  ({arm}) {ARMS[arm]}: {path} — {why}" for arm, path, why in findings]
@@ -234,6 +242,81 @@ def _application_subtree(
         yield APP_SUBTREE + name, f"neither data/ nor an asset that {SCENARIO_PAGE} names"
     for name in sorted(expected - actual):
         yield APP_SUBTREE + name, "absent from the output"
+
+
+def _explore_subtree(
+    site: Path, paths: list[str], config: MkDocsConfig
+) -> Iterator[tuple[str, str]]:
+    """The independent guided entry, sharing the legacy data subtree."""
+    subtree = site / EXPLORE_SUBTREE
+    page = site / EXPLORE_PAGE
+    if not subtree.exists() and not page.exists():
+        return
+    if not subtree.is_dir():
+        yield EXPLORE_SUBTREE, "guided assets are absent"
+    if not page.is_file():
+        yield EXPLORE_PAGE, "guided assets exist but their page is absent"
+        return
+
+    root = _site_root(config.site_url)
+    tags = _tags(page)
+    if sum(attrs.get("id") == "gre-explore" for _tag, attrs in tags) != 1:
+        yield EXPLORE_PAGE, "must contain exactly one #gre-explore mount"
+    if any(attrs.get("id") in ("gre-root", "gre-app") for _tag, attrs in tags):
+        yield EXPLORE_PAGE, "must not contain a legacy scenario mount or script"
+    scripts = [attrs for tag, attrs in tags if tag == "script" and attrs.get("id") == "gre-explore-app"]
+    if len(scripts) != 1:
+        yield EXPLORE_PAGE, "must name exactly one #gre-explore-app module"
+
+    expected: set[str] = set()
+    for attrs in scripts:
+        target = _resolve(attrs.get("src") or "", EXPLORE_PAGE, root)
+        if attrs.get("type") != "module":
+            yield EXPLORE_PAGE, "#gre-explore-app must be a module"
+        if target is None or not re.fullmatch(r"assets/explore/explore-[0-9a-f]{12}\.js", target):
+            yield EXPLORE_PAGE, "#gre-explore-app must name a hashed explore module"
+            continue
+        expected.add(target[len(EXPLORE_SUBTREE) :])
+        if not (attrs.get("data-software-version") or "").strip():
+            yield EXPLORE_PAGE, "#gre-explore-app lacks a software-version stamp"
+        pointer = json.loads(POINTER.read_text(encoding="utf-8"))
+        if not pointer.get("export_version") or attrs.get("data-data-version") != pointer["export_version"]:
+            yield EXPLORE_PAGE, "#gre-explore-app data-version stamp differs from the pointer"
+        manifests = [name for name in _pointer_files() if re.fullmatch(r"manifest-[0-9a-f]{12}\.json", name)]
+        if len(manifests) != 1:
+            yield EXPLORE_PAGE, "the pointer must name exactly one shared manifest"
+        else:
+            manifest = APP_DATA + manifests[0]
+            if _resolve(attrs.get("data-manifest") or "", target, root) != manifest:
+                yield EXPLORE_PAGE, "#gre-explore-app must reference the shared pinned scenario manifest"
+            if manifest not in paths:
+                yield manifest, "the guided page's shared manifest is absent"
+
+    sheets = [
+        target
+        for tag, attrs in tags
+        if tag == "link" and "stylesheet" in (attrs.get("rel") or "").lower().split()
+        if (target := _resolve(attrs.get("href") or "", EXPLORE_PAGE, root)) is not None
+        and target.startswith(EXPLORE_SUBTREE)
+    ]
+    if len(sheets) != 1:
+        yield EXPLORE_PAGE, "must name exactly one stylesheet in assets/explore/"
+    for target in sheets:
+        if not re.fullmatch(r"assets/explore/explore-[0-9a-f]{12}\.css", target):
+            yield EXPLORE_PAGE, "must name a hashed explore stylesheet"
+        else:
+            expected.add(target[len(EXPLORE_SUBTREE) :])
+    actual = {
+        entry.name + "/" if entry.is_dir() else entry.name
+        for entry in subtree.iterdir()
+    } if subtree.is_dir() else set()
+    for name in sorted(actual - expected):
+        yield EXPLORE_SUBTREE + name, "not an asset named by the guided page"
+    for name in sorted(expected - actual):
+        yield EXPLORE_SUBTREE + name, "absent from the output"
+    for name in sorted(expected & actual):
+        if _sha256(subtree / name)[:12] != name.removeprefix("explore-").split(".", 1)[0]:
+            yield EXPLORE_SUBTREE + name, "content does not match its hashed filename"
 
 
 def _pointer_files() -> dict[str, str]:

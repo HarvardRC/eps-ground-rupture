@@ -126,16 +126,18 @@ named in the last column carry the detail.
 | D-22 | Default displacement-window state. | FR-S5, FR-S6, FR-S8 | Product owner | Superseded (2026-11-03) | The earlier no-active-window default ("slip: any") is replaced by D-31's editable minimum 0 m and required maximum. The no-window numerical reference cases remain calculation baselines; §3.4 and §10.2. |
 | D-23 | Reader-facing display precision per quantity. | FR-O2, §10.1 note | Product owner | Proposed | Scarp height and slip 0.01 m; width 0.1 m; scarp dip 1° (D-5 provisionality); counts exact; shares whole percent; §4.2. |
 | D-24 | Independent display preferences, including small laptop windows and later tablet and phone views. | FR-G6, C12, NFR-4 | Product owner | Decided (2026-11-03) | Scope agreed: P2 reader choice of visible result components and display size and layout within the existing application; §4.9. Until then, §9.1 uses a temporary 1280 × 1080 measurement window. The detailed P2 choices listed in §4.9 remain open before implementation. |
-| D-25 | Guided first-use scenario journey. | §5.1, C1, CR-1 | Product owner | Decided (2026-11-03) | Sequence and introductory copy agreed: understand purpose → describe site conditions → choose assumed displacement → review scenario → explore and interpret matching results. MVP scope; §2.3 records the approved introduction, D-26–D-34, and the remaining interaction and guidance choices. |
+| D-25 | Guided first-use scenario journey. | §5.1, C1, CR-1 | Product owner | Decided (2026-11-03) | Sequence and introductory copy agreed: understand purpose → describe site conditions → choose assumed displacement → review scenario → explore and interpret matching results. MVP scope; §2.3 records the approved introduction, D-26–D-36, and the first implementation scope. |
 | D-26 | Explicit site-condition selections. | FR-S1–S4, FR-S8 | Product owner | Decided (2026-11-03) | Fresh site conditions are unanswered and require one or more values. Select all selects every value as a convenience; it is not advice for uncertainty. Empty selections remain incomplete. §2.3. |
-| D-27 | Review before results change. | C1, FR-G3, NFR-3 | Product owner | Decided (2026-11-03) | Site-condition and displacement edits remain a draft until Review scenario → Show results. Retained results stay associated with the previously confirmed scenario. §2.3; step navigation follows D-30 and refinements follow D-34, while browser navigation and recovery stay open. |
-| D-28 | Preserve entries across displacement-mode switches. | FR-S5 | Product owner | Decided (2026-11-03) | Keep fault-slip and surface-offset entries separately within the draft. Switching back restores that mode's entries; only the selected mode contributes to the scenario. No silent conversion or erasure. §3.5; restarting follows D-29 and recovery remains open. |
+| D-27 | Review before results change. | C1, FR-G3, NFR-3 | Product owner | Decided (2026-11-03) | Site-condition and displacement edits remain a draft until Review scenario → Show results. Retained results stay associated with the previously confirmed scenario. §2.3; step navigation follows D-30 and refinements follow D-34. The §2.3 supplement bounds initial browser navigation and recovery at /explore/. |
+| D-28 | Preserve entries across displacement-mode switches. | FR-S5 | Product owner | Decided (2026-11-03) | Keep fault-slip and surface-offset entries separately within the draft. Switching back restores that mode's entries; only the selected mode contributes to the scenario. No silent conversion or erasure. §3.5; restarting follows D-29. The §2.3 supplement bounds initial recovery at /explore/. |
 | D-29 | Discard edits or start a new scenario. | FR-S8 | Product owner | Decided (2026-11-03) | Discard changes returns to the last confirmed scenario and its results, restoring both modes' entries as they stood at confirmation. Start a new scenario clears the reader's entries in both modes and current results, restores fresh defaults under D-31, then returns to unanswered site conditions. §2.3 and §3.7. |
-| D-30 | Preserve drafts while moving between steps. | C1, FR-G3 | Product owner | Decided (2026-11-03) | Back and revisiting input steps preserve the draft. Review requires complete, valid inputs. Returning to confirmed results preserves edits and shows You have unapplied changes with a return-to-review action while edits remain. §2.3; browser Back/Forward and recovery remain open. |
-| D-31 | Explicit movement entries, maximum shortcuts, and immediate range guidance. | FR-S5, FR-S8 | Product owner | Decided (2026-11-03) | Editable slip minimum 0 m; blank, required maxima; typing and mouse adjustment; slip shortcut sets exactly 5 m; immediate red slip guidance above 5 m; offset guidance and maximum shortcut use selected fault angles. Coverage warnings persist on review. §3.4–§3.5 distinguish the accepted examples from remaining step-size and multi-angle shortcut proposals. |
+| D-30 | Preserve drafts while moving between steps. | C1, FR-G3 | Product owner | Decided (2026-11-03) | Back and revisiting input steps preserve the draft. Review requires complete, valid inputs. Returning to confirmed results preserves edits and shows You have unapplied changes with a return-to-review action while edits remain. The §2.3 supplement bounds initial browser Back/Forward and recovery at /explore/. |
+| D-31 | Explicit movement entries, maximum shortcuts, and immediate range guidance. | FR-S5, FR-S8 | Product owner | Decided (2026-11-03) | Editable slip minimum 0 m; blank, required maxima; typing and mouse adjustment; slip shortcut sets exactly 5 m; immediate red slip guidance above 5 m; offset guidance and maximum shortcut use selected fault angles. Coverage warnings persist on review. §3.4–§3.5 distinguish the accepted examples from agent-selected initial step-size and multi-angle shortcut choices under §2.3. |
 | D-32 | Scenario review presentation. | C1, FR-S5, FR-S6, FR-G3 | Product owner | Decided (2026-11-03) | Site-condition and movement summaries with Edit actions; entered ranges distinct from per-angle conversions; visible conversion caveat and coverage warnings; plain explanation of contributing stages; Back and Show results. §2.3. The example values are illustrative; D-34 subsequently defines refinement confirmation. |
 | D-33 | First version of the guided results presentation. | FR-O1–O4, FR-G3, FR-D1, CR-4–CR-5 | Product owner | Decided (2026-11-04) | Initial populated-results layout accepted: visible confirmed scenario, counts and warnings; measurement tabs; chart and full statistics; interpretation and revision/download actions. §4.1. Invented values, omitted states, and unfinished refinement, revision, and download flows are not accepted implementations. |
-| D-34 | Result refinements use the scenario's draft and confirmation flow. | FR-S6–S8, FR-G3 | Product owner | Decided (2026-11-04) | Refine results opens population and scarp-type controls. Their edits join the draft and apply together through Review scenario → Show results; review requires one or more scarp types. Discard restores confirmed refinements; Start a new scenario restores all-stages/all-types defaults. Measurement and chart-view choices take effect immediately. §2.3 and §3.7; remaining control details stay open. |
+| D-34 | Result refinements use the scenario's draft and confirmation flow. | FR-S6–S8, FR-G3 | Product owner | Decided (2026-11-04) | Refine results opens population and scarp-type controls. Their edits join the draft and apply together through Review scenario → Show results; review requires one or more scarp types. Discard restores confirmed refinements; Start a new scenario restores all-stages/all-types defaults. Measurement and chart-view choices take effect immediately. §2.3 and §3.7; D-35 accepts the first control presentation. |
+| D-35 | First refinement presentation and stage explanation. | FR-S6–S8, FR-G3, CR-3 | Product owner | Decided (2026-11-04) | Refinement layout, stage-choice explanation and example, scarp explanations and schematic illustrations, empty-selection validation, and review/discard flow accepted. §3.7. Invented data and sketches are presentation aids, not scientific validation or accessibility certification. The separate-route implementation supplement in §2.3 distinguishes authorized agent choices from owner decisions. |
+| D-36 | Clearer results controls and an optional results walkthrough. | FR-O1, FR-S6–S8, FR-G3, NFR-5 | Product owner | Decided (2026-11-04) | The shared results-controls direction and optional five-stop walkthrough are approved. The owner selected Choice cards for normal browsing, with a short explanatory question for each measurement. §4.1 preserves the draft/review/confirmation boundary and labels detailed integration choices as delegated implementation decisions. |
 
 ---
 
@@ -168,6 +170,14 @@ morphology and measurement pages join under the existing explanatory
 section of the navigation; Contact joins last. No separate domain, no
 separate visual identity: §2.1 of the PRD keeps the product inside the
 existing site.
+
+**Parallel guided implementation (2026-11-04).** The owner requested
+that the new journey be implemented at a separate route while the
+existing scenario page remains available. The implementing agent
+selected `/explore/` for that route; `/scenario/` continues to serve
+the existing interface. Both live within the existing project site.
+The implementation supplement in §2.3 limits the initial new route;
+it does not replace the established page or its release requirements.
 
 ### 2.3 User journeys
 
@@ -288,9 +298,9 @@ confirmed scenario exists remain to be defined.
   **Show results**. Results are unavailable before first
   confirmation and after **Start a new scenario** clears them.
 
-These rules cover navigation within the journey. Browser Back and
-Forward, leaving the page, and reload recovery remain separate
-decisions.
+These rules cover navigation within the journey. The implementation
+supplement below defines the initial `/explore/` navigation and
+fresh-start behavior. Full recovery remains a later definition.
 
 **Agreed movement entry (D-31, 2026-11-03).** A fresh draft starts
 in fault-slip mode, with a visible, editable minimum of **0 m**
@@ -341,13 +351,17 @@ the valid draft and opens its results under D-27.
 Approval covers this presentation. The completed example's values
 are illustrative, not fresh defaults or approved worked-example
 inputs. Its final prototype acknowledgment is not a product screen.
-This decision does not settle result-refinement controls, the
-remaining movement-button proposals, or D-3's scientific review.
+D-35 subsequently accepts the first refinement controls. The
+implementation supplement below selects initial movement-button
+details; neither decision changes D-3's scientific-review status.
 
 **First results presentation agreed (D-33, 2026-11-04).** The owner
 accepted the results-screen example as a first version. §4.1 records
-its layout and scope. It extends the agreed journey without settling
-the remaining result states or revision and refinement flows.
+its layout and scope. D-35 subsequently accepts the refinement flow;
+the initial candidate uses the existing result-state safeguards and
+the shared draft flow. The
+[execution record](guided-journey-ip.md#execution-evidence) distinguishes
+implemented behavior from remaining verification and later scope.
 
 **Agreed refinement confirmation (D-34, 2026-11-04).** Open
 **Refine results** from the results screen to choose contributing
@@ -381,17 +395,81 @@ join the same draft as site conditions and movement:
   and Cumulative changes presentation immediately. Neither action
   creates a scenario draft change or requires confirmation.
 
-**Definition still open.** Returning visits, sample-input
-replacement, browser Back and Forward, draft recovery, the remaining
-refinement-control details in §3.7, the placement of retained results,
-and the remaining guidance and copy still need decisions.
-Movement-step details still proposed are listed in
-§3.4–§3.5. The selected review variant does not accept every
-detail of its behavior. D-26–D-34 supersede the corresponding
+**First refinement presentation agreed (D-35, 2026-11-04).** The
+owner approved the refinement example, including the stage explainer
+and its illustrated comparison. §3.7 records the accepted control
+layout, empty-selection validation, and review/discard flow.
+
+**Definition still open beyond the first implementation.** Sample
+replacement, returning visits and recovery, additional result states,
+field comparisons, and later guidance still need definition or
+verification. The initial separate-route choices are explicit in the
+supplement below. The selected review variant does not accept every
+detail of its behavior. D-26–D-36 supersede the corresponding
 behavior in the saved full-journey prototype; it is an earlier
 snapshot. The journey table and unaffected parts of §3 remain the
-baseline for the remaining definition. The dependent design and
-implementation tasks still need an amendment.
+baseline for the remaining definition. The additive
+[guided design](guided-journey-ddd.md) and
+[execution plan](guided-journey-ip.md) define the bounded first
+implementation separately from the accepted legacy tasks.
+
+**First implementation scope at `/explore/` (2026-11-04).** The
+owner authorized autonomous implementation on a separate route. The
+following choices were selected by the implementing agent under that
+authorization; they are not earlier owner decisions or changes to
+the release contract of `/scenario/`. They make the first guided
+version concrete while preserving the agreed journey:
+
+- Start with the approved introduction and a fresh draft. Offer
+  neither sample-input presets nor scenario import in this version.
+  No data values are silently recommended or preselected beyond
+  the agreed movement and refinement defaults.
+- Keep choices during navigation within the running page. Journey
+  steps do not create browser-history entries. Browser Back and
+  Forward retain their normal page-navigation meaning; a new page
+  load, reload, or return visit starts a fresh scenario. This version
+  does not save drafts or confirmed settings between page loads.
+  State that limitation in the introduction. The established
+  `/scenario/` recovery behavior remains unchanged (§7.3).
+- Use the agreed **Start a new scenario** action to clear current
+  results and restore unanswered site conditions, slip minimum 0,
+  blank maxima, all stages, and all scarp types; open Site conditions.
+  **Discard changes** restores every confirmed scenario choice and
+  returns to its results. It is available only after confirmation.
+- Use **− / +** controls with a 0.1 m increment alongside typing.
+  Preserve the existing decimal precision and validity rules.
+  For the offset shortcut, choose the smallest coverage maximum
+  among all selected fault angles and round down to 0.01 m. Enter
+  exactly the value printed on the button. This settles the earlier
+  step-size and general shortcut proposals for this version only.
+- Supply contextual links to the existing
+  [glossary](../../subprojects/mkdocs/docs/glossary.md) and relevant
+  [dashboards](../../subprojects/mkdocs/docs/dashboards/distributions.md),
+  as requested by the owner. Short hover explanations must also
+  be available on keyboard focus and through a touch/click action;
+  essential instructions and warnings remain visible. Reference
+  links open separately so following them preserves the scenario.
+  The owner's follow-up on 2026-11-04 brings floating explanations
+  into this candidate. Mark explained terms with a dotted underline.
+  Hovering or focusing a term shows a short glossary explanation;
+  clicking or tapping keeps it open. Escape, a second activation,
+  or clicking elsewhere closes it. Readers can move the pointer
+  onto an explanation without losing it. Only one is open at a time.
+  Explanations fit within the window and never change scenario
+  choices. Longer explanations and the full glossary remain available.
+  Text stays readable on narrow screens rather than becoming smaller.
+- The first guided version shows simulation results and provides
+  real result downloads. Field comparisons and additional chart
+  views remain available in the existing explorer and dashboards.
+  This candidate does not yet bring field overlays into the guided
+  results.
+
+These choices do not waive scientific safeguards, decimal validation,
+accessible operation, result provenance, or the requirement to use
+real published data for calculated results. Prototype values and
+schematic sketches remain identified as illustrations. The old
+copy registry is a baseline for the existing page; adding guided
+copy does not silently rewrite it or accepted implementation tasks.
 
 **Approved introduction (product owner, 2026-11-03).**
 
@@ -401,8 +479,8 @@ implementation tasks still need an amendment.
 > investigate, then see the simulated results. This is a research
 > tool; it does not predict what will happen at a particular site.
 
-This introduction is approved for the revised journey and awaits
-implementation. The prototype's existing §5 copy remains the
+This introduction is approved for the revised journey and appears in
+the `/explore/` candidate. The prototype's existing §5 copy remains the
 baseline for the rest of the wording review. Scientific-content
 approval continues to follow CR-10. The product continues to show
 results from existing simulations.
@@ -511,8 +589,10 @@ entered zero is valid, and minimum and maximum may be equal.
 Each displacement field supports direct typing and adjacent
 **− / +** buttons. The example adjusts by 0.1 m per click while
 preserving the allowed precision of typed values. Mouse adjustment
-and typing are agreed; the 0.1 m increment and detailed behavior
-at the recording boundary remain proposed for the final product.
+and typing are agreed. The §2.3 implementation supplement selects
+0.1 m for the initial `/explore/` version; it does not establish a
+permanent increment for later versions. Existing validity limits
+continue to apply at the recording boundary.
 The buttons are a convenience, not a restriction on typed decimals.
 
 The single **Set maximum to 5 m** shortcut changes only the slip
@@ -573,8 +653,9 @@ Mode switching is a draft edit and does not change previously
 confirmed results until **Review scenario → Show results** (D-27).
 D-28 covers switches within the draft. **Start a new scenario**
 clears both modes' reader entries and restores D-31's fresh
-defaults under D-29. Sample-input replacement,
-returning visits, and reload recovery remain separate decisions.
+defaults under D-29. The §2.3 supplement excludes sample-input
+replacement and saved recovery from the initial `/explore/` scope;
+their later behavior remains a separate definition.
 
 In offset mode the assist panel shows, for each selected dip, the
 converted slip window, the regression used (the glossary's
@@ -631,15 +712,16 @@ label **Set maximum to 2.51 m** and enters exactly **2.51**, within
 coverage. Do not present a hidden, more precise value than the one
 the button names.
 
-**Shortcut details still proposed.** For multiple selected angles,
+**First-version shortcut rule (§2.3 implementation supplement).**
+For multiple selected angles,
 use the largest offset covered for every selected angle: choose
 the smallest of their upper coverage limits. Round that value
-down to hundredths of a metre so the shortcut itself does not
-produce a partial-coverage warning. This general multi-angle and
-rounding rule was suggested, but has not been separately accepted;
-the demonstrated shortcut used only 30°. It does not change the
-per-angle conversion windows of §3.6. The exact decimal precision
-for other shortcut values remains part of this proposal.
+down to hundredths of a metre so it does not exceed the upper
+coverage limit. A conversion whose lower end is below modeled slip
+can still require a coverage warning. This general multi-angle and
+rounding rule is an agent-selected implementation choice for
+`/explore/`; the earlier owner-approved example used only 30°.
+It does not change the per-angle conversion windows of §3.6.
 
 ### 3.6 Multi-dip conversion rule (D-3, Proposed)
 
@@ -676,9 +758,58 @@ of the pending guided-journey design and implementation amendment.
 Both controls edit the shared draft and follow §2.3's confirmation,
 discard, and restart rules. The owner also requires one or more
 scarp types before review: an empty selection is an unfinished
-draft, with no automatic return to all types. Their precise layout,
-illustration content, and validation and focus presentation still
-need design before the dependent design and tasks are accepted.
+draft, with no automatic return to all types.
+
+**First control presentation (D-35, 2026-11-04).** The owner approved
+the refinement example with these observable behaviors:
+
+- Open or hide the **Refine results** section from results. Label
+  its controls **Draft choices**, separate from the confirmed
+  scenario summary. Place the population choice beside scarp types
+  in a wide window and stack them when space is limited.
+- Explain that a stage is a saved ground shape as fault slip
+  increases, with its own measurements. The all-stages choice
+  explores the range; the last-stage choice compares the greatest
+  recorded slip within it, which can fall below the entered maximum.
+  Explain that this changes counts, chart shapes, and statistics.
+- Offer **See how stages change the results** as an expandable
+  example. Show one simulation at three saved stages and distinguish
+  which stages each choice includes. Explain that all stages gives
+  more influence to simulations with more included measurements,
+  whereas last stage uses at most one per simulation. Neither
+  guarantees larger or smaller results. Mark the example's numbers
+  as invented; changing it does not apply the scenario draft.
+- Show all six scarp types with selectable checkboxes, short
+  explanations, and schematic shape sketches in canonical order.
+  **Select all** reflects none, some, or all selected types. Selecting
+  it from none or some selects every type; clearing it clears the
+  draft selection. The sketches explain shape, not scale or data.
+- **Review changes**, **Review scenario**, and **Return to review**
+  use the same validation. If no scarp type is selected, open the
+  section, show **Select one or more scarp types before review.**,
+  and focus its Select all control. A valid selection clears that
+  error. Do not disable the attempt or silently select values.
+- Above the controls, show **You have unapplied changes** with
+  **Return to review** and **Discard changes** while the draft
+  differs. Retain the confirmed summary, counts, charts, and
+  statistics until **Show results** confirms the reviewed draft.
+- Review lists the draft population and scarp types under **What
+  the results will include**, with **Edit refinements**. That action
+  opens the refinement section and focuses the selected population
+  choice. **Back to results** preserves the draft and shows existing
+  confirmed results. This label applies when returning from review
+  of an existing result; the fresh journey retains D-32's Back action.
+
+Approval covers the first presentation and illustrated validation
+flow. It does not make the example's invented measurements scientific
+data, certify its sketches as research figures, or establish full
+accessibility and supported-window acceptance. Scientific labels and
+definitions retain their existing review status.
+
+D-36's optional results walkthrough (§4.1) presents the stage and
+scarp-type editors separately. It changes their presentation only;
+the shared draft, validation, review, and confirmation rules above
+continue to apply.
 
 - **Population (FR-S6):** a two-option switch, **All stages within
   the slip range** (default) / **Last stage within the slip range**,
@@ -749,8 +880,83 @@ Serves: FR-O1–O6, C2, C3, FR-G1–G3.
 
 ### 4.1 Measurement views (FR-O1)
 
+**Results controls and optional walkthrough (D-36, 2026-11-04).**
+The owner approved the shared direction of the results-controls
+sketch and an optional walkthrough. In normal browsing, a prominent
+**Refine results** disclosure identifies **Simulation stages · Scarp
+types** and clearly indicates whether its options are shown. Keep
+this action separate from choosing a measurement to view.
+
+The owner selected **Choice cards** for normal browsing. Under
+**What would you like to examine?**, show three cards: **Scarp
+height**, **Deformation-zone width**, and **Scarp dip**. Each contains
+its measurement name and, respectively, **How high is the scarp?**,
+**How wide is the disturbed ground?**, or **How steep is the scarp
+face?**. Visibly mark the selected card in addition to its color.
+Place the cards side by side in a wide window and stack them when
+space is limited. Selecting a card changes the viewed measurement
+immediately; it does not change or confirm the scenario draft.
+These questions supplement existing measurement explanations and
+notices. The Compact selector was an alternative, not the selected
+presentation.
+
+The following walkthrough details are bounded implementation choices
+made under the owner's delegation. They make the optional guide
+concrete; they are not separate owner approvals of every edge case:
+
+- Normal browsing remains the default. **Walk me through results**
+  starts an optional sequence after a confirmed result exists:
+  **Scarp height → Deformation-zone width → Scarp dip → Simulation
+  stages → Scarp types**. Starting or restarting it begins at height.
+- While the guide is active, progress and **Back**/**Next** replace
+  the normal measurement selector. Identify the current stop and
+  its position out of five. Back is unavailable at the first stop;
+  Next names the following stop.
+- The first three stops show the current confirmed result's actual
+  chart and full statistics for that measurement, with its existing
+  explanation, notices, and chart choices. Visiting a measurement
+  selects it immediately without changing the scenario draft.
+  Preserve that measurement's chart view and percentile selection.
+- The last two stops show only the corresponding existing editor:
+  simulation stages at stop four, scarp types at stop five. Preserve
+  their explanations, examples, and glossary links. Their edits join
+  the same draft as pending site and movement edits; visiting a stop
+  or choosing Back or Next never changes input values or calculates
+  results. The last selected measurement remains retained.
+- Keep the confirmed scenario, counts, applicable warnings, and
+  unapplied-changes notice visible. The guide works with empty,
+  small, and zero-valid results, retaining their existing messages
+  and chart suppression; it never substitutes illustrative charts.
+- **Browse freely** is available at every stop, including with an
+  unfinished empty scarp selection. It ends the guide while retaining
+  the current measurement, chart choices, and draft. Leaving either
+  editor stop opens the normal refinement section. The pending
+  notice remains whenever the draft still differs.
+- At the last stop, show **Review changes** when any draft field
+  differs from the confirmation; otherwise show **Finish
+  walkthrough**. Finishing returns to normal browsing with the
+  current measurement and normal refinements open. Review ends the
+  guide before invoking the existing full-draft validation. An empty
+  scarp selection therefore opens the normal refinement error and
+  focuses Select all. Only **Show results** confirms a valid draft.
+- **Discard changes** ends the guide and restores the confirmed
+  draft through D-29. It retains the current measurement; when used
+  from either editor stop, normal refinements remain open.
+  Navigation to another main journey step and successful confirmation
+  also end the guide. Returning to results uses normal browsing.
+- A fresh page or **Start a new scenario** has the guide off and
+  resets the measurement to height. The guide is not saved across
+  reloads or return visits. It adds no scenario defaults, presets,
+  calculations, or alternative confirmation path.
+
+These additions change presentation at `/explore/` only. D-27–D-35,
+scientific safeguards, explanatory links, and the separate P2 display
+preferences remain in force. The saved sketch demonstrates controls,
+not real scientific outputs or release acceptance.
+
 **Agreed first presentation (D-33, 2026-11-04).** The results screen
-is headed **Explore your scenario**. The first version presents:
+is headed **Explore your scenario**. D-36 extends its controls as
+specified above. The first version presents:
 
 1. **Your confirmed scenario**, showing the site conditions,
    entered movement range, applicable per-angle conversions,
@@ -787,9 +993,10 @@ This is acceptance of the initial populated-results presentation.
 The prototype's counts and measurements are invented. Its action
 acknowledgments are review aids, not product dialogs or completed
 revision and download flows. Small, empty, and zero-valid-result
-presentations, remaining refinement details, field comparisons,
-retained-draft presentation, and the full download experience still
-need design.
+presentations, field comparisons, integration of the accepted
+refinement and retained-draft presentation, and the full download
+experience still need implementation and verification. D-35 records
+the refinement layout and validation now accepted.
 Their existing requirements remain in force. Example numerical
 methods, thresholds, and sizes do not amend scientific rules or
 establish accessibility or supported-window acceptance.
@@ -829,7 +1036,8 @@ exact curve, alternative error limits, or both remains to be decided
 when that work is opened, with performance verified for each option.
 
 Default measurement on load: scarp height; the other panels are one
-action away through D-33's measurement tabs. Choosing the visible result
+action away through the normal measurement selector. D-36 also offers
+optional sequential guidance. Choosing the visible result
 components and target display size is the separate P2 setting of
 [§4.9](#49-display-preferences-fr-g6-p2), not the cumulative-curve
 accuracy choice above. The deformation-zone-width panel
@@ -1293,11 +1501,18 @@ current Z / W."); nothing is recomputed against old versions.
 
 ### 7.3 Reload recovery (MVP)
 
+**Initial `/explore/` scope.** The §2.3 implementation supplement
+uses a fresh scenario after a new page load or reload, without saved
+settings. It does not offer **Reload and restore settings**. This
+temporary scope applies only to the separate guided route; the
+existing `/scenario/` behavior and release contract below remain.
+
 **Guided-journey amendment pending.** The rules below describe
 recovery of the earlier prototype's accepted scenario. D-27 now
 distinguishes a draft from the confirmed scenario. Returning
-visits, draft recovery, and how recovery offers the fresh-start
-action remain open under §2.3; the action itself follows D-29.
+visits, draft recovery, and how a future recovery flow offers the
+fresh-start action remain beyond the initial §2.3 scope; the action
+itself follows D-29.
 References below to
 default results do not authorize results for unanswered site
 conditions. Reconcile these flows before implementation.

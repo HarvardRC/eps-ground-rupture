@@ -457,6 +457,25 @@ produced by the computer simulations.
 
 ### 2.2 MVP and delivery priorities
 
+**Guided candidate (2026-11-04).** The owner requested a guided
+experience alongside the existing scenario explorer. Readers must
+be able to describe their assumptions, review them, and distinguish
+unapplied choices from the scenario behind their results. Both
+experiences remain available during review of the new one. Contextual
+glossary and dashboard links help readers understand unfamiliar
+terms and reach complementary views of the research. Readers can
+view a short explanation beside an unfamiliar term without leaving
+their scenario, using a mouse, keyboard, or touch. The
+[PDD](pdd.md#23-user-journeys) defines the first candidate's behavior
+and limits; this does not reduce the wider MVP requirements below.
+
+Readers must be able to distinguish choosing a measurement to view
+from changing which simulation records contribute. Optional guidance
+should introduce the three measurements, simulation-stage choices,
+and scarp-type choices without requiring a tutorial before using
+results. Leaving that guidance must preserve the reader's choices;
+scenario changes still require review before results change.
+
 The proposed **minimum viable product (MVP)** is P1, targeted as v0.4.
 It must support the complete core workflow: an engineer defines a
 plausible scenario, examines the matching simulated surface-rupture

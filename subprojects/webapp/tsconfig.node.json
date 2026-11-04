@@ -7,6 +7,8 @@
   "include": ["src/**/*.ts", "test/**/*.ts"],
   "exclude": [
     "src/main.ts",
+    "src/explore/main.ts",
+    "src/explore/app.ts",
     "src/recovery.ts",
     "src/views/dom/**",
     "src/overlay/field-overlay.ts",
