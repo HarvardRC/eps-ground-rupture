@@ -506,7 +506,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       const loaded = await ensureRegression();
       if (!alive()) return;
       if (version !== navigationVersion) { interrupted(); render(); return; }
-      if (!loaded) { busy = false; restoreError = regressionError || 'The offset-conversion data could not be loaded.'; render(); return; }
+      if (!loaded) { busy = false; restoreError = 'The offset-conversion data could not be loaded, so the results of your confirmed scenario could not be recalculated.'; render(); return; }
     }
     await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
     if (!alive()) return;
