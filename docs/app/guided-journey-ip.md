@@ -556,8 +556,8 @@ option. The bin-rule hint becomes `ddd5.12.logScaleNote`, and the bin
 table is built from the displayed log bins. A confirmation, or a
 same-tab restore, whose result has no log histogram turns the scale off
 and shows `ddd5.10.recoveryLogScaleOff` once, as a `role="status"`
-line cleared by the next navigation, edit, or display change. The
-persistent live region announces the same sentence. The toggle is presentation
+line cleared by the next step change, entry edit, or button press.
+The persistent live region announces the same sentence. The toggle is presentation
 only. It does not change `navigationVersion` or the draft, and it is
 saved with the display choices. The Cumulative view and the other
 measurements are unchanged. The walkthrough's width stop shows the
