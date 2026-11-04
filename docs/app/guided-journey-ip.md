@@ -593,6 +593,105 @@ checks covered:
 - the off-adjustment reported by a restore;
 - 320 px without horizontal overflow.
 
+### Guided browser specs, 2026-11-04 (G-12)
+
+G-12 added one spec per guided DDD §9.5 item to the T-60 lane's
+`playwright/specs/`, with shared helpers in
+`playwright/explore-support.ts`. The specs run in the lane's existing
+desktop and mobile projects, reporters, and strict-preview server. The
+mobile project's spec filter now also matches `explore-*.spec.ts`:
+
+1. `explore-journey`: the five steps to the GS-1 result with its
+   reference count (25,920) and valid height count; `/scenario/`
+   still mounts.
+2. `explore-validation`: site, movement, and scarp-type routing,
+   messages, `aria-invalid`, and focus. Review attempts from Results
+   route back to an emptied site group on Site and to a blank slip
+   maximum on Movement, keeping the confirmed count.
+3. `explore-draft-boundary`: the pending banner, Discard changes,
+   Return to review, Start a new scenario, and the GS-6 result
+   (3,434 records) unchanged during edits.
+4. `explore-modes`: each mode's entries kept across switches and
+   restored by Discard.
+5. `explore-sample`: the silent fill, both ask-before-replace
+   outcomes, the 30°-only coverage warning, no browser dialog, and
+   confirmed results untouched.
+6. `explore-continuity`: reload restores with the notice; corrupt and
+   other-release records require the explicit fresh start; a new tab
+   and a new context start fresh. It also covers the G-10 review
+   repairs: a Review reload in offset mode, and a save failing
+   mid-session, which clears the record.
+7. `explore-race`: a held regression response during navigation away
+   from an offset review, and from a restore, applies nothing stale;
+   Retry then recovers.
+8. `explore-walkthrough`: the five stops, progress, prompts, single
+   editors, Back/Next labels, Browse freely and Finish focus targets,
+   and the empty-type review block.
+9. `explore-log-scale`: the offer, label, chart-label clause, note,
+   and log bin rows (equal to GS-1's reference bins and its below-bar);
+   Cumulative and other measurements untouched; the walkthrough width
+   stop; the off-adjustment confirming GS-6, which has no log histogram.
+10. `explore-download`: the package delivered during a draft edit,
+    holding the four package members, GS-6's record count, and the
+    confirmed slip window rather than the draft's.
+11. `explore-layout`: no horizontal overflow at 320 and 1,024 px
+    across the steps, validation, results, charts, refinements, and
+    all five walkthrough stops.
+
+Expected values come from the served reference results (GS-1 and
+GS-6), the served manifest and pointer, and the copy registry. GS-6's
+records are all zero-slip stages with no valid measurement, so the
+specs that need charts use GS-1. A first run had five failing tests
+from three wrong spec assumptions: charts under GS-6 (three tests),
+a click on a not-yet-reached, disabled step button, and the race
+assertion's direction. All were spec errors and were corrected; no
+application defect appeared. Besides DDD and registry texts, some
+assertions pin the page's own validation, loading, download, and
+unreadable-record copy; a copy change there fails those specs
+loudly.
+
+An independent review mutation-tested the race, continuity, and
+sample specs: each failed when its guarded behavior was broken.
+Following that review, G-12 added a cross-step routing test, made the
+race spec wait until the held response was processed, and made new
+contexts keep the project's device emulation. On the reviewer's machine the full lane
+passed 206 with the legacy a11y spec passing, so that failure
+appears environment-dependent.
+
+At this verification, on the branch rebased onto the merged G-11:
+
+- `webappBrowserTest` (desktop and mobile) gave 207 passed, 5
+  skipped, and 1 failed. All 28 guided tests passed in each project.
+  The failure is the existing `axe: the failure states` legacy spec
+  recorded under G-08, failing identically on base; the 151 legacy
+  passes are unchanged.
+- The final guided specs passed 168 of 168 runs with
+  `--repeat-each 3` in both projects.
+- The pinned Node suite passed all 417 tests; typechecking, which
+  includes the specs, and both strict builds passed. The `/scenario/`
+  bundles were unchanged. All 31 hook tests passed. 5,498 relative
+  links in 61 Markdown files resolved; PDD agreement passed;
+  traceability linted 491 rows with no gaps.
+
+Outstanding beyond this lane, as §9.5 records:
+
+- physical touch devices; the mobile project only emulates a 360 px
+  touch viewport in Chromium;
+- other browser engines;
+- an actual Back/Forward-cache (`persisted`) restoration;
+- screen-reader announcement of the inserted status lines.
+
+The lane is not part of CI; it runs through
+`./gradlew :subprojects:webapp:webappBrowserTest`.
+
+**Documentation follow-up for the owner.** The legacy
+[DDD §7.5](ddd.md#75-browser-test-lane) still quotes the earlier
+mobile `testMatch` and calls the lane "the eleven specs". The G-12
+row and guided DDD §9.5 authorize the filter change, but the owner
+authorized legacy-DDD amendments for G-08 only, so §7.5 was left
+unchanged. It now describes the legacy specs only; the guided specs
+are §9.5's.
+
 ## Separate CI investigation
 
 The reported job `126383105016` belongs to historical run
