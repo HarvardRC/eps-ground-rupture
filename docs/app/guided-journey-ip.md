@@ -544,6 +544,54 @@ also restores, and the copy says the work stays in the tab. This is
 recorded for the owner's awareness against the PDD's "later visit"
 wording; no product decision was changed.
 
+### Width log scale, 2026-11-04 (G-11)
+
+G-11 offers the native checkbox `gx-dzw-log`, labeled by
+`ddd5.8.logScaleLabel`, after the chart choices. It appears exactly
+when the confirmed result's `histogramLog` is non-null and width's
+Distribution view is shown. Turned on, the chart comes from the shared
+`histogramLogSpec`/`histogramSvg` path. That spec's chart label
+appends `ddd5.11.logAxisClause` through the existing `chartLabel`
+option. The bin-rule hint becomes `ddd5.12.logScaleNote`, and the bin
+table is built from the displayed log bins. A confirmation, or a
+same-tab restore, whose result has no log histogram turns the scale off
+and shows `ddd5.10.recoveryLogScaleOff` once, as a `role="status"`
+line cleared by the next interaction. The toggle is presentation
+only. It does not change `navigationVersion` or the draft, and it is
+saved with the display choices. The Cumulative view and the other
+measurements are unchanged. The walkthrough's width stop shows the
+same control. No unit test was added: the behavior is DOM
+presentation over shared, already tested builders. G-12's browser
+spec covers it.
+
+At this verification, after rebasing onto the merged G-10:
+
+- The pinned Node suite passed all 417 tests; typechecking and the
+  bundles passed. Strict publication and preview builds passed
+  with `explore-33b64b7b45d0.js` and `explore-69b62f926a7d.css`. The
+  `/scenario/` bundles were unchanged. All 31 hook tests passed.
+- 5,498 relative links in 61 Markdown files resolved; PDD
+  agreement passed; traceability linted 491 rows with no gaps.
+
+A disposable Playwright script drove the strict preview build with
+the pinned data. All 24 checks passed; the script was not committed.
+It used the 30°, 5 m, Dense, Uniform: Strong scenario over 0–5 m slip,
+which returned 1,200 records. Width had 1,142 valid measurements, 23
+linear bin rows, and 9 log rows, including a `below 0.1 m` bar. The
+checks covered:
+
+- the offer's presence, label, and initial state;
+- the chart label's log clause, the note, and the log bin table;
+- no pending banner, the saved display choice, and focus kept on the
+  checkbox;
+- an unchanged Cumulative view and other measurements;
+- restoration after reload, and the walkthrough's width stop;
+- the off-adjustment after confirming the no-match 0.01–0.02 m slip
+  range, shown once and saved off;
+- a later offering confirmation that stayed unchecked;
+- the off-adjustment reported by a restore;
+- 320 px without horizontal overflow.
+
 ## Separate CI investigation
 
 The reported job `126383105016` belongs to historical run
