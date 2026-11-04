@@ -280,8 +280,10 @@ Strong sediment in both the uniform and layered groups, and a
 maximum vertical surface offset of 3 m. Depth and density remain
 unspecified. These are sample inputs, not recommended site values.
 This saved example is incomplete under D-26. Its depth and density
-choices and replacement behavior still need a product decision;
-do not silently fill them with all values.
+choices and replacement behavior needed a product decision; do not
+silently fill them with all values. D-37 (2026-11-04) completes the
+sample with 5 m depth and Dense density and defines
+ask-before-replace behavior; see the PDD's second increment.
 
 ## Stage 2 — Site conditions
 
@@ -771,6 +773,8 @@ The implementation does not settle all later product choices:
    sample-input replacement, and restoration of an unfinished draft.
    The candidate starts afresh on return and retains the mode-switch,
    discard, and restart actions already decided by D-28 and D-29.
+   D-37 and D-38 (2026-11-04) now define sample replacement and
+   same-tab restoration; recovery between visits remains open.
 3. **Presentation around results.** D-27, D-30, and D-32 define review,
    step navigation, and the unapplied-changes notice. D-33 places
    review and edit actions; D-34 includes refinements in the same

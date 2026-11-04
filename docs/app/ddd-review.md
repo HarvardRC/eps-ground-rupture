@@ -1621,6 +1621,43 @@ charts, simplified validation, or unreviewed interaction details to
 accepted requirements. PDD §2.3 points to the record. The application
 and accepted implementation task bodies are unchanged.
 
+## Guided second-increment decisions (2026-11-04)
+
+After the G-07 walkthrough and a review of the candidate against
+the prototype record, the owner decided:
+
+- **Sample inputs return (D-37).** The approved Stage-1 sample is
+  restored with its clarity intact. The owner approved the
+  restoration; the depth and density completion (5 m, Dense) and
+  the ask-before-replace rule are agent selections under the
+  standing §2.3 delegation, recorded for the owner's review.
+- **Same-tab continuity (D-38).** The owner delegated recovery
+  scope. The selected rule restores work across same-tab reloads
+  and back/forward restoration, recomputes results, and reports the
+  restore; a new tab or later visit starts fresh. PDD §7.3 is
+  reconciled with the guided journey.
+- **Publication path (D-39).** `/explore/` joins the unlisted
+  prototype deployment; a team demonstration and the
+  redistribution-license decision precede advertising. `/scenario/`
+  is paused — deployed unlisted, no further UX investment, no
+  longer the activation candidate; a later rework as a faster
+  iteration surface stays open.
+- **Copy.** The existing wording baseline stands; small
+  clarifications may ride along with tasks.
+- **Width log scale.** The owner noticed the guided page lost the
+  existing page's log-scale offer; parity returns as guided DDD
+  §9.3. The review confirmed the remaining candidate omissions —
+  field overlay, family view, shared links, import — stay
+  deliberate, linked out or parked until the D-39 activation
+  reconciliation.
+- **Result report (D-40, Proposed).** A self-contained
+  charts-and-provenance report is recorded in PDD §6.5 and parked
+  P2/P3; no task is scheduled.
+
+Guided DDD §9 and plan tasks G-08–G-12 carry the increment. The
+accepted legacy task bodies are unchanged; T-60 remains the browser
+lane the guided specs join. No scientific rule changed.
+
 ## References
 
 - [`docs/app/ddd.md` — Ground Rupture Explorer — detailed design document](ddd.md).

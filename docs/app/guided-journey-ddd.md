@@ -126,9 +126,12 @@ coverage warning. Slip shortcut sets only the maximum to exactly `'5'`.
 ## 3. Transitions and validation display
 
 App-local step navigation does not push browser history. Browser Back
-and Forward navigate site pages normally. A reload or remount starts
-a fresh draft; state is not stored in a URL, localStorage or session.
-Show this limit on the introduction and before leaving the page via
+and Forward navigate site pages normally. Same-tab continuity
+follows §9.2 (D-38): reload or Back/Forward cache restoration in
+the same tab restores the reader's work; a new tab or later visit
+starts a fresh draft. State never enters the URL or any persistent
+storage beyond the §9.2 session record. Show the continuity limits
+on the introduction and before leaving the page via
 supporting links. Supporting links open a separate tab with `noopener`.
 
 Introduce the purpose and approved research-tool wording, then Start
@@ -221,8 +224,9 @@ uses `quantileLinear` on the complete sorted array. Keep the existing
 less-than-0.2-percentage-point display-simplification explanation.
 Respect chart suppression below 10 valid values and caution below 30.
 Redraw on ResizeObserver using the actual container width; disconnect
-on unmount. The first candidate need not expose optional family/log
-views or field overlays; retain access to the existing explorer.
+on unmount. The guided page need not expose family views or field
+overlays; retain access to the existing explorer. The width
+log-scale offer joins in §9.3.
 
 Refine results opens a two-column population/scarp editor, stacked at
 narrow widths. It edits the same draft. A scarp-empty draft is allowed
@@ -403,8 +407,8 @@ after DOMContentLoaded. Repeated notification on the same root is a
 no-op. Dispose listeners, observers and in-flight work on navigation
 or replacement. Ignore completion from an old/disconnected root.
 On `pageshow` with `persisted=true`, release this bundle's retained
-mount and mount afresh. Browser Back/Forward cache restoration must
-honor the same fresh-draft behavior as a new page load.
+mount and mount afresh; §9.2's restore then applies, so Back/Forward
+cache restoration behaves like a same-tab reload, not a fresh visit.
 
 ## 8. Verification and completion
 
@@ -421,3 +425,200 @@ keyboard progression and 320/1024-pixel layouts. Confirm `/scenario/`
 still loads. Report actual evidence and any untested requirements in
 the [execution record](guided-journey-ip.md); do not infer release
 acceptance from a first candidate or from the illustrative prototype.
+
+## 9. Second increment (D-37–D-39, 2026-11-04)
+
+[PDD §2.3's second increment](pdd.md#23-user-journeys) governs this
+section; [ADR-0020](../adr/0020-parallel-guided-explorer.md) still
+applies. It amends §§3, 5, and 7 only where those sections say so;
+everything else above stands. No new runtime dependency.
+
+### 9.1 Sample inputs (D-37)
+
+Add to `explore/state.ts`:
+
+```ts
+sampleDraft(manifest: Manifest): Draft;
+```
+
+It returns a fresh draft whose `faultDip` holds the members for 30°
+and 40°, `depth` the member for 5 m, `density` the member labeled
+Dense, and `sediment` the Uniform: Strong and Layered: Strong
+pairs, all taken from the manifest dictionaries, with mode
+`offset` and `offsetMax` `'3'`. Slip entries, population, and scarp
+classes keep fresh defaults. Throw when any member is missing from
+the manifest; the sample must not silently shrink to the values
+that exist.
+
+The introduction renders **Try sample inputs** as a secondary
+action beside **Build your scenario**, with the helper text
+`Sample inputs, not recommended site values.` Activation with a
+draft equal to `freshDraft` and no confirmed scenario replaces the
+draft with `sampleDraft` and opens Site conditions. Otherwise
+render an inline confirmation in place of the introduction actions
+— `Replace your current choices with the sample inputs?` with
+**Use the sample** and **Keep my choices** — never a browser
+dialog. Use the sample replaces the whole draft, both movement
+modes and refinements included; Keep my choices dismisses and
+returns focus to the trigger. The fill never changes the confirmed
+scenario, its results, or the walkthrough state; D-30's pending
+banner applies as for any draft edit.
+
+On arrival at Site conditions from a sample fill, show one status
+line above the conditions — `These are sample inputs, not
+recommended site values. Change anything.` — with `role="status"`.
+Clear it when the reader leaves the step; it is presentation state,
+never part of Draft. The sample's 3 m offset at 30° produces the
+ordinary §3 coverage warning on the movement step and review; that
+demonstration is deliberate (D-37). State tests cover completeness,
+validity against the fixture manifest, canonical ordering, the
+fresh slip entries, and the missing-member throw.
+
+### 9.2 Same-tab continuity (D-38)
+
+Add `src/explore/session.ts`, a pure serialization module plus a
+storage wrapper, wired in `app.ts` and `main.ts`:
+
+```ts
+interface SessionRecord {
+  record: 1;
+  dataVersion: string;
+  step: Step;
+  draft: Draft;
+  confirmed: Draft | null;
+  display: DisplayChoices;
+}
+saveSession(storage: Storage, record: SessionRecord): boolean;
+loadSession(storage: Storage): SessionRecord | 'absent' | 'invalid';
+clearSession(storage: Storage): void;
+```
+
+`DisplayChoices` serializes the §5 presentation choices: selected
+measurement, per-measurement chart view and read-off, width log
+scale (§9.3), chart-data and stage-example disclosures, and whether
+refinements are open. The walkthrough index is never stored (PDD
+D-38). Results, `RenderInput`, counts, and version stamps beyond
+`dataVersion` are never stored. Use `window.sessionStorage`, key
+`gre-explore-session`, JSON-encoded; every access sits in
+try/catch. An unavailable or throwing storage disables continuity
+for the mount: the page runs with the first-version fresh behavior
+and the introduction keeps its earlier kept-only-while-open
+wording.
+
+Save after every committed state change — draft edits, step moves,
+confirmation, discard, display changes — through the single render
+path. Start a new scenario clears the record before saving the
+fresh state. A failed save disables further saves for the mount and
+adjusts the introduction wording the same way; it never interrupts
+the reader.
+
+On mount, including §7's `pageshow` remount, when a record exists:
+
+1. `'invalid'` JSON, a wrong `record` version, or a `dataVersion`
+   differing from the served stamps: do not restore. Render the
+   introduction with a visible explanation — unreadable saved work,
+   or `The data release changed since this tab last used it.` — and
+   require the explicit **Start a new scenario** action, which
+   clears the record, per §7.3's explicit-choice rule. Never apply
+   defaults silently over a record that existed.
+2. Otherwise validate both stored drafts against the manifest with
+   `validateDraft` and the §2 structural rules. A `confirmed` draft
+   with issues, or a structurally unreadable `draft`, is case 1.
+   An incomplete or invalid working draft and inactive-mode strings
+   are valid to restore (D-30).
+3. Restore draft, display choices, and step. A non-null `confirmed`
+   recomputes through the ordinary confirmation pipeline, including
+   the regression load in offset mode, before Results renders real
+   values; the busy state is §3's. A regression or data failure
+   keeps the restored draft, shows the §7 retry affordance, and
+   leaves Results unavailable until retry succeeds.
+   `navigationVersion` cancellation applies to a restore in flight
+   exactly as to review requests.
+4. After a successful restore, show one `role="status"` line near
+   the heading — `Restored the work in this tab.` — cleared on the
+   next navigation or edit. Never claim a restoration that did not
+   happen; the no-record path renders the ordinary introduction.
+
+Copy: the introduction's limitation line becomes `Your work stays
+in this tab, including across a reload. Closing the tab or opening
+a new one starts a fresh scenario.`; the supporting-links aside and
+the static fallback paragraph in
+`subprojects/mkdocs/docs/explore.md` say the same. The
+storage-unavailable path keeps the previous wording. Add no
+`beforeunload` prompt. Node tests cover round-trip, tampered JSON,
+a wrong record version, data-version mismatch classification, and
+that no result field is serialized; restores in a real page are
+§9.5's to verify.
+
+### 9.3 Width log scale
+
+Display state gains `logScale: boolean`, initially false, applying
+to the width Distribution view only. When the confirmed
+`RenderInput.histogramLog` is non-null and width's Distribution
+view is shown, render a labeled native checkbox after the chart
+choices — id `gx-dzw-log`, label
+`copyText('ddd5.8.logScaleLabel')` — checked from `logScale`. Omit
+it entirely otherwise. When it is on, build the chart from
+`histogramLog` through the same shared
+`histogramSpec`/`histogramSvg` path, append
+`copyText('ddd5.11.logAxisClause')` to the caption through the
+existing chart-text option, show
+`copyText('ddd5.12.logScaleNote')` as the bin-rule hint, and keep
+the bin-data table consistent with the displayed bins. When a new
+confirmation yields a null `histogramLog` while `logScale` is on,
+turn it off and show `copyText('ddd5.10.recoveryLogScaleOff')` once
+as a status line. The toggle is immediate presentation under D-34:
+it never dirties the draft, joins `DisplayChoices` (§9.2), and
+leaves the Cumulative view and the other measurements untouched.
+The walkthrough's width stop uses the same live section and
+inherits the control.
+
+### 9.4 Unlisted publication (D-39)
+
+One configuration change moves `explore.md` and `assets/explore/`
+out of `draft_docs` in `subprojects/mkdocs/mkdocs.yml`, keeping
+both `not_in_nav` lines, so the publication build serves the page
+unlisted, exactly as T-54 arranges for the existing page. Keep the
+front-matter search exclusion. Extend `hooks/site_checks.py` and
+its tests so the unlisted invariants hold for `explore/` in the
+publication tree — no navigation, sitemap, or search entry, with
+arm (f) applying there — and the preview keeps its current
+coverage. The deployment itself stays the owner's manual
+Companion-site run beside T-54; nothing in this candidate deploys.
+`/scenario/` keeps its configuration, and its bundles stay
+byte-identical.
+
+### 9.5 Guided browser specs
+
+When the main plan's T-60 lane exists, add guided specs that run in
+the same projects, reporters, and strict-preview server. Cover,
+with real pinned data and fixture scenarios:
+
+1. The five-step journey to a confirmed result with its matching
+   count, and `/scenario/` still mounting.
+2. Validation routing and focus for incomplete site, movement, and
+   scarp selections, including review attempts from Results.
+3. The draft/confirmed boundary: pending banner, Discard changes,
+   Start a new scenario, and retained results unchanged during
+   edits.
+4. Displacement-mode preservation across switches and discard.
+5. Sample inputs: silent fresh fill; both ask-before-replace
+   outcomes; confirmed results untouched (§9.1).
+6. Continuity: reload restores work and says so; an injected
+   corrupt or version-mismatched record requires the explicit
+   fresh-start choice; a new context starts fresh (§9.2).
+7. The offset-review race: delay the regression response, navigate
+   away, and assert no stale review applies (`navigationVersion`).
+8. The walkthrough's five stops, exits, empty-type review block,
+   and focus targets (§5.2).
+9. The width log-scale offer, captions, note, and the
+   off-adjustment when a confirmation stops offering it (§9.3).
+10. A downloaded package delivered from a confirmed result during
+    draft edits.
+11. 320 px and 1,024 px layouts without horizontal overflow across
+    steps, results, refinements, and the guide.
+
+Specs assert the visible text and ARIA states that §§3–5 and
+§§9.1–9.3 name; they invent no values. Touch-device and
+cross-engine coverage stay outside this lane and remain recorded as
+outstanding in the execution record.

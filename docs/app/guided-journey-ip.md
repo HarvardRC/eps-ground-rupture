@@ -6,6 +6,14 @@ and preserves `/scenario/`. The historical [IP](ip.md) task bodies
 and completion records remain unchanged. Its existing core tests and
 scientific contracts still apply.
 
+**Second increment, 2026-11-04.** The owner restored sample inputs
+(D-37), accepted the delegated same-tab continuity rule (D-38), set
+the publication path and paused `/scenario/` (D-39), kept the §5
+copy baseline, and requested width log-scale parity.
+[Guided DDD §9](guided-journey-ddd.md#9-second-increment-d-37d-39-2026-11-04)
+specifies the increment; tasks G-08–G-12 below execute it. G-01–G-07
+and their evidence stand unchanged.
+
 Execute the following tasks in order. Parallel work is allowed only
 after the preceding contract exists and file ownership is disjoint.
 All design comes from the [guided DDD](guided-journey-ddd.md), which
@@ -20,6 +28,17 @@ supersedes legacy interaction design only for the new page.
 | G-05 | G-02–G-04 | Run DDD §8 checks, inspect UI through CUA, fix observed defects, and update execution evidence below. | Working candidate plus truthful verification and remaining limitations. |
 | G-06 | G-05; owner walkthrough, 2026-11-04 | Apply readable typography in DDD §5 and floating glossary help in §6; preserve existing disclosures and scientific behavior. | Typecheck and strict builds pass; mouse, keyboard, dismissal, viewport fit and unchanged draft are verified; record evidence. |
 | G-07 | G-06; PDD D-36 | Implement the prominent refinement disclosure, selected Choice cards, and optional results walkthrough exactly to guided DDD §§5.1–5.2 in `app.ts` and `explore.css`. | Verify five-stop navigation, measurement cards, chart choices, exit/focus, draft isolation, empty-type review, discard, confirmation, empty results, and 320/1024 px layouts. Typecheck and strict builds pass; record actual evidence. |
+| G-08 | G-01; PDD D-39 | Move `explore.md` and `assets/explore/` out of `draft_docs`, keep `not_in_nav` and the search exclusion, and extend `site_checks.py` and its tests to hold the unlisted invariants in the publication tree, exactly to guided DDD §9.4. No deployment. | Both strict builds pass with the page published unlisted — no nav, sitemap, or search entry — and hook tests cover it; `/scenario/` bundles stay byte-identical; evidence recorded. |
+| G-09 | G-02 interfaces; PDD D-37 | Implement `sampleDraft` and the introduction's sample action, inline replacement confirmation, and site-conditions status line exactly to guided DDD §9.1, with state tests. | Fresh fill, both ask-before-replace outcomes, sample labeling, the deliberate 30° coverage warning, and untouched confirmed results verified; typecheck, tests, and builds pass; evidence recorded. |
+| G-10 | G-09 (shared files); PDD D-38 | Implement `session.ts` and the restore flow, the copy updates in `app.ts` and `explore.md`, and the §7 `pageshow` amendment exactly to guided DDD §9.2, with session tests. | Same-tab reload and back/forward restore the draft, confirmed settings, step, and display with the visible notice; invalid or mismatched records require the explicit fresh start; storage failure keeps the fresh behavior and wording; results recompute and are never stored; tests and builds pass; evidence recorded. |
+| G-11 | G-10 (shared files) | Implement the width log-scale offer exactly to guided DDD §9.3, reusing the registry texts and shared chart builders. | The toggle appears exactly when the log histogram exists, switches bins, caption, and note, reports the off-adjustment, never dirties the draft, and persists with display choices; tests and builds pass; evidence recorded. |
+| G-12 | Main-plan T-60 lane; G-08–G-11 | Implement the guided browser specs of guided DDD §9.5 inside the T-60 lane, running against the strict preview build. | All eleven guided specs pass in both lane projects, the race and continuity specs included; touch and cross-engine coverage recorded as outstanding; evidence recorded. |
+
+G-08 is independent of the application tasks. G-09–G-11 share
+`app.ts` and `state.ts` and run in order. G-12 waits for the main
+plan's accepted T-60 task to build the browser lane; implementing
+T-60 next is the recommended order for the same agent. The owner
+runs the deployment beside T-54 after G-08 lands.
 
 ### G-07 browser verification
 
@@ -70,8 +89,10 @@ python3 .github/scripts/check_traceability.py
   :subprojects:mkdocs:mkdocsPreview
 ```
 
-The preview includes both unadvertised routes; the publication build
-retains the draft boundary. Do not deploy, stage, commit or push.
+The preview includes both unadvertised routes; the publication
+build retains the draft boundary until G-08 lands. Do not deploy.
+Stage, commit, push, or open pull requests only as the owner's
+kickoff instruction for each task states.
 
 ## Execution evidence
 
@@ -222,7 +243,9 @@ traceability, relative-link, and whitespace checks passed. The
 scientific suite was not rerun for these presentation changes.
 Pending offset-review cancellation was checked in source; a delayed
 network race was not forced in the browser. The broader acceptance
-limits above remain in force. Changes remain uncommitted.
+limits above remain in force. Changes remained uncommitted at that
+verification; the owner then committed the candidate to
+`dev-v.0.4.1-redesign` as `a570fbe` (2026-11-04).
 
 ## Separate CI investigation
 

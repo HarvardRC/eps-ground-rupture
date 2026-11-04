@@ -5650,6 +5650,12 @@ sources. Each line names what unparks it.
 - Chart export ([D-14](pdd.md#1-decision-register)) — P2. Its cumulative
   images must include the PDD §4.1 accuracy statement in the rendered
   caption strip; acceptance covers its inclusion and legibility.
+- Result report ([D-40](pdd.md#1-decision-register)) — P2/P3,
+  proposed 2026-11-04: one self-contained document pairing the §6.1
+  provenance and scenario summary with rendered charts and
+  statistics ([PDD §6.5](pdd.md#65-result-report-d-40-proposed));
+  builds on chart export (D-14) and unparks by owner priority after
+  it.
 - Finer logarithmic bins that subdivide each decade by mantissa steps
   — a P2 option for the width panel's log-scale toggle, which ships in
   the MVP; it needs a [D-23](pdd.md#1-decision-register)

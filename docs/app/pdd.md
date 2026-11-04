@@ -138,6 +138,10 @@ named in the last column carry the detail.
 | D-34 | Result refinements use the scenario's draft and confirmation flow. | FR-S6–S8, FR-G3 | Product owner | Decided (2026-11-04) | Refine results opens population and scarp-type controls. Their edits join the draft and apply together through Review scenario → Show results; review requires one or more scarp types. Discard restores confirmed refinements; Start a new scenario restores all-stages/all-types defaults. Measurement and chart-view choices take effect immediately. §2.3 and §3.7; D-35 accepts the first control presentation. |
 | D-35 | First refinement presentation and stage explanation. | FR-S6–S8, FR-G3, CR-3 | Product owner | Decided (2026-11-04) | Refinement layout, stage-choice explanation and example, scarp explanations and schematic illustrations, empty-selection validation, and review/discard flow accepted. §3.7. Invented data and sketches are presentation aids, not scientific validation or accessibility certification. The separate-route implementation supplement in §2.3 distinguishes authorized agent choices from owner decisions. |
 | D-36 | Clearer results controls and an optional results walkthrough. | FR-O1, FR-S6–S8, FR-G3, NFR-5 | Product owner | Decided (2026-11-04) | The shared results-controls direction and optional five-stop walkthrough are approved. The owner selected Choice cards for normal browsing, with a short explanatory question for each measurement. §4.1 preserves the draft/review/confirmation boundary and labels detailed integration choices as delegated implementation decisions. |
+| D-37 | Sample inputs on the guided introduction. | §5.1, C1 | Product owner | Decided (2026-11-04) | Try sample inputs fills the approved illustrative scenario, completed with 5 m depth and Dense density, and opens site conditions; a non-fresh draft is replaced only after an explicit confirmation. §2.3; the completion values and the replacement rule are agent selections under the §2.3 delegation. |
+| D-38 | Same-tab continuity at `/explore/`. | §5.1, FR-S8 | Product owner | Decided (2026-11-04) | Scope delegated to the implementing agent and recorded: same-tab reload and back/forward restoration restore the draft, confirmed settings, step, and display choices and recompute results, with a visible notice; a new tab or later visit starts fresh. §2.3 and §7.3. |
+| D-39 | Guided publication path; `/scenario/` paused. | §2.2, R-11 | Product owner | Decided (2026-11-04) | `/explore/` joins the unlisted prototype deployment; a team demonstration and the redistribution-license decision precede advertising it. `/scenario/` stays deployed unlisted without further UX investment and is no longer the activation candidate. §2.3. |
+| D-40 | Result-report export. | FR-D1, FR-D2 | Product owner | Proposed | One self-contained document pairing the §6.1 provenance and scenario summary with rendered charts and statistics; builds on D-14; parked P2/P3. §6.5. |
 
 ---
 
@@ -400,15 +404,16 @@ owner approved the refinement example, including the stage explainer
 and its illustrated comparison. §3.7 records the accepted control
 layout, empty-selection validation, and review/discard flow.
 
-**Definition still open beyond the first implementation.** Sample
-replacement, returning visits and recovery, additional result states,
-field comparisons, and later guidance still need definition or
-verification. The initial separate-route choices are explicit in the
-supplement below. The selected review variant does not accept every
-detail of its behavior. D-26–D-36 supersede the corresponding
-behavior in the saved full-journey prototype; it is an earlier
-snapshot. The journey table and unaffected parts of §3 remain the
-baseline for the remaining definition. The additive
+**Definition still open beyond the first implementation.**
+Additional result states, field comparisons, recovery between
+visits, and later guidance still need definition or verification;
+the second increment below defines sample inputs (D-37) and
+same-tab continuity (D-38). The initial separate-route choices are
+explicit in the supplement below. The selected review variant does
+not accept every detail of its behavior. D-26–D-36 supersede the
+corresponding behavior in the saved full-journey prototype; it is
+an earlier snapshot. The journey table and unaffected parts of §3
+remain the baseline for the remaining definition. The additive
 [guided design](guided-journey-ddd.md) and
 [execution plan](guided-journey-ip.md) define the bounded first
 implementation separately from the accepted legacy tasks.
@@ -470,6 +475,73 @@ real published data for calculated results. Prototype values and
 schematic sketches remain identified as illustrations. The old
 copy registry is a baseline for the existing page; adding guided
 copy does not silently rewrite it or accepted implementation tasks.
+
+**Second increment (D-37–D-39, 2026-11-04).** After walking through
+the working candidate, the owner restored sample inputs, delegated
+and accepted a continuity rule, and set the publication path. These
+amend the first-version scope above; D-26–D-36 and the agreed
+journey are unchanged. Width log-scale parity with §4.1 returns in
+the same increment as an implementation correction, not a new
+decision.
+
+- **Sample inputs (D-37, owner decision).** The introduction offers
+  **Try sample inputs** beside the primary action. It fills the
+  draft with the approved illustrative scenario — fault angles 30°
+  and 40°, Uniform: Strong and Layered: Strong sediment, and a
+  maximum vertical surface offset of 3 m — completed, because D-26
+  allows no unanswered condition, with sediment depth 5 m and Dense
+  density, then opens site conditions so the reader can inspect and
+  change every value. The completion values and the replacement
+  rule below are agent selections under the standing §2.3
+  delegation; the restoration and the originally approved sample
+  values are the owner's. Label the values as sample inputs, not
+  recommended site values. At 30° the sample's offset extends
+  beyond coverage, so the ordinary warning appears; demonstrating
+  coverage reporting with the sample is deliberate. The fill is an
+  ordinary draft edit under D-27 and D-30: it never changes
+  confirmed results. From a fresh draft with no confirmed scenario
+  it fills silently; otherwise the action asks before replacing the
+  reader's entries, offering **Use the sample** and **Keep my
+  choices**, and replaces the whole draft — both movement modes and
+  refinements — only on the former.
+
+- **Same-tab continuity (D-38, scope delegated).** Within one
+  browser tab, the guided page keeps the reader's work across
+  reload and back/forward restoration: the draft with both movement
+  modes, the confirmed scenario's settings, the journey step, and
+  display choices. Results are never stored; a restored confirmed
+  scenario recomputes from the currently served data. A successful
+  restore says so visibly. A new tab, window, or later visit starts
+  fresh, as before. Stored values are validated against the loaded
+  data before any result is shown; unknown, malformed, or
+  version-mismatched records stop the restore with an explicit
+  **Start a new scenario** choice and are never silently replaced
+  with defaults, following §7.3's rules. Storage failure falls back
+  to the first-version fresh behavior with its stated limitation.
+  The §4.1 walkthrough is presentation state and restarts off.
+
+- **Publication path (D-39, owner decision).** `/explore/` joins
+  the unlisted prototype deployment beside `/scenario/`: published,
+  with no navigation, sitemap, or search entry. The owner will
+  demonstrate it to the team and decide the redistribution license;
+  only then is it advertised. `/scenario/` is paused: it stays
+  deployed unlisted for comparison and field-overlay access and
+  receives no further UX investment; a later rework as a faster
+  iteration surface for engineers is possible but undefined. It is
+  no longer the activation candidate. Before `/explore/` is
+  advertised, reconcile the activation contract: the D-2 entry
+  point, the §10.3 walkthrough page, §9.1 budgets and measurement
+  marks for the guided bundle, browser-lane coverage, the §4.4
+  field-overlay decision for the guided page, and the §9 quality
+  bars. Activation remains a separate owner step; this decision
+  deploys and advertises nothing by itself.
+
+The owner also kept the existing copy baseline on 2026-11-04; small
+clarifications may ride along with tasks without reopening §5. The
+[guided design §9](guided-journey-ddd.md#9-second-increment-d-37d-39-2026-11-04)
+and plan tasks
+[G-08–G-12](guided-journey-ip.md#execution-evidence) implement this
+increment.
 
 **Approved introduction (product owner, 2026-11-03).**
 
@@ -1473,6 +1545,18 @@ the six types (§3.7). Animations come from the morphology
 library (§8.2) and are introduced with: "An illustrative example of
 this scarp type — not a visualization of your scenario."
 
+### 6.5 Result report (D-40, Proposed)
+
+Proposed 2026-11-04 and parked with the P2/P3 lanes. One action
+would produce a single self-contained document of the confirmed
+scenario — HTML or PDF — pairing the §6.1 provenance and scenario
+summary with the rendered charts and their D-14 caption strips, the
+full §4.2 statistics table, and every active caveat, so a reader
+can file or share one presentable record rather than CSV and JSON
+alone. It builds on chart export (D-14), adds no new calculation,
+and keeps every §6.1 content rule. The implementation plan's parked
+list carries the pointer; the owner has not scheduled it.
+
 ---
 
 ## 7. Sharing and versioning
@@ -1501,21 +1585,30 @@ current Z / W."); nothing is recomputed against old versions.
 
 ### 7.3 Reload recovery (MVP)
 
-**Initial `/explore/` scope.** The §2.3 implementation supplement
-uses a fresh scenario after a new page load or reload, without saved
-settings. It does not offer **Reload and restore settings**. This
-temporary scope applies only to the separate guided route; the
-existing `/scenario/` behavior and release contract below remain.
+**Initial `/explore/` scope, amended by D-38.** The §2.3
+implementation supplement first used a fresh scenario after every
+new page load or reload, without saved settings and without
+**Reload and restore settings**. The second increment (D-38,
+2026-11-04) narrows that rule: same-tab reload and back/forward
+restoration restore the reader's work under this section's
+validation and failure-reporting rules; a new tab or later visit
+still starts fresh. This scope applies only to the separate guided
+route; the existing `/scenario/` behavior and release contract
+below remain.
 
-**Guided-journey amendment pending.** The rules below describe
-recovery of the earlier prototype's accepted scenario. D-27 now
-distinguishes a draft from the confirmed scenario. Returning
-visits, draft recovery, and how a future recovery flow offers the
-fresh-start action remain beyond the initial §2.3 scope; the action
-itself follows D-29.
-References below to
+**Guided-journey reconciliation (D-38, 2026-11-04).** The rules
+below describe recovery of the earlier prototype's accepted
+scenario. D-27 now distinguishes a draft from the confirmed
+scenario. The §2.3 second increment adds same-tab continuity at
+`/explore/`: reload and back/forward restoration in the same tab
+restore the draft, the confirmed scenario's settings, the journey
+step, and display choices, recompute any results from the served
+data, and report the restore visibly, under this section's
+validation, explicit-choice, and failure-reporting rules. Returning
+visits and recovery between visits remain undefined for the guided
+page; the fresh-start action follows D-29. References below to
 default results do not authorize results for unanswered site
-conditions. Reconcile these flows before implementation.
+conditions. The flows below remain the existing page's contract.
 
 An open scenario may still refer to files from an earlier data vintage.
 If field measurements or conversion coefficients cannot be loaded, the
