@@ -466,7 +466,7 @@ introduction, supporting aside, and static fallback in `explore.md`
 carry the new continuity sentence. No `beforeunload` prompt was
 added.
 
-Sixteen new session tests cover:
+Thirteen new session tests cover:
 
 - round trips under the documented key, including an invalid working
   draft and an unconfirmed record;
