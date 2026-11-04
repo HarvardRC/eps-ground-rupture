@@ -849,6 +849,14 @@ Unless otherwise stated, a requirement applies to the scenario page.
 
 ### 5.1 Scenario inputs (C1, P1)
 
+The first-use experience must guide a reader through understanding
+the tool's purpose, describing site conditions, choosing an assumed
+displacement, reviewing the scenario, and exploring and interpreting
+the matching results. The owner agreed this sequence on 2026-11-03.
+It is part of the MVP's core scenario capability, independent of
+the P2 display preferences. The PDD defines the journey and records
+the interaction choices that remain open.
+
 #### Scenario-input controls
 
 | Input | User selects | Key rule |
@@ -1729,6 +1737,10 @@ quantities are metric.
 
 The product must describe its results as conditional results from a
 computer-simulation ensemble.
+
+The opening explanation must use plain language about simulated
+ground rupture and what the reader can do. Introduce technical terms
+where they help the reader understand a choice or interpret a result.
 
 Preferred wording includes:
 

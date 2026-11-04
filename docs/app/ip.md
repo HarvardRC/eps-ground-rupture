@@ -1,5 +1,13 @@
 # Ground Rupture Explorer — implementation plan
 
+**Pending product amendment (2026-11-03).** The owner agreed the
+guided first-use sequence and introductory copy in
+[PDD §2.3](pdd.md#23-user-journeys).
+The existing task bodies describe the earlier prototype experience.
+They do not implement this new journey. Its interaction details and
+remaining guidance need product definition, followed by design and task
+amendments; implementing agents must not infer those choices.
+
 **Status:** first full draft, corrected after external review and
 again after the adversarial review of the document pair (both
 2026-10-30), and after the two external reviews of this plan (both

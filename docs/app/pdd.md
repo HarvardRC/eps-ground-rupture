@@ -125,6 +125,7 @@ named in the last column carry the detail.
 | D-22 | Default displacement-window state. | FR-S5, FR-S6, FR-S8 | Product owner | Proposed | No active window by default ("slip: any"); GS-0 and GS-7 pin it; §3.4. |
 | D-23 | Reader-facing display precision per quantity. | FR-O2, §10.1 note | Product owner | Proposed | Scarp height and slip 0.01 m; width 0.1 m; scarp dip 1° (D-5 provisionality); counts exact; shares whole percent; §4.2. |
 | D-24 | Independent display preferences, including small laptop windows and later tablet and phone views. | FR-G6, C12, NFR-4 | Product owner | Decided (2026-11-03) | Scope agreed: P2 reader choice of visible result components and display size and layout within the existing application; §4.9. Until then, §9.1 uses a temporary 1280 × 1080 measurement window. The detailed P2 choices listed in §4.9 remain open before implementation. |
+| D-25 | Guided first-use scenario journey. | §5.1, C1, CR-1 | Product owner | Decided (2026-11-03) | Sequence and introductory copy agreed: understand purpose → describe site conditions → choose assumed displacement → review scenario → explore and interpret matching results. MVP scope; §2.3 records the approved introduction and the remaining interaction and guidance choices. |
 
 ---
 
@@ -160,6 +161,51 @@ existing site.
 
 ### 2.3 User journeys
 
+**Agreed first-use sequence (D-25, 2026-11-03).** The scenario page
+guides a reader through:
+
+1. Understanding what the tool offers.
+2. Describing the site conditions.
+3. Choosing an assumed displacement.
+4. Reviewing the scenario.
+5. Exploring and interpreting the matching results.
+
+This sequence serves the practicing engineer described in PRD §3.1,
+who knows the engineering problem but may be unfamiliar with the
+simulation data and methods. It is an MVP requirement. The P2
+display preferences in §4.9 remain a separate capability.
+
+**Prototype recorded.** The owner has agreed the sequence and
+the introduction below, welcomed the prototype's visual direction,
+and selected **Focused steps** as the review variant. The
+[prototype record](scenario-journey-prototype.md) describes the
+screens and links to the saved clickable version. The alternative
+Guided page remains in that snapshot for comparison.
+
+**Definition still open.** Navigation and editing between stages,
+treatment of unknown conditions, when results first appear and
+update, and the remaining guidance and copy still need decisions.
+The selected review variant does not accept every detail of its
+behavior. The existing
+journey table and §3 describe the earlier filter-based experience;
+they are the baseline to revise, not a completed definition of D-25.
+The dependent design and implementation tasks need an amendment
+after these product choices are resolved.
+
+**Approved introduction (product owner, 2026-11-03).**
+
+> **Use simulations to understand ground rupture.**
+>
+> Describe the site conditions and fault movement you want to
+> investigate, then see the simulated results. This is a research
+> tool; it does not predict what will happen at a particular site.
+
+This introduction is approved for the revised journey and awaits
+implementation. The prototype's existing §5 copy remains the
+baseline for the rest of the wording review. Scientific-content
+approval continues to follow CR-10. The product continues to show
+results from existing simulations.
+
 | Journey (PRD story) | Path through the product |
 |---|---|
 | US-1 dam scenario | Scenario page → inputs (§3) → conversion assist (§3.6) → results (§4) → download (§6.1) |
@@ -185,8 +231,9 @@ the results; on small screens, inputs stack above results with a
 persistent summary of the active scenario. Every control change
 updates results immediately (NFR-3); there is no "submit" step.
 P2 adds the independent display preferences of
-[§4.9](#49-display-preferences-fr-g6-p2); the current responsive
-layout remains the MVP behavior.
+[§4.9](#49-display-preferences-fr-g6-p2). This is the existing
+prototype layout; the first-use revision in
+[§2.3](#23-user-journeys) remains to be defined.
 
 A one-line **scenario summary** restates the active scenario in words
 above the results at all times (FR-G3: generated from state, never

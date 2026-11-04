@@ -1,5 +1,12 @@
 # Ground Rupture Explorer — detailed design document
 
+**Pending product amendment (2026-11-03).** The owner agreed the
+guided first-use sequence and introductory copy in
+[PDD §2.3](pdd.md#23-user-journeys).
+This document still specifies the earlier prototype experience.
+The new journey's interaction details and remaining guidance are open;
+the affected design needs revision once those choices are defined.
+
 **Status:** first full draft, corrected after external review
 (2026-10-30) and again after the reviews of the implementation plan
 (2026-10-31), then after the IP consistency review (2026-11-01) and

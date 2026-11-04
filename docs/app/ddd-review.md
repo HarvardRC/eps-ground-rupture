@@ -1581,6 +1581,46 @@ whitespace checks, and new prose met the 72-column convention except
 tables and links. These checks verify the documentation change;
 they supply no browser-fit or performance measurements.
 
+## First-use journey decision (2026-11-03)
+
+After reviewing the live prototype, the owner found that its controls
+did not guide a reader to build a scenario and that its wording was
+too technical and abrupt. The earlier consistency reviews had not
+established the quality of that first-use experience. The PDD's
+unassisted user walkthrough remained pending.
+
+The owner agreed the sequence now recorded in
+[PRD §5.1](prd.md#51-scenario-inputs-c1-p1) and
+[PDD §2.3](pdd.md#23-user-journeys), decision D-25: understand the
+purpose, describe site conditions, choose an assumed displacement,
+review the scenario, then explore and interpret matching results.
+This is an MVP correction, separate from P2 display preferences.
+The owner requested simpler language and then approved the
+introduction now quoted in PDD §2.3, beginning "Use simulations to
+understand ground rupture." That introduction awaits implementation;
+the remaining guidance and copy still need review.
+
+The product definition explicitly leaves the detailed interaction
+choices open for prototype review. DDD and IP carry a pending
+amendment notice so the existing instructions cannot be mistaken for
+an implementation specification of the revised journey. No accepted
+task body or application code changed in this decision record.
+
+## Scenario journey prototype record (2026-11-03)
+
+The owner welcomed the clickable prototype's visual direction and
+selected Focused steps in the comparison. At the owner's request,
+the [prototype record](scenario-journey-prototype.md) now describes
+the five screens, their wording and controls, the sample inputs,
+and the remaining product decisions. The editable source and a
+standalone clickable snapshot are saved alongside it under
+`docs/app/prototypes/`; Guided page remains available for comparison.
+
+This records the reviewed design without promoting its illustrative
+charts, simplified validation, or unreviewed interaction details to
+accepted requirements. PDD §2.3 points to the record. The application
+and accepted implementation task bodies are unchanged.
+
 ## References
 
 - [`docs/app/ddd.md` — Ground Rupture Explorer — detailed design document](ddd.md).
