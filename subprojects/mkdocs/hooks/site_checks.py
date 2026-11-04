@@ -34,7 +34,12 @@ arms of §6.1:
     and from search/search_index.json, and no href or src in a built page
     resolves to it; in a publication build, for every unlisted page, its
     URL is absent from sitemap.xml and from search/search_index.json, and
-    no href or src in any other built page resolves to it;
+    no href or src in any other built page resolves to it, except in a page
+    that is itself published unlisted (owner ruling 2026-11-05, G-08: today
+    exactly the guided explore/index.html's link to the existing explorer,
+    guided-journey-ddd.md §6); and in a publication build that outputs
+    explore/index.html, the guided page is one of the unlisted pages
+    (PDD D-39);
 (e) Tableau exclusion: no built page carries a <script> whose src begins
     with https://public.tableau.com/javascripts/api/, and every built page
     carries a <script> whose src ends with javascripts/tableau-loader.js.
@@ -365,13 +370,17 @@ def _publication_boundary(
     site: Path, paths: list[str], config: MkDocsConfig
 ) -> Iterator[tuple[str, str]]:
     """Arm (d)."""
+    present = set(paths)
     checked = [(f, "drafted") for f in _drafts]
+    unlisted_pages: set[str] = set()
     if _publication_build(config):
         checked += [(f, "unlisted") for f in _unlisted]
+        unlisted_pages = {f.dest_uri for f in _unlisted}
+        if EXPLORE_PAGE in present and EXPLORE_PAGE not in unlisted_pages:
+            yield EXPLORE_PAGE, "the published guided page is not unlisted (not_in_nav, PDD D-39)"
     if not checked:
         return
     root = _site_root(config.site_url)
-    present = set(paths)
     in_sitemap = _sitemap_paths(site, root)
     in_search = _search_paths(site)
     # Each site-relative URL path that addresses a checked file, mapped to it.
@@ -390,7 +399,9 @@ def _publication_boundary(
         hits: dict[str, str] = {}
         for ref in _refs(site / page):
             for f, state in targets.get(_resolve(ref, page, root) or "", []):
-                if not (state == "unlisted" and page == f.dest_uri):
+                # A page published unlisted lists nothing it links to
+                # (owner ruling 2026-11-05); an advertised page still fails.
+                if not (state == "unlisted" and page in unlisted_pages):
                     hits.setdefault(f.src_uri, state)
         for src_uri, state in hits.items():
             yield page, f"an href or src resolves to the {state} {src_uri}"

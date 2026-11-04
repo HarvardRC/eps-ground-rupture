@@ -9060,9 +9060,10 @@ phases of
    matter `search: exclude: true` keeps it out of the search index
    (the search plugin of Material 9.7.7 skips such a page), and in
    publication builds the site checks hook removes it from
-   `sitemap.xml` and fails the build when any other page links to it
-   (arm (d), below); its results header shows the prototype notice
-   ([§5.8](#58-view-layer));
+   `sitemap.xml` and fails the build when any other page links to it,
+   unless that page is itself published unlisted (owner ruling,
+   2026-11-05; arm (d), below); its results header shows the
+   prototype notice ([§5.8](#58-view-layer));
 3. *activated* (Phase 2, the public release): nav entry, search and
    sitemap inclusion, no prototype notice — the activation commit
    below.
@@ -9186,7 +9187,18 @@ site-relative path under five arms:
   or `src` in a built page resolves to it; in a publication build,
   for every unlisted page, its URL is absent from `sitemap.xml` and
   from `search/search_index.json`, and no `href` or `src` in any
-  other built page resolves to it. MkDocs itself logs a link to a
+  other built page resolves to it, except in a page that is itself
+  published unlisted. That narrow exemption is the owner's ruling of
+  2026-11-05 for guided task G-08: today it admits exactly the
+  guided `explore.md` page's link to `scenario.md`, which
+  [PDD D-39](pdd.md#1-decision-register) keeps for comparison and
+  field-overlay access and
+  [guided DDD §6](guided-journey-ddd.md#6-downloads-and-supporting-content)
+  requires. A link from any advertised page to an unlisted one still
+  fails, so advertising `/explore/` trips this arm and forces that
+  linking decision. In a publication build that outputs
+  `explore/index.html`, the guided page must also be unlisted.
+  MkDocs itself logs a link to a
   draft at INFO only, which `--strict` ignores, and a link to a
   `not_in_nav` page not at all.
 - (e) **Tableau exclusion** — no built page carries a `<script>`

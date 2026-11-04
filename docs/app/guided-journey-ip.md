@@ -300,6 +300,79 @@ limits above remain in force. Changes remained uncommitted at that
 verification; the owner then committed the candidate to
 `dev-v.0.4.1-redesign` as `a570fbe` (2026-11-04).
 
+### Unlisted publication, 2026-11-04 (G-08)
+
+G-08 removed `explore.md` and `assets/explore/` from `draft_docs`
+in `mkdocs.yml`, leaving `media/dev/`. Both `not_in_nav` lines and
+the page's `search: exclude: true` front matter remain. Nothing was
+deployed; the owner's manual Companion-site run deploys the page.
+
+The first strict publication build after that change failed arm
+(d): the guided page links to the unlisted `scenario.md`, and the
+hook rejected a link to an unlisted page from any other built page.
+Guided DDD §6 keeps that existing-explorer link, and D-39 defines
+unlisted as no navigation, sitemap, or search entry. Review found
+that this departed from the legacy DDD §6.1 wording, so G-08 put the
+question to the owner rather than merging.
+
+**Owner ruling, 2026-11-05.** The owner chose to amend legacy
+[DDD §6.1](ddd.md#61-build-outputs-asset-paths-and-page-scaffold)
+arm (d) and its phase-2 paragraph with a dated, narrow exemption:
+links to an unlisted page are permitted only from pages that are
+themselves published unlisted — today exactly `explore.md` →
+`scenario.md`, per D-39 (comparison and field-overlay access) and
+guided DDD §6. Arm (d) must still fail any link from an advertised
+page to an unlisted one, and the hook tests must cover both sides.
+The rule stays deliberately strict: when the D-39 reconciliation
+advertises `/explore/`, arm (d) trips and forces the field-overlay
+and linking decision, queued in the next phase. A legacy-DDD
+amendment lies outside the standing grant's letter; this ruling
+authorizes it for G-08 only. The owner then authorized the
+autonomous merge.
+
+The hook and the legacy DDD now carry that rule. In a publication
+build that outputs `explore/index.html`, a new arm (d) finding also
+requires the guided page to stay unlisted.
+
+Fifteen new hook tests cover the guided page in the publication
+tree: the allowed `explore` → `scenario` link; rejected links from
+a listed page, including rendered navigation, to either unlisted
+page; sitemap and search entries; the not-unlisted guard; the trip
+on the existing-explorer link once `/explore/` is advertised;
+sitemap removal; arm (f) under `on_post_build`; the preview's
+unchanged coverage, drafts included; and the committed
+configurations. All 31 hook tests passed. The allowed link and the
+guard each fail against the base hook.
+
+At this verification:
+
+- Strict publication and preview builds passed. The publication
+  tree contained `explore/index.html`, `explore-2d90789ca249.js`,
+  and `explore-b86e68537c5b.css`. Neither `sitemap.xml` (10
+  entries), `sitemap.xml.gz`, nor the search index named
+  `explore/`, and no built page other than `explore/` itself
+  linked to it. The preview kept its sitemap entry, as before.
+- The `/scenario/` bundles `app-26490347afd0.js` and
+  `app-08bebc049c15.css` matched the pre-change baseline SHA-256s.
+- The pinned Node suite passed all 401 tests; typechecking and the
+  bundle passed. 5,498 relative links in 61 Markdown files
+  resolved; PDD agreement passed; traceability linted 491 rows
+  with no gaps.
+
+Apart from `sitemap.xml` and `sitemap.xml.gz`, every file of the
+publication tree was byte-identical to the preview's. No browser
+visit to the publication build was made. The deployed page
+and its unlisted state are verified only when the owner reruns T-54.
+
+The T-60 lane, run as T-54's pre-deployment check, gave 151 passed,
+5 skipped, and 1 failed: `axe: the failure states` reported a
+serious `color-contrast` violation on `.md-top` in the existing
+explorer's incompatible-settings decision. It failed identically on
+the unchanged base `7581b80`, where T-54 had recorded 152 passes,
+so G-08 did not cause it. It is a legacy-page spec outside this
+increment, reported to the owner as a T-54 rerun item rather than a
+G-08 question.
+
 ## Separate CI investigation
 
 The reported job `126383105016` belongs to historical run
