@@ -12,7 +12,10 @@ the publication path and paused `/scenario/` (D-39), kept the §5
 copy baseline, and requested width log-scale parity.
 [Guided DDD §9](guided-journey-ddd.md#9-second-increment-d-37d-39-2026-11-04)
 specifies the increment; tasks G-08–G-12 below execute it. G-01–G-07
-and their evidence stand unchanged.
+and their evidence stand unchanged. The owner accepted this
+increment's documents in `adf8fed` (2026-11-04) and granted
+autonomous execution — commit, push, pull requests, and merges —
+recorded under [Commands](#commands).
 
 Execute the following tasks in order. Parallel work is allowed only
 after the preceding contract exists and file ownership is disjoint.
@@ -38,7 +41,9 @@ G-08 is independent of the application tasks. G-09–G-11 share
 `app.ts` and `state.ts` and run in order. G-12 waits for the main
 plan's accepted T-60 task to build the browser lane; implementing
 T-60 next is the recommended order for the same agent. The owner
-runs the deployment beside T-54 after G-08 lands.
+runs the deployment beside T-54 after G-08 lands. Nothing from the
+[next phase](#next-phase-owner-instruction-2026-11-04) joins this
+kickoff.
 
 ### G-07 browser verification
 
@@ -90,9 +95,55 @@ python3 .github/scripts/check_traceability.py
 ```
 
 The preview includes both unadvertised routes; the publication
-build retains the draft boundary until G-08 lands. Do not deploy.
-Stage, commit, push, or open pull requests only as the owner's
-kickoff instruction for each task states.
+build retains the draft boundary until G-08 lands. Do not deploy;
+deployments stay the owner's manual workflow runs.
+
+**Owner grant, 2026-11-04.** For this increment the implementing
+agent works autonomously: it stages, commits, pushes, opens, and
+merges its own pull requests into `dev-v.0.4.x` without per-task
+owner approval. The grant covers tasks G-08–G-12, the main plan's
+T-60 when executed under this kickoff, the doc-bearing evidence
+and ledger updates those tasks carry, and first bringing
+`dev-v.0.4.1-redesign` into `dev-v.0.4.x` by pull request so task
+branches start from the accepted candidate. The main contract's
+merge conditions still hold — CI green, independent review passed,
+no open owner question, branch current with `dev-v.0.4.x` — and
+everything outside this grant keeps the main plan's rules.
+
+## Next phase (owner instruction, 2026-11-04)
+
+The owner queued every deliberate deferral as the phase after this
+increment ([PDD D-41](pdd.md#1-decision-register)). Team
+availability schedules it; it may run before the team
+demonstration. Advertising still follows D-39. Nothing below joins
+the current kickoff: each item first needs its guided DDD section
+and, where named, a product decision, accepted the ordinary way.
+
+| Task | Prerequisite | Exact work and authority | Completion |
+| --- | --- | --- | --- |
+| G-13 | Next phase; a guided DDD report section, to be drafted; PDD D-40 (P2) and D-14 | Implement the result report: one action on confirmed results producing a single self-contained HTML or PDF document pairing the §6.1 provenance and scenario summary with the rendered charts and D-14 caption strips, the §4.2 statistics table, and every active caveat, per [PDD §6.5](pdd.md#65-result-report-d-40-p2). | Fixed by its design section when drafted; the §6.1 content rules and D-14 caption requirements apply unchanged. |
+
+Queued definitions and decisions, with their authorities:
+
+- the field-overlay decision for the guided page
+  ([PDD §4.4](pdd.md#44-field-overlay-fr-o5-d-18-proposed));
+- the family-view offer on the guided page (D-13,
+  [PDD §3.7](pdd.md#37-population-scarp-filter-family-view-reset));
+- shared links restoring a guided scenario
+  ([PDD §7.1](pdd.md#71-shared-links));
+- recovery between visits beyond D-38
+  ([PDD §7.3](pdd.md#73-reload-recovery-mvp));
+- scenario import, excluded by the first-version scope
+  ([PDD §2.3](pdd.md#23-user-journeys));
+- the entry-point re-pointing
+  ([PDD §2.2](pdd.md#22-entry-point-d-2-decided-2026-10-28));
+- budgets and measurement marks for the guided bundle and the
+  quality bars ([PDD §9](pdd.md#9-product-quality-bars));
+- acceptance walkthroughs re-pointed to the guided page
+  ([PDD §10.3](pdd.md#103-acceptance-walkthroughs));
+- touch and cross-engine browser coverage beyond G-12's lane;
+- the paused `/scenario/` engineer-sandbox rework decision
+  (D-39).
 
 ## Execution evidence
 

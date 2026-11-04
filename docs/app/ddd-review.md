@@ -1658,6 +1658,32 @@ Guided DDD §9 and plan tasks G-08–G-12 carry the increment. The
 accepted legacy task bodies are unchanged; T-60 remains the browser
 lane the guided specs join. No scientific rule changed.
 
+## Owner instructions on the second-increment execution (2026-11-04)
+
+The owner accepted the second-increment documents in `adf8fed`
+(2026-11-04) and issued three execution instructions:
+
+- **Autonomous execution.** The implementing agent stages, commits,
+  pushes, opens, and merges its own pull requests for G-08–G-12 and
+  for T-60 under the guided kickoff — the doc-bearing evidence
+  updates included — without per-task owner approval. The standing
+  merge conditions hold: green CI, independent review, no open
+  owner question, branch current with `dev-v.0.4.x`. Deployments
+  stay the owner's. The grant includes first bringing
+  `dev-v.0.4.1-redesign` into `dev-v.0.4.x` by pull request. It is
+  recorded in the guided plan's Commands section, with dated
+  exceptions in the main plan's contract prose.
+- **Next phase (D-41).** Every deliberate deferral is queued as the
+  phase after the second increment: the D-39 reconciliation list,
+  family view, shared links, between-visit recovery, scenario
+  import, the result report, touch and cross-engine coverage, and
+  the `/scenario/` rework decision. Team availability schedules the
+  phase; it may precede the team demonstration. Advertising still
+  follows D-39 and its reconciliation list.
+- **Result report (D-40) set P2.** The owner scheduled the
+  presentable report as a recorded task: guided task G-13 in the
+  next-phase queue, after its design section and D-14.
+
 ## References
 
 - [`docs/app/ddd.md` — Ground Rupture Explorer — detailed design document](ddd.md).

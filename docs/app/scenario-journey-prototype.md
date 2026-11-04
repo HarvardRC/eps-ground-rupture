@@ -774,7 +774,8 @@ The implementation does not settle all later product choices:
    The candidate starts afresh on return and retains the mode-switch,
    discard, and restart actions already decided by D-28 and D-29.
    D-37 and D-38 (2026-11-04) now define sample replacement and
-   same-tab restoration; recovery between visits remains open.
+   same-tab restoration; recovery between visits remains open and
+   is queued in the next phase (PDD D-41, 2026-11-04).
 3. **Presentation around results.** D-27, D-30, and D-32 define review,
    step navigation, and the unapplied-changes notice. D-33 places
    review and edit actions; D-34 includes refinements in the same

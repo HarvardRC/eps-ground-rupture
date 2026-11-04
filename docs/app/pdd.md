@@ -141,7 +141,8 @@ named in the last column carry the detail.
 | D-37 | Sample inputs on the guided introduction. | §5.1, C1 | Product owner | Decided (2026-11-04) | Try sample inputs fills the approved illustrative scenario, completed with 5 m depth and Dense density, and opens site conditions; a non-fresh draft is replaced only after an explicit confirmation. §2.3; the completion values and the replacement rule are agent selections under the §2.3 delegation. |
 | D-38 | Same-tab continuity at `/explore/`. | §5.1, FR-S8 | Product owner | Decided (2026-11-04) | Scope delegated to the implementing agent and recorded: same-tab reload and back/forward restoration restore the draft, confirmed settings, step, and display choices and recompute results, with a visible notice; a new tab or later visit starts fresh. §2.3 and §7.3. |
 | D-39 | Guided publication path; `/scenario/` paused. | §2.2, R-11 | Product owner | Decided (2026-11-04) | `/explore/` joins the unlisted prototype deployment; a team demonstration and the redistribution-license decision precede advertising it. `/scenario/` stays deployed unlisted without further UX investment and is no longer the activation candidate. §2.3. |
-| D-40 | Result-report export. | FR-D1, FR-D2 | Product owner | Proposed | One self-contained document pairing the §6.1 provenance and scenario summary with rendered charts and statistics; builds on D-14; parked P2/P3. §6.5. |
+| D-40 | Result-report export. | FR-D1, FR-D2 | Product owner | Decided (2026-11-04) | One self-contained document pairing the §6.1 provenance and scenario summary with rendered charts and statistics; builds on D-14. The owner set it P2; guided task G-13 carries it in the next-phase queue (D-41). §6.5. |
+| D-41 | Next-phase queue for the deliberate deferrals. | §2.2 | Product owner | Decided (2026-11-04) | Every deliberate deferral of the guided redesign is queued as the phase after the second increment: the D-39 reconciliation list, family view, shared links, between-visit recovery, scenario import, the result report (G-13), remaining browser coverage, and the paused `/scenario/` rework decision. Team availability schedules the phase; it may precede the team demonstration. Advertising still follows D-39. §2.3. |
 
 ---
 
@@ -408,7 +409,8 @@ layout, empty-selection validation, and review/discard flow.
 Additional result states, field comparisons, recovery between
 visits, and later guidance still need definition or verification;
 the second increment below defines sample inputs (D-37) and
-same-tab continuity (D-38). The initial separate-route choices are
+same-tab continuity (D-38), and the next phase (D-41) queues the
+remaining deferrals. The initial separate-route choices are
 explicit in the supplement below. The selected review variant does
 not accept every detail of its behavior. D-26–D-36 supersede the
 corresponding behavior in the saved full-journey prototype; it is
@@ -542,6 +544,25 @@ clarifications may ride along with tasks without reopening §5. The
 and plan tasks
 [G-08–G-12](guided-journey-ip.md#execution-evidence) implement this
 increment.
+
+**Next phase (D-41, 2026-11-04).** The owner queued every remaining
+deliberate deferral as the phase after the second increment. Team
+availability schedules it, and it may run before the team
+demonstration; advertising still follows D-39 and its
+reconciliation list. The queue: the §4.4 field-overlay decision for
+the guided page; the §3.7 family-view offer there (D-13); §7.1
+shared links for a guided scenario; recovery between visits beyond
+D-38 (§7.3); scenario import, excluded by the first-version scope
+above; the D-2 entry point (§2.2); the §9.1 budgets and measurement
+marks for the guided bundle and the §9 quality bars; the §10.3
+acceptance walkthroughs re-pointed to the guided page; touch and
+cross-engine browser coverage beyond the second increment's lane;
+the result report (D-40, §6.5), set P2 and recorded as guided task
+G-13; and the `/scenario/` engineer-sandbox rework decision left
+open by D-39. The
+[guided plan's next phase](guided-journey-ip.md#next-phase-owner-instruction-2026-11-04)
+holds the queue's task view; every item still needs its design
+section or product decision before execution.
 
 **Approved introduction (product owner, 2026-11-03).**
 
@@ -1545,17 +1566,20 @@ the six types (§3.7). Animations come from the morphology
 library (§8.2) and are introduced with: "An illustrative example of
 this scarp type — not a visualization of your scenario."
 
-### 6.5 Result report (D-40, Proposed)
+### 6.5 Result report (D-40, P2)
 
-Proposed 2026-11-04 and parked with the P2/P3 lanes. One action
-would produce a single self-contained document of the confirmed
-scenario — HTML or PDF — pairing the §6.1 provenance and scenario
-summary with the rendered charts and their D-14 caption strips, the
-full §4.2 statistics table, and every active caveat, so a reader
-can file or share one presentable record rather than CSV and JSON
-alone. It builds on chart export (D-14), adds no new calculation,
-and keeps every §6.1 content rule. The implementation plan's parked
-list carries the pointer; the owner has not scheduled it.
+Proposed 2026-11-04 and decided the same day: the owner set the
+report P2 and had a task recorded. One action produces a single
+self-contained document of the confirmed scenario — HTML or PDF —
+pairing the §6.1 provenance and scenario summary with the rendered
+charts and their D-14 caption strips, the full §4.2 statistics
+table, and every active caveat, so a reader can file or share one
+presentable record rather than CSV and JSON alone. It builds on
+chart export (D-14), adds no new calculation, and keeps every §6.1
+content rule. Guided task G-13 records it in the next-phase queue
+(D-41); its design section is drafted and accepted before
+execution, and the implementation plan's parked list keeps the
+schedule pointer.
 
 ---
 
