@@ -85,7 +85,7 @@ class GuidedAssetsTest(unittest.TestCase):
     def test_valid_shared_data_and_isolated_assets(self) -> None:
         self.assertEqual(self.findings(), [])
 
-    def test_publication_omits_both_page_and_assets(self) -> None:
+    def test_absent_page_and_assets_pass(self) -> None:
         self.page.unlink()
         for path in self.assets.iterdir():
             path.unlink()
@@ -179,10 +179,11 @@ class GuidedUnlistedTest(unittest.TestCase):
         patch.object(checks, "_command", "build").start()
         self.publication = SimpleNamespace(site_url=SITE_URL, config_file_path="/x/mkdocs.yml")
         self.preview = SimpleNamespace(site_url=SITE_URL, config_file_path="/x/mkdocs.preview.yml")
-        # The unlisted pages link to each other and to themselves; the listed
-        # pages link only to listed pages.
+        # The guided page links to the existing explorer and to itself; the
+        # existing explorer links only to itself; listed pages link only to
+        # listed pages.
         self.write("explore/index.html", '<a href="../scenario/">x</a><a href="./">x</a>')
-        self.write("scenario/index.html", '<a href="../explore/">x</a>')
+        self.write("scenario/index.html", '<a href="./#gre-disclaimer">x</a>')
         self.write("index.html", '<a href="glossary/">x</a>')
         self.write("glossary/index.html", '<a href="../">x</a>')
         self.sitemap(["", "glossary/"])
@@ -208,14 +209,14 @@ class GuidedUnlistedTest(unittest.TestCase):
         found = self.findings(config)
         self.assertTrue(any(fragment in why for _path, why in found), found)
 
-    def test_unlisted_pages_may_link_to_each_other(self) -> None:
+    def test_guided_page_may_link_to_existing_explorer(self) -> None:
         self.assertEqual(self.findings(self.publication), [])
 
     def test_listed_page_linking_to_guided_page_fails(self) -> None:
         self.write("index.html", '<a href="explore/">x</a>')
         self.reject(self.publication, "resolves to the unlisted explore.md")
 
-    def test_navigation_entry_for_guided_page_fails(self) -> None:
+    def test_rendered_nav_link_to_guided_page_fails(self) -> None:
         self.write("glossary/index.html", '<nav><a href="../explore/index.html">E</a></nav>')
         self.reject(self.publication, "resolves to the unlisted explore.md")
 
@@ -227,9 +228,18 @@ class GuidedUnlistedTest(unittest.TestCase):
         self.search(["", "explore/#gre-explore"])
         self.reject(self.publication, "indexes the unlisted explore.md")
 
-    def test_guided_page_listed_in_navigation_config_fails(self) -> None:
+    def test_guided_page_not_unlisted_fails(self) -> None:
         patch.object(checks, "_unlisted", [self.scenario]).start()
         self.reject(self.publication, "guided page is not unlisted")
+
+    def test_existing_explorer_may_not_link_to_guided_page(self) -> None:
+        # Only the guided page's links are exempt (guided DDD §6).
+        self.write("scenario/index.html", '<a href="../explore/">x</a>')
+        self.reject(self.publication, "resolves to the unlisted explore.md")
+
+    def test_guided_page_link_exemption_needs_it_unlisted(self) -> None:
+        patch.object(checks, "_unlisted", [self.scenario]).start()
+        self.reject(self.publication, "resolves to the unlisted scenario.md")
 
     def test_existing_explorer_link_from_listed_page_still_fails(self) -> None:
         self.write("glossary/index.html", '<a href="../scenario/">x</a>')
@@ -242,6 +252,16 @@ class GuidedUnlistedTest(unittest.TestCase):
         self.write("index.html", '<a href="explore/">x</a>')
         patch.object(checks, "_unlisted", [self.scenario]).start()
         self.assertEqual(self.findings(self.preview), [])
+
+    def test_preview_still_rejects_drafts(self) -> None:
+        drafted = SimpleNamespace(src_uri="media/dev/clip.mp4", url="media/dev/clip.mp4",
+                                  dest_uri="media/dev/clip.mp4", page=None)
+        patch.object(checks, "_drafts", [drafted]).start()
+        self.write("media/dev/clip.mp4", "x")
+        self.write("explore/index.html", '<a href="../media/dev/clip.mp4">x</a>')
+        found = self.findings(self.preview)
+        self.assertIn(("media/dev/clip.mp4", "the output of the drafted media/dev/clip.mp4"), found)
+        self.assertIn(("explore/index.html", "an href or src resolves to the drafted media/dev/clip.mp4"), found)
 
     def test_publication_sitemap_drops_guided_page(self) -> None:
         rendered = (

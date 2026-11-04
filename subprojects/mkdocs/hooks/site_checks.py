@@ -34,11 +34,11 @@ arms of §6.1:
     and from search/search_index.json, and no href or src in a built page
     resolves to it; in a publication build, for every unlisted page, its
     URL is absent from sitemap.xml and from search/search_index.json, and
-    no href or src in any listed built page resolves to it — links between
-    unlisted pages list neither, so the guided page keeps its link to the
-    existing explorer (guided-journey-ddd.md §§6, 9.4); and in a
-    publication build that outputs explore/index.html, the guided page is
-    one of the unlisted pages (PDD D-39);
+    no href or src in any other built page resolves to it, except that the
+    unlisted guided page explore/index.html may link to another unlisted
+    page, keeping its link to the existing explorer (guided-journey-ddd.md
+    §6); and in a publication build that outputs explore/index.html, the
+    guided page is one of the unlisted pages (PDD D-39);
 (e) Tableau exclusion: no built page carries a <script> whose src begins
     with https://public.tableau.com/javascripts/api/, and every built page
     carries a <script> whose src ends with javascripts/tableau-loader.js.
@@ -371,7 +371,6 @@ def _publication_boundary(
     """Arm (d)."""
     present = set(paths)
     checked = [(f, "drafted") for f in _drafts]
-    # Built pages that are themselves unlisted; their links list nothing.
     unlisted_pages: set[str] = set()
     if _publication_build(config):
         checked += [(f, "unlisted") for f in _unlisted]
@@ -399,7 +398,10 @@ def _publication_boundary(
         hits: dict[str, str] = {}
         for ref in _refs(site / page):
             for f, state in targets.get(_resolve(ref, page, root) or "", []):
-                if not (state == "unlisted" and page in unlisted_pages):
+                # An unlisted page's links to itself list nothing, and the
+                # unlisted guided page keeps its existing-explorer link.
+                exempt = page == f.dest_uri or (page == EXPLORE_PAGE and page in unlisted_pages)
+                if not (state == "unlisted" and exempt):
                     hits.setdefault(f.src_uri, state)
         for src_uri, state in hits.items():
             yield page, f"an href or src resolves to the {state} {src_uri}"

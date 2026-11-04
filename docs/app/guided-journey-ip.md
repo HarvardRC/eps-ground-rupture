@@ -309,24 +309,30 @@ deployed; the owner's manual Companion-site run deploys the page.
 
 The first strict publication build after that change failed arm
 (d): the guided page links to the unlisted `scenario.md`, and the
-hook rejected a link from any other built page. Guided DDD §§5–6
-keep that existing-explorer link, and D-39 defines unlisted as no
-navigation, sitemap, or search entry. The hook now rejects links to
-an unlisted page from listed pages only; links between unlisted
-pages list neither. In a publication build that outputs
+hook rejected a link to an unlisted page from any other built page.
+Guided DDD §6 keeps that existing-explorer link, and D-39 defines
+unlisted as no navigation, sitemap, or search entry. The hook now
+exempts only links from the unlisted guided page to another
+unlisted page; every other page, `scenario/` included, still may
+not link to an unlisted page. In a publication build that outputs
 `explore/index.html`, a new arm (d) finding also requires the
-guided page to stay unlisted. The legacy
-[DDD §6.1](ddd.md#61-build-outputs-asset-paths-and-page-scaffold)
-still says "any other page"; it was left unchanged as the
-`/scenario/` contract, so its wording now differs from the hook's
-narrower rule. That difference is open for the owner's review.
+guided page to stay unlisted.
 
-Thirteen new hook tests cover the guided page in the publication
-tree: link, navigation, sitemap, and search rejections; unlisted
-cross-links; the not-unlisted guard; sitemap removal; arm (f)
-under `on_post_build`; the preview's unchanged coverage; and the
-committed configurations. With the new configuration, two of them
-failed against the previous hook. All 29 hook tests passed.
+**Owner question (open).** The legacy
+[DDD §6.1](ddd.md#61-build-outputs-asset-paths-and-page-scaffold)
+says the build fails "when any other page links to" the unlisted
+page. The guided page's exemption departs from that wording, and the
+grant does not cover amending the legacy DDD. G-08 is therefore not
+merged autonomously; it waits for the owner's ruling.
+
+Sixteen new hook tests cover the guided page in the publication
+tree: rejection of links from listed pages and the existing
+explorer, rendered navigation, sitemap, and search entries; the
+guided page's own exemption and its unlisted precondition; the
+not-unlisted guard; sitemap removal; arm (f) under `on_post_build`;
+the preview's unchanged coverage, drafts included; and the committed
+configurations. All 32 hook tests passed. The exemption and the
+guard each fail against the base hook.
 
 At this verification:
 
@@ -334,7 +340,7 @@ At this verification:
   tree contained `explore/index.html`, `explore-2d90789ca249.js`,
   and `explore-b86e68537c5b.css`. Neither `sitemap.xml` (10
   entries), `sitemap.xml.gz`, nor the search index named
-  `explore/`, and no built page outside the two unlisted pages
+  `explore/`, and no built page other than `explore/` itself
   linked to it. The preview kept its sitemap entry, as before.
 - The `/scenario/` bundles `app-26490347afd0.js` and
   `app-08bebc049c15.css` matched the pre-change baseline SHA-256s.
@@ -347,6 +353,14 @@ Apart from `sitemap.xml` and `sitemap.xml.gz`, every file of the
 publication tree was byte-identical to the preview's. No browser
 visit to the publication build was made. The deployed page
 and its unlisted state are verified only when the owner reruns T-54.
+
+The T-60 lane, run as T-54's pre-deployment check, gave 151 passed,
+5 skipped, and 1 failed: `axe: the failure states` reported a
+serious `color-contrast` violation on `.md-top` in the existing
+explorer's incompatible-settings decision. It failed identically on
+the unchanged base `7581b80`, where T-54 had recorded 152 passes,
+so G-08 did not cause it. It is a legacy-page spec outside this
+increment and remains open for the owner before the T-54 rerun.
 
 ## Separate CI investigation
 
