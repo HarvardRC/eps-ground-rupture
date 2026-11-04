@@ -1,6 +1,6 @@
 # Ground Rupture Explorer scenario journey prototype
 
-**Review record: 2026-11-03. Selected version: Focused steps.**
+**Review record: 2026-11-03–04. Selected version: Focused steps.**
 
 This prototype shows how a reader can build a scenario before
 exploring its results. It replaces the opening collection of filters
@@ -9,15 +9,17 @@ approved the journey and introduction, liked the visual direction,
 and selected **Focused steps** in the prototype review.
 
 The journey, introduction, review variant, selection, review,
-displacement-mode, restart, step-navigation, movement-entry, and
-review-screen decisions below are agreed. Other detailed interactions
-remain proposals. The saved full-journey prototype is an earlier
+displacement-mode, restart, step-navigation, movement-entry,
+review-screen, first results presentation, and result-refinement
+decisions below are agreed. Other detailed interactions remain
+proposals. The saved full-journey prototype is an earlier
 snapshot: its unspecified-condition, displacement-default, and
 result-update behavior is superseded by those decisions. The later
-component examples capture the site-selection, movement-entry, and
-review-screen discussions.
-None queries simulation records or calculates result distributions;
-the movement and review examples calculate illustrated conversions.
+component examples capture the site-selection, movement-entry,
+review-screen, and results discussions. None queries simulation
+records. The movement and review examples calculate illustrated
+conversions; the results example calculates charts and statistics
+from invented measurements.
 These examples do not replace the product definition or
 implementation plan.
 
@@ -29,13 +31,15 @@ implementation plan.
 - [Movement-entry editable source](prototypes/fault-movement-entry.fragment.html).
 - [Scenario-review example](prototypes/scenario-review.html).
 - [Scenario-review editable source](prototypes/scenario-review.fragment.html).
+- [Scenario-results example](prototypes/scenario-results.html).
+- [Scenario-results editable source](prototypes/scenario-results.fragment.html).
 - [Product definition and approved introduction](pdd.md#23-user-journeys).
 
 Open the clickable HTML file in a browser. When viewing it on
 GitHub, download the file first; the repository's source view does
 not run it. The saved page includes the prototype and its controls,
 with shared interface assets loaded from public content-delivery
-networks. These pages are not offline bundles. The four examples
+networks. These pages are not offline bundles. The five examples
 are separate pages; a selection made in one does not update another.
 
 ## Reader and purpose
@@ -89,10 +93,10 @@ proposed released product. The review control for showing supporting
 explanations is also a design-comparison aid, not an agreed product
 setting.
 
-## Agreed interaction decisions — 2026-11-03
+## Agreed interaction decisions — through 2026-11-04
 
 [PDD §2.3](pdd.md#23-user-journeys) records the authoritative product
-definition in D-26–D-32.
+definition in D-26–D-34.
 
 **Required site conditions (D-26).** A fresh scenario starts with
 no values selected for fault angle, sediment depth, sediment
@@ -115,14 +119,15 @@ one or more values to continue**. Continue with missing selections
 shows condition-specific errors and moves focus to the first
 incomplete condition. A valid selection clears its error.
 
-**Draft and confirmed scenarios (D-27).** Site-condition and
-displacement edits remain a draft. They affect results only after
+**Draft and confirmed scenarios (D-27, extended by D-34).**
+Site-condition, displacement, population, and scarp-type edits
+remain one draft. They affect results only after
 **Review scenario → Show results**, for both the first scenario
 and subsequent revisions. Any retained
-results and their summary remain associated with the previously
-confirmed scenario. Their exact placement, browser navigation,
-recovery, and when population and scarp-type refinements
-take effect remain open.
+results, counts, and their summary remain associated with the
+previously confirmed scenario. The complete presentation of retained
+results, browser navigation, and recovery remain open. D-34 defines
+when population and scarp-type refinements take effect below.
 
 **Displacement-mode entries (D-28).** The draft preserves fault-slip
 minimum and maximum separately from the surface-offset maximum.
@@ -145,7 +150,10 @@ Each confirmation remembers both displacement modes' entries.
 **Discard changes** restores them to what they held at that
 confirmation, including the inactive mode, and restores the
 confirmed mode and site conditions. It abandons edits to either
-mode; inactive entries still do not contribute to results.
+mode; inactive entries still do not contribute to results. D-34
+extends the same confirmation and discard behavior to population
+and scarp-type selections. Starting a new scenario also restores
+all stages within the slip range and all scarp types.
 The placement and availability presentation of these actions
 remain open.
 
@@ -160,7 +168,8 @@ incomplete or invalid. Those results still describe the confirmed
 scenario. While the draft differs from its last-confirmed state,
 show **You have unapplied changes** and **Return to review**. That
 action applies the same review validation. Remembered inactive-mode
-edits count as unapplied changes; merely visiting a step does not.
+edits count as unapplied changes; population and scarp-type edits
+do too under D-34. Merely visiting a step does not create a change.
 Restoring the confirmed entries removes the notice. Visiting results
 never applies edits; no results are available before confirmation
 or after **Start a new scenario**. Browser Back and Forward and
@@ -184,6 +193,25 @@ coverage warnings, and a plain explanation of the contributing
 records before **Show results**. The
 [review step below](#stage-4--review-scenario) records the accepted
 presentation and the example's limits.
+
+**First results presentation (D-33).** On 2026-11-04, the owner
+accepted the results example as a first version. It keeps the
+confirmed scenario, record counts, population, scarp types, and
+warnings visible above measurement views. Charts, full statistics,
+interpretation guidance, and review, edit, and download actions
+follow. The [results step below](#stage-5--explore-results) records
+this presentation and the remaining work. This is not acceptance
+of invented results, a final release, or unshown result states.
+
+**Result refinements (D-34).** On 2026-11-04, the owner agreed to
+open **Refine results** from the results screen. Population and
+scarp-type choices join the same draft as site conditions and
+movement. All pending changes take effect together only through
+**Review scenario → Show results**. Measurement and chart-view
+changes remain immediate presentation choices. The
+[results step below](#stage-5--explore-results) records the choices,
+defaults, discard/restart behavior, and details still open. The
+saved examples do not yet implement this refinement flow.
 
 These decisions supersede the corresponding behavior in the saved
 full-journey HTML snapshot. That snapshot still permits unspecified
@@ -441,10 +469,12 @@ stages in the slip window** and says:
 With multiple selected angles in offset mode, identify each
 simulation's corresponding range for its fault angle. Explain that
 a stage is a saved point as fault movement increases and that all
-resulting scarp types are included. This accepts the review
-presentation; it does not settle the placement or activation of
-later population and scarp-type refinements, nor change D-3's
-scientific-review status.
+resulting scarp types are included in the initial scenario. Under
+D-34, review must reflect the draft's chosen population and scarp
+types before confirming all pending changes. Exact placement and
+wording for refined choices still need definition. The saved review
+example retains the initial defaults and has no refinement controls.
+Neither presentation decision changes D-3's scientific-review status.
 
 **Illustrative completed scenario.** The saved review example opens
 with fault angle 30°, depth 5 m, Dense sediment, Uniform: strong,
@@ -469,35 +499,123 @@ wording. Use this later example for the accepted review presentation.
 
 ## Stage 5 — Explore results
 
-The heading is **Explore your scenario**, with the instruction:
+**First version accepted (D-33, 2026-11-04).** The owner approved
+the later results example with the qualification, “at least as the
+first version.” It establishes the presentation of a normal populated
+result. It does not establish release readiness or resolve unshown
+states and interactions.
 
-> Read the range of simulated results, then change a condition to
-> investigate a different scenario.
+The heading remains **Explore your scenario**. The accepted order is:
 
-The reader can switch between **Scarp height**,
-**Deformation-zone width**, and **Scarp dip**. Each view shows a
-measurement explanation, an illustrative distribution, and places
-for the median and 16th–84th percentile range. Numbers are left as
-dashes. The chart shapes are fixed illustrations and do not respond
-to the selected conditions.
+1. **Your confirmed scenario**, with the matching-record count,
+   site conditions, entered movement and converted slip range,
+   population, and included scarp types. Explain that each record
+   is a saved stage and that one simulation may contribute several.
+2. Applicable result limitations, including partial coverage and
+   the small-slip caution. Preserve the complete entered movement
+   range when only part is covered. These warnings remain visible.
+3. Measurement selection: **Scarp height**, **Deformation-zone
+   width**, and **Scarp dip**, with Scarp height shown first.
+4. The selected measurement's explanation, valid-measurement count,
+   applicable warning, chart, full statistics, and reading guidance.
+5. Actions for changing the scenario and downloading its results,
+   followed by the research-tool disclaimer.
 
-The width view carries the main-rupture-zone limitation. The dip
-view carries a provisional-data notice. The statistics framing says
-that the summaries describe matching simulations and are not
-recommended design values. This wording is proposed pending the
-usual product and scientific-content review.
+The chart offers **Distribution** and **Cumulative** views, with
+Distribution shown initially. Distribution explains how often each
+measurement range appears. Cumulative explains the share of matching
+measurements at or below a value and offers a percentile read-off.
+The chart shows median and 84th-percentile markers. A cumulative
+read-off describes matching measurements, not earthquake probability.
+The visible explanation of cumulative-curve simplification retains
+the existing below-0.2-percentage-point error bound and distinguishes
+the displayed curve from statistics and read-offs using all valid
+matching measurements. Accepting this presentation does not replace
+the authoritative scientific calculations or numerical rules.
 
-**Your scenario and result context** opens the scenario summary and
-edit actions. **Refine the analysis** is a placeholder for population,
-scarp-type filtering, chart views, and field comparisons.
+**Statistics** sits beside the chart when space permits and stacks
+below it in a narrow window. Keep the full table visible: valid
+measurements, excluded missing values, median, 16th and 84th
+percentiles, minimum, maximum, mean, and standard deviation, with
+units where applicable. State that missing values are excluded from
+that measurement's chart and statistics.
 
-**Change site conditions** and **Change fault movement** return to
-the corresponding stage, followed by review. Under D-27 these are
-draft edits until **Show results** confirms them. Any retained
-results must continue to identify the previously confirmed scenario.
-The saved snapshot does not model that distinction. **Download result**
-only explains that the prototype has no calculated data to download.
-It creates no result package.
+**Reading these results** explains the median and middle 68% range.
+It states that these summaries are not recommended design values
+and that choosing a design value requires engineering judgment.
+The width view retains the limitation to the main modeled rupture
+zone; the dip view retains the provisional-data warning. Existing
+scientific safeguards remain authoritative.
+
+**Review scenario** is beside the heading. **Change site conditions**
+and **Change fault movement** are below the results, with
+**Download results** as the prominent action alongside them. This
+accepts their placement. D-27–D-32, extended by D-34, still govern
+their behavior: input and refinement edits remain drafts until
+review and **Show results**, and retained results continue to
+identify their confirmed scenario.
+The complete retained-draft workflow and download experience remain
+to be designed.
+
+**Refine results (D-34, 2026-11-04).** A **Refine results** section
+opens from the results screen and provides these choices:
+
+- **Population:** all recorded stages within the chosen slip range
+  (the existing default), or the last stage within that range for
+  each simulation. Keep the existing scientific population rules.
+- **Scarp types:** select multiple types, initially including all
+  types. Short explanations and illustrations help readers
+  understand the choices. Review requires one or more selected
+  scarp types. Removing the last selection leaves an unfinished
+  empty draft; it never silently restores all types. The draft
+  cannot pass review until at least one type is selected. Existing
+  confirmed results remain unchanged while the draft is empty.
+
+Refinement edits join the same scenario draft as any pending site
+conditions or movement edits. Review and **Show results** apply all
+of them together. There is no separate Apply action or automatic
+update when a refinement changes. Until confirmation, existing
+results, matching counts, and the scenario summary continue to
+describe the previously confirmed choices. The unapplied-changes
+notice follows D-30, including changes to refinements.
+
+**Discard changes** restores the last confirmed population and
+scarp-type selections along with the rest of the draft. **Start a
+new scenario** restores all stages within the slip range and all
+scarp types along with D-29 and D-31's fresh defaults. Switching
+measurement tabs or chart views immediately changes the presentation
+of the confirmed results; it does not require scenario confirmation
+or apply draft edits.
+
+The precise refinement layout, explanations and illustrations,
+selection-error presentation, and keyboard focus still need
+definition. The saved examples have no interactive D-34 refinement
+flow and are not implementation evidence for it.
+
+**Illustrative data and prototype limits.** The results example
+uses the same illustrative complete scenario as the review example.
+Its counts, measurement arrays, chart shapes, and statistics are
+invented. They are not research findings, approved sample values,
+production calculation fixtures, or a replacement for scientific
+algorithms. Switching measurements and chart views and adjusting the
+percentile read-off demonstrate the presentation using those values.
+Review, edit, and download actions show prototype-boundary notices;
+they do not connect the separate examples or generate a result
+package. Those notices and the invented-data label belong to the
+review environment, not the product.
+
+Empty results, small populations, zero valid measurements, remaining
+refinement details, field comparisons, retained draft workflows, and
+actual downloads remain open. The first-version approval is not
+accessibility or viewport acceptance.
+
+**Earlier snapshot.** The original full-journey prototype showed
+fixed illustrative charts with dashes for statistics, a **Your
+scenario and result context** disclosure, a **Refine the analysis**
+placeholder, and a **Download result** acknowledgement. That earlier
+screen is historical. Use the later results example for D-33's
+accepted first presentation; it does not authorize hiding required
+context, statistics, or warnings in a disclosure.
 
 ## Choices still to resolve before implementation
 
@@ -513,18 +631,22 @@ The selected visual direction does not settle the following details:
    draft outside the mode switches and discard/restart actions
    already decided by D-28 and D-29.
 3. **Presentation around results.** D-27, D-30, and D-32 define review,
-   step navigation, and the unapplied-changes notice. Define the
-   placement of retained results and editing actions. Define how
-   draft recovery and performance endpoints fit the revised journey.
-   The saved snapshot does not model these flows.
-4. **Complete results.** Place all required statistics, counts,
-   population information, conversions, coverage flags, small and
-   empty states, and warnings. Their absence or placement inside a
-   disclosure in this mockup does not authorize hiding information
-   that the PRD and PDD require to remain visible.
-5. **Refinements and downloads.** Define the population and scarp-type
-   controls, chart alternatives, field comparison, and real download
-   experience while retaining the existing scientific rules.
+   step navigation, and the unapplied-changes notice. D-33 places
+   review and edit actions; D-34 includes refinements in the same
+   draft. Complete the retained-draft presentation, including the
+   notice and discard/restart actions. Define how draft recovery and
+   performance endpoints fit the revised journey. The examples do
+   not model these flows.
+4. **Complete results.** D-33 establishes a normal populated result's
+   first presentation. Define empty results, small populations, and
+   measurements with no valid values, while preserving required
+   context and warnings. The accepted example does not authorize
+   hiding information that the PRD and PDD require to remain visible.
+5. **Refinements and downloads.** D-34 defines the refinement choices
+   and when they take effect. Resolve their layout, explanations,
+   illustrations, selection errors, and focus. Define remaining
+   chart alternatives, field comparison, and real downloads while
+   retaining the scientific rules.
 6. **Navigation and access.** Define browser Back and Forward,
    persistence and recovery, keyboard focus and announcements, and
    behavior at ordinary laptop and narrow-window sizes. The saved
@@ -532,11 +654,12 @@ The selected visual direction does not settle the following details:
 
 The current decimal-validation requirements, conversion rules, and
 scientific safeguards remain authoritative except for the explicit
-product amendments recorded in the PDD. D-26–D-32 amend site-condition
+product amendments recorded in the PDD. D-26–D-34 amend site-condition
 and displacement defaults, result-update timing, mode preservation,
 discard/restart behavior, step navigation, and movement-entry
-feedback and review presentation. The dependent design and
-implementation plan still need revision. Fixed example values,
+feedback, review and results presentation, and result refinements.
+The dependent design and implementation plan still need revision.
+Fixed example values,
 omitted controls, and simplified validation are not instructions to
 change unrelated scientific rules or to treat remaining proposals
 as agreed.

@@ -1,15 +1,17 @@
 # Ground Rupture Explorer — implementation plan
 
-**Pending product amendment (2026-11-03).** The owner agreed the
-guided first-use journey, introductory copy, and interaction
-decisions D-26–D-32 in
+**Pending product amendment (updated 2026-11-04).** The owner agreed
+the guided first-use journey, introductory copy, and interaction
+decisions D-26–D-34 in
 [PDD §2.3](pdd.md#23-user-journeys).
 The existing task bodies describe the earlier prototype experience.
-They do not implement this new journey, including D-26–D-32.
+They do not implement this new journey, including D-26–D-34.
 The movement component now records explicit maxima, editable
 minimum 0 m, shortcuts, and immediate range guidance. D-32 defines
-the agreed review presentation. See the
-[prototype record](scenario-journey-prototype.md) for the saved
+the agreed review presentation. D-33 accepts the first results
+layout. D-34 applies the shared draft, confirmation, discard, and
+restart rules to refinements. Remaining control details are open.
+See the [prototype record](scenario-journey-prototype.md) for the saved
 examples and which details remain proposals.
 The remaining interaction and guidance choices need product
 definition, followed by design and task amendments; implementing

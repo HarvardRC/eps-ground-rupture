@@ -1,17 +1,22 @@
 # Ground Rupture Explorer — detailed design document
 
-**Pending product amendment (2026-11-03).** The owner agreed the
-guided first-use journey, introductory copy, and interaction
-decisions D-26–D-32 in
+**Pending product amendment (updated 2026-11-04).** The owner agreed
+the guided first-use journey, introductory copy, and interaction
+decisions D-26–D-34 in
 [PDD §2.3](pdd.md#23-user-journeys).
 This document still specifies the earlier prototype experience.
-Returning visits, browser navigation, refinements, recovery, and
-remaining guidance are still open. Its full-ensemble defaults,
+Returning visits, browser navigation, remaining refinement details,
+recovery, and guidance are still open. Its full-ensemble defaults,
 automatic result updates, and behavior when switching modes need
-alignment with D-26–D-32, including the discard, restart, and
+alignment with D-26–D-34, including the discard, restart, and
 step-navigation actions. D-31 also replaces the fresh no-window
 state with an explicit maximum, and adds movement shortcuts and
 immediate range guidance. D-32 defines the review presentation.
+D-33 accepts the first results layout; its tabs and visible
+statistics supersede the earlier result arrangement at product
+level. D-34 includes refinements in the shared draft, confirmation,
+discard, and restart behavior; presentation changes are immediate.
+Detailed design and copy-registry amendments remain pending.
 The reviewed component examples are saved with the
 [prototype record](scenario-journey-prototype.md).
 Their illustrative increments and remaining shortcut proposals
