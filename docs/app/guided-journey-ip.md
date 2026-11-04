@@ -311,27 +311,37 @@ The first strict publication build after that change failed arm
 (d): the guided page links to the unlisted `scenario.md`, and the
 hook rejected a link to an unlisted page from any other built page.
 Guided DDD §6 keeps that existing-explorer link, and D-39 defines
-unlisted as no navigation, sitemap, or search entry. The hook now
-exempts only links from the unlisted guided page to another
-unlisted page; every other page, `scenario/` included, still may
-not link to an unlisted page. In a publication build that outputs
-`explore/index.html`, a new arm (d) finding also requires the
-guided page to stay unlisted.
+unlisted as no navigation, sitemap, or search entry. Review found
+that this departed from the legacy DDD §6.1 wording, so G-08 put the
+question to the owner rather than merging.
 
-**Owner question (open).** The legacy
+**Owner ruling, 2026-11-05.** The owner chose to amend legacy
 [DDD §6.1](ddd.md#61-build-outputs-asset-paths-and-page-scaffold)
-says the build fails "when any other page links to" the unlisted
-page. The guided page's exemption departs from that wording, and the
-grant does not cover amending the legacy DDD. G-08 is therefore not
-merged autonomously; it waits for the owner's ruling.
+arm (d) and its phase-2 paragraph with a dated, narrow exemption:
+links to an unlisted page are permitted only from pages that are
+themselves published unlisted — today exactly `explore.md` →
+`scenario.md`, per D-39 (comparison and field-overlay access) and
+guided DDD §6. Arm (d) must still fail any link from an advertised
+page to an unlisted one, and the hook tests must cover both sides.
+The rule stays deliberately strict: when the D-39 reconciliation
+advertises `/explore/`, arm (d) trips and forces the field-overlay
+and linking decision, queued in the next phase. A legacy-DDD
+amendment lies outside the standing grant's letter; this ruling
+authorizes it for G-08 only. The owner then authorized the
+autonomous merge.
 
-Sixteen new hook tests cover the guided page in the publication
-tree: rejection of links from listed pages and the existing
-explorer, rendered navigation, sitemap, and search entries; the
-guided page's own exemption and its unlisted precondition; the
-not-unlisted guard; sitemap removal; arm (f) under `on_post_build`;
-the preview's unchanged coverage, drafts included; and the committed
-configurations. All 32 hook tests passed. The exemption and the
+The hook and the legacy DDD now carry that rule. In a publication
+build that outputs `explore/index.html`, a new arm (d) finding also
+requires the guided page to stay unlisted.
+
+Fifteen new hook tests cover the guided page in the publication
+tree: the allowed `explore` → `scenario` link; rejected links from
+a listed page, including rendered navigation, to either unlisted
+page; sitemap and search entries; the not-unlisted guard; the trip
+on the existing-explorer link once `/explore/` is advertised;
+sitemap removal; arm (f) under `on_post_build`; the preview's
+unchanged coverage, drafts included; and the committed
+configurations. All 31 hook tests passed. The allowed link and the
 guard each fail against the base hook.
 
 At this verification:
@@ -345,7 +355,7 @@ At this verification:
 - The `/scenario/` bundles `app-26490347afd0.js` and
   `app-08bebc049c15.css` matched the pre-change baseline SHA-256s.
 - The pinned Node suite passed all 401 tests; typechecking and the
-  bundle passed. 5,496 relative links in 61 Markdown files
+  bundle passed. 5,498 relative links in 61 Markdown files
   resolved; PDD agreement passed; traceability linted 491 rows
   with no gaps.
 

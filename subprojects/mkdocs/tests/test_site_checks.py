@@ -179,8 +179,8 @@ class GuidedUnlistedTest(unittest.TestCase):
         patch.object(checks, "_command", "build").start()
         self.publication = SimpleNamespace(site_url=SITE_URL, config_file_path="/x/mkdocs.yml")
         self.preview = SimpleNamespace(site_url=SITE_URL, config_file_path="/x/mkdocs.preview.yml")
-        # The guided page links to the existing explorer and to itself; the
-        # existing explorer links only to itself; listed pages link only to
+        # The unlisted guided page links to the unlisted existing explorer
+        # and to itself (owner ruling 2026-11-05); listed pages link only to
         # listed pages.
         self.write("explore/index.html", '<a href="../scenario/">x</a><a href="./">x</a>')
         self.write("scenario/index.html", '<a href="./#gre-disclaimer">x</a>')
@@ -232,12 +232,9 @@ class GuidedUnlistedTest(unittest.TestCase):
         patch.object(checks, "_unlisted", [self.scenario]).start()
         self.reject(self.publication, "guided page is not unlisted")
 
-    def test_existing_explorer_may_not_link_to_guided_page(self) -> None:
-        # Only the guided page's links are exempt (guided DDD §6).
-        self.write("scenario/index.html", '<a href="../explore/">x</a>')
-        self.reject(self.publication, "resolves to the unlisted explore.md")
-
-    def test_guided_page_link_exemption_needs_it_unlisted(self) -> None:
+    def test_advertised_guided_page_linking_to_existing_explorer_fails(self) -> None:
+        # Advertising /explore/ (it leaves the unlisted pages) trips arm (d)
+        # on its existing-explorer link, forcing that decision consciously.
         patch.object(checks, "_unlisted", [self.scenario]).start()
         self.reject(self.publication, "resolves to the unlisted scenario.md")
 
