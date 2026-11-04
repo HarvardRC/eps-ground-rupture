@@ -19,9 +19,9 @@ Use a current stable version of Chrome, Edge, Firefox, or Safari.
 If the controls do not appear, update your browser and reload. For
 Safari on iPhone or iPad, update iOS or iPadOS.
 
-Your draft is kept only while this page remains open. Reloading or
-leaving the page starts a new scenario. Supporting links in the
-interactive explorer open a separate tab to preserve your draft.
+Your work stays in this tab, including across a reload. Closing the
+tab or opening a new one starts a fresh scenario. Supporting links in
+the interactive explorer open a separate tab to preserve your work.
 
 Read [the paper](paper.md), [data and citation](data.md),
 [the glossary](glossary.md), or [the dashboards](index.md).

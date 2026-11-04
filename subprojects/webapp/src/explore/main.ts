@@ -4,6 +4,7 @@ import { loadRegression, loadVintage } from '../decode/decode';
 import { LoadError } from '../decode/load-error';
 import type { Regression } from '../decode/fields';
 import { mountExplorer } from './app';
+import { SESSION_KEY } from './session';
 
 const SELF = import.meta.url;
 const SLOT = Symbol.for('gre.explore.mount');
@@ -26,6 +27,20 @@ function missingFeatures(): string[] {
     ['object URLs', () => typeof URL.createObjectURL === 'function' && typeof URL.revokeObjectURL === 'function'],
   ];
   return checks.filter(([, check]) => { try { return !check(); } catch { return true; } }).map(([name]) => name);
+}
+
+/**
+ * The tab's session storage, or null when it is unavailable or throws on
+ * access; continuity is then off for the mount (guided DDD §9.2).
+ */
+function tabStorage(): Storage | null {
+  try {
+    const storage = window.sessionStorage;
+    storage.getItem(SESSION_KEY);
+    return storage;
+  } catch {
+    return null;
+  }
 }
 
 function message(root: HTMLElement, title: string, detail: string, retry?: () => void): void {
@@ -67,7 +82,7 @@ async function start(mount: Mount, tag: HTMLScriptElement): Promise<void> {
       }
       return regression;
     };
-    mountExplorer(root, { vintage, stamps: { softwareVersion, dataVersion }, loadRegression: getRegression, signal: abort.signal });
+    mountExplorer(root, { vintage, stamps: { softwareVersion, dataVersion }, loadRegression: getRegression, signal: abort.signal, storage: tabStorage() });
   } catch (error) {
     if (!alive()) return;
     const detail = error instanceof LoadError && (error.kind === 'data-version' || error.kind === 'schema-version')
@@ -109,8 +124,9 @@ else if (document.readyState === 'loading') document.addEventListener('DOMConten
 else ready();
 
 // A browser-history restoration can retain the old DOM and JavaScript
-// heap without a MkDocs or DOMContentLoaded notification. Returning to
-// this candidate must still start a fresh draft, as its session copy says.
+// heap without a MkDocs or DOMContentLoaded notification. Release the
+// retained mount and mount afresh, so the same-tab restore of guided DDD
+// §9.2 applies exactly as after a reload (§7).
 window.addEventListener('pageshow', event => {
   if (!event.persisted) return;
   const previous = owner[SLOT];

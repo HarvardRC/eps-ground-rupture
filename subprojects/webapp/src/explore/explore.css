@@ -64,6 +64,10 @@
 #gre-explore .gx-sample-confirm { padding: 17px; border: 1px solid #bc966b; background: #fff5df; border-radius: 7px; }
 #gre-explore .gx-sample-confirm p { font-size: .8rem; }
 #gre-explore .gx-sample-status { margin: 0 0 18px; padding: 10px 15px; border-left: 3px solid #bc966b; background: #fff5df; font-size: .8rem; }
+#gre-explore .gx-restored { margin: 0 0 18px; padding: 10px 15px; border-left: 3px solid var(--gx-accent); background: #f7f1ef; font-size: .8rem; }
+#gre-explore .gx-restoring { margin: 0 0 18px; }
+#gre-explore .gx-restore-retry, #gre-explore .gx-restore-blocked { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+#gre-explore .gx-restore-retry p, #gre-explore .gx-restore-blocked p { flex: 1 1 260px; margin: 0; font-size: .8rem; }
 #gre-explore .gx-restart .gx-button { padding: 7px 0; border: 0; color: var(--gx-muted); background: transparent; font-weight: 400; text-decoration: underline; }
 #gre-explore .gx-support { padding: 20px 30px; border-top: 1px solid var(--gx-line); background: var(--gx-wash); border-radius: 0 0 14px 14px; color: var(--gx-muted); font-size: .7rem; }
 #gre-explore .gx-support p:last-child { margin: 12px 0 0; font-size: .7rem; }
