@@ -373,6 +373,66 @@ so G-08 did not cause it. It is a legacy-page spec outside this
 increment, reported to the owner as a T-54 rerun item rather than a
 G-08 question.
 
+### Sample inputs, 2026-11-04 (G-09)
+
+G-09 added `sampleDraft` to the guided state. It fills 30° and 40°
+fault angles, 5 m depth, Dense density, and the Uniform: Strong and
+Layered: Strong pairs, all taken from the manifest dictionaries,
+with offset mode and a 3 m maximum. Slip entries, population, and
+scarp types keep their fresh defaults. A missing member throws
+rather than shrinking the sample. The existing sediment-group
+labeling moved from `app.ts` into `state.ts` unchanged, so the
+sample and the page name sediment the same way.
+
+The introduction offers **Try sample inputs** beside **Build your
+scenario**, with `Sample inputs, not recommended site values.` A
+fresh, unconfirmed draft fills silently and opens Site conditions.
+Otherwise the introduction actions give way to an inline question,
+`Replace your current choices with the sample inputs?`, focused,
+with **Use the sample** and **Keep my choices**. The status line
+`These are sample inputs, not recommended site values. Change
+anything.` (`role="status"`) appears on Site conditions after a fill
+and clears when the reader leaves that step.
+
+Three new state tests cover completeness, validity against the
+fixture manifest, canonical ordering, independent copies, the fresh
+slip entries and refinements, and each missing member.
+
+At this verification, after rebasing onto the merged G-08:
+
+- The pinned Node suite passed all 404 tests; typechecking and the
+  bundles passed. Strict publication and preview builds passed
+  with `explore-57b0e14797fe.js` and `explore-ea4ea319bbbd.css`.
+  The `/scenario/` bundles `app-26490347afd0.js` and
+  `app-08bebc049c15.css` were unchanged. All 31 hook tests passed.
+- 5,498 relative links in 61 Markdown files resolved; PDD
+  agreement passed; traceability linted 491 rows with no gaps.
+
+A disposable Playwright script drove the strict preview build with
+the pinned data at 1,024 px and 320 px; 35 checks passed and the
+script was not committed. They covered:
+
+- the fresh fill, its six site selections, offset mode with 3 m,
+  and the status line, cleared on leaving Site;
+- the deliberate coverage warning at 30° only on the movement step
+  and review (coverage up to about 2.51 m). The confirmed sample
+  returned 2,880 matching records;
+- with a confirmed scenario, the focused inline question; Keep my
+  choices restoring the actions and focusing the trigger;
+- Use the sample after slip-mode and last-stage edits, which
+  restored offset mode, 3 m, fresh slip entries, and all stages,
+  leaving the confirmed count unchanged;
+- a confirmed 30-record last-stage scenario, unchanged after a fill
+  that raised the pending banner, with the walkthrough off on
+  return;
+- an edited, unconfirmed draft asking first, with Keep my choices
+  leaving it;
+- no browser dialog, no page error, and no horizontal overflow at
+  320 px, where the status line renders at 16 px.
+
+Screen-reader announcement of the inserted status line, touch, and
+other engines were not checked; G-12 adds the committed spec.
+
 ## Separate CI investigation
 
 The reported job `126383105016` belongs to historical run
