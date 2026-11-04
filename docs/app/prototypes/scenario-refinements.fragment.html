@@ -1,0 +1,511 @@
+<div id="scenario-refinements-proposal">
+  <div class="rs-preview-label">Design example · Measurements are invented. Shape sketches are schematic.</div>
+  <section class="rs-app" aria-labelledby="rs-title">
+    <header class="rs-brand-row"><strong>Ground Rupture Explorer</strong><span>Research companion</span></header>
+    <main data-rf-view="results">
+      <div class="rs-heading"><div><p class="rs-step">Step 5 of 5 · Results</p><h2 id="rs-title">Explore your scenario</h2></div><button class="rs-button cursor-interaction" type="button" data-rf-action="review">Review scenario</button></div>
+
+      <section class="rs-context" aria-label="Confirmed scenario">
+        <div class="rs-context-head"><h3>Your confirmed scenario</h3><strong data-matching-count>360 matching records</strong></div>
+        <p><strong>Site:</strong> 30° fault angle · 5 m sediment depth · Dense · Uniform: strong</p>
+        <p><strong>Movement:</strong> 0–3 m surface offset → approximately 0.01–5.99 m fault slip</p>
+        <p class="rs-secondary"><strong>Included:</strong> <span data-confirmed-included>All stages within the slip range · All scarp types</span></p>
+        <p class="rs-secondary" data-confirmed-stages>Charts and statistics combine measurements from all included stages. One simulation may contribute several records.</p>
+      </section>
+      <div class="rf-pending" data-pending hidden>
+        <p><strong>You have unapplied changes</strong><span>These results still describe your confirmed scenario.</span></p>
+        <div><button type="button" class="rs-button cursor-interaction" data-rf-action="review">Return to review</button><button type="button" class="rs-button cursor-interaction" data-rf-action="discard">Discard changes</button></div>
+      </div>
+      <div class="rf-toggle-row"><button type="button" class="rs-button cursor-interaction" data-rf-action="toggle" aria-expanded="true" aria-controls="rf-editor">Hide refinements</button></div>
+      <section id="rf-editor" class="rf-editor" aria-labelledby="rf-heading">
+        <div class="rf-editor-title"><h3 id="rf-heading">Refine results</h3><span>Draft choices</span></div>
+        <p class="rs-secondary">Review your changes before they affect the results.</p>
+        <div class="rf-controls">
+          <fieldset class="rf-population"><legend>Which simulation stages should contribute?</legend>
+            <p class="rf-stage-intro">A simulation records the ground's shape as fault slip increases. Each saved point is a <strong>stage</strong>, with its own measurements.</p>
+            <label class="rf-radio cursor-interaction"><input type="radio" name="rf-population" value="all" checked><span><strong>All stages within the slip range</strong><span>Explore results throughout the range. Use every recorded stage within it; one simulation may contribute several measurements.</span></span></label>
+            <label class="rf-radio cursor-interaction"><input type="radio" name="rf-population" value="last"><span><strong>Last stage within the slip range</strong><span>Compare simulations at their greatest recorded slip within the range. Use at most one stage per simulation, which may fall below your range's upper end.</span></span></label>
+            <p class="rf-stage-impact">This choice can change the record count, chart shape, median, and percentiles.</p>
+            <details class="rf-stage-example" data-stage-example>
+              <summary class="cursor-interaction">See how stages change the results</summary>
+              <p><strong>Example: one simulation, three stages.</strong> Invented values for a fault-slip range of 0–3 m, with all scarp types included.</p>
+              <table aria-label="Invented stages included by the stage choice"><thead><tr><th scope="col">Fault slip</th><th scope="col">Scarp height</th><th scope="col">Stage used?</th></tr></thead><tbody>
+                <tr data-example-stage="earlier"><td>0.5 m</td><td>0.2 m</td><td data-example-included>Included</td></tr>
+                <tr data-example-stage="earlier"><td>1.5 m</td><td>0.7 m</td><td data-example-included>Included</td></tr>
+                <tr data-example-stage="last"><td>2.5 m</td><td>1.1 m</td><td data-example-included>Included</td></tr>
+              </tbody></table>
+              <p data-example-effect aria-live="polite"></p>
+              <p class="rs-secondary">Change the stage choice above to compare. This example follows only that choice and keeps all scarp types included. The displayed results below wait for confirmation.</p>
+              <p>Across simulations, <strong>All stages</strong> gives more influence to simulations with more included measurements. <strong>Last stage</strong> uses at most one measurement per simulation. Neither choice guarantees larger or smaller results.</p>
+            </details>
+          </fieldset>
+          <fieldset class="rf-types" aria-describedby="rf-type-help rf-type-error"><legend>Which resulting scarp types?</legend>
+            <p id="rf-type-help" class="rs-secondary">Choose one or more types. These are simulated outcomes.</p>
+            <p id="rf-type-error" class="rf-error" role="alert" hidden>Select one or more scarp types before review.</p>
+            <label class="rf-select-all cursor-interaction"><input type="checkbox" data-all-types checked> Select all</label>
+            <div class="rf-type-grid" data-type-grid></div>
+          </fieldset>
+        </div>
+        <div class="rf-editor-footer"><p class="rs-secondary">The charts below keep the confirmed settings until you choose Show results.</p><button type="button" class="rs-button rs-primary cursor-interaction" data-rf-action="review">Review changes</button></div>
+      </section>
+      <div class="rs-notices" aria-label="Result limitations">
+        <p><strong>Partial coverage.</strong> At 30°, the simulations cover offsets up to approximately 2.51 m. These results describe only the covered part of your 0–3 m range.</p>
+        <p><strong>Small-slip caution.</strong> Your range includes slip below 0.5 m, where automated measurements can be less reliable. Treat results near zero with extra caution.</p>
+      </div>
+
+      <div class="rs-measurements" role="group" aria-label="Choose a measurement">
+        <button type="button" data-measure="height" aria-pressed="true" class="cursor-interaction">Scarp height</button>
+        <button type="button" data-measure="width" aria-pressed="false" class="cursor-interaction">Deformation-zone width</button>
+        <button type="button" data-measure="dip" aria-pressed="false" class="cursor-interaction">Scarp dip</button>
+      </div>
+      <section class="rs-measurement" aria-labelledby="rs-measure-title">
+        <div class="rs-measure-head"><h3 id="rs-measure-title">Scarp height</h3><p data-valid-count>348 valid measurements</p></div>
+        <p class="rs-explanation" data-explanation>The vertical step in the ground created by the rupture.</p>
+        <p class="rs-measure-warning" data-measure-warning hidden></p>
+        <p class="rs-measure-warning" data-size-warning hidden></p>
+        <div class="rs-analysis">
+          <div class="rs-chart-side">
+            <div class="rs-chart-controls" role="group" aria-label="Chart view">
+              <button class="cursor-interaction" type="button" data-chart-mode="histogram" aria-pressed="true">Distribution</button>
+              <button class="cursor-interaction" type="button" data-chart-mode="cumulative" aria-pressed="false">Cumulative</button>
+            </div>
+            <p class="rs-chart-help" data-chart-help>How often each range appears among the matching measurements.</p>
+            <div class="rs-plot" data-plot>
+              <svg class="rs-chart" role="img" aria-label="Illustrative measurement distribution"></svg>
+              <div class="rs-tooltip" data-tooltip-panel hidden></div>
+            </div>
+            <p class="rs-legend" data-legend><span class="rs-line rs-solid"></span>Median<span class="rs-line rs-dashed"></span>84th percentile</p>
+            <div class="rs-readout" data-readout hidden>
+              <label for="rs-percentile">Percentile <output for="rs-percentile" data-percentile-label>84</output></label>
+              <input class="cursor-interaction" id="rs-percentile" type="range" min="0" max="100" step="1" value="84">
+              <p data-percentile-value aria-live="polite"></p>
+            </div>
+            <p class="rs-chart-note" data-chart-note></p>
+          </div>
+          <section class="rs-statistics" aria-labelledby="rs-stats-title">
+            <h4 id="rs-stats-title">Statistics</h4>
+            <p class="rs-secondary rs-stats-intro">Matching simulation records.</p>
+            <table><caption class="rs-sr-only">Illustrative statistics for the selected measurement</caption><thead><tr><th scope="col">Statistic</th><th scope="col" data-unit-header>Value</th></tr></thead><tbody data-stat-rows></tbody></table>
+            <p class="rs-secondary rs-excluded">Missing values are excluded from this measurement's chart and statistics.</p>
+          </section>
+        </div>
+        <div class="rs-interpretation"><strong>Reading these results</strong><p>The median is the middle measurement; the 16th–84th percentile range describes the middle 68% of measurements. These summaries are not recommended design values. Choosing a design value requires engineering judgment.</p></div>
+      </section>
+
+      <footer class="rs-footer">
+        <div class="rs-actions"><button type="button" class="rs-button cursor-interaction" data-endpoint="site">Change site conditions</button><button type="button" class="rs-button cursor-interaction" data-endpoint="movement">Change fault movement</button></div>
+        <button type="button" class="rs-button rs-primary cursor-interaction" data-endpoint="download">Download results</button>
+      </footer>
+      <p class="rs-disclaimer">This is a research tool; it does not predict what will happen at a particular site.</p>
+    </main>
+    <section class="rf-review" data-rf-view="review" hidden aria-labelledby="rf-review-title">
+      <p class="rs-step">Step 4 of 5 · Review</p><h2 id="rf-review-title">Review your scenario</h2>
+      <p class="rs-secondary rf-review-intro">Check your assumptions before showing results.</p>
+      <section class="rf-review-section"><div class="rs-context-head"><h3>Site conditions</h3><button type="button" class="rs-button cursor-interaction" data-endpoint="site">Edit site conditions</button></div>
+        <dl><div><dt>Fault angle</dt><dd>30°</dd></div><div><dt>Sediment depth</dt><dd>5 m</dd></div><div><dt>Sediment density</dt><dd>Dense</dd></div><div><dt>Sediment strength and structure</dt><dd>Uniform: strong</dd></div></dl>
+      </section>
+      <section class="rf-review-section"><div class="rs-context-head"><h3>Fault movement</h3><button type="button" class="rs-button cursor-interaction" data-endpoint="movement">Edit fault movement</button></div>
+        <dl><div><dt>Specified as</dt><dd>Vertical surface offset</dd></div><div><dt>Your assumed range</dt><dd>0–3 m</dd></div><div><dt>Corresponding slip at 30°</dt><dd>Approximately 0.01–5.99 m</dd></div></dl>
+        <p class="rs-secondary">Modeled slip: 0–5.0135 m. Conversion is approximate. Raised surface ridges can cause it to overestimate fault slip.</p>
+        <div class="rs-notices"><p><strong>Part of your range is outside the simulations.</strong> At 30°, offset coverage ends at approximately 2.51 m. Results will describe only the covered part of your 0–3 m range.</p></div>
+      </section>
+      <section class="rf-review-section"><div class="rs-context-head"><h3>What the results will include</h3><button type="button" class="rs-button cursor-interaction" data-rf-action="edit-refinements">Edit refinements</button></div>
+        <dl><div><dt>Simulation stages</dt><dd data-review-population></dd></div><div><dt>Resulting scarp types</dt><dd data-review-types></dd></div></dl>
+        <p data-review-explanation></p>
+        <p class="rs-secondary rf-review-intro" data-review-type-explanation></p>
+      </section>
+      <footer class="rs-footer"><button type="button" class="rs-button cursor-interaction" data-rf-action="back-results">Back to results</button><button type="button" class="rs-button rs-primary cursor-interaction" data-rf-action="confirm">Show results</button></footer>
+    </section>
+  </section>
+  <div class="rs-preview-response" data-preview-response role="status" hidden></div>
+</div>
+
+<style>
+  #scenario-refinements-proposal { --rs-bg: light-dark(#fffdfa,#242122); --rs-text: light-dark(#302b2d,#f3ebef); --rs-muted: light-dark(#665c61,#cdbfc5); --rs-border: light-dark(#dcd3d7,#55484e); --rs-accent: light-dark(#8f213b,#efb1c1); --rs-soft: light-dark(#f6f0f1,#30282d); --rs-warning: light-dark(#8b2238,#ffc2cd); --rs-warning-bg: light-dark(#fff1f3,#41252f); font: 15px/1.45 Arial,sans-serif; color: var(--rs-text); width: 100%; }
+  #scenario-refinements-proposal * { box-sizing: border-box; }
+  #scenario-refinements-proposal [hidden] { display: none !important; }
+  #scenario-refinements-proposal .rs-preview-label { color: light-dark(#72561e,#dfc384); background: light-dark(#fff8e8,#30291d); padding: 9px 14px; font-size: 13px; }
+  #scenario-refinements-proposal .rs-app { background: var(--rs-bg); }
+  #scenario-refinements-proposal .rs-brand-row { padding: 12px 26px; border-bottom: 1px solid var(--rs-border); display: flex; gap: 18px; flex-wrap: wrap; align-items: baseline; }
+  #scenario-refinements-proposal .rs-brand-row strong { font-size: 16px; }
+  #scenario-refinements-proposal .rs-brand-row span { font-size: 13px; color: var(--rs-muted); }
+  #scenario-refinements-proposal main { padding: 16px 26px; }
+  #scenario-refinements-proposal p { margin: 0; }
+  #scenario-refinements-proposal h2 { margin: 0; font-size: 25px; line-height: 1.2; font-weight: 600; }
+  #scenario-refinements-proposal h3 { margin: 0; font-size: 18px; font-weight: 600; }
+  #scenario-refinements-proposal h4 { margin: 0; font-size: 16px; font-weight: 600; }
+  #scenario-refinements-proposal .rs-step { color: var(--rs-accent); font-size: 13px; margin-bottom: 4px; }
+  #scenario-refinements-proposal .rs-heading, #scenario-refinements-proposal .rs-context-head, #scenario-refinements-proposal .rs-measure-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 18px; }
+  #scenario-refinements-proposal .rs-intro { margin-top: 8px; color: var(--rs-muted); }
+  #scenario-refinements-proposal button { font: inherit; border: 1px solid var(--rs-border); color: var(--rs-text); background: var(--rs-bg); border-radius: 5px; min-height: 40px; padding: 8px 13px; }
+  #scenario-refinements-proposal button:hover { background: var(--rs-soft); }
+  #scenario-refinements-proposal .rs-primary { background: var(--rs-accent); color: light-dark(#fff,#34141e); border-color: var(--rs-accent); }
+  #scenario-refinements-proposal .rs-primary:hover { background: light-dark(#701b30,#ffd1dc); }
+  #scenario-refinements-proposal .rs-context { background: var(--rs-soft); padding: 10px 16px; margin-top: 12px; border-radius: 5px; }
+  #scenario-refinements-proposal .rs-context-head { margin-bottom: 7px; }
+  #scenario-refinements-proposal .rs-context-head h3 { font-size: 15px; }
+  #scenario-refinements-proposal .rs-context-head > strong { font-size: 14px; }
+  #scenario-refinements-proposal .rs-context p { font-size: 13px; margin-top: 3px; }
+  #scenario-refinements-proposal .rs-secondary { color: var(--rs-muted); font-size: 13px; }
+  #scenario-refinements-proposal .rs-notices { padding: 11px 14px; border-left: 3px solid var(--rs-warning); background: var(--rs-warning-bg); color: var(--rs-warning); font-size: 13px; margin-top: 10px; }
+  #scenario-refinements-proposal .rs-notices p + p { margin-top: 6px; }
+  #scenario-refinements-proposal .rs-measurements { display: flex; gap: 6px; flex-wrap: wrap; border-bottom: 1px solid var(--rs-border); margin-top: 14px; }
+  #scenario-refinements-proposal .rs-measurements button { border: 0; border-bottom: 3px solid transparent; border-radius: 0; padding: 10px 12px; font-size: 14px; }
+  #scenario-refinements-proposal .rs-measurements button[aria-pressed="true"] { color: var(--rs-accent); border-bottom-color: var(--rs-accent); background: var(--rs-soft); font-weight: 600; }
+  #scenario-refinements-proposal .rs-measurement { padding-top: 16px; }
+  #scenario-refinements-proposal .rs-measure-head p { font-size: 13px; font-weight: 600; }
+  #scenario-refinements-proposal .rs-explanation { font-size: 14px; margin-top: 4px; color: var(--rs-muted); }
+  #scenario-refinements-proposal .rs-measure-warning { background: var(--rs-warning-bg); color: var(--rs-warning); padding: 9px 12px; font-size: 13px; margin-top: 10px; border-left: 3px solid var(--rs-warning); }
+  #scenario-refinements-proposal .rs-analysis { display: grid; grid-template-columns: minmax(0,1fr) 290px; gap: 24px; margin-top: 15px; }
+  #scenario-refinements-proposal .rs-chart-side { min-width: 0; }
+  #scenario-refinements-proposal .rs-chart-controls { display: inline-flex; gap: 0; }
+  #scenario-refinements-proposal .rs-chart-controls button { border-radius: 0; font-size: 13px; min-height: 35px; padding: 7px 12px; }
+  #scenario-refinements-proposal .rs-chart-controls button:first-child { border-radius: 5px 0 0 5px; }
+  #scenario-refinements-proposal .rs-chart-controls button:last-child { border-radius: 0 5px 5px 0; margin-left: -1px; }
+  #scenario-refinements-proposal .rs-chart-controls button[aria-pressed="true"] { background: var(--rs-accent); color: light-dark(#fff,#34141e); border-color: var(--rs-accent); }
+  #scenario-refinements-proposal .rs-chart-help { color: var(--rs-muted); font-size: 13px; margin: 8px 0 2px; min-height: 19px; }
+  #scenario-refinements-proposal .rs-plot { position: relative; width: 100%; }
+  #scenario-refinements-proposal .rs-chart { display: block; width: 100%; height: 260px; overflow: visible; }
+  #scenario-refinements-proposal .rs-chart text { font-family: Arial,sans-serif; font-size: 12px; fill: var(--rs-muted); }
+  #scenario-refinements-proposal .rs-chart .domain, #scenario-refinements-proposal .rs-chart .tick line { stroke: var(--rs-border); }
+  #scenario-refinements-proposal .rs-chart .rs-bars { fill: var(--rs-accent); opacity: .72; }
+  #scenario-refinements-proposal .rs-chart .rs-curve { stroke: var(--rs-accent); stroke-width: 2; fill: none; }
+  #scenario-refinements-proposal .rs-chart .rs-guide { stroke: var(--rs-muted); stroke-width: 1.3; }
+  #scenario-refinements-proposal .rs-chart .rs-selected-line { stroke: var(--rs-accent); stroke-width: 1; stroke-dasharray: 2 3; }
+  #scenario-refinements-proposal .rs-chart .rs-selected-dot { fill: var(--rs-accent); }
+  #scenario-refinements-proposal .rs-chart .axis-title { fill: var(--rs-text); }
+  #scenario-refinements-proposal .rs-tooltip { position: absolute; max-width: 230px; padding: 7px 10px; background: var(--rs-bg); border: 1px solid var(--rs-border); color: var(--rs-text); border-radius: 5px; font-size: 12px; pointer-events: none; box-shadow: 0 3px 12px light-dark(#302b2d18,#00000045); z-index: 3; }
+  #scenario-refinements-proposal .rs-legend { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 7px; font-size: 12px; color: var(--rs-muted); margin: 0 0 7px; }
+  #scenario-refinements-proposal .rs-line { width: 21px; height: 0; border-top: 1.5px solid var(--rs-muted); display: inline-block; margin-left: 10px; }
+  #scenario-refinements-proposal .rs-dashed { border-top-style: dashed; }
+  #scenario-refinements-proposal .rs-chart-note { font-size: 12px; color: var(--rs-muted); margin-top: 8px; }
+  #scenario-refinements-proposal .rs-readout { padding-top: 8px; }
+  #scenario-refinements-proposal .rs-readout label { display: flex; justify-content: space-between; font-size: 13px; }
+  #scenario-refinements-proposal .rs-readout output { font-weight: 600; }
+  #scenario-refinements-proposal input[type="range"] { width: 100%; accent-color: var(--rs-accent); margin: 9px 0 4px; }
+  #scenario-refinements-proposal .rs-readout p { font-size: 13px; }
+  #scenario-refinements-proposal .rs-statistics { border-left: 1px solid var(--rs-border); padding-left: 20px; }
+  #scenario-refinements-proposal .rs-stats-intro { margin-top: 3px; }
+  #scenario-refinements-proposal table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
+  #scenario-refinements-proposal th, #scenario-refinements-proposal td { text-align: left; padding: 4px 0; border-bottom: 1px solid var(--rs-border); font-weight: 400; }
+  #scenario-refinements-proposal thead th { font-size: 12px; color: var(--rs-muted); }
+  #scenario-refinements-proposal td:last-child, #scenario-refinements-proposal th:last-child { text-align: right; padding-left: 12px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  #scenario-refinements-proposal tbody tr[data-stat="median"] { font-weight: 600; background: var(--rs-soft); }
+  #scenario-refinements-proposal tbody tr[data-stat="median"] th, #scenario-refinements-proposal tbody tr[data-stat="median"] td { font-weight: 600; }
+  #scenario-refinements-proposal .rs-excluded { margin-top: 9px; font-size: 12px; }
+  #scenario-refinements-proposal .rs-interpretation { display: flex; gap: 15px; margin-top: 16px; border-top: 1px solid var(--rs-border); padding-top: 12px; font-size: 13px; }
+  #scenario-refinements-proposal .rs-interpretation strong { flex: 0 0 135px; }
+  #scenario-refinements-proposal .rs-interpretation p { color: var(--rs-muted); }
+  #scenario-refinements-proposal .rs-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--rs-border); }
+  #scenario-refinements-proposal .rs-actions { display: flex; gap: 9px; flex-wrap: wrap; }
+  #scenario-refinements-proposal .rs-disclaimer { margin-top: 14px; color: var(--rs-muted); font-size: 13px; }
+  #scenario-refinements-proposal .rs-preview-response { margin-top: 12px; padding: 12px 15px; color: light-dark(#72561e,#dfc384); background: light-dark(#fff8e8,#30291d); font-size: 14px; }
+  #scenario-refinements-proposal .rs-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+  #scenario-refinements-proposal .rf-toggle-row { margin: 12px 0; }
+  #scenario-refinements-proposal .rf-pending { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding: 12px 15px; margin-top: 12px; background: light-dark(#fff7e4,#342c1d); color: light-dark(#6f5110,#e8cc88); font-size: 14px; border-left: 3px solid light-dark(#a57919,#e8cc88); }
+  #scenario-refinements-proposal .rf-pending p span { display: block; font-size: 13px; margin-top: 3px; }
+  #scenario-refinements-proposal .rf-pending > div { display: flex; flex-wrap: wrap; gap: 8px; }
+  #scenario-refinements-proposal .rf-editor { border: 1px solid var(--rs-border); border-radius: 6px; padding: 18px; margin: 12px 0 18px; }
+  #scenario-refinements-proposal .rf-editor-title { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 5px; }
+  #scenario-refinements-proposal .rf-editor-title > span { color: var(--rs-accent); font-size: 13px; }
+  #scenario-refinements-proposal .rf-controls { display: grid; grid-template-columns: minmax(0,.8fr) minmax(0,1.2fr); gap: 24px; margin-top: 20px; }
+  #scenario-refinements-proposal fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+  #scenario-refinements-proposal legend { font-size: 14px; font-weight: 600; padding: 0; margin-bottom: 9px; }
+  #scenario-refinements-proposal input[type="radio"], #scenario-refinements-proposal input[type="checkbox"] { width: 17px; height: 17px; flex: 0 0 17px; accent-color: var(--rs-accent); margin: 2px 0 0; }
+  #scenario-refinements-proposal .rf-radio { display: flex; align-items: flex-start; gap: 9px; padding: 12px; border: 1px solid var(--rs-border); border-radius: 5px; margin-bottom: 10px; font-size: 14px; }
+  #scenario-refinements-proposal .rf-radio:has(input:checked) { border-color: var(--rs-accent); background: var(--rs-soft); }
+  #scenario-refinements-proposal .rf-radio span span { display: block; color: var(--rs-muted); font-size: 13px; margin-top: 4px; }
+  #scenario-refinements-proposal .rf-stage-intro { font-size: 14px; margin-bottom: 12px; }
+  #scenario-refinements-proposal .rf-stage-impact { font-size: 13px; }
+  #scenario-refinements-proposal .rf-stage-example { font-size: 13px; margin-top: 12px; }
+  #scenario-refinements-proposal .rf-stage-example summary { color: var(--rs-accent); padding: 8px 0; min-height: 40px; }
+  #scenario-refinements-proposal .rf-stage-example p { margin-top: 10px; }
+  #scenario-refinements-proposal .rf-stage-example table { table-layout: fixed; }
+  #scenario-refinements-proposal .rf-stage-example th, #scenario-refinements-proposal .rf-stage-example td { padding: 6px 3px; white-space: normal; text-align: left; overflow-wrap: anywhere; }
+  #scenario-refinements-proposal .rf-stage-example tr[data-included="true"] { background: var(--rs-soft); }
+  #scenario-refinements-proposal .rf-stage-example tr[data-included="false"] { color: var(--rs-muted); }
+  #scenario-refinements-proposal .rf-select-all { display: flex; align-items: center; gap: 8px; padding: 10px 0; font-size: 14px; min-height: 44px; }
+  #scenario-refinements-proposal .rf-type-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; }
+  #scenario-refinements-proposal .rf-type { display: grid; grid-template-columns: 17px minmax(0,1fr); align-content: start; align-items: start; gap: 5px 8px; border: 1px solid var(--rs-border); border-radius: 5px; padding: 10px; font-size: 13px; }
+  #scenario-refinements-proposal .rf-type:has(input:checked) { background: var(--rs-soft); border-color: var(--rs-accent); }
+  #scenario-refinements-proposal .rf-type-name { display: flex; gap: 6px; align-items: baseline; font-weight: 600; }
+  #scenario-refinements-proposal .rf-type-swatch { width: 8px; height: 8px; flex: 0 0 8px; border-radius: 50%; }
+  #scenario-refinements-proposal .rf-type svg { display: block; width: 100%; max-width: 110px; height: 32px; color: var(--rs-muted); grid-column: 2; }
+  #scenario-refinements-proposal .rf-type-description { color: var(--rs-muted); font-size: 12px; grid-column: 2; }
+  #scenario-refinements-proposal .rf-error { color: var(--rs-warning); font-size: 14px; margin-top: 9px; }
+  #scenario-refinements-proposal .rf-types[data-invalid="true"] { border-left: 3px solid var(--rs-warning); padding-left: 12px; }
+  #scenario-refinements-proposal .rf-editor-footer { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--rs-border); }
+  #scenario-refinements-proposal .rf-editor-footer p { max-width: 460px; }
+  #scenario-refinements-proposal .rf-review { max-width: 720px; margin: 0 auto; padding: 24px; }
+  #scenario-refinements-proposal .rf-review-intro { margin-top: 8px; }
+  #scenario-refinements-proposal .rf-review-section { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--rs-border); }
+  #scenario-refinements-proposal .rf-review dl { margin: 12px 0; }
+  #scenario-refinements-proposal .rf-review dl div { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.3fr); gap: 12px; margin: 8px 0; font-size: 14px; }
+  #scenario-refinements-proposal .rf-review dt { color: var(--rs-muted); }
+  #scenario-refinements-proposal .rf-review dd { margin: 0; }
+  #scenario-refinements-proposal .rf-review-section > p { font-size: 14px; }
+  @media (max-width: 760px) {
+    #scenario-refinements-proposal .rf-controls { grid-template-columns: minmax(0,1fr); }
+    #scenario-refinements-proposal main { padding: 18px; }
+    #scenario-refinements-proposal .rs-brand-row { padding: 16px 18px; }
+    #scenario-refinements-proposal .rs-analysis { grid-template-columns: minmax(0,1fr); gap: 20px; }
+    #scenario-refinements-proposal .rs-statistics { padding-left: 0; border-left: 0; border-top: 1px solid var(--rs-border); padding-top: 14px; }
+    #scenario-refinements-proposal .rs-interpretation { display: block; }
+    #scenario-refinements-proposal .rs-interpretation p { margin-top: 5px; }
+  }
+  @media (max-width: 440px) {
+    #scenario-refinements-proposal .rf-type-grid { grid-template-columns: minmax(0,1fr); }
+    #scenario-refinements-proposal .rf-editor, #scenario-refinements-proposal .rf-review { padding: 14px; }
+    #scenario-refinements-proposal .rf-review dl div { grid-template-columns: 1fr; gap: 2px; }
+    #scenario-refinements-proposal main { padding: 16px 12px; }
+    #scenario-refinements-proposal h2 { font-size: 22px; }
+    #scenario-refinements-proposal .rs-heading { align-items: flex-start; }
+    #scenario-refinements-proposal .rs-heading button { font-size: 13px; }
+    #scenario-refinements-proposal .rs-context { padding: 11px; }
+    #scenario-refinements-proposal .rs-measurements button { padding: 9px 8px; font-size: 13px; }
+  }
+  @media (pointer: coarse) { #scenario-refinements-proposal button { min-height: 44px; } #scenario-refinements-proposal input[type="range"] { min-height: 44px; } }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script>
+(() => {
+  const root = document.getElementById('scenario-refinements-proposal');
+  const $ = selector => root.querySelector(selector);
+  if (typeof d3 === 'undefined') { $('[data-preview-response]').hidden = false; $('[data-preview-response]').textContent = 'The chart preview could not load. Reload this example to try again.'; return; }
+  const measurements = {
+    height: { name: 'Scarp height', unit: 'm', digits: 2, n: 348, description: 'The vertical step in the ground created by the rupture.', warning: '', value: p => .08 + 3 * (.8 * p ** 1.4 + .2 * p ** 7) },
+    width: { name: 'Deformation-zone width', unit: 'm', digits: 1, n: 342, description: 'The width of the main disturbed zone around the rupture.', warning: 'This measures the main modeled rupture zone. Real earthquakes can also produce separate deformation away from the main trace, which the model does not represent.', value: p => .6 + 13 * (.7 * p ** 1.2 + .3 * p ** 6) },
+    dip: { name: 'Scarp dip', unit: '°', digits: 0, n: 336, description: 'The steepness of the scarp face, measured from horizontal.', warning: 'Provisional data: scarp-dip values await correction by the research group. The largest errors are concentrated in the Simple scarp types. Treat these results as provisional.', value: p => 9 + 68 * (.8 * Math.sqrt(p) + .2 * p ** 8) }
+  };
+  const types = [
+    {name:'Monoclinal', color:'#009ffa', description:'A smooth ramp or flexure.', path:'M4 9H35C51 9 54 29 70 29H106'},
+    {name:'Monoclinal Collapse', color:'#3f67b1', description:'A ramp with a slumped face.', path:'M4 9H33Q43 9 48 18L54 20L64 29H106'},
+    {name:'Pressure Ridge', color:'#f47820', description:'A mound pushed up at the fault.', path:'M4 28H27L44 9L57 6L74 28H106'},
+    {name:'Pressure Ridge Collapse', color:'#af773e', description:'A mound with a collapsed face.', path:'M4 28H27L44 9L57 8L65 19L80 28H106'},
+    {name:'Simple', color:'#ed2024', description:'A clean, steep step.', path:'M4 9H48L55 29H106'},
+    {name:'Simple Collapse', color:'#9f1d20', description:'A step with a crumbled face.', path:'M4 9H43L52 17L64 29H106'}
+  ];
+  // 60 synthetic trials, six stages each. Classifications can change
+  // between stages. These records are design aids, not scientific data.
+  const records = Array.from({length:360},(_,i)=>{
+    const trial=Math.floor(i/6), stage=i%6, type=(trial+Math.floor(stage/2))%6;
+    const p=Math.min(1,(stage+1)/6*.7+type/5*.18+(trial%10)/9*.12);
+    return {trial,stage,slip:.1+stage*.98,type,height:i%30===0?null:measurements.height.value(p),width:i%20===0?null:measurements.width.value(p),dip:i%15===0?null:measurements.dip.value(p)};
+  });
+  const defaults=()=>({population:'all',types:types.map((_,i)=>i)});
+  const clone=value=>JSON.parse(JSON.stringify(value));
+  let state = { measure:'height', chart:'histogram', percentile:84, confirmed:defaults(), draft:defaults(), view:'results', refineOpen:true, attempted:false, exampleOpen:false };
+  let matched=[];
+  const ownSnapshots = new Set();
+  const endpoints = {
+    review: 'Prototype boundary: Review scenario returns to the review screen you approved. This results example keeps the confirmed scenario unchanged.',
+    site: 'Prototype boundary: this action returns to Site conditions with the saved choices. Changes remain a draft until Review scenario → Show results. This example does not calculate revised results.',
+    movement: 'Prototype boundary: this action returns to Fault movement with the saved entries. Changes remain a draft until Review scenario → Show results. This example does not calculate revised results.',
+    download: 'Prototype boundary: the real download will contain matching records, statistics, the scenario definition, and provenance. This example contains invented values, so it does not create a results download.'
+  };
+  const format = (n,m=measurements[state.measure]) => n.toFixed(m.digits);
+  const populationLabel=p=>p==='last'?'Last stage within the slip range':'All stages within the slip range';
+  const typeLabel=selected=>selected.length===types.length?'All scarp types (no filter)':selected.map(i=>types[i].name).join('; ');
+  const dirty=()=>JSON.stringify(state.draft)!==JSON.stringify(state.confirmed);
+  const snapshotKey=s=>JSON.stringify(s?.modelContent || null);
+  function updateData() {
+    let selected=records.filter(r=>r.slip>=.01020856413&&r.slip<=5.9854);
+    if(state.confirmed.population==='last'){
+      const lastByTrial=new Map();
+      selected.forEach(r=>{const previous=lastByTrial.get(r.trial);if(!previous||r.slip>previous.slip)lastByTrial.set(r.trial,r);});
+      selected=Array.from(lastByTrial.values());
+    }
+    // Select the last stage before applying the scarp-type restriction.
+    matched=state.confirmed.types.length===types.length?selected:selected.filter(r=>state.confirmed.types.includes(r.type));
+    Object.entries(measurements).forEach(([key,m])=>{m.values=matched.map(r=>r[key]).filter(v=>v!==null).sort((a,b)=>a-b);m.n=m.values.length;});
+  }
+  function makeTypeControls() {
+    const grid=$('[data-type-grid]');
+    types.forEach((t,i)=>{
+      const label=document.createElement('label');label.className='rf-type cursor-interaction';
+      const input=document.createElement('input');input.type='checkbox';input.dataset.type=String(i);input.setAttribute('aria-label',t.name);input.setAttribute('aria-describedby','rf-type-help rf-type-error');
+      const name=document.createElement('span');name.className='rf-type-name';
+      const swatch=document.createElement('span');swatch.className='rf-type-swatch';swatch.style.background=t.color;swatch.setAttribute('aria-hidden','true');
+      name.append(swatch,document.createTextNode(t.name));
+      const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 110 38');svg.setAttribute('role','img');svg.setAttribute('aria-label','Schematic profile: '+t.name);
+      const path=document.createElementNS('http://www.w3.org/2000/svg','path');path.setAttribute('d',t.path);path.setAttribute('fill','none');path.setAttribute('stroke','currentColor');path.setAttribute('stroke-width','2');svg.append(path);
+      const description=document.createElement('span');description.className='rf-type-description';description.textContent=t.description;
+      label.append(input,name,svg,description);grid.append(label);
+    });
+  }
+  function refinementsValid() { return state.draft.types.length>0; }
+  function goReview() {
+    state.attempted=true;
+    if(!refinementsValid()) {
+      state.view='results';state.refineOpen=true;render();
+      $('[data-all-types]').focus();
+      $('.rf-types').scrollIntoView({block:'start',behavior:'instant'});
+    } else {
+      state.view='review';render();
+      $('[data-rf-view="review"] [data-rf-action="edit-refinements"]').focus();
+      $('[data-rf-view="review"]').scrollIntoView({block:'start',behavior:'instant'});
+    }
+    save();
+  }
+  function renderFlow() {
+    $('[data-rf-view="results"]').hidden=state.view!=='results';
+    $('[data-rf-view="review"]').hidden=state.view!=='review';
+    $('.rs-app').setAttribute('aria-labelledby',state.view==='review'?'rf-review-title':'rs-title');
+    $('[data-matching-count]').textContent=matched.length+' matching records';
+    $('[data-confirmed-included]').textContent=populationLabel(state.confirmed.population)+' · '+typeLabel(state.confirmed.types);
+    $('[data-confirmed-stages]').textContent=state.confirmed.population==='last'?'Charts and statistics use the last recorded stage within the slip range from each simulation. Each simulation contributes at most one record.':'Charts and statistics combine measurements from all included stages. One simulation may contribute several records.';
+    $('[data-pending]').hidden=!dirty();
+    $('#rf-editor').hidden=!state.refineOpen;
+    const toggle=$('[data-rf-action="toggle"]');toggle.textContent=state.refineOpen?'Hide refinements':'Refine results';toggle.setAttribute('aria-expanded',String(state.refineOpen));
+    root.querySelectorAll('input[name="rf-population"]').forEach(input=>{input.checked=input.value===state.draft.population;});
+    $('[data-stage-example]').open=state.exampleOpen;
+    root.querySelectorAll('[data-example-stage]').forEach(row=>{
+      const included=state.draft.population==='all'||row.dataset.exampleStage==='last';
+      row.dataset.included=String(included);
+      row.querySelector('[data-example-included]').textContent=included?'Included':'Omitted';
+    });
+    $('[data-example-effect]').textContent=state.draft.population==='last'?'Last stage: this simulation contributes only the 1.1 m height, recorded at 2.5 m slip. There is no recorded stage at 3 m, so no value is invented there. With one height, the median is 1.1 m.':'All stages: this simulation contributes three heights — 0.2, 0.7, and 1.1 m. Their median is 0.7 m.';
+    root.querySelectorAll('[data-type]').forEach(input=>{input.checked=state.draft.types.includes(Number(input.dataset.type));input.setAttribute('aria-invalid',String(state.attempted&&!refinementsValid()));});
+    const all=$('[data-all-types]');all.checked=state.draft.types.length===types.length;all.indeterminate=state.draft.types.length>0&&!all.checked;
+    $('#rf-type-error').hidden=!(state.attempted&&!refinementsValid());
+    $('.rf-types').dataset.invalid=String(state.attempted&&!refinementsValid());
+    $('[data-review-population]').textContent=populationLabel(state.draft.population);
+    $('[data-review-types]').textContent=typeLabel(state.draft.types);
+    $('[data-review-explanation]').textContent=state.draft.population==='last'?'Compare simulations at their greatest recorded slip within the range. Charts and statistics use at most one stage per simulation; it may fall below the range’s upper end.':'Explore results throughout the slip range. Charts and statistics combine measurements from every included stage, so one simulation may contribute several records.';
+    $('[data-review-type-explanation]').textContent=state.draft.types.length===types.length?'Include all resulting scarp types without a type filter.':state.draft.population==='last'?'Then keep only those selected stages whose resulting scarp type is included above. An earlier stage is not substituted when the last stage has a different type.':'Keep only records whose resulting scarp type is included above.';
+  }
+  function restore(snapshot) {
+    const s = snapshot?.modelContent;
+    if (s?.proposal !== 'scenario-refinements-v1') return;
+    if (measurements[s.measure]) state.measure = s.measure;
+    if (['histogram','cumulative'].includes(s.chart)) state.chart = s.chart;
+    if (Number.isInteger(s.percentile) && s.percentile >= 0 && s.percentile <= 100) state.percentile = s.percentile;
+    for(const key of ['confirmed','draft']){
+      const r=s[key];if(r&&['all','last'].includes(r.population)&&Array.isArray(r.types)){
+        const valid=types.map((_,i)=>i).filter(i=>r.types.includes(i));
+        if(key==='draft'||valid.length)state[key]={population:r.population,types:valid};
+      }
+    }
+    const ui=snapshot.privateContent;
+    if(ui){state.view=ui.view==='review'&&refinementsValid()?'review':'results';state.refineOpen=ui.refineOpen!==false;state.attempted=ui.attempted===true;state.exampleOpen=ui.exampleOpen===true;}
+  }
+  function save() {
+    const snapshot = {modelContent:{proposal:'scenario-refinements-v1',measure:state.measure,chart:state.chart,percentile:state.percentile,confirmed:state.confirmed,draft:state.draft},privateContent:{view:state.view,refineOpen:state.refineOpen,attempted:state.attempted,exampleOpen:state.exampleOpen}};
+    ownSnapshots.add(snapshotKey(snapshot));
+    if (ownSnapshots.size > 100) ownSnapshots.delete(ownSnapshots.values().next().value);
+    window.openai?.setWidgetState?.(snapshot).catch(() => {});
+  }
+  function showTooltip(text,x,y) {
+    const tip=$('[data-tooltip-panel]'); tip.textContent=text; tip.hidden=false;
+    const width=$('[data-plot]').getBoundingClientRect().width;
+    tip.style.left=Math.max(0,Math.min(width-tip.offsetWidth,x+9))+'px';
+    tip.style.top=Math.max(0,y-tip.offsetHeight-7)+'px';
+  }
+  function draw() {
+    const m=measurements[state.measure], values=m.values;
+    if(state.view!=='results'||m.n<10){d3.select($('.rs-chart')).selectAll('*').remove();return;}
+    const width=Math.max(230,Math.floor($('[data-plot]').getBoundingClientRect().width));
+    const height=260, left=58, right=18, top=27, bottom=52;
+    const extent=d3.extent(values), span=extent[1]-extent[0];
+    const domain=[Math.max(0,extent[0]-span*.045),extent[1]+span*.045];
+    const x=d3.scaleLinear().domain(domain).range([left,width-right]);
+    const svg=d3.select($('.rs-chart')); svg.selectAll('*').remove();
+    svg.attr('viewBox',`0 0 ${width} ${height}`).attr('aria-label',`Illustrative ${state.chart === 'histogram' ? 'distribution' : 'cumulative distribution'} of ${m.name.toLowerCase()}. Full statistics follow the chart.`);
+    svg.append('title').text('Invented design example: '+m.name);
+    svg.append('desc').text(`${m.n} illustrative measurements. Median ${format(d3.quantileSorted(values,.5),m)} ${m.unit}; 84th percentile ${format(d3.quantileSorted(values,.84),m)} ${m.unit}.`);
+    const ticks=width<400 ? 4 : 5;
+    const bins=d3.bin().domain(domain).thresholds(10)(values);
+    const cumulative=state.chart==='cumulative';
+    const y=d3.scaleLinear().domain(cumulative?[0,100]:[0,d3.max(bins,b=>b.length)*1.1]).nice().range([height-bottom,top]);
+    const yAxis=d3.axisLeft(y).ticks(4).tickSize(-(width-left-right)).tickFormat(cumulative?d=>d+'%':d3.format('d'));
+    svg.append('g').attr('transform',`translate(${left},0)`).call(yAxis).call(g=>g.select('.domain').remove()).call(g=>g.selectAll('.tick line').attr('opacity',.5));
+    svg.append('g').attr('transform',`translate(0,${height-bottom})`).call(d3.axisBottom(x).ticks(ticks));
+    svg.append('text').attr('class','axis-title').attr('data-axis','y').attr('x',left).attr('y',14).text(cumulative?'Share at or below':'Number of measurements');
+    svg.append('text').attr('class','axis-title').attr('data-axis','x').attr('x',(left+width-right)/2).attr('y',height-10).attr('text-anchor','middle').text(m.name+' ('+m.unit+')');
+    if (!cumulative) {
+      svg.append('g').selectAll('rect').data(bins).join('rect').attr('class','rs-bars').attr('x',b=>x(b.x0)+1).attr('y',b=>y(b.length)).attr('width',b=>Math.max(0,x(b.x1)-x(b.x0)-2)).attr('height',b=>y(0)-y(b.length));
+      svg.append('g').selectAll('rect').data(bins).join('rect').attr('fill','transparent').attr('x',b=>x(b.x0)).attr('y',top).attr('width',b=>x(b.x1)-x(b.x0)).attr('height',height-top-bottom).on('pointermove',(event,b)=>{const p=d3.pointer(event,$('.rs-chart'));showTooltip(`${format(b.x0,m)}–${format(b.x1,m)} ${m.unit}: ${b.length} measurements`,p[0],p[1]);}).on('pointerleave',()=>{$('[data-tooltip-panel]').hidden=true;});
+    } else {
+      const points=[[values[0],0],...values.map((v,i)=>[v,(i+1)/values.length*100])];
+      svg.append('path').datum(points).attr('class','rs-curve').attr('d',d3.line().x(d=>x(d[0])).y(d=>y(d[1])).curve(d3.curveStepAfter));
+      const q=d3.quantileSorted(values,state.percentile/100);
+      svg.append('path').attr('class','rs-selected-line').attr('fill','none').attr('d',`M${left},${y(state.percentile)}H${x(q)}V${y(0)}`);
+      svg.append('circle').attr('class','rs-selected-dot').attr('cx',x(q)).attr('cy',y(state.percentile)).attr('r',3.5);
+      svg.append('rect').attr('x',left).attr('y',top).attr('width',width-left-right).attr('height',height-top-bottom).attr('fill','transparent').on('pointermove',event=>{
+        const p=d3.pointer(event,$('.rs-chart')), value=x.invert(p[0]), share=d3.bisectRight(values,value)/values.length*100;
+        showTooltip(`${share.toFixed(1)}% at or below ${format(value,m)} ${m.unit}`,p[0],p[1]);
+      }).on('pointerleave',()=>{$('[data-tooltip-panel]').hidden=true;});
+    }
+    [.5,.84].forEach(p=>{
+      const q=d3.quantileSorted(values,p);
+      svg.append('line').attr('class','rs-guide').attr('x1',x(q)).attr('x2',x(q)).attr('y1',top).attr('y2',y(0)).attr('stroke-dasharray',p===.84?'5 4':null).attr('pointer-events','none');
+    });
+    $('[data-chart-note]').textContent=cumulative?'The curve may be simplified for display. Simplification changes cumulative percentages by less than 0.2 percentage points. Statistics and percentile read-offs use all matching valid measurements.':'Histogram: measurements are grouped into equal-width intervals; bar height shows the number in each interval.';
+  }
+  function render() {
+    updateData();renderFlow();
+    const m=measurements[state.measure], values=m.values;
+    $('#rs-measure-title').textContent=m.name;
+    $('[data-valid-count]').textContent=m.n+' valid measurements';
+    $('[data-explanation]').textContent=m.description;
+    $('[data-measure-warning]').hidden=!m.warning;
+    $('[data-measure-warning]').textContent=m.warning;
+    root.querySelectorAll('[data-measure]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.measure===state.measure)));
+    root.querySelectorAll('[data-chart-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.chartMode===state.chart)));
+    $('[data-unit-header]').textContent='Value';
+    const stat=n=>typeof n==='number'&&Number.isFinite(n)?format(n,m):'—';
+    const rows=[['valid','Valid measurements',String(m.n)],['excluded','Excluded: no value',String(matched.length-m.n)],['median','Median (50th percentile)',stat(d3.quantileSorted(values,.5))],['p16','16th percentile',stat(d3.quantileSorted(values,.16))],['p84','84th percentile',stat(d3.quantileSorted(values,.84))],['min','Minimum',stat(values[0])],['max','Maximum',stat(values.at(-1))],['mean','Mean',stat(d3.mean(values))],['sd','Standard deviation',stat(d3.deviation(values))]];
+    const body=$('[data-stat-rows]'); body.replaceChildren();
+    rows.forEach(([key,name,value])=>{const row=document.createElement('tr'),label=document.createElement('th'),cell=document.createElement('td');row.dataset.stat=key;label.scope='row';label.textContent=name;cell.textContent=['valid','excluded'].includes(key)||value==='—'?value:value+(m.unit==='°'?'':' ')+m.unit;row.append(label,cell);body.append(row);});
+    const sizeWarning=$('[data-size-warning]');sizeWarning.hidden=m.n>=30;
+    sizeWarning.textContent=m.n===0?`${matched.length} records match, but none has a valid ${m.name.toLowerCase()} value.`:m.n<10?'Fewer than 10 valid measurements match — too few for a reliable distribution. Showing the statistics table only; interpret with caution.':`Only ${m.n} valid measurements match — too few for a reliable distribution. Interpret with caution.`;
+    $('.rs-chart-side').hidden=m.n<10;
+    $('[data-chart-help]').textContent=state.chart==='histogram'?'How often each range appears among the matching measurements.':'The share of matching measurements at or below each value.';
+    $('[data-readout]').hidden=state.chart!=='cumulative';
+    $('#rs-percentile').value=String(state.percentile);
+    $('[data-percentile-label]').textContent=String(state.percentile);
+    const q=d3.quantileSorted(values,state.percentile/100);
+    const ordinal=state.percentile+(state.percentile%100>=11&&state.percentile%100<=13?'th':({1:'st',2:'nd',3:'rd'}[state.percentile%10]||'th'));
+    $('[data-percentile-value]').textContent=`${ordinal} percentile: ${stat(q)} ${m.unit}. This describes the matching measurements, not the chance of an earthquake.`;
+    $('[data-tooltip-panel]').hidden=true;
+    draw();
+  }
+  root.addEventListener('click',event=>{
+    const button=event.target.closest('button'); if(!button)return;
+    if(button.dataset.measure){state.measure=button.dataset.measure;render();save();}
+    if(button.dataset.chartMode){state.chart=button.dataset.chartMode;render();save();}
+    if(button.dataset.rfAction){
+      const action=button.dataset.rfAction;
+      $('[data-preview-response]').hidden=true;
+      if(action==='review'){goReview();return;}
+      if(action==='toggle')state.refineOpen=!state.refineOpen;
+      if(action==='discard'){state.draft=clone(state.confirmed);state.attempted=false;}
+      if(action==='edit-refinements'){state.view='results';state.refineOpen=true;}
+      if(action==='back-results')state.view='results';
+      if(action==='confirm'){
+        if(!refinementsValid()){goReview();return;}
+        state.confirmed=clone(state.draft);state.view='results';state.refineOpen=false;state.attempted=false;
+      }
+      render();save();
+      if(action==='edit-refinements'){$('[name="rf-population"]:checked').focus();$('#rf-editor').scrollIntoView({block:'start',behavior:'instant'});}
+      if(['confirm','back-results'].includes(action)){$('[data-rf-action="review"]').focus();$('[data-rf-view="results"]').scrollIntoView({block:'start',behavior:'instant'});}
+    }
+    if(button.dataset.endpoint){const panel=$('[data-preview-response]');panel.textContent=endpoints[button.dataset.endpoint];panel.hidden=false;panel.scrollIntoView({block:'nearest',behavior:'instant'});}
+  });
+  $('#rs-percentile').addEventListener('input',event=>{state.percentile=Number(event.target.value);render();save();});
+  $('[data-stage-example]').addEventListener('toggle',event=>{if(state.exampleOpen!==event.target.open){state.exampleOpen=event.target.open;save();}});
+  root.addEventListener('change',event=>{
+    const target=event.target;
+    if(target.name==='rf-population')state.draft.population=target.value;
+    else if(target.hasAttribute('data-all-types'))state.draft.types=target.checked?types.map((_,i)=>i):[];
+    else if(target.hasAttribute('data-type')){const i=Number(target.dataset.type);state.draft.types=types.map((_,k)=>k).filter(k=>k===i?target.checked:state.draft.types.includes(k));}
+    else return;
+    render();save();
+  });
+  window.addEventListener('openai:set_globals',event=>{const snapshot=event.detail?.globals?.widgetState;if(!snapshot||ownSnapshots.has(snapshotKey(snapshot)))return;restore(snapshot);render();});
+  makeTypeControls();
+  restore(window.openai?.widgetState);
+  render();
+  new ResizeObserver(()=>draw()).observe($('[data-plot]'));
+})();
+</script>

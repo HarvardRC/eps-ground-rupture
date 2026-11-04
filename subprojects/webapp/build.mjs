@@ -9,6 +9,8 @@
 // esbuild's browser default format empties; no source map is written,
 // because scenarioAssets publishes exactly the one .js and the one
 // .css file.
+// The independent guided entry emits explore.js and explore.css; its
+// staging task publishes them separately and reuses the scenario data.
 //
 // With --tests it compiles every test/**/*.test.ts file and, when it
 // exists, test/parity.ts into build/test/ at the same relative paths,
@@ -53,6 +55,23 @@ if (process.argv.slice(2).includes("--tests")) {
   await esbuild.build({
     entryPoints: ["src/app.css"],
     outfile: "build/dist/app.css",
+    bundle: true,
+    minify: true,
+    sourcemap: false,
+  });
+  await esbuild.build({
+    entryPoints: ["src/explore/main.ts"],
+    outfile: "build/dist/explore.js",
+    bundle: true,
+    format: "esm",
+    platform: "browser",
+    target: "es2020",
+    minify: true,
+    sourcemap: false,
+  });
+  await esbuild.build({
+    entryPoints: ["src/explore/explore.css"],
+    outfile: "build/dist/explore.css",
     bundle: true,
     minify: true,
     sourcemap: false,

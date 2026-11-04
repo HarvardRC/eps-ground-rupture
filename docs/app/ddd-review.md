@@ -1644,6 +1644,109 @@ whitespace checks, and new prose met the 72-column convention except
 tables and links. These checks verify the documentation change;
 they supply no browser-fit or performance measurements.
 
+## First-use journey decision (2026-11-03)
+
+After reviewing the live prototype, the owner found that its controls
+did not guide a reader to build a scenario and that its wording was
+too technical and abrupt. The earlier consistency reviews had not
+established the quality of that first-use experience. The PDD's
+unassisted user walkthrough remained pending.
+
+The owner agreed the sequence now recorded in
+[PRD §5.1](prd.md#51-scenario-inputs-c1-p1) and
+[PDD §2.3](pdd.md#23-user-journeys), decision D-25: understand the
+purpose, describe site conditions, choose an assumed displacement,
+review the scenario, then explore and interpret matching results.
+This is an MVP correction, separate from P2 display preferences.
+The owner requested simpler language and then approved the
+introduction now quoted in PDD §2.3, beginning "Use simulations to
+understand ground rupture." That introduction awaits implementation;
+the remaining guidance and copy still need review.
+
+The product definition explicitly leaves the detailed interaction
+choices open for prototype review. DDD and IP carry a pending
+amendment notice so the existing instructions cannot be mistaken for
+an implementation specification of the revised journey. No accepted
+task body or application code changed in this decision record.
+
+## Scenario journey prototype record (2026-11-03)
+
+The owner welcomed the clickable prototype's visual direction and
+selected Focused steps in the comparison. At the owner's request,
+the [prototype record](scenario-journey-prototype.md) now describes
+the five screens, their wording and controls, the sample inputs,
+and the remaining product decisions. The editable source and a
+standalone clickable snapshot are saved alongside it under
+`docs/app/prototypes/`; Guided page remains available for comparison.
+
+This records the reviewed design without promoting its illustrative
+charts, simplified validation, or unreviewed interaction details to
+accepted requirements. PDD §2.3 points to the record. The application
+and accepted implementation task bodies are unchanged.
+
+## Guided second-increment decisions (2026-11-04)
+
+After the G-07 walkthrough and a review of the candidate against
+the prototype record, the owner decided:
+
+- **Sample inputs return (D-37).** The approved Stage-1 sample is
+  restored with its clarity intact. The owner approved the
+  restoration; the depth and density completion (5 m, Dense) and
+  the ask-before-replace rule are agent selections under the
+  standing §2.3 delegation, recorded for the owner's review.
+- **Same-tab continuity (D-38).** The owner delegated recovery
+  scope. The selected rule restores work across same-tab reloads
+  and back/forward restoration, recomputes results, and reports the
+  restore; a new tab or later visit starts fresh. PDD §7.3 is
+  reconciled with the guided journey.
+- **Publication path (D-39).** `/explore/` joins the unlisted
+  prototype deployment; a team demonstration and the
+  redistribution-license decision precede advertising. `/scenario/`
+  is paused — deployed unlisted, no further UX investment, no
+  longer the activation candidate; a later rework as a faster
+  iteration surface stays open.
+- **Copy.** The existing wording baseline stands; small
+  clarifications may ride along with tasks.
+- **Width log scale.** The owner noticed the guided page lost the
+  existing page's log-scale offer; parity returns as guided DDD
+  §9.3. The review confirmed the remaining candidate omissions —
+  field overlay, family view, shared links, import — stay
+  deliberate, linked out or parked until the D-39 activation
+  reconciliation.
+- **Result report (D-40, Proposed).** A self-contained
+  charts-and-provenance report is recorded in PDD §6.5 and parked
+  P2/P3; no task is scheduled.
+
+Guided DDD §9 and plan tasks G-08–G-12 carry the increment. The
+accepted legacy task bodies are unchanged; T-60 remains the browser
+lane the guided specs join. No scientific rule changed.
+
+## Owner instructions on the second-increment execution (2026-11-04)
+
+The owner accepted the second-increment documents in `adf8fed`
+(2026-11-04) and issued three execution instructions:
+
+- **Autonomous execution.** The implementing agent stages, commits,
+  pushes, opens, and merges its own pull requests for G-08–G-12 —
+  the doc-bearing evidence updates included — without per-task
+  owner approval. The standing merge conditions hold: green CI,
+  independent review, no open owner question, branch current with
+  `dev-v.0.4.x`. Deployments stay the owner's. The owner merges
+  `dev-v.0.4.1-redesign` into `dev-v.0.4.x` and pushes it before
+  the kickoff; T-54 and T-60 are already implemented there. The
+  grant is recorded in the guided plan's Commands section, with
+  dated exceptions in the main plan's contract prose.
+- **Next phase (D-41).** Every deliberate deferral is queued as the
+  phase after the second increment: the D-39 reconciliation list,
+  family view, shared links, between-visit recovery, scenario
+  import, the result report, touch and cross-engine coverage, and
+  the `/scenario/` rework decision. Team availability schedules the
+  phase; it may precede the team demonstration. Advertising still
+  follows D-39 and its reconciliation list.
+- **Result report (D-40) set P2.** The owner scheduled the
+  presentable report as a recorded task: guided task G-13 in the
+  next-phase queue, after its design section and D-14.
+
 ## References
 
 - [`docs/app/ddd.md` — Ground Rupture Explorer — detailed design document](ddd.md).

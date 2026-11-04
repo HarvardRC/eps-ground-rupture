@@ -197,6 +197,7 @@ val fetchVintage by tasks.registering {
 }
 
 val scenarioHead: File = file("docs/includes/scenario-head.html")
+val exploreHead: File = file("docs/includes/explore-head.html")
 
 /** The root `CITATION.cff`, the software-version record (docs/app/ddd.md §6.2, Sources). */
 val citationFile: File = rootProject.file("CITATION.cff")
@@ -307,13 +308,61 @@ val scenarioAssets by tasks.registering(Sync::class) {
     }
 }
 
+// The guided candidate is independent of the legacy bundle and shares
+// only its already verified data tree (guided-journey-ddd.md §§1, 7).
+val exploreAssets by tasks.registering(Sync::class) {
+    group = "documentation"
+    description = "Stage the guided explorer bundle and its stamped include, sharing the scenario data."
+    dependsOn(scenarioAssets)
+    inputs.file(pointerFile)
+    inputs.file(citationFile)
+    outputs.file(exploreHead)
+    into("docs/assets/explore")
+    outputs.upToDateWhen {
+        val expected = mutableSetOf<String>()
+        for (asset in listOf("explore.js", "explore.css")) {
+            val source = File(webappDist, asset)
+            if (!source.isFile) return@upToDateWhen false
+            expected += hashedName(source)
+        }
+        val destination = file("docs/assets/explore")
+        fileTree(destination).files.map { it.relativeTo(destination).invariantSeparatorsPath }.toSet() == expected
+    }
+    from(webappDist) {
+        include("explore.js", "explore.css")
+        eachFile { name = hashedName(file) }
+    }
+    doLast {
+        val pointer = readPointer()
+        val manifests = pointer.files.keys.filter { Regex("manifest-[0-9a-f]{12}\\.json").matches(it) }
+        if (manifests.size != 1) {
+            throw GradleException("exploreAssets: the pointer must name exactly one manifest; it names $manifests.")
+        }
+        val js = hashedName(File(webappDist, "explore.js"))
+        val css = hashedName(File(webappDist, "explore.css"))
+        val softwareVersion = htmlAttribute(readSoftwareVersion())
+        val dataVersion = htmlAttribute(readDataVersion())
+        exploreHead.parentFile.mkdirs()
+        exploreHead.writeText(
+            """
+            |<link rel="stylesheet" href="../assets/explore/$css">
+            |<script type="module" id="gre-explore-app"
+            |        src="../assets/explore/$js"
+            |        data-software-version="$softwareVersion"
+            |        data-data-version="$dataVersion"
+            |        data-manifest="../scenario/data/${manifests.single()}"></script>
+            |""".trimMargin(),
+        )
+    }
+}
+
 val mkdocsServe by tasks.registering(Exec::class) {
     group = "documentation"
     description = "Serve the companion site locally with live reload (http://127.0.0.1:8000)."
     workingDir = projectDir
     useVenv()
     commandLine("$venvDir/bin/mkdocs", "serve")
-    dependsOn(poetryInstall, scenarioAssets)
+    dependsOn(poetryInstall, exploreAssets)
 }
 
 val mkdocsBuild by tasks.registering(Exec::class) {
@@ -322,7 +371,7 @@ val mkdocsBuild by tasks.registering(Exec::class) {
     workingDir = projectDir
     useVenv()
     commandLine("$venvDir/bin/mkdocs", "build", "--strict")
-    dependsOn(poetryInstall, scenarioAssets)
+    dependsOn(poetryInstall, exploreAssets)
 
     inputs.dir("docs")
     inputs.file("mkdocs.yml")
@@ -342,7 +391,7 @@ val mkdocsPreview by tasks.registering(Exec::class) {
     workingDir = projectDir
     useVenv()
     commandLine("$venvDir/bin/mkdocs", "build", "--strict", "-f", "mkdocs.preview.yml")
-    dependsOn(poetryInstall, scenarioAssets)
+    dependsOn(poetryInstall, exploreAssets)
 
     inputs.dir("docs")
     inputs.file("mkdocs.yml")
@@ -362,6 +411,8 @@ tasks.named<Delete>("clean") {
         layout.projectDirectory.dir("site-preview"),
         layout.projectDirectory.dir("docs/assets/scenario"),
         layout.projectDirectory.file("docs/includes/scenario-head.html"),
+        layout.projectDirectory.dir("docs/assets/explore"),
+        layout.projectDirectory.file("docs/includes/explore-head.html"),
         layout.projectDirectory.dir("docs/includes/media"),
     )
 }

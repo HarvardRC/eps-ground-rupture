@@ -168,10 +168,12 @@ venv.bak/
 /site
 subprojects/mkdocs/site/
 # Site build products and development media (docs/app/ddd.md §6.1): the
-# staged scenario bundle and data, the generated includes, local development
+# staged application bundles and data, generated includes, local development
 # media, and the preview build.
 subprojects/mkdocs/docs/assets/scenario/
 subprojects/mkdocs/docs/includes/scenario-head.html
+subprojects/mkdocs/docs/assets/explore/
+subprojects/mkdocs/docs/includes/explore-head.html
 subprojects/mkdocs/docs/includes/media/
 subprojects/mkdocs/docs/media/dev/
 subprojects/mkdocs/site-preview/

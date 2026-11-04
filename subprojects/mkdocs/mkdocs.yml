@@ -155,8 +155,11 @@ exclude_docs: |
 # fails every build whose output crosses the boundary.
 draft_docs: |
   media/dev/
+  explore.md
+  assets/explore/
 not_in_nav: |
   scenario.md
+  explore.md
 hooks:
   - hooks/site_checks.py
 

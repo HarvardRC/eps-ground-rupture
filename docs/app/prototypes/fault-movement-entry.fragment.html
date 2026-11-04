@@ -1,0 +1,337 @@
+<div id="movement-entry-proposal" class="viz-dotted-background">
+  <section class="movement-surface" aria-labelledby="movement-title">
+    <header>
+      <p class="movement-brand">Ground Rupture Explorer</p>
+      <p class="movement-step">Fault movement</p>
+      <h2 id="movement-title">Choose the assumed fault movement</h2>
+      <p class="movement-help">Choose what you want to specify, then enter a maximum value.</p>
+    </header>
+    <div data-view="entry">
+      <fieldset class="movement-modes">
+        <legend>What are you specifying?</legend>
+        <label class="movement-mode cursor-interaction" data-mode-card="slip">
+          <input type="radio" name="movement-kind" value="slip" checked>
+          <span><strong>Fault slip at depth</strong><span class="movement-mode-detail">The distance the fault moves underground.</span></span>
+        </label>
+        <label class="movement-mode cursor-interaction" data-mode-card="offset">
+          <input type="radio" name="movement-kind" value="offset">
+          <span><strong>Vertical surface offset</strong><span class="movement-mode-detail">The vertical difference across the rupture at the ground surface.</span></span>
+        </label>
+        <p class="movement-help movement-remember">Your entries are kept when you switch modes.</p>
+      </fieldset>
+      <section data-mode-panel="slip" aria-labelledby="movement-slip-heading">
+        <h3 id="movement-slip-heading">Fault-slip range</h3>
+        <p class="movement-help">Modeled fault slip: approximately 0–5 m.</p>
+        <div class="movement-fields">
+          <div class="movement-field">
+            <label for="movement-slip-min">Minimum (m)</label>
+            <div class="movement-stepper">
+              <button type="button" data-step="-1" data-field="slipMin" aria-label="Decrease minimum fault slip by 0.1 m" class="cursor-interaction">−</button>
+              <input id="movement-slip-min" data-input="slipMin" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" value="0" required aria-describedby="movement-slipMin-error">
+              <button type="button" data-step="1" data-field="slipMin" aria-label="Increase minimum fault slip by 0.1 m" class="cursor-interaction">+</button>
+            </div>
+            <p id="movement-slipMin-error" class="movement-error" role="alert" hidden></p>
+          </div>
+          <div class="movement-field">
+            <label for="movement-slip-max">Maximum (m) <span class="movement-qualifier">Required</span></label>
+            <div class="movement-stepper">
+              <button type="button" data-step="-1" data-field="slipMax" aria-label="Decrease maximum fault slip by 0.1 m" class="cursor-interaction">−</button>
+              <input id="movement-slip-max" data-input="slipMax" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" required aria-describedby="movement-slipMax-error">
+              <button type="button" data-step="1" data-field="slipMax" aria-label="Increase maximum fault slip by 0.1 m" class="cursor-interaction">+</button>
+            </div>
+            <button type="button" data-action="set-slip-maximum" class="movement-secondary movement-shortcut cursor-interaction">Set maximum to 5 m</button>
+            <p id="movement-slipMax-error" class="movement-error" role="alert" hidden></p>
+          </div>
+        </div>
+      </section>
+      <section data-mode-panel="offset" aria-labelledby="movement-offset-heading" hidden>
+        <h3 id="movement-offset-heading">Surface-offset range</h3>
+        <p class="movement-help">The range starts at 0 m and ends at the maximum you enter.</p>
+        <p class="movement-help movement-offset-context">Fault angle: <strong>30°</strong>. At this angle, the simulations cover offsets up to approximately <strong>2.51 m</strong>.</p>
+        <div class="movement-fields movement-single">
+          <div class="movement-field">
+            <label for="movement-offset-max">Maximum (m) <span class="movement-qualifier">Required</span></label>
+            <div class="movement-stepper">
+              <button type="button" data-step="-1" data-field="offsetMax" aria-label="Decrease maximum surface offset by 0.1 m" class="cursor-interaction">−</button>
+              <input id="movement-offset-max" data-input="offsetMax" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" required aria-describedby="movement-offsetMax-error movement-offset-coverage">
+              <button type="button" data-step="1" data-field="offsetMax" aria-label="Increase maximum surface offset by 0.1 m" class="cursor-interaction">+</button>
+            </div>
+            <button type="button" data-action="set-offset-maximum" class="movement-secondary movement-shortcut cursor-interaction">Set maximum to 2.51 m</button>
+            <p id="movement-offsetMax-error" class="movement-error" role="alert" hidden></p>
+          </div>
+        </div>
+        <ul id="movement-offset-coverage" class="movement-coverage" aria-live="polite" hidden></ul>
+      </section>
+      <p class="movement-help movement-adjust-help">Type a value or use − / + to change it by 0.1 m.</p>
+      <p class="movement-range" aria-live="polite">Enter a maximum to continue.</p>
+      <footer class="movement-footer">
+        <button class="movement-primary cursor-interaction" type="button" data-action="review">Review scenario</button>
+      </footer>
+    </div>
+    <section data-view="review" aria-labelledby="movement-review-heading" hidden>
+      <h3 id="movement-review-heading">Fault movement</h3>
+      <dl class="movement-review-list">
+        <div><dt>Quantity</dt><dd data-review="quantity"></dd></div>
+        <div><dt>Assumed range</dt><dd data-review="range"></dd></div>
+      </dl>
+      <p class="movement-help" data-review="explanation"></p>
+      <ul class="movement-coverage" data-review="coverage" hidden></ul>
+      <footer class="movement-footer">
+        <button class="movement-secondary cursor-interaction" type="button" data-action="edit">Edit fault movement</button>
+      </footer>
+    </section>
+  </section>
+</div>
+<style>
+  #movement-entry-proposal { padding: 18px 0; font: 15px/1.5 Arial, sans-serif; color: light-dark(#282526, #eee9e9); }
+  #movement-entry-proposal * { box-sizing: border-box; }
+  #movement-entry-proposal [hidden] { display: none; }
+  #movement-entry-proposal .movement-surface { max-width: 650px; margin: 0 auto; padding: 26px; border: 1px solid light-dark(#ded7d5, #51484b); border-radius: 10px; background: light-dark(#fffdfa, #242122); }
+  #movement-entry-proposal p { margin: 0; }
+  #movement-entry-proposal .movement-brand { font-size: 14px; font-weight: 600; margin-bottom: 22px; }
+  #movement-entry-proposal .movement-step { font-size: 13px; color: light-dark(#765154, #d1a3aa); margin-bottom: 6px; }
+  #movement-entry-proposal h2 { font-size: 24px; line-height: 1.25; font-weight: 600; margin: 0 0 10px; }
+  #movement-entry-proposal h3 { font-size: 17px; font-weight: 600; margin: 0 0 4px; }
+  #movement-entry-proposal .movement-help { color: light-dark(#645b5e, #c8bdc1); font-size: 14px; }
+  #movement-entry-proposal .movement-modes { min-width: 0; border: 0; padding: 0; margin: 24px 0; }
+  #movement-entry-proposal legend { padding: 0; margin: 0 0 10px; font-size: 15px; font-weight: 600; }
+  #movement-entry-proposal .movement-mode { display: flex; align-items: flex-start; gap: 10px; padding: 12px; margin-bottom: 8px; border: 1px solid light-dark(#cfc4c7, #78696f); border-radius: 6px; background: light-dark(#fffdfa, #2e282b); }
+  #movement-entry-proposal .movement-mode[data-selected="true"] { background: light-dark(#f8eaf0, #422d35); border-color: light-dark(#8f213b, #eaa9b7); }
+  #movement-entry-proposal .movement-mode strong { display: block; font-size: 15px; font-weight: 600; }
+  #movement-entry-proposal .movement-mode-detail { display: block; font-size: 14px; color: light-dark(#645b5e, #c8bdc1); margin-top: 2px; }
+  #movement-entry-proposal input[type="radio"] { width: 18px; height: 18px; flex: 0 0 18px; margin: 3px 0 0; accent-color: light-dark(#8f213b, #eaa9b7); }
+  #movement-entry-proposal .movement-remember { margin-top: 10px; }
+  #movement-entry-proposal .movement-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 16px; }
+  #movement-entry-proposal .movement-field { min-width: 0; }
+  #movement-entry-proposal .movement-field label { display: flex; align-items: baseline; flex-wrap: wrap; gap: 7px; margin-bottom: 7px; font-weight: 600; }
+  #movement-entry-proposal .movement-qualifier { font-size: 12px; font-weight: 400; color: light-dark(#645b5e, #c8bdc1); }
+  #movement-entry-proposal input[type="text"] { font: 16px/1.4 Arial, sans-serif; width: 100%; padding: 9px 11px; border: 1px solid light-dark(#a89a9f, #8a797f); border-radius: 6px; color: light-dark(#282526, #eee9e9); background: light-dark(#ffffff, #211d1f); }
+  #movement-entry-proposal input[aria-invalid="true"] { border-color: light-dark(#aa1531, #ffb2c1); }
+  #movement-entry-proposal input[data-warning="true"] { border-color: light-dark(#aa1531, #ffb2c1); color: light-dark(#aa1531, #ffb2c1); background: light-dark(#fff0f2, #42252d); }
+  #movement-entry-proposal .movement-field .movement-help { margin-top: 6px; }
+  #movement-entry-proposal .movement-error { margin-top: 7px; font-size: 14px; color: light-dark(#aa1531, #ffb2c1); }
+  #movement-entry-proposal .movement-range { margin-top: 18px; font-size: 14px; }
+  #movement-entry-proposal .movement-range[data-pending="true"] { color: light-dark(#765c19, #e4c97f); }
+  #movement-entry-proposal .movement-footer { display: flex; justify-content: flex-end; padding-top: 18px; margin-top: 22px; border-top: 1px solid light-dark(#ded7d5, #51484b); }
+  #movement-entry-proposal button { font: inherit; border-radius: 6px; padding: 10px 18px; }
+  #movement-entry-proposal .movement-stepper { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; gap: 5px; }
+  #movement-entry-proposal .movement-stepper input { min-width: 0; text-align: center; font-variant-numeric: tabular-nums; }
+  #movement-entry-proposal .movement-stepper button { padding: 0; min-height: 44px; font-size: 20px; color: light-dark(#3d3438, #eee4e8); background: light-dark(#f7f2f0, #352d31); border: 1px solid light-dark(#cfc4c7, #78696f); }
+  #movement-entry-proposal .movement-stepper button:disabled { opacity: 0.4; cursor: default; }
+  #movement-entry-proposal .movement-adjust-help { margin-top: 12px; }
+  #movement-entry-proposal .movement-primary { color: light-dark(#ffffff, #33121c); background: light-dark(#8f213b, #eaa9b7); border: 1px solid transparent; }
+  #movement-entry-proposal .movement-secondary { color: light-dark(#3d3438, #eee4e8); background: light-dark(#fffdfa, #2e282b); border: 1px solid light-dark(#cfc4c7, #78696f); }
+  #movement-entry-proposal .movement-shortcut { margin-top: 9px; padding: 7px 12px; font-size: 14px; min-height: 40px; }
+  #movement-entry-proposal .movement-offset-context { margin-top: 10px; }
+  #movement-entry-proposal .movement-coverage { padding: 0; margin: 14px 0 0; list-style: none; font-size: 14px; }
+  #movement-entry-proposal .movement-coverage li + li { margin-top: 8px; }
+  #movement-entry-proposal .movement-coverage [data-outside="true"] { color: light-dark(#aa1531, #ffb2c1); }
+  #movement-entry-proposal [data-view="review"] { margin-top: 26px; }
+  #movement-entry-proposal .movement-review-list { margin: 12px 0 16px; }
+  #movement-entry-proposal .movement-review-list div { display: grid; grid-template-columns: 125px minmax(0, 1fr); gap: 16px; padding: 9px 0; }
+  #movement-entry-proposal dt { font-size: 14px; color: light-dark(#645b5e, #c8bdc1); }
+  #movement-entry-proposal dd { margin: 0; overflow-wrap: anywhere; }
+  @media (max-width: 430px) { #movement-entry-proposal .movement-surface { padding: 20px 16px; } #movement-entry-proposal h2 { font-size: 22px; } #movement-entry-proposal .movement-fields { grid-template-columns: 1fr; } #movement-entry-proposal .movement-review-list div { grid-template-columns: 1fr; gap: 2px; } }
+</style>
+<script>
+(() => {
+  const root = document.getElementById('movement-entry-proposal');
+  const inputs = Object.fromEntries(Array.from(root.querySelectorAll('[data-input]')).map(input => [input.dataset.input, input]));
+  const radios = Array.from(root.querySelectorAll('input[type="radio"]'));
+  const panels = Array.from(root.querySelectorAll('[data-mode-panel]'));
+  const ownSnapshots = new Set();
+  const snapshotKey = snapshot => {
+    const content = snapshot?.modelContent;
+    const privateContent = snapshot?.privateContent;
+    return JSON.stringify([content?.proposal, content?.mode, content?.slipMin, content?.slipMax, content?.offsetMax, privateContent?.view, privateContent?.attempted?.slip, privateContent?.attempted?.offset]);
+  };
+  let state = { mode: 'slip', slipMin: '0', slipMax: '', offsetMax: '' };
+  let attempted = { slip: false, offset: false };
+  let view = 'entry';
+  const keysFor = mode => mode === 'slip' ? ['slipMin', 'slipMax'] : ['offsetMax'];
+  // This isolated example uses the 30° selection from the site-condition demo.
+  // The full journey will pass every selected dip with its release coefficients.
+  const selectedDipFits = [{ dip: 30, slope: 0.5020759691269575, intercept: -0.0051254736669561485 }];
+  function offsetShortcut() {
+    const coveredMaximum = Math.min(...selectedDipFits.map(fit => fit.slope * 5.0135 + fit.intercept));
+    // Round downward to avoid a shortcut that itself exceeds model coverage.
+    return String(Math.floor(coveredMaximum * 100) / 100);
+  }
+  function offsetCoverage() {
+    if (state.mode !== 'offset') return [];
+    const maximum = parse(state.offsetMax);
+    if (maximum.error) return [];
+    return selectedDipFits.map(fit => {
+      const slip = (maximum.number - fit.intercept) / fit.slope;
+      return { dip: fit.dip, slip, outside: slip > 5.0135 };
+    });
+  }
+  function showCoverage(list, coverage) {
+    list.replaceChildren(...coverage.map(item => {
+      const line = document.createElement('li');
+      line.dataset.outside = String(item.outside);
+      line.textContent = item.dip + '° fault angle: about ' + item.slip.toFixed(2) + ' m of slip is needed. ' + (item.outside ? 'Warning: this exceeds the simulated range. Results cover only part of your offset range.' : 'This is within the simulated range.');
+      return line;
+    }));
+    list.hidden = coverage.length === 0;
+  }
+  function parse(raw, minimum = false) {
+    const value = raw.trim();
+    if (value === '') return { error: minimum ? 'Enter a minimum value.' : 'Enter a maximum value.' };
+    if (raw.length > 16) return { error: 'Use no more than 16 characters.' };
+    if (!/^(?:\d+(?:\.\d*)?|\.\d+)$/.test(value)) return { error: 'Enter a non-negative decimal number.' };
+    let [whole, fraction = ''] = value.split('.');
+    whole = (whole || '0').replace(/^0+(?=\d)/, '');
+    fraction = fraction.replace(/0+$/, '');
+    const label = whole + (fraction ? '.' + fraction : '');
+    if (label.length > 16) return { error: 'Use a shorter decimal value.' };
+    return { number: Number(label), label, blank: false };
+  }
+  function steppedValue(key, direction) {
+    const raw = state[key];
+    const parsed = raw.trim() === '' ? { label: '0' } : parse(raw);
+    if (parsed.error) return null;
+    const [whole, fraction = ''] = parsed.label.split('.');
+    const digits = Math.max(4, fraction.length);
+    const scale = 10n ** BigInt(digits);
+    let units = BigInt(whole) * scale + BigInt(fraction.padEnd(digits, '0')) + BigInt(direction) * scale / 10n;
+    if (units < 0n) units = 0n;
+    if (key !== 'offsetMax') {
+      const ceiling = 50135n * scale / 10000n;
+      const original = BigInt(whole) * scale + BigInt(fraction.padEnd(digits, '0'));
+      if (original > ceiling && direction > 0) return null;
+      if (original <= ceiling && units > ceiling) units = ceiling;
+    }
+    const decimals = (units % scale).toString().padStart(digits, '0').replace(/0+$/, '');
+    const label = (units / scale).toString() + (decimals ? '.' + decimals : '');
+    if (label.length > 16 || label === parsed.label && raw.trim() !== '') return null;
+    return label;
+  }
+  function validate() {
+    const errors = {};
+    const maximumKey = state.mode === 'slip' ? 'slipMax' : 'offsetMax';
+    const minimum = state.mode === 'slip' ? parse(state.slipMin, true) : { number: 0, label: '0' };
+    const maximum = parse(state[maximumKey], false);
+    if (minimum.error) errors.slipMin = minimum.error;
+    if (maximum.error) errors[maximumKey] = maximum.error;
+    if (state.mode === 'slip') {
+      if (!minimum.error && minimum.number > 5.0135) errors.slipMin = 'Above the recorded maximum of 5.0135 m. Enter a smaller value.';
+      if (!maximum.error && maximum.number > 5.0135) errors.slipMax = 'Above the recorded maximum of 5.0135 m. Enter a smaller value.';
+    }
+    if (!minimum.error && !maximum.error && maximum.number < minimum.number && !errors[maximumKey]) errors[maximumKey] = 'Maximum must be at least the minimum.';
+    return { errors, valid: Object.keys(errors).length === 0, minimum, maximum };
+  }
+  function render() {
+    const checked = validate();
+    const coverage = offsetCoverage();
+    root.querySelector('[data-action="set-offset-maximum"]').textContent = 'Set maximum to ' + offsetShortcut() + ' m';
+    for (const radio of radios) {
+      radio.checked = radio.value === state.mode;
+      radio.closest('[data-mode-card]').dataset.selected = String(radio.checked);
+    }
+    for (const panel of panels) panel.hidden = panel.dataset.modePanel !== state.mode;
+    for (const button of root.querySelectorAll('[data-step]')) {
+      button.disabled = steppedValue(button.dataset.field, Number(button.dataset.step)) === null;
+    }
+    for (const [key, input] of Object.entries(inputs)) {
+      if (input.value !== state[key]) input.value = state[key];
+      const active = keysFor(state.mode).includes(key);
+      const parsed = parse(state[key], key === 'slipMin');
+      const aboveFive = active && state.mode === 'slip' && !parsed.error && parsed.number > 5;
+      const beyondData = aboveFive && parsed.number > 5.0135;
+      const validationMessage = active && (attempted[state.mode] || beyondData) ? checked.errors[key] : '';
+      const message = validationMessage || (aboveFive ? 'Above 5 m, but within the recorded range, which ends at 5.0135 m.' : '');
+      const error = root.querySelector('#movement-' + key + '-error');
+      error.hidden = !message;
+      error.textContent = message || '';
+      input.setAttribute('aria-invalid', String(Boolean(validationMessage)));
+      input.dataset.warning = String(aboveFive || key === 'offsetMax' && coverage.some(item => item.outside));
+    }
+    showCoverage(root.querySelector('#movement-offset-coverage'), coverage);
+    const range = root.querySelector('.movement-range');
+    const quantity = state.mode === 'slip' ? 'Fault slip at depth' : 'Vertical surface offset';
+    range.dataset.pending = String(!checked.valid);
+    range.hidden = attempted[state.mode] && !checked.valid;
+    range.textContent = checked.valid ? quantity + ': ' + checked.minimum.label + '–' + checked.maximum.label + ' m' : (state[state.mode === 'slip' ? 'slipMax' : 'offsetMax'].trim() === '' ? 'Enter a maximum to continue.' : 'Complete the range to continue.');
+    root.querySelector('[data-view="entry"]').hidden = view !== 'entry';
+    root.querySelector('[data-view="review"]').hidden = view !== 'review';
+    showCoverage(root.querySelector('[data-review="coverage"]'), view === 'review' ? coverage.filter(item => item.outside) : []);
+    if (view === 'review' && checked.valid) {
+      root.querySelector('[data-review="quantity"]').textContent = quantity;
+      root.querySelector('[data-review="range"]').textContent = checked.minimum.label + '–' + checked.maximum.label + ' m';
+      root.querySelector('[data-review="explanation"]').textContent = state.mode === 'slip' ? 'The range uses the minimum and maximum shown in your inputs.' : 'The surface-offset range runs from 0 m to your maximum.';
+    }
+  }
+  function save() {
+    const snapshot = { modelContent: { proposal: 'movement-stepper-v2', ...state }, privateContent: { view, attempted: { ...attempted } } };
+    const serialized = snapshotKey(snapshot);
+    ownSnapshots.add(serialized);
+    if (ownSnapshots.size > 50) ownSnapshots.delete(ownSnapshots.values().next().value);
+    if (window.openai?.setWidgetState) window.openai.setWidgetState(snapshot).catch(() => {});
+  }
+  function restore(snapshot) {
+    const content = snapshot?.modelContent;
+    if (content?.proposal !== 'movement-stepper-v2' || !['slip', 'offset'].includes(content.mode)) return;
+    if (!['slipMin', 'slipMax', 'offsetMax'].every(key => typeof content[key] === 'string')) return;
+    state = { mode: content.mode, slipMin: content.slipMin, slipMax: content.slipMax, offsetMax: content.offsetMax };
+    attempted = { slip: snapshot.privateContent?.attempted?.slip === true, offset: snapshot.privateContent?.attempted?.offset === true };
+    view = snapshot.privateContent?.view === 'review' && validate().valid ? 'review' : 'entry';
+  }
+  root.addEventListener('input', event => {
+    const key = event.target.dataset.input;
+    if (!Object.hasOwn(inputs, key)) return;
+    state[key] = event.target.value;
+    render();
+  });
+  root.addEventListener('change', event => {
+    if (event.target.name === 'movement-kind') {
+      state.mode = event.target.value;
+      view = 'entry';
+      render();
+      save();
+    } else if (Object.hasOwn(inputs, event.target.dataset.input)) save();
+  });
+  root.addEventListener('click', event => {
+    const button = event.target.closest('[data-step]');
+    if (!button) return;
+    const value = steppedValue(button.dataset.field, Number(button.dataset.step));
+    if (value === null) return;
+    state[button.dataset.field] = value;
+    render();
+    save();
+  });
+  root.querySelector('[data-action="review"]').addEventListener('click', () => {
+    attempted[state.mode] = true;
+    const checked = validate();
+    if (checked.valid) view = 'review';
+    render();
+    if (checked.valid) root.querySelector('[data-action="edit"]').focus();
+    else inputs[keysFor(state.mode).find(key => checked.errors[key])].focus();
+    save();
+  });
+  root.querySelector('[data-action="set-slip-maximum"]').addEventListener('click', () => {
+    state.slipMax = '5';
+    render();
+    save();
+  });
+  root.querySelector('[data-action="set-offset-maximum"]').addEventListener('click', () => {
+    state.offsetMax = offsetShortcut();
+    render();
+    save();
+  });
+  root.querySelector('[data-action="edit"]').addEventListener('click', () => {
+    view = 'entry';
+    render();
+    inputs[state.mode === 'slip' ? 'slipMax' : 'offsetMax'].focus();
+    save();
+  });
+  restore(window.openai?.widgetState);
+  render();
+  window.addEventListener('openai:set_globals', event => {
+    const snapshot = event.detail?.globals?.widgetState;
+    if (!snapshot || ownSnapshots.has(snapshotKey(snapshot))) return;
+    restore(snapshot);
+    render();
+  });
+})();
+</script>

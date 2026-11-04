@@ -1,5 +1,36 @@
 # Ground Rupture Explorer — high-level design document
 
+**Parallel guided implementation (2026-11-04).** The owner approved
+D-26–D-36 and authorized implementation alongside `/scenario/`.
+[ADR-0020](../adr/0020-parallel-guided-explorer.md) records the separate
+`/explore/` interface over the shared scientific core. The guided
+interface holds unfinished choices apart from confirmed results and
+updates results only after review and confirmation. It has independent
+page state and assets, sharing the pinned data release, calculations,
+charts and downloadable package with the existing explorer. Supporting
+links reuse the glossary and dashboards; no dashboard is embedded.
+Short glossary explanations appear beside relevant terms without
+leaving the scenario and work with mouse, keyboard, and touch.
+
+The optional results walkthrough of [PDD §4.1](pdd.md#41-measurement-views-fr-o1)
+reuses this presentation and draft boundary. It guides readers through
+the three measurements and the two refinement editors. Navigation
+changes the visible explanation or measurement; refinement edits
+remain drafts until review and confirmation. Leaving the guide
+retains the current measurement and choices. Normal browsing uses
+the owner's selected Choice cards, each pairing a measurement with
+a plain explanatory question. They share the existing presentation
+state. No calculation, data, or deployment boundary changes;
+ADR-0020 remains applicable.
+
+The candidate scope is defined in [PDD §2.3](pdd.md#23-user-journeys),
+including explicitly delegated first-version choices. Its
+[detailed design](guided-journey-ddd.md) and
+[implementation plan](guided-journey-ip.md) govern this new route.
+The historical design below remains authoritative for `/scenario/`
+and shared scientific behavior, except where the additive design
+expressly identifies the new page's interaction difference.
+
 **Status:** first draft for owner review (2026-10-15).
 
 <!-- toc -->

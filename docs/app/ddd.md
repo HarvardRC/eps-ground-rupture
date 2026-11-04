@@ -1,5 +1,16 @@
 # Ground Rupture Explorer — detailed design document
 
+**Parallel guided implementation (2026-11-04).** This document
+continues to specify `/scenario/` and the shared scientific core.
+The new `/explore/` route follows the additive
+[guided detailed design](guided-journey-ddd.md), derived from
+[PDD §2.3](pdd.md#23-user-journeys), D-26–D-35, and the owner's
+separate-route implementation request. The
+[prototype record](scenario-journey-prototype.md) preserves the
+approved examples. The supplement fixes the candidate's remaining
+state, entry, navigation and integration choices without rewriting
+accepted legacy task bodies or numerical contracts.
+
 **Status:** first full draft, corrected after external review
 (2026-10-30) and again after the reviews of the implementation plan
 (2026-10-31), then after the IP consistency review (2026-11-01) and

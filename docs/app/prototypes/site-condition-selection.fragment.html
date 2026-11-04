@@ -1,0 +1,177 @@
+<div id="site-selection-proposal" class="viz-dotted-background">
+  <section class="selection-surface" aria-labelledby="selection-title">
+    <header class="selection-header">
+      <p class="selection-brand">Ground Rupture Explorer</p>
+      <p class="selection-step">Site conditions</p>
+      <h2 id="selection-title">What conditions would you like to include?</h2>
+      <p class="selection-help">Choose one or more values for each condition.</p>
+    </header>
+    <form novalidate>
+      <fieldset data-condition="angle" aria-describedby="selection-angle-summary selection-angle-error">
+        <legend>Fault angle <span class="selection-required">Required</span></legend>
+        <p class="selection-help">The angle of the fault below the ground surface.</p>
+        <label class="selection-all cursor-interaction"><input type="checkbox" data-all="angle"> Select all</label>
+        <div class="selection-options">
+          <button class="selection-option cursor-interaction" type="button" data-value="20" aria-pressed="false">20°</button>
+          <button class="selection-option cursor-interaction" type="button" data-value="30" aria-pressed="false">30°</button>
+          <button class="selection-option cursor-interaction" type="button" data-value="40" aria-pressed="false">40°</button>
+          <button class="selection-option cursor-interaction" type="button" data-value="45" aria-pressed="false">45°</button>
+          <button class="selection-option cursor-interaction" type="button" data-value="50" aria-pressed="false">50°</button>
+          <button class="selection-option cursor-interaction" type="button" data-value="60" aria-pressed="false">60°</button>
+          <button class="selection-option cursor-interaction" type="button" data-value="70" aria-pressed="false">70°</button>
+        </div>
+        <p id="selection-angle-summary" class="selection-summary" aria-live="polite">Choose one or more values to continue</p>
+        <p id="selection-angle-error" class="selection-error" role="alert" hidden></p>
+      </fieldset>
+      <fieldset data-condition="sediment" aria-describedby="selection-sediment-summary selection-sediment-error">
+        <legend>Sediment profile <span class="selection-required">Required</span></legend>
+        <p class="selection-help">Choose profiles from either group, or from both.</p>
+        <label class="selection-all cursor-interaction"><input type="checkbox" data-all="sediment"> Select all</label>
+        <div role="group" aria-labelledby="selection-uniform-label">
+          <p class="selection-group" id="selection-uniform-label">Uniform sediment</p>
+          <div class="selection-options">
+            <button class="selection-option cursor-interaction" type="button" data-value="uniform-weak" aria-label="Uniform: weak" aria-pressed="false">Weak</button>
+            <button class="selection-option cursor-interaction" type="button" data-value="uniform-moderate" aria-label="Uniform: moderate" aria-pressed="false">Moderate</button>
+            <button class="selection-option cursor-interaction" type="button" data-value="uniform-strong" aria-label="Uniform: strong" aria-pressed="false">Strong</button>
+          </div>
+        </div>
+        <div role="group" aria-labelledby="selection-layered-label">
+          <p class="selection-group" id="selection-layered-label">Layered sediment</p>
+          <div class="selection-options">
+            <button class="selection-option cursor-interaction" type="button" data-value="layered-weak" aria-label="Layered: weak" aria-pressed="false">Weak</button>
+            <button class="selection-option cursor-interaction" type="button" data-value="layered-moderate" aria-label="Layered: moderate" aria-pressed="false">Moderate</button>
+            <button class="selection-option cursor-interaction" type="button" data-value="layered-strong" aria-label="Layered: strong" aria-pressed="false">Strong</button>
+            <button class="selection-option cursor-interaction" type="button" data-value="layered-random" aria-label="Layered: random heterogeneous" aria-pressed="false">Random heterogeneous</button>
+            <button class="selection-option cursor-interaction" type="button" data-value="layered-cohesive" aria-label="Layered: cohesive top unit" aria-pressed="false">Cohesive top unit</button>
+            <button class="selection-option cursor-interaction" type="button" data-value="layered-alternating" aria-label="Layered: alternating strong–weak" aria-pressed="false">Alternating strong–weak</button>
+          </div>
+        </div>
+        <p id="selection-sediment-summary" class="selection-summary" aria-live="polite">Choose one or more values to continue</p>
+        <p id="selection-sediment-error" class="selection-error" role="alert" hidden></p>
+      </fieldset>
+      <footer class="selection-footer">
+        <span class="selection-help">Next: assumed displacement</span>
+        <button class="selection-continue cursor-interaction" type="button">Continue</button>
+      </footer>
+      <p class="selection-success" role="status" hidden>These site conditions are ready. You can continue to assumed displacement.</p>
+    </form>
+  </section>
+</div>
+<style>
+  #site-selection-proposal { padding: 18px 0; font: 15px/1.5 Arial, sans-serif; color: light-dark(#282526, #eee9e9); }
+  #site-selection-proposal * { box-sizing: border-box; }
+  #site-selection-proposal [hidden] { display: none; }
+  #site-selection-proposal .selection-surface { max-width: 650px; margin: 0 auto; background: light-dark(#fffdfa, #242122); border: 1px solid light-dark(#ded7d5, #51484b); border-radius: 10px; padding: 26px; }
+  #site-selection-proposal p { margin: 0; }
+  #site-selection-proposal .selection-brand { font-size: 14px; font-weight: 600; margin-bottom: 22px; }
+  #site-selection-proposal .selection-step { font-size: 13px; color: light-dark(#765154, #d1a3aa); margin-bottom: 6px; }
+  #site-selection-proposal h2 { font-size: 24px; line-height: 1.25; font-weight: 600; margin: 0 0 10px; }
+  #site-selection-proposal .selection-help { color: light-dark(#645b5e, #c8bdc1); font-size: 14px; }
+  #site-selection-proposal form { margin-top: 24px; }
+  #site-selection-proposal fieldset { min-width: 0; margin: 0 0 26px; padding: 0; border: 0; }
+  #site-selection-proposal legend { float: none; width: auto; font-size: 17px; font-weight: 600; padding: 0; margin-bottom: 4px; }
+  #site-selection-proposal .selection-all { display: flex; align-items: center; gap: 10px; margin-top: 14px; min-height: 32px; }
+  #site-selection-proposal input { margin: 0; width: 18px; height: 18px; flex: 0 0 18px; accent-color: light-dark(#8f213b, #eaa9b7); }
+  #site-selection-proposal .selection-required { display: inline-block; font-size: 12px; font-weight: 400; color: light-dark(#645b5e, #c8bdc1); margin-left: 8px; }
+  #site-selection-proposal .selection-options { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  #site-selection-proposal button { font: inherit; }
+  #site-selection-proposal .selection-option { border: 1px solid light-dark(#cfc4c7, #78696f); border-radius: 6px; padding: 7px 11px; min-width: 45px; background: light-dark(#fffdfa, #2e282b); color: light-dark(#3d3438, #eee4e8); }
+  #site-selection-proposal .selection-option[aria-pressed="true"] { background: light-dark(#8f213b, #eaa9b7); color: light-dark(#ffffff, #33121c); border-color: light-dark(#8f213b, #eaa9b7); }
+  #site-selection-proposal .selection-group { font-size: 14px; font-weight: 600; margin: 12px 0 6px; }
+  #site-selection-proposal .selection-summary { margin-top: 12px; font-size: 14px; }
+  #site-selection-proposal .selection-summary[data-pending="true"] { color: light-dark(#765c19, #e4c97f); }
+  #site-selection-proposal .selection-error { color: light-dark(#aa1531, #ffb2c1); font-size: 14px; margin-top: 8px; }
+  #site-selection-proposal .selection-footer { border-top: 1px solid light-dark(#ded7d5, #51484b); padding-top: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; }
+  #site-selection-proposal .selection-continue { border: 1px solid transparent; border-radius: 6px; padding: 10px 22px; background: light-dark(#8f213b, #eaa9b7); color: light-dark(#fff, #33121c); }
+  #site-selection-proposal .selection-success { margin-top: 16px; color: light-dark(#31613e, #afdab7); font-size: 14px; }
+  @media (max-width: 430px) { #site-selection-proposal .selection-surface { padding: 20px 16px; } #site-selection-proposal h2 { font-size: 22px; } }
+  @media (pointer: coarse) { #site-selection-proposal .selection-option, #site-selection-proposal .selection-all { min-height: 44px; } }
+</style>
+<script>
+(() => {
+  const root = document.getElementById('site-selection-proposal');
+  const keys = ['angle', 'sediment'];
+  const fields = Object.fromEntries(keys.map(key => [key, root.querySelector('[data-condition="' + key + '"]')]));
+  const options = Object.fromEntries(keys.map(key => [key, Array.from(fields[key].querySelectorAll('[data-value]'))]));
+  const values = key => options[key].map(button => button.dataset.value);
+  let state = { angle: { selected: [] }, sediment: { selected: [] } };
+  let attempted = false;
+  let success = false;
+  let lastSaved = '';
+  const errors = { angle: 'Choose one or more fault angles.', sediment: 'Choose one or more sediment profiles.' };
+  const allLabels = { angle: 'All values selected', sediment: 'All values selected' };
+  const valid = key => state[key].selected.length > 0;
+  const allSelected = key => state[key].selected.length === options[key].length;
+  function readSnapshot(snapshot) {
+    const data = snapshot?.modelContent;
+    if (data?.proposal !== 'site-selection-v2') return;
+    const next = {};
+    for (const key of keys) {
+      const candidate = data.conditions?.[key];
+      if (!candidate || !Array.isArray(candidate.selected)) return;
+      next[key] = { selected: values(key).filter(value => candidate.selected.includes(value)) };
+    }
+    state = next;
+    attempted = snapshot.privateContent?.attempted === true;
+    success = snapshot.privateContent?.success === true && keys.every(valid);
+  }
+  function render() {
+    for (const key of keys) {
+      const checkbox = fields[key].querySelector('input');
+      checkbox.checked = allSelected(key);
+      checkbox.indeterminate = valid(key) && !allSelected(key);
+      for (const button of options[key]) button.setAttribute('aria-pressed', String(state[key].selected.includes(button.dataset.value)));
+      const chosen = options[key].filter(button => state[key].selected.includes(button.dataset.value)).map(button => button.getAttribute('aria-label') || button.textContent);
+      const summary = root.querySelector('#selection-' + key + '-summary');
+      summary.textContent = allSelected(key) ? allLabels[key] : chosen.length ? chosen.join('; ') : 'Choose one or more values to continue';
+      summary.dataset.pending = String(!valid(key));
+      const error = root.querySelector('#selection-' + key + '-error');
+      error.hidden = !attempted || valid(key);
+      error.textContent = error.hidden ? '' : errors[key];
+      summary.hidden = !error.hidden;
+      fields[key].setAttribute('aria-invalid', String(!error.hidden));
+    }
+    root.querySelector('.selection-success').hidden = !success;
+  }
+  function save() {
+    const conditions = Object.fromEntries(keys.map(key => [key, { all: allSelected(key), selected: [...state[key].selected] }]));
+    const snapshot = { modelContent: { proposal: 'site-selection-v2', conditions }, privateContent: { attempted, success } };
+    lastSaved = JSON.stringify(snapshot);
+    if (window.openai?.setWidgetState) window.openai.setWidgetState(snapshot).catch(() => {});
+  }
+  root.addEventListener('click', event => {
+    const button = event.target.closest('button[data-value]');
+    if (!button || !root.contains(button)) return;
+    const key = button.closest('[data-condition]').dataset.condition;
+    const value = button.dataset.value;
+    state[key].selected = state[key].selected.includes(value) ? state[key].selected.filter(item => item !== value) : [...state[key].selected, value];
+    success = false;
+    render();
+    save();
+  });
+  root.addEventListener('change', event => {
+    const key = event.target.dataset.all;
+    if (!keys.includes(key)) return;
+    state[key] = { selected: event.target.checked ? values(key) : [] };
+    success = false;
+    render();
+    save();
+  });
+  root.querySelector('.selection-continue').addEventListener('click', event => {
+    event.preventDefault();
+    attempted = true;
+    success = keys.every(valid);
+    render();
+    if (!success) fields[keys.find(key => !valid(key))].querySelector('input').focus();
+    save();
+  });
+  readSnapshot(window.openai?.widgetState);
+  render();
+  window.addEventListener('openai:set_globals', event => {
+    const snapshot = event.detail?.globals?.widgetState;
+    if (!snapshot || JSON.stringify(snapshot) === lastSaved) return;
+    readSnapshot(snapshot);
+    render();
+  });
+})();
+</script>

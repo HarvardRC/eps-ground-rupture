@@ -125,10 +125,16 @@ jobs:
       # a published prerelease, downloading its files with gh, and verifying
       # every SHA-256. The bundle task is excluded because the webapp-bundle
       # job's artifact already populates its output.
-      - name: Stage scenario assets
-        run: ./gradlew :subprojects:mkdocs:scenarioAssets -x :subprojects:webapp:webappBundle
+      # exploreAssets depends on that staging and adds its isolated bundle
+      # under assets/explore/, referring to the same pinned data.
+      - name: Stage scenario and guided explorer assets
+        run: ./gradlew :subprojects:mkdocs:exploreAssets -x :subprojects:webapp:webappBundle
         env:
           GH_TOKEN: ${{ github.token }}
+
+      - name: Test site checks
+        working-directory: subprojects/mkdocs
+        run: ../python/.venv/bin/python -m unittest discover -s tests -p 'test_*.py'
 
       # Run from the mkdocs directory, not via `mkdocs -f`: pymdownx.snippets
       # resolves base_path from the working directory, so building from

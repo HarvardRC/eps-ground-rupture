@@ -1,5 +1,14 @@
 # Ground Rupture Explorer — implementation plan
 
+**Parallel guided implementation (2026-11-04).** The historical task
+bodies below remain unchanged and govern the existing `/scenario/`
+page and shared core. The owner's separately authorized `/explore/`
+implementation follows the additive
+[guided implementation plan](guided-journey-ip.md) and its
+[detailed design](guided-journey-ddd.md). The additive plan implements
+D-26–D-35 and records actual candidate verification separately from
+these accepted tasks.
+
 **Status:** first full draft, corrected after external review and
 again after the adversarial review of the document pair (both
 2026-10-30), and after the two external reviews of this plan (both
@@ -296,7 +305,9 @@ decision of 2026-11-01 its task branch starts at
 request it opens — a task's, a scratch one, or a drill's — targets
 `dev-v.0.4.x` (`gh pr create --base dev-v.0.4.x`), never `main`, the
 repository's default branch — and it pushes a branch or opens a pull
-request only when the owner asks); and **Status**:
+request only when the owner asks, the owner's 2026-11-04 grant
+([guided plan, Commands](guided-journey-ip.md#commands)) standing as
+that ask for the guided second increment's tasks); and **Status**:
 
 - **Draftable** — every input is an accepted document or section, so
   the task body can be written now; during the full-draft campaign a
@@ -321,8 +332,10 @@ request only when the owner asks); and **Status**:
   and its branch is current with `dev-v.0.4.x`; otherwise by the
   owner. A pull request that changes the DDD, this plan, the review
   ledger, or an ADR beyond a task's own Status cell is the owner's to
-  merge. The merge that carries the change is the record, with no
-  separate owner commit. A Done record means
+  merge, except under the owner's 2026-11-04 guided-increment grant
+  ([guided plan, Commands](guided-journey-ip.md#commands)). The
+  merge that carries the change is the record, with no separate
+  owner commit. A Done record means
   that the task's implementation is on `dev-v.0.4.x`, not only its
   Status cell; `main` receives the implementation once, with T-65's
   release merge ([§3](#3-gates-and-release-sequence), Branches), and
@@ -5640,6 +5653,13 @@ sources. Each line names what unparks it.
 - Chart export ([D-14](pdd.md#1-decision-register)) — P2. Its cumulative
   images must include the PDD §4.1 accuracy statement in the rendered
   caption strip; acceptance covers its inclusion and legibility.
+- Result report ([D-40](pdd.md#1-decision-register)) — P2, decided
+  2026-11-04: one self-contained document pairing the §6.1
+  provenance and scenario summary with rendered charts and
+  statistics ([PDD §6.5](pdd.md#65-result-report-d-40-p2));
+  recorded as guided task G-13 in the next-phase queue (D-41) under
+  the owner's earlier-start provision above, and still sequenced
+  after chart export (D-14).
 - Finer logarithmic bins that subdivide each decade by mantissa steps
   — a P2 option for the width panel's log-scale toggle, which ships in
   the MVP; it needs a [D-23](pdd.md#1-decision-register)
