@@ -60,6 +60,24 @@ val webappBundle by tasks.registering(NodeTask::class) {
     script.set(file("build.mjs"))
 }
 
+// Downloads the Chromium build the locked @playwright/test pins into
+// Playwright's per-user browser cache, unless it is already there
+// (docs/app/ddd.md §2, §7.5). Never `check`, never CI; run by hand before
+// a local `measure` diagnostic.
+val playwrightInstall by tasks.registering(NpmTask::class) {
+    dependsOn(npmCi)
+    npmCommand.set(listOf("run", "browser-install"))
+}
+
+// The browser test lane (docs/app/ddd.md §7.5): the functional projects
+// `desktop` and `mobile` against the freshly built preview tree. The
+// release checklist only — never `check`, never CI.
+val webappBrowserTest by tasks.registering(NpmTask::class) {
+    dependsOn(":subprojects:mkdocs:mkdocsPreview")
+    dependsOn(playwrightInstall)
+    npmCommand.set(listOf("run", "browser-test"))
+}
+
 tasks.named("check") {
     dependsOn(tscCheck, webappTest)
 }

@@ -430,7 +430,7 @@ runs.
    (expected 0) as a diagnostic; the two named full-data tests
    reproduce the tie share and the evaluation-order effect.
 3. **DD-3 — browser-testing tool.** Playwright (`@playwright/test`
-   1.47.2) driving the Chromium build it pins — one evergreen engine,
+   1.64.1) driving the Chromium build it pins — one evergreen engine,
    per the second amendment of 2026-10-29 to
    [ADR-0015](../adr/0015-golden-scenario-parity.md) — with
    `@axe-core/playwright` 4.10.0 as its one accessibility engine, both
@@ -959,29 +959,39 @@ therefore runs the same runtime, and no workflow step installs Node.js
 
 Development dependencies, each listed at an exact version in
 `package.json` (no `^` or `~` range): `typescript 5.5.4`,
-`esbuild 0.24.0`, `@playwright/test 1.47.2`, `playwright-core 1.47.2`
-(below), `@types/node 22.10.2` (the Node.js 22 typings that
+`esbuild 0.24.0`, `@playwright/test 1.64.1`, `playwright-core 1.64.1`
+(below; raised on 2026-11-03 from 1.47.2, whose `playwright install`
+downloads browsers without verifying the SSL certificate —
+[GHSA-7mvr-c777-76hp](https://github.com/advisories/GHSA-7mvr-c777-76hp),
+fixed in 1.55.1 — to the newest release, which pins the newest
+browser build), `@types/node 22.10.2` (the Node.js 22 typings that
 `tsconfig.node.json` and the tests' `node:test` imports need — they
 also declare the `fetch`, `performance`, and `DecompressionStream`
 globals that `decode/` calls in both environments — released
 alongside the runtime pin),
 `@axe-core/playwright 4.10.0` (the accessibility engine of
-[§7.5](#75-browser-test-lane), contemporary with the other pins; the
-lockfile resolves its `axe-core` dependency to one exact version), and
+[§7.5](#75-browser-test-lane), contemporary with the other pins but
+Playwright's; the lockfile resolves its `axe-core` dependency to one
+exact version), and
 `caniuse-lite 1.0.30001820` (the browser-support dataset of the
 compatibility test of
 [§7.6](#76-performance-and-compatibility-measurements), which states
 when the dataset is upgraded). The list is complete: another package
 joins only by amending it. `playwright-core` is pinned, at the version
-that `@playwright/test` 1.47.2 installs through `playwright`, because
+that `@playwright/test` 1.64.1 installs through `playwright`, because
 `@axe-core/playwright` declares it as a peer with the open range
-`>= 1.0.0`: in a trial install of the other six pins on 2026-11-01,
-outside the repository, npm met that peer with the newest release,
-1.64.1, at the top level, nested 1.47.2 under `playwright`, and the
-`new AxeBuilder({ page })` call of §7.5 failed the type check
-(TS2740), its `page` typed by the other copy. With the pin,
+`>= 1.0.0`, which npm meets with the newest release: when that is
+not the version `playwright` installs, the tree holds two copies, and
+the `new AxeBuilder({ page })` call of §7.5 fails the type check, its
+`page` typed by the other copy. In a trial install on 2026-11-03,
+outside the repository, of the other six pins with `@playwright/test`
+at 1.64.0, npm placed the newest release, 1.64.1, at the top level
+and nested 1.64.0 under `playwright`, and that call failed (TS2322),
+as it had failed with 1.47.2 on 2026-11-01 (TS2740). With the pin,
 `package-lock.json` must record `node_modules/playwright-core` at
-1.47.2. The shipped bundle has zero runtime
+1.64.1, its only copy: on 2026-11-03 the lockfile that `npmInstall`
+wrote under the pinned runtime held that one entry, and the call
+passed `tscCheck`. The shipped bundle has zero runtime
 dependencies, so `dependencies` stays empty. The committed
 `package-lock.json` pins the whole tree; builds install with
 `npm ci`, and `npm install` runs only to create the lockfile or
@@ -1022,7 +1032,12 @@ the Gradle tasks run:
 `npm ci` installs `@playwright/test` but downloads no browser, so
 `browser-install` downloads the Chromium build that the locked
 `@playwright/test` pins, unless that build is already present, into
-Playwright's per-user browser cache outside the repository.
+Playwright's per-user browser cache outside the repository. Since
+Playwright 1.57 that build is a Chrome for Testing build of Chromium:
+for 1.64.1, Chrome for Testing 156.0.8078.4 (Playwright's `chromium`
+revision 1248), which headed runs such as the `measure` project of
+§7.5 use, and Chrome Headless Shell of the same version, which
+headless runs use.
 
 `node --test` receives the quoted glob unexpanded and runs only the
 compiled test files; without the pattern, Node 22's default discovery
@@ -1235,7 +1250,8 @@ in `src/views/dom/`.
 
 *Closes:* DD-10. *Verification (planned):* the pins are read from the
 committed `build.gradle.kts`, `package.json`, and `package-lock.json`,
-whose `node_modules/playwright-core` entry must read 1.47.2 (T-01),
+whose `node_modules/playwright-core` entry must read 1.64.1 (T-01,
+which checked 1.47.2, the pin of its revision),
 and from `perf/versions.tf` and `perf/.terraform.lock.hcl`
 (T-59); `test/toolchain.test.ts` fails any `webappTest` run on
 another runtime; the `run.mjs` command line and its
@@ -11228,9 +11244,9 @@ upgrade of the pinned package (§2).
     or the P2 display preference of
     [PDD §4.9](pdd.md#49-display-preferences-fr-g6-p2). The desktop
     and mobile functional projects retain their own viewports.
-    Playwright 1.47.2
-    has no per-project `workers`, so every invocation of this project
-    carries `--workers=1` (§7.6).
+    It sets no per-project `workers`, which Playwright has had since
+    1.52; every invocation of this project carries `--workers=1`
+    instead (§7.6).
 - **Invocation.** `webappBrowserTest` runs, from
   `subprojects/webapp`, the npm script `browser-test` of
   [§2](#2-repository-structure-naming-and-toolchain),
@@ -11250,7 +11266,8 @@ upgrade of the pinned package (§2).
   runs one. `subprojects/webapp/README.md` gives both invocations,
   the lane's and the diagnostic's, as written here.
 - **Routing.** Functional specs may intercept requests with
-  `page.route` (the failure, lifecycle, and mid-edit drives below);
+  `page.route` (the failure, lifecycle, and mid-edit drives below,
+  and the bundle substitution of the reload-exception case);
   measurement specs never call `page.route`, `context.route`, or
   `routeFromHAR` and never record HAR, because routing disables the
   HTTP cache.
@@ -11302,7 +11319,7 @@ eleven specs live in `subprojects/webapp/playwright/specs/`.
 | `consistency.spec.ts` | "scenario summaries, charts, tables, and downloads describe the same active scenario" | Builds GS-1 through the controls; captures the summary, chart labels, table values, and a download (Playwright's download event); asserts one scenario describes them all: the downloaded `scenario.json`'s `scenario` deep-equals the reference GS-1 `inputs`; `python3 -I test/zipcheck.py <download> <instant of provenance block 8>` exits 0, so the archive holds the four members, stored and well formed; and the package's settings, versions, counts, and statistics match the displayed ones, the footer stamps included ([SC-2 (download reproducibility)](pdd.md#101-success-criteria)'s reviewer path). |
 | `failure-states.spec.ts` | "each §6.1 state appears when its condition holds — invalid or out-of-range input, no data for the selected scenario, unavailable browser capabilities, and internal failure — without being confused with one another" (the §6.1 is [HLDD §6.1 — Failure honesty (ADR-0010)](hldd.md#61-failure-honesty-adr-0010)) | Drives each category. Invalid input: offset entries `abc`, `-1`, `1000.0001` (above the 1000 m bound of [§5.7](#57-scenario-controls) R2), and a blank commit, and slip-window entries `-1`, `abc`, minimum `3` with maximum `2`, and a maximum above `slip_window_bounds.max`, each get `aria-invalid="true"`, an accessible description that ends with its `copy.json` line verbatim (for a slip field, after the `#gre-slip-range` and `#gre-slip-help` texts), the element the appended id names holding exactly that line, the field text unchanged, and the summary and a captured download's provenance unchanged; entering offset mode with a blank field shows no error and changes nothing ([§5.7](#57-scenario-controls)). Out-of-range input: an offset entry whose 30° window runs past the recorded maximum is accepted and flagged `partly_out`, never rejected ([§5.10](#510-failure-states)), and the offset `1000`, the largest R2 accepts, is accepted with the results rendered, never the unavailable state. No data: GS-4 shows the empty state. Unavailable capabilities: deleting `DecompressionStream` with an init script yields the complete §5.10 capability notice verbatim, naming it and stating the 12-month policy, latest-stable-browser update and reload, and iOS/iPadOS update instructions; the fallback and `#gre-disclaimer` stand and no skeleton is built. With JavaScript enabled and the application bundle request aborted, the ordinary fallback's browser-policy and recovery paragraph remains visible and the `<noscript>` text is absent; with JavaScript disabled, both that paragraph and the `<noscript>` text are visible. Internal failure: an aborted artifact request, a truncated artifact, a manifest whose `export_version` differs from `data-data-version`, and the scenario HTML with `data-software-version=""`, each served by `page.route`, yield the unavailable state — the third its version-mismatch variant naming both versions, the fourth the reason "the page is missing information it needs to load the data" with `#gre-versions` empty — "never empty or stale results" ([ADR-0015](../adr/0015-golden-scenario-parity.md), second amendment), with focus on `#gre-state` ([§5.11](#511-accessibility-supported-environments-and-navigation-lifecycle)); with every regression-export request aborted, entering offset mode — a prefetch — shows nothing, and the offset `3`, committed by moving focus to the short disclaimer's link (the field's `change`), an accepted offset-mode Scenario, then yields the unavailable state naming the conversion coefficients and moves focus from that link to `#gre-state` ([§5.3](#53-query-engine), [§5.10](#510-failure-states)); an aborted field-export request on switching the overlay on shows the overlay legend's unavailable line and leaves the simulation results rendered, and switching the overlay off and on again with the request unrouted then draws the marks on the height and width panels and removes that line; an error thrown by an unrelated script added with `page.addScriptTag` leaves the results rendered. Asserts the presentations pairwise distinct, `#gre-disclaimer` present in every state, and the short disclaimer in `#gre-caveats` present in every state except the capability notice, which builds no skeleton ([§5.10](#510-failure-states)). Also the **Terminal state during startup** cases below. |
 | `a11y.spec.ts` | "the automatable accessibility checks pass" | Runs axe with the tags above, the WCAG 2.2 AA set of [PDD §9.3 — Accessibility target (D-17, Proposed)](pdd.md#93-accessibility-target-d-17-proposed), on the scenario page in the loaded state (again with the width panel's "Logarithmic scale" checked), the warning (GS-2), suppression (GS-5), and empty (GS-4) states, and the failure states — each with the chart-data disclosures closed and again open — and on each shipped product page; asserts zero violations. On GS-1 and GS-2, asserts the [DD-9](#1-ddd-decision-register) artifacts of [§5.11](#511-accessibility-supported-environments-and-navigation-lifecycle): each chart `toHaveRole('img')`, an accessible name matching the §5.11 chart-label template with N equal to the panel head's valid count, and an accessible description equal to its `<figcaption>`, including the PDD §4.1 accuracy paragraph in cumulative view and excluding it in histogram view; `aria-details` resolving to the panel's `<details id="{pid}-data">`; with the disclosure open, the bin-table headers are the label with unit, the legend labels, and `Total`, each row's group cells sum to its Total, the Totals sum to the panel N, and the nonzero segments of bar i equal the nonzero cells of row i; the family toggle gives three group columns with unchanged Totals; with the overlay on, the field table has one row per tick drawn. In GS-5, a panel whose chart is suppressed shows no figure and no disclosure and keeps its statistics table. Read-off: `fill('95')` then Tab makes the input's accessible description match `/^Percentile 95: /`, and the status region announces exactly once. Rapid changes ([§5.3](#53-query-engine) item 2): from the loaded GS-0 state, after `performance.clearMarks()` and with a `MutationObserver` recording each non-empty text of the status region, one `page.evaluate` clicks the one-state population radio (GS-7) and then registers a `requestAnimationFrame` callback that clicks the all-stages radio — registered after the click's frame request, so it runs right after the scheduler's frame callback — so the second change is accepted after the first's frame commits and before that frame's announcement and mark tasks run; once the status region holds text, the observer has recorded exactly one text, the §5.11 "Results updated: {matching} matching records." with {matching} GS-0's reference `matching_records` by `formatCount`, and exactly one `egr:results-updated` mark exists, its `detail.seq` equal to that of the later of the two `egr:change-accepted` marks. Also the **Transient announcement guards** cases below. |
-| `keyboard-responsive.spec.ts` | "keyboard interaction and responsive layouts behave as PDD §9.2, PDD §9.3, and §7.2 specify" (the §7.2 is [HLDD §7.2 — Accessibility and supported environments](hldd.md#72-accessibility-and-supported-environments)) | Traverses the page by keyboard: every control reachable with visible focus, and operating a control by keyboard produces the same result update as the pointer path. Focus retention: a dip checkbox (Space), a population radio (ArrowDown), a panel view-switch radio (ArrowRight), the read-off input (`84`, Enter), the overlay switch (Space), and the slip maximum (`3`, Enter), each operated with `h = document.activeElement` stored first. After the update settles — for the dip checkbox, the population radio, the read-off, and the slip maximum, a status-region change; for the view-switch radio and the overlay switch, which are display-only and announce nothing ([§5.11](#511-accessibility-supported-environments-and-navigation-lifecycle)), the next replacement of the `.gre-chart` slot of the operated panel (for the overlay switch, of `#gre-scarp_height`), with the status region asserted unchanged — `h === document.activeElement && h.isConnected`. Mid-edit: with the field-export request held by `page.route`, switch the overlay on, focus the slip maximum, type `2.5` without Enter, release the request; marks then appear on the height and width panels with neither the Scenario nor the display state changed ([§5.3](#53-query-engine) item 3), while the value stays `2.5`, `selectionStart` is 3, focus, summary, and `aria-invalid` are unchanged; Enter then makes the summary read "slip 0–2.5 m". Empty-state focus: type `0` in the offset field and commit by clicking panel 1's Cumulative radio; `document.activeElement.id` is `gre-state`. In the `mobile` project the spec operates the view switch and the read-off with `tap()`; asserts no page-level horizontal scroll — `document.documentElement.scrollWidth` at most `window.innerWidth` — with every chart-data disclosure closed and again with every one open, each open table scrolling inside its `.gre-table-scroll` wrapper instead ([§5.11](#511-accessibility-supported-environments-and-navigation-lifecycle)); asserts `#gre-summary` in the viewport and its box clear of the focused control's, first with focus on the first fault-dip checkbox and then on Reset, each reached by Tab — the small-screen persistent summary of [§5.7](#57-scenario-controls) and WCAG 2.2 SC 2.4.11; and asserts no hover-dependent essentials. |
+| `keyboard-responsive.spec.ts` | "keyboard interaction and responsive layouts behave as PDD §9.2, PDD §9.3, and §7.2 specify" (the §7.2 is [HLDD §7.2 — Accessibility and supported environments](hldd.md#72-accessibility-and-supported-environments)) | Traverses the page by keyboard: every control reachable with visible focus, and operating a control by keyboard produces the same result update as the pointer path. Focus retention: a dip checkbox (Space), a population radio (ArrowDown), a panel view-switch radio (ArrowRight), the read-off input (`84`, Enter), the overlay switch (Space), and the slip maximum (`3`, Enter), each operated with `h` stored first: `document.activeElement`, or, for the two radios, the radio of the same group that the arrow key focuses and checks (the next in DOM order), since a native radio group moves focus with its selection. After the update settles — for the dip checkbox, the population radio, the read-off, and the slip maximum, a status-region change; for the view-switch radio and the overlay switch, which are display-only and announce nothing ([§5.11](#511-accessibility-supported-environments-and-navigation-lifecycle)), the next replacement of the `.gre-chart` slot of the operated panel (for the overlay switch, of `#gre-scarp_height`), with the status region asserted unchanged — `h === document.activeElement && h.isConnected`. Mid-edit: with the field-export request held by `page.route`, switch the overlay on, focus the slip maximum, type `2.5` without Enter, release the request; marks then appear on the height and width panels with neither the Scenario nor the display state changed ([§5.3](#53-query-engine) item 3), while the value stays `2.5`, `selectionStart` is 3, focus, summary, and `aria-invalid` are unchanged; Enter then makes the summary read "slip 0–2.5 m". Empty-state focus: type `0` in the offset field and commit by clicking panel 1's Cumulative radio; `document.activeElement.id` is `gre-state`. In the `mobile` project the spec operates the view switch and the read-off with `tap()`; asserts no page-level horizontal scroll — `document.documentElement.scrollWidth` at most `window.innerWidth` — with every chart-data disclosure closed and again with every one open, each open table scrolling inside its `.gre-table-scroll` wrapper instead ([§5.11](#511-accessibility-supported-environments-and-navigation-lifecycle)); asserts `#gre-summary` in the viewport and its box clear of the focused control's, first with focus on the first fault-dip checkbox and then on Reset, each reached by Tab — the small-screen persistent summary of [§5.7](#57-scenario-controls) and WCAG 2.2 SC 2.4.11; and asserts no hover-dependent essentials. |
 | `site-regression.spec.ts` | the per-release regression checks of [§7.7](#77-site-validation-and-release-checklist) on existing surfaces | Visits the existing dashboard, navigation, and citation pages: embeds and links present and loading; the scenario bundle requested only on the scenario page; the site-wide Tableau embedding module never requested there (the [§6.1](#61-build-outputs-asset-paths-and-page-scaffold) exclusion, observed from each page's requests); each dashboard page entered both directly and by instant navigation from a non-dashboard page, the probe surviving, its `<tableau-viz>` upgrading on both paths (the §6.1 loader). Host fidelity of the served tree: `request.get('data', { maxRedirects: 0 })` gets 301 to `BASE_URL` + `data/`; `request.get('no-such-page/')` gets 404 `text/html`; a `.gz` data file comes back without `Content-Encoding`. |
 
 *Closes:* DD-3. *Verification (planned):* the exit status of
@@ -11463,7 +11480,11 @@ or real deployment is involved. Assert:
   successful preserving save, so it cannot claim restoration, and a
   concurrent vintage-load failure, so it cannot claim defaults were shown. A write/read-back
   failure or reload exception produces its exact message without
-  navigation. A known record's removal exception, throwing verification
+  navigation; the reload exception is driven by serving, through
+  `page.route`, the application bundle with each `location.reload()`
+  call replaced by a call that throws, since Chromium's
+  `Location.reload` is an unforgeable own property that an init script
+  cannot replace. A known record's removal exception, throwing verification
   read, or non-null read-back blocks restoration; explicit retry after clearing succeeds resumes,
   and explicit default-start after clearing uses no saved settings.
   Failed discard never reloads. No branch silently applies only part
@@ -11955,7 +11976,7 @@ event names it — the protocol's memory-cache signal, its `Response` type
 having no memory-cache member. A cache-served request is warm once its
 `loadingFinished` arrives, whatever `hasExtraInfo` says and without
 waiting for extra information, which Chromium may never send for a
-cached response that sets that flag (the pinned Playwright 1.47.2
+cached response that sets that flag (the pinned Playwright 1.64.1
 network manager likewise ignores the flag on a response served from
 cache). Any other request settles at its `loadingFinished` with the
 response event's `status` when `hasExtraInfo` is false, and otherwise
