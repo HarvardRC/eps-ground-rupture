@@ -36,6 +36,43 @@ export function freshDraft(manifest: Manifest): Draft {
   };
 }
 
+/** The reader-facing group of a manifest sediment set. */
+export function sedimentGroup(set: string): string {
+  if (/hetero|layer/i.test(set)) return 'Layered sediment';
+  if (/homo|uniform/i.test(set)) return 'Uniform sediment';
+  return set;
+}
+
+/**
+ * The approved illustrative scenario (PDD D-37; guided DDD §9.1): fault
+ * angles 30° and 40°, 5 m depth, Dense density, Uniform: Strong and
+ * Layered: Strong sediment, and a 0–3 m vertical surface offset. Every
+ * member comes from the manifest dictionaries; a missing member throws
+ * rather than shrinking the sample.
+ */
+export function sampleDraft(manifest: Manifest): Draft {
+  const columns = manifest.trialColumns;
+  const member = <T>(values: readonly T[], value: T, label: string): T => {
+    if (!values.includes(value)) throw new Error(`Sample inputs: this data release has no ${label}.`);
+    return value;
+  };
+  const sediment = (['Uniform', 'Layered'] as const).map(group => {
+    const pairs = manifest.armStrengthStates.filter(pair =>
+      sedimentGroup(pair.set) === `${group} sediment` && pair.sedimentStrength === 'Strong');
+    if (pairs.length !== 1) throw new Error(`Sample inputs: this data release has no single ${group}: Strong sediment.`);
+    return { set: pairs[0].set, sedimentStrength: pairs[0].sedimentStrength };
+  }).sort(compareSedimentPairs);
+  return {
+    ...freshDraft(manifest),
+    faultDip: [member(columns.fault_dip, 30, '30° fault angle'), member(columns.fault_dip, 40, '40° fault angle')],
+    depth: [member(columns.depth, 5, '5 m sediment depth')],
+    density: [member(columns.density, 'Dense', 'Dense sediment density')],
+    sediment,
+    mode: 'offset',
+    offsetMax: '3',
+  };
+}
+
 export function cloneDraft(draft: Draft): Draft {
   return {
     ...draft, faultDip: [...draft.faultDip], depth: [...draft.depth],

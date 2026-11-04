@@ -19,7 +19,7 @@ import type { RenderInput } from '../views/render-input';
 import { statsRows, unclassifiedLine } from '../views/stats-table';
 import { computeResult } from './compute';
 import { DEFINITIONS, type DefinitionKey } from './glossary';
-import { cloneDraft, draftChanged, freshDraft, offsetShortcut, stepDecimal, validateDraft, type Draft, type Issue, type Step } from './state';
+import { cloneDraft, draftChanged, freshDraft, offsetShortcut, sampleDraft, sedimentGroup, stepDecimal, validateDraft, type Draft, type Issue, type Step } from './state';
 
 export interface ExplorerOptions {
   vintage: Vintage;
@@ -53,11 +53,6 @@ const help = (title: string, text: string, anchor: string): string => `<details 
 const term = (key: DefinitionKey, label: string): string => `<button type="button" class="gx-term" data-explain="${key}" data-glossary-source="${DEFINITIONS[key].source}" aria-label="${escape(label)}: explanation">${escape(label)}</button>`;
 const button = (action: string, label: string, primary = false, extra = ''): string => `<button type="button" class="gx-button${primary ? ' gx-primary' : ''}" data-action="${action}" ${extra}>${label}</button>`;
 const populationName = (population: string): string => population === 'one_state_per_trial' ? 'Last stage within the slip range' : 'All stages within the slip range';
-function sedimentGroup(set: string): string {
-  if (/hetero|layer/i.test(set)) return 'Layered sediment';
-  if (/homo|uniform/i.test(set)) return 'Uniform sediment';
-  return set;
-}
 const sedimentName = (pair: SedimentPair): string => `${sedimentGroup(pair.set).replace(' sediment', '')}: ${pair.sedimentStrength}`;
 
 export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void {
@@ -74,6 +69,9 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   let refineOpen = false;
   let guideIndex: 0 | 1 | 2 | 3 | 4 | null = null;
   let exampleOpen = false;
+  // Sample-input presentation state (guided DDD §9.1), never part of Draft.
+  let sampleAsk = false;
+  let sampleArrived = false;
   let regression: Regression | null = null;
   let regressionPromise: Promise<boolean> | null = null;
   let regressionError = '';
@@ -193,7 +191,20 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   }
 
   function introView(): string {
-    return `${heading('Use simulations to understand ground rupture.', 'Describe the site conditions and fault movement you want to investigate, then see the simulated results.')}<p class="gx-research">This is a research tool; it does not predict what will happen at a particular site.</p><div class="gx-intro-grid"><div><h3>Describe your assumptions</h3><p>Choose the modeled site conditions and fault movement you want to investigate.</p></div><div><h3>Review your scenario</h3><p>Check your choices and see whether the simulations cover your movement range.</p></div><div><h3>Understand the results</h3><p>Explore scarp height, deformation-zone width, and scarp dip, then download the matching records.</p></div></div><p>Results come from an existing set of research simulations. This page does not run a new simulation.</p><p class="gx-session-note">Your choices are kept while this page remains open. Reloading or leaving and returning starts a new draft.</p><footer class="gx-footer">${button('start', 'Build your scenario', true)}</footer>`;
+    return `${heading('Use simulations to understand ground rupture.', 'Describe the site conditions and fault movement you want to investigate, then see the simulated results.')}<p class="gx-research">This is a research tool; it does not predict what will happen at a particular site.</p><div class="gx-intro-grid"><div><h3>Describe your assumptions</h3><p>Choose the modeled site conditions and fault movement you want to investigate.</p></div><div><h3>Review your scenario</h3><p>Check your choices and see whether the simulations cover your movement range.</p></div><div><h3>Understand the results</h3><p>Explore scarp height, deformation-zone width, and scarp dip, then download the matching records.</p></div></div><p>Results come from an existing set of research simulations. This page does not run a new simulation.</p><p class="gx-session-note">Your choices are kept while this page remains open. Reloading or leaving and returning starts a new draft.</p>${introActions()}`;
+  }
+
+  /** The introduction's actions, or the inline sample-replacement question (guided DDD §9.1). */
+  function introActions(): string {
+    if (sampleAsk) return `<div class="gx-footer gx-sample-confirm" role="group" aria-labelledby="gx-sample-question"><p id="gx-sample-question" tabindex="-1"><strong>Replace your current choices with the sample inputs?</strong></p><div>${button('sample-use', 'Use the sample', true)}${button('sample-keep', 'Keep my choices')}</div></div>`;
+    return `<footer class="gx-footer gx-intro-actions"><div>${button('start', 'Build your scenario', true)}${button('sample', 'Try sample inputs', false, 'id="gx-sample" aria-describedby="gx-sample-hint"')}</div><p id="gx-sample-hint" class="gx-hint">Sample inputs, not recommended site values.</p></footer>`;
+  }
+
+  /** Fill the whole draft with the sample and open Site conditions; the confirmation, results, and walkthrough are untouched. */
+  function useSample(): void {
+    const sample = sampleDraft(manifest);
+    draft = sample; issues = []; sampleAsk = false; sampleArrived = true;
+    setStep('site');
   }
 
   function siteGroup(field: 'faultDip' | 'depth' | 'density' | 'sediment', title: string, hint: string, anchor: string): string {
@@ -211,7 +222,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   }
 
   function siteView(): string {
-    return `${heading('Describe the site conditions', 'Choose one or more values for each condition.')}<div class="gx-site-grid">${siteGroup('faultDip', 'Fault angle', 'How steeply the fault is tilted, measured from horizontal.', 'fault-dip')}${siteGroup('depth', 'Sediment depth', 'The thickness of the sediment layer above the fault.', 'sediment-depth')}${siteGroup('density', 'Sediment density', 'How tightly the sediment is packed.', 'sediment-strength')}${siteGroup('sediment', 'Sediment strength and structure', 'Choose uniform material or a layered profile. You can include more than one possibility.', 'set')}</div><footer class="gx-footer">${button('intro', 'Back')}${reached.has('review') ? button('review', 'Return to review', true) : button('site-next', 'Continue to fault movement', true)}</footer>`;
+    return `${heading('Describe the site conditions', 'Choose one or more values for each condition.')}${sampleArrived ? '<p class="gx-sample-status" role="status">These are sample inputs, not recommended site values. Change anything.</p>' : ''}<div class="gx-site-grid">${siteGroup('faultDip', 'Fault angle', 'How steeply the fault is tilted, measured from horizontal.', 'fault-dip')}${siteGroup('depth', 'Sediment depth', 'The thickness of the sediment layer above the fault.', 'sediment-depth')}${siteGroup('density', 'Sediment density', 'How tightly the sediment is packed.', 'sediment-strength')}${siteGroup('sediment', 'Sediment strength and structure', 'Choose uniform material or a layered profile. You can include more than one possibility.', 'set')}</div><footer class="gx-footer">${button('intro', 'Back')}${reached.has('review') ? button('review', 'Return to review', true) : button('site-next', 'Continue to fault movement', true)}</footer>`;
   }
 
   function numeric(field: 'slipMin' | 'slipMax' | 'offsetMax', label: string, required: boolean): string {
@@ -403,6 +414,9 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   function render(focusId?: string, scroll = false): void {
     if (!alive()) return;
     closeHelp();
+    // Sample presentation belongs to one screen each; leaving it clears it.
+    if (step !== 'site') sampleArrived = false;
+    if (step !== 'intro') sampleAsk = false;
     chartObserver?.disconnect(); chartObserver = null;
     const active = document.activeElement as HTMLElement | null;
     const activeId = active && shell.contains(active) ? active.id : '';
@@ -594,7 +608,13 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       const chart = target.dataset.chart as 'histogram' | 'cumulative' | undefined;
       if (chart) { display = { ...display, view: { ...display.view, [display.measurement]: chart } }; render(); return; }
       const action = target.dataset.action;
-      if (action === 'start' || action === 'site') setStep('site');
+      if (action === 'sample') {
+        // Fill silently only over an untouched fresh draft with nothing confirmed.
+        if (confirmed === null && !draftChanged(draft, freshDraft(manifest))) useSample();
+        else { sampleAsk = true; render('gx-sample-question'); }
+      } else if (action === 'sample-use') useSample();
+      else if (action === 'sample-keep') { sampleAsk = false; render('gx-sample'); }
+      else if (action === 'start' || action === 'site') setStep('site');
       else if (action === 'intro') setStep('intro');
       else if (action === 'movement') setStep('movement');
       else if (action === 'back-results' && result) setStep('results');
@@ -615,7 +635,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       else if (action === 'refine') { refineOpen = !refineOpen; render(); }
       else if (action === 'edit-refinements') { refineOpen = true; setStep('results'); $(`#gx-population-${draft.population}`)?.focus({ preventScroll: true }); $('#gx-refinements')?.scrollIntoView({ block: 'start' }); }
       else if (action === 'discard' && confirmed) { if (guideIndex !== null && guideIndex >= 3) refineOpen = true; guideIndex = null; draft = cloneDraft(confirmed); issues = []; generalError = ''; setStep('results'); status.textContent = 'Draft changes discarded. The confirmed scenario has been restored.'; }
-      else if (action === 'new') { guideIndex = null; draft = freshDraft(manifest); confirmed = null; result = null; issues = []; generalError = ''; reached = new Set(['intro', 'site']); display = defaultDisplayState(); refineOpen = false; setStep('site'); status.textContent = 'New scenario. Choose one or more values for each site condition.'; }
+      else if (action === 'new') { guideIndex = null; sampleArrived = false; draft = freshDraft(manifest); confirmed = null; result = null; issues = []; generalError = ''; reached = new Set(['intro', 'site']); display = defaultDisplayState(); refineOpen = false; setStep('site'); status.textContent = 'New scenario. Choose one or more values for each site condition.'; }
       else if (action === 'plus' || action === 'minus') { navigationVersion += 1; const field = target.dataset.field as 'slipMin' | 'slipMax' | 'offsetMax'; draft[field] = stepDecimal(draft[field], action === 'plus' ? 1 : -1); issues = issues.filter(item => item.field !== field); render(); status.textContent = `${field === 'slipMin' ? 'Minimum' : 'Maximum'}: ${draft[field]} m.`; }
       else if (action === 'slip-shortcut') { navigationVersion += 1; draft.slipMax = '5'; issues = issues.filter(item => item.field !== 'slipMax'); render('gx-slipMax'); }
       else if (action === 'offset-shortcut' && regression) { navigationVersion += 1; const cap = offsetShortcut(draft.faultDip, regression, manifest.slipWindowBounds.max); if (cap !== null) draft.offsetMax = cap; issues = issues.filter(item => item.field !== 'offsetMax'); render('gx-offsetMax'); }
