@@ -1,0 +1,470 @@
+<div id="scenario-review-proposal" class="viz-dotted-background">
+  <section class="review-surface" aria-labelledby="review-title">
+    <header>
+      <p class="review-brand">Ground Rupture Explorer</p>
+      <p class="review-step" data-step-label>Step 4 of 5 · Review</p>
+      <h2 id="review-title">Review your scenario</h2>
+      <p class="review-help" data-intro>Check your assumptions before showing results.</p>
+    </header>
+
+    <div data-view="review">
+      <section class="review-section" aria-labelledby="review-site-heading">
+        <div class="review-section-head">
+          <h3 id="review-site-heading">Site conditions</h3>
+          <button type="button" class="review-edit cursor-interaction" data-action="edit-site" aria-label="Edit site conditions">Edit</button>
+        </div>
+        <dl class="review-summary">
+          <div><dt>Fault angle</dt><dd data-summary="dip"></dd></div>
+          <div><dt>Sediment depth</dt><dd data-summary="depth"></dd></div>
+          <div><dt>Sediment density</dt><dd data-summary="density"></dd></div>
+          <div><dt>Sediment strength and structure</dt><dd data-summary="profile"></dd></div>
+        </dl>
+      </section>
+
+      <section class="review-section" aria-labelledby="review-movement-heading">
+        <div class="review-section-head">
+          <h3 id="review-movement-heading">Fault movement</h3>
+          <button type="button" class="review-edit cursor-interaction" data-action="edit-movement" aria-label="Edit fault movement">Edit</button>
+        </div>
+        <dl class="review-summary">
+          <div><dt>Specified as</dt><dd data-summary="mode"></dd></div>
+          <div><dt>Your assumed range</dt><dd class="review-emphasis" data-summary="range"></dd></div>
+        </dl>
+        <div class="review-conversion" data-conversion-panel>
+          <h4>Corresponding fault slip at depth</h4>
+          <div class="review-conversion-rows" data-conversions></div>
+          <p class="review-help">Modeled slip: 0–5.0135 m.</p>
+          <p class="review-help review-conversion-caveat">This conversion is approximate. Raised ridges at the surface can make it overestimate fault slip.</p>
+        </div>
+        <div class="review-warning" data-coverage-warning hidden>
+          <h4>Part of your range is outside the simulations</h4>
+          <div data-coverage-details></div>
+          <p>Results will describe only the part covered by the simulations.</p>
+        </div>
+        <p class="review-field-message" data-slip-advisory hidden></p>
+      </section>
+
+      <section class="review-section review-population" aria-labelledby="review-population-heading">
+        <h3 id="review-population-heading">What the results will include</h3>
+        <p class="review-population-name">All model stages in the slip window</p>
+        <p data-population-explanation>For simulations matching these site conditions, include every recorded stage within the corresponding slip range. Each simulation may contribute more than one stage.</p>
+        <p class="review-help">A stage is a saved point as fault movement increases. All resulting scarp types are included.</p>
+      </section>
+      <footer class="review-footer">
+        <button type="button" class="review-secondary cursor-interaction" data-action="edit-movement">Back</button>
+        <button type="button" class="review-primary cursor-interaction" data-action="show-results">Show results</button>
+      </footer>
+    </div>
+
+    <div data-view="site" hidden>
+      <div data-site-fields></div>
+      <footer class="review-footer review-footer-end">
+        <button type="button" class="review-primary cursor-interaction" data-action="return-review">Return to review</button>
+      </footer>
+    </div>
+
+    <div data-view="movement" hidden>
+      <fieldset class="review-modes">
+        <legend>What are you specifying?</legend>
+        <label class="review-mode cursor-interaction" data-mode-card="slip">
+          <input type="radio" name="review-movement-mode" value="slip">
+          <span><strong>Fault slip at depth</strong><span>The distance the fault moves underground.</span></span>
+        </label>
+        <label class="review-mode cursor-interaction" data-mode-card="offset">
+          <input type="radio" name="review-movement-mode" value="offset">
+          <span><strong>Vertical surface offset</strong><span>The vertical difference across the rupture at the ground surface.</span></span>
+        </label>
+        <p class="review-help">Your entries are kept when you switch modes.</p>
+      </fieldset>
+      <section data-mode-panel="slip">
+        <h3>Fault-slip range</h3>
+        <p class="review-help">Modeled fault slip: approximately 0–5 m.</p>
+        <div class="review-fields">
+          <div class="review-field">
+            <label for="review-slip-min">Minimum (m)</label>
+            <div class="review-stepper">
+              <button type="button" data-step="-1" data-field="slipMin" aria-label="Decrease minimum fault slip by 0.1 m" class="cursor-interaction">−</button>
+              <input id="review-slip-min" type="text" inputmode="decimal" data-input="slipMin" autocomplete="off" required aria-describedby="review-slipMin-error">
+              <button type="button" data-step="1" data-field="slipMin" aria-label="Increase minimum fault slip by 0.1 m" class="cursor-interaction">+</button>
+            </div>
+            <p id="review-slipMin-error" class="review-field-message" role="alert" hidden></p>
+          </div>
+          <div class="review-field">
+            <label for="review-slip-max">Maximum (m) <span>Required</span></label>
+            <div class="review-stepper">
+              <button type="button" data-step="-1" data-field="slipMax" aria-label="Decrease maximum fault slip by 0.1 m" class="cursor-interaction">−</button>
+              <input id="review-slip-max" type="text" inputmode="decimal" data-input="slipMax" autocomplete="off" required aria-describedby="review-slipMax-error">
+              <button type="button" data-step="1" data-field="slipMax" aria-label="Increase maximum fault slip by 0.1 m" class="cursor-interaction">+</button>
+            </div>
+            <button type="button" class="review-secondary review-shortcut cursor-interaction" data-action="slip-maximum">Set maximum to 5 m</button>
+            <p id="review-slipMax-error" class="review-field-message" role="alert" hidden></p>
+          </div>
+        </div>
+      </section>
+      <section data-mode-panel="offset">
+        <h3>Surface-offset range</h3>
+        <p class="review-help">The range starts at 0 m and ends at the maximum you enter.</p>
+        <p class="review-help review-offset-context" data-offset-context></p>
+        <div class="review-fields">
+          <div class="review-field">
+            <label for="review-offset-max">Maximum (m) <span>Required</span></label>
+            <div class="review-stepper">
+              <button type="button" data-step="-1" data-field="offsetMax" aria-label="Decrease maximum surface offset by 0.1 m" class="cursor-interaction">−</button>
+              <input id="review-offset-max" type="text" inputmode="decimal" data-input="offsetMax" autocomplete="off" required aria-describedby="review-offsetMax-error review-editor-coverage">
+              <button type="button" data-step="1" data-field="offsetMax" aria-label="Increase maximum surface offset by 0.1 m" class="cursor-interaction">+</button>
+            </div>
+            <button type="button" class="review-secondary review-shortcut cursor-interaction" data-action="offset-maximum">Set maximum</button>
+            <p id="review-offsetMax-error" class="review-field-message" role="alert" hidden></p>
+          </div>
+        </div>
+        <div id="review-editor-coverage" class="review-editor-coverage" aria-live="polite"></div>
+      </section>
+      <p class="review-help review-stepper-help">Type a value or use − / + to change it by 0.1 m.</p>
+      <footer class="review-footer review-footer-end">
+        <button type="button" class="review-primary cursor-interaction" data-action="return-review">Return to review</button>
+      </footer>
+    </div>
+  </section>
+  <p class="review-preview-status" role="status" aria-live="polite" hidden></p>
+</div>
+
+<style>
+  #scenario-review-proposal { padding: 18px 0; color: light-dark(#282526, #eee9e9); font: 15px/1.5 Arial, sans-serif; }
+  #scenario-review-proposal * { box-sizing: border-box; }
+  #scenario-review-proposal [hidden] { display: none; }
+  #scenario-review-proposal .review-surface { max-width: 680px; margin: 0 auto; padding: 26px; border: 1px solid light-dark(#ded7d5, #51484b); border-radius: 10px; background: light-dark(#fffdfa, #242122); }
+  #scenario-review-proposal p { margin: 0; }
+  #scenario-review-proposal .review-brand { font-size: 14px; font-weight: 600; margin-bottom: 20px; }
+  #scenario-review-proposal .review-step { font-size: 13px; color: light-dark(#765154, #d1a3aa); margin-bottom: 6px; }
+  #scenario-review-proposal h2 { font-size: 24px; line-height: 1.25; font-weight: 600; margin: 0 0 9px; }
+  #scenario-review-proposal h3 { font-size: 17px; font-weight: 600; margin: 0; }
+  #scenario-review-proposal h4 { font-size: 14px; font-weight: 600; margin: 0 0 7px; }
+  #scenario-review-proposal .review-help { color: light-dark(#645b5e, #c8bdc1); font-size: 14px; }
+  #scenario-review-proposal .review-section { margin-top: 23px; padding-top: 18px; border-top: 1px solid light-dark(#ded7d5, #51484b); }
+  #scenario-review-proposal .review-section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  #scenario-review-proposal button { font: inherit; color: inherit; border-radius: 6px; padding: 10px 16px; min-height: 44px; }
+  #scenario-review-proposal .review-edit { padding: 5px 7px; min-height: 36px; color: light-dark(#8f213b, #eaa9b7); background: transparent; border: 0; text-decoration: underline; text-underline-offset: 3px; }
+  #scenario-review-proposal .review-summary { margin: 8px 0 0; }
+  #scenario-review-proposal .review-summary div { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 15px; padding: 5px 0; }
+  #scenario-review-proposal dt { font-size: 14px; color: light-dark(#645b5e, #c8bdc1); }
+  #scenario-review-proposal dd { margin: 0; overflow-wrap: anywhere; }
+  #scenario-review-proposal .review-emphasis { font-weight: 600; }
+  #scenario-review-proposal .review-conversion { margin-top: 18px; }
+  #scenario-review-proposal .review-conversion-rows { display: grid; gap: 7px; margin-bottom: 8px; }
+  #scenario-review-proposal .review-conversion-row { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; align-items: baseline; gap: 10px; font-size: 14px; }
+  #scenario-review-proposal .review-conversion-row span:last-child { color: light-dark(#645b5e, #c8bdc1); }
+  #scenario-review-proposal .review-conversion-row[data-partial="true"] span:last-child { color: light-dark(#aa1531, #ffb2c1); }
+  #scenario-review-proposal .review-conversion-caveat { margin-top: 7px; }
+  #scenario-review-proposal .review-warning { margin-top: 15px; padding: 13px 15px; border-left: 3px solid light-dark(#aa1531, #ffb2c1); background: light-dark(#fff0f2, #42252d); color: light-dark(#8d1730, #ffbcc8); font-size: 14px; }
+  #scenario-review-proposal .review-warning p + p, #scenario-review-proposal .review-warning div + p { margin-top: 7px; }
+  #scenario-review-proposal .review-population-name { margin-top: 10px; font-weight: 600; font-size: 14px; }
+  #scenario-review-proposal .review-population p + p { margin-top: 7px; }
+  #scenario-review-proposal .review-population > p:not(.review-help) { font-size: 14px; }
+  #scenario-review-proposal .review-footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; margin-top: 24px; padding-top: 18px; border-top: 1px solid light-dark(#ded7d5, #51484b); }
+  #scenario-review-proposal .review-footer-end { justify-content: flex-end; }
+  #scenario-review-proposal .review-primary { color: light-dark(#ffffff, #33121c); background: light-dark(#8f213b, #eaa9b7); border: 1px solid transparent; }
+  #scenario-review-proposal .review-secondary { color: light-dark(#3d3438, #eee4e8); background: light-dark(#fffdfa, #2e282b); border: 1px solid light-dark(#cfc4c7, #78696f); }
+  #scenario-review-proposal fieldset { min-width: 0; border: 0; padding: 0; margin: 23px 0; }
+  #scenario-review-proposal legend { font-weight: 600; padding: 0; margin-bottom: 8px; }
+  #scenario-review-proposal legend span, #scenario-review-proposal .review-field label span { font-size: 12px; font-weight: 400; color: light-dark(#645b5e, #c8bdc1); margin-left: 7px; }
+  #scenario-review-proposal .review-all { display: flex; gap: 8px; align-items: center; margin: 5px 0 10px; font-size: 14px; }
+  #scenario-review-proposal input[type="checkbox"], #scenario-review-proposal input[type="radio"] { width: 18px; height: 18px; accent-color: light-dark(#8f213b, #eaa9b7); }
+  #scenario-review-proposal .review-options { display: flex; gap: 7px; flex-wrap: wrap; }
+  #scenario-review-proposal .review-choice { padding: 8px 12px; background: light-dark(#fffdfa, #2e282b); border: 1px solid light-dark(#cfc4c7, #78696f); font-size: 14px; }
+  #scenario-review-proposal .review-choice[aria-pressed="true"] { background: light-dark(#f8eaf0, #422d35); border-color: light-dark(#8f213b, #eaa9b7); color: light-dark(#8f213b, #eaa9b7); }
+  #scenario-review-proposal .review-profile-group { margin-top: 10px; }
+  #scenario-review-proposal .review-profile-group > p { font-size: 14px; margin-bottom: 6px; }
+  #scenario-review-proposal .review-site-helper { margin-top: 8px; font-size: 14px; color: light-dark(#765c19, #e4c97f); }
+  #scenario-review-proposal .review-site-helper[data-invalid="true"], #scenario-review-proposal .review-field-message, #scenario-review-proposal [data-editor-partial="true"] { color: light-dark(#aa1531, #ffb2c1); }
+  #scenario-review-proposal .review-mode { display: flex; align-items: flex-start; gap: 10px; padding: 12px; margin-bottom: 8px; border: 1px solid light-dark(#cfc4c7, #78696f); border-radius: 6px; background: light-dark(#fffdfa, #2e282b); }
+  #scenario-review-proposal .review-mode[data-selected="true"] { background: light-dark(#f8eaf0, #422d35); border-color: light-dark(#8f213b, #eaa9b7); }
+  #scenario-review-proposal .review-mode input { flex: 0 0 18px; margin: 3px 0 0; }
+  #scenario-review-proposal .review-mode strong, #scenario-review-proposal .review-mode span span { display: block; }
+  #scenario-review-proposal .review-mode span span { color: light-dark(#645b5e, #c8bdc1); font-size: 14px; margin-top: 2px; }
+  #scenario-review-proposal .review-modes > p { margin-top: 10px; }
+  #scenario-review-proposal .review-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 16px; }
+  #scenario-review-proposal .review-field { min-width: 0; }
+  #scenario-review-proposal .review-field label { display: block; margin-bottom: 7px; font-weight: 600; }
+  #scenario-review-proposal .review-stepper { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; gap: 5px; }
+  #scenario-review-proposal input[type="text"] { min-width: 0; width: 100%; padding: 9px 8px; text-align: center; font: 16px/1.4 Arial, sans-serif; border: 1px solid light-dark(#a89a9f, #8a797f); border-radius: 6px; color: light-dark(#282526, #eee9e9); background: light-dark(#ffffff, #211d1f); }
+  #scenario-review-proposal input[aria-invalid="true"], #scenario-review-proposal input[data-warning="true"] { border-color: light-dark(#aa1531, #ffb2c1); background: light-dark(#fff0f2, #42252d); color: light-dark(#aa1531, #ffb2c1); }
+  #scenario-review-proposal .review-stepper button { padding: 0; font-size: 20px; background: light-dark(#f7f2f0, #352d31); border: 1px solid light-dark(#cfc4c7, #78696f); }
+  #scenario-review-proposal .review-stepper button:disabled { opacity: 0.4; cursor: default; }
+  #scenario-review-proposal .review-shortcut { margin-top: 9px; padding: 7px 12px; font-size: 14px; }
+  #scenario-review-proposal .review-field-message { margin-top: 7px; font-size: 14px; }
+  #scenario-review-proposal .review-offset-context, #scenario-review-proposal .review-stepper-help { margin-top: 12px; }
+  #scenario-review-proposal .review-editor-coverage { margin-top: 12px; font-size: 14px; }
+  #scenario-review-proposal .review-editor-coverage p + p { margin-top: 7px; }
+  #scenario-review-proposal .review-preview-status { max-width: 680px; margin: 14px auto 0; color: light-dark(#645b5e, #c8bdc1); font-size: 14px; }
+  @media (max-width: 440px) {
+    #scenario-review-proposal .review-surface { padding: 20px 16px; }
+    #scenario-review-proposal h2 { font-size: 22px; }
+    #scenario-review-proposal .review-summary div { grid-template-columns: 1fr; gap: 2px; padding: 7px 0; }
+    #scenario-review-proposal .review-fields { grid-template-columns: 1fr; }
+    #scenario-review-proposal .review-conversion-row { grid-template-columns: 46px minmax(0, 1fr); gap: 2px 10px; }
+    #scenario-review-proposal .review-conversion-row span:last-child { grid-column: 2; }
+  }
+  @media (pointer: coarse) { #scenario-review-proposal .review-edit { min-height: 44px; padding-left: 12px; padding-right: 12px; } }
+</style>
+
+<script>
+(() => {
+  const root = document.getElementById('scenario-review-proposal');
+  const options = {
+    dip: { name: 'Fault angle', values: ['20', '30', '40', '45', '50', '60', '70'] },
+    depth: { name: 'Sediment depth', values: ['3', '5', '10'] },
+    density: { name: 'Sediment density', values: ['Dense', 'Medium', 'Loose'] },
+    profile: { name: 'Sediment strength and structure', values: ['uniform-weak', 'uniform-moderate', 'uniform-strong', 'layered-weak', 'layered-moderate', 'layered-strong', 'layered-random', 'layered-cohesive', 'layered-alternating'] }
+  };
+  const profileNames = { 'uniform-weak': 'Uniform: weak', 'uniform-moderate': 'Uniform: moderate', 'uniform-strong': 'Uniform: strong', 'layered-weak': 'Layered: weak', 'layered-moderate': 'Layered: moderate', 'layered-strong': 'Layered: strong', 'layered-random': 'Layered: random heterogeneous', 'layered-cohesive': 'Layered: cohesive top unit', 'layered-alternating': 'Layered: alternating strong–weak' };
+  const fits = {
+    '20': { slope: 0.343631463143434, intercept: -0.003977424639196814 },
+    '30': { slope: 0.5020759691269575, intercept: -0.0051254736669561485 },
+    '40': { slope: 0.6453072800312353, intercept: -0.007145518549672714 },
+    '45': { slope: 0.7103153164855742, intercept: -0.010324344379258887 },
+    '50': { slope: 0.7695316348977412, intercept: -0.010746660754951343 },
+    '60': { slope: 0.8703131285692298, intercept: -0.012491905769942413 },
+    '70': { slope: 0.944509022977752, intercept: -0.013347723759209895 }
+  };
+  const slipCap = 5.0135;
+  const siteKeys = Object.keys(options);
+  const inputs = Object.fromEntries(Array.from(root.querySelectorAll('[data-input]')).map(input => [input.dataset.input, input]));
+  // Complete illustrative scenario, not an approved preset or real site.
+  let state = { dip: ['30'], depth: ['5'], density: ['Dense'], profile: ['uniform-strong'], mode: 'offset', slipMin: '0', slipMax: '', offsetMax: '3' };
+  let view = 'review';
+  let attempted = { site: false, slip: false, offset: false };
+  let confirmed = false;
+  const ownSnapshots = new Set();
+  const display = (key, value) => key === 'dip' ? value + '°' : key === 'depth' ? value + ' m' : key === 'profile' ? profileNames[value] : value;
+  const ordered = key => options[key].values.filter(value => state[key].includes(value));
+  function parse(raw, isMinimum = false) {
+    const value = raw.trim();
+    if (!value) return { error: isMinimum ? 'Enter a minimum value.' : 'Enter a maximum value.' };
+    if (raw.length > 16) return { error: 'Use no more than 16 characters.' };
+    if (!/^(?:\d+(?:\.\d*)?|\.\d+)$/.test(value)) return { error: 'Enter a non-negative decimal number.' };
+    let [whole, fraction = ''] = value.split('.');
+    whole = (whole || '0').replace(/^0+(?=\d)/, '');
+    fraction = fraction.replace(/0+$/, '');
+    const label = whole + (fraction ? '.' + fraction : '');
+    if (label.length > 16) return { error: 'Use a shorter decimal value.' };
+    return { number: Number(label), label };
+  }
+  function movementValidation() {
+    const errors = {};
+    const maxKey = state.mode === 'slip' ? 'slipMax' : 'offsetMax';
+    const min = state.mode === 'slip' ? parse(state.slipMin, true) : { number: 0, label: '0' };
+    const max = parse(state[maxKey]);
+    if (min.error) errors.slipMin = min.error;
+    if (max.error) errors[maxKey] = max.error;
+    if (state.mode === 'slip') {
+      if (!min.error && min.number > slipCap) errors.slipMin = 'Above the recorded maximum of 5.0135 m. Enter a smaller value.';
+      if (!max.error && max.number > slipCap) errors.slipMax = 'Above the recorded maximum of 5.0135 m. Enter a smaller value.';
+      if (!min.error && !max.error && max.number < min.number && !errors.slipMax) errors.slipMax = 'Maximum must be at least the minimum.';
+    } else if (!max.error && max.number > 1000) errors.offsetMax = 'Enter 1000 m or less.';
+    return { errors, min, max, valid: Object.keys(errors).length === 0 };
+  }
+  function conversions() {
+    const checked = movementValidation();
+    if (state.mode !== 'offset' || !checked.valid) return [];
+    return ordered('dip').map(dip => {
+      const fit = fits[dip];
+      return { dip, min: (0 - fit.intercept) / fit.slope, max: (checked.max.number - fit.intercept) / fit.slope, limit: fit.slope * slipCap + fit.intercept };
+    }).map(row => ({ ...row, partial: row.max > slipCap }));
+  }
+  function offsetShortcut() {
+    if (!state.dip.length) return null;
+    return String(Math.floor(Math.min(...state.dip.map(dip => fits[dip].slope * slipCap + fits[dip].intercept)) * 100) / 100);
+  }
+  function stepValue(key, direction) {
+    const raw = state[key];
+    const parsed = raw.trim() ? parse(raw) : { label: '0' };
+    if (parsed.error) return null;
+    const [whole, fraction = ''] = parsed.label.split('.');
+    const digits = Math.max(4, fraction.length);
+    const scale = 10n ** BigInt(digits);
+    const original = BigInt(whole) * scale + BigInt(fraction.padEnd(digits, '0'));
+    const ceiling = key === 'offsetMax' ? 1000n * scale : 50135n * scale / 10000n;
+    if (original >= ceiling && direction > 0) return null;
+    let units = original + BigInt(direction) * scale / 10n;
+    if (units < 0n) units = 0n;
+    if (original <= ceiling && units > ceiling) units = ceiling;
+    const decimal = (units % scale).toString().padStart(digits, '0').replace(/0+$/, '');
+    const label = (units / scale).toString() + (decimal ? '.' + decimal : '');
+    return label.length > 16 || label === parsed.label && raw.trim() ? null : label;
+  }
+  function makeSiteFields() {
+    const container = root.querySelector('[data-site-fields]');
+    for (const [key, definition] of Object.entries(options)) {
+      const group = document.createElement('fieldset');
+      group.dataset.siteGroup = key;
+      group.setAttribute('aria-describedby', 'review-' + key + '-help');
+      const legend = document.createElement('legend');
+      legend.textContent = definition.name;
+      const required = document.createElement('span'); required.textContent = 'Required'; legend.append(required);
+      const allLabel = document.createElement('label'); allLabel.className = 'review-all cursor-interaction';
+      const all = document.createElement('input'); all.type = 'checkbox'; all.dataset.selectAll = key;
+      allLabel.append(all, document.createTextNode('Select all'));
+      group.append(legend, allLabel);
+      const lists = key === 'profile' ? [['Uniform sediment', definition.values.slice(0, 3)], ['Layered sediment', definition.values.slice(3)]] : [[null, definition.values]];
+      for (const [heading, values] of lists) {
+        const section = document.createElement('div');
+        if (heading) { section.className = 'review-profile-group'; const p = document.createElement('p'); p.textContent = heading; section.append(p); }
+        const choices = document.createElement('div'); choices.className = 'review-options';
+        for (const value of values) {
+          const button = document.createElement('button'); button.type = 'button'; button.className = 'review-choice cursor-interaction';
+          button.dataset.choice = key; button.dataset.value = value;
+          button.setAttribute('aria-label', display(key, value)); button.setAttribute('aria-pressed', 'false');
+          button.textContent = key === 'profile' ? profileNames[value].split(': ')[1] : display(key, value);
+          choices.append(button);
+        }
+        section.append(choices); group.append(section);
+      }
+      const help = document.createElement('p'); help.id = 'review-' + key + '-help'; help.className = 'review-site-helper';
+      group.append(help); container.append(group);
+    }
+  }
+  function paragraph(text, partial = false) {
+    const element = document.createElement('p'); element.textContent = text; element.dataset.editorPartial = String(partial); return element;
+  }
+  function render() {
+    const checked = movementValidation();
+    const rows = conversions();
+    const partial = rows.filter(row => row.partial);
+    root.querySelector('#review-title').textContent = view === 'site' ? 'Describe the site conditions' : view === 'movement' ? 'Choose the assumed fault movement' : 'Review your scenario';
+    root.querySelector('[data-step-label]').textContent = view === 'site' ? 'Step 2 of 5 · Site conditions' : view === 'movement' ? 'Step 3 of 5 · Fault movement' : 'Step 4 of 5 · Review';
+    root.querySelector('[data-intro]').textContent = view === 'site' ? 'Choose one or more values for each condition.' : view === 'movement' ? 'Choose what you want to specify, then enter a maximum value.' : 'Check your assumptions before showing results.';
+    root.querySelectorAll('[data-view]').forEach(section => { section.hidden = section.dataset.view !== view; });
+    for (const key of siteKeys) {
+      root.querySelector('[data-summary="' + key + '"]').textContent = ordered(key).map(value => display(key, value)).join('; ');
+      const all = root.querySelector('[data-select-all="' + key + '"]');
+      all.checked = state[key].length === options[key].values.length;
+      all.indeterminate = state[key].length > 0 && !all.checked;
+      root.querySelectorAll('[data-choice="' + key + '"]').forEach(button => button.setAttribute('aria-pressed', String(state[key].includes(button.dataset.value))));
+      const help = root.querySelector('#review-' + key + '-help');
+      const invalid = attempted.site && !state[key].length;
+      help.hidden = state[key].length > 0;
+      help.dataset.invalid = String(invalid);
+      help.textContent = invalid ? 'Choose one or more values for ' + options[key].name.toLowerCase() + '.' : 'Choose one or more values to continue';
+      if (invalid) help.setAttribute('role', 'alert'); else help.removeAttribute('role');
+    }
+    root.querySelector('[data-summary="mode"]').textContent = state.mode === 'offset' ? 'Vertical surface offset' : 'Fault slip at depth';
+    root.querySelector('[data-summary="range"]').textContent = checked.valid ? checked.min.label + '–' + checked.max.label + ' m' : 'Incomplete';
+    root.querySelector('[data-conversion-panel]').hidden = state.mode !== 'offset';
+    root.querySelector('[data-conversions]').replaceChildren(...rows.map(row => {
+      const line = document.createElement('div'); line.className = 'review-conversion-row'; line.dataset.partial = String(row.partial);
+      [row.dip + '°', '≈ ' + row.min.toFixed(2) + '–' + row.max.toFixed(2) + ' m', row.partial ? 'Partly covered' : 'Within range'].forEach(text => { const span = document.createElement('span'); span.textContent = text; line.append(span); });
+      return line;
+    }));
+    root.querySelector('[data-coverage-warning]').hidden = partial.length === 0;
+    root.querySelector('[data-coverage-details]').replaceChildren(...partial.map(row => paragraph('At ' + row.dip + '°, the simulations cover offsets up to approximately ' + row.limit.toFixed(2) + ' m. Your ' + checked.max.label + ' m maximum exceeds that coverage.')));
+    const advisory = root.querySelector('[data-slip-advisory]');
+    advisory.hidden = state.mode !== 'slip' || !checked.valid || checked.max.number <= 5;
+    advisory.textContent = 'Your slip range extends above 5 m, but remains within the recorded maximum of 5.0135 m.';
+    root.querySelector('[data-population-explanation]').textContent = 'For simulations matching these site conditions, include every recorded stage within ' + (state.mode === 'offset' && state.dip.length > 1 ? 'its fault angle’s corresponding slip range.' : 'the corresponding slip range.') + ' Each simulation may contribute more than one stage.';
+    root.querySelectorAll('[name="review-movement-mode"]').forEach(radio => { radio.checked = radio.value === state.mode; radio.closest('[data-mode-card]').dataset.selected = String(radio.checked); });
+    root.querySelectorAll('[data-mode-panel]').forEach(panel => { panel.hidden = panel.dataset.modePanel !== state.mode; });
+    for (const [key, input] of Object.entries(inputs)) {
+      if (input.value !== state[key]) input.value = state[key];
+      const active = state.mode === 'slip' ? key !== 'offsetMax' : key === 'offsetMax';
+      const parsed = parse(state[key], key === 'slipMin');
+      const aboveFive = active && state.mode === 'slip' && !parsed.error && parsed.number > 5;
+      const beyond = aboveFive && parsed.number > slipCap;
+      const error = active && (attempted[state.mode] || beyond) ? checked.errors[key] : '';
+      const message = error || (aboveFive ? 'Above 5 m, but within the recorded range, which ends at 5.0135 m.' : '');
+      const line = root.querySelector('#review-' + key + '-error');
+      line.textContent = message || ''; line.hidden = !message;
+      input.setAttribute('aria-invalid', String(Boolean(error)));
+      input.dataset.warning = String(aboveFive || key === 'offsetMax' && partial.length > 0);
+    }
+    root.querySelectorAll('[data-step]').forEach(button => { button.disabled = stepValue(button.dataset.field, Number(button.dataset.step)) === null; });
+    const shortcut = root.querySelector('[data-action="offset-maximum"]');
+    shortcut.disabled = offsetShortcut() === null;
+    shortcut.textContent = offsetShortcut() === null ? 'Choose a fault angle first' : 'Set maximum to ' + offsetShortcut() + ' m';
+    root.querySelector('[data-offset-context]').textContent = ordered('dip').map(dip => dip + '°: offset coverage up to approximately ' + (fits[dip].slope * slipCap + fits[dip].intercept).toFixed(2) + ' m.').join(' ');
+    root.querySelector('#review-editor-coverage').replaceChildren(...rows.map(row => paragraph(row.dip + '°: about ' + row.max.toFixed(2) + ' m of slip is needed. ' + (row.partial ? 'Warning: results cover only part of your offset range.' : 'This is within the simulated range.'), row.partial)));
+    const note = root.querySelector('.review-preview-status');
+    note.hidden = !confirmed;
+    note.textContent = 'Prototype: your reviewed scenario has been confirmed. This example ends before the results screen; no simulation results have been calculated.';
+  }
+  function snapshotKey(snapshot) {
+    const s = snapshot?.modelContent?.scenario;
+    const p = snapshot?.privateContent;
+    return JSON.stringify([snapshot?.modelContent?.proposal, ...siteKeys.map(key => s?.[key]), s?.mode, s?.slipMin, s?.slipMax, s?.offsetMax, p?.view, p?.attempted?.site, p?.attempted?.slip, p?.attempted?.offset, p?.confirmed]);
+  }
+  function save() {
+    const snapshot = { modelContent: { proposal: 'scenario-review-v1', scenario: JSON.parse(JSON.stringify(state)) }, privateContent: { view, attempted: { ...attempted }, confirmed } };
+    ownSnapshots.add(snapshotKey(snapshot));
+    if (ownSnapshots.size > 100) ownSnapshots.delete(ownSnapshots.values().next().value);
+    window.openai?.setWidgetState?.(snapshot).catch(() => {});
+  }
+  function restore(snapshot) {
+    if (snapshot?.modelContent?.proposal !== 'scenario-review-v1') return;
+    const next = snapshot.modelContent.scenario;
+    if (!next || !['slip', 'offset'].includes(next.mode)) return;
+    if (!siteKeys.every(key => Array.isArray(next[key]) && next[key].every(value => options[key].values.includes(value)))) return;
+    if (!['slipMin', 'slipMax', 'offsetMax'].every(key => typeof next[key] === 'string')) return;
+    state = { ...Object.fromEntries(siteKeys.map(key => [key, [...new Set(next[key])]])), mode: next.mode, slipMin: next.slipMin, slipMax: next.slipMax, offsetMax: next.offsetMax };
+    const p = snapshot.privateContent;
+    view = ['site', 'movement', 'review'].includes(p?.view) ? p.view : 'review';
+    attempted = { site: p?.attempted?.site === true, slip: p?.attempted?.slip === true, offset: p?.attempted?.offset === true };
+    confirmed = p?.confirmed === true;
+    if (view === 'review' && siteKeys.some(key => !state[key].length)) view = 'site';
+    if (view === 'review' && !movementValidation().valid) view = 'movement';
+  }
+  function returnToReview(confirm = false) {
+    const missing = siteKeys.find(key => !state[key].length);
+    if (missing) {
+      attempted.site = true; view = 'site'; render(); root.querySelector('[data-select-all="' + missing + '"]').focus(); return;
+    }
+    const checked = movementValidation();
+    if (!checked.valid) {
+      attempted[state.mode] = true; view = 'movement'; render(); inputs[Object.keys(checked.errors)[0]].focus(); return;
+    }
+    view = 'review'; confirmed = confirm; render();
+    root.querySelector(confirm ? '[data-action="show-results"]' : '[data-action="edit-site"]').focus();
+  }
+  root.addEventListener('input', event => {
+    const key = event.target.dataset.input;
+    if (!Object.hasOwn(inputs, key)) return;
+    state[key] = event.target.value; confirmed = false; render(); save();
+  });
+  root.addEventListener('change', event => {
+    if (event.target.dataset.selectAll) {
+      const key = event.target.dataset.selectAll;
+      state[key] = event.target.checked ? [...options[key].values] : [];
+    } else if (event.target.name === 'review-movement-mode') state.mode = event.target.value;
+    else return;
+    confirmed = false; render(); save();
+  });
+  root.addEventListener('click', event => {
+    const button = event.target.closest('button');
+    if (!button) return;
+    if (button.dataset.choice) {
+      const key = button.dataset.choice, value = button.dataset.value;
+      state[key] = state[key].includes(value) ? state[key].filter(item => item !== value) : [...state[key], value];
+      confirmed = false; render();
+    } else if (button.dataset.step) {
+      const value = stepValue(button.dataset.field, Number(button.dataset.step));
+      if (value === null) return;
+      state[button.dataset.field] = value; confirmed = false; render();
+    } else {
+      const action = button.dataset.action;
+      if (action === 'edit-site' || action === 'edit-movement') {
+        view = action === 'edit-site' ? 'site' : 'movement'; confirmed = false; render();
+        if (view === 'site') root.querySelector('[data-select-all="dip"]').focus();
+        else inputs[state.mode === 'slip' ? 'slipMax' : 'offsetMax'].focus();
+      } else if (action === 'return-review' || action === 'show-results') returnToReview(action === 'show-results');
+      else if (action === 'slip-maximum') { state.slipMax = '5'; confirmed = false; render(); }
+      else if (action === 'offset-maximum' && offsetShortcut() !== null) { state.offsetMax = offsetShortcut(); confirmed = false; render(); }
+      else return;
+    }
+    save();
+  });
+  makeSiteFields(); restore(window.openai?.widgetState); render();
+  window.addEventListener('openai:set_globals', event => {
+    const snapshot = event.detail?.globals?.widgetState;
+    if (!snapshot || ownSnapshots.has(snapshotKey(snapshot))) return;
+    restore(snapshot); render();
+  });
+})();
+</script>

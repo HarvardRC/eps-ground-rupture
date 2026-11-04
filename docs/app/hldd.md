@@ -2,13 +2,14 @@
 
 **Pending journey amendment (2026-11-03).** The guided journey and
 its agreed interaction behavior are defined by
-[PDD §2.3](pdd.md#23-user-journeys), including D-26–D-31.
+[PDD §2.3](pdd.md#23-user-journeys), including D-26–D-32.
 This design still describes the earlier prototype. Its initial
 full-ensemble state and updates on every edit are superseded at
 the product level. D-31 adds explicit movement entry, maximum
 shortcuts, and immediate coverage guidance; the fresh no-window
-state is superseded. Amend the affected interaction, state, and
-performance design after the remaining product choices are resolved.
+state is superseded. D-32 defines the agreed review presentation.
+Amend the affected interaction, state, and performance design after
+the remaining product choices are resolved.
 
 **Status:** first draft for owner review (2026-10-15).
 

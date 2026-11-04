@@ -126,13 +126,14 @@ named in the last column carry the detail.
 | D-22 | Default displacement-window state. | FR-S5, FR-S6, FR-S8 | Product owner | Superseded (2026-11-03) | The earlier no-active-window default ("slip: any") is replaced by D-31's editable minimum 0 m and required maximum. The no-window numerical reference cases remain calculation baselines; §3.4 and §10.2. |
 | D-23 | Reader-facing display precision per quantity. | FR-O2, §10.1 note | Product owner | Proposed | Scarp height and slip 0.01 m; width 0.1 m; scarp dip 1° (D-5 provisionality); counts exact; shares whole percent; §4.2. |
 | D-24 | Independent display preferences, including small laptop windows and later tablet and phone views. | FR-G6, C12, NFR-4 | Product owner | Decided (2026-11-03) | Scope agreed: P2 reader choice of visible result components and display size and layout within the existing application; §4.9. Until then, §9.1 uses a temporary 1280 × 1080 measurement window. The detailed P2 choices listed in §4.9 remain open before implementation. |
-| D-25 | Guided first-use scenario journey. | §5.1, C1, CR-1 | Product owner | Decided (2026-11-03) | Sequence and introductory copy agreed: understand purpose → describe site conditions → choose assumed displacement → review scenario → explore and interpret matching results. MVP scope; §2.3 records the approved introduction, D-26–D-31, and the remaining interaction and guidance choices. |
+| D-25 | Guided first-use scenario journey. | §5.1, C1, CR-1 | Product owner | Decided (2026-11-03) | Sequence and introductory copy agreed: understand purpose → describe site conditions → choose assumed displacement → review scenario → explore and interpret matching results. MVP scope; §2.3 records the approved introduction, D-26–D-32, and the remaining interaction and guidance choices. |
 | D-26 | Explicit site-condition selections. | FR-S1–S4, FR-S8 | Product owner | Decided (2026-11-03) | Fresh site conditions are unanswered and require one or more values. Select all selects every value as a convenience; it is not advice for uncertainty. Empty selections remain incomplete. §2.3. |
 | D-27 | Review before results change. | C1, FR-G3, NFR-3 | Product owner | Decided (2026-11-03) | Site-condition and displacement edits remain a draft until Review scenario → Show results. Retained results stay associated with the previously confirmed scenario. §2.3; step navigation follows D-30, while browser navigation, recovery, and refinement choices stay open. |
 | D-28 | Preserve entries across displacement-mode switches. | FR-S5 | Product owner | Decided (2026-11-03) | Keep fault-slip and surface-offset entries separately within the draft. Switching back restores that mode's entries; only the selected mode contributes to the scenario. No silent conversion or erasure. §3.5; restarting follows D-29 and recovery remains open. |
 | D-29 | Discard edits or start a new scenario. | FR-S8 | Product owner | Decided (2026-11-03) | Discard changes returns to the last confirmed scenario and its results, restoring both modes' entries as they stood at confirmation. Start a new scenario clears the reader's entries in both modes and current results, restores fresh defaults under D-31, then returns to unanswered site conditions. §2.3 and §3.7. |
 | D-30 | Preserve drafts while moving between steps. | C1, FR-G3 | Product owner | Decided (2026-11-03) | Back and revisiting input steps preserve the draft. Review requires complete, valid inputs. Returning to confirmed results preserves edits and shows You have unapplied changes with a return-to-review action while edits remain. §2.3; browser Back/Forward and recovery remain open. |
 | D-31 | Explicit movement entries, maximum shortcuts, and immediate range guidance. | FR-S5, FR-S8 | Product owner | Decided (2026-11-03) | Editable slip minimum 0 m; blank, required maxima; typing and mouse adjustment; slip shortcut sets exactly 5 m; immediate red slip guidance above 5 m; offset guidance and maximum shortcut use selected fault angles. Coverage warnings persist on review. §3.4–§3.5 distinguish the accepted examples from remaining step-size and multi-angle shortcut proposals. |
+| D-32 | Scenario review presentation. | C1, FR-S5, FR-S6, FR-G3 | Product owner | Decided (2026-11-03) | Site-condition and movement summaries with Edit actions; entered ranges distinct from per-angle conversions; visible conversion caveat and coverage warnings; plain explanation of contributing stages; Back and Show results. §2.3. The example values are illustrative, and result refinements remain open. |
 
 ---
 
@@ -297,15 +298,46 @@ replace D-22's proposed no-window default. D-28 still preserves
 both modes' entries; D-29 restores the fresh defaults when starting
 again.
 
-**Next review-screen proposal, not yet accepted.** The proposed
-screen shows site conditions and fault movement with Edit actions,
-per-angle converted slip windows in offset mode, visible coverage
-warnings, and a plain explanation of which simulation records
-contribute. Its primary action is **Show results**. D-27 already
-defines confirmation, and D-31 already requires visible coverage
-warnings on review; the proposed arrangement and complete content
-still need review. Recording this proposal does not accept its
-layout or settle the result-refinement controls.
+**Agreed review presentation (D-32, 2026-11-03).** The owner approved
+the review-screen example. The heading is **Review your scenario**,
+followed by **Check your assumptions before showing results.**
+Present the following sections in order:
+
+1. **Site conditions.** Show every selected fault angle, sediment
+   depth, density, and strength and structure, with an **Edit**
+   action for the section.
+2. **Fault movement.** Identify the selected entry mode and the
+   reader's assumed range, with an **Edit** action. In offset mode,
+   show **Corresponding fault slip at depth** separately, with a
+   converted range and coverage indication for each selected angle.
+   Show the modeled slip range and explain that conversion is
+   approximate: raised ridges at the surface can cause it to
+   overestimate slip. Keep applicable movement warnings visible.
+3. **What the results will include.** Explain the current population
+   in plain language. For **All model stages in the slip window**,
+   include every recorded stage within the corresponding slip range
+   from simulations matching the site conditions. Each simulation
+   may contribute more than one stage. Explain that a stage is a
+   saved point as fault movement increases, and identify the scarp
+   types included. With multiple angles in offset mode, explain
+   that each simulation uses its angle's corresponding slip range.
+
+Partial coverage does not shorten the reader's displayed assumption.
+State which angles have incomplete coverage, the covered offset
+maximum for each, and that results describe only the covered part.
+The valid draft may still proceed with that warning (D-31).
+
+**Edit** returns to the corresponding input step while preserving
+all draft choices. Its primary action becomes **Return to review**,
+which follows D-30's validation. **Back** returns to fault movement.
+The review screen's primary action is **Show results**; it confirms
+the valid draft and opens its results under D-27.
+
+Approval covers this presentation. The completed example's values
+are illustrative, not fresh defaults or approved worked-example
+inputs. Its final prototype acknowledgment is not a product screen.
+This decision does not settle result-refinement controls, the
+remaining movement-button proposals, or D-3's scientific review.
 
 **Definition still open.** Returning visits, sample-input
 replacement, browser Back and Forward,
@@ -314,7 +346,7 @@ effect, their controls, the placement of retained results, and the
 remaining guidance and copy still need
 decisions. Movement-step details still proposed are listed in
 §3.4–§3.5. The selected review variant does not accept every
-detail of its behavior. D-26–D-31 supersede the corresponding
+detail of its behavior. D-26–D-32 supersede the corresponding
 behavior in the saved full-journey prototype; it is an earlier
 snapshot. The journey table and unaffected parts of §3 remain the
 baseline for the remaining definition. The dependent design and

@@ -2,17 +2,18 @@
 
 **Pending product amendment (2026-11-03).** The owner agreed the
 guided first-use journey, introductory copy, and interaction
-decisions D-26–D-31 in
+decisions D-26–D-32 in
 [PDD §2.3](pdd.md#23-user-journeys).
 This document still specifies the earlier prototype experience.
 Returning visits, browser navigation, refinements, recovery, and
 remaining guidance are still open. Its full-ensemble defaults,
 automatic result updates, and behavior when switching modes need
-alignment with D-26–D-31, including the discard, restart, and
+alignment with D-26–D-32, including the discard, restart, and
 step-navigation actions. D-31 also replaces the fresh no-window
 state with an explicit maximum, and adds movement shortcuts and
-immediate range guidance. The reviewed component examples are
-saved with the [prototype record](scenario-journey-prototype.md).
+immediate range guidance. D-32 defines the review presentation.
+The reviewed component examples are saved with the
+[prototype record](scenario-journey-prototype.md).
 Their illustrative increments and remaining shortcut proposals
 are not substitutes for accepted design decisions.
 The affected design needs revision once the remaining choices are

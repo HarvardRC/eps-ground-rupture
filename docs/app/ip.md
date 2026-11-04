@@ -2,12 +2,13 @@
 
 **Pending product amendment (2026-11-03).** The owner agreed the
 guided first-use journey, introductory copy, and interaction
-decisions D-26–D-31 in
+decisions D-26–D-32 in
 [PDD §2.3](pdd.md#23-user-journeys).
 The existing task bodies describe the earlier prototype experience.
-They do not implement this new journey, including D-26–D-31.
+They do not implement this new journey, including D-26–D-32.
 The movement component now records explicit maxima, editable
-minimum 0 m, shortcuts, and immediate range guidance. See the
+minimum 0 m, shortcuts, and immediate range guidance. D-32 defines
+the agreed review presentation. See the
 [prototype record](scenario-journey-prototype.md) for the saved
 examples and which details remain proposals.
 The remaining interaction and guidance choices need product

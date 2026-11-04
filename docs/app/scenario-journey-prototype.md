@@ -9,14 +9,15 @@ approved the journey and introduction, liked the visual direction,
 and selected **Focused steps** in the prototype review.
 
 The journey, introduction, review variant, selection, review,
-displacement-mode, restart, step-navigation, and movement-entry
-decisions below are agreed. Other detailed interactions remain
-proposals. The saved full-journey prototype is an earlier snapshot:
-its unspecified-condition, displacement-default, and result-update
-behavior is superseded by those decisions. The later component
-examples capture the site-selection and movement-entry discussions.
+displacement-mode, restart, step-navigation, movement-entry, and
+review-screen decisions below are agreed. Other detailed interactions
+remain proposals. The saved full-journey prototype is an earlier
+snapshot: its unspecified-condition, displacement-default, and
+result-update behavior is superseded by those decisions. The later
+component examples capture the site-selection, movement-entry, and
+review-screen discussions.
 None queries simulation records or calculates result distributions;
-the movement example does calculate the illustrated conversion.
+the movement and review examples calculate illustrated conversions.
 These examples do not replace the product definition or
 implementation plan.
 
@@ -26,13 +27,15 @@ implementation plan.
 - [Site-selection editable source](prototypes/site-condition-selection.fragment.html).
 - [Fault-movement entry example](prototypes/fault-movement-entry.html).
 - [Movement-entry editable source](prototypes/fault-movement-entry.fragment.html).
+- [Scenario-review example](prototypes/scenario-review.html).
+- [Scenario-review editable source](prototypes/scenario-review.fragment.html).
 - [Product definition and approved introduction](pdd.md#23-user-journeys).
 
 Open the clickable HTML file in a browser. When viewing it on
 GitHub, download the file first; the repository's source view does
 not run it. The saved page includes the prototype and its controls,
 with shared interface assets loaded from public content-delivery
-networks. These pages are not offline bundles. The three examples
+networks. These pages are not offline bundles. The four examples
 are separate pages; a selection made in one does not update another.
 
 ## Reader and purpose
@@ -89,7 +92,7 @@ setting.
 ## Agreed interaction decisions — 2026-11-03
 
 [PDD §2.3](pdd.md#23-user-journeys) records the authoritative product
-definition in D-26–D-31.
+definition in D-26–D-32.
 
 **Required site conditions (D-26).** A fresh scenario starts with
 no values selected for fault angle, sediment depth, sediment
@@ -173,6 +176,14 @@ coverage is checked using the fault angles selected in the preceding
 step. Offset coverage warnings remain visible on review. The
 [movement step below](#stage-3--fault-movement) records the accepted
 behavior, current example values, and remaining proposals separately.
+
+**Review presentation (D-32).** The owner approved the complete
+review-screen example on 2026-11-03. It presents editable summaries,
+the entered movement range separately from its conversion, visible
+coverage warnings, and a plain explanation of the contributing
+records before **Show results**. The
+[review step below](#stage-4--review-scenario) records the accepted
+presentation and the example's limits.
 
 These decisions supersede the corresponding behavior in the saved
 full-journey HTML snapshot. That snapshot still permits unspecified
@@ -389,36 +400,72 @@ research group's final treatment remains open under
 
 ## Stage 4 — Review scenario
 
-The heading is **Review your scenario**. A row for each site
-condition and for fault movement shows the draft choice, with an
-**Edit** action. A completed draft has no unanswered site
-conditions. The saved snapshot's explanation of unspecified
-conditions is superseded by D-26 and must be removed when updated.
+**Agreed presentation (D-32, 2026-11-03).** The heading is **Review
+your scenario**, followed by **Check your assumptions before showing
+results**. The screen has three sections, in this order:
 
-Editing a site condition returns to the site-conditions stage;
-editing fault movement returns to its stage. The next action there
-becomes **Return to review**. Other choices remain intact.
+1. **Site conditions.** Show the selected fault angles, sediment
+   depth, sediment density, and sediment strength and structure.
+   A completed draft has no unanswered conditions. The section's
+   **Edit** action returns to the site-conditions step.
+2. **Fault movement.** Identify the active entry mode and show
+   **Your assumed range**. In offset mode, separately show
+   **Corresponding fault slip at depth** for every selected angle,
+   with its coverage status and the modeled slip range. The
+   section's **Edit** action returns to the fault-movement step.
+3. **What the results will include.** Explain the contributing
+   simulation records before confirmation.
 
-**How simulation stages are included** explains the current default:
-all recorded stages within the chosen slip range. The saved
-snapshot also describes all recorded stages when no range is set;
-D-31 supersedes that fresh-journey path. The prototype mentions a
-later result refinement for one state per trial but does not
-implement it.
+Both Edit routes preserve the draft. Their next action becomes
+**Return to review**, with D-30's complete-input validation. **Back**
+returns to fault movement. The primary action is **Show results**;
+under D-27 it confirms the valid draft and opens its results.
 
-Under D-27, **Show results** confirms the reviewed valid draft and
-opens its results. The saved snapshot labels this action **Explore
-matching results** and does not model confirmation separately from
-editing. No result is calculated by this prototype.
+Keep the full entered offset range visible, even when only part is
+covered by the simulations. Do not silently shorten it. Converted
+slip ranges are approximate and retain the caveat that raised ridges
+at the surface can cause the conversion to overestimate fault slip.
+A visible **Part of your range is outside the simulations** warning
+identifies affected angles and their covered offset maxima, then
+states: **Results will describe only the part covered by the
+simulations**. Partial coverage does not block confirmation when
+the inputs otherwise satisfy the existing validity rules.
 
-**Next review-screen proposal.** The next suggested design exercise
-is a complete review screen with site-condition and fault-movement
-summaries and Edit actions, converted slip windows for each selected
-angle in offset mode, visible coverage warnings, a plain explanation
-of the contributing simulation records, and one **Show results**
-action. D-27 already defines confirmation and D-31 requires coverage
-warnings on review. The new layout and remaining presentation
-details have not been approved merely by recording this proposal.
+For the initial population, the explanation identifies **All model
+stages in the slip window** and says:
+
+> For simulations matching these site conditions, include every
+> recorded stage within the corresponding slip range. Each
+> simulation may contribute more than one stage.
+
+With multiple selected angles in offset mode, identify each
+simulation's corresponding range for its fault angle. Explain that
+a stage is a saved point as fault movement increases and that all
+resulting scarp types are included. This accepts the review
+presentation; it does not settle the placement or activation of
+later population and scarp-type refinements, nor change D-3's
+scientific-review status.
+
+**Illustrative completed scenario.** The saved review example opens
+with fault angle 30°, depth 5 m, Dense sediment, Uniform: strong,
+and a surface-offset range of 0–3 m. These demonstrate a completed
+review; they are neither fresh defaults nor an approved sample or
+site recommendation. At the reviewed data-v1 limits, the conversion
+shows approximately 0.01–5.99 m of slip and partial coverage against
+the modeled 0–5.0135 m range. Changing the offset to 2 m removes that
+coverage warning. Adding 40° shows a separate conversion and status.
+
+The saved example's Edit actions work, including required-condition
+validation. Its **Show results** action ends with a clearly labeled
+prototype acknowledgement; it calculates no results or match counts.
+That acknowledgement is outside the proposed product screen. The
+example includes the still-proposed 0.1 m mouse increment and general
+multi-angle offset-shortcut rule from D-31; accepting review does not
+settle those separate choices.
+
+The earlier full-journey snapshot retains superseded unspecified
+conditions, a no-window explanation, and **Explore matching results**
+wording. Use this later example for the accepted review presentation.
 
 ## Stage 5 — Explore results
 
@@ -465,7 +512,7 @@ The selected visual direction does not settle the following details:
    sample-input replacement, and the treatment of an unfinished
    draft outside the mode switches and discard/restart actions
    already decided by D-28 and D-29.
-3. **Presentation around results.** D-27 and D-30 define review,
+3. **Presentation around results.** D-27, D-30, and D-32 define review,
    step navigation, and the unapplied-changes notice. Define the
    placement of retained results and editing actions. Define how
    draft recovery and performance endpoints fit the revised journey.
@@ -485,13 +532,14 @@ The selected visual direction does not settle the following details:
 
 The current decimal-validation requirements, conversion rules, and
 scientific safeguards remain authoritative except for the explicit
-product amendments recorded in the PDD. D-26–D-31 amend site-condition
+product amendments recorded in the PDD. D-26–D-32 amend site-condition
 and displacement defaults, result-update timing, mode preservation,
 discard/restart behavior, step navigation, and movement-entry
-feedback. The dependent design and implementation plan still need
-revision. Fixed example values, omitted controls, and simplified
-validation are not instructions to change unrelated scientific
-rules or to treat remaining proposals as agreed.
+feedback and review presentation. The dependent design and
+implementation plan still need revision. Fixed example values,
+omitted controls, and simplified validation are not instructions to
+change unrelated scientific rules or to treat remaining proposals
+as agreed.
 
 After the remaining product choices are resolved, amend the PDD and
 the dependent design and task bodies. A realistic scenario walkthrough
