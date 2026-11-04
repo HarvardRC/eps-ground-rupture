@@ -651,10 +651,10 @@ unreadable-record copy; a copy change there fails those specs
 loudly.
 
 An independent review mutation-tested the race, continuity, and
-sample specs: each failed when its guarded behavior was broken. It
-also added a cross-step routing test, made the race spec wait until
-the held response was processed, and made new contexts keep the
-project's device emulation. On the reviewer's machine the full lane
+sample specs: each failed when its guarded behavior was broken.
+Following that review, G-12 added a cross-step routing test, made the
+race spec wait until the held response was processed, and made new
+contexts keep the project's device emulation. On the reviewer's machine the full lane
 passed 206 with the legacy a11y spec passing, so that failure
 appears environment-dependent.
 
