@@ -44,7 +44,8 @@ export default defineConfig({
     {
       name: 'mobile',
       testDir: 'playwright/specs',
-      testMatch: /(render|interactions|golden-scenario|keyboard-responsive)\.spec\.ts$/,
+      // The legacy mobile specs, and every guided /explore/ spec (guided DDD §9.5).
+      testMatch: /(render|interactions|golden-scenario|keyboard-responsive|explore-[a-z-]+)\.spec\.ts$/,
       use: { viewport: { width: 360, height: 780 }, isMobile: true, hasTouch: true, trace: 'on' },
     },
     {
