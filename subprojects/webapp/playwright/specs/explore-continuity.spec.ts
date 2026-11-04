@@ -80,6 +80,12 @@ test('a record from another data release requires the explicit fresh start', asy
   await expect(stepButton(page, 'site')).toBeDisabled();
 });
 
+/** A new context with the running project's viewport and device emulation. */
+const projectContext = (browser: import('@playwright/test').Browser) => {
+  const use = test.info().project.use;
+  return browser.newContext({ baseURL: use.baseURL, viewport: use.viewport, isMobile: use.isMobile, hasTouch: use.hasTouch });
+};
+
 test('a new tab and a new browser context start fresh', async ({ page, browser }) => {
   await gotoExplore(page);
   await action(page, 'Build your scenario').click();
@@ -90,13 +96,16 @@ test('a new tab and a new browser context start fresh', async ({ page, browser }
   await expect(tab.locator('#gx-heading')).toHaveText(INTRO_HEADING);
   await expect(tab.locator('.gx-restored')).toHaveCount(0);
   await tab.close();
-  const context = await browser.newContext({ baseURL: page.url().replace(/explore\/.*$/, '') });
-  const fresh = await context.newPage();
-  await fresh.goto('explore/');
-  await explorerReady(fresh);
-  await expect(fresh.locator('#gx-heading')).toHaveText(INTRO_HEADING);
-  await expect(fresh.locator('.gx-restored')).toHaveCount(0);
-  await context.close();
+  const context = await projectContext(browser);
+  try {
+    const fresh = await context.newPage();
+    await fresh.goto('explore/');
+    await explorerReady(fresh);
+    await expect(fresh.locator('#gx-heading')).toHaveText(INTRO_HEADING);
+    await expect(fresh.locator('.gx-restored')).toHaveCount(0);
+  } finally {
+    await context.close();
+  }
 });
 
 test('a Review reload in offset mode shows the conversion without a confirmation', async ({ page }) => {
@@ -113,27 +122,34 @@ test('a Review reload in offset mode shows the conversion without a confirmation
   await expect(page.locator('.gx-restored')).toHaveText(RESTORED);
 });
 
-test('a save failing mid-session clears the older record, so reload starts fresh', async ({ browser, page }) => {
-  const context = await browser.newContext();
-  await context.addInitScript(() => {
-    const original = Storage.prototype.setItem;
-    let saves = 0;
-    Storage.prototype.setItem = function (key: string, value: string) {
-      saves += 1;
-      if (saves > 3) throw new DOMException('full', 'QuotaExceededError');
-      return original.call(this, key, value);
-    };
-  });
-  const tab = await context.newPage();
-  await tab.goto(new URL('explore/', test.info().project.use.baseURL).href);
-  await explorerReady(tab);
-  await tab.locator('#gre-explore .gx-main button', { hasText: 'Build your scenario' }).click();
-  for (const id of ['#gx-faultDip-0', '#gx-depth-0', '#gx-density-0']) await tab.locator(id).click();
-  await expect(tab.locator('.gx-session-note')).toHaveCount(0);
-  expect(await tab.evaluate((key) => sessionStorage.getItem(key), SESSION_KEY)).toBeNull();
-  await tab.reload();
-  await explorerReady(tab);
-  await expect(tab.locator('#gx-heading')).toHaveText(INTRO_HEADING);
-  await expect(tab.locator('.gx-restored')).toHaveCount(0);
-  await context.close();
+test('a save failing mid-session clears the older record, so reload starts fresh', async ({ browser }) => {
+  const context = await projectContext(browser);
+  try {
+    await context.addInitScript(() => {
+      const original = Storage.prototype.setItem;
+      let saves = 0;
+      Storage.prototype.setItem = function (key: string, value: string) {
+        saves += 1;
+        if (saves > 3) throw new DOMException('full', 'QuotaExceededError');
+        return original.call(this, key, value);
+      };
+    });
+    const tab = await context.newPage();
+    await tab.goto('explore/');
+    await explorerReady(tab);
+    await tab.locator('#gre-explore .gx-main button', { hasText: 'Build your scenario' }).click();
+    for (const id of ['#gx-faultDip-0', '#gx-depth-0', '#gx-density-0']) await tab.locator(id).click();
+    expect(await tab.evaluate((key) => sessionStorage.getItem(key), SESSION_KEY)).toBeNull();
+    // The failed save switched this mount back to the first-version wording.
+    await tab.locator('#gre-explore .gx-steps button[data-step="intro"]').click();
+    await expect(tab.locator('.gx-session-note')).toHaveText(
+      'Your choices are kept while this page remains open. Reloading or leaving and returning starts a new draft.',
+    );
+    await tab.reload();
+    await explorerReady(tab);
+    await expect(tab.locator('#gx-heading')).toHaveText(INTRO_HEADING);
+    await expect(tab.locator('.gx-restored')).toHaveCount(0);
+  } finally {
+    await context.close();
+  }
 });

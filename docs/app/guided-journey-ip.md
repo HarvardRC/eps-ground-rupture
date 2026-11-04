@@ -605,8 +605,9 @@ mobile project's spec filter now also matches `explore-*.spec.ts`:
    reference count (25,920) and valid height count; `/scenario/`
    still mounts.
 2. `explore-validation`: site, movement, and scarp-type routing,
-   messages, `aria-invalid`, and focus, including review attempts
-   from Results.
+   messages, `aria-invalid`, and focus. Review attempts from Results
+   route back to an emptied site group on Site and to a blank slip
+   maximum on Movement, keeping the confirmed count.
 3. `explore-draft-boundary`: the pending banner, Discard changes,
    Return to review, Start a new scenario, and the GS-6 result
    (3,434 records) unchanged during edits.
@@ -644,18 +645,28 @@ specs that need charts use GS-1. A first run had five failing tests
 from three wrong spec assumptions: charts under GS-6 (three tests),
 a click on a not-yet-reached, disabled step button, and the race
 assertion's direction. All were spec errors and were corrected; no
-application defect appeared.
+application defect appeared. Besides DDD and registry texts, some
+assertions pin the page's own validation, loading, download, and
+unreadable-record copy; a copy change there fails those specs
+loudly.
+
+An independent review mutation-tested the race, continuity, and
+sample specs: each failed when its guarded behavior was broken. It
+also added a cross-step routing test, made the race spec wait until
+the held response was processed, and made new contexts keep the
+project's device emulation. On the reviewer's machine the full lane
+passed 206 with the legacy a11y spec passing, so that failure
+appears environment-dependent.
 
 At this verification, on the branch rebased onto the merged G-11:
 
-- `webappBrowserTest` (desktop and mobile) gave 205 passed, 5
-  skipped, and 1 failed. All 27 guided tests passed in each project.
+- `webappBrowserTest` (desktop and mobile) gave 207 passed, 5
+  skipped, and 1 failed. All 28 guided tests passed in each project.
   The failure is the existing `axe: the failure states` legacy spec
   recorded under G-08, failing identically on base; the 151 legacy
   passes are unchanged.
-- The guided specs passed 150 of 150 runs with `--repeat-each 3` in
-  both projects, before the two continuity tests were added; those
-  passed 36 of 36 repeats with the rest of their file.
+- The final guided specs passed 168 of 168 runs with
+  `--repeat-each 3` in both projects.
 - The pinned Node suite passed all 417 tests; typechecking, which
   includes the specs, and both strict builds passed. The `/scenario/`
   bundles were unchanged. All 31 hook tests passed. 5,498 relative
@@ -672,6 +683,14 @@ Outstanding beyond this lane, as §9.5 records:
 
 The lane is not part of CI; it runs through
 `./gradlew :subprojects:webapp:webappBrowserTest`.
+
+**Documentation follow-up for the owner.** The legacy
+[DDD §7.5](ddd.md#75-browser-test-lane) still quotes the earlier
+mobile `testMatch` and calls the lane "the eleven specs". The G-12
+row and guided DDD §9.5 authorize the filter change, but the owner
+authorized legacy-DDD amendments for G-08 only, so §7.5 was left
+unchanged. It now describes the legacy specs only; the guided specs
+are §9.5's.
 
 ## Separate CI investigation
 

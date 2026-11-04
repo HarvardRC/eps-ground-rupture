@@ -89,3 +89,31 @@ test('an empty scarp selection blocks review from Results with the confirmed res
   await expect(page.locator('#gx-scarpClass-all')).toBeFocused();
   await expect(page.locator('#gx-refine-button')).toHaveAttribute('aria-expanded', 'true');
 });
+
+test('a review attempt from Results routes back to the first invalid earlier step', async ({ page }) => {
+  await gotoExplore(page);
+  const ref = await confirmGolden(page, 'GS-6');
+  const count = countText(ref.counts.matching_records);
+
+  // An emptied site group: review from Results returns to Site, focused on that group.
+  await stepButton(page, 'site').click();
+  await setChecked(page, '#gx-depth-all', false);
+  await stepButton(page, 'results').click();
+  await page.locator('.gx-main > .gx-section-head').getByRole('button', { name: 'Review scenario' }).click();
+  await expect(heading(page)).toHaveText(SITE_HEADING);
+  await expect(page.locator('#gx-depth-all')).toBeFocused();
+  await expect(page.locator('#gx-error-depth')).toHaveText('Choose one or more sediment depths.');
+  await setChecked(page, '#gx-depth-all', true);
+
+  // An invalid slip entry: review from Results returns to Movement, focused on the field.
+  await stepButton(page, 'movement').click();
+  await typeEntry(page, 'slipMax', '');
+  await stepButton(page, 'results').click();
+  await expect(confirmedCount(page)).toHaveText(count);
+  await page.locator('.gx-pending').getByRole('button', { name: 'Return to review' }).click();
+  await expect(heading(page)).toHaveText(MOVEMENT_HEADING);
+  await expect(page.locator('#gx-slipMax')).toBeFocused();
+  await expect(page.locator('#gx-error-slipMax')).toHaveText('Enter the maximum fault slip in metres.');
+  await stepButton(page, 'results').click();
+  await expect(confirmedCount(page)).toHaveText(count);
+});

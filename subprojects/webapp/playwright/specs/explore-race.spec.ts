@@ -43,6 +43,10 @@ test('navigating away during a held offset review keeps the reader where they we
   await page.waitForResponse(REGRESSION);
   await settleFrames(page);
   await expect(heading(page)).toHaveText(SITE_HEADING);
+  // Prove the held response was processed before asserting nothing stale applied.
+  await action(page, 'Continue to fault movement').click();
+  await page.locator('#gx-offset-feedback table').waitFor();
+  await expect(heading(page)).toHaveText(MOVEMENT_HEADING);
   // The stale review never applied: Review was never reached.
   await expect(stepButton(page, 'review')).toBeDisabled();
   await expect(stepButton(page, 'results')).toBeDisabled();
