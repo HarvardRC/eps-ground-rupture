@@ -433,6 +433,117 @@ script was not committed. They covered:
 Screen-reader announcement of the inserted status line, touch, and
 other engines were not checked; G-12 adds the committed spec.
 
+### Same-tab continuity, 2026-11-04 (G-10)
+
+G-10 added `session.ts`: the version-1 record of the draft, the
+confirmed settings, the step, and the display choices, stored under
+`gre-explore-session` in the tab's session storage. Every storage
+access is guarded. Results, `RenderInput`, counts, stamps other than
+`dataVersion`, and the walkthrough index are never stored.
+`classifySession` checks a loaded record against the served data
+version and validates the confirmed draft with `validateDraft`.
+A working draft only needs the §2 structure.
+
+The page saves from its single render path. Typing, percentile, and
+disclosure changes, which update without a full render, call the same
+save directly. On mount, including the `pageshow` remount, a
+restorable record restores the draft, display choices, refinement and
+example disclosures, and step. Earlier steps count as reached, and
+all steps do when a confirmation exists. A confirmation recomputes
+through the ordinary pipeline, with the regression in offset mode.
+`navigationVersion` cancellation applies, and a failure or
+interruption offers **Retry restoring results** while Results stays
+unavailable. `Restored the work in this tab.` (`role="status"`)
+appears only after a restore completes, never for an untouched
+introduction, and clears on the next navigation or edit. An unreadable or version-mismatched record
+leaves the introduction with its explanation and only **Start a new
+scenario**. The record stays untouched until that choice clears it.
+Implementation choices where the DDD names no wording or control:
+
+- the unreadable-case text `The work saved in this tab could not be
+  read.`, with `Your earlier choices have not been restored.` added in
+  both cases;
+- the **Retry restoring results** control as the §7 retry affordance
+  for a restore. A restore cancelled by navigation stays recoverable
+  and reports `Restoring the results was interrupted.`;
+- `Recalculating the results of your confirmed scenario…` while busy.
+
+Unavailable storage, or a failed save, keeps the first-version
+behavior and wording. A failed save also clears any older record, so
+a reload starts fresh as that wording says. A reload on Review in
+offset mode loads the conversion, as on Movement. The
+introduction, supporting aside, and static fallback in `explore.md`
+carry the new continuity sentence. No `beforeunload` prompt was
+added.
+
+Thirteen new session tests cover:
+
+- round trips under the documented key, including an invalid working
+  draft and an unconfirmed record;
+- the serialized field set, with no result fields;
+- tampered JSON, wrong record versions, and ten structural tamperings;
+- the data-version mismatch and an invalid confirmed draft;
+- a results step without a confirmation;
+- absence, clearing, and throwing storage.
+
+At this verification:
+
+- The pinned Node suite passed all 417 tests; typechecking and the
+  bundles passed. Strict publication and preview builds passed
+  with `explore-61092bd8467a.js` and `explore-2c551385ec3a.css`. The
+  `/scenario/` bundles were unchanged. All 31 hook tests passed.
+- 5,498 relative links in 61 Markdown files resolved; PDD
+  agreement passed; traceability linted 491 rows with no gaps.
+
+A disposable Playwright script drove the strict preview build with
+the pinned data. All 47 checks passed; the script was not committed.
+An independent review found the untouched-introduction claim, the
+stale record after a late save failure, and the missing Review
+conversion; their repairs are included and checked.
+They covered:
+
+- the new intro and aside wording, with no notice on a first visit;
+- a Site-step reload restoring selections with the notice, which
+  the next edit cleared;
+- a confirmed sample scenario (2,880 records) reloaded from the
+  walkthrough's Width stop. The same count was recomputed in about
+  50–65 ms, with Width, Cumulative, the 90th-percentile read-off,
+  the chart-data and stage-example disclosures, the pending
+  last-stage edit, and the confirmed all-stages population
+  restored. The walkthrough restarted off, and the stored record
+  held only its six fields;
+- Back from the glossary in the same tab restoring the results
+  with the notice;
+- a new tab starting fresh;
+- corrupt and version-mismatched records explained, offering only
+  Start a new scenario, kept until that choice, and then replaced
+  by the fresh Site state;
+- a failed regression response leaving Results unavailable without
+  a restore claim, and Retry restoring the count;
+- a held regression response during navigation to Site: the stale
+  restore applied nothing, and Retry kept the current step;
+- a throwing `setItem` and an unavailable `sessionStorage`, each
+  keeping the earlier wording, starting fresh after reload, and
+  raising no page error;
+- a save failing after three successful ones, which cleared the
+  older record; the reload started fresh without a claim;
+- a reload of an untouched introduction claiming nothing, and a
+  Review-step reload in offset mode showing the conversion and its
+  30° coverage warning;
+- the blocked introduction at 320 px without horizontal overflow.
+
+The Back navigation reported navigation type `back_forward`, a
+reload rather than a Back/Forward-cache restoration. The
+`persisted` `pageshow` remount was therefore reviewed in source but
+not exercised. Touch and other engines were not checked; G-12 adds
+the committed spec.
+
+As the DDD designs it, the restore runs on any mount in the tab. A
+return to `/explore/` in the same tab through a site link therefore
+also restores, and the copy says the work stays in the tab. This is
+recorded for the owner's awareness against the PDD's "later visit"
+wording; no product decision was changed.
+
 ## Separate CI investigation
 
 The reported job `126383105016` belongs to historical run

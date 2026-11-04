@@ -19,6 +19,7 @@ import type { RenderInput } from '../views/render-input';
 import { statsRows, unclassifiedLine } from '../views/stats-table';
 import { computeResult } from './compute';
 import { DEFINITIONS, type DefinitionKey } from './glossary';
+import { classifySession, clearSession, loadSession, saveSession, type DisplayChoices, type SessionRecord } from './session';
 import { cloneDraft, draftChanged, freshDraft, offsetShortcut, sampleDraft, sedimentGroup, stepDecimal, validateDraft, type Draft, type Issue, type Step } from './state';
 
 export interface ExplorerOptions {
@@ -26,7 +27,11 @@ export interface ExplorerOptions {
   stamps: VersionStamps;
   loadRegression(): Promise<Regression>;
   signal: AbortSignal;
+  /** The tab's session storage, or null when it is unavailable (guided DDD §9.2). */
+  storage: Storage | null;
 }
+
+const KEPT_IN_TAB = 'Your work stays in this tab, including across a reload. Closing the tab or opening a new one starts a fresh scenario.';
 
 const escape = (value: unknown): string => String(value).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]!));
 const STEPS: readonly Step[] = ['intro', 'site', 'movement', 'review', 'results'];
@@ -72,6 +77,15 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   // Sample-input presentation state (guided DDD §9.1), never part of Draft.
   let sampleAsk = false;
   let sampleArrived = false;
+  // Same-tab continuity (guided DDD §9.2). `continuity` turns off for the
+  // mount when storage is unavailable or a save fails; `blocked` holds an
+  // unrestorable record until the explicit fresh start; `restoreTarget` is
+  // a restored confirmation awaiting recomputation.
+  let continuity = options.storage !== null;
+  let blocked: 'unreadable' | 'data-changed' | null = null;
+  let restoredNotice = false;
+  let restoreTarget: Draft | null = null;
+  let restoreError = '';
   let regression: Regression | null = null;
   let regressionPromise: Promise<boolean> | null = null;
   let regressionError = '';
@@ -183,7 +197,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   }
 
   function support(): string {
-    return `<aside class="gx-support"><p>Supporting pages open in a separate tab. Your draft stays here while this page remains open; reloading starts a new draft.</p><nav aria-label="Supporting information">${link('../paper/', 'Research paper')} · ${link('../data/', 'Data and citation')} · ${link('../glossary/', 'Glossary')} · ${link('../scenario/', 'Existing explorer')}</nav><p>Software ${escape(stamps.softwareVersion)} · Data ${escape(stamps.dataVersion)}</p></aside>`;
+    return `<aside class="gx-support"><p>Supporting pages open in a separate tab. ${continuity ? KEPT_IN_TAB : 'Your draft stays here while this page remains open; reloading starts a new draft.'}</p><nav aria-label="Supporting information">${link('../paper/', 'Research paper')} · ${link('../data/', 'Data and citation')} · ${link('../glossary/', 'Glossary')} · ${link('../scenario/', 'Existing explorer')}</nav><p>Software ${escape(stamps.softwareVersion)} · Data ${escape(stamps.dataVersion)}</p></aside>`;
   }
 
   function navigation(): string {
@@ -191,11 +205,12 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   }
 
   function introView(): string {
-    return `${heading('Use simulations to understand ground rupture.', 'Describe the site conditions and fault movement you want to investigate, then see the simulated results.')}<p class="gx-research">This is a research tool; it does not predict what will happen at a particular site.</p><div class="gx-intro-grid"><div><h3>Describe your assumptions</h3><p>Choose the modeled site conditions and fault movement you want to investigate.</p></div><div><h3>Review your scenario</h3><p>Check your choices and see whether the simulations cover your movement range.</p></div><div><h3>Understand the results</h3><p>Explore scarp height, deformation-zone width, and scarp dip, then download the matching records.</p></div></div><p>Results come from an existing set of research simulations. This page does not run a new simulation.</p><p class="gx-session-note">Your choices are kept while this page remains open. Reloading or leaving and returning starts a new draft.</p>${introActions()}`;
+    return `${heading('Use simulations to understand ground rupture.', 'Describe the site conditions and fault movement you want to investigate, then see the simulated results.')}<p class="gx-research">This is a research tool; it does not predict what will happen at a particular site.</p><div class="gx-intro-grid"><div><h3>Describe your assumptions</h3><p>Choose the modeled site conditions and fault movement you want to investigate.</p></div><div><h3>Review your scenario</h3><p>Check your choices and see whether the simulations cover your movement range.</p></div><div><h3>Understand the results</h3><p>Explore scarp height, deformation-zone width, and scarp dip, then download the matching records.</p></div></div><p>Results come from an existing set of research simulations. This page does not run a new simulation.</p><p class="gx-session-note">${continuity ? KEPT_IN_TAB : 'Your choices are kept while this page remains open. Reloading or leaving and returning starts a new draft.'}</p>${introActions()}`;
   }
 
-  /** The introduction's actions, or the inline sample-replacement question (guided DDD §9.1). */
+  /** The introduction's actions, the unrestorable-record choice (§9.2), or the inline sample-replacement question (§9.1). */
   function introActions(): string {
+    if (blocked) return `<div class="gx-footer gx-warning gx-restore-blocked"><p>${blocked === 'data-changed' ? 'The data release changed since this tab last used it.' : 'The work saved in this tab could not be read.'} Your earlier choices have not been restored.</p><div>${button('new', 'Start a new scenario', true, 'id="gx-restore-new"')}</div></div>`;
     if (sampleAsk) return `<div class="gx-footer gx-sample-confirm" role="group" aria-labelledby="gx-sample-question"><p id="gx-sample-question" tabindex="-1"><strong>Replace your current choices with the sample inputs?</strong></p><div>${button('sample-use', 'Use the sample', true)}${button('sample-keep', 'Keep my choices')}</div></div>`;
     return `<footer class="gx-footer gx-intro-actions"><div>${button('start', 'Build your scenario', true)}${button('sample', 'Try sample inputs', false, 'id="gx-sample" aria-describedby="gx-sample-hint"')}</div><p id="gx-sample-hint" class="gx-hint">Sample inputs, not recommended site values.</p></footer>`;
   }
@@ -426,8 +441,8 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     const activeKey = active && shell.contains(active) ? controlKey(active) : null;
     const matchingControls = () => [...shell.querySelectorAll<HTMLElement>('button, input')].filter(node => controlKey(node) === activeKey);
     const activePosition = activeKey === null ? -1 : matchingControls().indexOf(active!);
-    const views: Record<Step, () => string> = { intro: introView, site: siteView, movement: movementView, review: reviewView, results: resultsView };
-    shell.innerHTML = `<header class="gx-brand"><strong>Ground Rupture Explorer</strong><span>Research companion</span></header>${navigation()}<main class="gx-main">${generalError ? `<div class="gx-warning" role="alert">${escape(generalError)}</div>` : ''}${views[step]()}${step !== 'intro' ? `<div class="gx-restart">${button('new', 'Start a new scenario')}</div>` : ''}</main>${support()}`;
+    const views: Record<Step, () => string> = { intro: introView, site: siteView, movement: movementView, review: reviewView, results: () => result ? resultsView() : heading('Explore your scenario', 'See the range of simulated measurements for the scenario you confirmed.') };
+    shell.innerHTML = `<header class="gx-brand"><strong>Ground Rupture Explorer</strong><span>Research companion</span></header>${navigation()}<main class="gx-main">${restoredNotice ? '<p class="gx-restored" role="status">Restored the work in this tab.</p>' : ''}${generalError ? `<div class="gx-warning" role="alert">${escape(generalError)}</div>` : ''}${restorePanel()}${views[step]()}${step !== 'intro' ? `<div class="gx-restart">${button('new', 'Start a new scenario')}</div>` : ''}</main>${support()}`;
     shell.querySelectorAll<HTMLInputElement>('input[data-mixed]').forEach(input => { input.indeterminate = input.dataset.mixed === 'true'; });
     refreshMovementFeedback();
     if (step === 'results') {
@@ -442,12 +457,99 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     if (targetId) $(`#${targetId}`)?.focus({ preventScroll: true });
     else if (activePosition >= 0) matchingControls()[activePosition]?.focus({ preventScroll: true });
     if (scroll) ($(`#${focusId ?? 'gx-heading'}`) ?? $('#gx-heading'))?.scrollIntoView({ block: 'start' });
+    persist();
+  }
+
+  /** A restored confirmation still awaiting its results (§9.2, step 3). */
+  function restorePanel(): string {
+    if (!restoreTarget) return '';
+    if (busy) return '<p class="gx-hint gx-restoring" role="status">Recalculating the results of your confirmed scenario…</p>';
+    return `<div class="gx-warning gx-restore-retry"><p>${escape(restoreError || 'The results of your confirmed scenario have not been recalculated yet.')} Your choices have been kept.</p>${button('retry-restore', 'Retry restoring results', false, 'id="gx-retry-restore"')}</div>`;
+  }
+
+  function displayChoices(): DisplayChoices {
+    return {
+      measurement: display.measurement, view: { ...display.view }, readoff: { ...display.readoff },
+      logScale: display.logScale, chartDataOpen: { ...display.chartDataOpen }, exampleOpen, refineOpen,
+    };
+  }
+
+  /** Save the committed state (§9.2). Never while an unrestorable record awaits the explicit fresh start. */
+  function persist(): void {
+    if (!options.storage || !continuity || blocked) return;
+    const kept = confirmed ?? restoreTarget;
+    const record: SessionRecord = {
+      record: 1, dataVersion: stamps.dataVersion, step, draft: cloneDraft(draft),
+      confirmed: kept ? cloneDraft(kept) : null, display: displayChoices(),
+    };
+    if (!saveSession(options.storage, record)) {
+      // A failed save never interrupts the reader; the mount falls back to
+      // the first-version fresh behavior and its wording.
+      // Clear any older record so a reload really starts fresh, as the
+      // fallback wording then says.
+      continuity = false;
+      clearSession(options.storage);
+      const note = $('.gx-session-note');
+      if (note) note.textContent = 'Your choices are kept while this page remains open. Reloading or leaving and returning starts a new draft.';
+      const aside = $('.gx-support p');
+      if (aside) aside.textContent = 'Supporting pages open in a separate tab. Your draft stays here while this page remains open; reloading starts a new draft.';
+    }
+  }
+
+  /** Recompute a restored confirmation through the ordinary pipeline (§9.2, step 3). */
+  async function restoreResults(): Promise<void> {
+    const target = restoreTarget;
+    if (!target || busy) return;
+    const version = navigationVersion;
+    // A newer confirmation or Start a new scenario supersedes this restore;
+    // its continuation then leaves every shared flag alone.
+    const superseded = () => !alive() || restoreTarget !== target;
+    const interrupted = () => { busy = false; restoreError = 'Restoring the results was interrupted.'; };
+    busy = true; restoreError = ''; render();
+    const checked = validateDraft(target, manifest);
+    if (!checked.scenario) { busy = false; restoreError = 'The results of your confirmed scenario could not be recalculated.'; render(); return; }
+    if (target.mode === 'offset') {
+      const loaded = await ensureRegression();
+      if (superseded()) return;
+      if (version !== navigationVersion) { interrupted(); render(); return; }
+      if (!loaded) { busy = false; restoreError = 'The offset-conversion data could not be loaded, so the results of your confirmed scenario could not be recalculated.'; render(); return; }
+    }
+    await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+    if (superseded()) return;
+    if (version !== navigationVersion) { interrupted(); render(); return; }
+    try {
+      const computed = computeResult(vintage, checked.scenario, sequence + 1, regression);
+      confirmed = target; result = computed; sequence += 1; busy = false; restoreTarget = null; restoreError = '';
+      restoredNotice = true;
+      // Move focus only when the reader has not already moved it into the page.
+      const focusFree = !shell.contains(document.activeElement);
+      render(step === 'results' && focusFree ? 'gx-heading' : undefined);
+      status.textContent = `${formatCount(computed.selection.matchingRecords)} simulation records match your confirmed scenario.`;
+    } catch (error) {
+      console.error('Guided restore:', error); busy = false;
+      restoreError = 'The results of your confirmed scenario could not be recalculated.';
+      render();
+    }
+  }
+
+  /** Apply a validated record (§9.2, step 3); results recompute separately. */
+  function applyRecord(record: SessionRecord): void {
+    draft = cloneDraft(record.draft);
+    step = record.step;
+    const { measurement, view, readoff, logScale, chartDataOpen } = record.display;
+    display = { ...defaultDisplayState(), measurement, view: { ...view }, readoff: { ...readoff }, logScale, chartDataOpen: { ...chartDataOpen } };
+    exampleOpen = record.display.exampleOpen; refineOpen = record.display.refineOpen;
+    reached = new Set(record.confirmed ? STEPS : STEPS.slice(0, STEPS.indexOf(step) + 1));
+    restoreTarget = record.confirmed ? cloneDraft(record.confirmed) : null;
+    // An untouched introduction is not restored work: no claim (§9.2, step 4).
+    const untouched = step === 'intro' && record.confirmed === null && !draftChanged(record.draft, freshDraft(manifest));
+    restoredNotice = restoreTarget === null && !untouched;
   }
 
   function setStep(next: Step): void {
     if (next === 'results' && !result) return;
     if (next !== 'results') guideIndex = null;
-    navigationVersion += 1;
+    navigationVersion += 1; restoredNotice = false;
     step = next; reached.add(next); generalError = ''; alert.textContent = ''; render('gx-heading', true);
     if (next === 'movement' && draft.mode === 'offset') void ensureRegression();
   }
@@ -527,6 +629,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       if (!checked.scenario) { busy = false; showIssues(checked.issues); return; }
       const computed = computeResult(vintage, checked.scenario, sequence + 1, regression);
       confirmed = snapshot; result = computed; sequence += 1; busy = false; issues = []; refineOpen = false; guideIndex = null; alert.textContent = '';
+      restoreTarget = null; restoreError = ''; restoredNotice = false;
       step = 'results'; reached.add('results');
       render('gx-heading', true);
       status.textContent = `Results updated. ${formatCount(computed.selection.matchingRecords)} simulation records match your confirmed scenario.`;
@@ -602,6 +705,8 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       else showHelp(target, true);
       return;
     }
+    // The restore notice lasts until the next navigation or edit (§9.2).
+    restoredNotice = false;
     try {
       const measurement = target.dataset.measurement as MeasurementName | undefined;
       if (measurement) { display = { ...display, measurement }; render(); return; }
@@ -635,7 +740,13 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       else if (action === 'refine') { refineOpen = !refineOpen; render(); }
       else if (action === 'edit-refinements') { refineOpen = true; setStep('results'); $(`#gx-population-${draft.population}`)?.focus({ preventScroll: true }); $('#gx-refinements')?.scrollIntoView({ block: 'start' }); }
       else if (action === 'discard' && confirmed) { if (guideIndex !== null && guideIndex >= 3) refineOpen = true; guideIndex = null; draft = cloneDraft(confirmed); issues = []; generalError = ''; setStep('results'); status.textContent = 'Draft changes discarded. The confirmed scenario has been restored.'; }
-      else if (action === 'new') { guideIndex = null; sampleArrived = false; draft = freshDraft(manifest); confirmed = null; result = null; issues = []; generalError = ''; reached = new Set(['intro', 'site']); display = defaultDisplayState(); refineOpen = false; setStep('site'); status.textContent = 'New scenario. Choose one or more values for each site condition.'; }
+      else if (action === 'new') {
+        // Clear the record before the fresh state is saved (§9.2), including an unrestorable one.
+        if (options.storage) clearSession(options.storage);
+        blocked = null; restoreTarget = null; restoreError = ''; busy = false;
+        guideIndex = null; sampleArrived = false; draft = freshDraft(manifest); confirmed = null; result = null; issues = []; generalError = ''; reached = new Set(['intro', 'site']); display = defaultDisplayState(); refineOpen = false; setStep('site'); status.textContent = 'New scenario. Choose one or more values for each site condition.';
+      }
+      else if (action === 'retry-restore') void restoreResults();
       else if (action === 'plus' || action === 'minus') { navigationVersion += 1; const field = target.dataset.field as 'slipMin' | 'slipMax' | 'offsetMax'; draft[field] = stepDecimal(draft[field], action === 'plus' ? 1 : -1); issues = issues.filter(item => item.field !== field); render(); status.textContent = `${field === 'slipMin' ? 'Minimum' : 'Maximum'}: ${draft[field]} m.`; }
       else if (action === 'slip-shortcut') { navigationVersion += 1; draft.slipMax = '5'; issues = issues.filter(item => item.field !== 'slipMax'); render('gx-slipMax'); }
       else if (action === 'offset-shortcut' && regression) { navigationVersion += 1; const cap = offsetShortcut(draft.faultDip, regression, manifest.slipWindowBounds.max); if (cap !== null) draft.offsetMax = cap; issues = issues.filter(item => item.field !== 'offsetMax'); render('gx-offsetMax'); }
@@ -649,7 +760,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   shell.addEventListener('change', event => {
     const input = event.target;
     if (!(input instanceof HTMLInputElement)) return;
-    navigationVersion += 1;
+    navigationVersion += 1; restoredNotice = false;
     if (input.name === 'gx-mode') { draft.mode = input.value as 'slip' | 'offset'; issues = issues.filter(item => item.step !== 'movement'); render(); if (draft.mode === 'offset') void ensureRegression(); return; }
     if (input.name === 'gx-population') { draft.population = input.value as Draft['population']; render(); return; }
     const field = input.dataset.all ?? input.dataset.choice;
@@ -678,20 +789,33 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       draft[field] = input.value; issues = issues.filter(item => item.field !== field);
       input.removeAttribute('aria-invalid'); const error = $(`#gx-error-${field}`); if (error) { error.hidden = true; error.textContent = ''; }
       refreshMovementFeedback();
+      if (restoredNotice) { restoredNotice = false; $('.gx-restored')?.remove(); }
+      persist();
     } else if (input.id === 'gx-percentile') {
       const q = Number(input.value);
       display = { ...display, readoff: { ...display.readoff, [display.measurement]: q } };
       const label = input.parentElement?.querySelector('output'); if (label) label.textContent = String(q);
       drawChart();
+      persist();
     }
   }, { signal });
 
   shell.addEventListener('toggle', event => {
     const details = event.target;
     if (!(details instanceof HTMLDetailsElement) || !shell.contains(details)) return;
-    if (details.id === 'gx-stage-example') exampleOpen = details.open;
-    if (details.id === `gre-${display.measurement}-data`) display = { ...display, chartDataOpen: { ...display.chartDataOpen, [display.measurement]: details.open } };
+    if (details.id === 'gx-stage-example') { exampleOpen = details.open; persist(); }
+    if (details.id === `gre-${display.measurement}-data`) { display = { ...display, chartDataOpen: { ...display.chartDataOpen, [display.measurement]: details.open } }; persist(); }
   }, { capture: true, signal });
   signal.addEventListener('abort', () => { closeHelp(); chartObserver?.disconnect(); downloadUrls.forEach(url => URL.revokeObjectURL(url)); downloadUrls.clear(); }, { once: true });
+
+  // Same-tab continuity on mount, including the pageshow remount (§9.2).
+  // The walkthrough is presentation state and always starts off.
+  if (options.storage) {
+    const found = classifySession(loadSession(options.storage), stamps.dataVersion, manifest);
+    if (found.kind === 'unreadable' || found.kind === 'data-changed') { blocked = found.kind; step = 'intro'; }
+    else if (found.kind === 'restore') applyRecord(found.record);
+  }
   render();
+  if (((step as Step) === 'movement' || (step as Step) === 'review') && draft.mode === 'offset') void ensureRegression();
+  if (restoreTarget) void restoreResults();
 }
