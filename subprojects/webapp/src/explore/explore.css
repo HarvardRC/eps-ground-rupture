@@ -150,6 +150,8 @@
 #gre-explore .gx-chart-choices { margin: 0 0 12px; }
 #gre-explore .gx-chart-choices button { border: 1px solid var(--gx-line); border-radius: 5px; padding: 8px 13px; font-size: .8rem; background: white; color: var(--gx-muted); }
 #gre-explore .gx-chart-choices button[aria-pressed="true"] { background: var(--gx-accent); border-color: var(--gx-accent); color: white; }
+#gre-explore .gx-log { display: inline-flex; align-items: center; gap: 9px; min-height: 44px; margin: 0 0 8px; font-size: .8rem; cursor: pointer; }
+#gre-explore .gx-log-off { margin: 0 0 18px; padding: 10px 15px; border-left: 3px solid #bc966b; background: #fff5df; font-size: .8rem; }
 #gre-explore .gx-analysis { display: grid; grid-template-columns: minmax(0, 1fr) 290px; gap: 25px; align-items: start; margin-top: 22px; }
 #gre-explore .gx-analysis.gx-table-only { grid-template-columns: minmax(0, 1fr); max-width: 580px; }
 #gre-explore .gx-chart-side { min-width: 0; }
