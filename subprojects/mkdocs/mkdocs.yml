@@ -152,11 +152,11 @@ exclude_docs: |
 # entirely (out of the site tree, sitemap.xml, and the search index) while
 # `mkdocs serve` still builds it; mkdocs.preview.yml drafts only media/dev/.
 # `not_in_nav` only declares a nav omission deliberate. The site checks hook
-# fails every build whose output crosses the boundary.
+# fails every build whose output crosses the boundary. scenario.md and the
+# guided explore.md are unlisted prototypes (PDD D-39; guided-journey-ddd.md
+# §9.4): published, with no nav, sitemap, or search entry.
 draft_docs: |
   media/dev/
-  explore.md
-  assets/explore/
 not_in_nav: |
   scenario.md
   explore.md

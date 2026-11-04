@@ -300,6 +300,54 @@ limits above remain in force. Changes remained uncommitted at that
 verification; the owner then committed the candidate to
 `dev-v.0.4.1-redesign` as `a570fbe` (2026-11-04).
 
+### Unlisted publication, 2026-11-04 (G-08)
+
+G-08 removed `explore.md` and `assets/explore/` from `draft_docs`
+in `mkdocs.yml`, leaving `media/dev/`. Both `not_in_nav` lines and
+the page's `search: exclude: true` front matter remain. Nothing was
+deployed; the owner's manual Companion-site run deploys the page.
+
+The first strict publication build after that change failed arm
+(d): the guided page links to the unlisted `scenario.md`, and the
+hook rejected a link from any other built page. Guided DDD §§5–6
+keep that existing-explorer link, and D-39 defines unlisted as no
+navigation, sitemap, or search entry. The hook now rejects links to
+an unlisted page from listed pages only; links between unlisted
+pages list neither. In a publication build that outputs
+`explore/index.html`, a new arm (d) finding also requires the
+guided page to stay unlisted. The legacy
+[DDD §6.1](ddd.md#61-build-outputs-asset-paths-and-page-scaffold)
+still says "any other page"; it was left unchanged as the
+`/scenario/` contract, so its wording now differs from the hook's
+narrower rule. That difference is open for the owner's review.
+
+Thirteen new hook tests cover the guided page in the publication
+tree: link, navigation, sitemap, and search rejections; unlisted
+cross-links; the not-unlisted guard; sitemap removal; arm (f)
+under `on_post_build`; the preview's unchanged coverage; and the
+committed configurations. With the new configuration, two of them
+failed against the previous hook. All 29 hook tests passed.
+
+At this verification:
+
+- Strict publication and preview builds passed. The publication
+  tree contained `explore/index.html`, `explore-2d90789ca249.js`,
+  and `explore-b86e68537c5b.css`. Neither `sitemap.xml` (10
+  entries), `sitemap.xml.gz`, nor the search index named
+  `explore/`, and no built page outside the two unlisted pages
+  linked to it. The preview kept its sitemap entry, as before.
+- The `/scenario/` bundles `app-26490347afd0.js` and
+  `app-08bebc049c15.css` matched the pre-change baseline SHA-256s.
+- The pinned Node suite passed all 401 tests; typechecking and the
+  bundle passed. 5,496 relative links in 61 Markdown files
+  resolved; PDD agreement passed; traceability linted 491 rows
+  with no gaps.
+
+Apart from `sitemap.xml` and `sitemap.xml.gz`, every file of the
+publication tree was byte-identical to the preview's. No browser
+visit to the publication build was made. The deployed page
+and its unlisted state are verified only when the owner reruns T-54.
+
 ## Separate CI investigation
 
 The reported job `126383105016` belongs to historical run

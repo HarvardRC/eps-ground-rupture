@@ -1,15 +1,19 @@
-"""Adversarial output fixtures for the guided entry's staging boundary."""
+"""Adversarial output fixtures for the guided entry's staging boundary
+and its unlisted publication (guided-journey-ddd.md §9.4)."""
 
 from __future__ import annotations
 
 import hashlib
 import importlib.util
 import json
+import os
 import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
+
+from mkdocs.structure.files import InclusionLevel
 
 
 HOOK = Path(__file__).resolve().parents[1] / "hooks" / "site_checks.py"
@@ -143,6 +147,159 @@ class GuidedAssetsTest(unittest.TestCase):
     def test_missing_stylesheet_fails(self) -> None:
         self.replace(f'<link rel="stylesheet" href="../assets/explore/{self.css}">', "")
         self.reject("exactly one stylesheet")
+
+
+SITE_URL = "https://example.test/eps-ground-rupture/"
+SITEMAP_NS = "http://www.sitemaps.org/schemas/sitemap/0.9"
+MKDOCS_ROOT = Path(__file__).resolve().parents[1]
+
+
+def page_file(name: str) -> SimpleNamespace:
+    """A stand-in for the mkdocs File of the top-level page `name`.md."""
+    return SimpleNamespace(
+        src_uri=f"{name}.md",
+        url=f"{name}/",
+        dest_uri=f"{name}/index.html",
+        page=SimpleNamespace(canonical_url=f"{SITE_URL}{name}/"),
+    )
+
+
+class GuidedUnlistedTest(unittest.TestCase):
+    """Guided DDD §9.4: the publication tree serves explore/ unlisted."""
+
+    def setUp(self) -> None:
+        self.temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temporary.cleanup)
+        self.site = Path(self.temporary.name)
+        self.explore = page_file("explore")
+        self.scenario = page_file("scenario")
+        self.addCleanup(patch.stopall)
+        patch.object(checks, "_drafts", []).start()
+        patch.object(checks, "_unlisted", [self.explore, self.scenario]).start()
+        patch.object(checks, "_command", "build").start()
+        self.publication = SimpleNamespace(site_url=SITE_URL, config_file_path="/x/mkdocs.yml")
+        self.preview = SimpleNamespace(site_url=SITE_URL, config_file_path="/x/mkdocs.preview.yml")
+        # The unlisted pages link to each other and to themselves; the listed
+        # pages link only to listed pages.
+        self.write("explore/index.html", '<a href="../scenario/">x</a><a href="./">x</a>')
+        self.write("scenario/index.html", '<a href="../explore/">x</a>')
+        self.write("index.html", '<a href="glossary/">x</a>')
+        self.write("glossary/index.html", '<a href="../">x</a>')
+        self.sitemap(["", "glossary/"])
+        self.search(["", "glossary/", "glossary/#slip"])
+
+    def write(self, path: str, text: str) -> None:
+        target = self.site / path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(text, encoding="utf-8")
+
+    def sitemap(self, paths: list[str]) -> None:
+        urls = "".join(f"<url><loc>{SITE_URL}{p}</loc></url>" for p in paths)
+        self.write("sitemap.xml", f'<urlset xmlns="{SITEMAP_NS}">{urls}</urlset>')
+
+    def search(self, locations: list[str]) -> None:
+        docs = [{"location": loc} for loc in locations]
+        self.write("search/search_index.json", json.dumps({"docs": docs}))
+
+    def findings(self, config: SimpleNamespace) -> list[tuple[str, str]]:
+        return list(checks._publication_boundary(self.site, checks._walk(self.site), config))
+
+    def reject(self, config: SimpleNamespace, fragment: str) -> None:
+        found = self.findings(config)
+        self.assertTrue(any(fragment in why for _path, why in found), found)
+
+    def test_unlisted_pages_may_link_to_each_other(self) -> None:
+        self.assertEqual(self.findings(self.publication), [])
+
+    def test_listed_page_linking_to_guided_page_fails(self) -> None:
+        self.write("index.html", '<a href="explore/">x</a>')
+        self.reject(self.publication, "resolves to the unlisted explore.md")
+
+    def test_navigation_entry_for_guided_page_fails(self) -> None:
+        self.write("glossary/index.html", '<nav><a href="../explore/index.html">E</a></nav>')
+        self.reject(self.publication, "resolves to the unlisted explore.md")
+
+    def test_sitemap_entry_for_guided_page_fails(self) -> None:
+        self.sitemap(["", "explore/"])
+        self.reject(self.publication, "lists the unlisted explore.md")
+
+    def test_search_entry_for_guided_page_fails(self) -> None:
+        self.search(["", "explore/#gre-explore"])
+        self.reject(self.publication, "indexes the unlisted explore.md")
+
+    def test_guided_page_listed_in_navigation_config_fails(self) -> None:
+        patch.object(checks, "_unlisted", [self.scenario]).start()
+        self.reject(self.publication, "guided page is not unlisted")
+
+    def test_existing_explorer_link_from_listed_page_still_fails(self) -> None:
+        self.write("glossary/index.html", '<a href="../scenario/">x</a>')
+        self.reject(self.publication, "resolves to the unlisted scenario.md")
+
+    def test_preview_keeps_its_coverage(self) -> None:
+        # The preview keeps both pages in its sitemap for instant navigation
+        # (docs/app/ddd.md §6.1) and checks only its drafts.
+        self.sitemap(["", "explore/", "scenario/"])
+        self.write("index.html", '<a href="explore/">x</a>')
+        patch.object(checks, "_unlisted", [self.scenario]).start()
+        self.assertEqual(self.findings(self.preview), [])
+
+    def test_publication_sitemap_drops_guided_page(self) -> None:
+        rendered = (
+            f'<urlset xmlns="{SITEMAP_NS}">\n'
+            f"    <url>\n         <loc>{SITE_URL}</loc>\n    </url>\n"
+            f"    <url>\n         <loc>{SITE_URL}explore/</loc>\n    </url>\n"
+            "</urlset>\n"
+        )
+        out = checks.on_post_template(rendered, template_name="sitemap.xml", config=self.publication)
+        self.assertNotIn("explore/", out)
+        self.assertIn(f"<loc>{SITE_URL}</loc>", out)
+        kept = checks.on_post_template(rendered, template_name="sitemap.xml", config=self.preview)
+        self.assertEqual(kept, rendered)
+
+    def test_guided_arm_applies_in_publication_build(self) -> None:
+        self.write("explore/index.html", '<div id="gre-explore"></div>')
+        for arm in ("_application_subtree", "_tableau_exclusion", "_publication_inventory"):
+            patch.object(checks, arm, lambda *a, **k: iter(())).start()
+        config = SimpleNamespace(site_dir=str(self.site), **vars(self.publication))
+        with self.assertRaises(checks.PluginError) as raised:
+            checks.on_post_build(config=config)
+        self.assertIn("(f) guided explorer: assets/explore/", str(raised.exception))
+
+
+class PublicationConfigTest(unittest.TestCase):
+    """The committed configurations serve explore/ unlisted (guided DDD §9.4)."""
+
+    def setUp(self) -> None:
+        cwd = os.getcwd()
+        os.chdir(MKDOCS_ROOT)
+        self.addCleanup(os.chdir, cwd)
+
+    def test_both_pages_unlisted_in_publication_and_preview(self) -> None:
+        from mkdocs.config import load_config
+        from mkdocs.structure.files import get_files
+
+        for name in ("mkdocs.yml", "mkdocs.preview.yml"):
+            levels = {f.src_uri: f.inclusion for f in get_files(load_config(name))}
+            for page in ("explore.md", "scenario.md"):
+                self.assertIs(levels[page], InclusionLevel.NOT_IN_NAV, (name, page))
+
+    def test_guided_page_and_assets_are_not_drafted(self) -> None:
+        from mkdocs.config import load_config
+        from mkdocs.structure.files import get_files
+
+        for name in ("mkdocs.yml", "mkdocs.preview.yml"):
+            files = get_files(load_config(name))
+            drafted = [f.src_uri for f in files if f.inclusion is InclusionLevel.DRAFT]
+            self.assertTrue(all(uri.startswith("media/dev/") for uri in drafted), (name, drafted))
+            self.assertTrue(
+                any(f.src_uri.startswith("assets/explore/") for f in files),
+                f"{name}: stage the guided assets (exploreAssets) before these tests",
+            )
+
+    def test_guided_page_keeps_search_exclusion(self) -> None:
+        text = (MKDOCS_ROOT / "docs" / "explore.md").read_text(encoding="utf-8")
+        front = text.split("---", 2)[1]
+        self.assertRegex(front, r"search:\s*\n\s+exclude:\s*true")
 
 
 if __name__ == "__main__":
