@@ -485,7 +485,10 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     if (!saveSession(options.storage, record)) {
       // A failed save never interrupts the reader; the mount falls back to
       // the first-version fresh behavior and its wording.
+      // Clear any older record so a reload really starts fresh, as the
+      // fallback wording then says.
       continuity = false;
+      clearSession(options.storage);
       const note = $('.gx-session-note');
       if (note) note.textContent = 'Your choices are kept while this page remains open. Reloading or leaving and returning starts a new draft.';
       const aside = $('.gx-support p');
@@ -498,25 +501,30 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     const target = restoreTarget;
     if (!target || busy) return;
     const version = navigationVersion;
+    // A newer confirmation or Start a new scenario supersedes this restore;
+    // its continuation then leaves every shared flag alone.
+    const superseded = () => !alive() || restoreTarget !== target;
     const interrupted = () => { busy = false; restoreError = 'Restoring the results was interrupted.'; };
     busy = true; restoreError = ''; render();
     const checked = validateDraft(target, manifest);
-    if (!checked.scenario) { busy = false; restoreTarget = null; return; }
+    if (!checked.scenario) { busy = false; restoreError = 'The results of your confirmed scenario could not be recalculated.'; render(); return; }
     if (target.mode === 'offset') {
       const loaded = await ensureRegression();
-      if (!alive()) return;
+      if (superseded()) return;
       if (version !== navigationVersion) { interrupted(); render(); return; }
       if (!loaded) { busy = false; restoreError = 'The offset-conversion data could not be loaded, so the results of your confirmed scenario could not be recalculated.'; render(); return; }
     }
     await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
-    if (!alive()) return;
+    if (superseded()) return;
     if (version !== navigationVersion) { interrupted(); render(); return; }
     try {
       const computed = computeResult(vintage, checked.scenario, sequence + 1, regression);
       confirmed = target; result = computed; sequence += 1; busy = false; restoreTarget = null; restoreError = '';
       restoredNotice = true;
-      render(step === 'results' ? 'gx-heading' : undefined);
-      status.textContent = `Restored the work in this tab. ${formatCount(computed.selection.matchingRecords)} simulation records match your confirmed scenario.`;
+      // Move focus only when the reader has not already moved it into the page.
+      const focusFree = !shell.contains(document.activeElement);
+      render(step === 'results' && focusFree ? 'gx-heading' : undefined);
+      status.textContent = `${formatCount(computed.selection.matchingRecords)} simulation records match your confirmed scenario.`;
     } catch (error) {
       console.error('Guided restore:', error); busy = false;
       restoreError = 'The results of your confirmed scenario could not be recalculated.';
@@ -533,7 +541,9 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     exampleOpen = record.display.exampleOpen; refineOpen = record.display.refineOpen;
     reached = new Set(record.confirmed ? STEPS : STEPS.slice(0, STEPS.indexOf(step) + 1));
     restoreTarget = record.confirmed ? cloneDraft(record.confirmed) : null;
-    restoredNotice = restoreTarget === null;
+    // An untouched introduction is not restored work: no claim (§9.2, step 4).
+    const untouched = step === 'intro' && record.confirmed === null && !draftChanged(record.draft, freshDraft(manifest));
+    restoredNotice = restoreTarget === null && !untouched;
   }
 
   function setStep(next: Step): void {
@@ -806,6 +816,6 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     else if (found.kind === 'restore') applyRecord(found.record);
   }
   render();
-  if ((step as Step) === 'movement' && draft.mode === 'offset') void ensureRegression();
+  if (((step as Step) === 'movement' || (step as Step) === 'review') && draft.mode === 'offset') void ensureRegression();
   if (restoreTarget) void restoreResults();
 }

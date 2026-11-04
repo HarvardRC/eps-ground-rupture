@@ -454,14 +454,24 @@ through the ordinary pipeline, with the regression in offset mode.
 `navigationVersion` cancellation applies, and a failure or
 interruption offers **Retry restoring results** while Results stays
 unavailable. `Restored the work in this tab.` (`role="status"`)
-appears only after a restore completes and clears on the next
-navigation or edit. An unreadable or version-mismatched record
+appears only after a restore completes, never for an untouched
+introduction, and clears on the next navigation or edit. An unreadable or version-mismatched record
 leaves the introduction with its explanation and only **Start a new
 scenario**. The record stays untouched until that choice clears it.
-The DDD names no wording for the unreadable case. The page says `The
-work saved in this tab could not be read.`, and both cases add `Your
-earlier choices have not been restored.` Unavailable storage, or a
-failed save, keeps the first-version behavior and wording. The
+Implementation choices where the DDD names no wording or control:
+
+- the unreadable-case text `The work saved in this tab could not be
+  read.`, with `Your earlier choices have not been restored.` added in
+  both cases;
+- the **Retry restoring results** control as the §7 retry affordance
+  for a restore. A restore cancelled by navigation stays recoverable
+  and reports `Restoring the results was interrupted.`;
+- `Recalculating the results of your confirmed scenario…` while busy.
+
+Unavailable storage, or a failed save, keeps the first-version
+behavior and wording. A failed save also clears any older record, so
+a reload starts fresh as that wording says. A reload on Review in
+offset mode loads the conversion, as on Movement. The
 introduction, supporting aside, and static fallback in `explore.md`
 carry the new continuity sentence. No `beforeunload` prompt was
 added.
@@ -486,7 +496,10 @@ At this verification:
   agreement passed; traceability linted 491 rows with no gaps.
 
 A disposable Playwright script drove the strict preview build with
-the pinned data. All 45 checks passed; the script was not committed.
+the pinned data. All 47 checks passed; the script was not committed.
+An independent review found the untouched-introduction claim, the
+stale record after a late save failure, and the missing Review
+conversion; their repairs are included and checked.
 They covered:
 
 - the new intro and aside wording, with no notice on a first visit;
@@ -512,6 +525,11 @@ They covered:
 - a throwing `setItem` and an unavailable `sessionStorage`, each
   keeping the earlier wording, starting fresh after reload, and
   raising no page error;
+- a save failing after three successful ones, which cleared the
+  older record; the reload started fresh without a claim;
+- a reload of an untouched introduction claiming nothing, and a
+  Review-step reload in offset mode showing the conversion and its
+  30° coverage warning;
 - the blocked introduction at 320 px without horizontal overflow.
 
 The Back navigation reported navigation type `back_forward`, a
@@ -519,6 +537,12 @@ reload rather than a Back/Forward-cache restoration. The
 `persisted` `pageshow` remount was therefore reviewed in source but
 not exercised. Touch and other engines were not checked; G-12 adds
 the committed spec.
+
+As the DDD designs it, the restore runs on any mount in the tab. A
+return to `/explore/` in the same tab through a site link therefore
+also restores, and the copy says the work stays in the tab. This is
+recorded for the owner's awareness against the PDD's "later visit"
+wording; no product decision was changed.
 
 ## Separate CI investigation
 
