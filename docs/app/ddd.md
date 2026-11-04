@@ -9062,8 +9062,8 @@ phases of
    publication builds the site checks hook removes it from
    `sitemap.xml` and fails the build when any other page links to it,
    unless that page is itself published unlisted (owner ruling,
-   2026-11-05; arm (d), below); its results header shows the prototype notice
-   ([§5.8](#58-view-layer));
+   2026-11-05; arm (d), below); its results header shows the
+   prototype notice ([§5.8](#58-view-layer));
 3. *activated* (Phase 2, the public release): nav entry, search and
    sitemap inclusion, no prototype notice — the activation commit
    below.

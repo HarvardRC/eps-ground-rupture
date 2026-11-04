@@ -370,7 +370,8 @@ serious `color-contrast` violation on `.md-top` in the existing
 explorer's incompatible-settings decision. It failed identically on
 the unchanged base `7581b80`, where T-54 had recorded 152 passes,
 so G-08 did not cause it. It is a legacy-page spec outside this
-increment and remains open for the owner before the T-54 rerun.
+increment, reported to the owner as a T-54 rerun item rather than a
+G-08 question.
 
 ## Separate CI investigation
 
