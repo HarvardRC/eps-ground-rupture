@@ -20,7 +20,7 @@ import { statsRows, unclassifiedLine } from '../views/stats-table';
 import { computeResult } from './compute';
 import { DEFINITIONS, type DefinitionKey } from './glossary';
 import { classifySession, clearSession, loadSession, saveSession, type DisplayChoices, type SessionRecord } from './session';
-import { cloneDraft, draftChanged, freshDraft, offsetShortcut, sampleDraft, sedimentGroup, stepDecimal, validateDraft, type Draft, type Issue, type SampleId, type Step } from './state';
+import { cloneDraft, draftChanged, freshDraft, offsetShortcut, isSampleId, sampleDraft, sedimentGroup, stepDecimal, validateDraft, type Draft, type Issue, type SampleId, type Step } from './state';
 
 export interface ExplorerOptions {
   vintage: Vintage;
@@ -740,7 +740,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       const chart = target.dataset.chart as 'histogram' | 'cumulative' | undefined;
       if (chart) { display = { ...display, view: { ...display.view, [display.measurement]: chart } }; render(); return; }
       const action = target.dataset.action;
-      const sample = target.dataset.sample === 'illustrative' || target.dataset.sample === 'kern' ? target.dataset.sample : null;
+      const sample = isSampleId(target.dataset.sample) ? target.dataset.sample : null;
       if (action === 'sample' && sample) {
         // Fill silently only over an untouched fresh draft with nothing confirmed.
         if (confirmed === null && !draftChanged(draft, freshDraft(manifest))) useSample(sample);

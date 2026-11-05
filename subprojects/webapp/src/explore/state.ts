@@ -46,6 +46,16 @@ export function sedimentGroup(set: string): string {
 /** The named samples of the introduction's chooser (PDD D-42; guided DDD §10.1). */
 export type SampleId = 'illustrative' | 'kern';
 
+/** Each sample's values; the Record type makes every SampleId carry its own. */
+const SAMPLE_VALUES: Record<SampleId, { dips: number[]; depth: number; density: string; strength: string; offsetMax: string }> = {
+  illustrative: { dips: [30, 40], depth: 5, density: 'Dense', strength: 'Strong', offsetMax: '3' },
+  kern: { dips: [60, 70], depth: 10, density: 'Medium', strength: 'Moderate', offsetMax: '1.3' },
+};
+
+/** Narrow an untrusted string, such as a `data-sample` attribute, to a SampleId. */
+export const isSampleId = (value: unknown): value is SampleId =>
+  typeof value === 'string' && Object.prototype.hasOwnProperty.call(SAMPLE_VALUES, value);
+
 /**
  * A named sample draft (PDD D-37 and D-42; guided DDD §§9.1, 10.1).
  *
@@ -64,18 +74,16 @@ export type SampleId = 'illustrative' | 'kern';
 export function sampleDraft(manifest: Manifest, sample: SampleId): Draft {
   const columns = manifest.trialColumns;
   const member = <T>(values: readonly T[], value: T, label: string): T => {
-    if (!values.includes(value)) throw new Error(`Sample inputs: this data release has no ${label}.`);
+    if (!values.includes(value)) throw new Error(`Sample: this data release has no ${label}.`);
     return value;
   };
   const sediments = (strength: string): Draft['sediment'] => (['Uniform', 'Layered'] as const).map(group => {
     const pairs = manifest.armStrengthStates.filter(pair =>
       sedimentGroup(pair.set) === `${group} sediment` && pair.sedimentStrength === strength);
-    if (pairs.length !== 1) throw new Error(`Sample inputs: this data release has no single ${group}: ${strength} sediment.`);
+    if (pairs.length !== 1) throw new Error(`Sample: this data release has no single ${group}: ${strength} sediment.`);
     return { set: pairs[0].set, sedimentStrength: pairs[0].sedimentStrength };
   }).sort(compareSedimentPairs);
-  const spec = sample === 'kern'
-    ? { dips: [60, 70], depth: 10, density: 'Medium', strength: 'Moderate', offsetMax: '1.3' }
-    : { dips: [30, 40], depth: 5, density: 'Dense', strength: 'Strong', offsetMax: '3' };
+  const spec = SAMPLE_VALUES[sample];
   return {
     ...freshDraft(manifest),
     faultDip: spec.dips.map(dip => member(columns.fault_dip, dip, `${dip}° fault angle`)),

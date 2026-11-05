@@ -11,6 +11,7 @@ import {
   draftChanged,
   freshDraft,
   offsetShortcut,
+  isSampleId,
   sampleDraft,
   sedimentGroup,
   stepDecimal,
@@ -371,5 +372,13 @@ describe('sample inputs (guided DDD §§9.1, 10.1)', () => {
     assert.deepEqual(sampleDraft(no70, 'illustrative').faultDip, [30, 40]);
     const no30: Manifest = { ...manifest, trialColumns: { ...manifest.trialColumns, fault_dip: manifest.trialColumns.fault_dip.filter(v => v !== 30) } };
     assert.deepEqual(sampleDraft(no30, 'kern').faultDip, [60, 70]);
+  });
+});
+
+describe('sample identifiers', () => {
+  test('isSampleId accepts exactly the named samples', () => {
+    assert.equal(isSampleId('illustrative'), true);
+    assert.equal(isSampleId('kern'), true);
+    for (const other of [undefined, null, '', 'Kern', 'toString', '__proto__', 'constructor', 1]) assert.equal(isSampleId(other), false);
   });
 });
