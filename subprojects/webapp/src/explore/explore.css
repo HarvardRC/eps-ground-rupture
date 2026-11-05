@@ -326,14 +326,15 @@
 #gre-explore .gx-readiness { margin-top: 22px; }
 #gre-explore .gx-still-needed { margin: 0; color: var(--gx-muted); }
 #gre-explore .gx-issue-summary { padding: 14px 18px; border: 2px solid var(--gx-danger); border-left-width: 6px; border-radius: 8px; background: var(--gx-paper); }
-#gre-explore .gx-issue-summary p { margin: 0 0 6px; font-weight: 650; color: var(--gx-danger); }
+#gre-explore .gx-issue-summary h3 { margin: 0 0 6px; font-size: .9rem; font-weight: 650; letter-spacing: 0; color: var(--gx-danger); }
 #gre-explore .gx-issue-summary ul { margin: 0; padding-left: 1.2em; }
 #gre-explore .gx-issue-summary, #gre-explore fieldset[tabindex="-1"] { scroll-margin-top: 80px; }
 #gre-explore fieldset[tabindex="-1"]:focus:not(:focus-visible) { outline: none; }
-#gre-explore .gx-site-group.gx-invalid { border: 2px solid var(--gx-danger); border-left-width: 6px; }
+#gre-explore .gx-site-group.gx-invalid { border-color: var(--gx-danger); box-shadow: 0 0 0 1px var(--gx-danger), inset 5px 0 0 var(--gx-danger); }
 #gre-explore #gx-group-scarpClass.gx-invalid { border-left: 6px solid var(--gx-danger); padding-left: 14px; }
 /* The step list is a sequence indicator: entries not yet open are plain text, not disabled controls. */
 #gre-explore .gx-steps .gx-step-entry { display: flex; gap: 8px; align-items: center; padding: 9px 10px; color: var(--gx-muted); font-size: .8rem; }
+#gre-explore .gx-steps .gx-step-entry[aria-current="step"] { color: var(--gx-accent); font-weight: 700; background: #ece1df; border-radius: 6px; }
 #gre-explore .gx-steps .gx-step-entry span { border: 1px dashed currentColor; border-radius: 50%; width: 23px; height: 23px; display: grid; place-items: center; font-size: .7rem; }
 @media (max-width: 680px) {
   #gre-explore .gx-steps .gx-step-entry { padding: 7px; gap: 5px; }

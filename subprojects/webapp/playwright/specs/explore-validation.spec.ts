@@ -36,9 +36,12 @@ test('incomplete site conditions: the Still-needed line, then a focused summary 
   await setChecked(page, '#gx-faultDip-0', false);
   await expect(line).toHaveText('Still needed: Fault angle · Sediment depth · Sediment density · Sediment strength and structure.');
   // Each name moves focus to its group, without leaving the step.
+  const url = page.url();
   await line.getByRole('link', { name: 'Sediment density' }).click();
   await expect(page.locator('#gx-group-density')).toBeFocused();
   await expect(heading(page)).toHaveText(SITE_HEADING);
+  // Not a navigation: the theme's instant navigation never sees the fragment.
+  expect(page.url()).toBe(url);
 
   // The forward action stays enabled; an unsuccessful click answers with a
   // visible summary that takes the focus, not the first Select all.
@@ -47,7 +50,8 @@ test('incomplete site conditions: the Still-needed line, then a focused summary 
   await forward.click();
   await expect(heading(page)).toHaveText(SITE_HEADING);
   await expect(summary).toBeFocused();
-  await expect(summary.locator('p')).toHaveText('Choose values for 4 conditions before continuing.');
+  await expect(page.getByRole('group', { name: 'Choose values for 4 conditions before continuing.' })).toHaveCount(1);
+  await expect(summary.getByRole('heading')).toHaveText('Choose values for 4 conditions before continuing.');
   await expect(summary.getByRole('link')).toHaveText(['Fault angle', 'Sediment depth', 'Sediment density', 'Sediment strength and structure']);
   await expect(line).toHaveCount(0);
   for (const [group, message] of [
@@ -69,7 +73,7 @@ test('incomplete site conditions: the Still-needed line, then a focused summary 
   await setChecked(page, '#gx-faultDip-0', true);
   await expect(page.locator('#gx-error-faultDip')).toBeHidden();
   await expect(page.locator('#gx-group-faultDip')).not.toHaveClass(/gx-invalid/);
-  await expect(summary.locator('p')).toHaveText('Choose values for 3 conditions before continuing.');
+  await expect(summary.getByRole('heading')).toHaveText('Choose values for 3 conditions before continuing.');
   await summary.getByRole('link', { name: 'Sediment depth' }).click();
   await expect(page.locator('#gx-group-depth')).toBeFocused();
   // Another attempt focuses the summary again.
@@ -77,8 +81,14 @@ test('incomplete site conditions: the Still-needed line, then a focused summary 
   await expect(summary).toBeFocused();
   await setChecked(page, '#gx-depth-all', true);
   await setChecked(page, '#gx-density-all', true);
-  await expect(summary.locator('p')).toHaveText('Choose a value for 1 condition before continuing.');
+  await expect(summary.getByRole('heading')).toHaveText('Choose a value for 1 condition before continuing.');
   await expect(summary.getByRole('link')).toHaveText(['Sediment strength and structure']);
+  // Leaving the step ends the attempt: coming back shows the neutral line again.
+  await action(page, 'Back').click();
+  await action(page, 'Build your scenario').click();
+  await expect(summary).toHaveCount(0);
+  await expect(page.locator('#gre-explore .gx-invalid')).toHaveCount(0);
+  await expect(line).toHaveText('Still needed: Sediment strength and structure.');
   await setChecked(page, '#gx-sediment-all', true);
   await expect(summary).toHaveCount(0);
   await expect(line).toHaveCount(0);
@@ -116,12 +126,13 @@ test('movement entries route review back to the first invalid field', async ({ p
   const line = page.locator('.gx-still-needed');
   const summary = page.locator('#gx-issue-summary');
   await expect(line).toHaveText('Still needed: Maximum fault slip.');
-  await expect(page.locator('#gx-slipMax')).not.toHaveAttribute('aria-invalid', 'true');
+  await expect(page.locator('#gre-explore [aria-invalid="true"]')).toHaveCount(0);
+  await expect(page.locator('#gre-explore .gx-field-error:visible')).toHaveCount(0);
 
   await action(page, 'Review scenario').click();
   await expect(heading(page)).toHaveText(MOVEMENT_HEADING);
   await expect(summary).toBeFocused();
-  await expect(summary.locator('p')).toHaveText('Choose a value for 1 condition before continuing.');
+  await expect(summary.getByRole('heading')).toHaveText('Choose a value for 1 condition before continuing.');
   // A single numeric field keeps its own invalid mark (§12.1).
   await expect(page.locator('#gx-slipMax')).toHaveAttribute('aria-invalid', 'true');
   await expect(page.locator('#gx-error-slipMax')).toHaveText('Enter the maximum fault slip in metres.');
@@ -141,9 +152,13 @@ test('movement entries route review back to the first invalid field', async ({ p
   await action(page, 'Review scenario').click();
   await expect(page.locator('#gx-error-slipMax')).toHaveText('Maximum slip must be at least the minimum slip.');
   await expect(summary).toBeFocused();
-  await typeEntry(page, 'slipMax', '3');
+  // Correcting the other end clears the message it corrected, at once.
+  await typeEntry(page, 'slipMin', '0.5');
+  await expect(page.locator('#gx-error-slipMax')).toBeHidden();
+  await expect(page.locator('#gx-slipMax')).not.toHaveAttribute('aria-invalid', 'true');
+  await expect(summary).toHaveCount(0);
   await expect(line).toHaveCount(0);
-  await typeEntry(page, 'slipMax', '1');
+  await typeEntry(page, 'slipMin', '2');
 
   // Back on Site, the step's own route forward still validates first.
   await stepButton(page, 'site').click();

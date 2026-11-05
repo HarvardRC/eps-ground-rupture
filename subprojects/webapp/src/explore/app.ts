@@ -428,7 +428,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   }
 
   function conditionLink(field: string): string {
-    return `<a href="#${conditionTarget(field)}" data-condition="${field}">${escape(CONDITION_NAMES[field] ?? field)}</a>`;
+    return `<a href="#${conditionTarget(field)}" id="gx-need-${field}" data-condition="${field}">${escape(CONDITION_NAMES[field] ?? field)}</a>`;
   }
 
   /**
@@ -436,16 +436,17 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
    * attempt, the summary of that attempt's conditions, which shrinks as each
    * is corrected; otherwise the neutral line naming what is still needed.
    */
-  function readinessBody(scope: Step): string {
-    const attempted = unfinished(issues, scope);
-    if (attempted.length) return `<div class="gx-issue-summary" id="gx-issue-summary" tabindex="-1" role="group" aria-labelledby="gx-issue-summary-title"><p id="gx-issue-summary-title">${escape(summaryTitle(attempted.length))}</p><ul>${attempted.map(field => `<li>${conditionLink(field)}</li>`).join('')}</ul></div>`;
-    const needed = unfinished(validateDraft(draft, manifest).issues, scope);
+  function readinessBody(scope: Step, only?: string): string {
+    const attempted = unfinished(issues, scope).filter(field => !only || field === only);
+    if (attempted.length) return `<div class="gx-issue-summary" id="gx-issue-summary" tabindex="-1" role="group" aria-labelledby="gx-issue-summary-title"><h3 id="gx-issue-summary-title">${escape(summaryTitle(attempted.length))}</h3><ul>${attempted.map(field => `<li>${conditionLink(field)}</li>`).join('')}</ul></div>`;
+    const needed = unfinished(validateDraft(draft, manifest).issues, scope).filter(field => !only || field === only);
     return needed.length ? `<p class="gx-still-needed">${STILL_NEEDED} ${needed.map(conditionLink).join('<span aria-hidden="true"> · </span>')}.</p>` : '';
   }
 
-  function readiness(scope: Step): string {
-    const body = readinessBody(scope);
-    return `<div class="gx-readiness" data-scope="${scope}" data-body="${escape(body)}">${body}</div>`;
+  /** `only` limits a walkthrough stop to the one field it shows, so every link has its target on screen. */
+  function readiness(scope: Step, only?: string): string {
+    const body = readinessBody(scope, only);
+    return `<div class="gx-readiness" data-scope="${scope}"${only ? ` data-only="${only}"` : ''} data-body="${escape(body)}">${body}</div>`;
   }
 
   /** Typing does not re-render: the guidance updates in place when its content changes. */
@@ -453,7 +454,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     const slot = $('.gx-readiness');
     const scope = slot?.dataset.scope as Step | undefined;
     if (!slot || !scope) return;
-    const body = readinessBody(scope);
+    const body = readinessBody(scope, slot.dataset.only);
     if (slot.dataset.body !== body) { slot.innerHTML = body; slot.dataset.body = body; }
   }
 
@@ -468,7 +469,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       if (choice.group && choice.group !== lastGroup) { lastGroup = choice.group; prefix = `<h4 class="gx-choice-subheading">${escape(lastGroup)}</h4>`; }
       return `${prefix}<label class="gx-choice ${choice.selected ? 'gx-selected' : ''}"><input type="checkbox" id="gx-${field}-${choice.value}" data-choice="${field}" value="${choice.value}" ${choice.group ? `aria-label="${escape(choice.group)}: ${escape(choice.label)}"` : ''} ${choice.selected ? 'checked' : ''} aria-describedby="gx-error-${field}"><span>${escape(choice.label)}</span></label>`;
     }).join('');
-    return `<fieldset class="gx-site-group${issue(field) ? ' gx-invalid' : ''}" id="gx-group-${field}" tabindex="-1" aria-describedby="gx-error-${field}"><legend>${term(field, title)} <span class="gx-required">Required</span></legend><p>${hint} ${glossary(anchor)}</p><label class="gx-select-all"><input type="checkbox" id="gx-${field}-all" data-all="${field}" aria-describedby="gx-error-${field}" ${selectedCount === choices.length ? 'checked' : ''} data-mixed="${selectedCount > 0 && selectedCount < choices.length}"> Select all</label><div class="gx-choices">${content}</div>${issueHtml(field)}${selectedCount === 0 && !issue(field) ? '<p class="gx-hint">Choose one or more values to continue.</p>' : ''}${annotation(field)}</fieldset>`;
+    return `<fieldset class="gx-site-group${issue(field) ? ' gx-invalid' : ''}" id="gx-group-${field}" tabindex="-1"><legend>${term(field, title)} <span class="gx-required">Required</span></legend><p>${hint} ${glossary(anchor)}</p><label class="gx-select-all"><input type="checkbox" id="gx-${field}-all" data-all="${field}" aria-describedby="gx-error-${field}" ${selectedCount === choices.length ? 'checked' : ''} data-mixed="${selectedCount > 0 && selectedCount < choices.length}"> Select all</label><div class="gx-choices">${content}</div>${issueHtml(field)}${selectedCount === 0 && !issue(field) ? '<p class="gx-hint">Choose one or more values to continue.</p>' : ''}${annotation(field)}</fieldset>`;
   }
 
   function siteView(): string {
@@ -556,7 +557,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   }
 
   function scarpEditor(): string {
-    return `<fieldset id="gx-group-scarpClass"${issue('scarpClass') ? ' class="gx-invalid"' : ''} tabindex="-1" aria-describedby="gx-error-scarpClass"><legend>Which resulting ${term('scarpTypes', 'scarp types')}?</legend><p>Choose one or more types. These are simulated outcomes, not site inputs.</p>${issueHtml('scarpClass')}<label class="gx-select-all"><input type="checkbox" id="gx-scarpClass-all" data-all="scarpClass" aria-describedby="gx-error-scarpClass" ${draft.scarpClass.length === manifest.scarpClasses.length ? 'checked' : ''} data-mixed="${draft.scarpClass.length > 0 && draft.scarpClass.length < manifest.scarpClasses.length}"> Select all</label><div class="gx-types">${manifest.scarpClasses.map((name, i) => `<label class="gx-type"><input type="checkbox" id="gx-scarpClass-${i}" data-choice="scarpClass" value="${i}" ${draft.scarpClass.includes(name) ? 'checked' : ''} aria-describedby="gx-error-scarpClass"><span class="gx-type-name"><i style="background:${escape(manifest.scarpClassPalette[name])}" aria-hidden="true"></i>${escape(name)}</span><svg viewBox="0 0 110 38" aria-hidden="true"><path d="${SHAPES[i]?.[1] ?? SHAPES[0][1]}" fill="none" stroke="currentColor" stroke-width="2"/></svg><span class="gx-hint">${SHAPES[i]?.[0] ?? ''}</span></label>`).join('')}</div><p class="gx-hint">Profiles are schematic. ${glossary('scarp-classes', 'About scarp classes')}</p></fieldset>`;
+    return `<fieldset id="gx-group-scarpClass"${issue('scarpClass') ? ' class="gx-invalid"' : ''} tabindex="-1"><legend>Which resulting ${term('scarpTypes', 'scarp types')}?</legend><p>Choose one or more types. These are simulated outcomes, not site inputs.</p>${issueHtml('scarpClass')}<label class="gx-select-all"><input type="checkbox" id="gx-scarpClass-all" data-all="scarpClass" aria-describedby="gx-error-scarpClass" ${draft.scarpClass.length === manifest.scarpClasses.length ? 'checked' : ''} data-mixed="${draft.scarpClass.length > 0 && draft.scarpClass.length < manifest.scarpClasses.length}"> Select all</label><div class="gx-types">${manifest.scarpClasses.map((name, i) => `<label class="gx-type"><input type="checkbox" id="gx-scarpClass-${i}" data-choice="scarpClass" value="${i}" ${draft.scarpClass.includes(name) ? 'checked' : ''} aria-describedby="gx-error-scarpClass"><span class="gx-type-name"><i style="background:${escape(manifest.scarpClassPalette[name])}" aria-hidden="true"></i>${escape(name)}</span><svg viewBox="0 0 110 38" aria-hidden="true"><path d="${SHAPES[i]?.[1] ?? SHAPES[0][1]}" fill="none" stroke="currentColor" stroke-width="2"/></svg><span class="gx-hint">${SHAPES[i]?.[0] ?? ''}</span></label>`).join('')}</div><p class="gx-hint">Profiles are schematic. ${glossary('scarp-classes', 'About scarp classes')}</p></fieldset>`;
   }
 
   function refinementsView(): string {
@@ -584,7 +585,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   }
 
   function guideEditor(): string {
-    return `<section class="gx-guide-editor"><p class="gx-guide-draft"><strong>Draft choices.</strong> Review changes before applying them. Results keep the confirmed settings until you choose Show results.</p>${guideIndex === 3 ? populationEditor() : scarpEditor()}${readiness('results')}</section>`;
+    return `<section class="gx-guide-editor"><p class="gx-guide-draft"><strong>Draft choices.</strong> Review changes before applying them. Results keep the confirmed settings until you choose Show results.</p>${guideIndex === 3 ? populationEditor() : scarpEditor()}${readiness('results', guideIndex === 3 ? 'population' : 'scarpClass')}</section>`;
   }
 
   function moveGuide(index: 0 | 1 | 2 | 3 | 4): void {
@@ -878,6 +879,8 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     if (next === 'results' && !result) return;
     if (next !== 'results') guideIndex = null;
     invalidate(); restoredNotice = false; logOffNotice = false;
+    // Leaving a step ends its attempt: coming back shows the neutral line, not the old summary (§12.1).
+    issues = issues.filter(item => item.step !== step);
     step = next; reached.add(next); generalError = ''; alert.textContent = ''; render('gx-heading', true);
     if (next === 'movement' && draft.mode === 'offset') void ensureRegression();
   }
@@ -916,8 +919,11 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     // summary near the forward action names every condition (§12.1).
     alert.textContent = '';
     render('gx-issue-summary', true);
-    // A step without a summary slot (the review step) still keeps the reader oriented.
-    if (!$('#gx-issue-summary')) $('#gx-heading')?.focus({ preventScroll: true });
+    // A step without a summary slot (the review step) still says what is wrong.
+    if (!$('#gx-issue-summary')) {
+      $('#gx-heading')?.focus({ preventScroll: true });
+      alert.textContent = [...new Set(found.map(item => item.message))].join(' ');
+    }
   }
 
   async function goReview(): Promise<void> {
@@ -1040,7 +1046,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       // The theme's instant navigation would treat the fragment as a page
       // change and remount the explorer; the link stays within the step.
       event.preventDefault(); event.stopPropagation(); closeHelp();
-      const goal = $(conditionLink.getAttribute('href') ?? '');
+      const goal = document.getElementById(conditionTarget(conditionLink.dataset.condition ?? ''));
       goal?.scrollIntoView({ block: 'start' });
       goal?.focus({ preventScroll: true });
       return;
@@ -1205,8 +1211,16 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     if (input.dataset.number) {
       invalidate();
       const field = input.dataset.number as 'slipMin' | 'slipMax' | 'offsetMax';
-      draft[field] = input.value; issues = issues.filter(item => item.field !== field);
-      input.removeAttribute('aria-invalid'); const error = $(`#gx-error-${field}`); if (error) { error.hidden = true; error.textContent = ''; }
+      // The edited field's message clears at once (§12.1), and so does any other
+      // movement message the edit has corrected (lowering the minimum below the maximum).
+      draft[field] = input.value;
+      const holding = validateDraft(draft, manifest).issues;
+      issues = issues.filter(item => item.field !== field && (item.step !== 'movement' || holding.some(h => h.field === item.field && h.message === item.message)));
+      for (const name of ['slipMin', 'slipMax', 'offsetMax'] as const) {
+        if (issue(name)) continue;
+        $(`#gx-${name}`)?.removeAttribute('aria-invalid');
+        const error = $(`#gx-error-${name}`); if (error) { error.hidden = true; error.textContent = ''; }
+      }
       refreshMovementFeedback();
       checkSampleFill();
       refreshAnnotations();

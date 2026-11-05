@@ -85,8 +85,14 @@ test('an empty type selection ends the guide at review and focuses the summary',
   for (let i = 0; i < 4; i++) await page.locator('.gx-guide-header .gx-guide-nav .gx-primary').click();
   await setChecked(page, '#gx-scarpClass-all', false);
   await expect(page.locator('.gx-guide-header .gx-guide-nav .gx-primary')).toHaveText('Review changes');
-  // The stop's own guidance names the condition before the attempt (§12.1).
+  // The stop's own guidance names the condition before the attempt (§12.1);
+  // the stages stop names only what it shows, so no link lacks its target.
   await expect(page.locator('.gx-guide-editor .gx-still-needed')).toHaveText('Still needed: Scarp types.');
+  await page.locator('.gx-guide-header .gx-guide-nav').getByRole('button', { name: 'Back' }).click();
+  await expect(page.locator('.gx-guide-editor .gx-still-needed')).toHaveCount(0);
+  await page.locator('.gx-guide-header .gx-guide-nav .gx-primary').click();
+  await page.locator('.gx-guide-editor .gx-still-needed').getByRole('link', { name: 'Scarp types' }).click();
+  await expect(page.locator('#gx-group-scarpClass')).toBeFocused();
   await page.locator('.gx-guide-header .gx-guide-nav .gx-primary').click();
   await expect(page.locator('.gx-guide-header')).toHaveCount(0);
   await expect(heading(page)).toHaveText(RESULTS_HEADING);
