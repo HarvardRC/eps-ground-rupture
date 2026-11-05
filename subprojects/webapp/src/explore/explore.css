@@ -61,10 +61,16 @@
 #gre-explore .gx-restart { margin-top: 24px; }
 #gre-explore .gx-intro-actions { justify-content: flex-start; }
 #gre-explore .gx-intro-actions .gx-hint { margin: 0; }
-#gre-explore .gx-sample-choice { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-#gre-explore .gx-sample-choice > span { font-size: .8rem; color: var(--gx-muted); }
-#gre-explore .gx-sample-confirm { padding: 17px; border: 1px solid #bc966b; background: #fff5df; border-radius: 7px; }
-#gre-explore .gx-sample-confirm p { font-size: .8rem; }
+#gre-explore .gx-sample-list { flex: 1 0 100%; margin: 0; padding: 6px; list-style: none; border: 1px solid #bfb7ac; border-radius: 7px; background: var(--gx-paper); box-shadow: 0 6px 18px rgb(40 39 39 / .12); }
+#gre-explore .gx-sample-list [role="option"] { display: block; padding: 10px 12px; border-radius: 5px; cursor: pointer; }
+#gre-explore .gx-sample-list [role="option"]:hover, #gre-explore .gx-sample-list [aria-selected="true"] { background: #ece1df; }
+#gre-explore .gx-option-name { display: block; font-weight: 650; font-size: .8rem; }
+#gre-explore .gx-option-descriptor { display: block; color: var(--gx-muted); font-size: .8rem; }
+#gre-explore .gx-sample-dialog { width: min(34rem, calc(100vw - 32px)); padding: 24px; border: 1px solid #bc966b; border-radius: 10px; background: var(--gx-paper); color: var(--gx-ink); }
+#gre-explore .gx-sample-dialog::backdrop { background: rgb(40 39 39 / .45); }
+#gre-explore .gx-sample-dialog h2 { font-size: 1rem; margin-bottom: 18px; }
+#gre-explore .gx-dialog-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+#gre-explore .gx-sample-active { margin: 0 0 18px; }
 #gre-explore .gx-sample-status { margin: 0 0 18px; padding: 10px 15px; border-left: 3px solid #bc966b; background: #fff5df; font-size: .8rem; }
 #gre-explore .gx-sample-story { margin: 0 0 18px; padding: 10px 15px; border: 1px solid var(--gx-line); border-radius: 7px; font-size: .8rem; }
 #gre-explore .gx-sample-story > summary { cursor: pointer; font-weight: 600; }

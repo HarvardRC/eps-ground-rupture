@@ -21,7 +21,7 @@ import { computeResult } from './compute';
 import { DEFINITIONS, type DefinitionKey } from './glossary';
 import { classifySession, clearSession, loadSession, saveSession, type DisplayChoices, type SessionRecord } from './session';
 import { STORIES, type StoryLink } from './stories';
-import { cloneDraft, draftChanged, freshDraft, offsetShortcut, isSampleId, sampleDraft, sedimentGroup, stepDecimal, validateDraft, type Draft, type Issue, type SampleId, type Step } from './state';
+import { cloneDraft, draftChanged, freshDraft, holdsSample, offsetShortcut, isSampleId, sampleDraft, sedimentGroup, stepDecimal, validateDraft, type Draft, type Issue, type SampleId, type Step } from './state';
 
 export interface ExplorerOptions {
   vintage: Vintage;
@@ -58,12 +58,17 @@ const glossary = (anchor: string, label = 'Read the glossary'): string => link(`
 const help = (title: string, text: string, anchor: string): string => `<details class="gx-help"><summary>${escape(title)}</summary><p>${escape(text)} ${glossary(anchor)}</p></details>`;
 const term = (key: DefinitionKey, label: string): string => `<button type="button" class="gx-term" data-explain="${key}" data-glossary-source="${DEFINITIONS[key].source}" aria-label="${escape(label)}: explanation">${escape(label)}</button>`;
 const button = (action: string, label: string, primary = false, extra = ''): string => `<button type="button" class="gx-button${primary ? ' gx-primary' : ''}" data-action="${action}" ${extra}>${label}</button>`;
-/** The chooser's sample names (guided DDD §10.1), used in the question and the status line after "the". */
-const SAMPLES: readonly { id: SampleId; label: string; name: string }[] = [
-  { id: 'illustrative', label: 'Illustrative sample', name: 'illustrative sample' },
-  { id: 'kern', label: 'Kern County 1952 sample', name: 'Kern County 1952 sample' },
+/**
+ * The prefilled samples by scale (PDD D-43; guided DDD §10.3): each option's
+ * label and one-line descriptor, and the scale name the question and the
+ * prefill notice use after "the".
+ */
+const SAMPLES: readonly { id: SampleId; label: string; descriptor: string; name: string }[] = [
+  { id: 'illustrative', label: 'Chi-Chi scale — shallow fault (30°/40°)', descriptor: 'Up to 3 m of surface offset or 3–5 m of fault slip, at the scale of the 1999 Chi-Chi earthquake.', name: 'Chi-Chi scale' },
+  { id: 'kern', label: 'Kern County 1952 scale — steep fault (60°/70°)', descriptor: 'Up to 1.3 m of surface offset or 1.6–1.9 m of fault slip, at the scale of the 1952 Kern County earthquake.', name: 'Kern County 1952 scale' },
 ];
 const sampleName = (id: SampleId): string => SAMPLES.find(sample => sample.id === id)!.name;
+const sampleNotice = (id: SampleId): string => `Prefilled with the ${sampleName(id)} values. This is an illustration — change anything you wish.`;
 const populationName = (population: string): string => population === 'one_state_per_trial' ? 'Last stage within the slip range' : 'All stages within the slip range';
 const sedimentName = (pair: SedimentPair): string => `${sedimentGroup(pair.set).replace(' sediment', '')}: ${pair.sedimentStrength}`;
 
@@ -81,10 +86,14 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   let refineOpen = false;
   let guideIndex: 0 | 1 | 2 | 3 | 4 | null = null;
   let exampleOpen = false;
-  // Sample-input presentation state (guided DDD §9.1), never part of Draft.
-  // Each holds the sample's identity so the question, the fill, and the status line name the one chosen.
+  // Sample presentation state (guided DDD §§9.1, 10.3), never part of Draft.
+  // `sampleAsk` is the sample the replacement dialog asks about; `sampleFill`
+  // the standing fill behind the prefill notice, dropped at the first draft
+  // edit; `sampleWalk` keeps Site conditions sequential after a fill until a
+  // later step is reached.
   let sampleAsk: SampleId | null = null;
-  let sampleArrived: SampleId | null = null;
+  let sampleFill: { id: SampleId; values: Draft } | null = null;
+  let sampleWalk = false;
   // The story disclosure's open state across re-renders of Site conditions (§10.2); every fill starts closed.
   let storyOpen = false;
   // Same-tab continuity (guided DDD §9.2). `continuity` turns off for the
@@ -222,19 +231,82 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     return `${heading('Use simulations to understand ground rupture.', 'Describe the site conditions and fault movement you want to investigate, then see the simulated results.')}<p class="gx-research">This is a research tool; it does not predict what will happen at a particular site.</p><div class="gx-intro-grid"><div><h3>Describe your assumptions</h3><p>Choose the modeled site conditions and fault movement you want to investigate.</p></div><div><h3>Review your scenario</h3><p>Check your choices and see whether the simulations cover your movement range.</p></div><div><h3>Understand the results</h3><p>Explore scarp height, deformation-zone width, and scarp dip, then download the matching records.</p></div></div><p>Results come from an existing set of research simulations. This page does not run a new simulation.</p><p class="gx-session-note">${continuity ? KEPT_IN_TAB : 'Your choices are kept while this page remains open. Reloading or leaving and returning starts a new draft.'}</p>${introActions()}`;
   }
 
-  /** The introduction's actions, the unrestorable-record choice (§9.2), or the inline sample-replacement question (§9.1). */
+  /**
+   * The introduction's actions — Build your scenario and the Try a prefilled
+   * sample listbox (§10.3) — or the unrestorable-record choice (§9.2). The
+   * listbox renders closed; opening and closing it never re-renders.
+   */
   function introActions(): string {
     if (blocked) return `<div class="gx-footer gx-warning gx-restore-blocked"><p>${blocked === 'data-changed' ? 'The data release changed since this tab last used it.' : 'The work saved in this tab could not be read.'} Your earlier choices have not been restored.</p><div>${button('new', 'Start a new scenario', true, 'id="gx-restore-new"')}</div></div>`;
-    if (sampleAsk) return `<div class="gx-footer gx-sample-confirm" role="group" aria-labelledby="gx-sample-question"><p id="gx-sample-question" tabindex="-1"><strong>Replace your current choices with the ${escape(sampleName(sampleAsk))}?</strong></p><div>${button('sample-use', 'Use the sample', true, `data-sample="${sampleAsk}"`)}${button('sample-keep', 'Keep my choices', false, `data-sample="${sampleAsk}"`)}</div></div>`;
-    const samples = SAMPLES.map(sample => button('sample', escape(sample.label), false, `id="gx-sample-${sample.id}" data-sample="${sample.id}" aria-describedby="gx-sample-hint"`)).join('');
-    return `<footer class="gx-footer gx-intro-actions"><div>${button('start', 'Build your scenario', true)}<div class="gx-sample-choice" role="group" aria-labelledby="gx-sample-label"><span id="gx-sample-label">Try a sample:</span>${samples}</div></div><p id="gx-sample-hint" class="gx-hint">Sample values, not recommended site values.</p></footer>`;
+    const options = SAMPLES.map(sample => `<li role="option" id="gx-sample-${sample.id}" data-sample="${sample.id}" tabindex="-1" aria-selected="false" aria-labelledby="gx-sample-${sample.id}-name" aria-describedby="gx-sample-${sample.id}-descriptor"><span class="gx-option-name" id="gx-sample-${sample.id}-name">${escape(sample.label)}</span><span class="gx-option-descriptor" id="gx-sample-${sample.id}-descriptor">${escape(sample.descriptor)}</span></li>`).join('');
+    return `<footer class="gx-footer gx-intro-actions"><div>${button('start', 'Build your scenario', true)}${button('sample-menu', 'Try a prefilled sample <span aria-hidden="true">⌄</span>', false, 'id="gx-sample-trigger" aria-haspopup="listbox" aria-expanded="false" aria-controls="gx-sample-list" aria-describedby="gx-sample-hint"')}</div><ul class="gx-sample-list" id="gx-sample-list" role="listbox" aria-labelledby="gx-sample-trigger" hidden>${options}</ul><p id="gx-sample-hint" class="gx-hint">Sample values, not recommended site values.</p></footer>${sampleAsk ? sampleDialog(sampleAsk) : ''}`;
+  }
+
+  /** The modal replacement question (§10.3): never a browser dialog; opened by `render`. */
+  function sampleDialog(id: SampleId): string {
+    return `<dialog class="gx-sample-dialog" id="gx-sample-dialog" aria-labelledby="gx-sample-question"><h2 id="gx-sample-question">Replace your current choices with the ${escape(sampleName(id))} values?</h2><div class="gx-dialog-actions">${button('sample-use', 'Use the sample', true, `id="gx-sample-use" data-sample="${id}"`)}${button('sample-keep', 'Keep my choices', false, `id="gx-sample-keep" data-sample="${id}"`)}</div></dialog>`;
+  }
+
+  const sampleList = () => $<HTMLUListElement>('#gx-sample-list');
+  const sampleOptions = () => [...shell.querySelectorAll<HTMLElement>('#gx-sample-list [role="option"]')];
+
+  /** Open the listbox in place with `index`'s option focused and selected. */
+  function openSampleList(index: number): void {
+    const list = sampleList(), options = sampleOptions();
+    if (!list || !options.length) return;
+    list.hidden = false;
+    $('#gx-sample-trigger')?.setAttribute('aria-expanded', 'true');
+    focusSampleOption(Math.max(0, Math.min(index, options.length - 1)));
+  }
+
+  function focusSampleOption(index: number): void {
+    sampleOptions().forEach((option, i) => option.setAttribute('aria-selected', String(i === index)));
+    sampleOptions()[index]?.focus();
+  }
+
+  function closeSampleList(returnFocus: boolean): void {
+    const list = sampleList();
+    if (!list || list.hidden) return;
+    list.hidden = true;
+    sampleOptions().forEach(option => option.setAttribute('aria-selected', 'false'));
+    const trigger = $('#gx-sample-trigger');
+    trigger?.setAttribute('aria-expanded', 'false');
+    if (returnFocus) trigger?.focus();
+  }
+
+  /** A chosen sample fills silently over an untouched fresh draft with nothing confirmed, and asks otherwise. */
+  function chooseSample(id: SampleId): void {
+    closeSampleList(false);
+    if (confirmed === null && !draftChanged(draft, freshDraft(manifest))) useSample(id);
+    else { sampleAsk = id; render('gx-sample-keep'); }
+  }
+
+  /** Keep my choices, Escape, or any other close of the dialog: nothing changes. */
+  function keepChoices(): void {
+    if (!sampleAsk) return;
+    sampleAsk = null; render('gx-sample-trigger');
   }
 
   /** Fill the whole draft with the named sample and open Site conditions; the confirmation, results, and walkthrough are untouched. */
   function useSample(id: SampleId): void {
-    const sample = sampleDraft(manifest, id);
-    draft = sample; issues = []; sampleAsk = null; sampleArrived = id; storyOpen = false;
+    draft = sampleDraft(manifest, id);
+    sampleFill = { id, values: cloneDraft(draft) }; sampleWalk = true;
+    issues = []; sampleAsk = null; storyOpen = false;
     setStep('site');
+    status.textContent = sampleNotice(id);
+  }
+
+  /** The prefill notice on both input steps (§10.3); the §10.2 story stays on Site conditions. */
+  function sampleNoticeView(): string {
+    if (!sampleFill) return '';
+    return `<div class="gx-sample-active"><p class="gx-sample-status">${escape(sampleNotice(sampleFill.id))}</p>${step === 'site' ? storyView(sampleFill.id) : ''}</div>`;
+  }
+
+  /** The first draft edit drops the fill and its notice; callers that do not re-render remove it in place. */
+  function checkSampleFill(): void {
+    if (!sampleFill || holdsSample(draft, sampleFill.values)) return;
+    sampleFill = null;
+    $('.gx-sample-active')?.remove();
   }
 
   /** The closed "About this sample" disclosure under the sample status line (guided DDD §10.2). */
@@ -260,7 +332,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   }
 
   function siteView(): string {
-    return `${heading('Describe the site conditions', 'Choose one or more values for each condition.')}${sampleArrived ? `<p class="gx-sample-status" role="status">Filled with the ${escape(sampleName(sampleArrived))}: sample values, not recommended site values. Change anything.</p>${storyView(sampleArrived)}` : ''}<div class="gx-site-grid">${siteGroup('faultDip', 'Fault angle', 'How steeply the fault is tilted, measured from horizontal.', 'fault-dip')}${siteGroup('depth', 'Sediment depth', 'The thickness of the sediment layer above the fault.', 'sediment-depth')}${siteGroup('density', 'Sediment density', 'How tightly the sediment is packed.', 'sediment-strength')}${siteGroup('sediment', 'Sediment strength and structure', 'Choose uniform material or a layered profile. You can include more than one possibility.', 'set')}</div><footer class="gx-footer">${button('intro', 'Back')}${reached.has('review') ? button('review', 'Return to review', true) : button('site-next', 'Continue to fault movement', true)}</footer>`;
+    return `${heading('Describe the site conditions', 'Choose one or more values for each condition.')}${sampleNoticeView()}<div class="gx-site-grid">${siteGroup('faultDip', 'Fault angle', 'How steeply the fault is tilted, measured from horizontal.', 'fault-dip')}${siteGroup('depth', 'Sediment depth', 'The thickness of the sediment layer above the fault.', 'sediment-depth')}${siteGroup('density', 'Sediment density', 'How tightly the sediment is packed.', 'sediment-strength')}${siteGroup('sediment', 'Sediment strength and structure', 'Choose uniform material or a layered profile. You can include more than one possibility.', 'set')}</div><footer class="gx-footer">${button('intro', 'Back')}${reached.has('review') && !sampleWalk ? button('review', 'Return to review', true) : `<div>${reached.has('review') ? button('review', 'Return to review') : ''}${button('site-next', 'Continue to fault movement', true)}</div>`}</footer>`;
   }
 
   function numeric(field: 'slipMin' | 'slipMax' | 'offsetMax', label: string, required: boolean): string {
@@ -275,7 +347,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
 
   function movementView(): string {
     const shortcut = regression ? offsetShortcut(draft.faultDip, regression, manifest.slipWindowBounds.max) : null;
-    return `${heading('Choose the assumed fault movement', 'Choose what you want to specify, then enter the range you want to investigate.')}<fieldset class="gx-modes"><legend>What are you specifying?</legend><label><input type="radio" id="gx-mode-slip" name="gx-mode" value="slip" ${draft.mode === 'slip' ? 'checked' : ''}><span><strong>Fault slip at depth</strong><span>The distance the fault moves underground.</span></span></label><label><input type="radio" id="gx-mode-offset" name="gx-mode" value="offset" ${draft.mode === 'offset' ? 'checked' : ''}><span><strong>Vertical surface offset</strong><span>The vertical difference across the rupture at the ground surface.</span></span></label></fieldset><p class="gx-hint">Your entries are kept when you switch modes.</p>${draft.mode === 'slip' ? `<section class="gx-movement"><h3>${term('slip', 'Fault-slip range')}</h3><p>Modeled fault slip: ${escape(manifest.slipWindowBounds.min)}–${escape(manifest.slipWindowBounds.max)} m. Stages are recorded about every ${displayRound(manifest.stageSpacing.mean, 2)} m of slip.</p>${help('What is fault slip?', 'Slip is how far the two blocks move past each other along the fault.', 'slip')}<div class="gx-number-row">${numeric('slipMin', 'Minimum', false)}${numeric('slipMax', 'Maximum', true)}</div>${button('slip-shortcut', 'Set maximum to 5 m')}</section>` : `<section class="gx-movement"><h3>${term('offset', 'Surface-offset range')}</h3><p>The range starts at 0 m and ends at the maximum you enter.</p>${help('How is surface offset related to fault slip?', 'Surface offset is a vertical difference at the ground surface. The app estimates a corresponding fault-slip range for each selected fault angle; raised surface ridges can make that estimate too large.', 'vertical-separation')}${numeric('offsetMax', 'Maximum', true)}${regression ? (shortcut !== null ? button('offset-shortcut', `Set maximum to ${escape(shortcut)} m`) : '') : regressionStatus()}<div id="gx-offset-feedback"></div></section>`}<p class="gx-hint gx-spaced">Type a value or use − / + to change it by 0.1 m. The maximum buttons use the modeled coverage; they are not recommendations for your site.</p><p>${link('../dashboards/slip-regression/', 'See the slip-regression dashboard')} for the broader simulation relationship.</p><footer class="gx-footer">${button('site', 'Back')}${button('review', reached.has('review') ? 'Return to review' : 'Review scenario', true)}</footer>`;
+    return `${heading('Choose the assumed fault movement', 'Choose what you want to specify, then enter the range you want to investigate.')}${sampleNoticeView()}<fieldset class="gx-modes"><legend>What are you specifying?</legend><label><input type="radio" id="gx-mode-slip" name="gx-mode" value="slip" ${draft.mode === 'slip' ? 'checked' : ''}><span><strong>Fault slip at depth</strong><span>The distance the fault moves underground.</span></span></label><label><input type="radio" id="gx-mode-offset" name="gx-mode" value="offset" ${draft.mode === 'offset' ? 'checked' : ''}><span><strong>Vertical surface offset</strong><span>The vertical difference across the rupture at the ground surface.</span></span></label></fieldset><p class="gx-hint">Your entries are kept when you switch modes.</p>${draft.mode === 'slip' ? `<section class="gx-movement"><h3>${term('slip', 'Fault-slip range')}</h3><p>Modeled fault slip: ${escape(manifest.slipWindowBounds.min)}–${escape(manifest.slipWindowBounds.max)} m. Stages are recorded about every ${displayRound(manifest.stageSpacing.mean, 2)} m of slip.</p>${help('What is fault slip?', 'Slip is how far the two blocks move past each other along the fault.', 'slip')}<div class="gx-number-row">${numeric('slipMin', 'Minimum', false)}${numeric('slipMax', 'Maximum', true)}</div>${button('slip-shortcut', 'Set maximum to 5 m')}</section>` : `<section class="gx-movement"><h3>${term('offset', 'Surface-offset range')}</h3><p>The range starts at 0 m and ends at the maximum you enter.</p>${help('How is surface offset related to fault slip?', 'Surface offset is a vertical difference at the ground surface. The app estimates a corresponding fault-slip range for each selected fault angle; raised surface ridges can make that estimate too large.', 'vertical-separation')}${numeric('offsetMax', 'Maximum', true)}${regression ? (shortcut !== null ? button('offset-shortcut', `Set maximum to ${escape(shortcut)} m`) : '') : regressionStatus()}<div id="gx-offset-feedback"></div></section>`}<p class="gx-hint gx-spaced">Type a value or use − / + to change it by 0.1 m. The maximum buttons use the modeled coverage; they are not recommendations for your site.</p><p>${link('../dashboards/slip-regression/', 'See the slip-regression dashboard')} for the broader simulation relationship.</p><footer class="gx-footer">${button('site', 'Back')}${button('review', reached.has('review') ? 'Return to review' : 'Review scenario', true)}</footer>`;
   }
 
   function selectionSummary(value: Draft): string {
@@ -458,9 +530,12 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   function render(focusId?: string, scroll = false): void {
     if (!alive()) return;
     closeHelp();
-    // Sample presentation belongs to one screen each; leaving it clears it.
-    if (step !== 'site') sampleArrived = null;
+    // The replacement question belongs to the introduction; the prefill
+    // notice stands on both input steps until the first draft edit, and
+    // the sequential walk after a fill ends at any later step (§10.3).
     if (step !== 'intro') sampleAsk = null;
+    if (step !== 'intro' && step !== 'site') sampleWalk = false;
+    checkSampleFill();
     chartObserver?.disconnect(); chartObserver = null;
     const active = document.activeElement as HTMLElement | null;
     const activeId = active && shell.contains(active) ? active.id : '';
@@ -473,6 +548,8 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     const views: Record<Step, () => string> = { intro: introView, site: siteView, movement: movementView, review: reviewView, results: () => result ? resultsView() : heading('Explore your scenario', 'See the range of simulated measurements for the scenario you confirmed.') };
     shell.innerHTML = `<header class="gx-brand"><strong>Ground Rupture Explorer</strong><span>Research companion</span></header>${navigation()}<main class="gx-main">${restoredNotice ? '<p class="gx-restored" role="status">Restored the work in this tab.</p>' : ''}${logOffNotice ? `<p class="gx-log-off" role="status">${escape(copyText('ddd5.10.recoveryLogScaleOff'))}</p>` : ''}${generalError ? `<div class="gx-warning" role="alert">${escape(generalError)}</div>` : ''}${restorePanel()}${views[step]()}${step !== 'intro' ? `<div class="gx-restart">${button('new', 'Start a new scenario')}</div>` : ''}</main>${support()}`;
     shell.querySelectorAll<HTMLInputElement>('input[data-mixed]').forEach(input => { input.indeterminate = input.dataset.mixed === 'true'; });
+    const dialog = $<HTMLDialogElement>('#gx-sample-dialog');
+    if (dialog && !dialog.open) dialog.showModal();
     refreshMovementFeedback();
     if (step === 'results') {
       drawChart();
@@ -751,9 +828,10 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   window.visualViewport?.addEventListener('scroll', helpScrolled, { passive: true, signal });
 
   shell.addEventListener('click', event => {
-    const target = event.target instanceof Element ? event.target.closest<HTMLButtonElement>('button') : null;
-    if (!target || target.disabled) return;
-    if (target.dataset.explain) {
+    // Buttons, and the prefilled-sample listbox's options (§10.3).
+    const target = event.target instanceof Element ? event.target.closest<HTMLElement>('button, #gx-sample-list [role="option"]') : null;
+    if (!target || (target instanceof HTMLButtonElement && target.disabled)) return;
+    if (target instanceof HTMLButtonElement && target.dataset.explain) {
       if (helpTrigger === target && helpPinned) closeHelp();
       else showHelp(target, true);
       return;
@@ -771,12 +849,10 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       if (chart) { display = { ...display, view: { ...display.view, [display.measurement]: chart } }; render(); return; }
       const action = target.dataset.action;
       const sample = isSampleId(target.dataset.sample) ? target.dataset.sample : null;
-      if (action === 'sample' && sample) {
-        // Fill silently only over an untouched fresh draft with nothing confirmed.
-        if (confirmed === null && !draftChanged(draft, freshDraft(manifest))) useSample(sample);
-        else { sampleAsk = sample; render('gx-sample-question'); }
-      } else if (action === 'sample-use' && sample) useSample(sample);
-      else if (action === 'sample-keep' && sample) { sampleAsk = null; render(`gx-sample-${sample}`); }
+      if (target.getAttribute('role') === 'option') { if (sample) chooseSample(sample); }
+      else if (action === 'sample-menu') { if (sampleList()?.hidden) openSampleList(0); else closeSampleList(true); }
+      else if (action === 'sample-use' && sample) useSample(sample);
+      else if (action === 'sample-keep') keepChoices();
       else if (action === 'start' || action === 'site') setStep('site');
       else if (action === 'intro') setStep('intro');
       else if (action === 'movement') setStep('movement');
@@ -802,7 +878,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
         // Clear the record before the fresh state is saved (§9.2), including an unrestorable one.
         if (options.storage) clearSession(options.storage);
         blocked = null; restoreTarget = null; restoreError = ''; busy = false; restoring = false;
-        guideIndex = null; sampleArrived = null; draft = freshDraft(manifest); confirmed = null; result = null; issues = []; generalError = ''; reached = new Set(['intro', 'site']); display = defaultDisplayState(); refineOpen = false; setStep('site'); status.textContent = 'New scenario. Choose one or more values for each site condition.';
+        guideIndex = null; sampleFill = null; sampleWalk = false; draft = freshDraft(manifest); confirmed = null; result = null; issues = []; generalError = ''; reached = new Set(['intro', 'site']); display = defaultDisplayState(); refineOpen = false; setStep('site'); status.textContent = 'New scenario. Choose one or more values for each site condition.';
       }
       else if (action === 'retry-restore') void restoreResults();
       else if (action === 'plus' || action === 'minus') { invalidate(); const field = target.dataset.field as 'slipMin' | 'slipMax' | 'offsetMax'; draft[field] = stepDecimal(draft[field], action === 'plus' ? 1 : -1); issues = issues.filter(item => item.field !== field); render(); status.textContent = `${field === 'slipMin' ? 'Minimum' : 'Maximum'}: ${draft[field]} m.`; }
@@ -814,6 +890,55 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       console.error('Guided interaction:', error); generalError = 'This action could not be completed. Your confirmed results have not changed.'; alert.textContent = generalError; render();
     }
   }, { signal });
+
+  // The prefilled-sample listbox (§10.3): opened from its button, focus on
+  // its options; arrows, Home and End move, Enter or Space chooses, Escape
+  // closes to the button, and leaving it closes it. The replacement dialog
+  // keeps Tab between its two choices.
+  shell.addEventListener('keydown', event => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    if (target.id === 'gx-sample-trigger') {
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') { event.preventDefault(); openSampleList(event.key === 'ArrowDown' ? 0 : SAMPLES.length - 1); }
+      else if (event.key === 'Escape' && !sampleList()?.hidden) { event.preventDefault(); closeSampleList(true); }
+      return;
+    }
+    if (target.getAttribute('role') === 'option' && sampleList()?.contains(target)) {
+      const options = sampleOptions(), index = options.indexOf(target);
+      const moves: Partial<Record<string, number>> = { ArrowDown: Math.min(index + 1, options.length - 1), ArrowUp: Math.max(index - 1, 0), Home: 0, End: options.length - 1 };
+      const move = moves[event.key];
+      if (move !== undefined) { event.preventDefault(); focusSampleOption(move); }
+      else if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); target.click(); }
+      else if (event.key === 'Escape') { event.preventDefault(); closeSampleList(true); }
+      return;
+    }
+    if (event.key === 'Tab' && target.closest('#gx-sample-dialog')) {
+      const choices = [...shell.querySelectorAll<HTMLElement>('#gx-sample-dialog button')];
+      const index = choices.indexOf(target);
+      const next = event.shiftKey ? (index <= 0 ? choices.length - 1 : index - 1) : (index + 1) % choices.length;
+      event.preventDefault(); choices[next]?.focus();
+    }
+  }, { signal });
+  // A press on the open list's button keeps focus in the list, so its click closes the list.
+  shell.addEventListener('mousedown', event => {
+    if (event.target instanceof Element && event.target.closest('#gx-sample-trigger') && sampleList()?.hidden === false) event.preventDefault();
+  }, { signal });
+  shell.addEventListener('focusout', event => {
+    const list = sampleList();
+    if (!list || list.hidden || !(event.target instanceof Node) || !list.contains(event.target)) return;
+    // Moving within the list, or to its button (whose click then closes it), keeps it open.
+    const next = event.relatedTarget;
+    if (next instanceof Node && (list.contains(next) || next === $('#gx-sample-trigger'))) return;
+    closeSampleList(false);
+  }, { signal });
+  // Escape on the modal is Keep my choices; any other close of it likewise.
+  shell.addEventListener('cancel', event => {
+    if (!(event.target instanceof HTMLDialogElement) || event.target.id !== 'gx-sample-dialog') return;
+    event.preventDefault(); keepChoices();
+  }, { capture: true, signal });
+  shell.addEventListener('close', event => {
+    if (event.target instanceof HTMLDialogElement && event.target.id === 'gx-sample-dialog' && event.target.isConnected) keepChoices();
+  }, { capture: true, signal });
 
   shell.addEventListener('change', event => {
     const input = event.target;
@@ -856,6 +981,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       draft[field] = input.value; issues = issues.filter(item => item.field !== field);
       input.removeAttribute('aria-invalid'); const error = $(`#gx-error-${field}`); if (error) { error.hidden = true; error.textContent = ''; }
       refreshMovementFeedback();
+      checkSampleFill();
       if (restoredNotice) { restoredNotice = false; $('.gx-restored')?.remove(); }
       if (logOffNotice) { logOffNotice = false; $('.gx-log-off')?.remove(); }
       persist();

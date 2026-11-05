@@ -11,6 +11,7 @@ import {
   draftChanged,
   freshDraft,
   offsetShortcut,
+  holdsSample,
   isSampleId,
   sampleDraft,
   sedimentGroup,
@@ -298,11 +299,11 @@ describe('exact decimal adjustment and offset shortcut', () => {
 describe('sample inputs (guided DDD §§9.1, 10.1)', () => {
   const EXPECTED = {
     illustrative: {
-      faultDip: [30, 40], depth: [5], density: ['Dense'], strength: 'Strong', offsetMax: '3',
+      faultDip: [30, 40], depth: [5], density: ['Dense'], strength: 'Strong', offsetMax: '3', slipMin: '3', slipMax: '5',
       members: [['fault_dip', 30, /30° fault angle/], ['fault_dip', 40, /40° fault angle/], ['depth', 5, /5 m sediment depth/], ['density', 'Dense', /Dense sediment density/]],
     },
     kern: {
-      faultDip: [60, 70], depth: [10], density: ['Medium'], strength: 'Moderate', offsetMax: '1.3',
+      faultDip: [60, 70], depth: [10], density: ['Medium'], strength: 'Moderate', offsetMax: '1.3', slipMin: '1.6', slipMax: '1.9',
       members: [['fault_dip', 60, /60° fault angle/], ['fault_dip', 70, /70° fault angle/], ['depth', 10, /10 m sediment depth/], ['density', 'Medium', /Medium sediment density/]],
     },
   } as const;
@@ -331,10 +332,14 @@ describe('sample inputs (guided DDD §§9.1, 10.1)', () => {
       assert.deepEqual(judged.scenario.window, { mode: 'offset', offsetMax: expected.offsetMax });
     });
 
-    test(`the ${id} sample keeps fresh slip entries, population, and scarp classes`, () => {
+    test(`the ${id} sample prefills both movement modes and keeps fresh population and scarp classes`, () => {
       const sample = sampleDraft(manifest, id), fresh = freshDraft(manifest);
-      assert.equal(sample.slipMin, fresh.slipMin);
-      assert.equal(sample.slipMax, fresh.slipMax);
+      // Both modes prefill (guided DDD §10.3); offset stays active.
+      assert.equal(sample.slipMin, expected.slipMin);
+      assert.equal(sample.slipMax, expected.slipMax);
+      const slip = validateDraft({ ...sample, mode: 'slip' }, manifest);
+      assert.deepEqual(slip.issues, []);
+      assert.deepEqual(slip.scenario?.window, { mode: 'slip', min: expected.slipMin, max: expected.slipMax });
       assert.equal(sample.population, fresh.population);
       assert.deepEqual(sample.scarpClass, fresh.scarpClass);
       assert.equal(draftChanged(sample, fresh), true);
@@ -362,6 +367,23 @@ describe('sample inputs (guided DDD §§9.1, 10.1)', () => {
         };
         assert.throws(() => sampleDraft(pruned, id), new RegExp(`${group}: ${expected.strength}`));
       }
+      // A release whose recorded slip stops below the window refuses the sample.
+      const short: Manifest = { ...manifest, slipWindowBounds: { ...manifest.slipWindowBounds, max: 1.5 } };
+      assert.throws(() => sampleDraft(short, id), new RegExp(`${expected.slipMin}–${expected.slipMax} m of fault slip`));
+    });
+
+    test(`the ${id} fill stands until the first draft edit, a mode switch excepted`, () => {
+      const fill = sampleDraft(manifest, id);
+      assert.equal(holdsSample(cloneDraft(fill), fill), true);
+      assert.equal(holdsSample({ ...cloneDraft(fill), mode: 'slip' }, fill), true);
+      // Set order is not an edit; any value change is, the inactive mode's included.
+      assert.equal(holdsSample({ ...cloneDraft(fill), faultDip: [...fill.faultDip].reverse() }, fill), true);
+      for (const edit of [
+        { faultDip: fill.faultDip.slice(1) }, { depth: [] }, { density: [] }, { sediment: fill.sediment.slice(1) },
+        { offsetMax: `${fill.offsetMax}0` }, { slipMin: '0' }, { slipMax: '2' },
+        { population: 'one_state_per_trial' as const }, { scarpClass: fill.scarpClass.slice(1) },
+      ]) assert.equal(holdsSample({ ...cloneDraft(fill), ...edit }, fill), false, JSON.stringify(edit));
+      assert.equal(holdsSample(freshDraft(manifest), fill), false);
     });
   }
 
