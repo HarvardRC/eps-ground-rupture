@@ -1860,6 +1860,31 @@ fixed as a defect (permitted under D-39); a measurement artifact
 is stabilized in the spec, an exclusion being the recorded last
 resort. Guided DDD §11.3 carries the mandate.
 
+## Overnight approval delegation (2026-11-05)
+
+Before the G-20 and G-21 gates, the owner delegated the run's
+remaining approvals to the planning session for the night: string
+gates and interpretation choices within the recorded D-43–D-45
+designs, each recorded in the task evidence as approved under this
+delegation. New product decisions, the owner's session
+permissions, and deployments stay the owner's; the owner ratifies
+this entry by the commit that carries it.
+
+## Overnight ruling: guided-only copy layer (2026-11-05)
+
+G-20 found §11.1 in conflict with two standing constraints: the
+`/scenario/` bundles' byte-identity, verified by every guided
+task, and the PDD copy deck, whose hashes pin `copy.json` to
+pdd.md §5. Under the overnight delegation the planning session
+ruled for the guided-only copy layer: the guided page renders the
+adopted wording for shared strings; `/scenario/` and the copy deck
+stay unchanged; whether `/scenario/` adopts the wording — waiving
+byte-identity and amending the copy deck — is a separate owner
+decision, held for the morning together with audit entry 16 (the
+slip Minimum "Required" mark), which D-45 does not adopt. The
+agent's 75-entry disposition of the audit is confirmed as the
+evidence format.
+
 ## References
 
 - [`docs/app/ddd.md` — Ground Rupture Explorer — detailed design document](ddd.md).

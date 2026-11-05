@@ -780,7 +780,9 @@ A relayed external review, read before the G-18 merge, revises
   one tab stop with arrow movement; Escape closes without
   applying.
 - Names and event wording: the Chi-Chi and Kern County
-  connections appear in the previews and stories only. The shared
+  connections appear in the previews, the stories, and the
+  per-field annotations, never in the card titles (owner ruling,
+  2026-11-05, with the G-19 approval). The shared
   story sentence becomes "These examples help you try the tool.
   They do not reconstruct either earthquake." — a CR-10 story
   edit replacing §10.2's anchored-not-modeled sentence.
@@ -814,9 +816,11 @@ the §10.5 rework lands.
 
 ### 11.1 Wording (G-20)
 
-The audit's swaps apply wherever the current string appears in the
-guided page or a shared component, never in a `/scenario/`-only
-file (D-39):
+The audit's swaps apply wherever the current string appears on
+the guided page — through a guided-side copy layer where the
+string is shared, so `/scenario/`'s bundles and the PDD copy deck
+stay byte-identical (overnight ruling, 2026-11-05) — and never in
+a `/scenario/`-only file (D-39):
 
 | Current | Adopted |
 | --- | --- |

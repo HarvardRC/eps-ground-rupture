@@ -675,9 +675,12 @@ overlap fixed; and truthful recovery messages — a first
 calculation failure claims no preserved results, and the
 version-mismatch message and its control agree. Strings the audit
 gives verbatim are approved; the rest return through the string
-gates. Shared-component changes reach `/scenario/` as fixes, not
-new UX investment (D-39). Guided DDD §11 holds the design; tasks
-G-20 and G-21 carry it, sequenced after G-19.
+gates. The guided page renders shared strings through its own
+copy layer (overnight ruling, 2026-11-05): `/scenario/`'s bundles
+and the PDD copy deck stay unchanged, and whether `/scenario/`
+adopts the wording is a separate owner decision. Guided DDD §11
+holds the design; tasks G-20 and G-21 carry it, sequenced after
+G-19.
 
 **Negative scarp heights (D-46, Proposed 2026-11-05).** The Kern
 sample surfaces a −0.02 m scarp height while the description says
