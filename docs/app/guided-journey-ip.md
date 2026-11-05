@@ -1066,11 +1066,18 @@ the 1.3 m. It asked for alt text that matches the photograph, for
 the CC work title in the credit, and for pinned anchors and
 non-vacuous link checks in the tests.
 
-**CR-10.** The story texts went to the owner for approval through
-the coordinating session on 2026-11-04. Two questions are open: the
-Kern 1.3 m pairing of elevation change with surface offset, and the
-field-overlay sentence. The merge waits for the owner's answer,
-which is recorded below.
+**Owner approval, 2026-11-04 (CR-10, relayed through the planning
+session).** The owner approved the revised story texts exactly as
+they stand in `src/explore/stories.ts`, with both images and one
+image per story. The trench photograph stays out by the owner's
+choice after viewing it. On the open points:
+
+- the Kern wording "the scale of that elevation change" stands;
+- the field-overlay sentence is confirmed as written;
+- the Tri-Mountain citation alone supports the 2.5 m lift, with
+  nothing further to verify now, as §10.2 allows;
+- a README line for third-party photographs is approved, but stays
+  outside G-15 for the owner's own commit.
 
 Not verified: screen-reader reading of the disclosure, touch, and
 engines other than Chromium. The README licensing table does not
