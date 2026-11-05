@@ -93,8 +93,7 @@ function orderChoices<T extends { label: string }>(field: string, choices: T[]):
 /** The background trigger and its helper (§10.5); the trigger's words also head the card preview's story. */
 const STORY_TRIGGER = 'Why these sample values?';
 const STORY_HELPER = 'Background, photos and sources';
-/** The note on switching movement modes while a sample is active (§10.5). */
-// The owner-approved mode-switch note (guided DDD §12.7, CR-10).
+/** The note on switching movement modes while a sample is active: the owner-approved text of guided DDD §12.7 (CR-10), superseding §10.5's. */
 const MODE_NOTE = 'The sample has separate example values for each mode; one is not converted from the other. Switching modes can change the results.';
 const populationName = (population: string): string => population === 'one_state_per_trial' ? 'Last stage within the slip range' : 'All stages within the slip range';
 const sedimentName = (pair: SedimentPair): string => `${sedimentGroup(pair.set).replace(' sediment', '')}: ${pair.sedimentStrength}`;
