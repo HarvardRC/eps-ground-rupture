@@ -111,7 +111,7 @@ test('Try a prefilled sample opens a dialog of two cards that preview without ch
   const [first, second] = SAMPLES;
   await expectPreview(page, first);
   await expect(card(page, first)).toBeFocused();
-  await expect(page.getByRole('radiogroup', { name: 'Try a prefilled sample' })).toBeVisible();
+  await expect(page.getByRole('radiogroup', { name: 'Samples' })).toBeVisible();
   for (const sample of SAMPLES) {
     const item = page.getByRole('radio', { name: sample.title, exact: true });
     await expect(item).toBeVisible();
@@ -244,9 +244,11 @@ for (const sample of SAMPLES) {
     await stepButton(page, 'movement').click();
     await expect(notice(page)).toHaveText(prefilled(sample));
 
-    // Typing updates it in place, without a re-render; restoring the value keeps it Modified.
+    // Typing updates it in place, without a re-render (the tagged node survives); restoring the value keeps it Modified.
+    await notice(page).evaluate((node) => node.setAttribute('data-probe', 'kept'));
     await typeEntry(page, 'offsetMax', '1');
     await expect(notice(page)).toHaveText(modified(sample));
+    await expect(notice(page)).toHaveAttribute('data-probe', 'kept');
     await typeEntry(page, 'offsetMax', sample.offsetMax);
     await expect(notice(page)).toHaveText(modified(sample));
     await stepButton(page, 'site').click();
@@ -286,6 +288,15 @@ for (const sample of SAMPLES) {
     await setChecked(page, '#gx-population-one_state_per_trial', true);
 
     await stepButton(page, 'intro').click();
+    // Previewing over a confirmed scenario changes neither the draft nor the confirmation.
+    const before = await storedRecord(page);
+    await trigger(page).click();
+    for (const other of [...SAMPLES].reverse()) { await card(page, other).click(); await expectPreview(page, other); }
+    await page.locator('#gx-sample-cancel').click();
+    const after = await storedRecord(page);
+    expect(after?.draft).toEqual(before?.draft);
+    expect(after?.confirmed).toEqual(before?.confirmed);
+
     await pickSample(page, sample.id);
     await expectAsked(page, sample);
     // Focus stays inside the dialog: Tab and Shift+Tab cycle its two choices.
@@ -331,6 +342,52 @@ for (const sample of SAMPLES) {
     await stepButton(page, 'site').click();
     await expect(notice(page)).toHaveText(modified(sample));
     expect(dialogs).toBe(0);
+  });
+}
+
+for (const sample of SAMPLES) {
+  test(`${sample.id}: Discard changes returns to the notice of the fill the confirmation started from, never un-Modified`, async ({ page }) => {
+    await gotoExplore(page);
+    await pickSample(page, sample.id);
+    await action(page, 'Continue to fault movement').click();
+    await page.locator('#gx-offset-feedback table').waitFor();
+    await action(page, 'Review scenario').click();
+    await action(page, 'Show results').click();
+    await page.locator('.gx-context').waitFor();
+    const discard = () => page.locator('.gx-pending').getByRole('button', { name: 'Discard changes' }).click();
+
+    // Confirmed unedited; an edit turns it Modified, and discarding back to the sample's values keeps Modified.
+    await page.locator('#gx-refine-button').click();
+    await setChecked(page, '#gx-population-one_state_per_trial', true);
+    await discard();
+    await expect(page.locator('#gx-population-all_stages')).toBeChecked();
+    await stepButton(page, 'site').click();
+    await expect(notice(page)).toHaveText(modified(sample));
+
+    // Confirmed while Modified; a further edit and a discard keep the same fill's notice.
+    await setChecked(page, '#gx-faultDip-0', !(await page.locator('#gx-faultDip-0').isChecked()));
+    await action(page, 'Return to review').click();
+    await action(page, 'Show results').click();
+    await page.locator('.gx-context').waitFor();
+    await stepButton(page, 'site').click();
+    await setChecked(page, '#gx-depth-0', !(await page.locator('#gx-depth-0').isChecked()));
+    await stepButton(page, 'results').click();
+    await discard();
+    await stepButton(page, 'site').click();
+    await expect(notice(page)).toHaveText(modified(sample));
+
+    // A confirmation made without a sample discards the notice with the sample's draft.
+    await page.locator('.gx-restart button').click();
+    await stepButton(page, 'intro').click();
+    await confirmGolden(page, 'GS-6');
+    await stepButton(page, 'intro').click();
+    await pickSample(page, sample.id);
+    await action(page, 'Use the sample').click();
+    await expect(notice(page)).toHaveText(prefilled(sample));
+    await stepButton(page, 'results').click();
+    await discard();
+    await stepButton(page, 'site').click();
+    await expect(notice(page)).toHaveCount(0);
   });
 }
 

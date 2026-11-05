@@ -101,7 +101,13 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   // `sampleWalk` keeps Site conditions sequential after a fill until a
   // later step is reached.
   let sampleChoice: { selected: SampleId; stage: 'preview' | 'confirm' } | null = null;
-  let sampleFill: { id: SampleId; values: Draft; modified: boolean } | null = null;
+  // `confirmedFill` is the fill standing when the current confirmation was
+  // made, so discarding back to it keeps the notice of the fill it started
+  // from; `serial` tells one fill from another of the same sample.
+  type SampleFill = { id: SampleId; values: Draft; modified: boolean; serial: number };
+  let sampleFill: SampleFill | null = null;
+  let confirmedFill: SampleFill | null = null;
+  let fillSerial = 0;
   let sampleModeNote = false;
   let sampleWalk = false;
   // The story disclosure's open state across re-renders of Site conditions (§10.2); every fill starts closed.
@@ -260,7 +266,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     }
     const cards = SAMPLES.map(sample => {
       const checked = sample.id === chosen.id;
-      return `<div class="gx-sample-card" role="radio" id="gx-sample-${sample.id}" data-sample-card="${sample.id}" aria-checked="${checked}" tabindex="${checked ? 0 : -1}" aria-labelledby="gx-sample-${sample.id}-title" aria-describedby="gx-sample-${sample.id}-descriptor"${checked ? ' autofocus' : ''}><strong id="gx-sample-${sample.id}-title">${escape(sample.title)}</strong><span id="gx-sample-${sample.id}-descriptor">${escape(sample.descriptor)}</span></div>`;
+      return `<div class="gx-sample-card" role="radio" id="gx-sample-${sample.id}" data-sample-card="${sample.id}" aria-checked="${checked}" tabindex="${checked ? 0 : -1}" aria-labelledby="gx-sample-${sample.id}-title" aria-describedby="gx-sample-${sample.id}-descriptor" aria-controls="gx-sample-preview"${checked ? ' autofocus' : ''}><strong id="gx-sample-${sample.id}-title">${escape(sample.title)}</strong><span id="gx-sample-${sample.id}-descriptor">${escape(sample.descriptor)}</span></div>`;
     }).join('');
     let preview: string;
     try {
@@ -269,7 +275,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     } catch (error) {
       preview = `<p class="gx-warning">${escape(error instanceof Error ? error.message : String(error))}</p>`;
     }
-    return `<h2 id="gx-sample-title">Try a prefilled sample</h2><div class="gx-sample-cards" role="radiogroup" aria-labelledby="gx-sample-title">${cards}</div><section class="gx-sample-preview" id="gx-sample-preview" aria-labelledby="gx-sample-preview-title"><h3 id="gx-sample-preview-title">${escape(chosen.title)}</h3>${preview}</section><div class="gx-dialog-actions">${button('sample-apply', 'Use this sample', true, 'id="gx-sample-apply"')}${button('sample-close', 'Cancel', false, 'id="gx-sample-cancel"')}</div>`;
+    return `<h2 id="gx-sample-title">Try a prefilled sample</h2><div class="gx-sample-cards" role="radiogroup" aria-label="Samples">${cards}</div><section class="gx-sample-preview" id="gx-sample-preview" aria-labelledby="gx-sample-preview-title"><h3 id="gx-sample-preview-title">${escape(chosen.title)}</h3>${preview}</section><div class="gx-dialog-actions">${button('sample-apply', 'Use this sample', true, 'id="gx-sample-apply"')}${button('sample-close', 'Cancel', false, 'id="gx-sample-cancel"')}</div>`;
   }
 
   /** Redraw the open dialog's content in place (a card selection, the next step) and focus `focusId`. */
@@ -303,7 +309,8 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   /** Fill the whole draft with the named sample and open Site conditions; the confirmation, results, and walkthrough are untouched. */
   function useSample(id: SampleId): void {
     draft = sampleDraft(manifest, id);
-    sampleFill = { id, values: cloneDraft(draft), modified: false }; sampleModeNote = false; sampleWalk = true;
+    fillSerial += 1;
+    sampleFill = { id, values: cloneDraft(draft), modified: false, serial: fillSerial }; sampleModeNote = false; sampleWalk = true;
     issues = []; sampleChoice = null; storyOpen = false;
     setStep('site');
     status.textContent = sampleNotice(id, false);
@@ -771,7 +778,8 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       const checked = validateDraft(snapshot, manifest);
       if (!checked.scenario) { busy = false; showIssues(checked.issues); return; }
       const computed = computeResult(vintage, checked.scenario, sequence + 1, regression);
-      confirmed = snapshot; result = computed; sequence += 1; busy = false; issues = []; refineOpen = false; guideIndex = null; alert.textContent = '';
+      confirmed = snapshot; confirmedFill = sampleFill ? { ...sampleFill } : null;
+      result = computed; sequence += 1; busy = false; issues = []; refineOpen = false; guideIndex = null; alert.textContent = '';
       restoreTarget = null; restoring = false; restoreError = ''; restoredNotice = false; logOffNotice = false;
       adjustLogScale(computed);
       step = 'results'; reached.add('results');
@@ -893,14 +901,18 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       else if (action === 'refine') { refineOpen = !refineOpen; render(); }
       else if (action === 'edit-refinements') { refineOpen = true; setStep('results'); $(`#gx-population-${draft.population}`)?.focus({ preventScroll: true }); $('#gx-refinements')?.scrollIntoView({ block: 'start' }); }
       else if (action === 'discard' && confirmed) { if (guideIndex !== null && guideIndex >= 3) refineOpen = true; guideIndex = null; draft = cloneDraft(confirmed); issues = []; generalError = '';
-        // Discarding replaces the draft: the sample notice stays only if the restored draft still holds the fill.
-        if (sampleFill && holdsSample(draft, sampleFill.values)) sampleFill = { ...sampleFill, modified: false }; else sampleFill = null;
+        // Discarding returns to the confirmed draft: the notice is that of the fill it started from, if any,
+        // and once Modified it stays Modified (§10.5).
+        if (confirmedFill) {
+          const lineage: SampleFill = sampleFill !== null && sampleFill.serial === confirmedFill.serial ? sampleFill : confirmedFill;
+          sampleFill = { ...lineage, modified: lineage.modified || !holdsSample(draft, lineage.values) };
+        } else sampleFill = null;
         setStep('results'); status.textContent = 'Draft changes discarded. The confirmed scenario has been restored.'; }
       else if (action === 'new') {
         // Clear the record before the fresh state is saved (§9.2), including an unrestorable one.
         if (options.storage) clearSession(options.storage);
         blocked = null; restoreTarget = null; restoreError = ''; busy = false; restoring = false;
-        guideIndex = null; sampleFill = null; sampleModeNote = false; sampleWalk = false; draft = freshDraft(manifest); confirmed = null; result = null; issues = []; generalError = ''; reached = new Set(['intro', 'site']); display = defaultDisplayState(); refineOpen = false; setStep('site'); status.textContent = 'New scenario. Choose one or more values for each site condition.';
+        guideIndex = null; sampleFill = null; confirmedFill = null; sampleModeNote = false; sampleWalk = false; draft = freshDraft(manifest); confirmed = null; result = null; issues = []; generalError = ''; reached = new Set(['intro', 'site']); display = defaultDisplayState(); refineOpen = false; setStep('site'); status.textContent = 'New scenario. Choose one or more values for each site condition.';
       }
       else if (action === 'retry-restore') void restoreResults();
       else if (action === 'plus' || action === 'minus') { invalidate(); const field = target.dataset.field as 'slipMin' | 'slipMax' | 'offsetMax'; draft[field] = stepDecimal(draft[field], action === 'plus' ? 1 : -1); issues = issues.filter(item => item.field !== field); render(); status.textContent = `${field === 'slipMin' ? 'Minimum' : 'Maximum'}: ${draft[field]} m.`; }
@@ -931,8 +943,16 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       if (event.key === ' ') { event.preventDefault(); return; }
     }
     if (event.key === 'Tab') {
-      const stops = [...shell.querySelectorAll<HTMLElement>('#gx-sample-dialog [data-sample-card][tabindex="0"], #gx-sample-dialog button:not(:disabled)')];
-      const index = stops.indexOf(target);
+      // Every tab stop in the dialog, in order: the selected card, links, disclosures, and buttons.
+      const stops = [...shell.querySelectorAll<HTMLElement>('#gx-sample-dialog :is([data-sample-card][tabindex="0"], a[href], summary, input, button:not(:disabled))')]
+        .filter(stop => stop.getClientRects().length > 0);
+      if (!stops.length) return;
+      // From an element outside the stops (focused by a click), continue from its place in the document.
+      let index = stops.indexOf(target);
+      if (index < 0) {
+        const after = stops.findIndex(stop => target.compareDocumentPosition(stop) & Node.DOCUMENT_POSITION_FOLLOWING);
+        index = event.shiftKey ? (after < 0 ? stops.length : after) : (after < 0 ? 0 : after) - 1;
+      }
       const next = event.shiftKey ? (index <= 0 ? stops.length - 1 : index - 1) : (index + 1) % stops.length;
       event.preventDefault(); stops[next]?.focus();
     }
