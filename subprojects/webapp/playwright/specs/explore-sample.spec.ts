@@ -1,37 +1,42 @@
 // explore-sample.spec.ts (guided DDD §9.5 item 5, parameterized by
-// §§10.1 and 10.3): the Try a prefilled sample listbox and its keyboard
-// operation; each sample's silent fresh fill, prefilled in both movement
-// modes; the modal replacement question, its focus, and both outcomes
-// with the chosen sample keeping its identity; confirmed results
-// untouched; the prefill notice standing on both input steps until the
-// first draft edit; and the sequential footer after a fill (§§9.1,
-// 10.1–10.3; PDD D-37, D-42, D-43).
+// §§10.1, 10.3, and 10.5): the Try a prefilled sample dialog — two cards
+// forming one tab stop, previewing values without changing the draft;
+// Use this sample, and the replacement question as its next step with
+// the chosen sample keeping its identity; confirmed results untouched;
+// the prefill notice and its Modified form on both input steps; the
+// sequential footer after a fill; both-mode prefills and the mode-switch
+// note (§§9.1, 10.1–10.3, 10.5; PDD D-37, D-42, D-43, D-44).
 
 import { expect, test, type Page } from '@playwright/test';
 import {
-  MOVEMENT_HEADING, SITE_HEADING, action, confirmGolden, confirmedCount, countText, explorerReady, gotoExplore, heading,
-  holdRegression, pickSample, setChecked, settleFrames, stepButton, typeEntry,
+  INTRO_HEADING, MOVEMENT_HEADING, SITE_HEADING, action, confirmGolden, confirmedCount, countText, explorerReady,
+  gotoExplore, heading, holdRegression, pickSample, setChecked, settleFrames, stepButton, storedRecord, typeEntry,
 } from '../explore-support';
 
 test.describe.configure({ timeout: 120_000 });
 
 const HINT = 'Sample values, not recommended site values.';
+const MODE_NOTE = 'The two modes are separate assumptions. Each selects a different set of simulations, so results can differ.';
 
 const SAMPLES = [
   {
     id: 'illustrative',
-    label: 'Chi-Chi scale — shallow fault (30°/40°)',
-    descriptor: 'Up to 3 m of surface offset or 3–5 m of fault slip, at the scale of the 1999 Chi-Chi earthquake.',
-    name: 'Chi-Chi scale',
+    title: 'Lower fault angles',
+    descriptor: '30° and 40°; surface offset up to 3 m',
+    name: 'lower fault angles',
     site: ['30°', '40°', '5 m', 'Dense', 'Uniform sediment: Strong', 'Layered sediment: Strong'],
+    preview: ['30°; 40°', '5 m', 'Dense', 'Layered: Strong; Uniform: Strong', '0–3 m', '3–5 m'],
+    slipNote: 'The slip range is an example band within the simulations’ coverage.',
     offsetMax: '3', slipMin: '3', slipMax: '5',
   },
   {
     id: 'kern',
-    label: 'Kern County 1952 scale — steep fault (60°/70°)',
-    descriptor: 'Up to 1.3 m of surface offset or 1.6–1.9 m of fault slip, at the scale of the 1952 Kern County earthquake.',
-    name: 'Kern County 1952 scale',
+    title: 'Steeper fault angles',
+    descriptor: '60° and 70°; surface offset up to 1.3 m',
+    name: 'steeper fault angles',
     site: ['60°', '70°', '10 m', 'Medium', 'Uniform sediment: Moderate', 'Layered sediment: Moderate'],
+    preview: ['60°; 70°', '10 m', 'Medium', 'Layered: Moderate; Uniform: Moderate', '0–1.3 m', '1.6–1.9 m'],
+    slipNote: 'The slip range spans Bawden (2001)’s two patch estimates, 1.6 m and 1.9 m, used as an example band.',
     offsetMax: '1.3', slipMin: '1.6', slipMax: '1.9',
   },
 ] as const;
@@ -39,13 +44,15 @@ const SAMPLES = [
 type Sample = (typeof SAMPLES)[number];
 
 const trigger = (page: Page) => page.locator('#gx-sample-trigger');
-const list = (page: Page) => page.locator('#gx-sample-list');
-const option = (page: Page, sample: Sample) => page.locator(`#gx-sample-${sample.id}`);
 const dialog = (page: Page) => page.locator('#gx-sample-dialog');
+const card = (page: Page, sample: Sample) => page.locator(`#gx-sample-${sample.id}`);
+const preview = (page: Page) => page.locator('#gx-sample-preview');
 const notice = (page: Page) => page.locator('.gx-sample-status');
+const modeNote = (page: Page) => page.locator('#gx-sample-mode-note');
 const announced = (page: Page) => page.locator('#gre-explore > p.gx-sr-only[role="status"]');
-const noticeText = (sample: Sample) => `Prefilled with the ${sample.name} values. This is an illustration — change anything you wish.`;
-const question = (sample: Sample) => `Replace your current choices with the ${sample.name} values?`;
+const prefilled = (sample: Sample) => `Prefilled with the ${sample.name} sample. You can change any value.`;
+const modified = (sample: Sample) => `Started from the ${sample.name} sample · Modified`;
+const question = (sample: Sample) => `Replace your current choices with the ${sample.name} sample?`;
 
 /** The checked site choices by accessible name, in page order. */
 const checkedSite = (page: Page) =>
@@ -55,111 +62,139 @@ const checkedSite = (page: Page) =>
 
 /** The chosen sample filled the draft and opened Site conditions, naming itself once. */
 async function expectFilled(page: Page, sample: Sample): Promise<void> {
+  await expect(dialog(page)).toHaveCount(0);
   await expect(heading(page)).toHaveText(SITE_HEADING);
   await expect(heading(page)).toBeFocused();
-  await expect(notice(page)).toHaveText(noticeText(sample));
+  await expect(notice(page)).toHaveText(prefilled(sample));
   // Announced once through the shared status region, not by the standing notice.
-  await expect(announced(page)).toHaveText(noticeText(sample));
+  await expect(announced(page)).toHaveText(prefilled(sample));
   await expect(notice(page)).not.toHaveAttribute('role');
   expect(await checkedSite(page)).toEqual([...sample.site]);
 }
 
-/** The modal question is open, names the sample, and holds focus on Keep my choices. */
+/** The dialog is open and modal on its card step, `sample` selected and previewed. */
+async function expectPreview(page: Page, sample: Sample): Promise<void> {
+  await expect(page.getByRole('dialog', { name: 'Try a prefilled sample' })).toBeVisible();
+  expect(await dialog(page).evaluate((node) => node.matches(':modal'))).toBe(true);
+  await expect(card(page, sample)).toHaveAttribute('aria-checked', 'true');
+  await expect(card(page, sample)).toHaveAttribute('tabindex', '0');
+  for (const other of SAMPLES.filter((s) => s.id !== sample.id)) {
+    await expect(card(page, other)).toHaveAttribute('aria-checked', 'false');
+    await expect(card(page, other)).toHaveAttribute('tabindex', '-1');
+  }
+  await expect(preview(page).locator('h3')).toHaveText(sample.title);
+  await expect(preview(page).locator('dd')).toHaveText([...sample.preview]);
+  await expect(preview(page)).toContainText(sample.slipNote);
+}
+
+/** The dialog's second step: the replacement question, focus on Keep my choices. */
 async function expectAsked(page: Page, sample: Sample): Promise<void> {
-  await expect(dialog(page)).toBeVisible();
   await expect(page.getByRole('dialog', { name: question(sample) })).toBeVisible();
   expect(await dialog(page).evaluate((node) => node.matches(':modal'))).toBe(true);
   await expect(page.locator('#gx-sample-keep')).toBeFocused();
 }
 
-test('Try a prefilled sample opens a listbox naming both samples by scale, with descriptors', async ({ page }) => {
+/** The draft as last saved, without the presentation. */
+const savedDraft = async (page: Page) => (await storedRecord(page))?.draft;
+
+test('Try a prefilled sample opens a dialog of two cards that preview without changing the draft', async ({ page }) => {
+  let dialogs = 0;
+  page.on('dialog', (d) => { dialogs += 1; void d.dismiss(); });
   await gotoExplore(page);
-  await expect(trigger(page)).toHaveText(/^Try a prefilled sample/);
-  await expect(trigger(page)).toHaveAttribute('aria-haspopup', 'listbox');
-  await expect(trigger(page)).toHaveAttribute('aria-expanded', 'false');
+  await expect(page.locator('.gx-intro-actions button')).toHaveText(['Build your scenario', 'Try a prefilled sample']);
+  await expect(trigger(page)).toHaveAttribute('aria-haspopup', 'dialog');
   await expect(trigger(page)).toHaveAccessibleDescription(HINT);
-  await expect(list(page)).toBeHidden();
-  // One sample action: the introduction's only buttons are Build your scenario and the trigger.
-  await expect(page.locator('.gx-intro-actions button')).toHaveText(['Build your scenario', /^Try a prefilled sample/]);
+  await expect(dialog(page)).toHaveCount(0);
+  const before = await savedDraft(page);
 
   await trigger(page).click();
-  await expect(trigger(page)).toHaveAttribute('aria-expanded', 'true');
-  await expect(page.getByRole('listbox', { name: 'Try a prefilled sample' })).toBeVisible();
+  const [first, second] = SAMPLES;
+  await expectPreview(page, first);
+  await expect(card(page, first)).toBeFocused();
+  await expect(page.getByRole('radiogroup', { name: 'Try a prefilled sample' })).toBeVisible();
   for (const sample of SAMPLES) {
-    const item = page.getByRole('option', { name: sample.label, exact: true });
+    const item = page.getByRole('radio', { name: sample.title, exact: true });
     await expect(item).toBeVisible();
     await expect(item).toHaveAccessibleDescription(sample.descriptor);
+    // Titles and descriptors name inputs; the slip window stays out of them.
+    await expect(item).not.toContainText('slip');
   }
-  await expect(option(page, SAMPLES[0])).toBeFocused();
-  await expect(option(page, SAMPLES[0])).toHaveAttribute('aria-selected', 'true');
-  // The button closes it again, keeping focus.
-  await trigger(page).click();
-  await expect(list(page)).toBeHidden();
-  await expect(trigger(page)).toHaveAttribute('aria-expanded', 'false');
+  await card(page, second).click();
+  await expectPreview(page, second);
+  await expect(card(page, second)).toBeFocused();
+  // Previewing changed nothing: Cancel closes, the draft is the one before.
+  await page.locator('#gx-sample-cancel').click();
+  await expect(dialog(page)).toHaveCount(0);
   await expect(trigger(page)).toBeFocused();
-  // A click elsewhere closes it too.
-  await trigger(page).click();
-  await page.locator('.gx-intro-grid').click();
-  await expect(list(page)).toBeHidden();
-  await expect(heading(page)).toHaveText('Use simulations to understand ground rupture.');
+  await expect(heading(page)).toHaveText(INTRO_HEADING);
+  expect(await savedDraft(page)).toEqual(before);
+  await action(page, 'Build your scenario').click();
+  expect(await checkedSite(page)).toEqual([]);
+  await expect(notice(page)).toHaveCount(0);
+  expect(dialogs).toBe(0);
 });
 
 for (const sample of SAMPLES) {
-  test(`${sample.id}: the listbox works from the keyboard`, async ({ page }) => {
+  test(`${sample.id}: the dialog works from the keyboard`, async ({ page }) => {
     await gotoExplore(page);
     const [first, last] = SAMPLES;
+    const before = await savedDraft(page);
     await action(page, 'Build your scenario').focus();
     await page.keyboard.press('Tab');
     await expect(trigger(page)).toBeFocused();
     await page.keyboard.press('Enter');
-    await expect(option(page, first)).toBeFocused();
+    await expect(card(page, first)).toBeFocused();
+    // Arrows move the selection and the preview with it, wrapping; Home and End jump.
     await page.keyboard.press('ArrowDown');
-    await expect(option(page, last)).toBeFocused();
-    await expect(option(page, last)).toHaveAttribute('aria-selected', 'true');
-    await expect(option(page, first)).toHaveAttribute('aria-selected', 'false');
+    await expect(card(page, last)).toBeFocused();
+    await expectPreview(page, last);
     await page.keyboard.press('ArrowDown');
-    await expect(option(page, last)).toBeFocused();
-    await page.keyboard.press('ArrowUp');
-    await expect(option(page, first)).toBeFocused();
-    await expect(option(page, first)).toHaveAttribute('aria-selected', 'true');
-    await page.keyboard.press('ArrowUp');
-    await expect(option(page, first)).toBeFocused();
-    await page.keyboard.press('Home');
-    await expect(option(page, first)).toBeFocused();
+    await expect(card(page, first)).toBeFocused();
+    await page.keyboard.press('ArrowLeft');
+    await expect(card(page, last)).toBeFocused();
+    await page.keyboard.press('ArrowRight');
+    await expect(card(page, first)).toBeFocused();
     await page.keyboard.press('End');
-    await expect(option(page, last)).toBeFocused();
-    await page.keyboard.press('Escape');
-    await expect(list(page)).toBeHidden();
-    await expect(trigger(page)).toBeFocused();
-    // ArrowUp opens on the last option; Tab leaves and closes the list.
-    await page.keyboard.press('ArrowUp');
-    await expect(option(page, last)).toBeFocused();
+    await expectPreview(page, last);
+    await page.keyboard.press('Home');
+    await expectPreview(page, first);
+    // The cards are one tab stop; Tab stays inside the dialog.
     await page.keyboard.press('Tab');
-    await expect(list(page)).toBeHidden();
-    await expect(trigger(page)).toHaveAttribute('aria-expanded', 'false');
+    await expect(page.locator('#gx-sample-apply')).toBeFocused();
+    await page.keyboard.press('Tab');
+    await expect(page.locator('#gx-sample-cancel')).toBeFocused();
+    await page.keyboard.press('Tab');
+    await expect(card(page, first)).toBeFocused();
+    await page.keyboard.press('Shift+Tab');
+    await expect(page.locator('#gx-sample-cancel')).toBeFocused();
+    // Escape closes without applying.
+    await page.keyboard.press('Escape');
+    await expect(dialog(page)).toHaveCount(0);
+    await expect(trigger(page)).toBeFocused();
+    expect(await savedDraft(page)).toEqual(before);
 
-    // Space opens; the arrows reach this sample; Enter chooses it.
-    await trigger(page).focus();
+    // Select this sample by keyboard and apply it.
     await page.keyboard.press('Space');
-    await expect(option(page, first)).toBeFocused();
+    await expect(card(page, first)).toBeFocused();
     if (sample.id === last.id) await page.keyboard.press('ArrowDown');
-    await expect(option(page, sample)).toBeFocused();
+    await expectPreview(page, sample);
+    await page.keyboard.press('Tab');
     await page.keyboard.press('Enter');
     await expectFilled(page, sample);
   });
 
-  test(`${sample.id}: a fresh draft fills silently, prefilled in both movement modes, and the walk stays sequential`, async ({ page }) => {
+  test(`${sample.id}: a fresh draft fills silently, prefilled in both movement modes, with the mode-switch note`, async ({ page }) => {
     let dialogs = 0;
     page.on('dialog', (d) => { dialogs += 1; void d.dismiss(); });
     await gotoExplore(page);
     await pickSample(page, sample.id);
     await expectFilled(page, sample);
-    await expect(dialog(page)).toHaveCount(0);
     await expect(action(page, 'Return to review')).toHaveCount(0);
 
     await action(page, 'Continue to fault movement').click();
     await expect(heading(page)).toHaveText(MOVEMENT_HEADING);
-    await expect(notice(page)).toHaveText(noticeText(sample));
+    await expect(notice(page)).toHaveText(prefilled(sample));
+    await expect(modeNote(page)).toHaveCount(0);
     await expect(page.locator('#gx-mode-offset')).toBeChecked();
     await expect(page.locator('#gx-offsetMax')).toHaveValue(sample.offsetMax);
     await page.locator('#gx-offset-feedback table').waitFor();
@@ -176,57 +211,72 @@ for (const sample of SAMPLES) {
         await expect(page.locator('#gx-offset-feedback tbody tr', { hasText: dip })).toContainText('Within range');
       }
     }
-    // Switching modes shows the other prefilled window; it is not an edit.
+    // Switching modes shows the other prefilled window and the note; it is not an edit.
     await setChecked(page, '#gx-mode-slip', true);
     await expect(page.locator('#gx-slipMin')).toHaveValue(sample.slipMin);
     await expect(page.locator('#gx-slipMax')).toHaveValue(sample.slipMax);
     await expect(page.locator('#gx-error-slipMin')).toBeHidden();
     await expect(page.locator('#gx-error-slipMax')).toBeHidden();
-    await expect(notice(page)).toHaveText(noticeText(sample));
+    await expect(modeNote(page)).toHaveText(MODE_NOTE);
+    await expect(announced(page)).toHaveText(MODE_NOTE);
+    await expect(notice(page)).toHaveText(prefilled(sample));
+    await setChecked(page, '#gx-mode-offset', true);
+    await expect(modeNote(page)).toHaveText(MODE_NOTE);
+    await setChecked(page, '#gx-mode-slip', true);
 
     // The slip-mode sample is a valid scenario on review.
     await action(page, 'Review scenario').click();
     await expect(page.locator('.gx-review-section', { hasText: 'Edit fault movement' })).toContainText(`${sample.slipMin}–${sample.slipMax} m fault slip`);
     await expect(page.locator('.gx-warning')).toHaveCount(0);
     await stepButton(page, 'site').click();
-    await expect(notice(page)).toHaveText(noticeText(sample));
+    await expect(notice(page)).toHaveText(prefilled(sample));
     // Review now reached and the walk past Site conditions, Return to review leads again.
     await expect(page.locator('.gx-footer .gx-primary')).toHaveText('Return to review');
     expect(dialogs).toBe(0);
   });
 
-  test(`${sample.id}: the notice stands on both input steps until the first draft edit`, async ({ page }) => {
+  test(`${sample.id}: the notice turns Modified at the first edit and stays until replacement or a new scenario`, async ({ page }) => {
     await gotoExplore(page);
     await pickSample(page, sample.id);
     await expectFilled(page, sample);
     await action(page, 'Continue to fault movement').click();
-    await expect(notice(page)).toHaveText(noticeText(sample));
-    await stepButton(page, 'site').click();
-    await expect(notice(page)).toHaveText(noticeText(sample));
     await stepButton(page, 'intro').click();
     await stepButton(page, 'movement').click();
-    await expect(notice(page)).toHaveText(noticeText(sample));
+    await expect(notice(page)).toHaveText(prefilled(sample));
 
-    // Typing removes it in place, without a re-render; it does not come back.
+    // Typing updates it in place, without a re-render; restoring the value keeps it Modified.
     await typeEntry(page, 'offsetMax', '1');
-    await expect(notice(page)).toHaveCount(0);
+    await expect(notice(page)).toHaveText(modified(sample));
     await typeEntry(page, 'offsetMax', sample.offsetMax);
+    await expect(notice(page)).toHaveText(modified(sample));
     await stepButton(page, 'site').click();
-    await expect(notice(page)).toHaveCount(0);
-    await expect(page.locator('.gx-sample-story')).toHaveCount(0);
+    await expect(notice(page)).toHaveText(modified(sample));
+    await expect(page.locator('.gx-sample-story')).toHaveCount(1);
+    // The mode-switch note belongs to the sample too.
+    await stepButton(page, 'movement').click();
+    await setChecked(page, '#gx-mode-slip', true);
+    await expect(modeNote(page)).toHaveText(MODE_NOTE);
 
-    // A site edit clears a fill as well (this one replaces the edited draft through the dialog).
+    // Replacement starts over in the first form.
     await stepButton(page, 'intro').click();
     await pickSample(page, sample.id);
+    await expectAsked(page, sample);
     await action(page, 'Use the sample').click();
     await expectFilled(page, sample);
     await setChecked(page, '#gx-depth-0', !(await page.locator('#gx-depth-0').isChecked()));
-    await expect(notice(page)).toHaveCount(0);
+    await expect(notice(page)).toHaveText(modified(sample));
     await action(page, 'Continue to fault movement').click();
+    await expect(notice(page)).toHaveText(modified(sample));
+    await expect(modeNote(page)).toHaveCount(0);
+
+    // Start a new scenario removes it.
+    await page.locator('.gx-restart button').click();
+    await expect(heading(page)).toHaveText(SITE_HEADING);
     await expect(notice(page)).toHaveCount(0);
+    await expect(page.locator('.gx-sample-story')).toHaveCount(0);
   });
 
-  test(`${sample.id}: with a confirmed scenario, the modal asks; Escape and Keep my choices keep them, Use the sample replaces only the draft`, async ({ page }) => {
+  test(`${sample.id}: with a confirmed scenario, the question follows; Escape and Keep my choices keep them, Use the sample replaces only the draft`, async ({ page }) => {
     let dialogs = 0;
     page.on('dialog', (d) => { dialogs += 1; void d.dismiss(); });
     await gotoExplore(page);
@@ -274,44 +324,40 @@ for (const sample of SAMPLES) {
     await expect(page.locator('#gx-population-all_stages')).toBeChecked();
     await stepButton(page, 'site').click();
     await expect(page.locator('.gx-footer .gx-primary')).toHaveText('Return to review');
-    await expect(notice(page)).toHaveText(noticeText(sample));
-    // A refinement is a draft edit too: it clears the notice.
+    await expect(notice(page)).toHaveText(prefilled(sample));
+    // A refinement is a draft edit too.
     await stepButton(page, 'results').click();
     await setChecked(page, '#gx-population-one_state_per_trial', true);
     await stepButton(page, 'site').click();
-    await expect(notice(page)).toHaveCount(0);
+    await expect(notice(page)).toHaveText(modified(sample));
     expect(dialogs).toBe(0);
   });
 }
 
-test('an open listbox and an open dialog survive the re-render of a settling restore', async ({ page }) => {
+test('an open dialog survives the re-render of a settling restore, at either step', async ({ page }) => {
   await gotoExplore(page);
   await confirmGolden(page, 'GS-1');
   await stepButton(page, 'intro').click();
   const [first, last] = SAMPLES;
 
-  // Hold the restore's conversion data so it settles while the listbox is open.
+  // Hold the restore's conversion data so it settles while the dialog is open.
   let release = await holdRegression(page);
   await page.reload();
   await explorerReady(page);
   await expect(page.locator('.gx-restoring')).toHaveCount(1);
-  await trigger(page).focus();
+  await trigger(page).click();
   await page.keyboard.press('ArrowDown');
-  await page.keyboard.press('ArrowDown');
-  await expect(option(page, last)).toBeFocused();
+  await expectPreview(page, last);
   release();
   await expect(page.locator('.gx-restoring')).toHaveCount(0);
   await settleFrames(page);
-  await expect(list(page)).toBeVisible();
-  await expect(trigger(page)).toHaveAttribute('aria-expanded', 'true');
-  await expect(option(page, last)).toBeFocused();
-  await expect(option(page, last)).toHaveAttribute('aria-selected', 'true');
+  await expectPreview(page, last);
+  await expect(card(page, last)).toBeFocused();
   await page.keyboard.press('ArrowUp');
-  await expect(option(page, first)).toBeFocused();
+  await expectPreview(page, first);
   await page.keyboard.press('Escape');
   await expect(trigger(page)).toBeFocused();
 
-  // The same for the dialog: still modal, focus on the same choice, Escape still keeps.
   release = await holdRegression(page);
   await page.reload();
   await explorerReady(page);
@@ -332,7 +378,7 @@ test('an open listbox and an open dialog survive the re-render of a settling res
   await expect(page.locator('.gx-context')).toBeVisible();
 });
 
-test('opening and closing the listbox is neither a navigation nor an edit: the restore notice stays', async ({ page }) => {
+test('opening, browsing, and closing the dialog is neither a navigation nor an edit: the restore notice stays', async ({ page }) => {
   await gotoExplore(page);
   await action(page, 'Build your scenario').click();
   await setChecked(page, '#gx-faultDip-0', true);
@@ -341,17 +387,16 @@ test('opening and closing the listbox is neither a navigation nor an edit: the r
   await explorerReady(page);
   await expect(page.locator('.gx-restored')).toHaveCount(1);
   await trigger(page).click();
+  await card(page, SAMPLES[1]).click();
   await page.keyboard.press('Escape');
-  await trigger(page).click();
-  await trigger(page).click();
   await expect(page.locator('.gx-restored')).toHaveCount(1);
-  // Choosing a sample acts, and the notice goes with it.
+  // Asking and keeping changes nothing either.
   await pickSample(page, 'illustrative');
-  await expect(page.locator('.gx-restored')).toHaveCount(0);
   await action(page, 'Keep my choices').click();
+  await expect(page.locator('.gx-restored')).toHaveCount(1);
 });
 
-test('an edited draft without a confirmation asks first, and each option keeps its identity', async ({ page }) => {
+test('an edited draft without a confirmation asks first, and each card keeps its identity', async ({ page }) => {
   await gotoExplore(page);
   await action(page, 'Build your scenario').click();
   await setChecked(page, '#gx-faultDip-0', true);
@@ -374,7 +419,7 @@ test('an edited draft without a confirmation asks first, and each option keeps i
   await action(page, 'Use the sample').click();
   await expectFilled(page, kern);
 
-  // From a filled Kern draft, the Chi-Chi option asks and replaces with its own values.
+  // From a filled steeper-angle draft, the lower-angle card asks and replaces with its own values.
   await stepButton(page, 'intro').click();
   await pickSample(page, illustrative.id);
   await expectAsked(page, illustrative);
@@ -384,7 +429,7 @@ test('an edited draft without a confirmation asks first, and each option keeps i
 
 // The "About this sample" disclosure (guided DDD §10.2): closed after
 // either fill, the sample's own story with loaded, credited images, kept
-// open across steps while the fill stands, and gone with the notice.
+// open across steps, and staying with the notice through edits.
 const STORY = {
   illustrative: { text: '1999 M 7.6 Chi-Chi earthquake', credit: 'Photo: Liu Shu fu / Office of the President, Taiwan', image: 'sample-chichi-kuangfu-track.jpg' },
   kern: { text: 'M 7.36 Kern County earthquake', credit: 'Photo: D. H. Kupfer, U.S. Geological Survey, 1952. Public domain.', image: 'sample-kern-bealville-tracks.jpg' },
@@ -425,14 +470,14 @@ for (const sample of SAMPLES) {
       await expect(anchor.locator('.gx-sr-only')).toHaveText(' (opens in a new tab)');
     }
 
-    // The story stays on Site conditions, and its open state survives the trip to Fault movement.
+    // The story stays on Site conditions; its open state survives the trip to Fault movement and an edit.
     await action(page, 'Continue to fault movement').click();
     await expect(page.locator('.gx-sample-story')).toHaveCount(0);
     await stepButton(page, 'site').click();
     await expect(page.locator('details.gx-sample-story')).toHaveAttribute('open');
-    // The first edit takes it away with the notice.
     await setChecked(page, '#gx-faultDip-0', true);
-    await expect(page.locator('.gx-sample-story')).toHaveCount(0);
+    await expect(notice(page)).toHaveText(modified(sample));
+    await expect(page.locator('details.gx-sample-story')).toHaveAttribute('open');
 
     // A new fill starts closed.
     await stepButton(page, 'intro').click();

@@ -18,8 +18,11 @@ for (const width of [320, 1024] as const) {
     const fits = async (where: string) => expect(await overflows(page), `${where} at ${width} px`).toBe(false);
     await fits('introduction');
     await page.locator('#gx-sample-trigger').click();
-    await fits('introduction with the sample listbox open');
+    await fits('introduction with the sample dialog open');
+    await page.locator('#gx-sample-kern').click();
+    await fits('sample dialog previewing the second card');
     await page.locator('#gx-sample-illustrative').click();
+    await page.locator('#gx-sample-apply').click();
     await fits('site conditions with the sample notice');
     await page.locator('details.gx-sample-story summary').click();
     await page.locator('details.gx-sample-story img').scrollIntoViewIfNeeded();
