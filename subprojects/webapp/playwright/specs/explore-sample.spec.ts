@@ -665,7 +665,7 @@ for (const sample of SAMPLES) {
 // name the events as the stories do (owner ruling on choice f, 2026-11-05).
 const ANNOTATION = {
   illustrative: {
-    faultDip: 'A sample choice; the 1999 Chi-Chi earthquake does not set these angles.',
+    faultDip: 'These angles are sample choices, not taken from the 1999 Chi-Chi earthquake.',
     offsetMax: 'Of the scale of the surface offsets in the sample’s background: meters of uplift, including about 2.5 m at a school playground in the 1999 Chi-Chi earthquake.',
     slip: 'An example band within the simulations’ coverage. It is not converted from the surface offset.',
     sources: { faultDip: 0, offsetMax: 2, slip: 0 },

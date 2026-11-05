@@ -113,7 +113,7 @@ const SAMPLE_CHOICE: Annotation = { text: 'A sample choice, not a description of
  */
 export const ANNOTATIONS: Record<SampleId, Record<AnnotatedField, Annotation>> = {
   illustrative: {
-    faultDip: { text: 'A sample choice; the 1999 Chi-Chi earthquake does not set these angles.', sources: [] },
+    faultDip: { text: 'These angles are sample choices, not taken from the 1999 Chi-Chi earthquake.', sources: [] },
     depth: SAMPLE_CHOICE,
     density: SAMPLE_CHOICE,
     sediment: SAMPLE_CHOICE,
