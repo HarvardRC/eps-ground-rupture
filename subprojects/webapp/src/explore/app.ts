@@ -99,6 +99,8 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   let regressionPromise: Promise<boolean> | null = null;
   let regressionError = '';
   let busy = false;
+  // True while a restore owns `busy` (§9.2, step 3); `invalidate` releases it at once (G-16).
+  let restoring = false;
   let navigationVersion = 0;
   let sequence = 0;
   let chartObserver: ResizeObserver | null = null;
@@ -334,14 +336,14 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   }
 
   function moveGuide(index: 0 | 1 | 2 | 3 | 4): void {
-    navigationVersion += 1;
+    invalidate();
     guideIndex = index;
     if (index < 3) display = { ...display, measurement: MEASUREMENTS[index] };
     render('gx-guide-heading', true);
   }
 
   function leaveGuide(): void {
-    navigationVersion += 1;
+    invalidate();
     const previous = guideIndex;
     guideIndex = null;
     if (previous !== null && previous >= 3) refineOpen = true;
@@ -519,23 +521,22 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     const version = navigationVersion;
     // A newer confirmation or Start a new scenario supersedes this restore;
     // its continuation then leaves every shared flag alone.
-    const superseded = () => !alive() || restoreTarget !== target;
-    const interrupted = () => { busy = false; restoreError = 'Restoring the results was interrupted.'; };
-    busy = true; restoreError = ''; render();
+    // A navigation (`invalidate`) has already released the busy state and
+    // recorded the interruption; either way the continuation stops here.
+    const superseded = () => !alive() || restoreTarget !== target || version !== navigationVersion;
+    busy = true; restoring = true; restoreError = ''; render();
     const checked = validateDraft(target, manifest);
-    if (!checked.scenario) { busy = false; restoreError = 'The results of your confirmed scenario could not be recalculated.'; render(); return; }
+    if (!checked.scenario) { busy = false; restoring = false; restoreError = 'The results of your confirmed scenario could not be recalculated.'; render(); return; }
     if (target.mode === 'offset') {
       const loaded = await ensureRegression();
       if (superseded()) return;
-      if (version !== navigationVersion) { interrupted(); render(); return; }
-      if (!loaded) { busy = false; restoreError = 'The offset-conversion data could not be loaded, so the results of your confirmed scenario could not be recalculated.'; render(); return; }
+      if (!loaded) { busy = false; restoring = false; restoreError = 'The offset-conversion data could not be loaded, so the results of your confirmed scenario could not be recalculated.'; render(); return; }
     }
     await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
     if (superseded()) return;
-    if (version !== navigationVersion) { interrupted(); render(); return; }
     try {
       const computed = computeResult(vintage, checked.scenario, sequence + 1, regression);
-      confirmed = target; result = computed; sequence += 1; busy = false; restoreTarget = null; restoreError = '';
+      confirmed = target; result = computed; sequence += 1; busy = false; restoring = false; restoreTarget = null; restoreError = '';
       adjustLogScale(computed);
       restoredNotice = true;
       // Move focus only when the reader has not already moved it into the page.
@@ -543,7 +544,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       render(step === 'results' && focusFree ? 'gx-heading' : undefined);
       status.textContent = `${formatCount(computed.selection.matchingRecords)} simulation records match your confirmed scenario.${logOffNotice ? ` ${copyText('ddd5.10.recoveryLogScaleOff')}` : ''}`;
     } catch (error) {
-      console.error('Guided restore:', error); busy = false;
+      console.error('Guided restore:', error); busy = false; restoring = false;
       restoreError = 'The results of your confirmed scenario could not be recalculated.';
       render();
     }
@@ -571,10 +572,25 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     restoredNotice = restoreTarget === null && !untouched;
   }
 
+  /**
+   * Cancel pending async work (§9.2, step 3: a restore in flight is cancelled
+   * exactly as a review request). A pending restore releases its busy state
+   * here rather than when its conversion fetch settles, so Show results is
+   * available at once; its late continuation then leaves every shared flag alone.
+   */
+  function invalidate(): void {
+    navigationVersion += 1;
+    if (!restoring) return;
+    restoring = false; busy = false; restoreError = 'Restoring the results was interrupted.';
+    // Callers that do not re-render (typing) still replace the stale progress line.
+    const pending = $('.gx-restoring');
+    if (pending) pending.outerHTML = restorePanel();
+  }
+
   function setStep(next: Step): void {
     if (next === 'results' && !result) return;
     if (next !== 'results') guideIndex = null;
-    navigationVersion += 1; restoredNotice = false; logOffNotice = false;
+    invalidate(); restoredNotice = false; logOffNotice = false;
     step = next; reached.add(next); generalError = ''; alert.textContent = ''; render('gx-heading', true);
     if (next === 'movement' && draft.mode === 'offset') void ensureRegression();
   }
@@ -602,7 +618,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
 
   function showIssues(found: Issue[]): void {
     guideIndex = null;
-    navigationVersion += 1;
+    invalidate();
     issues = found;
     const first = found[0];
     if (!first) return;
@@ -654,7 +670,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       if (!checked.scenario) { busy = false; showIssues(checked.issues); return; }
       const computed = computeResult(vintage, checked.scenario, sequence + 1, regression);
       confirmed = snapshot; result = computed; sequence += 1; busy = false; issues = []; refineOpen = false; guideIndex = null; alert.textContent = '';
-      restoreTarget = null; restoreError = ''; restoredNotice = false; logOffNotice = false;
+      restoreTarget = null; restoring = false; restoreError = ''; restoredNotice = false; logOffNotice = false;
       adjustLogScale(computed);
       step = 'results'; reached.add('results');
       render('gx-heading', true);
@@ -771,13 +787,13 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       else if (action === 'new') {
         // Clear the record before the fresh state is saved (§9.2), including an unrestorable one.
         if (options.storage) clearSession(options.storage);
-        blocked = null; restoreTarget = null; restoreError = ''; busy = false;
+        blocked = null; restoreTarget = null; restoreError = ''; busy = false; restoring = false;
         guideIndex = null; sampleArrived = null; draft = freshDraft(manifest); confirmed = null; result = null; issues = []; generalError = ''; reached = new Set(['intro', 'site']); display = defaultDisplayState(); refineOpen = false; setStep('site'); status.textContent = 'New scenario. Choose one or more values for each site condition.';
       }
       else if (action === 'retry-restore') void restoreResults();
-      else if (action === 'plus' || action === 'minus') { navigationVersion += 1; const field = target.dataset.field as 'slipMin' | 'slipMax' | 'offsetMax'; draft[field] = stepDecimal(draft[field], action === 'plus' ? 1 : -1); issues = issues.filter(item => item.field !== field); render(); status.textContent = `${field === 'slipMin' ? 'Minimum' : 'Maximum'}: ${draft[field]} m.`; }
-      else if (action === 'slip-shortcut') { navigationVersion += 1; draft.slipMax = '5'; issues = issues.filter(item => item.field !== 'slipMax'); render('gx-slipMax'); }
-      else if (action === 'offset-shortcut' && regression) { navigationVersion += 1; const cap = offsetShortcut(draft.faultDip, regression, manifest.slipWindowBounds.max); if (cap !== null) draft.offsetMax = cap; issues = issues.filter(item => item.field !== 'offsetMax'); render('gx-offsetMax'); }
+      else if (action === 'plus' || action === 'minus') { invalidate(); const field = target.dataset.field as 'slipMin' | 'slipMax' | 'offsetMax'; draft[field] = stepDecimal(draft[field], action === 'plus' ? 1 : -1); issues = issues.filter(item => item.field !== field); render(); status.textContent = `${field === 'slipMin' ? 'Minimum' : 'Maximum'}: ${draft[field]} m.`; }
+      else if (action === 'slip-shortcut') { invalidate(); draft.slipMax = '5'; issues = issues.filter(item => item.field !== 'slipMax'); render('gx-slipMax'); }
+      else if (action === 'offset-shortcut' && regression) { invalidate(); const cap = offsetShortcut(draft.faultDip, regression, manifest.slipWindowBounds.max); if (cap !== null) draft.offsetMax = cap; issues = issues.filter(item => item.field !== 'offsetMax'); render('gx-offsetMax'); }
       else if (action === 'retry-regression') { $('#gx-offsetMax')?.focus(); void ensureRegression(); }
       else if (action === 'download') download();
     } catch (error) {
@@ -793,7 +809,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       display = { ...display, logScale: input.checked }; restoredNotice = false; logOffNotice = false;
       render(input.id); return;
     }
-    navigationVersion += 1; restoredNotice = false; logOffNotice = false;
+    invalidate(); restoredNotice = false; logOffNotice = false;
     if (input.name === 'gx-mode') { draft.mode = input.value as 'slip' | 'offset'; issues = issues.filter(item => item.step !== 'movement'); render(); if (draft.mode === 'offset') void ensureRegression(); return; }
     if (input.name === 'gx-population') { draft.population = input.value as Draft['population']; render(); return; }
     const field = input.dataset.all ?? input.dataset.choice;
@@ -817,7 +833,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     const input = event.target;
     if (!(input instanceof HTMLInputElement)) return;
     if (input.dataset.number) {
-      navigationVersion += 1;
+      invalidate();
       const field = input.dataset.number as 'slipMin' | 'slipMax' | 'offsetMax';
       draft[field] = input.value; issues = issues.filter(item => item.field !== field);
       input.removeAttribute('aria-invalid'); const error = $(`#gx-error-${field}`); if (error) { error.hidden = true; error.textContent = ''; }

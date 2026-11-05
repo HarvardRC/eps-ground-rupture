@@ -810,6 +810,86 @@ evidence.
 
 Not verified: screen-reader announcement of the renamed status
 line, touch, and engines other than Chromium.
+### Restore busy release, 2026-11-04 (G-16)
+
+G-16 ran under the owner's release and grant renewal of 2026-11-04
+([Commands](#commands)). It fixes the external review's defect
+against §9.2. A restore in offset mode waits for the conversion
+data. Until now, a navigation during that wait marked the restore
+interrupted only when the fetch settled, so a stalled fetch kept
+**Show results** disabled even for a slip-mode draft that needs no
+conversion data.
+
+- Every former `navigationVersion` increment in
+  `src/explore/app.ts` now calls `invalidate()`. Version semantics
+  are unchanged.
+- While a restore owns `busy` (the new `restoring` flag),
+  `invalidate()` releases it immediately and records `Restoring the
+  results was interrupted.`, so the retry panel and **Show results**
+  are available at once.
+- Typing in an entry field does not re-render the page, so the
+  release replaces a visible progress line in place.
+- The restore's late continuation now returns on any version change
+  as well as on supersession, leaving every shared flag alone. It
+  can therefore never clear the `busy` state of a confirmation the
+  reader started after the release.
+- A successful confirmation also clears `restoring`. After the
+  review, a restore superseded by a confirmation can no longer leave
+  the flag stale.
+- Restore outcomes are otherwise unchanged: success, a validation
+  failure, a conversion-load failure, the interruption message, and
+  Retry.
+
+The §9.5 continuity spec (item 6) gains two tests. Each holds the
+regression response for its whole run:
+
+- **Navigation.** After a reload on Results, a navigation clears
+  the progress line and shows the interruption at once. A slip-mode
+  draft then reviews and confirms while the fetch is still held. The
+  released fetch, processed before the checks run (proved by the
+  offset conversion table rendering), changes neither the confirmed
+  count nor the movement, and adds no restore notice.
+- **Typing.** After a reload on Movement, typing in the offset field
+  cancels the restore in place. After the release, the interruption
+  stays until Retry succeeds.
+
+Both tests failed against the unfixed code at the progress-line
+check. The hold helpers moved from the race spec into
+`playwright/explore-support.ts`, shared by both specs.
+
+One limit is accepted under the row's wording. Suppose a reload
+lands on Review with a slip-mode draft over an offset confirmation
+while the fetch stalls. **Show results** stays disabled until the
+reader navigates or edits, because a disabled button cannot itself
+supersede the restore.
+
+At this verification:
+
+- The pinned Node suite passed all 417 tests; typechecking and the
+  bundles passed. Strict publication and preview builds passed
+  with `explore-b97a505fb764.js` and `explore-abe9a2aa7049.css`.
+  After rebasing onto the merged G-14, the suite passed all 422
+  tests and the builds passed with `explore-18adc509ae2e.js` and
+  `explore-cbf963b397ab.css`.
+  The `/scenario/` bundles `app-26490347afd0.js` and
+  `app-08bebc049c15.css` were unchanged. All 31 hook tests passed.
+- The doc checks below passed: relative links resolved, PDD
+  agreement held, and traceability linted 491 rows with no gaps.
+- The guided specs passed 60 of 60 in `desktop` and `mobile`, and
+  68 of 68 after the rebase onto G-14. The
+  continuity and race specs passed 60 of 60 over three repeats.
+- The full lane passed 211, skipped 5, and failed 1: the legacy
+  `/scenario/` `axe: the failure states` spec, the same failure
+  recorded under G-12.
+
+Independent review passed with no blocking finding. Its
+should-fix, a deterministic proof that the held response was
+processed, and its nits (the stale `restoring` flag, the shared
+helpers, a test title) are applied. The accepted limit above is its
+third nit.
+
+Not verified: a real network stall, as opposed to a held route;
+touch; and engines other than Chromium.
 
 ## Separate CI investigation
 

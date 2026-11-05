@@ -136,3 +136,18 @@ export const storedRecord = (page: Page): Promise<Record<string, any> | null> =>
     const text = sessionStorage.getItem(key);
     return text === null ? null : JSON.parse(text);
   }, SESSION_KEY);
+
+/** The regression export's served path, matched by glob. */
+export const REGRESSION = '**/regression-*.json.gz';
+
+/** Hold every regression response until the returned release is called. */
+export async function holdRegression(page: Page): Promise<() => void> {
+  let release!: () => void;
+  const held = new Promise<void>((resolve) => { release = resolve; });
+  await page.route(REGRESSION, async (route) => { await held; await route.continue(); });
+  return release;
+}
+
+/** Two animation frames and a task, so pending continuations run. */
+export const settleFrames = (page: Page) =>
+  page.evaluate(() => new Promise<void>((done) => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(done, 0)))));
