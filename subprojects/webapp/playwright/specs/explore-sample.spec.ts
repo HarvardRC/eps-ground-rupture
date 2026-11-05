@@ -21,7 +21,7 @@ const HINT = 'Sample values, not recommended site values.';
 const TRIGGER = 'Why these sample values?';
 const HELPER = 'Background, photos and sources';
 const SHARED = 'These examples help you try the tool. They do not reconstruct either earthquake.';
-const MODE_NOTE = 'The two modes are separate assumptions. Each selects a different set of simulations, so results can differ.';
+const MODE_NOTE = 'The sample has separate example values for each mode; one is not converted from the other. Switching modes can change the results.';
 
 const SAMPLES = [
   {

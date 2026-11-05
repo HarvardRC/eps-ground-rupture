@@ -66,14 +66,19 @@
 #gre-explore .gx-sample-card:hover { background: var(--gx-wash); }
 #gre-explore .gx-sample-card[aria-checked="true"] { border: 2px solid var(--gx-accent); padding: 11px 13px; background: #f7f1ef; }
 #gre-explore .gx-sample-card span { color: var(--gx-muted); }
-#gre-explore .gx-sample-preview { margin-bottom: 18px; padding-top: 12px; border-top: 1px solid var(--gx-line); font-size: .8rem; }
-#gre-explore .gx-sample-mode-note { padding: 10px 15px; border-left: 3px solid #bc966b; background: #fff5df; font-size: .8rem; }
-#gre-explore .gx-sample-dialog { width: min(40rem, calc(100vw - 32px)); max-height: calc(100dvh - 32px); overflow: auto; padding: 24px; border: 1px solid #bc966b; border-radius: 10px; background: var(--gx-paper); color: var(--gx-ink); }
+#gre-explore .gx-sample-preview { margin-bottom: 0; padding-top: 12px; border-top: 1px solid var(--gx-line); font-size: .8rem; }
+/* Sample explanations read as information (§12.6): a neutral wash, not the caution family. */
+#gre-explore .gx-sample-mode-note { padding: 10px 15px; border-left: 3px solid var(--gx-muted); background: var(--gx-wash); font-size: .8rem; }
+/* The dialog's body scrolls under a persistent footer of actions (§12.4). */
+#gre-explore .gx-sample-dialog { width: min(40rem, calc(100vw - 32px)); max-height: calc(100dvh - 32px); overflow: hidden; padding: 0; border: 1px solid #bc966b; border-radius: 10px; background: var(--gx-paper); color: var(--gx-ink); }
 #gre-explore .gx-sample-dialog::backdrop { background: rgb(40 39 39 / .45); }
 #gre-explore .gx-sample-dialog h2 { font-size: 1rem; margin-bottom: 18px; }
 #gre-explore .gx-dialog-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+#gre-explore .gx-sample-dialog[open] { display: flex; flex-direction: column; }
+#gre-explore .gx-sample-dialog .gx-dialog-body { position: relative; flex: 1 1 auto; min-height: 0; overflow: auto; padding: 24px 24px 18px; }
+#gre-explore .gx-sample-dialog .gx-dialog-actions { flex: none; padding: 14px 24px 18px; border-top: 1px solid var(--gx-line); background: var(--gx-paper); }
 #gre-explore .gx-sample-active { margin: 0 0 18px; }
-#gre-explore .gx-sample-status { margin: 0 0 18px; padding: 10px 15px; border-left: 3px solid #bc966b; background: #fff5df; font-size: .8rem; }
+#gre-explore .gx-sample-status { margin: 0 0 18px; padding: 10px 15px; border-left: 3px solid var(--gx-muted); background: var(--gx-wash); font-size: .8rem; }
 #gre-explore .gx-sample-story { margin: 0 0 18px; padding: 10px 15px; border: 1px solid var(--gx-line); border-radius: 7px; font-size: .8rem; }
 #gre-explore .gx-sample-story > summary { cursor: pointer; }
 #gre-explore .gx-story-trigger { color: var(--gx-accent); font-weight: 700; font-size: .9rem; }
@@ -81,7 +86,7 @@
 #gre-explore .gx-sample-background { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--gx-line); }
 #gre-explore .gx-sample-background h4 { margin: 0; font-size: .85rem; }
 #gre-explore .gx-sample-background p { margin: 10px 0 0; }
-#gre-explore .gx-annotation { margin: 10px 0 0; padding: 6px 10px; border-left: 3px solid #bc966b; background: #fff5df; color: var(--gx-ink); font-size: .75rem; }
+#gre-explore .gx-annotation { margin: 10px 0 0; padding: 6px 10px; border-left: 3px solid var(--gx-muted); background: var(--gx-wash); color: var(--gx-ink); font-size: .75rem; }
 #gre-explore .gx-sample-story p { margin: 10px 0 0; }
 #gre-explore .gx-story-figure { margin: 12px 0 0; }
 #gre-explore .gx-story-figure img { display: block; width: 100%; max-width: 640px; height: auto; border-radius: 4px; }
@@ -343,3 +348,8 @@
 @media (max-width: 680px) {
   #gre-explore .gx-steps .gx-step-entry { padding: 7px; gap: 5px; }
 }
+/* The theme's floating Back to top control leaves the guided page only
+ * (guided DDD §12.3): it covered the movement step's heading and + control.
+ * This stylesheet loads only with the guided page, and the :has() scope
+ * keeps the rule to a page holding the explorer. */
+body:has(#gre-explore) .md-top { display: none !important; }
