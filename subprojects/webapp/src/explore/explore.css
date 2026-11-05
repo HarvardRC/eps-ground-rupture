@@ -78,9 +78,9 @@
 #gre-explore .gx-sample-dialog .gx-dialog-body { position: relative; flex: 1 1 auto; min-height: 0; overflow: auto; padding: 24px 24px 18px; scroll-padding-block: 12px; }
 #gre-explore .gx-sample-dialog .gx-dialog-body > :last-child { margin-bottom: 0; }
 /* A very short viewport (under 280 px, such as 1280 × 720 at 400% zoom) cannot spare a fixed footer:
- * the whole dialog scrolls instead, so the actions are never clipped. */
+ * the whole dialog scrolls instead, so the preview stays readable and the actions reachable. */
 @media (max-height: 17.5em) {
-  #gre-explore .gx-sample-dialog[open] { display: block; overflow: auto; }
+  #gre-explore .gx-sample-dialog[open] { display: block; overflow: auto; scroll-padding-block: 12px; }
   #gre-explore .gx-sample-dialog .gx-dialog-body { overflow: visible; }
 }
 #gre-explore .gx-sample-dialog .gx-dialog-actions { flex: none; padding: 14px 24px 18px; border-top: 1px solid var(--gx-line); background: var(--gx-paper); }

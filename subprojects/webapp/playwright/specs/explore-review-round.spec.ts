@@ -6,6 +6,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { action, gotoExplore, pickSample, setChecked } from '../explore-support';
+import { mounted, settle } from '../support';
 
 test.describe.configure({ timeout: 120_000 });
 
@@ -45,6 +46,9 @@ test('the theme\'s Back to top control leaves the guided page only (§12.3)', as
   await expect(page.locator('.md-top')).not.toHaveAttribute('hidden');
   // And the existing explorer, loaded directly.
   await page.goto('scenario/');
+  // The existing explorer scrolls to its panel when it mounts: reveal only after that.
+  await mounted(page);
+  await settle(page);
   await revealBackToTop(page);
   expect(await topDisplay(page)).toBe('block');
   await expect(page.locator('.md-top')).not.toHaveAttribute('hidden');
@@ -81,18 +85,25 @@ for (const id of ['illustrative', 'kern'] as const) {
   });
 }
 
-test('a very short viewport scrolls the whole dialog, so the actions are never clipped (§12.4)', async ({ page }) => {
+test('a very short viewport scrolls the whole dialog, so the preview stays readable and the actions reachable (§12.4)', async ({ page }) => {
   await gotoExplore(page);
   await page.setViewportSize({ width: 320, height: 180 });
   await page.locator('#gx-sample-trigger').click();
-  const apply = page.locator('#gx-sample-apply');
-  await apply.scrollIntoViewIfNeeded();
-  expect(await apply.evaluate((node) => {
+  const dialog = page.locator('#gx-sample-dialog');
+  // The fallback itself: the dialog is the one scroller, not its body under a footer.
+  expect(await dialog.evaluate((n) => getComputedStyle(n).display)).toBe('block');
+  expect(await dialog.evaluate((n) => n.scrollHeight > n.clientHeight)).toBe(true);
+  expect(await dialog.locator('.gx-dialog-body').evaluate((n) => n.scrollHeight <= n.clientHeight + 1)).toBe(true);
+  const uncovered = (selector: string) => page.locator(selector).evaluate((node) => {
     const box = node.getBoundingClientRect();
     return box.top >= 0 && box.bottom <= innerHeight && node.contains(document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2));
-  })).toBe(true);
-  await apply.click();
-  await expect(page.locator('#gx-sample-dialog')).toHaveCount(0);
+  });
+  expect(await uncovered('#gx-sample-title')).toBe(true);
+  await page.locator('#gx-sample-cancel').scrollIntoViewIfNeeded();
+  expect(await uncovered('#gx-sample-cancel')).toBe(true);
+  await page.locator('#gx-sample-apply').scrollIntoViewIfNeeded();
+  await page.locator('#gx-sample-apply').click();
+  await expect(dialog).toHaveCount(0);
 });
 
 test('both slip endpoints carry the Required mark; the initial minimum stays 0 (§12.5)', async ({ page }) => {
