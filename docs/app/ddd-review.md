@@ -1916,6 +1916,23 @@ design; G-22 and G-23 are released on the standing terms.
 Option B — `/scenario/` adopting the copy-layer wording — stays
 open with the owner.
 
+## Option B declined; /scenario/ redesign framed (2026-11-05)
+
+The owner keeps ruling (A): the guided copy layer stands, and the
+shared registry, the copy deck, and `/scenario/` stay unchanged
+this phase. Looking at the page again, the owner judges that
+`/scenario/` needs a major redesign, not wording adjustments, so
+option B — the registry adopting the audit wording — is declined
+as a standalone change and folds into the queued `/scenario/`
+rework decision. The owner frames that rework as a question of
+role: if the page is to be a sandbox for iterative work beside
+the guided journey, how that is done — audience and entry points,
+what migrates from the guided work, whether one engine serves
+both presentations — is to be figured out when the next phase
+opens (D-41). The overlay's documented fold-in remains the path
+for the wording whenever the redesign adopts it; nothing in the
+current release changes.
+
 ## References
 
 - [`docs/app/ddd.md` — Ground Rupture Explorer — detailed design document](ddd.md).
