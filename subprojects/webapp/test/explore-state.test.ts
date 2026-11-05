@@ -13,6 +13,9 @@ import {
   offsetShortcut,
   fieldHoldsSample,
   holdsSample,
+  invalidNumberMessage,
+  NUMBER_MALFORMED,
+  NUMBER_TOO_LONG,
   isSampleId,
   sampleDraft,
   sedimentGroup,
@@ -81,6 +84,30 @@ describe('guided draft validation', () => {
     draft.mode = 'offset';
     draft.offsetMax = '0';
     assert.deepEqual(validateDraft(draft, manifest).scenario?.window, { mode: 'offset', offsetMax: '0' });
+  });
+
+  test('an invalid entry is explained by the rule it broke (§11.1)', () => {
+    const draft = completeDraft();
+    const message = (field: 'slipMin' | 'offsetMax', input: string) => {
+      draft.mode = field === 'slipMin' ? 'slip' : 'offset';
+      draft[field] = input;
+      return validateDraft(draft, manifest).issues.find(issue => issue.field === field)?.message;
+    };
+    for (const input of ['abc', '-1', '1.2.3', '1,2,3', '.', '1e3', '3 m']) {
+      assert.equal(message('slipMin', input), NUMBER_MALFORMED, input);
+      assert.equal(message('offsetMax', input), NUMBER_MALFORMED, input);
+    }
+    // Over 16 as typed, or over 16 once ".5" is written "0.5".
+    for (const input of ['00000000000000000', '0.123456789012345', '.123456789012345', ' 12345678901234567 ']) {
+      assert.equal(message('slipMin', input), NUMBER_TOO_LONG, input);
+      assert.equal(message('offsetMax', input), NUMBER_TOO_LONG, input);
+    }
+    assert.equal(invalidNumberMessage('.123456789012345'), NUMBER_TOO_LONG);
+    // A comma decimal follows the same rules.
+    assert.equal(invalidNumberMessage(',123456789012345'), NUMBER_TOO_LONG);
+    assert.equal(invalidNumberMessage('1,2,3'), NUMBER_MALFORMED);
+    assert.match(NUMBER_TOO_LONG, /16 characters/);
+    for (const issue of validateDraft({ ...completeDraft(), mode: 'offset', offsetMax: 'x' }, manifest).issues) assert.equal(issue.message.includes('normalization'), false);
   });
 
   test('normalization preserves raw edits and respects both length limits', () => {
