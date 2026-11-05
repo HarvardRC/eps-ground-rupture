@@ -707,8 +707,9 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     };
     const { sample, confirmedSample } = record.display;
     sampleFill = sample ? rebuild(sample.id, sample.modified) : null;
-    confirmedFill = !record.confirmed || !confirmedSample ? null
-      : confirmedSample.current && sampleFill ? { ...sampleFill, modified: confirmedSample.modified }
+    // A confirmed fill never stands without a working one (the record's own rule).
+    confirmedFill = !record.confirmed || !confirmedSample || !sampleFill ? null
+      : confirmedSample.current ? { ...sampleFill, modified: confirmedSample.modified }
       : rebuild(confirmedSample.id, confirmedSample.modified);
     sampleModeNote = sampleFill !== null && draft.mode !== sampleFill.values.mode;
   }

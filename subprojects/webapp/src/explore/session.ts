@@ -83,7 +83,10 @@ export function loadSession(storage: Storage): SessionRecord | 'absent' | 'inval
   } catch {
     return 'invalid';
   }
-  return isRecord(value) ? value : 'invalid';
+  if (!isRecord(value)) return 'invalid';
+  // A record from before the sample keys reads them as null.
+  if (!('sample' in value.display)) Object.assign(value.display, { sample: null, confirmedSample: null });
+  return value;
 }
 
 export function clearSession(storage: Storage): void {
@@ -146,6 +149,7 @@ const isStoredConfirmed = (value: unknown): value is StoredConfirmedSample =>
   isObject(value) && hasExactly(value, ['id', 'modified', 'current']) && isSampleId(value.id)
   && typeof value.modified === 'boolean' && typeof value.current === 'boolean';
 
+/** The display choices; the sample keys may be absent together (a record written before them). */
 function isDisplay(value: unknown): value is DisplayChoices {
   if (!isObject(value)) return false;
   // Both sample keys or neither: a record from before them restores without a notice.
@@ -156,8 +160,6 @@ function isDisplay(value: unknown): value is DisplayChoices {
     if (!(sample === null || isStoredSample(sample)) || !(confirmedSample === null || isStoredConfirmed(confirmedSample))) return false;
     // A confirmed fill still current is the working fill itself; a confirmed fill implies a working one.
     if (confirmedSample !== null && (sample === null || (confirmedSample.current && confirmedSample.id !== sample.id))) return false;
-  } else {
-    value.sample = null; value.confirmedSample = null;
   }
   const readoff = (v: unknown): v is number | null => v === null || (Number.isInteger(v) && (v as number) >= 0 && (v as number) <= 100);
   const view = (v: unknown): v is PanelView => v === 'histogram' || v === 'cumulative';
@@ -174,5 +176,5 @@ function isRecord(value: unknown): value is SessionRecord {
     && isDraft(value.draft) && (value.confirmed === null || isDraft(value.confirmed))
     && isDisplay(value.display)
     // The confirmed scenario's fill needs a confirmed scenario.
-    && (value.confirmed !== null || (value.display as DisplayChoices).confirmedSample === null);
+    && (value.confirmed !== null || !(value.display as Partial<DisplayChoices>).confirmedSample);
 }

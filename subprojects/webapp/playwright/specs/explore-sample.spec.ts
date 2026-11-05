@@ -443,7 +443,7 @@ for (const sample of SAMPLES) {
     await action(page, 'Show results').click();
     await page.locator('.gx-context').waitFor();
 
-    // The same fill: an edit turns it Modified, and after a reload discarding keeps Modified.
+    // The same fill (stored as current): an edit turns it Modified, and after a reload discarding keeps Modified.
     await page.locator('#gx-refine-button').click();
     await setChecked(page, '#gx-population-one_state_per_trial', true);
     await restored();
@@ -451,7 +451,8 @@ for (const sample of SAMPLES) {
     await stepButton(page, 'site').click();
     await expect(notice(page)).toHaveText(modified(sample));
 
-    // A later fill of the other sample: after a reload, discarding returns to the confirmed fill's notice.
+    // A later fill of the other sample: the confirmed fill carries the Modified it gained while
+    // current, so after a reload discarding returns to its notice still Modified.
     await stepButton(page, 'intro').click();
     await pickSample(page, other.id);
     await action(page, 'Use the sample').click();
