@@ -891,6 +891,74 @@ third nit.
 Not verified: a real network stall, as opposed to a held route;
 touch; and engines other than Chromium.
 
+### Log-off notice around downloads, 2026-11-04 (G-17)
+
+G-17 ran under the owner's release and grant renewal of 2026-11-04
+([Commands](#commands)). It fixes the external review's defect
+against §9.3.
+
+The click handler clears `logOffNotice` on every button press, as
+G-11 recorded. A successful download does not re-render, so after a
+zero-slip confirmation had turned the log scale off, the dismissed
+notice's line stayed on screen. The handler now removes
+`.gx-log-off` where it clears the flag. That covers the download
+and any other press that does not re-render.
+
+The independent review found one more place where the flag and the
+line could disagree. The read-off slider's closing `change` event
+cleared the flag, without removing the line, and also bumped
+`navigationVersion`. The slider is display state handled on
+`input`, and its `change` is neither an edit nor a navigation, so
+the `change` handler now returns for `#gx-percentile` before
+clearing anything. Neither change touches `download()` or the
+package code.
+
+The §9.5 width spec (item 9) gains one test:
+
+- turn the log scale on at GS-1;
+- reconfirm GS-6, a zero-slip result, so the notice appears;
+- download: the line clears at once, the ready status appears, and
+  the package keeps its member names and GS-6's reference record
+  count;
+- a later render does not bring the line back, and the log scale
+  stays off in the stored display.
+
+The test failed against the unfixed code at the cleared-line
+check. The slider path has no committed spec, because no golden
+scenario yields a chartable result without a log histogram; it was
+checked by reading the code.
+
+At this verification:
+
+- The pinned Node suite passed all 417 tests; typechecking and the
+  bundles passed. Strict publication and preview builds passed with
+  `explore-5f2a0c708a9a.js` and `explore-abe9a2aa7049.css`. The
+  `/scenario/` bundles `app-26490347afd0.js` and
+  `app-08bebc049c15.css` were unchanged. All 31 hook tests passed.
+  After rebasing onto the merged G-14 and G-16, the suite passed
+  all 422 tests, the builds passed with `explore-38b2b0ac6af5.js`
+  and `explore-cbf963b397ab.css`, and the guided specs passed 70 of
+  70 in `desktop` and `mobile`.
+- Relative links resolved, PDD agreement passed, and traceability
+  linted 491 rows with no gaps.
+- The full lane passed 210 and skipped 5, with no failure. The
+  legacy `/scenario/` `axe: the failure states` spec, which failed
+  in the G-12, G-14, and G-16 runs on this machine, passed in this
+  run. That is further evidence that its failure depends on the
+  environment, not on these changes. The log-scale and walkthrough
+  specs passed 30 of 30 over three repeats.
+
+Independent review passed. Its should-fix, the slider path, is
+applied. It also noted that the click handler clears
+`restoredNotice` while a successful download leaves `Restored the
+work in this tab.` on screen. §9.2 keeps that notice until the next
+navigation or edit, and a download is neither, so the visible line
+is arguably correct and was left unchanged. The out-of-step flag is
+recorded here for a later decision.
+
+Not verified: touch, engines other than Chromium, and
+screen-reader behaviour when the status line is removed.
+
 ## Separate CI investigation
 
 The reported job `126383105016` belongs to historical run

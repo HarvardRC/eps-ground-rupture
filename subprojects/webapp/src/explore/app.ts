@@ -748,8 +748,11 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       return;
     }
     // The restore notice lasts until the next navigation or edit (§9.2);
-    // the one-time log-scale status likewise.
+    // the one-time log-scale status likewise. A click that does not
+    // re-render (a successful download) must not leave the dismissed
+    // log-scale line on screen (G-17), so its element goes with its flag.
     restoredNotice = false; logOffNotice = false;
+    $('.gx-log-off')?.remove();
     try {
       const measurement = target.dataset.measurement as MeasurementName | undefined;
       if (measurement) { display = { ...display, measurement }; render(); return; }
@@ -809,6 +812,10 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       display = { ...display, logScale: input.checked }; restoredNotice = false; logOffNotice = false;
       render(input.id); return;
     }
+    // The read-off slider is display state handled on `input`; its closing
+    // `change` is neither an edit nor a navigation, so it clears no notice
+    // and cancels nothing (§9.3, G-17).
+    if (input.id === 'gx-percentile') return;
     invalidate(); restoredNotice = false; logOffNotice = false;
     if (input.name === 'gx-mode') { draft.mode = input.value as 'slip' | 'offset'; issues = issues.filter(item => item.step !== 'movement'); render(); if (draft.mode === 'offset') void ensureRegression(); return; }
     if (input.name === 'gx-population') { draft.population = input.value as Draft['population']; render(); return; }
