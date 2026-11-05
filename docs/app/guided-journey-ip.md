@@ -120,6 +120,10 @@ terms for the released next-phase tasks G-14–G-17
 terms to the rework tasks G-18 and G-19
 ([Next phase](#next-phase-owner-instruction-2026-11-04)).
 
+**Renewal extension, 2026-11-05.** The same terms cover the audit
+tasks G-20 and G-21
+([Next phase](#next-phase-owner-instruction-2026-11-04)).
+
 ## Next phase (owner instruction, 2026-11-04)
 
 The owner queued every deliberate deferral as the phase after this
@@ -156,6 +160,13 @@ guided DDD §10.5 revise the presentation, and the G-18 and G-19
 rows above are rewritten to match. The release terms are
 unchanged.
 
+**Owner release, 2026-11-05 (audit).** The owner adopted the
+second external audit as PDD D-45 and released G-20 and G-21 on
+the standing terms, sequenced after G-19; the
+[Commands](#commands) extension covers their merges. D-46 stays
+proposed with the research group; nothing in this release changes
+the §10.5 rework.
+
 | Task | Prerequisite | Exact work and authority | Completion |
 | --- | --- | --- | --- |
 | G-13 | Next phase; a guided DDD report section, to be drafted; PDD D-40 (P2) and D-14 | Implement the result report: one action on confirmed results producing a single self-contained HTML or PDF document pairing the §6.1 provenance and scenario summary with the rendered charts and D-14 caption strips, the §4.2 statistics table, and every active caveat, per [PDD §6.5](pdd.md#65-result-report-d-40-p2). | Fixed by its design section when drafted; the §6.1 content rules and D-14 caption requirements apply unchanged. |
@@ -165,6 +176,8 @@ unchanged.
 | G-17 | Next phase; guided DDD §9.3 | Clear the width log-scale-off notice consistently around downloads: after a zero-slip confirmation turns the log scale off, a successful download leaves the dismissed notice's element visible (`src/explore/app.ts`, `download`). Align the flag and the element, and cover log-on, zero-slip confirmation, then download in the §9.5 width spec. | The notice clears wherever its flag does; download contents unchanged; specs pass in the lane's desktop and mobile projects. |
 | G-18 | Released 2026-11-04; PDD D-43, D-44; guided DDD §§10.3, 10.5 | Rework the sample interaction: the **Try a prefilled sample** card-preview dialog (preview without draft change; Use this sample; the modal replacement question as the dialog's next step); the prefill notice with its Started from · Modified form; the sequential footer after a fill; both-mode prefills (Kern 1.6–1.9 m as Bawden 2001's two patch estimates used as an example band; illustrative 3–5 m delegated, named in the evidence) with the mode-switch note; extend the §9.5 specs accordingly. Final strings to the owner before merge. | Guided DDD §§10.3 and 10.5 behaviors hold; D-27/D-30 draft boundaries unchanged; specs pass in the lane's desktop and mobile projects. |
 | G-19 | Released 2026-11-04; G-18; PDD D-43, D-44; guided DDD §§10.4, 10.5 | The **Why these sample values?** trigger (helper: Background, photos and sources) following the notice's lifetime; per-field annotations updating or clearing with their values; the CR-10 story edit to the shared sentence; the card previews share the §10.2 story material. Annotation, trigger, and revised story strings to the owner for approval before merge. | Guided DDD §§10.4 and 10.5 hold; the §10.2 licensing evidence stays valid; specs cover preview content, trigger, and annotations in both lane projects. |
+| G-20 | Released 2026-11-05; after G-19; PDD D-45; guided DDD §§11.1–11.2 | Apply the audit's wording table across the guided page and shared components (D-39 boundary: no `/scenario/`-only file); the results-screen rework with **View full scenario**; the walkthrough label; help disclosures that add information; the Scarp dip provisional mark; physical density ordering; update the specs asserting old strings. The normalization explanation and the ZIP contents description go to the owner before merge. | Guided DDD §§11.1–11.2 hold; audit entries addressed or recorded as declined in the evidence; specs pass in the lane's desktop and mobile projects. |
+| G-21 | Released 2026-11-05; after G-19; PDD D-45; guided DDD §11.3 | Fix the disclosure icon overlap everywhere the pattern appears; make the first-calculation failure message claim only what exists; reconcile the version-mismatch message with its control; extend the §9.5 specs. | Guided DDD §11.3 holds; the three defects verified fixed in both lane projects; the evidence records the before and after. |
 
 Queued definitions and decisions, with their authorities:
 

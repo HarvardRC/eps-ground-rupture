@@ -1833,6 +1833,23 @@ uncertainty interval. Guided DDD §10.5 holds the design; the
 G-18 and G-19 rows are rewritten; the built G-18 stays unmerged
 pending the rework and the string gates.
 
+## Second external audit (2026-11-05)
+
+The owner relayed a second external audit of the deployed guided
+page — 75 entries, saved in the repository at
+`notes/2026-11-05/explorer-wording-ux-audit.html` — and adopted
+its wording and presentation package as PDD D-45, with tasks G-20
+and G-21 released on the standing terms and sequenced after the
+§10.5 rework. The planning session verified the audit's defect
+claims in source before the adoption: the first-calculation
+failure message claims preserved results that do not exist, the
+version-mismatch message asks for a reload its control does not
+perform, and the disclosure icon overlap shows on the live page.
+The negative-scarp-height question is recorded as D-46, proposed
+to the research group; the D-10 legal placeholder stays the
+owner's open decision. Strings the audit gives verbatim are
+approved; the remaining texts return through the string gates.
+
 ## References
 
 - [`docs/app/ddd.md` — Ground Rupture Explorer — detailed design document](ddd.md).

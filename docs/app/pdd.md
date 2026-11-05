@@ -146,6 +146,8 @@ named in the last column carry the detail.
 | D-42 | Two named sample scenarios with stories. | §5.1, C1, CR-10 | Product owner | Decided (2026-11-04) | One chooser offers two named samples: D-37's illustrative scenario, unchanged, and a second anchored to the 1952 M 7.36 Kern County earthquake — fault angles 60° and 70°, maximum vertical surface offset 1.3 m, completion values delegated as in D-37. Each carries a short story and up to two licensed images where suitable verified files exist; values are anchored to the named event's scale, never presented as modeling it. §2.3; guided DDD §10; tasks G-14 and G-15 in the next-phase queue (D-41). D-43 subsequently reworks the presentation. |
 | D-43 | Sample presentation rework. | §5.1, C1, CR-10 | Product owner | Decided (2026-11-04) | Reviewing the built result, the owner replaced the two sample buttons with one **Try a prefilled sample** action opening a scale-named listbox; made the replacement confirmation a modal dialog (never a browser dialog, as before); reworded the prefill notice and made it persist across the input steps; put the story panel behind a prominent Where these values come from trigger on both input steps; restored the sequential walk after a fill; prefilled both movement modes (the Kern slip window anchored to Bawden 2001's 1.6–1.9 m, the illustrative delegated); and added CR-10 per-field annotations. §2.3; guided DDD §§10.3–10.4; tasks G-18 and G-19. D-44 subsequently revises the presentation. |
 | D-44 | Sample presentation revision after external review. | §5.1, C1, CR-10 | Product owner | Decided (2026-11-05) | Before the G-18 merge, a relayed external review revised the D-43 presentation and the owner adopted it: a preview dialog of two selectable cards named by inputs (Lower fault angles — 30° and 40°, offset up to 3 m; Steeper fault angles — 60° and 70°, offset up to 1.3 m), event context and photographs in the previews, preview without changing the draft, the replacement question as the dialog's next step; the notice gains a "Started from the {sample} sample · Modified" form with background and photos reachable until the draft is replaced; the trigger reads Why these sample values?; the slip prefills stand with Bawden 2001's 1.6 m and 1.9 m framed as two patch estimates used as an example band, plus a visible mode-switch note; the shared story sentence becomes "These examples help you try the tool. They do not reconstruct either earthquake." (CR-10). §2.3; guided DDD §10.5; the revised G-18 and G-19. |
+| D-45 | Wording and UX polish from the second external audit. | FR-O1, FR-G3, NFR-5 | Product owner | Decided (2026-11-05) | The owner adopted the audit's wording table (matching simulation stages; measurements used; Missing values (excluded); Estimated fault slip at depth; Your selected range includes; Histogram counts by value range; Exit walkthrough; Download data (ZIP) with a contents description; a plain-language normalization explanation), the results-screen rework (compact summary and critical warnings with View full scenario, chart and measurement choices higher), the Results walkthrough · n of 5 label, help disclosures that add information, a provisional mark on the Scarp dip choice card, physical density ordering, and the overlap and message-truthfulness fixes. Audit: `notes/2026-11-05/explorer-wording-ux-audit.html`. §2.3; guided DDD §11; tasks G-20 and G-21, sequenced after G-19. |
+| D-46 | Interpretation of negative scarp heights. | FR-O1, CR-10 | Product owner | Proposed (2026-11-05) | The Kern sample surfaces a −0.02 m scarp height while the description says height above the ground; the data contract retains negative measurements deliberately. The research group is asked for the interpretation; the application keeps showing the data unchanged, and the explanation lands as CR-10 text once the group answers. §2.3. |
 
 ---
 
@@ -652,6 +654,37 @@ switching movement modes says the modes are separate assumptions
 that select different simulations. Everything else in D-43 holds.
 Guided DDD §10.5 holds the design; the revised G-18 and G-19
 carry it.
+
+**Audit polish (D-45, 2026-11-05).** The owner adopted the second
+external audit's wording and presentation package
+(`notes/2026-11-05/explorer-wording-ux-audit.html`): the wording
+table — matching simulation stages; measurements used; Missing
+values (excluded); Estimated fault slip at depth; Your selected
+range includes; Histogram counts by value range; Exit walkthrough;
+Download data (ZIP) with a short contents description; a
+plain-language explanation in place of the normalization phrase —
+and the presentation items: a compact confirmed-scenario summary
+with critical warnings and a **View full scenario** disclosure,
+chart and measurement choices higher on the results screen
+(amending the D-32 and D-36 presentations); the walkthrough
+progress labeled Results walkthrough · n of 5; help disclosures
+that add information beyond the sentence they follow; a
+provisional mark on the Scarp dip choice card before selection;
+density choices ordered Dense, Medium, Loose; the disclosure icon
+overlap fixed; and truthful recovery messages — a first
+calculation failure claims no preserved results, and the
+version-mismatch message and its control agree. Strings the audit
+gives verbatim are approved; the rest return through the string
+gates. Shared-component changes reach `/scenario/` as fixes, not
+new UX investment (D-39). Guided DDD §11 holds the design; tasks
+G-20 and G-21 carry it, sequenced after G-19.
+
+**Negative scarp heights (D-46, Proposed 2026-11-05).** The Kern
+sample surfaces a −0.02 m scarp height while the description says
+height above the ground; the data contract retains negative
+measurements deliberately. The research group is asked for the
+interpretation; the application keeps showing the data unchanged,
+and the explanation lands as CR-10 text once the group answers.
 
 **Approved introduction (product owner, 2026-11-03).**
 

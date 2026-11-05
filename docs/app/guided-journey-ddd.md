@@ -804,3 +804,57 @@ A relayed external review, read before the G-18 merge, revises
 - The §9.5 specs follow: card preview without draft change, the
   apply and replace steps, the notice's Modified form, trigger
   persistence, annotation updates, and the mode-switch note.
+
+## 11. Wording and UX polish (D-45)
+
+The second external audit
+(`notes/2026-11-05/explorer-wording-ux-audit.html`) governs this
+section; PDD D-45 adopts it. Tasks G-20 and G-21 carry it after
+the §10.5 rework lands.
+
+### 11.1 Wording (G-20)
+
+The audit's swaps apply wherever the current string appears in the
+guided page or a shared component, never in a `/scenario/`-only
+file (D-39):
+
+| Current | Adopted |
+| --- | --- |
+| matching records | matching simulation stages |
+| valid measurements | measurements used |
+| Excluded null count | Missing values (excluded) |
+| Corresponding fault slip at depth | Estimated fault slip at depth |
+| Your window includes | Your selected range includes |
+| Histogram bin data | Histogram counts by value range |
+| Browse freely | Exit walkthrough |
+| Download results | Download data (ZIP) |
+
+The normalization phrase becomes a plain-language explanation of
+the particular input error, and **Download data (ZIP)** gains a
+short contents description; both texts return through the string
+gate. Specs asserting the old strings update with them.
+
+### 11.2 Presentation (G-20)
+
+- Results screen: a compact confirmed-scenario summary and the
+  critical warnings stay visible; the full summary moves behind
+  **View full scenario**; chart and measurement choices move above
+  it. This amends the D-32 and D-36 presentations.
+- The walkthrough's header reads **Results walkthrough · n of 5**,
+  leaving the journey stepper's Step 5 of 5 unambiguous; Next
+  stays within reach after long content.
+- A help disclosure must add information beyond the sentence it
+  follows; those that only repeat it gain content or go.
+- The Scarp dip choice card carries its provisional mark before
+  selection, using the existing notice wording.
+- Density choices order physically: Dense, Medium, Loose.
+
+### 11.3 Defects (G-21)
+
+- The disclosure info icon must not overlap summary labels, on the
+  sample story and every other disclosure using the pattern.
+- A first calculation failure must not claim preserved results
+  when none exist; the message states only what holds.
+- The version-mismatch message and its control agree: either the
+  control reloads the page or the message asks to retry loading.
+- The §9.5 specs cover the three fixes.
