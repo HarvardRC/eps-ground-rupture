@@ -7,7 +7,7 @@ import { expect, test } from '@playwright/test';
 import { gs } from '../support';
 import {
   MOVEMENT_HEADING, REGRESSION, SITE_HEADING, action, chooseMovement, chooseSite, explorerReady, gotoExplore, heading,
-  holdRegression, settleFrames, stepButton,
+  holdRegression, settleFrames, expectStepClosed, stepButton,
 } from '../explore-support';
 
 test.describe.configure({ timeout: 120_000 });
@@ -35,8 +35,8 @@ test('navigating away during a held offset review keeps the reader where they we
   await page.locator('#gx-offset-feedback table').waitFor();
   await expect(heading(page)).toHaveText(MOVEMENT_HEADING);
   // The stale review never applied: Review was never reached.
-  await expect(stepButton(page, 'review')).toBeDisabled();
-  await expect(stepButton(page, 'results')).toBeDisabled();
+  await expectStepClosed(page, 'review');
+  await expectStepClosed(page, 'results');
   await page.unroute(REGRESSION);
 });
 
@@ -60,7 +60,7 @@ test('navigating away during a held restore applies no stale result', async ({ p
   await page.waitForResponse(REGRESSION);
   await settleFrames(page);
   await expect(heading(page)).toHaveText(SITE_HEADING);
-  await expect(stepButton(page, 'results')).toBeDisabled();
+  await expectStepClosed(page, 'results');
   await expect(page.locator('.gx-restore-retry')).toContainText('Restoring the results was interrupted.');
   await expect(page.locator('.gx-restored')).toHaveCount(0);
   await page.unroute(REGRESSION);

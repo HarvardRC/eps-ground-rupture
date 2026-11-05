@@ -78,17 +78,19 @@ test('Exit walkthrough keeps the measurement and focuses its card; Back returns'
   await expect(page.locator('.gx-pending')).toHaveCount(0);
 });
 
-test('an empty type selection ends the guide at review and focuses Select all', async ({ page }) => {
+test('an empty type selection ends the guide at review and focuses the summary', async ({ page }) => {
   await gotoExplore(page);
   const ref = await confirmGolden(page, 'GS-6');
   await action(page, 'Walk me through results').click();
   for (let i = 0; i < 4; i++) await page.locator('.gx-guide-header .gx-guide-nav .gx-primary').click();
   await setChecked(page, '#gx-scarpClass-all', false);
   await expect(page.locator('.gx-guide-header .gx-guide-nav .gx-primary')).toHaveText('Review changes');
+  // The stop's own guidance names the condition before the attempt (§12.1).
+  await expect(page.locator('.gx-guide-editor .gx-still-needed')).toHaveText('Still needed: Scarp types.');
   await page.locator('.gx-guide-header .gx-guide-nav .gx-primary').click();
   await expect(page.locator('.gx-guide-header')).toHaveCount(0);
   await expect(heading(page)).toHaveText(RESULTS_HEADING);
-  await expect(page.locator('#gx-scarpClass-all')).toBeFocused();
+  await expect(page.locator('#gx-refinements #gx-issue-summary')).toBeFocused();
   await expect(page.locator('#gx-error-scarpClass')).toHaveText('Select one or more scarp types before review.');
   await expect(page.locator('#gx-refine-button')).toHaveAttribute('aria-expanded', 'true');
   await expect(confirmedCount(page)).toHaveText(countText(ref.counts.matching_records));

@@ -4,8 +4,8 @@
 
 import { expect, test } from '@playwright/test';
 import {
-  MOVEMENT_HEADING, RESULTS_HEADING, SITE_HEADING,
-  action, confirmGolden, confirmedCount, countText, gotoExplore, heading, setChecked, stepButton, typeEntry,
+  INTRO_HEADING, MOVEMENT_HEADING, RESULTS_HEADING, SITE_HEADING,
+  action, confirmGolden, confirmedCount, countText, gotoExplore, heading, setChecked, expectStepClosed, stepButton, typeEntry,
 } from '../explore-support';
 
 test.describe.configure({ timeout: 120_000 });
@@ -49,12 +49,19 @@ test('draft edits leave the confirmed result until review, and Discard restores 
   await expect(stepButton(page, 'results')).toBeEnabled();
 });
 
-test('Start a new scenario clears the result and restores unanswered site conditions', async ({ page }) => {
+test('Start a new scenario clears the result and returns to the opening step, then unanswered site conditions', async ({ page }) => {
   await gotoExplore(page);
   await confirmGolden(page, 'GS-6');
   await page.locator('.gx-restart').getByRole('button', { name: 'Start a new scenario' }).click();
+  // The opening step offers both entry points again (guided DDD §12.2).
+  await expect(heading(page)).toHaveText(INTRO_HEADING);
+  await expect(heading(page)).toBeFocused();
+  await expect(action(page, 'Build your scenario')).toHaveCount(1);
+  await expect(page.locator('#gx-sample-trigger')).toHaveCount(1);
+  await expect(page.locator('#gre-explore > [role="status"]')).toHaveText('New scenario. Build your scenario or try a prefilled sample.');
+  for (const step of ['site', 'movement', 'review', 'results'] as const) await expectStepClosed(page, step);
+  await action(page, 'Build your scenario').click();
   await expect(heading(page)).toHaveText(SITE_HEADING);
-  await expect(stepButton(page, 'results')).toBeDisabled();
   for (const group of ['faultDip', 'depth', 'density', 'sediment']) {
     await expect(page.locator(`#gx-${group}-all`)).not.toBeChecked();
     await expect(page.locator(`#gx-group-${group} input[data-choice]:checked`)).toHaveCount(0);

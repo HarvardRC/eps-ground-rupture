@@ -27,10 +27,14 @@ for (const width of [320, 1024] as const) {
     await page.locator('details.gx-sample-story summary').click();
     await page.locator('details.gx-sample-story img').scrollIntoViewIfNeeded();
     await fits('site conditions with the sample story open');
-    // Start a new scenario returns to unanswered site conditions.
+    // Start a new scenario returns to the opening step (§12.2); Build your
+    // scenario then reaches unanswered site conditions and their guidance.
     await page.locator('.gx-restart button').click();
+    await fits('opening step after Start a new scenario');
+    await action(page, 'Build your scenario').click();
+    await fits('site conditions with the Still-needed line');
     await action(page, 'Continue to fault movement').click();
-    await fits('site validation errors');
+    await fits('site validation summary');
     await chooseSite(page, ref.inputs);
     await action(page, 'Continue to fault movement').click();
     await chooseMovement(page, ref.inputs);

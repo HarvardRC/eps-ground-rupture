@@ -32,6 +32,14 @@ export const action = (page: Page, name: string) => page.locator('#gre-explore .
 export const stepButton = (page: Page, step: 'intro' | 'site' | 'movement' | 'review' | 'results') =>
   page.locator(`#gre-explore .gx-steps button[data-step="${step}"]`);
 /**
+ * A step not yet open (guided DDD §12.1): the list shows it as a plain,
+ * non-interactive entry — never as a disabled button.
+ */
+export async function expectStepClosed(page: Page, step: 'intro' | 'site' | 'movement' | 'review' | 'results'): Promise<void> {
+  await expect(page.locator(`#gre-explore .gx-steps .gx-step-entry[data-step="${step}"]`)).toHaveCount(1);
+  await expect(stepButton(page, step)).toHaveCount(0);
+}
+/**
  * Choose a prefilled sample through the introduction's dialog (guided DDD
  * §10.5): open it, select the card, and Use this sample. Over a non-fresh
  * draft the replacement question follows.

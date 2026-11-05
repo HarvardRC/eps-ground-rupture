@@ -7,7 +7,7 @@ import { formatCount } from '../../src/views/format';
 import { gs, mounted } from '../support';
 import {
   INTRO_HEADING, MOVEMENT_HEADING, RESULTS_HEADING, REVIEW_HEADING, SITE_HEADING,
-  action, chooseMovement, chooseSite, confirmedCount, countText, gotoExplore, heading, stepButton,
+  action, chooseMovement, chooseSite, confirmedCount, countText, gotoExplore, heading, expectStepClosed, stepButton,
 } from '../explore-support';
 
 test.describe.configure({ timeout: 120_000 });
@@ -17,7 +17,7 @@ test('the five-step journey confirms GS-1 with the reference count', async ({ pa
   await gotoExplore(page);
   await expect(heading(page)).toHaveText(INTRO_HEADING);
   await expect(stepButton(page, 'intro')).toHaveAttribute('aria-current', 'step');
-  await expect(stepButton(page, 'results')).toBeDisabled();
+  await expectStepClosed(page, 'results');
 
   await action(page, 'Build your scenario').click();
   await expect(heading(page)).toHaveText(SITE_HEADING);
@@ -33,7 +33,7 @@ test('the five-step journey confirms GS-1 with the reference count', async ({ pa
   await expect(heading(page)).toHaveText(REVIEW_HEADING);
   await expect(page.locator('.gx-review-section').nth(1)).toContainText(`0–${ref.inputs.offset_max} m surface offset`);
   await expect(page.locator('.gx-review-section table.gx-conversions tbody tr')).toHaveCount(ref.inputs.fault_dip.length);
-  await expect(stepButton(page, 'results')).toBeDisabled();
+  await expectStepClosed(page, 'results');
 
   await action(page, 'Show results').click();
   await expect(heading(page)).toHaveText(RESULTS_HEADING);
