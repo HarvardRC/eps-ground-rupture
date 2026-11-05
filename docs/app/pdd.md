@@ -148,6 +148,7 @@ named in the last column carry the detail.
 | D-44 | Sample presentation revision after external review. | §5.1, C1, CR-10 | Product owner | Decided (2026-11-05) | Before the G-18 merge, a relayed external review revised the D-43 presentation and the owner adopted it: a preview dialog of two selectable cards named by inputs (Lower fault angles — 30° and 40°, offset up to 3 m; Steeper fault angles — 60° and 70°, offset up to 1.3 m), event context and photographs in the previews, preview without changing the draft, the replacement question as the dialog's next step; the notice gains a "Started from the {sample} sample · Modified" form with background and photos reachable until the draft is replaced; the trigger reads Why these sample values?; the slip prefills stand with Bawden 2001's 1.6 m and 1.9 m framed as two patch estimates used as an example band, plus a visible mode-switch note; the shared story sentence becomes "These examples help you try the tool. They do not reconstruct either earthquake." (CR-10). §2.3; guided DDD §10.5; the revised G-18 and G-19. |
 | D-45 | Wording and UX polish from the second external audit. | FR-O1, FR-G3, NFR-5 | Product owner | Decided (2026-11-05) | The owner adopted the audit's wording table (matching simulation stages; measurements used; Missing values (excluded); Estimated fault slip at depth; Your selected range includes; Histogram counts by value range; Exit walkthrough; Download data (ZIP) with a contents description; a plain-language normalization explanation), the results-screen rework (compact summary and critical warnings with View full scenario, chart and measurement choices higher), the Results walkthrough · n of 5 label, help disclosures that add information, a provisional mark on the Scarp dip choice card, physical density ordering, and the overlap and message-truthfulness fixes. Audit: `notes/2026-11-05/explorer-wording-ux-audit.html`. §2.3; guided DDD §11; tasks G-20 and G-21, sequenced after G-19. |
 | D-46 | Interpretation of negative scarp heights. | FR-O1, CR-10 | Product owner | Proposed (2026-11-05) | The Kern sample surfaces a −0.02 m scarp height while the description says height above the ground; the data contract retains negative measurements deliberately. The research group is asked for the interpretation; the application keeps showing the data unchanged, and the explanation lands as CR-10 text once the group answers. §2.3. |
+| D-47 | Progression guidance and review fixes. | FR-G3, NFR-5, CR-10 | Product owner | Decided (2026-11-05) | Reviewing the deployed build with a third external review (f3f94a7), the owner kept every progression control enabled with guidance instead of refusal: a neutral Still-needed line before the attempt; a visible focused summary linking each unfinished condition after an unsuccessful click, replacing the Select-all focus jump; group-boundary error emphasis without per-checkbox outlines; red marking only after an attempt (GOV.UK button guidance; W3C form-feedback guidance). The step list stays a sequence indicator without disabled buttons. Start a new scenario returns to the opening step. The same round: the theme's Back to top control leaves the guided page; the sample dialog keeps its actions in view; both slip endpoints carry the Required mark, adopting audit entry 16; sample explanations drop the caution coloring; the mode-switch note becomes "The sample has separate example values for each mode; one is not converted from the other. Switching modes can change the results." (CR-10). §2.3; guided DDD §12; tasks G-22 and G-23, sequenced after G-21. |
 
 ---
 
@@ -651,7 +652,8 @@ The D-43 slip prefills stand — 1.6–1.9 m for Kern, framed as
 Bawden 2001's two patch estimates used as an example band, 3–5 m
 delegated for the illustrative sample — and a visible note on
 switching movement modes says the modes are separate assumptions
-that select different simulations. Everything else in D-43 holds.
+that select different simulations (reworded by D-47). Everything
+else in D-43 holds.
 Guided DDD §10.5 holds the design; the revised G-18 and G-19
 carry it.
 
@@ -688,6 +690,30 @@ height above the ground; the data contract retains negative
 measurements deliberately. The research group is asked for the
 interpretation; the application keeps showing the data unchanged,
 and the explanation lands as CR-10 text once the group answers.
+
+**Progression guidance and review fixes (D-47, 2026-11-05).**
+Reviewing the deployed build, with a third external review taken
+at f3f94a7, the owner kept every progression control enabled,
+with guidance instead of refusal — GOV.UK's button guidance and
+W3C's form-feedback guidance: a neutral line near the forward
+button names what is still needed; an unsuccessful click answers
+with a visible summary linking each unfinished condition, which
+takes the focus instead of the first group's Select all; the
+empty-group presentation emphasizes the group boundary and its
+message, not every checkbox; red marking appears only after an
+attempt. The step list stays a sequence indicator rendered
+without disabled buttons, and no top-of-page Next duplicates the
+footer this round. Start a new scenario returns to the opening
+step, where the samples are offered. The same round: the theme's
+Back to top control leaves the guided page; the sample dialog
+keeps Use this sample and Cancel in view while the preview
+scrolls; both slip endpoints carry the Required mark, adopting
+audit entry 16; sample explanations drop the caution coloring;
+and the mode-switch note becomes "The sample has separate
+example values for each mode; one is not converted from the
+other. Switching modes can change the results." (CR-10). Guided
+DDD §12 holds the design; tasks G-22 and G-23 carry it,
+sequenced after G-21.
 
 **Approved introduction (product owner, 2026-11-03).**
 

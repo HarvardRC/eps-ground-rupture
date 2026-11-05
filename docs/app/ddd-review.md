@@ -1885,6 +1885,37 @@ slip Minimum "Required" mark), which D-45 does not adopt. The
 agent's 75-entry disposition of the audit is confirmed as the
 evidence format.
 
+## Deployed-build review and third external review (2026-11-05)
+
+The owner reviewed the morning deployment and relayed a third
+external review, taken at f3f94a7, with a screenshot of the
+theme's Back to top control covering the movement step's +
+control. The owner's findings: Start a new scenario lands on the
+second step, past the only sample entry point (verified: the
+reset opens Site conditions), and progression buttons stay
+enabled with better guidance, a click checking readiness and
+explaining what needs attention — GOV.UK's button guidance. The
+review's model: a neutral Still-needed line before the attempt,
+a visible focused summary after it (W3C form-feedback guidance),
+ending the Select-all focus jump and the per-checkbox outlines
+(verified in the validation display); a persistent dialog footer
+(verified: the actions follow the scrolled preview); the slip
+Minimum Required mark — audit entry 16, adopted with this round;
+neutral styling for sample explanations (verified: they share
+the caution washes); and a reworded mode-switch note whose
+replacement matches the samples' separate per-mode values
+(verified: the Kern slip window is Bawden 2001's band, not a
+conversion). The owner ruled the Back to top control off the
+guided page and kept the step list a sequence indicator; it
+renders without disabled buttons under the same guidance. A
+top-of-page Next, floated by the owner, is declined this round
+on the planning session's recommendation — one forward control
+per step, where readers expect it; the queued display work may
+revisit it. Adopted as PDD D-47; guided DDD §12 holds the
+design; G-22 and G-23 are released on the standing terms.
+Option B — `/scenario/` adopting the copy-layer wording — stays
+open with the owner.
+
 ## References
 
 - [`docs/app/ddd.md` — Ground Rupture Explorer — detailed design document](ddd.md).

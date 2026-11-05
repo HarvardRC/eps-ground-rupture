@@ -124,6 +124,10 @@ terms to the rework tasks G-18 and G-19
 tasks G-20 and G-21
 ([Next phase](#next-phase-owner-instruction-2026-11-04)).
 
+**Renewal extension, 2026-11-05 (deployed-build review).** The
+same terms cover G-22 and G-23
+([Next phase](#next-phase-owner-instruction-2026-11-04)).
+
 ## Next phase (owner instruction, 2026-11-04)
 
 The owner queued every deliberate deferral as the phase after this
@@ -167,6 +171,14 @@ the standing terms, sequenced after G-19; the
 proposed with the research group; nothing in this release changes
 the §10.5 rework.
 
+**Owner release, 2026-11-05 (deployed-build review).** Reviewing
+the morning deployment with a third external review, the owner
+adopted PDD D-47 and released G-22 and G-23 on the standing
+terms, sequenced after G-21; the [Commands](#commands) extension
+covers their merges. The Back to top control leaves the guided
+page, the step list stays a sequence indicator, and audit entry
+16 is adopted. Nothing else leaves the queue.
+
 | Task | Prerequisite | Exact work and authority | Completion |
 | --- | --- | --- | --- |
 | G-13 | Next phase; a guided DDD report section, to be drafted; PDD D-40 (P2) and D-14 | Implement the result report: one action on confirmed results producing a single self-contained HTML or PDF document pairing the §6.1 provenance and scenario summary with the rendered charts and D-14 caption strips, the §4.2 statistics table, and every active caveat, per [PDD §6.5](pdd.md#65-result-report-d-40-p2). | Fixed by its design section when drafted; the §6.1 content rules and D-14 caption requirements apply unchanged. |
@@ -178,6 +190,8 @@ the §10.5 rework.
 | G-19 | Released 2026-11-04; G-18; PDD D-43, D-44; guided DDD §§10.4, 10.5 | The **Why these sample values?** trigger (helper: Background, photos and sources) following the notice's lifetime; per-field annotations updating or clearing with their values; the CR-10 story edit to the shared sentence; the card previews share the §10.2 story material. Annotation, trigger, and revised story strings to the owner for approval before merge. | Guided DDD §§10.4 and 10.5 hold; the §10.2 licensing evidence stays valid; specs cover preview content, trigger, and annotations in both lane projects. |
 | G-20 | Released 2026-11-05; after G-19; PDD D-45; guided DDD §§11.1–11.2 | Apply the audit's wording table across the guided page and shared components (D-39 boundary: no `/scenario/`-only file); the results-screen rework with **View full scenario**; the walkthrough label; help disclosures that add information; the Scarp dip provisional mark; physical density ordering; update the specs asserting old strings. The normalization explanation and the ZIP contents description go to the owner before merge. | Guided DDD §§11.1–11.2 hold; audit entries addressed or recorded as declined in the evidence; specs pass in the lane's desktop and mobile projects. |
 | G-21 | Released 2026-11-05; after G-19; PDD D-45; guided DDD §11.3 | Fix the disclosure icon overlap everywhere the pattern appears; make the first-calculation failure message claim only what exists; reconcile the version-mismatch message with its control; resolve the recurring `.md-top` axe contrast report per §11.3 (owner addition, 2026-11-05); extend the §9.5 specs. | Guided DDD §11.3 holds; the defects verified fixed or determined in both lane projects; the evidence records the before and after. |
+| G-22 | Released 2026-11-05; after G-21; PDD D-47; guided DDD §§12.1–12.2 | Keep progression enabled with the Still-needed line near each forward button; on an unsuccessful click render the visible focused summary linking each unfinished group, replacing the Select-all focus jump; emphasize the group boundary, ending per-checkbox outlines and invalid marks; render unreached steps, and Results before results exist, as non-interactive entries rather than disabled buttons; return Start a new scenario to the opening step; extend the §9.5 specs. Final strings to the owner before merge. | Guided DDD §§12.1–12.2 hold; specs pass in the lane's desktop and mobile projects; the evidence records the strings' approval. |
+| G-23 | Released 2026-11-05; after G-22; PDD D-47; guided DDD §§12.3–12.7 | Remove the theme's Back to top control from the guided page only; keep the sample dialog's actions in a persistent footer while the preview scrolls; mark both slip endpoints Required; give sample explanations the neutral treatment, keeping caution styling for coverage and interpretation warnings; reword the mode-switch note per §12.7; extend the §9.5 specs. | Guided DDD §§12.3–12.7 hold; specs pass in the lane's desktop and mobile projects; the evidence records each fix's before and after. |
 
 Queued definitions and decisions, with their authorities:
 

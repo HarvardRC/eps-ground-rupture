@@ -800,9 +800,8 @@ A relayed external review, read before the G-18 merge, revises
   is presented as Bawden 2001's two patch estimates — 1.6 m and
   1.9 m — used as an example band, never as an uncertainty
   interval; card descriptors name the offset only. While a sample
-  is active, switching movement modes shows a short note that the
-  two modes are separate assumptions selecting different
-  simulations; its text follows the string gates.
+  is active, switching movement modes shows a short note, whose
+  text §12.7 (D-47) now sets.
 - The §9.5 specs follow: card preview without draft change, the
   apply and replace steps, the notice's Modified form, trigger
   persistence, annotation updates, and the mode-switch note.
@@ -869,3 +868,92 @@ gate. Specs asserting the old strings update with them.
   stabilize the spec, with a narrowly scoped, recorded exclusion
   only as the last resort. The determination enters the evidence.
 - The §9.5 specs cover the fixes.
+
+## 12. Progression guidance and review fixes (D-47)
+
+The owner's review of the deployed build and a third external
+review, relayed 2026-11-05 and taken at f3f94a7, govern this
+section; PDD D-47 adopts them. Tasks G-22 and G-23 carry it,
+sequenced after G-21.
+
+### 12.1 Readiness guidance (G-22)
+
+Progression stays enabled, and the page explains instead of
+refusing; GOV.UK's button guidance and the W3C form-feedback
+guidance are the owner's cited authorities.
+
+- Before any attempt, a neutral line near the step's forward
+  button names each unfinished condition — "Still needed:
+  Sediment depth · Sediment density." — each name a link moving
+  focus to its group. It updates as conditions change, and no
+  red marking shows on arrival.
+- An unsuccessful forward click renders a visible summary —
+  "Choose values for 2 conditions before continuing." — linking
+  each named condition. Focus moves to the summary, no longer to
+  the first group's Select all control; the per-group inline
+  messages stay.
+- The empty-group presentation emphasizes the group boundary and
+  its message. The per-checkbox red outlines and invalid marks
+  go; single numeric fields keep their own.
+- A corrected condition keeps clearing its message at once; an
+  action disables only while an operation runs, as Show results
+  does while calculating.
+- The step list stays a sequence indicator with no new click
+  behavior (owner ruling, 2026-11-05). Unreached steps, and
+  Results before results exist, stop rendering as disabled
+  buttons and render as non-interactive entries, so no control
+  reads as refusing; the rest stay clickable. A top-of-page Next
+  duplicating the footer was floated and is declined this round;
+  the queued display work may revisit it.
+- Final strings pass the owner's gate before merge.
+
+### 12.2 Start a new scenario (G-22)
+
+Start a new scenario returns to the opening step with the fresh
+draft, where Build your scenario and Try a prefilled sample are
+both offered; today it lands on Site conditions, past the only
+sample entry point.
+
+### 12.3 The floating Back to top control (G-23)
+
+The theme's Back to top control leaves the guided page (owner
+ruling, 2026-11-05): the owner's screenshot and the review both
+show it covering the movement step's heading and + control after
+validation — overlap the fixed scroll clearances cannot address,
+since the control floats mid-viewport. The rest of the site
+keeps it, and G-21's settled-wait a11y helper stays for the
+pages that keep it.
+
+### 12.4 Sample dialog actions (G-23)
+
+Use this sample and Cancel stay in view in a persistent dialog
+footer while the preview — values, story, photograph, sources —
+scrolls; at 1280 × 720 the review measured the actions about
+1,500 px below the viewport's top. The photographs and the
+background stay in the preview, per §10.2.
+
+### 12.5 Required marks (G-23)
+
+Both slip endpoints carry the Required mark: clearing the
+prefilled Minimum blocks review while only Maximum says
+Required. This adopts audit entry 16, which D-45 had left open.
+The initial minimum stays 0.
+
+### 12.6 Explanation styling (G-23)
+
+The sample notice, the per-field annotations, and the
+mode-switch note read as information, not caution: they leave
+the warning-family washes for a neutral treatment, and caution
+styling stays reserved for coverage and interpretation
+warnings. Contrast holds in both lane projects.
+
+### 12.7 Mode-switch note (G-23)
+
+The note reads: "The sample has separate example values for each
+mode; one is not converted from the other. Switching modes can
+change the results." It replaces the sentence saying each mode
+selects a different set of simulations, which read as a general
+claim about switching; the new text states the sample behavior —
+the per-mode values are separate by design, the Kern slip window
+being Bawden 2001's band rather than a conversion. (CR-10;
+§10.5's description of the note is superseded.)

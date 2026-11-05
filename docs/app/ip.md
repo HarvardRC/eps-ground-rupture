@@ -309,7 +309,7 @@ request only when the owner asks, the owner's 2026-11-04 grant
 ([guided plan, Commands](guided-journey-ip.md#commands)) standing as
 that ask for the guided second increment's tasks and, renewed and
 extended by the owner's dated releases, for the released guided
-tasks G-14–G-21); and **Status**:
+tasks G-14–G-23); and **Status**:
 
 - **Draftable** — every input is an accepted document or section, so
   the task body can be written now; during the full-draft campaign a
@@ -336,7 +336,7 @@ tasks G-14–G-21); and **Status**:
   ledger, or an ADR beyond a task's own Status cell is the owner's to
   merge, except under the owner's 2026-11-04 guided-increment grant
   and its dated renewals and extensions for guided tasks
-  G-14–G-21
+  G-14–G-23
   ([guided plan, Commands](guided-journey-ip.md#commands)). The
   merge that carries the change is the record, with no separate
   owner commit. A Done record means
