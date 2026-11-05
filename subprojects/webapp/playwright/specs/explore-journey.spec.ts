@@ -41,7 +41,7 @@ test('the five-step journey confirms GS-1 with the reference count', async ({ pa
   await expect(stepButton(page, 'results')).toHaveAttribute('aria-current', 'step');
   await expect(page.locator('#gx-chart svg')).toHaveCount(1);
   await expect(page.locator('.gx-measurement .gx-section-head strong')).toHaveText(
-    `${formatCount(ref.counts.per_measurement.scarp_height.valid)} valid measurements`,
+    `${formatCount(ref.counts.per_measurement.scarp_height.valid)} measurements used`,
   );
   await expect(page.locator('#gx-measurement-scarp_height')).toHaveAttribute('aria-pressed', 'true');
 });

@@ -43,7 +43,8 @@ export async function pickSample(page: Page, id: 'illustrative' | 'kern'): Promi
   await page.locator('#gx-sample-apply').click();
 }
 export const confirmedCount = (page: Page) => page.locator('.gx-context .gx-section-head strong');
-export const countText = (n: number): string => `${formatCount(n)} matching records`;
+/** The confirmed count in the adopted wording (guided DDD §11.1). */
+export const countText = (n: number): string => `${formatCount(n)} matching simulation ${n === 1 ? 'stage' : 'stages'}`;
 
 type Group = 'faultDip' | 'depth' | 'density' | 'sediment';
 

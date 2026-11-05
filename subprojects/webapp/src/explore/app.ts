@@ -10,6 +10,7 @@ import { readDecimal, compareDecimals } from '../state/parse';
 import { defaultDisplayState, type MeasurementName, type SedimentPair } from '../state/state';
 import { quantileLinear } from '../stats/quantile';
 import { binTableSpec, quantityText } from '../views/chart-text';
+import { guided, guidedSvg } from './copy-overlay';
 import { histogramLogSpec, histogramSpec, histogramSvg, ecdfSpec, ecdfSvg } from '../views/charts';
 import { copyText } from '../views/copy';
 import { toSvgElement } from '../views/dom/svg';
@@ -73,6 +74,22 @@ const sampleInfo = (id: SampleId) => SAMPLES.find(sample => sample.id === id)!;
 const sampleNotice = (id: SampleId, modified: boolean): string => modified
   ? `Started from the ${sampleInfo(id).name} sample · Modified`
   : `Prefilled with the ${sampleInfo(id).name} sample. You can change any value.`;
+/** What Download data (ZIP) holds, shown before the click (§11.1). */
+const DOWNLOAD_CONTENTS = 'Matching simulation stages, statistics, scenario settings and sources.';
+/** The Scarp dip card's mark before selection: the existing notice's own opening words (§11.2; PDD §5.4). */
+const PROVISIONAL_MARK = 'Provisional data';
+const plural = (n: number, one: string, many: string): string => `${formatCount(n)} ${n === 1 ? one : many}`;
+/** The adopted count wording (§11.1). */
+const matchingStages = (n: number): string => plural(n, 'matching simulation stage', 'matching simulation stages');
+const measurementsUsed = (n: number): string => plural(n, 'measurement used', 'measurements used');
+/** Density choices in physical order, Dense, Medium, Loose (§11.2); values outside it keep their place after. */
+const DENSITY_ORDER = ['Dense', 'Medium', 'Loose'];
+const densityRank = (value: string): number => { const i = DENSITY_ORDER.indexOf(value); return i < 0 ? DENSITY_ORDER.length : i; };
+const densityOrder = (values: readonly string[]): string[] => values.map((value, i) => ({ value, i })).sort((a, b) => densityRank(a.value) - densityRank(b.value) || a.i - b.i).map(item => item.value);
+function orderChoices<T extends { label: string }>(field: string, choices: T[]): T[] {
+  if (field !== 'density') return choices;
+  return choices.map((choice, i) => ({ choice, i })).sort((a, b) => densityRank(a.choice.label) - densityRank(b.choice.label) || a.i - b.i).map(item => item.choice);
+}
 /** The background trigger and its helper (§10.5); the trigger's words also head the card preview's story. */
 const STORY_TRIGGER = 'Why these sample values?';
 const STORY_HELPER = 'Background, photos and sources';
@@ -115,6 +132,8 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   let sampleWalk = false;
   // The Why these sample values? trigger's open state across re-renders and both input steps (§10.5); every fill starts closed.
   let storyOpen = false;
+  // The View full scenario disclosure's open state across re-renders (§11.2); presentation only.
+  let fullScenarioOpen = false;
   // Same-tab continuity (guided DDD §9.2). `continuity` turns off for the
   // mount when storage is unavailable or a save fails; `blocked` holds an
   // unrestorable record until the explicit fresh start; `restoreTarget` is
@@ -247,7 +266,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   }
 
   function introView(): string {
-    return `${heading('Use simulations to understand ground rupture.', 'Describe the site conditions and fault movement you want to investigate, then see the simulated results.')}<p class="gx-research">This is a research tool; it does not predict what will happen at a particular site.</p><div class="gx-intro-grid"><div><h3>Describe your assumptions</h3><p>Choose the modeled site conditions and fault movement you want to investigate.</p></div><div><h3>Review your scenario</h3><p>Check your choices and see whether the simulations cover your movement range.</p></div><div><h3>Understand the results</h3><p>Explore scarp height, deformation-zone width, and scarp dip, then download the matching records.</p></div></div><p>Results come from an existing set of research simulations. This page does not run a new simulation.</p><p class="gx-session-note">${continuity ? KEPT_IN_TAB : 'Your choices are kept while this page remains open. Reloading or leaving and returning starts a new draft.'}</p>${introActions()}`;
+    return `${heading('Use simulations to understand ground rupture.', 'Describe the site conditions and fault movement you want to investigate, then see the simulated results.')}<p class="gx-research">This is a research tool; it does not predict what will happen at a particular site.</p><div class="gx-intro-grid"><div><h3>Describe your assumptions</h3><p>Choose the modeled site conditions and fault movement you want to investigate.</p></div><div><h3>Review your scenario</h3><p>Check your choices and see whether the simulations cover your movement range.</p></div><div><h3>Understand the results</h3><p>Explore scarp height, deformation-zone width, and scarp dip, then download the matching simulation stages.</p></div></div><p>Results come from an existing set of research simulations. This page does not run a new simulation.</p><p class="gx-session-note">${continuity ? KEPT_IN_TAB : 'Your choices are kept while this page remains open. Reloading or leaving and returning starts a new draft.'}</p>${introActions()}`;
   }
 
   /** The introduction's actions — Build your scenario and Try a prefilled sample (§10.5) — or the unrestorable-record choice (§9.2). */
@@ -386,7 +405,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   function siteGroup(field: 'faultDip' | 'depth' | 'density' | 'sediment', title: string, hint: string, anchor: string): string {
     const choices: { value: string; label: string; group?: string; selected: boolean }[] = field === 'sediment'
       ? manifest.armStrengthStates.map((pair, i) => ({ value: String(i), label: pair.sedimentStrength, group: sedimentGroup(pair.set), selected: draft.sediment.some(p => p.set === pair.set && p.sedimentStrength === pair.sedimentStrength) }))
-      : (field === 'faultDip' ? manifest.trialColumns.fault_dip : field === 'depth' ? manifest.trialColumns.depth : manifest.trialColumns.density).map((value, i) => ({ value: String(i), label: `${value}${field === 'faultDip' ? '°' : field === 'depth' ? ' m' : ''}`, selected: (draft[field] as readonly (string | number)[]).includes(value) }));
+      : orderChoices(field, (field === 'faultDip' ? manifest.trialColumns.fault_dip : field === 'depth' ? manifest.trialColumns.depth : manifest.trialColumns.density).map((value, i) => ({ value: String(i), label: `${value}${field === 'faultDip' ? '°' : field === 'depth' ? ' m' : ''}`, selected: (draft[field] as readonly (string | number)[]).includes(value) })));
     const selectedCount = choices.filter(c => c.selected).length;
     let lastGroup = '';
     const content = choices.map(choice => {
@@ -394,7 +413,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       if (choice.group && choice.group !== lastGroup) { lastGroup = choice.group; prefix = `<h4 class="gx-choice-subheading">${escape(lastGroup)}</h4>`; }
       return `${prefix}<label class="gx-choice ${choice.selected ? 'gx-selected' : ''}"><input type="checkbox" id="gx-${field}-${choice.value}" data-choice="${field}" value="${choice.value}" ${choice.group ? `aria-label="${escape(choice.group)}: ${escape(choice.label)}"` : ''} ${choice.selected ? 'checked' : ''} aria-describedby="gx-error-${field}" ${issue(field) ? 'aria-invalid="true"' : ''}><span>${escape(choice.label)}</span></label>`;
     }).join('');
-    return `<fieldset class="gx-site-group" id="gx-group-${field}"><legend>${term(field, title)} <span class="gx-required">Required</span></legend><p>${hint}</p>${help(`About ${title.toLowerCase()}`, hint, anchor)}<label class="gx-select-all"><input type="checkbox" id="gx-${field}-all" data-all="${field}" aria-describedby="gx-error-${field}" ${issue(field) ? 'aria-invalid="true"' : ''} ${selectedCount === choices.length ? 'checked' : ''} data-mixed="${selectedCount > 0 && selectedCount < choices.length}"> Select all</label><div class="gx-choices">${content}</div>${issueHtml(field)}${selectedCount === 0 && !issue(field) ? '<p class="gx-hint">Choose one or more values to continue.</p>' : ''}${annotation(field)}</fieldset>`;
+    return `<fieldset class="gx-site-group" id="gx-group-${field}"><legend>${term(field, title)} <span class="gx-required">Required</span></legend><p>${hint} ${glossary(anchor)}</p><label class="gx-select-all"><input type="checkbox" id="gx-${field}-all" data-all="${field}" aria-describedby="gx-error-${field}" ${issue(field) ? 'aria-invalid="true"' : ''} ${selectedCount === choices.length ? 'checked' : ''} data-mixed="${selectedCount > 0 && selectedCount < choices.length}"> Select all</label><div class="gx-choices">${content}</div>${issueHtml(field)}${selectedCount === 0 && !issue(field) ? '<p class="gx-hint">Choose one or more values to continue.</p>' : ''}${annotation(field)}</fieldset>`;
   }
 
   function siteView(): string {
@@ -417,7 +436,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   }
 
   function selectionSummary(value: Draft): string {
-    return `<dl class="gx-summary"><div><dt>Fault angle</dt><dd>${value.faultDip.map(v => `${v}°`).join('; ')}</dd></div><div><dt>Sediment depth</dt><dd>${value.depth.map(v => `${v} m`).join('; ')}</dd></div><div><dt>Sediment density</dt><dd>${value.density.map(escape).join('; ')}</dd></div><div><dt>Sediment strength and structure</dt><dd>${value.sediment.map(p => escape(sedimentName(p))).join('; ')}</dd></div></dl>`;
+    return `<dl class="gx-summary"><div><dt>Fault angle</dt><dd>${value.faultDip.map(v => `${v}°`).join('; ')}</dd></div><div><dt>Sediment depth</dt><dd>${value.depth.map(v => `${v} m`).join('; ')}</dd></div><div><dt>Sediment density</dt><dd>${densityOrder(value.density).map(escape).join('; ')}</dd></div><div><dt>Sediment strength and structure</dt><dd>${value.sediment.map(p => escape(sedimentName(p))).join('; ')}</dd></div></dl>`;
   }
   function movementSummary(value: Draft): string {
     return value.mode === 'slip' ? `${escape(value.slipMin)}–${escape(value.slipMax)} m fault slip` : `0–${escape(value.offsetMax)} m surface offset`;
@@ -426,7 +445,8 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     return value.scarpClass.length === manifest.scarpClasses.length ? 'All scarp types (no filter)' : value.scarpClass.map(escape).join('; ');
   }
 
-  function coverage(value: Draft): string {
+  /** The offset conversion: its table and hint, its partial-coverage warning, or both (the default). */
+  function coverage(value: Draft, part: 'all' | 'table' | 'warning' = 'all'): string {
     if (value.mode !== 'offset' || !regression) return '';
     const number = readDecimal(value.offsetMax);
     if (number.kind !== 'decimal') return '';
@@ -446,7 +466,29 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       const upper = hi > max ? `The simulations cover offsets up to approximately ${displayRound(Math.max(0, cap), 2)} m; your ${escape(value.offsetMax)} m maximum exceeds that coverage.` : '';
       return `<p>At ${w.faultDip}°: ${lower}${upper}</p>`;
     }).join('');
-    return `<h4>Corresponding fault slip at depth</h4><table class="gx-conversions"><thead><tr><th>Fault angle</th><th>Slip range</th><th>Coverage</th></tr></thead><tbody>${rows}</tbody></table><p class="gx-hint">Modeled slip: ${escape(manifest.slipWindowBounds.min)}–${escape(manifest.slipWindowBounds.max)} m. Conversion is approximate. Raised surface ridges can cause it to overestimate fault slip. ${glossary('back-projection', 'How offset is converted to slip')}</p>${warnings ? `<div class="gx-warning"><strong>The simulations do not cover the full requested range</strong>${warnings}<p>Results describe only the part covered by the simulations.</p></div>` : ''}`;
+    const warningHtml = warnings ? `<div class="gx-warning"><strong>The simulations do not cover the full requested range</strong>${warnings}<p>Results describe only the part covered by the simulations.</p></div>` : '';
+    if (part === 'warning') return warningHtml;
+    return `<h4>Estimated fault slip at depth</h4><table class="gx-conversions"><thead><tr><th>Fault angle</th><th>Slip range</th><th>Coverage</th></tr></thead><tbody>${rows}</tbody></table><p class="gx-hint">Modeled slip: ${escape(manifest.slipWindowBounds.min)}–${escape(manifest.slipWindowBounds.max)} m. Conversion is approximate. Raised surface ridges can cause it to overestimate fault slip. ${glossary('back-projection', 'How offset is converted to slip')}</p>${part === 'all' ? warningHtml : ''}`;
+  }
+
+  /**
+   * The confirmed scenario in brief, above the results (§11.2): each line uses
+   * the review's own labels, so nothing is renamed; the critical coverage
+   * warning stands under it.
+   */
+  function compactSummary(value: Draft): string {
+    const part = (label: string, text: string) => `<span><strong>${label}:</strong> ${text}</span>`;
+    return `<p class="gx-compact">${[
+      part('Fault angle', value.faultDip.map(v => `${v}°`).join('; ')),
+      part('Sediment depth', value.depth.map(v => `${v} m`).join('; ')),
+      part('Sediment density', densityOrder(value.density).map(escape).join('; ')),
+      part('Sediment strength and structure', value.sediment.map(p => escape(sedimentName(p))).join('; ')),
+    ].join(' · ')}</p><p class="gx-compact">${part('Movement', movementSummary(value))} · ${part('Included', `${populationName(value.population)} · ${typesSummary(value)}`)}</p>`;
+  }
+
+  /** The full confirmed scenario behind **View full scenario**, below the results (§11.2). */
+  function fullScenario(value: Draft): string {
+    return `<details class="gx-full-scenario" id="gx-full-scenario"${fullScenarioOpen ? ' open' : ''}><summary>View full scenario</summary>${selectionSummary(value)}<p><strong>Movement:</strong> ${movementSummary(value)}</p><p><strong>Included:</strong> ${populationName(value.population)} · ${typesSummary(value)}</p><p class="gx-hint">${value.population === 'one_state_per_trial' ? 'Charts and statistics use the last recorded stage within the slip range from each simulation. Each simulation contributes at most one record.' : 'Charts and statistics combine measurements from all included stages. One simulation may contribute several records.'}</p>${coverage(value, 'table')}</details>`;
   }
 
   function reviewView(): string {
@@ -476,8 +518,14 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
 
   function guideHeader(): string {
     if (guideIndex === null) return '';
+    return `<section class="gx-guide-header" aria-label="Results walkthrough"><div class="gx-section-head"><div><p class="gx-step">Results walkthrough · ${guideIndex + 1} of 5</p><h3 id="gx-guide-heading" tabindex="-1">${guideLabels[guideIndex]}</h3></div>${button('guide-exit', 'Exit walkthrough')}</div>${guideIndex < 3 ? `<p class="gx-guide-prompt">${guidePrompts[guideIndex]}</p>` : ''}<ol class="gx-guide-progress" aria-label="Walkthrough progress">${guideProgress.map((label, i) => `<li ${i === guideIndex ? 'aria-current="step"' : ''}><span aria-hidden="true">${i + 1}</span>${label}</li>`).join('')}</ol>${guideNav()}</section>`;
+  }
+
+  /** The walkthrough's Back and Next; repeated after the stop's content so Next stays within reach (§11.2). */
+  function guideNav(bottom = false): string {
+    if (guideIndex === null) return '';
     const nextLabel = guideIndex < 4 ? `Next: ${guideLabels[guideIndex + 1]}` : dirty() ? 'Review changes' : 'Finish walkthrough';
-    return `<section class="gx-guide-header" aria-label="Results walkthrough"><div class="gx-section-head"><div><p class="gx-step">Step ${guideIndex + 1} of 5</p><h3 id="gx-guide-heading" tabindex="-1">${guideLabels[guideIndex]}</h3></div>${button('guide-exit', 'Browse freely')}</div>${guideIndex < 3 ? `<p class="gx-guide-prompt">${guidePrompts[guideIndex]}</p>` : ''}<ol class="gx-guide-progress" aria-label="Walkthrough progress">${guideProgress.map((label, i) => `<li ${i === guideIndex ? 'aria-current="step"' : ''}><span aria-hidden="true">${i + 1}</span>${label}</li>`).join('')}</ol><div class="gx-guide-nav">${button('guide-back', 'Back', false, guideIndex === 0 ? 'disabled' : '')}${button('guide-next', nextLabel, true)}</div></section>`;
+    return `<div class="gx-guide-nav${bottom ? ' gx-guide-nav-bottom' : ''}">${button('guide-back', 'Back', false, guideIndex === 0 ? 'disabled' : '')}${button('guide-next', nextLabel, true)}</div>`;
   }
 
   function guideEditor(): string {
@@ -521,16 +569,16 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
         if (window) return storedBounds(window.lo, window.hi, manifest.slipWindowBounds.recordingStep)[1] > Math.round(manifest.slipWindowBounds.max / manifest.slipWindowBounds.recordingStep);
       }
       return true;
-    }).map(ref => `<p>${escape(noticeText(ref))}</p>`).join('');
+    }).map(ref => `<p>${escape(guided(noticeText(ref)))}</p>`).join('');
     const canChart = count.valid >= config.chartFloorBelow() && statistics !== null;
-    const statisticTable = `<section class="gx-statistics"><h4>Statistics</h4><p class="gx-hint">Matching simulation records.</p><table><caption class="gx-sr-only">${MEASURE_NAMES[m]} statistics</caption><thead><tr><th>Statistic</th><th>Value</th></tr></thead><tbody>${rows.map((row, i) => `<tr><th scope="row">${i === 2 ? term('median', row.label) : i === 3 || i === 4 ? term('percentile', row.label) : escape(row.label)}</th><td>${escape(row.value)}${i > 1 && row.value !== '—' ? unit : ''}</td></tr>`).join('')}</tbody></table>${unclassified ? `<p class="gx-hint">${escape(unclassified)}</p>` : ''}<p class="gx-hint">Missing values are excluded from this measurement's chart and statistics.</p></section>`;
-    const selector = `<section class="gx-selector" aria-labelledby="gx-selector-heading"><div class="gx-selector-heading"><h3 id="gx-selector-heading">What would you like to examine?</h3>${button('guide-start', 'Walk me through results')}</div><div class="gx-measurement-cards" role="group" aria-label="Measurement">${MEASUREMENTS.map((measure, i) => `<button type="button" id="gx-measurement-${measure}" data-measurement="${measure}" aria-pressed="${m === measure}"><strong>${MEASURE_NAMES[measure]}</strong><span class="gx-card-question">${guidePrompts[i]}</span><span class="gx-card-status" ${m === measure ? '' : 'aria-hidden="true"'}>${m === measure ? '<span aria-hidden="true">✓</span> Viewing' : '&nbsp;'}</span></button>`).join('')}</div></section>`;
+    const statisticTable = `<section class="gx-statistics"><h4>Statistics</h4><p class="gx-hint">Matching simulation stages.</p><table><caption class="gx-sr-only">${MEASURE_NAMES[m]} statistics</caption><thead><tr><th>Statistic</th><th>Value</th></tr></thead><tbody>${rows.map((row, i) => `<tr><th scope="row">${i === 2 ? term('median', row.label) : i === 3 || i === 4 ? term('percentile', row.label) : escape(guided(row.label))}</th><td>${escape(row.value)}${i > 1 && row.value !== '—' ? unit : ''}</td></tr>`).join('')}</tbody></table>${unclassified ? `<p class="gx-hint">${escape(unclassified)}</p>` : ''}<p class="gx-hint">Missing values are excluded from this measurement's chart and statistics.</p></section>`;
+    const selector = `<section class="gx-selector" aria-labelledby="gx-selector-heading"><div class="gx-selector-heading"><h3 id="gx-selector-heading">What would you like to examine?</h3>${button('guide-start', 'Walk me through results')}</div><div class="gx-measurement-cards" role="group" aria-label="Measurement">${MEASUREMENTS.map((measure, i) => `<button type="button" id="gx-measurement-${measure}" data-measurement="${measure}" aria-pressed="${m === measure}"><strong>${MEASURE_NAMES[measure]}</strong><span class="gx-card-question">${guidePrompts[i]}</span>${measure === 'scarp_dip' ? `<span class="gx-card-flag">${escape(PROVISIONAL_MARK)}</span>` : ''}<span class="gx-card-status" ${m === measure ? '' : 'aria-hidden="true"'}>${m === measure ? '<span aria-hidden="true">✓</span> Viewing' : '&nbsp;'}</span></button>`).join('')}</div></section>`;
     // Width's Distribution view offers the logarithmic scale exactly when the confirmed result has one (§9.3).
     const logOffered = m === 'dzw' && display.view[m] === 'histogram' && result.histogramLog !== null;
     const logToggle = logOffered ? `<label class="gx-log" for="gx-dzw-log"><input type="checkbox" id="gx-dzw-log" ${display.logScale ? 'checked' : ''}> ${escape(copyText('ddd5.8.logScaleLabel'))}</label>` : '';
-    const measurement = plan.state === 'empty' ? `<section class="gx-measurement"><h3>${term(m, MEASURE_NAMES[m])}</h3><p class="gx-hint">${DESCRIPTIONS[m]} ${glossary(GLOSSARY[m], 'About this measurement')}</p>${m === 'dzw' ? `<p class="gx-warning">${escape(copyText('pdd5.7.widthScopeNote'))}</p>` : m === 'scarp_dip' ? `<p class="gx-warning">${escape(copyText('pdd5.4.scarpDipNotice'))}</p>` : ''}<section class="gx-empty"><h3>No matching simulation records</h3>${plan.explainer.map(ref => `<p>${escape(noticeText(ref))}</p>`).join('')}<p>Change a condition or movement range, then review the scenario again.</p></section></section>` : `<section class="gx-measurement"><div class="gx-section-head"><h3>${term(m, MEASURE_NAMES[m])}</h3><strong>${formatCount(count.valid)} valid measurements</strong></div><p class="gx-hint">${DESCRIPTIONS[m]} ${glossary(GLOSSARY[m], 'About this measurement')}</p>${m === 'dzw' ? `<p class="gx-warning">${escape(copyText('pdd5.7.widthScopeNote'))}</p>` : m === 'scarp_dip' ? `<p class="gx-warning">${escape(copyText('pdd5.4.scarpDipNotice'))}</p>` : ''}${warning ? `<p class="gx-warning">${escape(noticeText(warning))}</p>` : ''}<div class="gx-analysis${canChart ? '' : ' gx-table-only'}">${canChart ? `<section class="gx-chart-side"><div class="gx-chart-choices" role="group" aria-label="Chart view"><button type="button" id="gx-chart-histogram" data-chart="histogram" aria-pressed="${display.view[m] === 'histogram'}">Distribution</button><button type="button" id="gx-chart-cumulative" data-chart="cumulative" aria-pressed="${display.view[m] === 'cumulative'}">Cumulative</button></div>${logToggle}<p class="gx-hint">${display.view[m] === 'histogram' ? 'How often each range appears among the matching measurements.' : 'The share of matching measurements at or below each value.'}</p><figure id="gx-chart"></figure><div id="gx-chart-legend" class="gx-chart-legend"></div>${display.view[m] === 'cumulative' ? `<div class="gx-percentile"><label for="gx-percentile">Percentile <output>${display.readoff[m] ?? 84}</output></label><input id="gx-percentile" type="range" min="0" max="100" step="1" value="${display.readoff[m] ?? 84}"><p id="gx-percentile-output" aria-live="polite"></p></div>` : ''}<div id="gx-chart-table"></div></section>` : ''}${statisticTable}</div><div class="gx-interpretation"><strong>Reading these results</strong><p>The median is the middle measurement; the 16th–84th percentile range describes the middle 68% of measurements. These summaries are not recommended design values. Choosing a design value requires engineering judgment.</p>${glossary('statistics-terms', 'Statistics explained')}</div></section>`;
+    const measurement = plan.state === 'empty' ? `<section class="gx-measurement"><h3>${term(m, MEASURE_NAMES[m])}</h3><p class="gx-hint">${DESCRIPTIONS[m]} ${glossary(GLOSSARY[m], 'About this measurement')}</p>${m === 'dzw' ? `<p class="gx-warning">${escape(copyText('pdd5.7.widthScopeNote'))}</p>` : m === 'scarp_dip' ? `<p class="gx-warning">${escape(copyText('pdd5.4.scarpDipNotice'))}</p>` : ''}<section class="gx-empty"><h3>No matching simulation stages</h3>${plan.explainer.map(ref => `<p>${escape(guided(noticeText(ref)))}</p>`).join('')}<p>Change a condition or movement range, then review the scenario again.</p></section></section>` : `<section class="gx-measurement"><div class="gx-section-head"><h3>${term(m, MEASURE_NAMES[m])}</h3><strong>${measurementsUsed(count.valid)}</strong></div><p class="gx-hint">${DESCRIPTIONS[m]} ${glossary(GLOSSARY[m], 'About this measurement')}</p>${m === 'dzw' ? `<p class="gx-warning">${escape(copyText('pdd5.7.widthScopeNote'))}</p>` : m === 'scarp_dip' ? `<p class="gx-warning">${escape(copyText('pdd5.4.scarpDipNotice'))}</p>` : ''}${warning ? `<p class="gx-warning">${escape(guided(noticeText(warning)))}</p>` : ''}<div class="gx-analysis${canChart ? '' : ' gx-table-only'}">${canChart ? `<section class="gx-chart-side"><div class="gx-chart-choices" role="group" aria-label="Chart view"><button type="button" id="gx-chart-histogram" data-chart="histogram" aria-pressed="${display.view[m] === 'histogram'}">Distribution</button><button type="button" id="gx-chart-cumulative" data-chart="cumulative" aria-pressed="${display.view[m] === 'cumulative'}">Cumulative</button></div>${logToggle}<p class="gx-hint">${display.view[m] === 'histogram' ? 'How often each range appears among the matching measurements.' : 'The share of matching measurements at or below each value.'}</p><figure id="gx-chart"></figure><div id="gx-chart-legend" class="gx-chart-legend"></div>${display.view[m] === 'cumulative' ? `<div class="gx-percentile"><label for="gx-percentile">Percentile <output>${display.readoff[m] ?? 84}</output></label><input id="gx-percentile" type="range" min="0" max="100" step="1" value="${display.readoff[m] ?? 84}"><p id="gx-percentile-output" aria-live="polite"></p></div>` : ''}<div id="gx-chart-table"></div></section>` : ''}${statisticTable}</div><div class="gx-interpretation"><strong>Reading these results</strong><p>The median is the middle measurement; the 16th–84th percentile range describes the middle 68% of measurements. These summaries are not recommended design values. Choosing a design value requires engineering judgment.</p>${glossary('statistics-terms', 'Statistics explained')}</div></section>`;
     const controls = guideIndex === null ? `${refinementDisclosure()}${caveats ? `<div class="gx-warning">${caveats}</div>` : ''}${selector}` : `${guideHeader()}${caveats ? `<div class="gx-warning">${caveats}</div>` : ''}`;
-    return `<div class="gx-section-head"><div>${heading('Explore your scenario', 'See the range of simulated measurements for the scenario you confirmed.')}</div>${button('review', 'Review scenario')}</div><section class="gx-context"><div class="gx-section-head"><h3>Your confirmed scenario</h3><strong>${formatCount(result.selection.matchingRecords)} matching records</strong></div>${selectionSummary(confirmed)}<p><strong>Movement:</strong> ${movementSummary(confirmed)}</p><p><strong>Included:</strong> ${populationName(confirmed.population)} · ${typesSummary(confirmed)}</p><p class="gx-hint">${confirmed.population === 'one_state_per_trial' ? 'Charts and statistics use the last recorded stage within the slip range from each simulation. Each simulation contributes at most one record.' : 'Charts and statistics combine measurements from all included stages. One simulation may contribute several records.'}</p>${coverage(confirmed)}</section>${dirty() ? `<div class="gx-pending"><div><strong>You have unapplied changes</strong><p>These results still describe your confirmed scenario.</p></div><div>${button('review', 'Return to review')}${button('discard', 'Discard changes')}</div></div>` : ''}${controls}${guideIndex !== null && guideIndex >= 3 ? guideEditor() : measurement}<footer class="gx-footer"><div>${button('site', 'Change site conditions')}${button('movement', 'Change fault movement')}</div>${button('download', 'Download results', true)}</footer><p class="gx-research">This is a research tool; it does not predict what will happen at a particular site. ${link('../scenario/#gre-disclaimer', 'Full disclaimer')}</p><p class="gx-hint">The ${link('../dashboards/distributions/', 'Distributions')} and ${link('../dashboards/model-vs-reality/', 'Model vs reality')} dashboards show broader datasets rather than this confirmed scenario. The ${link('../scenario/', 'existing explorer')} also offers field comparisons and additional chart controls.</p>`;
+    return `<div class="gx-section-head"><div>${heading('Explore your scenario', 'See the range of simulated measurements for the scenario you confirmed.')}</div>${button('review', 'Review scenario')}</div><section class="gx-context"><div class="gx-section-head"><h3>Your confirmed scenario</h3><strong>${matchingStages(result.selection.matchingRecords)}</strong></div>${compactSummary(confirmed)}${coverage(confirmed, 'warning')}</section>${dirty() ? `<div class="gx-pending"><div><strong>You have unapplied changes</strong><p>These results still describe your confirmed scenario.</p></div><div>${button('review', 'Return to review')}${button('discard', 'Discard changes')}</div></div>` : ''}${controls}${guideIndex !== null && guideIndex >= 3 ? guideEditor() : measurement}${guideNav(true)}${fullScenario(confirmed)}<footer class="gx-footer"><div>${button('site', 'Change site conditions')}${button('movement', 'Change fault movement')}</div>${button('download', 'Download data (ZIP)', true, 'aria-describedby="gx-download-contents"')}</footer><p class="gx-hint gx-download-contents" id="gx-download-contents">${escape(DOWNLOAD_CONTENTS)}</p><p class="gx-research">This is a research tool; it does not predict what will happen at a particular site. ${link('../scenario/#gre-disclaimer', 'Full disclaimer')}</p><p class="gx-hint">The ${link('../dashboards/distributions/', 'Distributions')} and ${link('../dashboards/model-vs-reality/', 'Model vs reality')} dashboards show broader datasets rather than this confirmed scenario. The ${link('../scenario/', 'existing explorer')} also offers field comparisons and additional chart controls.</p>`;
   }
 
   function refreshMovementFeedback(): void {
@@ -571,8 +619,8 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     const q = display.readoff[m] ?? 84;
     const svg = display.view[m] === 'histogram' ? histogramSvg(bins, width) : ecdfSvg(ecdfSpec(measurement.values.sorted, { measurement: m, decimals: config.displayDecimals(m), valid: counts.valid, readoff: q, fieldTicks: false }), width);
     const caption = document.createElement('figcaption'); caption.id = `gre-${m}-cap`;
-    caption.textContent = display.view[m] === 'cumulative' ? copyText('pdd4.1.cumulativeAccuracy') : useLog ? copyText('ddd5.12.logScaleNote') : 'Histogram intervals follow the distribution of matching measurements; the chart-data table lists their exact boundaries and counts.';
-    const chartElement = toSvgElement(svg);
+    caption.textContent = display.view[m] === 'cumulative' ? guided(copyText('pdd4.1.cumulativeAccuracy')) : useLog ? copyText('ddd5.12.logScaleNote') : 'Histogram intervals follow the distribution of matching measurements; the chart-data table lists their exact boundaries and counts.';
+    const chartElement = toSvgElement(guidedSvg(svg));
     // The guided page uses larger type than the shared chart's original
     // presentation. Adjust only its title ink, never data or geometry.
     const cumulativeTitle = chartElement.querySelector('g[data-axis="cumulative"] text[transform]');
@@ -587,7 +635,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     const tableContainer = $('#gx-chart-table');
     if (tableContainer) {
       const spec = binTableSpec(bins.bins, bins.groups, bins.edges);
-      tableContainer.innerHTML = `<details id="gre-${m}-data" ${display.chartDataOpen[m] ? 'open' : ''}><summary>Histogram bin data</summary>${display.view[m] === 'cumulative' ? '<p class="gx-hint">These are histogram bins for the same measurements. They do not list points on the cumulative curve. Use the percentile control above for cumulative read-offs.</p>' : ''}<div class="gx-table-scroll"><table><caption>${escape(spec.caption)}</caption><thead><tr>${spec.head.map(cell => `<th scope="col">${escape(cell)}</th>`).join('')}</tr></thead><tbody>${spec.rows.map(row => `<tr>${row.header === null ? '' : `<th scope="row">${escape(row.header)}</th>`}${row.cells.map(cell => `<td>${escape(cell)}</td>`).join('')}</tr>`).join('')}</tbody></table></div></details>`;
+      tableContainer.innerHTML = `<details id="gre-${m}-data" ${display.chartDataOpen[m] ? 'open' : ''}><summary>Histogram counts by value range</summary>${display.view[m] === 'cumulative' ? '<p class="gx-hint">These are histogram bins for the same measurements. They do not list points on the cumulative curve. Use the percentile control above for cumulative read-offs.</p>' : ''}<div class="gx-table-scroll"><table><caption>${escape(guided(spec.caption))}</caption><thead><tr>${spec.head.map(cell => `<th scope="col">${escape(cell)}</th>`).join('')}</tr></thead><tbody>${spec.rows.map(row => `<tr>${row.header === null ? '' : `<th scope="row">${escape(row.header)}</th>`}${row.cells.map(cell => `<td>${escape(cell)}</td>`).join('')}</tr>`).join('')}</tbody></table></div></details>`;
     }
     const readout = $('#gx-percentile-output');
     if (readout) readout.textContent = `Percentile ${q}: ${quantityText(quantileLinear(measurement.values.sorted, q / 100), m, config.displayDecimals(m))}. This describes matching measurements, not the chance of an earthquake.`;
@@ -698,7 +746,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       // Move focus only when the reader has not already moved it into the page.
       const focusFree = !shell.contains(document.activeElement);
       render(step === 'results' && focusFree ? 'gx-heading' : undefined);
-      status.textContent = `${formatCount(computed.selection.matchingRecords)} simulation records match your confirmed scenario.${logOffNotice ? ` ${copyText('ddd5.10.recoveryLogScaleOff')}` : ''}`;
+      status.textContent = `${formatCount(computed.selection.matchingRecords)} simulation stages match your confirmed scenario.${logOffNotice ? ` ${copyText('ddd5.10.recoveryLogScaleOff')}` : ''}`;
     } catch (error) {
       console.error('Guided restore:', error); busy = false; restoring = false;
       restoreError = 'The results of your confirmed scenario could not be recalculated.';
@@ -859,7 +907,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       adjustLogScale(computed);
       step = 'results'; reached.add('results');
       render('gx-heading', true);
-      status.textContent = `Results updated. ${formatCount(computed.selection.matchingRecords)} simulation records match your confirmed scenario.${logOffNotice ? ` ${copyText('ddd5.10.recoveryLogScaleOff')}` : ''}`;
+      status.textContent = `Results updated. ${formatCount(computed.selection.matchingRecords)} simulation stages match your confirmed scenario.${logOffNotice ? ` ${copyText('ddd5.10.recoveryLogScaleOff')}` : ''}`;
     } catch (error) {
       console.error('Guided calculation:', error); busy = false;
       generalError = 'The results could not be calculated. Your previous confirmed scenario and results have been kept. Try Show results again.';
@@ -877,7 +925,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       status.textContent = 'Your confirmed result download is ready.';
     } catch (error) {
       console.error('Guided download:', error);
-      generalError = 'The download could not be created. Your confirmed result is unchanged; select Download results to retry.';
+      generalError = 'The download could not be created. Your confirmed result is unchanged; select Download data (ZIP) to retry.';
       alert.textContent = generalError; render();
     }
   }
@@ -1107,6 +1155,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     if (!(details instanceof HTMLDetailsElement) || !shell.contains(details)) return;
     if (details.id === 'gx-stage-example') { exampleOpen = details.open; persist(); }
     if (details.id === 'gx-sample-story') storyOpen = details.open;
+    if (details.id === 'gx-full-scenario') fullScenarioOpen = details.open;
     if (details.id === `gre-${display.measurement}-data`) { display = { ...display, chartDataOpen: { ...display.chartDataOpen, [display.measurement]: details.open } }; persist(); }
   }, { capture: true, signal });
   signal.addEventListener('abort', () => { closeHelp(); chartObserver?.disconnect(); downloadUrls.forEach(url => URL.revokeObjectURL(url)); downloadUrls.clear(); }, { once: true });

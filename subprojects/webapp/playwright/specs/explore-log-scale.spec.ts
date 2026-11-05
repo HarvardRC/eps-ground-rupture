@@ -49,9 +49,9 @@ test('the offer, its chart, and the off-adjustment', async ({ page }) => {
 
   // The walkthrough's width stop uses the same live section.
   await page.getByRole('button', { name: 'Walk me through results' }).click();
-  await page.locator('.gx-guide-nav .gx-primary').click();
+  await page.locator('.gx-guide-header .gx-guide-nav .gx-primary').click();
   await expect(page.locator('#gx-dzw-log')).toBeChecked();
-  await page.locator('.gx-guide-header').getByRole('button', { name: 'Browse freely' }).click();
+  await page.locator('.gx-guide-header').getByRole('button', { name: 'Exit walkthrough' }).click();
 
   // A confirmation without a log histogram turns it off and says so once.
   await reconfirmMovement(page, 'GS-6');

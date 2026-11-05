@@ -107,6 +107,23 @@ export function sampleDraft(manifest: Manifest, sample: SampleId): Draft {
   };
 }
 
+/** The audit's two plain-language messages for an entry the decimal reader refuses (§11.1; PDD D-45). */
+export const NUMBER_MALFORMED = 'Enter 0 or a positive number, such as 0.5.';
+export const NUMBER_TOO_LONG = 'Use at most 16 characters, counting the decimal point and the 0 before it.';
+
+/**
+ * Which rule an invalid entry broke, explained in plain words (§11.1). The
+ * reader's rules are unchanged: at most 16 characters as typed, and at
+ * most 16 once written in full, where ".5" becomes "0.5". A number-like
+ * entry over either limit is too long; anything else is malformed.
+ */
+export function invalidNumberMessage(raw: string): string {
+  const typed = raw.replace(/^[\t\n\f\r ]+|[\t\n\f\r ]+$/g, '');
+  const numberLike = /^\d*(?:[.,]\d*)?$/.test(typed) && /\d/.test(typed);
+  const written = typed.startsWith('.') || typed.startsWith(',') ? typed.length + 1 : typed.length;
+  return numberLike && written > 16 ? NUMBER_TOO_LONG : NUMBER_MALFORMED;
+}
+
 /**
  * Whether one control still holds the fill's value (guided DDD §10.5:
  * an annotation clears when its control's value changes). Sets compare
@@ -189,8 +206,7 @@ export function validateDraft(draft: Draft, manifest: Manifest): Judgment {
     for (const field of ['slipMin', 'slipMax'] as const) {
       const label = field === 'slipMin' ? 'minimum' : 'maximum';
       if (readings[field].kind === 'blank') add('movement', field, `Enter the ${label} fault slip in metres.`);
-      if (readings[field].kind === 'invalid') add('movement', field,
-        `Enter a nonnegative decimal for ${label} slip, using at most 16 characters before and after normalization.`);
+      if (readings[field].kind === 'invalid') add('movement', field, invalidNumberMessage(draft[field]));
       const reading = readings[field];
       if (reading.kind === 'decimal' && compareDecimals(reading.value, recordedSlipMax(manifest.slipWindowBounds)) > 0) {
         add('movement', field, `The simulations cover slip up to ${recordedSlipMax(manifest.slipWindowBounds)} m. Enter a value within that range.`);
@@ -207,7 +223,7 @@ export function validateDraft(draft: Draft, manifest: Manifest): Judgment {
     else add('movement', 'offsetMax', judged.reason === 'blank'
       ? 'Enter the maximum vertical surface offset in metres.'
       : judged.reason === 'above-bound' ? 'Enter a vertical surface offset from 0 to 1000 m.'
-        : 'Enter a nonnegative decimal offset, using at most 16 characters before and after normalization.');
+        : invalidNumberMessage(draft.offsetMax));
   }
   if (!draft.scarpClass.length) add('results', 'scarpClass', 'Select one or more scarp types before review.');
   else if (draft.scarpClass.some(c => !manifest.scarpClasses.includes(c))) {

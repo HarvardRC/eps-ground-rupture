@@ -310,3 +310,11 @@
 @media (max-width: 600px) {
   #gre-explore .gx-measurement-cards { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* G-20 (guided DDD §11.2): compact confirmed scenario, the full one behind a disclosure, the Scarp dip mark, the repeated walkthrough navigation, and the download's contents. */
+#gre-explore .gx-compact { margin: 6px 0 0; font-size: .85rem; }
+#gre-explore .gx-full-scenario { margin: 22px 0 0; padding: 10px 15px; border: 1px solid var(--gx-line); border-radius: 7px; }
+#gre-explore .gx-full-scenario > summary { cursor: pointer; font-weight: 600; }
+#gre-explore .gx-card-flag { align-self: flex-start; padding: 1px 7px; border: 1px solid #bc966b; border-radius: 999px; background: #fff5df; color: var(--gx-ink); font-size: .7rem; font-weight: 600; }
+#gre-explore .gx-guide-nav-bottom { margin-top: 18px; }
+#gre-explore .gx-download-contents { margin: 8px 0 0; text-align: right; }

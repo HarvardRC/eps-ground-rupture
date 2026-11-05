@@ -52,7 +52,7 @@ for (const width of [320, 1024] as const) {
     await page.getByRole('button', { name: 'Walk me through results' }).click();
     for (let stop = 0; stop < 5; stop++) {
       await fits(`walkthrough stop ${stop + 1}`);
-      if (stop < 4) await page.locator('.gx-guide-nav .gx-primary').click();
+      if (stop < 4) await page.locator('.gx-guide-header .gx-guide-nav .gx-primary').click();
     }
   });
 }
