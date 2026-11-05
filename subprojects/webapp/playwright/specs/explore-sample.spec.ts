@@ -5,7 +5,9 @@
 // the chosen sample keeping its identity; confirmed results untouched;
 // the prefill notice and its Modified form on both input steps; the
 // sequential footer after a fill; both-mode prefills and the mode-switch
-// note (§§9.1, 10.1–10.3, 10.5; PDD D-37, D-42, D-43, D-44).
+// note; the card previews' story material, the Why these sample
+// values? trigger, and the per-field annotations (§§9.1, 10.1–10.5;
+// PDD D-37, D-42, D-43, D-44).
 
 import { expect, test, type Page } from '@playwright/test';
 import {
@@ -16,6 +18,9 @@ import {
 test.describe.configure({ timeout: 120_000 });
 
 const HINT = 'Sample values, not recommended site values.';
+const TRIGGER = 'Why these sample values?';
+const HELPER = 'Background, photos and sources';
+const SHARED = 'These examples help you try the tool. They do not reconstruct either earthquake.';
 const MODE_NOTE = 'The two modes are separate assumptions. Each selects a different set of simulations, so results can differ.';
 
 const SAMPLES = [
@@ -85,6 +90,15 @@ async function expectPreview(page: Page, sample: Sample): Promise<void> {
   await expect(preview(page).locator('h3')).toHaveText(sample.title);
   await expect(preview(page).locator('dd')).toHaveText([...sample.preview]);
   await expect(preview(page)).toContainText(sample.slipNote);
+  // The preview shares the §10.2 story material: background, photographs, and sources (§10.5).
+  const background = preview(page).locator('.gx-sample-background');
+  await expect(background.locator('h4')).toHaveText(TRIGGER);
+  await expect(background).toContainText(STORY[sample.id].text);
+  await expect(background).toContainText(SHARED);
+  await expect(background.locator('img')).toHaveAttribute('src', `../images/${STORY[sample.id].image}`);
+  await expect(background.locator('.gx-credit')).toContainText(STORY[sample.id].credit);
+  await expect(background.locator('.gx-story-sources a')).toHaveCount(STORY[sample.id].sources);
+  for (const other of SAMPLES.filter((s) => s.id !== sample.id)) await expect(background).not.toContainText(STORY[other.id].text);
 }
 
 /** The dialog's second step: the replacement question, focus on Keep my choices. */
@@ -158,7 +172,13 @@ for (const sample of SAMPLES) {
     await expectPreview(page, last);
     await page.keyboard.press('Home');
     await expectPreview(page, first);
-    // The cards are one tab stop; Tab stays inside the dialog.
+    // The cards are one tab stop; Tab passes the preview's links in order and stays inside the dialog.
+    const links = await preview(page).locator('a[href]').all();
+    expect(links.length).toBe(STORY[first.id].links);
+    for (const item of links) {
+      await page.keyboard.press('Tab');
+      await expect(item).toBeFocused();
+    }
     await page.keyboard.press('Tab');
     await expect(page.locator('#gx-sample-apply')).toBeFocused();
     await page.keyboard.press('Tab');
@@ -178,7 +198,10 @@ for (const sample of SAMPLES) {
     await expect(card(page, first)).toBeFocused();
     if (sample.id === last.id) await page.keyboard.press('ArrowDown');
     await expectPreview(page, sample);
-    await page.keyboard.press('Tab');
+    // Backwards from the cards: Cancel, then Use this sample.
+    await page.keyboard.press('Shift+Tab');
+    await page.keyboard.press('Shift+Tab');
+    await expect(page.locator('#gx-sample-apply')).toBeFocused();
     await page.keyboard.press('Enter');
     await expectFilled(page, sample);
   });
@@ -559,16 +582,17 @@ test('an edited draft without a confirmation asks first, and each card keeps its
   await expectFilled(page, illustrative);
 });
 
-// The "About this sample" disclosure (guided DDD §10.2): closed after
-// either fill, the sample's own story with loaded, credited images, kept
-// open across steps, and staying with the notice through edits.
+// The Why these sample values? trigger (guided DDD §§10.2, 10.4, 10.5):
+// closed after either fill, directly under the notice on both input
+// steps, the sample's own story with loaded, credited images, its open
+// state kept across steps, and staying with the notice through edits.
 const STORY = {
-  illustrative: { text: '1999 M 7.6 Chi-Chi earthquake', credit: 'Photo: Liu Shu fu / Office of the President, Taiwan', image: 'sample-chichi-kuangfu-track.jpg' },
-  kern: { text: 'M 7.36 Kern County earthquake', credit: 'Photo: D. H. Kupfer, U.S. Geological Survey, 1952. Public domain.', image: 'sample-kern-bealville-tracks.jpg' },
+  illustrative: { text: '1999 M 7.6 Chi-Chi earthquake', credit: 'Photo: Liu Shu fu / Office of the President, Taiwan', image: 'sample-chichi-kuangfu-track.jpg', sources: 2, links: 4 },
+  kern: { text: 'M 7.36 Kern County earthquake', credit: 'Photo: D. H. Kupfer, U.S. Geological Survey, 1952. Public domain.', image: 'sample-kern-bealville-tracks.jpg', sources: 3, links: 4 },
 } as const;
 
 for (const sample of SAMPLES) {
-  test(`${sample.id}: the story disclosure follows the fill`, async ({ page }) => {
+  test(`${sample.id}: the Why these sample values? trigger follows the notice`, async ({ page }) => {
     await gotoExplore(page);
     await action(page, 'Build your scenario').click();
     await expect(page.locator('.gx-sample-story')).toHaveCount(0);
@@ -580,7 +604,11 @@ for (const sample of SAMPLES) {
     const story = page.locator('details.gx-sample-story');
     await expect(story).toHaveCount(1);
     await expect(story).not.toHaveAttribute('open');
-    await expect(story.locator('summary')).toHaveText('About this sample');
+    await expect(story.locator('summary')).toHaveText(`${TRIGGER} ${HELPER}`);
+    await expect(story.locator('summary .gx-story-trigger')).toHaveText(TRIGGER);
+    await expect(story.locator('summary .gx-story-helper')).toHaveText(HELPER);
+    // Directly under the notice.
+    expect(await notice(page).evaluate((node) => node.nextElementSibling?.id)).toBe('gx-sample-story');
     await story.locator('summary').click();
     await expect(story).toHaveAttribute('open');
     await expect(story).toContainText(STORY[sample.id].text);
@@ -602,19 +630,122 @@ for (const sample of SAMPLES) {
       await expect(anchor.locator('.gx-sr-only')).toHaveText(' (opens in a new tab)');
     }
 
-    // The story stays on Site conditions; its open state survives the trip to Fault movement and an edit.
+    await expect(story).toContainText(SHARED);
+    await expect(story).not.toContainText('reproduce no event');
+
+    // The trigger stands on Fault movement too, under the notice and still open; and back on Site conditions.
     await action(page, 'Continue to fault movement').click();
-    await expect(page.locator('.gx-sample-story')).toHaveCount(0);
+    await expect(heading(page)).toHaveText(MOVEMENT_HEADING);
+    await expect(page.locator('details.gx-sample-story')).toHaveAttribute('open');
+    expect(await notice(page).evaluate((node) => node.nextElementSibling?.id)).toBe('gx-sample-story');
+    await page.locator('details.gx-sample-story summary').click();
+    await expect(page.locator('details.gx-sample-story')).not.toHaveAttribute('open');
+    await page.locator('details.gx-sample-story summary').click();
     await stepButton(page, 'site').click();
     await expect(page.locator('details.gx-sample-story')).toHaveAttribute('open');
     await setChecked(page, '#gx-faultDip-0', true);
     await expect(notice(page)).toHaveText(modified(sample));
     await expect(page.locator('details.gx-sample-story')).toHaveAttribute('open');
+    // Modified is not the end of it: the trigger follows the notice's lifetime, not the first edit.
+    await action(page, 'Continue to fault movement').click();
+    await expect(page.locator('details.gx-sample-story')).toHaveCount(1);
+    await stepButton(page, 'site').click();
 
     // A new fill starts closed.
     await stepButton(page, 'intro').click();
     await pickSample(page, sample.id);
     await action(page, 'Use the sample').click();
     await expect(page.locator('details.gx-sample-story')).not.toHaveAttribute('open');
+  });
+}
+
+// Per-field annotations (guided DDD §§10.4, 10.5): beside each prefilled
+// control while it still holds the sample's value, clearing (and
+// returning) with that value alone, never announced on their own.
+const ANNOTATION = {
+  illustrative: {
+    faultDip: 'A sample choice; the background earthquake does not set these angles.',
+    offsetMax: 'Of the scale of the surface offsets in the sample’s background: meters of uplift, including about 2.5 m at a school playground.',
+    slip: 'An example band within the simulations’ coverage. It is not converted from the surface offset.',
+    sources: { faultDip: 0, offsetMax: 2, slip: 0 },
+  },
+  kern: {
+    faultDip: 'Geodetic studies put the dip of the fault in the sample’s background near 75°; the sample uses the two steepest modeled angles.',
+    offsetMax: 'The scale of the largest surface elevation change in the sample’s background, about 1.3 m.',
+    slip: 'Bawden (2001)’s two patch estimates, 1.6 m and 1.9 m, used as an example band, not an uncertainty range.',
+    sources: { faultDip: 2, offsetMax: 1, slip: 1 },
+  },
+} as const;
+const SAMPLE_CHOICE = 'A sample choice, not a description of any real site.';
+const note = (page: Page, field: string) => page.locator(`#gx-annotation-${field}`);
+const straight = (text: string) => text.replace(/’/g, "'");
+
+for (const sample of SAMPLES) {
+  test(`${sample.id}: annotations stand beside the prefilled controls and clear with their own value`, async ({ page }) => {
+    const expected = ANNOTATION[sample.id];
+    await gotoExplore(page);
+    await expect(page.locator('.gx-annotation')).toHaveCount(0);
+    await pickSample(page, sample.id);
+
+    // Site conditions: one per prefilled group, inside it, after its choices.
+    await expect(page.locator('.gx-annotation')).toHaveCount(4);
+    await expect(note(page, 'faultDip')).toContainText(straight(expected.faultDip));
+    await expect(note(page, 'faultDip').locator('a')).toHaveCount(expected.sources.faultDip);
+    for (const field of ['depth', 'density', 'sediment']) {
+      await expect(note(page, field)).toHaveText(SAMPLE_CHOICE);
+      expect(await note(page, field).evaluate((node) => node.closest('fieldset')?.id)).toBe(`gx-group-${field}`);
+    }
+    // Never announced on their own: no live region, and no control is described by one.
+    for (const item of await page.locator('.gx-annotation').all()) {
+      expect(await item.evaluate((node) => node.closest('[aria-live], [role="status"], [role="alert"]') === null)).toBe(true);
+    }
+    expect(await page.locator('[aria-describedby*="gx-annotation"]').count()).toBe(0);
+
+    // A change clears that control's annotation only; the sample's value again brings it back.
+    const box = page.locator('#gx-faultDip-0');
+    const was = await box.isChecked();
+    await setChecked(page, '#gx-faultDip-0', !was);
+    await expect(note(page, 'faultDip')).toHaveCount(0);
+    await expect(page.locator('.gx-annotation')).toHaveCount(3);
+    await setChecked(page, '#gx-faultDip-0', was);
+    await expect(note(page, 'faultDip')).toContainText(straight(expected.faultDip));
+    await setChecked(page, '#gx-depth-0', !(await page.locator('#gx-depth-0').isChecked()));
+    await expect(note(page, 'depth')).toHaveCount(0);
+    await expect(note(page, 'density')).toHaveText(SAMPLE_CHOICE);
+
+    // Fault movement: the offset annotation below the entry, updated in place while typing.
+    await action(page, 'Continue to fault movement').click();
+    // The conversion data re-renders the step once it loads; probe after that.
+    await page.locator('#gx-offset-feedback table').waitFor();
+    await expect(note(page, 'offsetMax')).toContainText(straight(expected.offsetMax));
+    await expect(note(page, 'offsetMax').locator('a')).toHaveCount(expected.sources.offsetMax);
+    await expect(note(page, 'offsetMax')).not.toContainText(sample.id === 'kern' ? 'Kern' : 'Taiwan');
+    const input = page.locator('#gx-offsetMax');
+    await input.evaluate((node) => node.setAttribute('data-probe', 'kept'));
+    await typeEntry(page, 'offsetMax', '2');
+    await expect(note(page, 'offsetMax')).toHaveCount(0);
+    await expect(input).toHaveAttribute('data-probe', 'kept');
+    await expect(input).toBeFocused();
+    await typeEntry(page, 'offsetMax', sample.offsetMax);
+    await expect(note(page, 'offsetMax')).toContainText(straight(expected.offsetMax));
+    // The + button is a value change as well.
+    await page.getByRole('button', { name: 'Increase maximum by 0.1 m' }).click();
+    await expect(note(page, 'offsetMax')).toHaveCount(0);
+
+    // Slip mode: the slip range's annotation, cleared by either entry.
+    await setChecked(page, '#gx-mode-slip', true);
+    await expect(note(page, 'slip')).toContainText(straight(expected.slip));
+    await expect(note(page, 'slip').locator('a')).toHaveCount(expected.sources.slip);
+    await typeEntry(page, 'slipMin', '0');
+    await expect(note(page, 'slip')).toHaveCount(0);
+    await typeEntry(page, 'slipMin', sample.slipMin);
+    await expect(note(page, 'slip')).toContainText(straight(expected.slip));
+
+    // They survive a reload with the notice, and leave with it.
+    await page.reload();
+    await explorerReady(page);
+    await expect(note(page, 'slip')).toContainText(straight(expected.slip));
+    await page.locator('.gx-restart button').click();
+    await expect(page.locator('.gx-annotation')).toHaveCount(0);
   });
 }

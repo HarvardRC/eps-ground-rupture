@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { describe, test } from 'node:test';
 
-import { ANCHORED_NOT_MODELED, STORIES } from '../src/explore/stories';
+import { ANNOTATIONS, SHARED_SENTENCE, STORIES } from '../src/explore/stories';
 import { isSampleId, type SampleId } from '../src/explore/state';
 
 const SAMPLE_IDS: readonly SampleId[] = ['illustrative', 'kern'];
@@ -35,9 +35,13 @@ describe('sample stories (guided DDD §10.2)', () => {
     for (const id of Object.keys(STORIES)) assert.ok(isSampleId(id));
   });
 
-  test('both stories carry the same anchored-not-modeled sentence', () => {
-    for (const id of SAMPLE_IDS) assert.ok(STORIES[id].paragraphs.join(' ').includes(ANCHORED_NOT_MODELED), id);
-    assert.match(ANCHORED_NOT_MODELED, /reproduce no event/);
+  test('both stories carry the §10.5 shared sentence, and the old one is gone', () => {
+    assert.equal(SHARED_SENTENCE, 'These examples help you try the tool. They do not reconstruct either earthquake.');
+    for (const id of SAMPLE_IDS) {
+      const text = STORIES[id].paragraphs.join(' ');
+      assert.equal(text.split(SHARED_SENTENCE).length - 1, 1, id);
+      assert.equal(text.includes('reproduce no event'), false, id);
+    }
   });
 
   test('the illustrative story keeps its §10.2 anchors', () => {
@@ -86,5 +90,41 @@ describe('sample stories (guided DDD §10.2)', () => {
         assert.ok(image.credit.license ? /^CC BY(-SA)? \d\.\d$/.test(image.credit.license.label) : /Public domain\.$/.test(image.credit.text));
       }
     }
+  });
+});
+
+describe('value annotations (guided DDD §§10.4, 10.5)', () => {
+  const FIELDS = ['faultDip', 'depth', 'density', 'sediment', 'offsetMax', 'slip'] as const;
+
+  test('every sample annotates every prefilled control in one or two sentences', () => {
+    assert.deepEqual(Object.keys(ANNOTATIONS).sort(), [...SAMPLE_IDS].sort());
+    for (const id of SAMPLE_IDS) {
+      assert.deepEqual(Object.keys(ANNOTATIONS[id]).sort(), [...FIELDS].sort(), id);
+      for (const field of FIELDS) {
+        const { text } = ANNOTATIONS[id][field];
+        const sentences = text.split(/(?<=[.;])\s+(?=[A-Z])/).length;
+        assert.ok(text.length > 0 && sentences <= 2, `${id} ${field}: ${text}`);
+      }
+    }
+  });
+
+  test('annotations link only their own story\'s sources and keep the event names to the stories', () => {
+    for (const id of SAMPLE_IDS) {
+      for (const field of FIELDS) {
+        const note = ANNOTATIONS[id][field];
+        for (const source of note.sources) assert.ok(STORIES[id].sources.some(item => item.href === source.href), `${id} ${field}: ${source.label}`);
+        const shown = [note.text, ...note.sources.map(source => source.label)].join(' ');
+        for (const name of ['Chi-Chi', 'Chelungpu', 'Kern', 'White Wolf', 'Taiwan', 'California', '1999', '1952', 'Museum']) {
+          assert.equal(shown.includes(name), false, `${id} ${field} names ${name}`);
+        }
+      }
+    }
+  });
+
+  test('the Kern annotations keep their anchors', () => {
+    assert.match(ANNOTATIONS.kern.faultDip.text, /near 75°/);
+    assert.match(ANNOTATIONS.kern.offsetMax.text, /about 1\.3 m/);
+    assert.match(ANNOTATIONS.kern.slip.text, /1\.6 m and 1\.9 m, used as an example band, not an uncertainty range/);
+    assert.deepEqual(ANNOTATIONS.kern.slip.sources.map(s => s.label), ['Bawden (2001)']);
   });
 });

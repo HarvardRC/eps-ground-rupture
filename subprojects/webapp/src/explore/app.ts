@@ -20,8 +20,8 @@ import { statsRows, unclassifiedLine } from '../views/stats-table';
 import { computeResult } from './compute';
 import { DEFINITIONS, type DefinitionKey } from './glossary';
 import { classifySession, clearSession, loadSession, saveSession, type DisplayChoices, type SessionRecord } from './session';
-import { STORIES, type StoryLink } from './stories';
-import { cloneDraft, draftChanged, freshDraft, holdsSample, offsetShortcut, isSampleId, sampleDraft, sedimentGroup, stepDecimal, validateDraft, type Draft, type Issue, type SampleId, type Step } from './state';
+import { ANNOTATIONS, STORIES, type AnnotatedField, type StoryLink } from './stories';
+import { cloneDraft, draftChanged, fieldHoldsSample, freshDraft, holdsSample, offsetShortcut, isSampleId, sampleDraft, sedimentGroup, stepDecimal, validateDraft, type Draft, type Issue, type SampleId, type Step } from './state';
 
 export interface ExplorerOptions {
   vintage: Vintage;
@@ -74,6 +74,8 @@ const sampleNotice = (id: SampleId, modified: boolean): string => modified
   ? `Started from the ${sampleInfo(id).name} sample · Modified`
   : `Prefilled with the ${sampleInfo(id).name} sample. You can change any value.`;
 /** The note on switching movement modes while a sample is active (§10.5). */
+const STORY_TRIGGER = 'Why these sample values?';
+const STORY_HELPER = 'Background, photos and sources';
 const MODE_NOTE = 'The two modes are separate assumptions. Each selects a different set of simulations, so results can differ.';
 const populationName = (population: string): string => population === 'one_state_per_trial' ? 'Last stage within the slip range' : 'All stages within the slip range';
 const sedimentName = (pair: SedimentPair): string => `${sedimentGroup(pair.set).replace(' sediment', '')}: ${pair.sedimentStrength}`;
@@ -271,7 +273,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     let preview: string;
     try {
       const values = sampleDraft(manifest, chosen.id);
-      preview = `${selectionSummary(values)}<dl class="gx-summary"><div><dt>Vertical surface offset</dt><dd>0–${escape(values.offsetMax)} m</dd></div><div><dt>Fault slip at depth, if you switch modes</dt><dd>${escape(values.slipMin)}–${escape(values.slipMax)} m</dd></div></dl><p class="gx-hint">${escape(chosen.slipNote)}</p>`;
+      preview = `${selectionSummary(values)}<dl class="gx-summary"><div><dt>Vertical surface offset</dt><dd>0–${escape(values.offsetMax)} m</dd></div><div><dt>Fault slip at depth, if you switch modes</dt><dd>${escape(values.slipMin)}–${escape(values.slipMax)} m</dd></div></dl><p class="gx-hint">${escape(chosen.slipNote)}</p><section class="gx-sample-background" aria-labelledby="gx-sample-background-title"><h4 id="gx-sample-background-title">${escape(STORY_TRIGGER)}</h4>${storyBody(chosen.id)}</section>`;
     } catch (error) {
       preview = `<p class="gx-warning">${escape(error instanceof Error ? error.message : String(error))}</p>`;
     }
@@ -319,7 +321,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   /** The prefill notice on both input steps (§§10.3, 10.5); the §10.2 story stays on Site conditions. */
   function sampleNoticeView(): string {
     if (!sampleFill) return '';
-    return `<div class="gx-sample-active"><p class="gx-sample-status">${escape(sampleNotice(sampleFill.id, sampleFill.modified))}</p>${step === 'site' ? storyView(sampleFill.id) : ''}</div>`;
+    return `<div class="gx-sample-active"><p class="gx-sample-status">${escape(sampleNotice(sampleFill.id, sampleFill.modified))}</p>${storyView(sampleFill.id)}</div>`;
   }
 
   /** The first draft edit turns the notice to its Modified form; callers that do not re-render update it in place. */
@@ -333,12 +335,42 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     if (line) line.textContent = sampleNotice(sampleFill.id, true);
   }
 
-  /** The closed "About this sample" disclosure under the sample status line (guided DDD §10.2). */
-  function storyView(id: SampleId): string {
+  /** A sample's §10.2 story material: paragraphs, photographs with credits, and sources. */
+  function storyBody(id: SampleId): string {
     const story = STORIES[id];
     const sourceLink = (item: StoryLink): string => link(item.href, item.label);
     const figures = story.images.map(image => `<figure class="gx-story-figure"><img src="${escape(image.src)}" width="${image.width}" height="${image.height}" alt="${escape(image.alt)}" loading="lazy" decoding="async"><figcaption>${escape(image.caption)} <span class="gx-credit">${escape(image.credit.text)}${image.credit.license ? ` ${sourceLink(image.credit.license)}.` : ''} ${sourceLink(image.credit.source)}</span></figcaption></figure>`).join('');
-    return `<details class="gx-sample-story" id="gx-sample-story"${storyOpen ? ' open' : ''}><summary>About this sample</summary>${story.paragraphs.map(text => `<p>${escape(text)}</p>`).join('')}${figures}<p class="gx-story-sources">Sources: ${story.sources.map(sourceLink).join('; ')}.</p></details>`;
+    return `${story.paragraphs.map(text => `<p>${escape(text)}</p>`).join('')}${figures}<p class="gx-story-sources">Sources: ${story.sources.map(sourceLink).join('; ')}.</p>`;
+  }
+
+  /**
+   * The closed **Why these sample values?** trigger directly under the notice
+   * on both input steps, with the notice's lifetime (guided DDD §§10.4, 10.5).
+   */
+  function storyView(id: SampleId): string {
+    return `<details class="gx-sample-story" id="gx-sample-story"${storyOpen ? ' open' : ''}><summary><span class="gx-story-trigger">${escape(STORY_TRIGGER)}</span> <span class="gx-story-helper">${escape(STORY_HELPER)}</span></summary>${storyBody(id)}</details>`;
+  }
+
+  /**
+   * The sample's note beside one prefilled control while that control still
+   * holds the sample's value (guided DDD §§10.4, 10.5). It is plain text in
+   * reading order, outside any live region and any description, so it is
+   * never announced on its own; it stands below the control, so its going
+   * moves nothing the reader is using.
+   */
+  function annotation(field: AnnotatedField): string {
+    if (!sampleFill || !fieldHoldsSample(draft, sampleFill.values, field)) return '';
+    const note = ANNOTATIONS[sampleFill.id][field];
+    const sources = note.sources.length ? ` ${note.sources.map(item => link(item.href, item.label)).join('; ')}.` : '';
+    return `<p class="gx-annotation" id="gx-annotation-${field}">${escape(note.text)}${sources}</p>`;
+  }
+
+  /** Typing changes a movement entry without a re-render: redraw its annotation in place. */
+  function refreshAnnotations(): void {
+    for (const field of ['offsetMax', 'slip'] as const) {
+      const slot = $(`#gx-annotation-slot-${field}`);
+      if (slot) { const html = annotation(field); if (slot.innerHTML !== html) slot.innerHTML = html; }
+    }
   }
 
   function siteGroup(field: 'faultDip' | 'depth' | 'density' | 'sediment', title: string, hint: string, anchor: string): string {
@@ -352,7 +384,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       if (choice.group && choice.group !== lastGroup) { lastGroup = choice.group; prefix = `<h4 class="gx-choice-subheading">${escape(lastGroup)}</h4>`; }
       return `${prefix}<label class="gx-choice ${choice.selected ? 'gx-selected' : ''}"><input type="checkbox" id="gx-${field}-${choice.value}" data-choice="${field}" value="${choice.value}" ${choice.group ? `aria-label="${escape(choice.group)}: ${escape(choice.label)}"` : ''} ${choice.selected ? 'checked' : ''} aria-describedby="gx-error-${field}" ${issue(field) ? 'aria-invalid="true"' : ''}><span>${escape(choice.label)}</span></label>`;
     }).join('');
-    return `<fieldset class="gx-site-group" id="gx-group-${field}"><legend>${term(field, title)} <span class="gx-required">Required</span></legend><p>${hint}</p>${help(`About ${title.toLowerCase()}`, hint, anchor)}<label class="gx-select-all"><input type="checkbox" id="gx-${field}-all" data-all="${field}" aria-describedby="gx-error-${field}" ${issue(field) ? 'aria-invalid="true"' : ''} ${selectedCount === choices.length ? 'checked' : ''} data-mixed="${selectedCount > 0 && selectedCount < choices.length}"> Select all</label><div class="gx-choices">${content}</div>${issueHtml(field)}${selectedCount === 0 && !issue(field) ? '<p class="gx-hint">Choose one or more values to continue.</p>' : ''}</fieldset>`;
+    return `<fieldset class="gx-site-group" id="gx-group-${field}"><legend>${term(field, title)} <span class="gx-required">Required</span></legend><p>${hint}</p>${help(`About ${title.toLowerCase()}`, hint, anchor)}<label class="gx-select-all"><input type="checkbox" id="gx-${field}-all" data-all="${field}" aria-describedby="gx-error-${field}" ${issue(field) ? 'aria-invalid="true"' : ''} ${selectedCount === choices.length ? 'checked' : ''} data-mixed="${selectedCount > 0 && selectedCount < choices.length}"> Select all</label><div class="gx-choices">${content}</div>${issueHtml(field)}${selectedCount === 0 && !issue(field) ? '<p class="gx-hint">Choose one or more values to continue.</p>' : ''}${annotation(field)}</fieldset>`;
   }
 
   function siteView(): string {
@@ -371,7 +403,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
 
   function movementView(): string {
     const shortcut = regression ? offsetShortcut(draft.faultDip, regression, manifest.slipWindowBounds.max) : null;
-    return `${heading('Choose the assumed fault movement', 'Choose what you want to specify, then enter the range you want to investigate.')}${sampleNoticeView()}<fieldset class="gx-modes"><legend>What are you specifying?</legend><label><input type="radio" id="gx-mode-slip" name="gx-mode" value="slip" ${draft.mode === 'slip' ? 'checked' : ''}><span><strong>Fault slip at depth</strong><span>The distance the fault moves underground.</span></span></label><label><input type="radio" id="gx-mode-offset" name="gx-mode" value="offset" ${draft.mode === 'offset' ? 'checked' : ''}><span><strong>Vertical surface offset</strong><span>The vertical difference across the rupture at the ground surface.</span></span></label></fieldset><p class="gx-hint">Your entries are kept when you switch modes.</p>${sampleFill && sampleModeNote ? `<p class="gx-sample-mode-note" id="gx-sample-mode-note">${escape(MODE_NOTE)}</p>` : ''}${draft.mode === 'slip' ? `<section class="gx-movement"><h3>${term('slip', 'Fault-slip range')}</h3><p>Modeled fault slip: ${escape(manifest.slipWindowBounds.min)}–${escape(manifest.slipWindowBounds.max)} m. Stages are recorded about every ${displayRound(manifest.stageSpacing.mean, 2)} m of slip.</p>${help('What is fault slip?', 'Slip is how far the two blocks move past each other along the fault.', 'slip')}<div class="gx-number-row">${numeric('slipMin', 'Minimum', false)}${numeric('slipMax', 'Maximum', true)}</div>${button('slip-shortcut', 'Set maximum to 5 m')}</section>` : `<section class="gx-movement"><h3>${term('offset', 'Surface-offset range')}</h3><p>The range starts at 0 m and ends at the maximum you enter.</p>${help('How is surface offset related to fault slip?', 'Surface offset is a vertical difference at the ground surface. The app estimates a corresponding fault-slip range for each selected fault angle; raised surface ridges can make that estimate too large.', 'vertical-separation')}${numeric('offsetMax', 'Maximum', true)}${regression ? (shortcut !== null ? button('offset-shortcut', `Set maximum to ${escape(shortcut)} m`) : '') : regressionStatus()}<div id="gx-offset-feedback"></div></section>`}<p class="gx-hint gx-spaced">Type a value or use − / + to change it by 0.1 m. The maximum buttons use the modeled coverage; they are not recommendations for your site.</p><p>${link('../dashboards/slip-regression/', 'See the slip-regression dashboard')} for the broader simulation relationship.</p><footer class="gx-footer">${button('site', 'Back')}${button('review', reached.has('review') ? 'Return to review' : 'Review scenario', true)}</footer>`;
+    return `${heading('Choose the assumed fault movement', 'Choose what you want to specify, then enter the range you want to investigate.')}${sampleNoticeView()}<fieldset class="gx-modes"><legend>What are you specifying?</legend><label><input type="radio" id="gx-mode-slip" name="gx-mode" value="slip" ${draft.mode === 'slip' ? 'checked' : ''}><span><strong>Fault slip at depth</strong><span>The distance the fault moves underground.</span></span></label><label><input type="radio" id="gx-mode-offset" name="gx-mode" value="offset" ${draft.mode === 'offset' ? 'checked' : ''}><span><strong>Vertical surface offset</strong><span>The vertical difference across the rupture at the ground surface.</span></span></label></fieldset><p class="gx-hint">Your entries are kept when you switch modes.</p>${sampleFill && sampleModeNote ? `<p class="gx-sample-mode-note" id="gx-sample-mode-note">${escape(MODE_NOTE)}</p>` : ''}${draft.mode === 'slip' ? `<section class="gx-movement"><h3>${term('slip', 'Fault-slip range')}</h3><p>Modeled fault slip: ${escape(manifest.slipWindowBounds.min)}–${escape(manifest.slipWindowBounds.max)} m. Stages are recorded about every ${displayRound(manifest.stageSpacing.mean, 2)} m of slip.</p>${help('What is fault slip?', 'Slip is how far the two blocks move past each other along the fault.', 'slip')}<div class="gx-number-row">${numeric('slipMin', 'Minimum', false)}${numeric('slipMax', 'Maximum', true)}</div><div id="gx-annotation-slot-slip">${annotation('slip')}</div>${button('slip-shortcut', 'Set maximum to 5 m')}</section>` : `<section class="gx-movement"><h3>${term('offset', 'Surface-offset range')}</h3><p>The range starts at 0 m and ends at the maximum you enter.</p>${help('How is surface offset related to fault slip?', 'Surface offset is a vertical difference at the ground surface. The app estimates a corresponding fault-slip range for each selected fault angle; raised surface ridges can make that estimate too large.', 'vertical-separation')}${numeric('offsetMax', 'Maximum', true)}<div id="gx-annotation-slot-offsetMax">${annotation('offsetMax')}</div>${regression ? (shortcut !== null ? button('offset-shortcut', `Set maximum to ${escape(shortcut)} m`) : '') : regressionStatus()}<div id="gx-offset-feedback"></div></section>`}<p class="gx-hint gx-spaced">Type a value or use − / + to change it by 0.1 m. The maximum buttons use the modeled coverage; they are not recommendations for your site.</p><p>${link('../dashboards/slip-regression/', 'See the slip-regression dashboard')} for the broader simulation relationship.</p><footer class="gx-footer">${button('site', 'Back')}${button('review', reached.has('review') ? 'Return to review' : 'Review scenario', true)}</footer>`;
   }
 
   function selectionSummary(value: Draft): string {
@@ -1047,6 +1079,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       input.removeAttribute('aria-invalid'); const error = $(`#gx-error-${field}`); if (error) { error.hidden = true; error.textContent = ''; }
       refreshMovementFeedback();
       checkSampleFill();
+      refreshAnnotations();
       if (restoredNotice) { restoredNotice = false; $('.gx-restored')?.remove(); }
       if (logOffNotice) { logOffNotice = false; $('.gx-log-off')?.remove(); }
       persist();

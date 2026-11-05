@@ -75,7 +75,13 @@
 #gre-explore .gx-sample-active { margin: 0 0 18px; }
 #gre-explore .gx-sample-status { margin: 0 0 18px; padding: 10px 15px; border-left: 3px solid #bc966b; background: #fff5df; font-size: .8rem; }
 #gre-explore .gx-sample-story { margin: 0 0 18px; padding: 10px 15px; border: 1px solid var(--gx-line); border-radius: 7px; font-size: .8rem; }
-#gre-explore .gx-sample-story > summary { cursor: pointer; font-weight: 600; }
+#gre-explore .gx-sample-story > summary { cursor: pointer; }
+#gre-explore .gx-story-trigger { color: var(--gx-accent); font-weight: 700; font-size: .9rem; }
+#gre-explore .gx-story-helper { color: var(--gx-muted); }
+#gre-explore .gx-sample-background { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--gx-line); }
+#gre-explore .gx-sample-background h4 { margin: 0; font-size: .85rem; }
+#gre-explore .gx-sample-background p { margin: 10px 0 0; }
+#gre-explore .gx-annotation { margin: 10px 0 0; padding: 6px 10px; border-left: 3px solid #bc966b; background: #fff5df; color: var(--gx-ink); font-size: .75rem; }
 #gre-explore .gx-sample-story p { margin: 10px 0 0; }
 #gre-explore .gx-story-figure { margin: 12px 0 0; }
 #gre-explore .gx-story-figure img { display: block; width: 100%; max-width: 640px; height: auto; border-radius: 4px; }
