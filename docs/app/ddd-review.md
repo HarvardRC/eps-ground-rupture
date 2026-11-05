@@ -1763,6 +1763,32 @@ presented as modeling it. Guided DDD §10 holds the design; guided
 tasks G-14 and G-15 join the next-phase queue (D-41). No
 scientific rule changed; story texts follow CR-10.
 
+## External review of the sample drafting and the live page (2026-11-04)
+
+The owner relayed an external review of commit `65a75f5` and the
+deployed guided page. Four corrections to the fresh drafting are
+applied: sample images move from `assets/explore/` — where the
+Gradle staging sync deletes extras and the hook's subtree
+exactness rejects them — to committed project images under the
+arm (b) allowlist (guided DDD §10.2); the images are explicitly
+optional in PDD D-42 and §2.3, reconciling the DDD's wording; the
+2.5 m claim now cites the museum's official page, which states the
+playground lift, instead of the figures page, which frames the
+bridge and the dam (the review's proposed scholarly companion
+stays to verify in G-15); and the joint-inversion citation is
+Bawden 2001, per its Zenodo record. Two source-confirmed defects
+join the next-phase queue: G-16 (P2 — a pending restore's busy
+state disables Show results for drafts that need no conversion
+data until the fetch settles) and G-17 (P3 — a successful download
+leaves the dismissed log-scale notice visible; reproduced live).
+The review's live checks passed sample fill, replacement
+confirmation and cancellation, preserved confirmed results, reload
+restoration, and the log display; the sample package matched the
+screen and exported statistics (2,880 records, 2,770 valid
+widths); and the proposed Kern inputs — 60° and 70° at 1.3 m —
+both showed Within range. G-14 gains the chooser-identity spec
+clause.
+
 ## References
 
 - [`docs/app/ddd.md` — Ground Rupture Explorer — detailed design document](ddd.md).

@@ -143,7 +143,7 @@ named in the last column carry the detail.
 | D-39 | Guided publication path; `/scenario/` paused. | §2.2, R-11 | Product owner | Decided (2026-11-04) | `/explore/` joins the unlisted prototype deployment; a team demonstration and the redistribution-license decision precede advertising it. `/scenario/` stays deployed unlisted without further UX investment and is no longer the activation candidate. §2.3. |
 | D-40 | Result-report export. | FR-D1, FR-D2 | Product owner | Decided (2026-11-04) | One self-contained document pairing the §6.1 provenance and scenario summary with rendered charts and statistics; builds on D-14. The owner set it P2; guided task G-13 carries it in the next-phase queue (D-41). §6.5. |
 | D-41 | Next-phase queue for the deliberate deferrals. | §2.2 | Product owner | Decided (2026-11-04) | Every deliberate deferral of the guided redesign is queued as the phase after the second increment: the D-39 reconciliation list, family view, shared links, between-visit recovery, scenario import, the result report (G-13), the sample scenarios and stories (D-42: G-14, G-15), remaining browser coverage, and the paused `/scenario/` rework decision. Team availability schedules the phase; it may precede the team demonstration. Advertising still follows D-39. §2.3. |
-| D-42 | Two named sample scenarios with stories. | §5.1, C1, CR-10 | Product owner | Decided (2026-11-04) | One chooser offers two named samples: D-37's illustrative scenario, unchanged, and a second anchored to the 1952 M 7.36 Kern County earthquake — fault angles 60° and 70°, maximum vertical surface offset 1.3 m, completion values delegated as in D-37. Each carries a short story with licensed images; values are anchored to the named event's scale, never presented as modeling it. §2.3; guided DDD §10; tasks G-14 and G-15 in the next-phase queue (D-41). |
+| D-42 | Two named sample scenarios with stories. | §5.1, C1, CR-10 | Product owner | Decided (2026-11-04) | One chooser offers two named samples: D-37's illustrative scenario, unchanged, and a second anchored to the 1952 M 7.36 Kern County earthquake — fault angles 60° and 70°, maximum vertical surface offset 1.3 m, completion values delegated as in D-37. Each carries a short story and up to two licensed images where suitable verified files exist; values are anchored to the named event's scale, never presented as modeling it. §2.3; guided DDD §10; tasks G-14 and G-15 in the next-phase queue (D-41). |
 
 ---
 
@@ -582,13 +582,16 @@ each sample says its values are of the named event's scale and
 reproduce no event. The anchors follow the published record — a
 steep White Wolf dip near 75°
 ([Stein & Thatcher 1981](https://ui.adsabs.harvard.edu/abs/1981JGR....86.4913S/abstract);
-[Bawden 2000](https://zenodo.org/records/1231281)) and about
+[Bawden 2001](https://zenodo.org/records/1231281)) and about
 1.3 m of maximum surface elevation change
 ([SCEDC](https://scedc.caltech.edu/earthquake/kern1952.html)) —
 and the magnitude is the site's own constant. Each sample carries
-a short story behind a closed disclosure, with at most two images,
-public domain or CC BY / CC BY-SA only, license verified per file
-at its source and credited visibly; the
+a short story behind a closed disclosure, with up to two images
+where a suitable file verifies — public domain or
+CC BY / CC BY-SA only, license verified per file at its source,
+credited visibly, and published as a project image under the
+legacy DDD §6.1 arm (b) allowlist, never inside the application
+subtree; the
 [USGS ScienceBase Bealville photograph](https://www.sciencebase.gov/catalog/item/51dd6f2be4b0f72b4471a1d7)
 is the Kern candidate. Story texts follow CR-10. Guided DDD §10
 holds the design; guided tasks G-14 and G-15 carry it in the

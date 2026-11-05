@@ -678,9 +678,14 @@ presentation state, never part of Draft:
 - The illustrative story anchors its scale to the 1999 M 7.6
   Chi-Chi earthquake as the published figures page already frames
   it (`subprojects/mkdocs/docs/figures.md`): meters of offset on
-  the Chelungpu fault, a school running track lifted about 2.5 m
-  and preserved in place. It states plainly that the values are
-  illustrative, of that scale, and model no event.
+  the Chelungpu fault at the collapsed bridge and the Shih-Kang
+  Dam. The preserved school grounds lifted about 2.5 m carry their
+  own citation — the museum's official page states the playground
+  lift
+  ([Tri-Mountain NSA](https://www.trimt-nsa.gov.tw/en/attraction/857/)),
+  with any scholarly companion verified during G-15. The story
+  states plainly that the values are illustrative, of that scale,
+  and model no event.
 - The Kern story names the 1952 M 7.36 Kern County earthquake on
   the White Wolf fault — the magnitude is the site's constant —
   and says the release's field measurements include the Buwalda &
@@ -690,10 +695,17 @@ presentation state, never part of Draft:
   about 1.3 m of maximum surface elevation change. The same
   anchored-not-modeled sentence applies.
 
-A story may carry one or two images under `assets/explore/`, each
-with alt text and a visible credit naming author and license; the
-images join the page's published assets under the §6 inventory
-rules. Public-domain or CC BY / CC BY-SA files only: verify the
+A story may carry one or two images, each with alt text and a
+visible credit naming author and license. They are project
+images, never application assets: the files live in the committed
+`subprojects/mkdocs/docs/images/` tree, publish at `images/`, and
+enter the legacy DDD §6.1 arm (b) publication inventory by one
+reviewed line each in `subprojects/mkdocs/publication-allowlist.txt`;
+the app references them relatively from `/explore/`. Nothing
+enters `assets/explore/`: the Gradle staging sync and the hook's
+subtree exactness keep that directory to the hashed bundle, so an
+image placed there is deleted or fails the build.
+Public-domain or CC BY / CC BY-SA files only: verify the
 license on the source's own page per file and record source URL,
 author, license, and verification date in the G-15 evidence.
 Candidates to verify: the USGS ScienceBase Bealville bent-track
