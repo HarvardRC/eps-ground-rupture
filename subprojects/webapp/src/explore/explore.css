@@ -61,6 +61,8 @@
 #gre-explore .gx-restart { margin-top: 24px; }
 #gre-explore .gx-intro-actions { justify-content: flex-start; }
 #gre-explore .gx-intro-actions .gx-hint { margin: 0; }
+#gre-explore .gx-sample-choice { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+#gre-explore .gx-sample-choice > span { font-size: .8rem; color: var(--gx-muted); }
 #gre-explore .gx-sample-confirm { padding: 17px; border: 1px solid #bc966b; background: #fff5df; border-radius: 7px; }
 #gre-explore .gx-sample-confirm p { font-size: .8rem; }
 #gre-explore .gx-sample-status { margin: 0 0 18px; padding: 10px 15px; border-left: 3px solid #bc966b; background: #fff5df; font-size: .8rem; }

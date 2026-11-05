@@ -54,7 +54,7 @@ function display(): DisplayChoices {
 }
 
 function record(overrides: Partial<SessionRecord> = {}): SessionRecord {
-  const confirmed = sampleDraft(manifest);
+  const confirmed = sampleDraft(manifest, 'illustrative');
   const draft = cloneDraft(confirmed);
   draft.mode = 'slip'; draft.slipMax = '9x'; draft.faultDip = [];
   return { record: 1, dataVersion: 'data-v1', step: 'results', draft, confirmed, display: display(), ...overrides };
@@ -151,7 +151,7 @@ describe('unrestorable records', () => {
 
   test('a confirmed draft that no longer validates is unreadable', () => {
     const storage = new MemoryStorage();
-    const confirmed = sampleDraft(manifest);
+    const confirmed = sampleDraft(manifest, 'illustrative');
     confirmed.faultDip = [25];
     saveSession(storage, record({ confirmed }));
     assert.deepEqual(classifySession(loadSession(storage), 'data-v1', manifest), { kind: 'unreadable' });
