@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { describe, test } from 'node:test';
 
-import { STORIES } from '../src/explore/stories';
+import { ANCHORED_NOT_MODELED, STORIES } from '../src/explore/stories';
 import { isSampleId, type SampleId } from '../src/explore/state';
 
 const SAMPLE_IDS: readonly SampleId[] = ['illustrative', 'kern'];
@@ -35,11 +35,31 @@ describe('sample stories (guided DDD §10.2)', () => {
     for (const id of Object.keys(STORIES)) assert.ok(isSampleId(id));
   });
 
-  test('each story says its values are anchored, not modeled', () => {
-    assert.match(STORIES.illustrative.paragraphs.join(' '), /do not model the Chi-Chi earthquake/);
-    assert.match(STORIES.kern.paragraphs.join(' '), /M 7\.36 Kern County earthquake/);
-    assert.match(STORIES.kern.paragraphs.join(' '), /they do not model it/);
-    assert.match(STORIES.kern.paragraphs.join(' '), /Buwalda and St\. Amand/);
+  test('both stories carry the same anchored-not-modeled sentence', () => {
+    for (const id of SAMPLE_IDS) assert.ok(STORIES[id].paragraphs.join(' ').includes(ANCHORED_NOT_MODELED), id);
+    assert.match(ANCHORED_NOT_MODELED, /reproduce no event/);
+  });
+
+  test('the illustrative story keeps its §10.2 anchors', () => {
+    const text = STORIES.illustrative.paragraphs.join(' ');
+    for (const anchor of ['illustrative', '1999 M 7.6 Chi-Chi earthquake', 'Chelungpu fault', 'bridge', 'Shih-Kang Dam', 'about 2.5 m', '0–3 m']) {
+      assert.ok(text.includes(anchor), anchor);
+    }
+    assert.ok(STORIES.illustrative.sources.some(source => source.href === 'https://www.trimt-nsa.gov.tw/en/attraction/857/'));
+  });
+
+  test('the Kern story keeps its §10.2 anchors', () => {
+    const text = STORIES.kern.paragraphs.join(' ');
+    for (const anchor of ['1952 M 7.36 Kern County earthquake', 'White Wolf fault', 'near 75°', 'about 1.3 m', '60° and 70°', 'Buwalda and St. Amand', 'compare your results with those measurements']) {
+      assert.ok(text.includes(anchor), anchor);
+    }
+  });
+
+  test('the figures citation points at an anchor the figures page still has', () => {
+    const figures = readFileSync('../mkdocs/docs/figures.md', 'utf8');
+    for (const source of STORIES.illustrative.sources.filter(item => item.href.startsWith('../figures/#'))) {
+      assert.ok(figures.includes(`{ #${source.href.split('#')[1]} }`), source.href);
+    }
   });
 
   test('sources are site-relative pages or https links', () => {

@@ -192,7 +192,7 @@ test('the chooser works from the keyboard', async ({ page }) => {
 // either fill, the sample's own story with loaded, credited images,
 // kept open across a re-render, and gone with the status line.
 const STORY = {
-  illustrative: { text: 'do not model the Chi-Chi earthquake', credit: 'Photo: Liu Shu fu / Office of the President, Taiwan', image: 'sample-chichi-kuangfu-track.jpg' },
+  illustrative: { text: '1999 M 7.6 Chi-Chi earthquake', credit: 'Photo: Liu Shu fu / Office of the President, Taiwan', image: 'sample-chichi-kuangfu-track.jpg' },
   kern: { text: 'M 7.36 Kern County earthquake', credit: 'Photo: D. H. Kupfer, U.S. Geological Survey, 1952. Public domain.', image: 'sample-kern-bealville-tracks.jpg' },
 } as const;
 
@@ -222,7 +222,13 @@ for (const sample of SAMPLES) {
     await image.scrollIntoViewIfNeeded();
     await expect.poll(() => image.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth)).toBeGreaterThan(0);
     await expect(story.locator('.gx-credit')).toContainText(STORY[sample.id].credit);
-    for (const anchor of await story.locator('a').all()) await expect(anchor).toHaveAttribute('target', '_blank');
+    // Every link opens a separate tab and says so: the sources plus the image's source (and license).
+    const anchors = story.locator('a');
+    await expect(anchors).toHaveCount(4);
+    for (const anchor of await anchors.all()) {
+      await expect(anchor).toHaveAttribute('target', '_blank');
+      await expect(anchor.locator('.gx-sr-only')).toHaveText(' (opens in a new tab)');
+    }
 
     // Open state survives a re-render of Site conditions; the story is never part of the draft.
     await setChecked(page, '#gx-faultDip-0', true);

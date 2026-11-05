@@ -32,11 +32,14 @@ export interface SampleStory {
   readonly images: readonly StoryImage[];
 }
 
+/** The anchored-not-modeled sentence both stories share (§10.2; PDD §2.3: values reproduce no event). */
+export const ANCHORED_NOT_MODELED = 'These are sample values anchored to that earthquake\'s scale; they reproduce no event and model no particular site.';
+
 export const STORIES: Record<SampleId, SampleStory> = {
   illustrative: {
     paragraphs: [
-      "These values are illustrative. They are of the scale seen in the 1999 M 7.6 Chi-Chi earthquake in Taiwan, where the Chelungpu fault broke the ground surface. Where an offset river crossed the fault, a bridge came down, and the Shih-Kang Dam was broken by roughly 8 m of uplift. At the former Kuangfu Junior High School in Wufeng, the fault lifted the school's playground about 2.5 m; its buckled running track is preserved at the 921 Earthquake Museum of Taiwan.",
-      "The sample's fault angles and its 0–3 m of vertical surface offset are of that scale. They do not model the Chi-Chi earthquake or any particular site.",
+      'These values are illustrative. Their scale comes from the 1999 M 7.6 Chi-Chi earthquake in Taiwan, where the Chelungpu fault broke the ground surface. An offset river along the fault brought down a bridge, and the Shih-Kang Dam was broken by roughly 8 m of uplift. At the former Kuangfu Junior High School in Wufeng, now the site of the 921 Earthquake Museum of Taiwan, the fault lifted the school\'s playground about 2.5 m.',
+      `The sample's 0–3 m of vertical surface offset is of that scale; its fault angles and sediment values are sample choices. ${ANCHORED_NOT_MODELED}`,
     ],
     sources: [
       { label: 'Chiama et al. (2025), Figure 1', href: '../figures/#fig-1' },
@@ -46,20 +49,20 @@ export const STORIES: Record<SampleId, SampleStory> = {
       src: '../images/sample-chichi-kuangfu-track.jpg',
       width: 960,
       height: 640,
-      alt: 'A red running track, buckled and lifted into a ramp where the Chelungpu fault crossed it, preserved under a canopy at the 921 Earthquake Museum of Taiwan.',
-      caption: 'The running track of the former Kuangfu Junior High School, lifted by the Chelungpu fault in 1999.',
+      alt: 'A section of running track buckled and pushed up into a ramp, its white lane lines broken, preserved under a canopy at the 921 Earthquake Museum of Taiwan; an intact red track runs in the foreground.',
+      caption: 'The fault scarp across the former Kuangfu Junior High School running track, preserved at the museum (photographed 2024).',
       credit: {
         text: 'Photo: Liu Shu fu / Office of the President, Taiwan, via Wikimedia Commons.',
-        source: { label: 'Source', href: 'https://commons.wikimedia.org/wiki/File:Ruin_of_the_destructed_running_tracks_at_the_921_Earthquake_Museum_of_Taiwan_2024-09-21.jpg' },
+        source: { label: 'Ruin of the destructed running tracks at the 921 Earthquake Museum of Taiwan', href: 'https://commons.wikimedia.org/wiki/File:Ruin_of_the_destructed_running_tracks_at_the_921_Earthquake_Museum_of_Taiwan_2024-09-21.jpg' },
         license: { label: 'CC BY 2.0', href: 'https://creativecommons.org/licenses/by/2.0/' },
       },
     }],
   },
   kern: {
     paragraphs: [
-      'This sample is anchored to the 1952 M 7.36 Kern County earthquake in California, which ruptured the White Wolf fault. The geodetic record points to a steep fault, dipping near 75°, and about 1.3 m of maximum surface elevation change.',
-      "The sample uses the two steepest modeled fault angles, 60° and 70°, and a vertical surface offset of up to 1.3 m; its sediment values are sample choices, not a description of the site. The values are of that earthquake's scale; they do not model it.",
-      "This release's field measurements include Buwalda and St. Amand's 1955 survey of the rupture, digitised by the research team. A later version of this page may compare your results with those measurements.",
+      'This sample is anchored to the 1952 M 7.36 Kern County earthquake in California, which ruptured the White Wolf fault. Geodetic studies point to a steep fault, dipping near 75°, and the earthquake raised the ground surface by up to about 1.3 m.',
+      `The sample uses the two steepest modeled fault angles, 60° and 70°, and a vertical surface offset of up to 1.3 m, the scale of that elevation change; its sediment values are sample choices, not a description of the site. ${ANCHORED_NOT_MODELED}`,
+      'This release\'s field measurements include part of Buwalda and St. Amand\'s 1955 survey of the rupture, digitised by the study\'s lead author. A later version of this page may compare your results with those measurements.',
     ],
     sources: [
       { label: 'Stein and Thatcher (1981)', href: 'https://ui.adsabs.harvard.edu/abs/1981JGR....86.4913S/abstract' },
@@ -74,7 +77,7 @@ export const STORIES: Record<SampleId, SampleStory> = {
       caption: 'Southern Pacific Railroad tracks near Bealville, bent where the 1952 earthquake shortened the ground.',
       credit: {
         text: 'Photo: D. H. Kupfer, U.S. Geological Survey, 1952. Public domain.',
-        source: { label: 'Source', href: 'https://www.sciencebase.gov/catalog/item/51dd6f2be4b0f72b4471a1d7' },
+        source: { label: 'Arvin-Tehachapi earthquake damage near Bealville', href: 'https://www.sciencebase.gov/catalog/item/51dd6f2be4b0f72b4471a1d7' },
         license: null,
       },
     }],
