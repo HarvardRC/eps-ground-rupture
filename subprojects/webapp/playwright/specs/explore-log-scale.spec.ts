@@ -2,10 +2,13 @@
 // log-scale offer, its caption clause and bin note, and the off-
 // adjustment when a confirmation stops offering it (§9.3). GS-1 has a
 // reference log histogram; GS-6 has none. Texts are the copy registry's.
+// A download after the off-adjustment clears the notice with its flag
+// and leaves the package unchanged (G-17).
 
 import { expect, test } from '@playwright/test';
+import { PACKAGE_MEMBER_NAMES } from '../../src/download/package';
 import { copyText } from '../../src/views/copy';
-import { gs } from '../support';
+import { gs, readDownload } from '../support';
 import { confirmGolden, gotoExplore, reconfirmMovement, storedRecord } from '../explore-support';
 
 test.describe.configure({ timeout: 180_000 });
@@ -58,5 +61,36 @@ test('the offer, its chart, and the off-adjustment', async ({ page }) => {
   await page.locator('#gx-measurement-dzw').click();
   await expect(off).toHaveCount(0);
   await expect(toggle).toHaveCount(0);
+  expect((await storedRecord(page))!.display.logScale).toBe(false);
+});
+
+test('a download after the off-adjustment clears the notice and keeps the package', async ({ page }, testInfo) => {
+  await gotoExplore(page);
+  await confirmGolden(page, 'GS-1');
+  await page.locator('#gx-measurement-dzw').click();
+  await page.locator('#gx-dzw-log').click();
+  await expect(page.locator('#gx-dzw-log')).toBeChecked();
+
+  const ref = await reconfirmMovement(page, 'GS-6');
+  const off = page.locator('.gx-log-off');
+  await expect(off).toHaveText(copyText('ddd5.10.recoveryLogScaleOff'));
+
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    page.locator('#gre-explore button[data-action="download"]').click(),
+  ]);
+  // The notice's flag clears on the click; its element goes with it, though a download does not re-render.
+  await expect(off).toHaveCount(0);
+  await expect(page.getByRole('status').filter({ hasText: 'Your confirmed result download is ready.' })).toHaveCount(1);
+  const captured = await readDownload(download, testInfo, 'explore-log-off');
+  expect([...captured.members.keys()]).toEqual([...PACKAGE_MEMBER_NAMES]);
+  const records = captured.members.get('records.csv')!.toString('utf8').trimEnd().split('\n');
+  expect(records.length - 1).toBe(ref.counts.matching_records);
+
+  // A later render does not bring it back, and the log scale stays off.
+  await page.locator('#gx-measurement-scarp_height').click();
+  await page.locator('#gx-measurement-dzw').click();
+  await expect(off).toHaveCount(0);
+  await expect(page.locator('#gx-dzw-log')).toHaveCount(0);
   expect((await storedRecord(page))!.display.logScale).toBe(false);
 });

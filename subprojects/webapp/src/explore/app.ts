@@ -748,8 +748,11 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       return;
     }
     // The restore notice lasts until the next navigation or edit (§9.2);
-    // the one-time log-scale status likewise.
+    // the one-time log-scale status likewise. A click that does not
+    // re-render (a successful download) must not leave the dismissed
+    // log-scale line on screen (G-17), so its element goes with its flag.
     restoredNotice = false; logOffNotice = false;
+    $('.gx-log-off')?.remove();
     try {
       const measurement = target.dataset.measurement as MeasurementName | undefined;
       if (measurement) { display = { ...display, measurement }; render(); return; }
