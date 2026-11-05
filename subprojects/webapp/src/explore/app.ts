@@ -812,6 +812,10 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       display = { ...display, logScale: input.checked }; restoredNotice = false; logOffNotice = false;
       render(input.id); return;
     }
+    // The read-off slider is display state handled on `input`; its closing
+    // `change` is neither an edit nor a navigation, so it clears no notice
+    // and cancels nothing (§9.3, G-17).
+    if (input.id === 'gx-percentile') return;
     invalidate(); restoredNotice = false; logOffNotice = false;
     if (input.name === 'gx-mode') { draft.mode = input.value as 'slip' | 'offset'; issues = issues.filter(item => item.step !== 'movement'); render(); if (draft.mode === 'offset') void ensureRegression(); return; }
     if (input.name === 'gx-population') { draft.population = input.value as Draft['population']; render(); return; }
