@@ -66,6 +66,14 @@
 #gre-explore .gx-sample-confirm { padding: 17px; border: 1px solid #bc966b; background: #fff5df; border-radius: 7px; }
 #gre-explore .gx-sample-confirm p { font-size: .8rem; }
 #gre-explore .gx-sample-status { margin: 0 0 18px; padding: 10px 15px; border-left: 3px solid #bc966b; background: #fff5df; font-size: .8rem; }
+#gre-explore .gx-sample-story { margin: 0 0 18px; padding: 10px 15px; border: 1px solid var(--gx-line); border-radius: 7px; font-size: .8rem; }
+#gre-explore .gx-sample-story > summary { cursor: pointer; font-weight: 600; }
+#gre-explore .gx-sample-story p { margin: 10px 0 0; }
+#gre-explore .gx-story-figure { margin: 12px 0 0; }
+#gre-explore .gx-story-figure img { display: block; width: 100%; max-width: 640px; height: auto; border-radius: 4px; }
+#gre-explore .gx-story-figure figcaption { margin-top: 6px; color: var(--gx-muted); }
+#gre-explore .gx-credit { display: block; }
+#gre-explore .gx-story-sources { color: var(--gx-muted); }
 #gre-explore .gx-restored { margin: 0 0 18px; padding: 10px 15px; border-left: 3px solid var(--gx-accent); background: #f7f1ef; font-size: .8rem; }
 #gre-explore .gx-restoring { margin: 0 0 18px; }
 #gre-explore .gx-restore-retry, #gre-explore .gx-restore-blocked { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 18px; }

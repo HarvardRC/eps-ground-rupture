@@ -7,3 +7,5 @@ images/fig-03-dem-model-schematic.png
 images/fig-04-compare-dem-models.png
 images/fig-05-ml-model-measurements.jpg
 images/fig-07-homogeneous-vs-ctu.png
+images/sample-chichi-kuangfu-track.jpg
+images/sample-kern-bealville-tracks.jpg

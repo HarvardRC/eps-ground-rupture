@@ -187,3 +187,55 @@ test('the chooser works from the keyboard', async ({ page }) => {
   await page.keyboard.press('Enter');
   await expectFilled(page, illustrative);
 });
+
+// The "About this sample" disclosure (guided DDD §10.2): closed after
+// either fill, the sample's own story with loaded, credited images,
+// kept open across a re-render, and gone with the status line.
+const STORY = {
+  illustrative: { text: 'do not model the Chi-Chi earthquake', credit: 'Photo: Liu Shu fu / Office of the President, Taiwan', image: 'sample-chichi-kuangfu-track.jpg' },
+  kern: { text: 'M 7.36 Kern County earthquake', credit: 'Photo: D. H. Kupfer, U.S. Geological Survey, 1952. Public domain.', image: 'sample-kern-bealville-tracks.jpg' },
+} as const;
+
+for (const sample of SAMPLES) {
+  test(`${sample.id}: the story disclosure follows the fill`, async ({ page }) => {
+    await gotoExplore(page);
+    await action(page, 'Build your scenario').click();
+    await expect(page.locator('.gx-sample-story')).toHaveCount(0);
+    await stepButton(page, 'intro').click();
+    await chooser(page, sample).click();
+    await expectFilled(page, sample);
+
+    const story = page.locator('details.gx-sample-story');
+    await expect(story).toHaveCount(1);
+    await expect(story).not.toHaveAttribute('open');
+    await expect(story.locator('summary')).toHaveText('About this sample');
+    await story.locator('summary').click();
+    await expect(story).toHaveAttribute('open');
+    await expect(story).toContainText(STORY[sample.id].text);
+    const other = SAMPLES.find((s) => s.id !== sample.id)!;
+    await expect(story).not.toContainText(STORY[other.id].text);
+
+    const image = story.locator('img');
+    await expect(image).toHaveCount(1);
+    await expect(image).toHaveAttribute('src', `../images/${STORY[sample.id].image}`);
+    expect((await image.getAttribute('alt'))!.length).toBeGreaterThan(20);
+    await image.scrollIntoViewIfNeeded();
+    await expect.poll(() => image.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth)).toBeGreaterThan(0);
+    await expect(story.locator('.gx-credit')).toContainText(STORY[sample.id].credit);
+    for (const anchor of await story.locator('a').all()) await expect(anchor).toHaveAttribute('target', '_blank');
+
+    // Open state survives a re-render of Site conditions; the story is never part of the draft.
+    await setChecked(page, '#gx-faultDip-0', true);
+    await expect(page.locator('details.gx-sample-story')).toHaveAttribute('open');
+    await action(page, 'Continue to fault movement').click();
+    await expect(page.locator('.gx-sample-story')).toHaveCount(0);
+    await stepButton(page, 'site').click();
+    await expect(page.locator('.gx-sample-story')).toHaveCount(0);
+
+    // A new fill starts closed.
+    await stepButton(page, 'intro').click();
+    await chooser(page, sample).click();
+    await action(page, 'Use the sample').click();
+    await expect(page.locator('details.gx-sample-story')).not.toHaveAttribute('open');
+  });
+}
