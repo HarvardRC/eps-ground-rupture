@@ -75,7 +75,7 @@ test('the adopted wording reaches the guided page, the shared builders included'
   await expect(table.locator('caption')).toContainText('measurements used per bin, by scarp type');
   await page.locator('#gx-chart-cumulative').click();
   await expect(page.locator('#gx-chart svg')).toHaveAttribute('aria-label', /cumulative distribution of [\d,]+ measurements used/);
-  await expect(page.locator('#gx-chart')).toContainText('use all measurements used for this scenario');
+  await expect(page.locator('#gx-chart')).toContainText('rely on all measurements used for this scenario');
   // No replaced wording anywhere on the page.
   for (const old of ['valid measurements', 'Valid count', 'Excluded null count', 'matching records', 'Your window includes', 'Histogram bin data', 'Corresponding fault slip', 'Download results']) {
     await expect(page.locator('#gre-explore')).not.toContainText(old);

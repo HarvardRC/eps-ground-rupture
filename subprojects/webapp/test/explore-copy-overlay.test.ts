@@ -38,6 +38,19 @@ describe('guided copy overlay (§11.1)', () => {
     assert.deepEqual(out.children, [{ tag: 'text', attrs: [], children: ['Measurements used'] }, 'plain']);
   });
 
+  test('edge cases: an empty slot, a slot spanning lines, and geometry left alone and cheap', () => {
+    assert.equal(guided(fillCopy('pdd5.8.smallResultWarning', { N: '' })), 'Only  measurements can be used for this scenario — too few for a reliable distribution. Interpret with caution.');
+    assert.equal(guided(fillCopy('ddd5.11.histogramLabel', { label: 'Two\nlines', N: '4' })), 'Two\nlines: histogram of 4 measurements used');
+    const points = Array.from({ length: 512 }, (_, i) => `${i}.123,${(i * 7) % 300}.456`).join(' ');
+    const tree = { tag: 'polyline', attrs: [['points', points], ['aria-label', 'Scarp height (m): histogram of 2 valid measurements']] as const, children: [] };
+    const started = performance.now();
+    for (let i = 0; i < 50; i++) guidedSvg(tree);
+    const out = guidedSvg(tree);
+    assert.equal(out.attrs[0][1], points);
+    assert.equal(out.attrs[1][1], 'Scarp height (m): histogram of 2 measurements used');
+    assert.ok(performance.now() - started < 500, 'fifty rewrites of a full chart stay cheap');
+  });
+
   test('no adopted text keeps the replaced wording', () => {
     for (const text of Object.values(GUIDED_COPY)) {
       assert.equal(/valid measurement|null count|Your window/.test(text), false, text);

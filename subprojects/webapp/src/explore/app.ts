@@ -857,7 +857,8 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     step = first.step === 'results' && !result ? 'review' : first.step;
     if (step === 'results') refineOpen = true;
     reached.add(step);
-    alert.textContent = found.map(item => item.message).join(' ');
+    // Each field's own error stays under it and describes it; the alert says each distinct message once.
+    alert.textContent = [...new Set(found.map(item => item.message))].join(' ');
     const field = first.field;
     render(`gx-${field}${['faultDip', 'depth', 'density', 'sediment', 'scarpClass'].includes(field) ? '-all' : ''}`, true);
   }

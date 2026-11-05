@@ -103,6 +103,9 @@ describe('guided draft validation', () => {
       assert.equal(message('offsetMax', input), NUMBER_TOO_LONG, input);
     }
     assert.equal(invalidNumberMessage('.123456789012345'), NUMBER_TOO_LONG);
+    // A comma decimal follows the same rules.
+    assert.equal(invalidNumberMessage(',123456789012345'), NUMBER_TOO_LONG);
+    assert.equal(invalidNumberMessage('1,2,3'), NUMBER_MALFORMED);
     assert.match(NUMBER_TOO_LONG, /16 characters/);
     for (const issue of validateDraft({ ...completeDraft(), mode: 'offset', offsetMax: 'x' }, manifest).issues) assert.equal(issue.message.includes('normalization'), false);
   });

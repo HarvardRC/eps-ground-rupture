@@ -13,7 +13,7 @@ import { copyEntry } from '../views/copy';
 import type { SvgNode } from '../views/svg';
 
 export const GUIDED_COPY: Readonly<Record<string, string>> = {
-  'pdd4.1.cumulativeAccuracy': 'The curve may be simplified for display. Simplification changes cumulative percentages by less than 0.2 percentage points. Statistics and percentile read-offs use all measurements used for this scenario.',
+  'pdd4.1.cumulativeAccuracy': 'The curve may be simplified for display. Simplification changes cumulative percentages by less than 0.2 percentage points. Statistics and percentile read-offs rely on all measurements used for this scenario.',
   'pdd5.8.smallResultWarning': 'Only {N} measurements can be used for this scenario — too few for a reliable distribution. Interpret with caution.',
   'pdd5.8.suppressionNotice': 'Fewer than 10 measurements can be used — too few for a reliable distribution. Showing the statistics table only; interpret with caution.',
   'pdd5.8.noValidMeasurement': '{X} simulation stages match this scenario, but none has a {measurement} value — no distribution can be computed. The stages appear in the Missing values (excluded) count of the statistics table.',
@@ -30,7 +30,12 @@ export const GUIDED_COPY: Readonly<Record<string, string>> = {
 const regexEscape = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const SLOT = /\{([A-Za-z_][A-Za-z0-9_]*)\}/g;
 
-interface Rewrite { readonly pattern: RegExp; readonly replace: (match: string, ...groups: string[]) => string }
+interface Rewrite {
+  /** The template's longest literal part; a text without it cannot match, so the pattern is skipped. */
+  readonly literal: string;
+  readonly pattern: RegExp;
+  readonly replace: (match: string, ...groups: string[]) => string;
+}
 
 /**
  * One rewrite per entry: the registry's template, its slots captured,
@@ -43,8 +48,12 @@ function rewriteFor(key: string, text: string): Rewrite {
   const oldSlots = [...entry.text.matchAll(SLOT)].map(m => m[1]);
   const newSlots = [...text.matchAll(SLOT)].map(m => m[1]);
   if ([...oldSlots].sort().join() !== [...newSlots].sort().join()) throw new Error(`copy overlay: ${key} changes its slots`);
-  const pattern = new RegExp(entry.text.split(SLOT).map((part, i) => i % 2 ? '(.+?)' : regexEscape(part)).join(''), 'g');
+  const parts = entry.text.split(SLOT);
+  // A slot may be empty or span lines; one at the very end takes the rest of the text.
+  const pattern = new RegExp(parts.map((part, i) => i % 2 ? (i === parts.length - 2 && parts[i + 1] === '' ? '([\\s\\S]*)' : '([\\s\\S]*?)') : regexEscape(part)).join(''), 'g');
+  const literal = parts.filter((_, i) => i % 2 === 0).reduce((a, b) => (b.length > a.length ? b : a), '');
   return {
+    literal,
     pattern,
     replace: (_match, ...groups) => {
       const values = new Map(oldSlots.map((name, i) => [name, groups[i]]));
@@ -60,14 +69,17 @@ const REWRITES: readonly Rewrite[] = Object.entries(GUIDED_COPY)
 
 /** The adopted wording for text a shared builder produced from the registry. */
 export function guided(text: string): string {
-  return REWRITES.reduce((value, rewrite) => value.replace(rewrite.pattern, rewrite.replace), text);
+  return REWRITES.reduce((value, rewrite) => (value.includes(rewrite.literal) ? value.replace(rewrite.pattern, rewrite.replace) : value), text);
 }
+
+/** The chart attributes that carry words; geometry (points, paths, coordinates) is never scanned. */
+const WORDED = new Set(['aria-label', 'aria-description', 'title']);
 
 /** A shared chart, its accessible name, title, and axis text in the adopted wording. */
 export function guidedSvg(node: SvgNode): SvgNode {
   return {
     tag: node.tag,
-    attrs: node.attrs.map(([name, value]) => [name, guided(value)] as const),
+    attrs: node.attrs.map(([name, value]) => [name, WORDED.has(name) ? guided(value) : value] as const),
     children: node.children.map(child => typeof child === 'string' ? guided(child) : guidedSvg(child)),
   };
 }
