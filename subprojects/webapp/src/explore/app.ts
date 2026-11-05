@@ -897,6 +897,8 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     busy = true; generalError = ''; render();
     await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
     if (!alive() || version !== navigationVersion) { busy = false; return; }
+    // Whether results stood before this attempt, whatever happens inside it (§11.3).
+    const hadResults = result !== null;
     try {
       const snapshot = cloneDraft(draft);
       const checked = validateDraft(snapshot, manifest);
@@ -912,7 +914,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     } catch (error) {
       console.error('Guided calculation:', error); busy = false;
       // Claim only what holds: earlier results are mentioned only when there are some (§11.3).
-      generalError = `We couldn’t calculate results. Your entries are still here.${result ? ' Your previous results are unchanged.' : ''} Select Show results to try again.`;
+      generalError = `We couldn’t calculate results. Your entries are still here.${hadResults ? ' Your previous results are unchanged.' : ''} Select Show results to try again.`;
       alert.textContent = generalError; render();
     }
   }

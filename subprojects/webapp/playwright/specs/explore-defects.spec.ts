@@ -49,6 +49,9 @@ test('every guided disclosure label clears the theme\'s icon and chevron', async
   await page.locator('#gx-full-scenario summary').click();
   await page.locator('#gx-stage-example summary').click();
   await expectClear(page, 'results, disclosures open');
+  // A larger default font scales the theme's icon; the label's clearance scales with it.
+  await page.evaluate(() => { document.documentElement.style.fontSize = '170%'; });
+  await expectClear(page, 'results, larger font');
 });
 
 /** Conversion data without the 20° coefficients: the movement and review steps convert only the selected angles, the calculation converts them all and fails. */

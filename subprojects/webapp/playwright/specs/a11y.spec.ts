@@ -54,9 +54,20 @@ const V = () => pointer().export_version;
  * Infinite animations (spinners) are left running.
  */
 async function settled(page: Page): Promise<void> {
-  await page.evaluate(() => Promise.all(document.getAnimations()
-    .filter((animation) => animation.effect?.getComputedTiming().iterations !== Infinity)
-    .map((animation) => animation.finished.catch(() => undefined))));
+  await page.evaluate(async () => {
+    const frame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    // Two frames first: a scroll's handler, and the fade it starts, land a frame after the mount.
+    await frame(); await frame();
+    // Then until none is left running, since finishing one may start another. A paused one never
+    // finishes and is not waited for.
+    for (let round = 0; round < 20; round++) {
+      const running = document.getAnimations().filter((animation) =>
+        animation.playState === 'running' && animation.effect?.getComputedTiming().iterations !== Infinity);
+      if (!running.length) return;
+      await Promise.all(running.map((animation) => animation.finished.catch(() => undefined)));
+      await frame();
+    }
+  });
 }
 
 /** Runs axe with the §7.5 tags, records the engine version as the `axe-core-version` annotation, and asserts zero violations (soft, so every state is reported). */
