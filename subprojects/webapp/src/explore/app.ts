@@ -326,6 +326,9 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   function checkSampleFill(): void {
     if (!sampleFill || sampleFill.modified || holdsSample(draft, sampleFill.values)) return;
     sampleFill = { ...sampleFill, modified: true };
+    // Once Modified, always Modified (§10.5): the confirmed scenario's fill, while it is
+    // still the working fill, carries the change, so a later Discard never shows it as Prefilled.
+    if (confirmedFill?.serial === sampleFill.serial) confirmedFill = { ...confirmedFill, modified: true };
     const line = $('.gx-sample-status');
     if (line) line.textContent = sampleNotice(sampleFill.id, true);
   }
@@ -598,6 +601,8 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     return {
       measurement: display.measurement, view: { ...display.view }, readoff: { ...display.readoff },
       logScale: display.logScale, chartDataOpen: { ...display.chartDataOpen }, exampleOpen, refineOpen,
+      sample: sampleFill ? { id: sampleFill.id, modified: sampleFill.modified } : null,
+      confirmedSample: confirmedFill ? { id: confirmedFill.id, modified: confirmedFill.modified, current: sampleFill?.serial === confirmedFill.serial } : null,
     };
   }
 
@@ -674,11 +679,38 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     const { measurement, view, readoff, logScale, chartDataOpen } = record.display;
     display = { ...defaultDisplayState(), measurement, view: { ...view }, readoff: { ...readoff }, logScale, chartDataOpen: { ...chartDataOpen } };
     exampleOpen = record.display.exampleOpen; refineOpen = record.display.refineOpen;
+    restoreFills(record);
     reached = new Set(record.confirmed ? STEPS : STEPS.slice(0, STEPS.indexOf(step) + 1));
     restoreTarget = record.confirmed ? cloneDraft(record.confirmed) : null;
     // An untouched introduction is not restored work: no claim (§9.2, step 4).
     const untouched = step === 'intro' && record.confirmed === null && !draftChanged(record.draft, freshDraft(manifest));
     restoredNotice = restoreTarget === null && !untouched;
+  }
+
+  /**
+   * Restore the sample notice with the record (owner decision R, 2026-11-05).
+   * A fill's values are rebuilt from the served release; a sample the release
+   * no longer supports drops its notice rather than the record. Modified is
+   * never undone: an unmodified fill whose values no longer match turns
+   * Modified at the first render. The mode-switch note returns when the draft
+   * is in the mode the sample did not set; the story starts closed.
+   */
+  function restoreFills(record: SessionRecord): void {
+    const rebuild = (id: SampleId, modified: boolean): SampleFill | null => {
+      try {
+        fillSerial += 1;
+        return { id, values: sampleDraft(manifest, id), modified, serial: fillSerial };
+      } catch (error) {
+        console.error('Guided restore: sample', error);
+        return null;
+      }
+    };
+    const { sample, confirmedSample } = record.display;
+    sampleFill = sample ? rebuild(sample.id, sample.modified) : null;
+    confirmedFill = !record.confirmed || !confirmedSample ? null
+      : confirmedSample.current && sampleFill ? { ...sampleFill, modified: confirmedSample.modified }
+      : rebuild(confirmedSample.id, confirmedSample.modified);
+    sampleModeNote = sampleFill !== null && draft.mode !== sampleFill.values.mode;
   }
 
   /**

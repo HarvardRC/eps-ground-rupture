@@ -5,10 +5,25 @@
 // stored either.
 import type { Manifest } from '../decode/fields';
 import { MEASUREMENT_NAMES, type MeasurementName, type PanelView } from '../state/state';
-import { validateDraft, type Draft, type Step } from './state';
+import { isSampleId, validateDraft, type Draft, type SampleId, type Step } from './state';
 
 export const SESSION_KEY = 'gre-explore-session';
 const STEPS: readonly Step[] = ['intro', 'site', 'movement', 'review', 'results'];
+
+/** A sample fill's identity and whether it has been edited (§10.5; owner decision R, 2026-11-05). */
+export interface StoredSample {
+  id: SampleId;
+  modified: boolean;
+}
+
+/**
+ * The fill standing when the current confirmation was made; `current`
+ * says it is still the working fill rather than an earlier one that a
+ * later fill replaced (Discard returns to its notice, §10.5).
+ */
+export interface StoredConfirmedSample extends StoredSample {
+  current: boolean;
+}
 
 /** The §5 presentation choices that persist with the record (§9.2). */
 export interface DisplayChoices {
@@ -19,6 +34,12 @@ export interface DisplayChoices {
   chartDataOpen: Record<MeasurementName, boolean>;
   exampleOpen: boolean;
   refineOpen: boolean;
+  /**
+   * The active sample notice, so a reload keeps it (owner decision R,
+   * 2026-11-05). A record written before these keys existed reads them as null.
+   */
+  sample: StoredSample | null;
+  confirmedSample: StoredConfirmedSample | null;
 }
 
 export interface SessionRecord {
@@ -104,6 +125,7 @@ const perMeasurement = <T>(value: unknown, item: (v: unknown) => v is T): value 
 
 const DRAFT_KEYS = ['faultDip', 'depth', 'density', 'sediment', 'mode', 'slipMin', 'slipMax', 'offsetMax', 'population', 'scarpClass'] as const;
 const DISPLAY_KEYS = ['measurement', 'view', 'readoff', 'logScale', 'chartDataOpen', 'exampleOpen', 'refineOpen'] as const;
+const SAMPLE_KEYS = ['sample', 'confirmedSample'] as const;
 const RECORD_KEYS = ['record', 'dataVersion', 'step', 'draft', 'confirmed', 'display'] as const;
 
 /** The §2 Draft structure; values need not validate against the manifest. */
@@ -118,8 +140,25 @@ export function isDraft(value: unknown): value is Draft {
     && isString(value.population) && arrayOf(value.scarpClass, isString);
 }
 
+const isStoredSample = (value: unknown): value is StoredSample =>
+  isObject(value) && hasExactly(value, ['id', 'modified']) && isSampleId(value.id) && typeof value.modified === 'boolean';
+const isStoredConfirmed = (value: unknown): value is StoredConfirmedSample =>
+  isObject(value) && hasExactly(value, ['id', 'modified', 'current']) && isSampleId(value.id)
+  && typeof value.modified === 'boolean' && typeof value.current === 'boolean';
+
 function isDisplay(value: unknown): value is DisplayChoices {
-  if (!isObject(value) || !hasExactly(value, DISPLAY_KEYS)) return false;
+  if (!isObject(value)) return false;
+  // Both sample keys or neither: a record from before them restores without a notice.
+  const sampleKeys = SAMPLE_KEYS.filter(key => key in value).length;
+  if (sampleKeys === 1 || !hasExactly(value, sampleKeys ? [...DISPLAY_KEYS, ...SAMPLE_KEYS] : DISPLAY_KEYS)) return false;
+  if (sampleKeys) {
+    const { sample, confirmedSample } = value;
+    if (!(sample === null || isStoredSample(sample)) || !(confirmedSample === null || isStoredConfirmed(confirmedSample))) return false;
+    // A confirmed fill still current is the working fill itself; a confirmed fill implies a working one.
+    if (confirmedSample !== null && (sample === null || (confirmedSample.current && confirmedSample.id !== sample.id))) return false;
+  } else {
+    value.sample = null; value.confirmedSample = null;
+  }
   const readoff = (v: unknown): v is number | null => v === null || (Number.isInteger(v) && (v as number) >= 0 && (v as number) <= 100);
   const view = (v: unknown): v is PanelView => v === 'histogram' || v === 'cumulative';
   const flag = (v: unknown): v is boolean => typeof v === 'boolean';
@@ -133,5 +172,7 @@ function isRecord(value: unknown): value is SessionRecord {
   return isObject(value) && hasExactly(value, RECORD_KEYS) && value.record === 1
     && isString(value.dataVersion) && (STEPS as readonly unknown[]).includes(value.step)
     && isDraft(value.draft) && (value.confirmed === null || isDraft(value.confirmed))
-    && isDisplay(value.display);
+    && isDisplay(value.display)
+    // The confirmed scenario's fill needs a confirmed scenario.
+    && (value.confirmed !== null || (value.display as DisplayChoices).confirmedSample === null);
 }

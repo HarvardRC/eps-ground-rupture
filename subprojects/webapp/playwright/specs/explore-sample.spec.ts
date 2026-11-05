@@ -391,6 +391,80 @@ for (const sample of SAMPLES) {
   });
 }
 
+for (const sample of SAMPLES) {
+  test(`${sample.id}: the notice, its story, and the mode-switch note survive a reload (owner decision R)`, async ({ page }) => {
+    const reload = async () => { await page.reload(); await explorerReady(page); };
+    await gotoExplore(page);
+    await pickSample(page, sample.id);
+    expect((await storedRecord(page))!.display.sample).toEqual({ id: sample.id, modified: false });
+    await reload();
+    await expect(heading(page)).toHaveText(SITE_HEADING);
+    await expect(notice(page)).toHaveText(prefilled(sample));
+    await expect(page.locator('details.gx-sample-story')).toHaveCount(1);
+    await expect(page.locator('details.gx-sample-story')).not.toHaveAttribute('open');
+
+    // A mode switch is not an edit; its note returns with the record while the draft is in the other mode.
+    await action(page, 'Continue to fault movement').click();
+    await page.locator('#gx-mode-slip').check();
+    await expect(modeNote(page)).toHaveText(MODE_NOTE);
+    await reload();
+    await expect(heading(page)).toHaveText(MOVEMENT_HEADING);
+    await expect(notice(page)).toHaveText(prefilled(sample));
+    await expect(modeNote(page)).toHaveText(MODE_NOTE);
+
+    // Modified survives too.
+    await typeEntry(page, 'slipMax', '4.5');
+    await expect(notice(page)).toHaveText(modified(sample));
+    await reload();
+    await expect(notice(page)).toHaveText(modified(sample));
+    expect((await storedRecord(page))!.display.sample).toEqual({ id: sample.id, modified: true });
+
+    // Start a new scenario ends it, across a reload as well.
+    await page.locator('.gx-restart button').click();
+    await expect(notice(page)).toHaveCount(0);
+    await reload();
+    await expect(notice(page)).toHaveCount(0);
+    expect((await storedRecord(page))!.display.sample).toBeNull();
+  });
+
+  test(`${sample.id}: after a reload, Discard changes still returns to the confirmed fill's notice`, async ({ page }) => {
+    const other = SAMPLES.find((s) => s.id !== sample.id)!;
+    const discard = () => page.locator('.gx-pending').getByRole('button', { name: 'Discard changes' }).click();
+    const restored = async () => {
+      await page.reload(); await explorerReady(page);
+      await expect(page.locator('.gx-restoring')).toHaveCount(0);
+      await page.locator('.gx-context').waitFor();
+    };
+    await gotoExplore(page);
+    await pickSample(page, sample.id);
+    await action(page, 'Continue to fault movement').click();
+    await page.locator('#gx-offset-feedback table').waitFor();
+    await action(page, 'Review scenario').click();
+    await action(page, 'Show results').click();
+    await page.locator('.gx-context').waitFor();
+
+    // The same fill: an edit turns it Modified, and after a reload discarding keeps Modified.
+    await page.locator('#gx-refine-button').click();
+    await setChecked(page, '#gx-population-one_state_per_trial', true);
+    await restored();
+    await discard();
+    await stepButton(page, 'site').click();
+    await expect(notice(page)).toHaveText(modified(sample));
+
+    // A later fill of the other sample: after a reload, discarding returns to the confirmed fill's notice.
+    await stepButton(page, 'intro').click();
+    await pickSample(page, other.id);
+    await action(page, 'Use the sample').click();
+    await expect(notice(page)).toHaveText(prefilled(other));
+    expect((await storedRecord(page))!.display.confirmedSample).toEqual({ id: sample.id, modified: true, current: false });
+    await stepButton(page, 'results').click();
+    await restored();
+    await discard();
+    await stepButton(page, 'site').click();
+    await expect(notice(page)).toHaveText(modified(sample));
+  });
+}
+
 test('an open dialog survives the re-render of a settling restore, at either step', async ({ page }) => {
   await gotoExplore(page);
   await confirmGolden(page, 'GS-1');
