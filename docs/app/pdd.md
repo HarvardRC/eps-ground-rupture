@@ -115,7 +115,7 @@ named in the last column carry the detail.
 | D-11 | Small-result warning threshold, chart floor, and empty-result diagnosis rule. | FR-O3 | Product owner | Proposed | Warn below 30 valid; suppress chart below 10; single-condition diagnosis; no-match state distinct from no-valid-measurement state; §4.5. |
 | D-12 | Unclassified records: population and display semantics. | FR-G2, FR-S7 | Product owner | Proposed | "All scarp types" applies no filter — unclassified records stay in the matching population (GS-0's 346,834); excluded from class-colored charts and class counts; §3.7, §4.3. |
 | D-13 | Scarp-family view availability and label. | FR-G2 | Product owner | Proposed | Toggle "Group collapse variants"; §3.7. |
-| D-14 | Chart-export provenance format. | FR-D2 (P2) | Product owner | Proposed | Caption strip + sidecar text; §6.3. |
+| D-14 | Chart-export provenance format. | FR-D2 (P1.5, D-48) | Product owner | Proposed | Caption strip + sidecar text; §6.3. |
 | D-15 | Shared-link version notice. | FR-X1 (P2) | Product owner | Proposed | URLs carry no version stamp when links first ship (P2); notice rule for later; §7.2. |
 | D-16 | Browser and mobile baseline. | NFR-4 | Product owner | Proposed | Evergreen 12-month window; 360 px floor; §9.2. Browser window amended at owner review, 2026-11-01. |
 | D-17 | Accessibility conformance target. | NFR-5 | Product owner | Proposed | WCAG 2.2 AA for new pages; §9.3. |
@@ -141,7 +141,7 @@ named in the last column carry the detail.
 | D-37 | Sample inputs on the guided introduction. | §5.1, C1 | Product owner | Decided (2026-11-04) | Try sample inputs fills the approved illustrative scenario, completed with 5 m depth and Dense density, and opens site conditions; a non-fresh draft is replaced only after an explicit confirmation. §2.3; the completion values and the replacement rule are agent selections under the §2.3 delegation. D-42 subsequently adds a second named sample and a chooser. |
 | D-38 | Same-tab continuity at `/explore/`. | §5.1, FR-S8 | Product owner | Decided (2026-11-04) | Scope delegated to the implementing agent and recorded: same-tab reload and back/forward restoration restore the draft, confirmed settings, step, and display choices and recompute results, with a visible notice; a new tab or later visit starts fresh. §2.3 and §7.3. |
 | D-39 | Guided publication path; `/scenario/` paused. | §2.2, R-11 | Product owner | Decided (2026-11-04) | `/explore/` joins the unlisted prototype deployment; a team demonstration and the redistribution-license decision precede advertising it. `/scenario/` stays deployed unlisted without further UX investment and is no longer the activation candidate. §2.3. |
-| D-40 | Result-report export. | FR-D1, FR-D2 | Product owner | Decided (2026-11-04) | One self-contained document pairing the §6.1 provenance and scenario summary with rendered charts and statistics; builds on D-14. The owner set it P2; guided task G-13 carries it in the next-phase queue (D-41). §6.5. |
+| D-40 | Result-report export. | FR-D1, FR-D2 | Product owner | Decided (2026-11-04) | One self-contained document pairing the §6.1 provenance and scenario summary with rendered charts and statistics; builds on D-14. The owner set it P2; guided task G-13 carries it in the next-phase queue (D-41). D-48 promotes it to P1.5. §6.5. |
 | D-41 | Next-phase queue for the deliberate deferrals. | §2.2 | Product owner | Decided (2026-11-04) | Every deliberate deferral of the guided redesign is queued as the phase after the second increment: the D-39 reconciliation list, family view, shared links, between-visit recovery, scenario import, the result report (G-13), the sample scenarios and stories (D-42: G-14, G-15), remaining browser coverage, and the paused `/scenario/` rework decision. Team availability schedules the phase; it may precede the team demonstration. Advertising still follows D-39. §2.3. |
 | D-42 | Two named sample scenarios with stories. | §5.1, C1, CR-10 | Product owner | Decided (2026-11-04) | One chooser offers two named samples: D-37's illustrative scenario, unchanged, and a second anchored to the 1952 M 7.36 Kern County earthquake — fault angles 60° and 70°, maximum vertical surface offset 1.3 m, completion values delegated as in D-37. Each carries a short story and up to two licensed images where suitable verified files exist; values are anchored to the named event's scale, never presented as modeling it. §2.3; guided DDD §10; tasks G-14 and G-15 in the next-phase queue (D-41). D-43 subsequently reworks the presentation. |
 | D-43 | Sample presentation rework. | §5.1, C1, CR-10 | Product owner | Decided (2026-11-04) | Reviewing the built result, the owner replaced the two sample buttons with one **Try a prefilled sample** action opening a scale-named listbox; made the replacement confirmation a modal dialog (never a browser dialog, as before); reworded the prefill notice and made it persist across the input steps; put the story panel behind a prominent Where these values come from trigger on both input steps; restored the sequential walk after a fill; prefilled both movement modes (the Kern slip window anchored to Bawden 2001's 1.6–1.9 m, the illustrative delegated); and added CR-10 per-field annotations. §2.3; guided DDD §§10.3–10.4; tasks G-18 and G-19. D-44 subsequently revises the presentation. |
@@ -149,6 +149,7 @@ named in the last column carry the detail.
 | D-45 | Wording and UX polish from the second external audit. | FR-O1, FR-G3, NFR-5 | Product owner | Decided (2026-11-05) | The owner adopted the audit's wording table (matching simulation stages; measurements used; Missing values (excluded); Estimated fault slip at depth; Your selected range includes; Histogram counts by value range; Exit walkthrough; Download data (ZIP) with a contents description; a plain-language normalization explanation), the results-screen rework (compact summary and critical warnings with View full scenario, chart and measurement choices higher), the Results walkthrough · n of 5 label, help disclosures that add information, a provisional mark on the Scarp dip choice card, physical density ordering, and the overlap and message-truthfulness fixes. Audit: `notes/2026-11-05/explorer-wording-ux-audit.html`. §2.3; guided DDD §11; tasks G-20 and G-21, sequenced after G-19. |
 | D-46 | Interpretation of negative scarp heights. | FR-O1, CR-10 | Product owner | Proposed (2026-11-05) | The Kern sample surfaces a −0.02 m scarp height while the description says height above the ground; the data contract retains negative measurements deliberately. The research group is asked for the interpretation; the application keeps showing the data unchanged, and the explanation lands as CR-10 text once the group answers. §2.3. |
 | D-47 | Progression guidance and review fixes. | FR-G3, NFR-5, CR-10 | Product owner | Decided (2026-11-05) | Reviewing the deployed build with a third external review (f3f94a7), the owner kept every progression control enabled with guidance instead of refusal: a neutral Still-needed line before the attempt; a visible focused summary linking each unfinished condition after an unsuccessful click, replacing the Select-all focus jump; group-boundary error emphasis without per-checkbox outlines; red marking only after an attempt (GOV.UK button guidance; W3C form-feedback guidance). The step list stays a sequence indicator without disabled buttons. Start a new scenario returns to the opening step. The same round: the theme's Back to top control leaves the guided page; the sample dialog keeps its actions in view; both slip endpoints carry the Required mark, adopting audit entry 16; sample explanations drop the caution coloring; the mode-switch note becomes "The sample has separate example values for each mode; one is not converted from the other. Switching modes can change the results." (CR-10). §2.3; guided DDD §12; tasks G-22 and G-23, sequenced after G-21. |
+| D-48 | P1.5 delivery band: the result report, then chart export. | FR-D2, D-14, D-40 | Product owner | Decided (2026-11-05) | Reviewing the parked backlog after the D-47 round, the owner created a band between the MVP and P2 and, the same day, set it release-blocking: v0.4 ships with both items, sequenced after the standing MVP graph, ahead of every remaining P2 item, and implemented at once rather than with the parked lane. The result report (D-40, §6.5; guided task G-13) comes first: a `.docx` built on the application's existing ZIP writer and delivered inside the FR-D1 download ZIP — no new control; the download description names it. Chart captions ride as document text carrying the D-14 fields. The standalone chart-image export (D-14, §6.3) follows as a thin action over the same rendering; D-14's on-image caption rule stays Proposed until an image ships alone. Execution waits only on the report's drafted design section, whose ZIP-layout amendment is guided-only so the `/scenario/` bundles stay byte-identical (D-39). The media index (ADR-0012) is not a prerequisite of either item and stays P2. §2.3; PRD §2.2. |
 
 ---
 
@@ -714,6 +715,20 @@ example values for each mode; one is not converted from the
 other. Switching modes can change the results." (CR-10). Guided
 DDD §12 holds the design; tasks G-22 and G-23 carry it,
 sequenced after G-21.
+
+**P1.5 promotion (D-48, 2026-11-05).** Reviewing the parked
+backlog after the D-47 round, the owner promoted chart export
+(FR-D2, D-14) and the result report (D-40) out of P2 into a new
+P1.5 band, and the same day set the band release-blocking: v0.4
+ships with both items, implemented now, ahead of every remaining
+P2 item. The report comes first: a `.docx` delivered
+inside the FR-D1 download ZIP — no new control — with chart
+captions as document text carrying the D-14 fields. The
+standalone chart-image export follows as a thin action over the
+same rendering; D-14's on-image caption rule stays Proposed
+until an image ships alone. The media index (ADR-0012) stays
+P2; it is not a prerequisite of either item. Execution waits
+only on the report's design section.
 
 **Approved introduction (product owner, 2026-11-03).**
 
@@ -1688,6 +1703,11 @@ left to implementation.
 
 ### 6.3 Chart export (FR-D2, P2; D-14 Proposed)
 
+D-48 (2026-11-05) promotes this export from P2 to P1.5,
+release-blocking for v0.4, second in the band after the result
+report, which carries these caption fields as document text; the
+on-image strip below applies when an image ships alone.
+
 An exported chart image carries a rendered caption strip: product
 name; the displayed measurement and its unit; the one-line scenario
 summary (which always names the population, §3.7); the count line
@@ -1720,17 +1740,23 @@ this scarp type — not a visualization of your scenario."
 ### 6.5 Result report (D-40, P2)
 
 Proposed 2026-11-04 and decided the same day: the owner set the
-report P2 and had a task recorded. One action produces a single
-self-contained document of the confirmed scenario — HTML or PDF —
-pairing the §6.1 provenance and scenario summary with the rendered
-charts and their D-14 caption strips, the full §4.2 statistics
-table, and every active caveat, so a reader can file or share one
-presentable record rather than CSV and JSON alone. It builds on
-chart export (D-14), adds no new calculation, and keeps every §6.1
-content rule. Guided task G-13 records it in the next-phase queue
-(D-41); its design section is drafted and accepted before
-execution, and the implementation plan's parked list keeps the
-schedule pointer.
+report P2 and had a task recorded; D-48 (2026-11-05) promotes it
+to P1.5, first in the band, release-blocking for v0.4, and sets
+its form and delivery. The report is a single self-contained
+`.docx` document of the confirmed scenario, built on the
+application's existing ZIP writer and delivered as a member of
+the FR-D1 download ZIP — no new control; the download
+description names it. It pairs the §6.1 provenance and scenario
+summary with the rendered charts — captions as document text
+carrying the D-14 fields — the full §4.2 statistics table, and
+every active caveat, so a reader can file or share one
+presentable record rather than CSV and JSON alone. It adds no
+new calculation and keeps every §6.1 content rule; its chart set
+is fixed by its design section, independent of on-screen view
+toggles. Markdown files inside the same ZIP are the recorded
+fallback; a `.pptx` sibling is a possible later addition. Guided
+task G-13 carries it; guided DDD §13 (drafted 2026-11-05) holds
+the design, accepted by the owner before execution.
 
 ---
 

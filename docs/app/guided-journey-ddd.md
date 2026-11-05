@@ -957,3 +957,166 @@ claim about switching; the new text states the sample behavior —
 the per-mode values are separate by design, the Kern slip window
 being Bawden 2001's band rather than a conversion. (CR-10;
 §10.5's description of the note is superseded.)
+
+## 13. Result report (D-48)
+
+PDD D-48 sets the result report first in the P1.5 band,
+release-blocking for v0.4, delivered with no new control: the
+FR-D1 download gains one member. PDD §6.5 holds the product rule;
+this section fixes the design guided task G-13 implements. Every
+change is guided-only — no file served to `/scenario/` changes,
+and its bundles stay byte-identical (D-39).
+
+### 13.1 Delivery inside the FR-D1 download
+
+The guided results download keeps its button, its file name rule,
+and its availability (confirmed results only). Its archive adds
+one final member, `report.docx`, after the four members of DDD
+§5.9. The guided download handler composes the archive itself: it
+takes the four text members from the shared `packageTexts`
+(unchanged), appends the report member, and writes the archive
+with the shared `zip` writer (unchanged), all at the handler's
+one `generatedAt` instant. The shared `buildPackage`, the
+`/scenario/` button and delivery, and every shared module keep
+their bytes.
+
+The hint under the button names the report (§13.7); the button
+label and the ready status line stay. A second activation while
+the archive is being assembled is ignored — a download-local busy
+flag, released when delivery or failure settles.
+
+### 13.2 Document content
+
+The report is one self-contained Word document of the confirmed
+scenario. Its order:
+
+1. Title block: the document title (§13.7), the one-line scenario
+   summary in the DDD §5.8 wording (settings and population), and
+   the generated instant with the software and data-export
+   versions.
+2. Provenance: the blocks of `provenance.txt` (DDD §5.9; PDD
+   §6.1) rendered as paragraphs — citation, DesignSafe DOIs,
+   versions, scenario settings, population, generation date, and
+   every active caveat, the same words as the text member.
+3. One section per measurement, in the PDD §4.1 order (scarp
+   height, deformation-zone width, scarp dip): the measurement
+   label and unit; the PDD §4.2 statistics table with the page's
+   row labels and formatted values; the histogram and the
+   cumulative chart as images, each followed by its caption.
+   The small-result warning, when active, opens the section in
+   the page's wording; scarp dip's section carries the
+   Provisional-data notice exactly as the page does (PDD §5.4).
+4. Nothing else: no field measurements (PDD §6.1), and no content
+   the page does not show.
+
+Each caption is document text carrying the D-14 fields: the
+displayed measurement and its unit; the one-line scenario
+summary; the count line in the page's wording; the software and
+data-export versions; "Cite: Chiama et al. (2025)"; and, on the
+cumulative chart, the PDD §4.1 accuracy statement in the guided
+overlay's approved wording. D-14's on-image strip is not used
+here (PDD §6.3): inside a document the caption is better as
+selectable text, and the on-image rule waits for the standalone
+chart export.
+
+### 13.3 Fixed chart set
+
+The report's charts do not follow the on-screen toggles: two per
+measurement — the linear histogram and the cumulative curve —
+whatever view, scale, or walkthrough state the page is in, so the
+same confirmed scenario always files the same record. The width
+log-scale variant stays out of the report this round (recorded; a
+D-23-governed refinement may revisit it). Where the page's chart
+floor suppresses a chart (D-11, fewer than 10 valid), the report
+prints the page's suppression notice in the image's and caption's
+place; the statistics table still renders whenever the page shows
+it.
+
+### 13.4 The `.docx` assembly
+
+`report.docx` is itself a stored ZIP written by the same shared
+`zip` writer, holding the minimal OOXML part set:
+`[Content_Types].xml`; `_rels/.rels`; `word/document.xml`;
+`word/_rels/document.xml.rels`; and one `word/media/chart-<n>.png`
+per rendered chart, numbered in document order. The document uses
+direct run and paragraph properties (bold, sizes) and no styles
+part; a styles part is a permitted refinement at review if Word's
+defaults disappoint. All XML parts are deterministic functions of
+the `RenderInput`, the version stamps, and `generatedAt`; only
+the PNG bytes are browser-dependent.
+
+Chart images are rasterized from the same SVG the shared DDD
+§5.12 builders produce for the guided page, overlay wording
+included: the SVG is serialized, drawn to a canvas at twice its
+CSS size, and encoded as PNG; the drawing embeds inline at the
+chart's CSS size (9,525 EMU per pixel). Rasterization is the only
+browser-bound step and is injected into the assembly, which is
+otherwise a browser-and-Node module (DDD §5.1) under
+`src/explore/`, so no `/scenario/`-served file changes.
+
+### 13.5 Failure behavior
+
+If rasterization or assembly fails, the download still delivers
+the four-member archive of DDD §5.9 and says so: the status line
+states that the data files are ready and the Word report could
+not be built this time (§13.7). The archive never carries a
+partial or corrupt `report.docx`, and the existing whole-download
+failure message is unchanged for failures before the four members
+exist. Failure honesty follows ADR-0010: the message names what
+is missing and claims nothing that did not happen.
+
+### 13.6 Archive layout and the independent checker
+
+DDD §5.9's four-member layout continues to hold for `/scenario/`,
+unchanged. The guided archive's layout is that plus `report.docx`
+last. `test/zipcheck.py` learns the guided case: the expected
+member list becomes an argument (the four names, or the four plus
+`report.docx`), and for the guided list it also opens
+`report.docx` as a nested archive and asserts the §13.4 part set,
+every part stored, names ASCII. The Node tests keep their digests
+for the four text members; the report member is asserted
+structurally, never by digest, because PNG bytes vary by browser.
+
+### 13.7 Strings
+
+New and changed reader-facing texts; final wording goes to the
+owner at the gate:
+
+- The hint under the download button, today "Matching simulation
+  stages, statistics, scenario settings and sources.", becomes:
+  "Matching simulation stages, statistics, scenario settings and
+  sources, with a Word report of this result (report.docx)."
+- The report-failure status line: "Your data download is ready.
+  The Word report could not be built this time, so the archive
+  holds the data files without it."
+- The document title: "Ground Rupture Explorer — result report".
+- The provenance section heading: "Provenance".
+
+Every other string in the report is an existing registry or
+overlay text used verbatim: the measurement labels, the PDD §4.2
+row labels, the count line, the view names, the PDD §4.1
+cumulative accuracy statement in its guided form, the PDD §5.4
+provisional notice, the DDD §5.8 summary wording, and the
+`provenance.txt` blocks. The report introduces no second wording
+for anything the page already says.
+
+### 13.8 Acceptance
+
+- Node tests cover the assembly as a pure function with injected
+  fixture PNGs: the part set, well-formed XML, every image
+  relationship resolving to a media part and every embed to a
+  relationship, the §13.2 order, captions carrying the D-14
+  fields, the suppression branch, the §13.5 fallback under a
+  failing injected rasterizer, and a fixed-scenario
+  `document.xml` snapshot.
+- `zipcheck.py` passes over a guided archive produced by the Node
+  tests: the outer layout, the nested part set, stored methods
+  throughout, and the DDD §5.9 digests for the four text members.
+- The guided browser specs (both lane projects) download a
+  confirmed scenario's archive, read it, and assert the member
+  list, the nested parts, one image per non-suppressed chart, the
+  caption and accuracy texts inside `document.xml`, and the
+  updated hint. The `/scenario/` bundles are asserted
+  byte-identical, as in every guided task.
+- The owner opens `report.docx` from a downloaded archive in Word
+  and the evidence records the check (G-13's completion).

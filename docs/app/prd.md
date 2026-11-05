@@ -495,8 +495,12 @@ through US-3 and the requirements below.
   and summary statistics; citations; and links to the paper and full
   data archive.
 
-- **P2:** shareable scenario URLs, inverse search, plot exports,
-  animations and morphology education, the derived-magnitude display
+- **P1.5 (PDD D-48, 2026-11-05):** chart image exports (FR-D2) and
+  the result report (PDD D-40) — in the v0.4 release, sequenced
+  after the P1 graph, ahead of all remaining P2 work.
+
+- **P2:** shareable scenario URLs, inverse search, animations and
+  morphology education, the derived-magnitude display
   aid (C10), reader-selected result content and display size (C12),
   and only those additional exploration features that address a
   documented gap in the existing dashboards (C8).
@@ -1303,7 +1307,8 @@ as chart context. Field measurements remain separately sourced and cited.
 #### FR-D2. Export chart images
 
 The product should allow users to export chart images for use in reports
-or review material. This is a P2 capability.
+or review material. This is a P1.5 capability, promoted from P2
+by PDD D-48 (2026-11-05) and shipping in v0.4.
 
 An exported image must include, or be accompanied by, enough information
 to identify:
@@ -2231,7 +2236,7 @@ carry no priority of their own (—).
 | [FR-O5](#fr-o5-field-data-context) | Field-data context | P1 | C3 | §5.2 |
 | [FR-O6](#fr-o6-kern-county-worked-example) | Kern County worked example | P1 | C3 | §5.2 |
 | [FR-D1](#fr-d1-download-matching-simulation-records-and-statistics) | Download matching simulation records and statistics | P1 | C4 | §5.3 |
-| [FR-D2](#fr-d2-export-chart-images) | Export chart images | P2 | C4 | §5.3 |
+| [FR-D2](#fr-d2-export-chart-images) | Export chart images | P1.5 | C4 | §5.3 |
 | [FR-D3](#fr-d3-link-to-the-complete-data-archive-and-paper) | Link to the complete data archive and paper | P1 | C5 | §5.3 |
 | [FR-D4](#fr-d4-offer-representative-scarp-type-animations) | Offer representative scarp-type animations | P2 | C4, C9 | §5.3 |
 | [FR-X1](#fr-x1-shareable-scenario-links) | Shareable scenario links | P2 | C6 | §5.4 |

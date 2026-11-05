@@ -1933,6 +1933,60 @@ opens (D-41). The overlay's documented fold-in remains the path
 for the wording whenever the redesign adopts it; nothing in the
 current release changes.
 
+## P1.5 band: chart export and the result report (2026-11-05)
+
+After the D-47 round closed, the owner reviewed the parked P2/P3
+backlog and promoted two items into a new P1.5 band, and the
+same day set it release-blocking — v0.4 ships with them, ahead
+of every remaining P2 item and implemented at once. Chart export
+(FR-D2, D-14) comes first, the result report (D-40, guided task
+G-13) second. PDD D-48 records the band; PRD
+§2.2 carries it; the parked list and the guided plan's G-13 row
+point at it. Execution waits only on D-14's format decision and
+the report's design section.
+
+Two clarifications the owner asked for are recorded with the
+decision. First, the media index (ADR-0012) is not a prerequisite
+of either item: it inventories third-party animations and
+photographs for the P2 content pages, while both band items
+render the product's own computed charts. Second, a correction of
+the 2026-11-04 record: when the owner proposed the result report
+and asked whether such a feature had been considered before, the
+session answered no. That answer was incomplete. The combined
+document was indeed new, but chart image export had stood in the
+PRD as FR-D2 (P2) since its first version, with D-14 proposing
+its provenance format — standing prior art the report builds on,
+as §6.5 records. D-48's ordering makes that relation the
+schedule: the export's rendering and caption work is the
+report's groundwork. Heading labels born "P2" keep their anchors
+unchanged; the register governs the tier.
+
+Refined the same day in discussion. The report comes first and is
+a `.docx`, hand-built on the application's existing ZIP writer
+(`download/zip.ts`) and delivered as a member of the FR-D1
+download ZIP — no new control; the one visible change outside the
+ZIP is the download description, which passes the usual string
+gate. Chart captions ride as document text carrying the D-14
+fields, and D-14's on-image caption rule stays Proposed until the
+standalone chart-image export — now second, a thin action over
+the same rendering — ships an image alone. Markdown files inside
+the same ZIP are the recorded fallback if the `.docx` build
+disappoints review; a `.pptx` sibling is noted as a possible
+later addition. The ZIP-layout amendment is guided-only, keeping
+the `/scenario/` bundles byte-identical (D-39).
+
+The design section followed the same day: guided DDD §13 fixes
+the delivery seam — the shared `packageTexts` and `zip` writer,
+both unchanged, composed by the guided handler — the document
+content, the fixed chart set (linear histogram and cumulative
+curve per measurement, independent of on-screen toggles), the
+`.docx` part set on the existing ZIP writer, the failure
+fallback, the layout checker's guided case, and the strings:
+four new or changed texts gated to the owner, everything else
+reused verbatim from the registry and overlay. G-13's row now
+points at §13; the owner's acceptance and release open
+execution.
+
 ## References
 
 - [`docs/app/ddd.md` — Ground Rupture Explorer — detailed design document](ddd.md).

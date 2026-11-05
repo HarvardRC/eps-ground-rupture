@@ -5606,7 +5606,10 @@ MVP ([PRD §2.2 — MVP and delivery
 priorities](prd.md#22-mvp-and-delivery-priorities)). This plan
 schedules no parked work before v0.4; starting any of it earlier in
 parallel is the owner's scheduling choice, not a requirement of the
-sources. Each line names what unparks it.
+sources. Each line names what unparks it. D-48 (2026-11-05)
+lifts chart export and the result report into a P1.5 band —
+release-blocking for v0.4 and implemented at once; their lines
+below stay as the capability record until task rows carry them.
 
 - Display preferences — P2, the owner-decided scope of
   [FR-G6](prd.md#fr-g6-display-preferences-p2) and
@@ -5654,16 +5657,19 @@ sources. Each line names what unparks it.
   reading of observed ranges outside the recorded extent awaits the
   owner's decision
   ([DDD §5.14](ddd.md#514-inverse-mode-p2)).
-- Chart export ([D-14](pdd.md#1-decision-register)) — P2. Its cumulative
+- Chart export ([D-14](pdd.md#1-decision-register)) — P1.5
+  (D-48, 2026-11-05; second in the band). Its cumulative
   images must include the PDD §4.1 accuracy statement in the rendered
   caption strip; acceptance covers its inclusion and legibility.
-- Result report ([D-40](pdd.md#1-decision-register)) — P2, decided
+- Result report ([D-40](pdd.md#1-decision-register)) — P1.5
+  (D-48, 2026-11-05; first in the band, a `.docx` inside the
+  FR-D1 download ZIP), decided
   2026-11-04: one self-contained document pairing the §6.1
   provenance and scenario summary with rendered charts and
   statistics ([PDD §6.5](pdd.md#65-result-report-d-40-p2));
-  recorded as guided task G-13 in the next-phase queue (D-41) under
-  the owner's earlier-start provision above, and still sequenced
-  after chart export (D-14).
+  recorded as guided task G-13 and, since D-48, sequenced ahead
+  of chart export (D-14), whose caption fields it carries as
+  document text.
 - Finer logarithmic bins that subdivide each decade by mantissa steps
   — a P2 option for the width panel's log-scale toggle, which ships in
   the MVP; it needs a [D-23](pdd.md#1-decision-register)
