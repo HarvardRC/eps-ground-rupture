@@ -1850,6 +1850,16 @@ to the research group; the D-10 legal placeholder stays the
 owner's open decision. Strings the audit gives verbatim are
 approved; the remaining texts return through the string gates.
 
+## Recurring a11y flake assigned to G-21 (2026-11-05)
+
+The G-18 completion report characterized the `/scenario/` lane's
+intermittent axe contrast failure on the theme's Back to top
+control as load- or timing-dependent and invisible to CI. The
+owner added its resolution to G-21: a genuine contrast failure is
+fixed as a defect (permitted under D-39); a measurement artifact
+is stabilized in the spec, an exclusion being the recorded last
+resort. Guided DDD §11.3 carries the mandate.
+
 ## References
 
 - [`docs/app/ddd.md` — Ground Rupture Explorer — detailed design document](ddd.md).

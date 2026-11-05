@@ -857,4 +857,11 @@ gate. Specs asserting the old strings update with them.
   when none exist; the message states only what holds.
 - The version-mismatch message and its control agree: either the
   control reloads the page or the message asks to retry loading.
-- The §9.5 specs cover the three fixes.
+- The recurring axe contrast report on the theme's Back to top
+  control (`.md-top`, the `/scenario/` failure states, load- or
+  timing-dependent): determine whether the contrast genuinely
+  fails there — then fix the style, a defect fix permitted under
+  D-39 — or whether the report is a measurement artifact — then
+  stabilize the spec, with a narrowly scoped, recorded exclusion
+  only as the last resort. The determination enters the evidence.
+- The §9.5 specs cover the fixes.
