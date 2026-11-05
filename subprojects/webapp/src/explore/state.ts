@@ -47,9 +47,9 @@ export function sedimentGroup(set: string): string {
 export type SampleId = 'illustrative' | 'kern';
 
 /** Each sample's values; the Record type makes every SampleId carry its own. */
-const SAMPLE_VALUES: Record<SampleId, { dips: number[]; depth: number; density: string; strength: string; offsetMax: string }> = {
-  illustrative: { dips: [30, 40], depth: 5, density: 'Dense', strength: 'Strong', offsetMax: '3' },
-  kern: { dips: [60, 70], depth: 10, density: 'Medium', strength: 'Moderate', offsetMax: '1.3' },
+const SAMPLE_VALUES: Record<SampleId, { dips: number[]; depth: number; density: string; strength: string; offsetMax: string; slipMin: string; slipMax: string }> = {
+  illustrative: { dips: [30, 40], depth: 5, density: 'Dense', strength: 'Strong', offsetMax: '3', slipMin: '3', slipMax: '5' },
+  kern: { dips: [60, 70], depth: 10, density: 'Medium', strength: 'Moderate', offsetMax: '1.3', slipMin: '1.6', slipMax: '1.9' },
 };
 
 /** Narrow an untrusted string, such as a `data-sample` attribute, to a SampleId. */
@@ -68,8 +68,15 @@ export const isSampleId = (value: unknown): value is SampleId =>
  *   Layered: Moderate sediment are agent selections under the PDD §2.3
  *   delegation, recorded in the G-14 evidence.
  *
- * Every member comes from the manifest dictionaries; a missing member
- * throws rather than shrinking the sample.
+ * Both movement modes prefill (PDD D-43; guided DDD §10.3); offset mode
+ * stays the active one. The Kern slip window is 1.6–1.9 m, the reverse
+ * slip of Bawden (2001), deliberately independent of the model's
+ * offset-to-slip conversion; the illustrative 3–5 m window is an agent
+ * selection under the PDD §2.3 delegation, recorded in the G-18 evidence.
+ *
+ * Every member comes from the manifest dictionaries; a missing member,
+ * or a slip window the release does not accept, throws rather than
+ * shrinking the sample.
  */
 export function sampleDraft(manifest: Manifest, sample: SampleId): Draft {
   const columns = manifest.trialColumns;
@@ -84,6 +91,9 @@ export function sampleDraft(manifest: Manifest, sample: SampleId): Draft {
     return { set: pairs[0].set, sedimentStrength: pairs[0].sedimentStrength };
   }).sort(compareSedimentPairs);
   const spec = SAMPLE_VALUES[sample];
+  if (judgeSlipWindow(spec.slipMin, spec.slipMax, manifest.slipWindowBounds).kind !== 'accepted') {
+    throw new Error(`Sample: this data release does not cover ${spec.slipMin}–${spec.slipMax} m of fault slip.`);
+  }
   return {
     ...freshDraft(manifest),
     faultDip: spec.dips.map(dip => member(columns.fault_dip, dip, `${dip}° fault angle`)),
@@ -92,7 +102,18 @@ export function sampleDraft(manifest: Manifest, sample: SampleId): Draft {
     sediment: sediments(spec.strength),
     mode: 'offset',
     offsetMax: spec.offsetMax,
+    slipMin: spec.slipMin,
+    slipMax: spec.slipMax,
   };
+}
+
+/**
+ * Whether a draft still holds a sample fill unedited (guided DDD §10.3):
+ * the prefill notice stands until the first draft edit. Switching the
+ * movement mode changes no prefilled value, so it is not an edit.
+ */
+export function holdsSample(draft: Draft, fill: Draft): boolean {
+  return comparable({ ...draft, mode: fill.mode }) === comparable(fill);
 }
 
 export function cloneDraft(draft: Draft): Draft {

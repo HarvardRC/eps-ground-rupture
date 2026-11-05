@@ -61,10 +61,18 @@
 #gre-explore .gx-restart { margin-top: 24px; }
 #gre-explore .gx-intro-actions { justify-content: flex-start; }
 #gre-explore .gx-intro-actions .gx-hint { margin: 0; }
-#gre-explore .gx-sample-choice { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-#gre-explore .gx-sample-choice > span { font-size: .8rem; color: var(--gx-muted); }
-#gre-explore .gx-sample-confirm { padding: 17px; border: 1px solid #bc966b; background: #fff5df; border-radius: 7px; }
-#gre-explore .gx-sample-confirm p { font-size: .8rem; }
+#gre-explore .gx-sample-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: 10px; margin-bottom: 16px; }
+#gre-explore .gx-sample-card { display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; border: 1px solid #bfb7ac; border-radius: 8px; cursor: pointer; font-size: .8rem; }
+#gre-explore .gx-sample-card:hover { background: var(--gx-wash); }
+#gre-explore .gx-sample-card[aria-checked="true"] { border: 2px solid var(--gx-accent); padding: 11px 13px; background: #f7f1ef; }
+#gre-explore .gx-sample-card span { color: var(--gx-muted); }
+#gre-explore .gx-sample-preview { margin-bottom: 18px; padding-top: 12px; border-top: 1px solid var(--gx-line); font-size: .8rem; }
+#gre-explore .gx-sample-mode-note { padding: 10px 15px; border-left: 3px solid #bc966b; background: #fff5df; font-size: .8rem; }
+#gre-explore .gx-sample-dialog { width: min(40rem, calc(100vw - 32px)); max-height: calc(100dvh - 32px); overflow: auto; padding: 24px; border: 1px solid #bc966b; border-radius: 10px; background: var(--gx-paper); color: var(--gx-ink); }
+#gre-explore .gx-sample-dialog::backdrop { background: rgb(40 39 39 / .45); }
+#gre-explore .gx-sample-dialog h2 { font-size: 1rem; margin-bottom: 18px; }
+#gre-explore .gx-dialog-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+#gre-explore .gx-sample-active { margin: 0 0 18px; }
 #gre-explore .gx-sample-status { margin: 0 0 18px; padding: 10px 15px; border-left: 3px solid #bc966b; background: #fff5df; font-size: .8rem; }
 #gre-explore .gx-sample-story { margin: 0 0 18px; padding: 10px 15px; border: 1px solid var(--gx-line); border-radius: 7px; font-size: .8rem; }
 #gre-explore .gx-sample-story > summary { cursor: pointer; font-weight: 600; }
