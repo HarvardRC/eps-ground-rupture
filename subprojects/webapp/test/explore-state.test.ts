@@ -11,6 +11,7 @@ import {
   draftChanged,
   freshDraft,
   offsetShortcut,
+  fieldHoldsSample,
   holdsSample,
   isSampleId,
   sampleDraft,
@@ -384,6 +385,28 @@ describe('sample inputs (guided DDD §§9.1, 10.1)', () => {
         { population: 'one_state_per_trial' as const }, { scarpClass: fill.scarpClass.slice(1) },
       ]) assert.equal(holdsSample({ ...cloneDraft(fill), ...edit }, fill), false, JSON.stringify(edit));
       assert.equal(holdsSample(freshDraft(manifest), fill), false);
+    });
+
+    test(`each ${id} annotation stands only while its own control holds the sample's value`, () => {
+      const fill = sampleDraft(manifest, id);
+      const fields = ['faultDip', 'depth', 'density', 'sediment', 'offsetMax', 'slip'] as const;
+      for (const field of fields) assert.equal(fieldHoldsSample(cloneDraft(fill), fill, field), true, field);
+      // A mode switch and set order change no control's value.
+      for (const field of fields) assert.equal(fieldHoldsSample({ ...cloneDraft(fill), mode: 'slip', faultDip: [...fill.faultDip].reverse(), sediment: [...fill.sediment].reverse() }, fill, field), true, field);
+      const edits: [typeof fields[number], Partial<typeof fill>][] = [
+        ['faultDip', { faultDip: fill.faultDip.slice(1) }], ['faultDip', { faultDip: [...fill.faultDip, 50] }],
+        ['depth', { depth: [] }], ['density', { density: [] }], ['sediment', { sediment: fill.sediment.slice(1) }],
+        ['offsetMax', { offsetMax: `${fill.offsetMax}.0` }], ['offsetMax', { offsetMax: '' }],
+        ['slip', { slipMin: '0' }], ['slip', { slipMax: '2' }],
+      ];
+      for (const [field, edit] of edits) {
+        const edited = { ...cloneDraft(fill), ...edit };
+        assert.equal(fieldHoldsSample(edited, fill, field), false, JSON.stringify(edit));
+        // Every other control's annotation stays.
+        for (const other of fields.filter(f => f !== field)) assert.equal(fieldHoldsSample(edited, fill, other), true, `${other} after ${JSON.stringify(edit)}`);
+      }
+      // Restoring the sample's value brings it back: the value is the sample's again.
+      assert.equal(fieldHoldsSample({ ...cloneDraft(fill), faultDip: [...fill.faultDip] }, fill, 'faultDip'), true);
     });
   }
 

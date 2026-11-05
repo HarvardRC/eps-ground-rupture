@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { describe, test } from 'node:test';
 
-import { ANCHORED_NOT_MODELED, STORIES } from '../src/explore/stories';
+import { ANNOTATIONS, SHARED_SENTENCE, STORIES } from '../src/explore/stories';
 import { isSampleId, type SampleId } from '../src/explore/state';
 
 const SAMPLE_IDS: readonly SampleId[] = ['illustrative', 'kern'];
@@ -35,9 +35,13 @@ describe('sample stories (guided DDD §10.2)', () => {
     for (const id of Object.keys(STORIES)) assert.ok(isSampleId(id));
   });
 
-  test('both stories carry the same anchored-not-modeled sentence', () => {
-    for (const id of SAMPLE_IDS) assert.ok(STORIES[id].paragraphs.join(' ').includes(ANCHORED_NOT_MODELED), id);
-    assert.match(ANCHORED_NOT_MODELED, /reproduce no event/);
+  test('both stories carry the §10.5 shared sentence, and the old one is gone', () => {
+    assert.equal(SHARED_SENTENCE, 'These examples help you try the tool. They do not reconstruct either earthquake.');
+    for (const id of SAMPLE_IDS) {
+      const text = STORIES[id].paragraphs.join(' ');
+      assert.equal(text.split(SHARED_SENTENCE).length - 1, 1, id);
+      assert.equal(text.includes('reproduce no event'), false, id);
+    }
   });
 
   test('the illustrative story keeps its §10.2 anchors', () => {
@@ -86,5 +90,48 @@ describe('sample stories (guided DDD §10.2)', () => {
         assert.ok(image.credit.license ? /^CC BY(-SA)? \d\.\d$/.test(image.credit.license.label) : /Public domain\.$/.test(image.credit.text));
       }
     }
+  });
+});
+
+describe('value annotations (guided DDD §§10.4, 10.5)', () => {
+  const FIELDS = ['faultDip', 'depth', 'density', 'sediment', 'offsetMax', 'slip'] as const;
+
+  test('every sample annotates every prefilled control in one or two sentences', () => {
+    assert.deepEqual(Object.keys(ANNOTATIONS).sort(), [...SAMPLE_IDS].sort());
+    for (const id of SAMPLE_IDS) {
+      assert.deepEqual(Object.keys(ANNOTATIONS[id]).sort(), [...FIELDS].sort(), id);
+      for (const field of FIELDS) {
+        const { text } = ANNOTATIONS[id][field];
+        const sentences = text.split(/(?<=[.;])\s+(?=[A-Z])/).length;
+        assert.ok(text.length > 0 && sentences <= 2, `${id} ${field}: ${text}`);
+      }
+    }
+  });
+
+  test('annotations link only their own story\'s sources, under the stories\' labels', () => {
+    for (const id of SAMPLE_IDS) {
+      for (const field of FIELDS) {
+        for (const source of ANNOTATIONS[id][field].sources) assert.ok(STORIES[id].sources.includes(source), `${id} ${field}: ${source.label}`);
+      }
+    }
+  });
+
+  test('annotations name the events and the fault as the stories do (owner ruling, 2026-11-05)', () => {
+    assert.match(ANNOTATIONS.illustrative.offsetMax.text, /in the 1999 Chi-Chi earthquake\.$/);
+    assert.match(ANNOTATIONS.illustrative.faultDip.text, /1999 Chi-Chi earthquake/);
+    assert.match(ANNOTATIONS.kern.faultDip.text, /^Geodetic studies put the White Wolf fault's dip near 75°/);
+    assert.match(ANNOTATIONS.kern.offsetMax.text, /1952 Kern County earthquake/);
+    // Every named event is the sample's own.
+    for (const field of FIELDS) {
+      assert.equal(/Kern|White Wolf|1952/.test(ANNOTATIONS.illustrative[field].text), false, field);
+      assert.equal(/Chi-Chi|Chelungpu|1999/.test(ANNOTATIONS.kern[field].text), false, field);
+    }
+  });
+
+  test('the Kern annotations keep their anchors', () => {
+    assert.match(ANNOTATIONS.kern.faultDip.text, /near 75°/);
+    assert.match(ANNOTATIONS.kern.offsetMax.text, /about 1\.3 m/);
+    assert.match(ANNOTATIONS.kern.slip.text, /1\.6 m and 1\.9 m, used as an example band, not an uncertainty range/);
+    assert.deepEqual(ANNOTATIONS.kern.slip.sources.map(s => s.label), ['Bawden (2001)']);
   });
 });

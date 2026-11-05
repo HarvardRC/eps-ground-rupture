@@ -1,7 +1,10 @@
-// The sample stories (PDD D-42; guided DDD §10.2): reader-facing
-// scientific prose under CR-10. Each story is presentation state shown
-// behind a closed "About this sample" disclosure after a sample fill;
-// nothing here enters the Draft. Images are project images published at
+// The sample stories and value annotations (PDD D-42, D-43, D-44;
+// guided DDD §§10.2, 10.4, 10.5): reader-facing scientific prose under
+// CR-10. A story is presentation state shown in the sample dialog's card
+// preview and behind the closed "Why these sample values?" trigger while
+// a fill stands; an annotation stands beside a prefilled control while
+// that control still holds the sample's value. Nothing here enters the
+// Draft. Images are project images published at
 // `images/` (never application assets), referenced relatively from
 // `/explore/`, each with alt text and a visible credit naming its author
 // and license. Licenses were verified per file at the source; the G-15
@@ -32,14 +35,14 @@ export interface SampleStory {
   readonly images: readonly StoryImage[];
 }
 
-/** The anchored-not-modeled sentence both stories share (§10.2; PDD §2.3: values reproduce no event). */
-export const ANCHORED_NOT_MODELED = 'These are sample values anchored to that earthquake\'s scale; they reproduce no event and model no particular site.';
+/** The sentence both stories share (§10.5, replacing §10.2's anchored-not-modeled sentence; PDD §2.3: values reproduce no event). */
+export const SHARED_SENTENCE = 'These examples help you try the tool. They do not reconstruct either earthquake.';
 
 export const STORIES: Record<SampleId, SampleStory> = {
   illustrative: {
     paragraphs: [
       'These values are illustrative. Their scale comes from the 1999 M 7.6 Chi-Chi earthquake in Taiwan, where the Chelungpu fault broke the ground surface. An offset river along the fault brought down a bridge, and the Shih-Kang Dam was broken by roughly 8 m of uplift. At the former Kuangfu Junior High School in Wufeng, now the site of the 921 Earthquake Museum of Taiwan, the fault lifted the school\'s playground about 2.5 m.',
-      `The sample's 0–3 m of vertical surface offset is of that scale; its fault angles and sediment values are sample choices. ${ANCHORED_NOT_MODELED}`,
+      `The sample's 0–3 m of vertical surface offset is of that scale; its fault angles and sediment values are sample choices. ${SHARED_SENTENCE}`,
     ],
     sources: [
       { label: 'Chiama et al. (2025), Figure 1', href: '../figures/#fig-1' },
@@ -61,7 +64,7 @@ export const STORIES: Record<SampleId, SampleStory> = {
   kern: {
     paragraphs: [
       'This sample is anchored to the 1952 M 7.36 Kern County earthquake in California, which ruptured the White Wolf fault. Geodetic studies point to a steep fault, dipping near 75°, and the earthquake raised the ground surface by up to about 1.3 m.',
-      `The sample uses the two steepest modeled fault angles, 60° and 70°, and a vertical surface offset of up to 1.3 m, the scale of that elevation change; its sediment values are sample choices, not a description of the site. ${ANCHORED_NOT_MODELED}`,
+      `The sample uses the two steepest modeled fault angles, 60° and 70°, and a vertical surface offset of up to 1.3 m, the scale of that elevation change; its sediment values are sample choices, not a description of the site. ${SHARED_SENTENCE}`,
       'This release\'s field measurements include part of Buwalda and St. Amand\'s 1955 survey of the rupture, digitised by the study\'s lead author. A later version of this page may compare your results with those measurements.',
     ],
     sources: [
@@ -81,5 +84,60 @@ export const STORIES: Record<SampleId, SampleStory> = {
         license: null,
       },
     }],
+  },
+};
+
+/** The controls an annotation can stand beside (§10.4); `slip` is the slip range as a pair. */
+export type AnnotatedField = 'faultDip' | 'depth' | 'density' | 'sediment' | 'offsetMax' | 'slip';
+
+export interface Annotation {
+  readonly text: string;
+  /** The §10.2 sources that apply, if any. */
+  readonly sources: readonly StoryLink[];
+}
+
+/** A source of the sample's own story, by its label. */
+const link = (id: SampleId, label: string): StoryLink => {
+  const found = STORIES[id].sources.find(source => source.label === label);
+  if (!found) throw new Error(`Annotation: no ${label} source in the ${id} story.`);
+  return found;
+};
+
+const SAMPLE_CHOICE: Annotation = { text: 'A sample choice, not a description of any real site.', sources: [] };
+
+/**
+ * One or two sentences beside each prefilled control (§10.4), linking the
+ * sources that apply. They name the events and the fault as the stories
+ * do; only the card titles stay free of them (owner ruling on §10.5,
+ * 2026-11-05).
+ */
+export const ANNOTATIONS: Record<SampleId, Record<AnnotatedField, Annotation>> = {
+  illustrative: {
+    faultDip: { text: 'These angles are sample choices, not taken from the 1999 Chi-Chi earthquake.', sources: [] },
+    depth: SAMPLE_CHOICE,
+    density: SAMPLE_CHOICE,
+    sediment: SAMPLE_CHOICE,
+    offsetMax: {
+      text: 'Of the scale of the surface offsets in the sample\'s background: meters of uplift, including about 2.5 m at a school playground in the 1999 Chi-Chi earthquake.',
+      sources: [link('illustrative', 'Chiama et al. (2025), Figure 1'), link('illustrative', 'Tri-Mountain National Scenic Area, 921 Earthquake Museum of Taiwan')],
+    },
+    slip: { text: 'An example band within the simulations\' coverage. It is not converted from the surface offset.', sources: [] },
+  },
+  kern: {
+    faultDip: {
+      text: 'Geodetic studies put the White Wolf fault\'s dip near 75°; the sample uses the two steepest modeled angles.',
+      sources: [link('kern', 'Stein and Thatcher (1981)'), link('kern', 'Bawden (2001)')],
+    },
+    depth: SAMPLE_CHOICE,
+    density: SAMPLE_CHOICE,
+    sediment: SAMPLE_CHOICE,
+    offsetMax: {
+      text: 'The scale of the largest surface elevation change in the 1952 Kern County earthquake, about 1.3 m.',
+      sources: [link('kern', 'SCEDC, 1952 Kern County earthquake')],
+    },
+    slip: {
+      text: 'Bawden (2001)\'s two patch estimates, 1.6 m and 1.9 m, used as an example band, not an uncertainty range.',
+      sources: [link('kern', 'Bawden (2001)')],
+    },
   },
 };

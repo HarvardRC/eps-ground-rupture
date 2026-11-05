@@ -108,6 +108,27 @@ export function sampleDraft(manifest: Manifest, sample: SampleId): Draft {
 }
 
 /**
+ * Whether one control still holds the fill's value (guided DDD §10.5:
+ * an annotation clears when its control's value changes). Sets compare
+ * without order; entries compare as typed text, like `holdsSample`.
+ */
+export function fieldHoldsSample(draft: Draft, fill: Draft, field: 'faultDip' | 'depth' | 'density' | 'sediment' | 'offsetMax' | 'slip'): boolean {
+  const sameSet = <T>(a: readonly T[], b: readonly T[]) => {
+    const left = new Set(a), right = new Set(b);
+    return left.size === right.size && [...left].every(v => right.has(v));
+  };
+  const pair = (p: { set: string; sedimentStrength: string }) => `${p.set}\u0000${p.sedimentStrength}`;
+  switch (field) {
+    case 'faultDip': return sameSet(draft.faultDip, fill.faultDip);
+    case 'depth': return sameSet(draft.depth, fill.depth);
+    case 'density': return sameSet(draft.density, fill.density);
+    case 'sediment': return sameSet(draft.sediment.map(pair), fill.sediment.map(pair));
+    case 'offsetMax': return draft.offsetMax === fill.offsetMax;
+    case 'slip': return draft.slipMin === fill.slipMin && draft.slipMax === fill.slipMax;
+  }
+}
+
+/**
  * Whether a draft still holds a sample fill unedited (guided DDD §10.3):
  * the prefill notice stands until the first draft edit. Switching the
  * movement mode changes no prefilled value, so it is not an edit.
