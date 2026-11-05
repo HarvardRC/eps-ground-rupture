@@ -294,9 +294,9 @@ for (const sample of SAMPLES) {
     await expect(notice(page)).toHaveText(modified(sample));
     await expect(modeNote(page)).toHaveCount(0);
 
-    // Start a new scenario removes it.
+    // Start a new scenario removes it, back at the opening step (§12.2).
     await page.locator('.gx-restart button').click();
-    await expect(heading(page)).toHaveText(SITE_HEADING);
+    await expect(heading(page)).toHaveText(INTRO_HEADING);
     await expect(notice(page)).toHaveCount(0);
     await expect(page.locator('.gx-sample-story')).toHaveCount(0);
   });

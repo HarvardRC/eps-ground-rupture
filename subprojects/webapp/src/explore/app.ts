@@ -97,6 +97,19 @@ const STORY_HELPER = 'Background, photos and sources';
 const MODE_NOTE = 'The two modes are separate assumptions. Each selects a different set of simulations, so results can differ.';
 const populationName = (population: string): string => population === 'one_state_per_trial' ? 'Last stage within the slip range' : 'All stages within the slip range';
 const sedimentName = (pair: SedimentPair): string => `${sedimentGroup(pair.set).replace(' sediment', '')}: ${pair.sedimentStrength}`;
+// Readiness guidance (guided DDD §12.1): the name of each condition a forward
+// action still needs, the neutral line before an attempt, and the summary
+// after an unsuccessful one. Owner-gated strings.
+const CONDITION_NAMES: Record<string, string> = {
+  faultDip: 'Fault angle', depth: 'Sediment depth', density: 'Sediment density', sediment: 'Sediment strength and structure',
+  slipMin: 'Minimum fault slip', slipMax: 'Maximum fault slip', offsetMax: 'Maximum surface offset',
+  scarpClass: 'Scarp types', population: 'Simulation stages',
+};
+const STILL_NEEDED = 'Still needed:';
+const summaryTitle = (n: number): string => n === 1 ? 'Choose a value for 1 condition before continuing.' : `Choose values for ${formatCount(n)} conditions before continuing.`;
+const NEW_SCENARIO_STATUS = 'New scenario. Build your scenario or try a prefilled sample.';
+/** Where a condition's link moves focus: a group's fieldset, or a single field. */
+const conditionTarget = (field: string): string => ['slipMin', 'slipMax', 'offsetMax'].includes(field) ? `gx-${field}` : field === 'population' ? 'gx-population-all_stages' : `gx-group-${field}`;
 
 export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void {
   const { vintage, stamps, signal } = options;
@@ -262,7 +275,14 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   }
 
   function navigation(): string {
-    return `<nav class="gx-steps" aria-label="Scenario steps">${STEPS.map((s, i) => `<button type="button" data-action="step" data-step="${s}" ${s === step ? 'aria-current="step"' : ''} ${!reached.has(s) || (s === 'results' && !result) ? 'disabled' : ''}><span>${i + 1}</span>${STEP_NAMES[s]}</button>`).join('')}</nav>`;
+    // A sequence indicator (§12.1): steps not yet open render as plain entries, never as disabled buttons.
+    return `<nav class="gx-steps" aria-label="Scenario steps">${STEPS.map((s, i) => {
+      const current = s === step ? 'aria-current="step"' : '';
+      const inner = `<span>${i + 1}</span>${STEP_NAMES[s]}`;
+      return !reached.has(s) || (s === 'results' && !result)
+        ? `<span class="gx-step-entry" data-step="${s}" ${current}>${inner}</span>`
+        : `<button type="button" data-action="step" data-step="${s}" ${current}>${inner}</button>`;
+    }).join('')}</nav>`;
   }
 
   function introView(): string {
@@ -402,6 +422,42 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     }
   }
 
+  /** Each field a step's forward action still needs, once per field, in validation order. */
+  function unfinished(found: readonly Issue[], scope: Step): string[] {
+    return [...new Set(found.filter(item => item.step === scope).map(item => item.field))];
+  }
+
+  function conditionLink(field: string): string {
+    return `<a href="#${conditionTarget(field)}" id="gx-need-${field}" data-condition="${field}">${escape(CONDITION_NAMES[field] ?? field)}</a>`;
+  }
+
+  /**
+   * The guidance near a step's forward action (§12.1): after an unsuccessful
+   * attempt, the summary of that attempt's conditions, which shrinks as each
+   * is corrected; otherwise the neutral line naming what is still needed.
+   */
+  function readinessBody(scope: Step, only?: string): string {
+    const attempted = unfinished(issues, scope).filter(field => !only || field === only);
+    if (attempted.length) return `<div class="gx-issue-summary" id="gx-issue-summary" tabindex="-1" role="group" aria-labelledby="gx-issue-summary-title"><h3 id="gx-issue-summary-title">${escape(summaryTitle(attempted.length))}</h3><ul>${attempted.map(field => `<li>${conditionLink(field)}</li>`).join('')}</ul></div>`;
+    const needed = unfinished(validateDraft(draft, manifest).issues, scope).filter(field => !only || field === only);
+    return needed.length ? `<p class="gx-still-needed">${STILL_NEEDED} ${needed.map(conditionLink).join('<span aria-hidden="true"> · </span>')}.</p>` : '';
+  }
+
+  /** `only` limits a walkthrough stop to the one field it shows, so every link has its target on screen. */
+  function readiness(scope: Step, only?: string): string {
+    const body = readinessBody(scope, only);
+    return `<div class="gx-readiness" data-scope="${scope}"${only ? ` data-only="${only}"` : ''} data-body="${escape(body)}">${body}</div>`;
+  }
+
+  /** Typing does not re-render: the guidance updates in place when its content changes. */
+  function refreshReadiness(): void {
+    const slot = $('.gx-readiness');
+    const scope = slot?.dataset.scope as Step | undefined;
+    if (!slot || !scope) return;
+    const body = readinessBody(scope, slot.dataset.only);
+    if (slot.dataset.body !== body) { slot.innerHTML = body; slot.dataset.body = body; }
+  }
+
   function siteGroup(field: 'faultDip' | 'depth' | 'density' | 'sediment', title: string, hint: string, anchor: string): string {
     const choices: { value: string; label: string; group?: string; selected: boolean }[] = field === 'sediment'
       ? manifest.armStrengthStates.map((pair, i) => ({ value: String(i), label: pair.sedimentStrength, group: sedimentGroup(pair.set), selected: draft.sediment.some(p => p.set === pair.set && p.sedimentStrength === pair.sedimentStrength) }))
@@ -411,13 +467,13 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     const content = choices.map(choice => {
       let prefix = '';
       if (choice.group && choice.group !== lastGroup) { lastGroup = choice.group; prefix = `<h4 class="gx-choice-subheading">${escape(lastGroup)}</h4>`; }
-      return `${prefix}<label class="gx-choice ${choice.selected ? 'gx-selected' : ''}"><input type="checkbox" id="gx-${field}-${choice.value}" data-choice="${field}" value="${choice.value}" ${choice.group ? `aria-label="${escape(choice.group)}: ${escape(choice.label)}"` : ''} ${choice.selected ? 'checked' : ''} aria-describedby="gx-error-${field}" ${issue(field) ? 'aria-invalid="true"' : ''}><span>${escape(choice.label)}</span></label>`;
+      return `${prefix}<label class="gx-choice ${choice.selected ? 'gx-selected' : ''}"><input type="checkbox" id="gx-${field}-${choice.value}" data-choice="${field}" value="${choice.value}" ${choice.group ? `aria-label="${escape(choice.group)}: ${escape(choice.label)}"` : ''} ${choice.selected ? 'checked' : ''} aria-describedby="gx-error-${field}"><span>${escape(choice.label)}</span></label>`;
     }).join('');
-    return `<fieldset class="gx-site-group" id="gx-group-${field}"><legend>${term(field, title)} <span class="gx-required">Required</span></legend><p>${hint} ${glossary(anchor)}</p><label class="gx-select-all"><input type="checkbox" id="gx-${field}-all" data-all="${field}" aria-describedby="gx-error-${field}" ${issue(field) ? 'aria-invalid="true"' : ''} ${selectedCount === choices.length ? 'checked' : ''} data-mixed="${selectedCount > 0 && selectedCount < choices.length}"> Select all</label><div class="gx-choices">${content}</div>${issueHtml(field)}${selectedCount === 0 && !issue(field) ? '<p class="gx-hint">Choose one or more values to continue.</p>' : ''}${annotation(field)}</fieldset>`;
+    return `<fieldset class="gx-site-group${issue(field) ? ' gx-invalid' : ''}" id="gx-group-${field}" tabindex="-1"><legend>${term(field, title)} <span class="gx-required">Required</span></legend><p>${hint} ${glossary(anchor)}</p><label class="gx-select-all"><input type="checkbox" id="gx-${field}-all" data-all="${field}" aria-describedby="gx-error-${field}" ${selectedCount === choices.length ? 'checked' : ''} data-mixed="${selectedCount > 0 && selectedCount < choices.length}"> Select all</label><div class="gx-choices">${content}</div>${issueHtml(field)}${selectedCount === 0 && !issue(field) ? '<p class="gx-hint">Choose one or more values to continue.</p>' : ''}${annotation(field)}</fieldset>`;
   }
 
   function siteView(): string {
-    return `${heading('Describe the site conditions', 'Choose one or more values for each condition.')}${sampleNoticeView()}<div class="gx-site-grid">${siteGroup('faultDip', 'Fault angle', 'How steeply the fault is tilted, measured from horizontal.', 'fault-dip')}${siteGroup('depth', 'Sediment depth', 'The thickness of the sediment layer above the fault.', 'sediment-depth')}${siteGroup('density', 'Sediment density', 'How tightly the sediment is packed.', 'sediment-strength')}${siteGroup('sediment', 'Sediment strength and structure', 'Choose uniform material or a layered profile. You can include more than one possibility.', 'set')}</div><footer class="gx-footer">${button('intro', 'Back')}${reached.has('review') && !sampleWalk ? button('review', 'Return to review', true) : `<div>${reached.has('review') ? button('review', 'Return to review') : ''}${button('site-next', 'Continue to fault movement', true)}</div>`}</footer>`;
+    return `${heading('Describe the site conditions', 'Choose one or more values for each condition.')}${sampleNoticeView()}<div class="gx-site-grid">${siteGroup('faultDip', 'Fault angle', 'How steeply the fault is tilted, measured from horizontal.', 'fault-dip')}${siteGroup('depth', 'Sediment depth', 'The thickness of the sediment layer above the fault.', 'sediment-depth')}${siteGroup('density', 'Sediment density', 'How tightly the sediment is packed.', 'sediment-strength')}${siteGroup('sediment', 'Sediment strength and structure', 'Choose uniform material or a layered profile. You can include more than one possibility.', 'set')}</div>${readiness('site')}<footer class="gx-footer">${button('intro', 'Back')}${reached.has('review') && !sampleWalk ? button('review', 'Return to review', true) : `<div>${reached.has('review') ? button('review', 'Return to review') : ''}${button('site-next', 'Continue to fault movement', true)}</div>`}</footer>`;
   }
 
   function numeric(field: 'slipMin' | 'slipMax' | 'offsetMax', label: string, required: boolean): string {
@@ -432,7 +488,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
 
   function movementView(): string {
     const shortcut = regression ? offsetShortcut(draft.faultDip, regression, manifest.slipWindowBounds.max) : null;
-    return `${heading('Choose the assumed fault movement', 'Choose what you want to specify, then enter the range you want to investigate.')}${sampleNoticeView()}<fieldset class="gx-modes"><legend>What are you specifying?</legend><label><input type="radio" id="gx-mode-slip" name="gx-mode" value="slip" ${draft.mode === 'slip' ? 'checked' : ''}><span><strong>Fault slip at depth</strong><span>The distance the fault moves underground.</span></span></label><label><input type="radio" id="gx-mode-offset" name="gx-mode" value="offset" ${draft.mode === 'offset' ? 'checked' : ''}><span><strong>Vertical surface offset</strong><span>The vertical difference across the rupture at the ground surface.</span></span></label></fieldset><p class="gx-hint">Your entries are kept when you switch modes.</p>${sampleFill && sampleModeNote ? `<p class="gx-sample-mode-note" id="gx-sample-mode-note">${escape(MODE_NOTE)}</p>` : ''}${draft.mode === 'slip' ? `<section class="gx-movement"><h3>${term('slip', 'Fault-slip range')}</h3><p>Modeled fault slip: ${escape(manifest.slipWindowBounds.min)}–${escape(manifest.slipWindowBounds.max)} m. Stages are recorded about every ${displayRound(manifest.stageSpacing.mean, 2)} m of slip.</p>${help('What is fault slip?', 'Slip is how far the two blocks move past each other along the fault.', 'slip')}<div class="gx-number-row">${numeric('slipMin', 'Minimum', false)}${numeric('slipMax', 'Maximum', true)}</div>${annotationSlot('slip')}${button('slip-shortcut', 'Set maximum to 5 m')}</section>` : `<section class="gx-movement"><h3>${term('offset', 'Surface-offset range')}</h3><p>The range starts at 0 m and ends at the maximum you enter.</p>${help('How is surface offset related to fault slip?', 'Surface offset is a vertical difference at the ground surface. The app estimates a corresponding fault-slip range for each selected fault angle; raised surface ridges can make that estimate too large.', 'vertical-separation')}${numeric('offsetMax', 'Maximum', true)}${annotationSlot('offsetMax')}${regression ? (shortcut !== null ? button('offset-shortcut', `Set maximum to ${escape(shortcut)} m`) : '') : regressionStatus()}<div id="gx-offset-feedback"></div></section>`}<p class="gx-hint gx-spaced">Type a value or use − / + to change it by 0.1 m. The maximum buttons use the modeled coverage; they are not recommendations for your site.</p><p>${link('../dashboards/slip-regression/', 'See the slip-regression dashboard')} for the broader simulation relationship.</p><footer class="gx-footer">${button('site', 'Back')}${button('review', reached.has('review') ? 'Return to review' : 'Review scenario', true)}</footer>`;
+    return `${heading('Choose the assumed fault movement', 'Choose what you want to specify, then enter the range you want to investigate.')}${sampleNoticeView()}<fieldset class="gx-modes"><legend>What are you specifying?</legend><label><input type="radio" id="gx-mode-slip" name="gx-mode" value="slip" ${draft.mode === 'slip' ? 'checked' : ''}><span><strong>Fault slip at depth</strong><span>The distance the fault moves underground.</span></span></label><label><input type="radio" id="gx-mode-offset" name="gx-mode" value="offset" ${draft.mode === 'offset' ? 'checked' : ''}><span><strong>Vertical surface offset</strong><span>The vertical difference across the rupture at the ground surface.</span></span></label></fieldset><p class="gx-hint">Your entries are kept when you switch modes.</p>${sampleFill && sampleModeNote ? `<p class="gx-sample-mode-note" id="gx-sample-mode-note">${escape(MODE_NOTE)}</p>` : ''}${draft.mode === 'slip' ? `<section class="gx-movement"><h3>${term('slip', 'Fault-slip range')}</h3><p>Modeled fault slip: ${escape(manifest.slipWindowBounds.min)}–${escape(manifest.slipWindowBounds.max)} m. Stages are recorded about every ${displayRound(manifest.stageSpacing.mean, 2)} m of slip.</p>${help('What is fault slip?', 'Slip is how far the two blocks move past each other along the fault.', 'slip')}<div class="gx-number-row">${numeric('slipMin', 'Minimum', false)}${numeric('slipMax', 'Maximum', true)}</div>${annotationSlot('slip')}${button('slip-shortcut', 'Set maximum to 5 m')}</section>` : `<section class="gx-movement"><h3>${term('offset', 'Surface-offset range')}</h3><p>The range starts at 0 m and ends at the maximum you enter.</p>${help('How is surface offset related to fault slip?', 'Surface offset is a vertical difference at the ground surface. The app estimates a corresponding fault-slip range for each selected fault angle; raised surface ridges can make that estimate too large.', 'vertical-separation')}${numeric('offsetMax', 'Maximum', true)}${annotationSlot('offsetMax')}${regression ? (shortcut !== null ? button('offset-shortcut', `Set maximum to ${escape(shortcut)} m`) : '') : regressionStatus()}<div id="gx-offset-feedback"></div></section>`}<p class="gx-hint gx-spaced">Type a value or use − / + to change it by 0.1 m. The maximum buttons use the modeled coverage; they are not recommendations for your site.</p><p>${link('../dashboards/slip-regression/', 'See the slip-regression dashboard')} for the broader simulation relationship.</p>${readiness('movement')}<footer class="gx-footer">${button('site', 'Back')}${button('review', reached.has('review') ? 'Return to review' : 'Review scenario', true)}</footer>`;
   }
 
   function selectionSummary(value: Draft): string {
@@ -501,11 +557,11 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   }
 
   function scarpEditor(): string {
-    return `<fieldset id="gx-group-scarpClass"><legend>Which resulting ${term('scarpTypes', 'scarp types')}?</legend><p>Choose one or more types. These are simulated outcomes, not site inputs.</p>${issueHtml('scarpClass')}<label class="gx-select-all"><input type="checkbox" id="gx-scarpClass-all" data-all="scarpClass" aria-describedby="gx-error-scarpClass" ${issue('scarpClass') ? 'aria-invalid="true"' : ''} ${draft.scarpClass.length === manifest.scarpClasses.length ? 'checked' : ''} data-mixed="${draft.scarpClass.length > 0 && draft.scarpClass.length < manifest.scarpClasses.length}"> Select all</label><div class="gx-types">${manifest.scarpClasses.map((name, i) => `<label class="gx-type"><input type="checkbox" id="gx-scarpClass-${i}" data-choice="scarpClass" value="${i}" ${draft.scarpClass.includes(name) ? 'checked' : ''} aria-describedby="gx-error-scarpClass" ${issue('scarpClass') ? 'aria-invalid="true"' : ''}><span class="gx-type-name"><i style="background:${escape(manifest.scarpClassPalette[name])}" aria-hidden="true"></i>${escape(name)}</span><svg viewBox="0 0 110 38" aria-hidden="true"><path d="${SHAPES[i]?.[1] ?? SHAPES[0][1]}" fill="none" stroke="currentColor" stroke-width="2"/></svg><span class="gx-hint">${SHAPES[i]?.[0] ?? ''}</span></label>`).join('')}</div><p class="gx-hint">Profiles are schematic. ${glossary('scarp-classes', 'About scarp classes')}</p></fieldset>`;
+    return `<fieldset id="gx-group-scarpClass"${issue('scarpClass') ? ' class="gx-invalid"' : ''} tabindex="-1"><legend>Which resulting ${term('scarpTypes', 'scarp types')}?</legend><p>Choose one or more types. These are simulated outcomes, not site inputs.</p>${issueHtml('scarpClass')}<label class="gx-select-all"><input type="checkbox" id="gx-scarpClass-all" data-all="scarpClass" aria-describedby="gx-error-scarpClass" ${draft.scarpClass.length === manifest.scarpClasses.length ? 'checked' : ''} data-mixed="${draft.scarpClass.length > 0 && draft.scarpClass.length < manifest.scarpClasses.length}"> Select all</label><div class="gx-types">${manifest.scarpClasses.map((name, i) => `<label class="gx-type"><input type="checkbox" id="gx-scarpClass-${i}" data-choice="scarpClass" value="${i}" ${draft.scarpClass.includes(name) ? 'checked' : ''} aria-describedby="gx-error-scarpClass"><span class="gx-type-name"><i style="background:${escape(manifest.scarpClassPalette[name])}" aria-hidden="true"></i>${escape(name)}</span><svg viewBox="0 0 110 38" aria-hidden="true"><path d="${SHAPES[i]?.[1] ?? SHAPES[0][1]}" fill="none" stroke="currentColor" stroke-width="2"/></svg><span class="gx-hint">${SHAPES[i]?.[0] ?? ''}</span></label>`).join('')}</div><p class="gx-hint">Profiles are schematic. ${glossary('scarp-classes', 'About scarp classes')}</p></fieldset>`;
   }
 
   function refinementsView(): string {
-    return `<section class="gx-refinements" id="gx-refinements"><div class="gx-section-head"><h3>Refine results</h3><span class="gx-hint">Draft choices</span></div><p>Review your changes before they affect the results.</p><div class="gx-refinement-grid">${populationEditor()}${scarpEditor()}</div><footer class="gx-footer"><p class="gx-hint">The charts keep the confirmed settings until you choose Show results.</p>${button('review', 'Review changes', true)}</footer></section>`;
+    return `<section class="gx-refinements" id="gx-refinements"><div class="gx-section-head"><h3>Refine results</h3><span class="gx-hint">Draft choices</span></div><p>Review your changes before they affect the results.</p><div class="gx-refinement-grid">${populationEditor()}${scarpEditor()}</div>${readiness('results')}<footer class="gx-footer"><p class="gx-hint">The charts keep the confirmed settings until you choose Show results.</p>${button('review', 'Review changes', true)}</footer></section>`;
   }
 
   function refinementDisclosure(): string {
@@ -529,7 +585,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   }
 
   function guideEditor(): string {
-    return `<section class="gx-guide-editor"><p class="gx-guide-draft"><strong>Draft choices.</strong> Review changes before applying them. Results keep the confirmed settings until you choose Show results.</p>${guideIndex === 3 ? populationEditor() : scarpEditor()}</section>`;
+    return `<section class="gx-guide-editor"><p class="gx-guide-draft"><strong>Draft choices.</strong> Review changes before applying them. Results keep the confirmed settings until you choose Show results.</p>${guideIndex === 3 ? populationEditor() : scarpEditor()}${readiness('results', guideIndex === 3 ? 'population' : 'scarpClass')}</section>`;
   }
 
   function moveGuide(index: 0 | 1 | 2 | 3 | 4): void {
@@ -823,6 +879,9 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     if (next === 'results' && !result) return;
     if (next !== 'results') guideIndex = null;
     invalidate(); restoredNotice = false; logOffNotice = false;
+    // Leaving a step ends its attempt: coming back shows the neutral line, not the old summary (§12.1).
+    // Staying on it (its own entry in the step list) keeps the attempt.
+    if (next !== step) issues = issues.filter(item => item.step !== step);
     step = next; reached.add(next); generalError = ''; alert.textContent = ''; render('gx-heading', true);
     if (next === 'movement' && draft.mode === 'offset') void ensureRegression();
   }
@@ -857,10 +916,15 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     step = first.step === 'results' && !result ? 'review' : first.step;
     if (step === 'results') refineOpen = true;
     reached.add(step);
-    // Each field's own error stays under it and describes it; the alert says each distinct message once.
-    alert.textContent = [...new Set(found.map(item => item.message))].join(' ');
-    const field = first.field;
-    render(`gx-${field}${['faultDip', 'depth', 'density', 'sediment', 'scarpClass'].includes(field) ? '-all' : ''}`, true);
+    // Each field's own error stays under it and describes it; the focused
+    // summary near the forward action names every condition (§12.1).
+    alert.textContent = '';
+    render('gx-issue-summary', true);
+    // A step without a summary slot (the review step) still says what is wrong.
+    if (!$('#gx-issue-summary')) {
+      $('#gx-heading')?.focus({ preventScroll: true });
+      alert.textContent = [...new Set(found.map(item => item.message))].join(' ');
+    }
   }
 
   async function goReview(): Promise<void> {
@@ -977,6 +1041,17 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   window.visualViewport?.addEventListener('scroll', helpScrolled, { passive: true, signal });
 
   shell.addEventListener('click', event => {
+    // A readiness link moves focus to its condition on this step (§12.1), never a navigation.
+    const conditionLink = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>('a[data-condition]') : null;
+    if (conditionLink) {
+      // The theme's instant navigation would treat the fragment as a page
+      // change and remount the explorer; the link stays within the step.
+      event.preventDefault(); event.stopPropagation(); closeHelp();
+      const goal = document.getElementById(conditionTarget(conditionLink.dataset.condition ?? ''));
+      goal?.scrollIntoView({ block: 'start' });
+      goal?.focus({ preventScroll: true });
+      return;
+    }
     // Buttons, and the sample dialog's cards (§10.5).
     const target = event.target instanceof Element ? event.target.closest<HTMLElement>('button, [data-sample-card]') : null;
     if (!target || (target instanceof HTMLButtonElement && target.disabled)) return;
@@ -1039,7 +1114,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
         // Clear the record before the fresh state is saved (§9.2), including an unrestorable one.
         if (options.storage) clearSession(options.storage);
         blocked = null; restoreTarget = null; restoreError = ''; busy = false; restoring = false;
-        guideIndex = null; sampleFill = null; confirmedFill = null; sampleModeNote = false; sampleWalk = false; draft = freshDraft(manifest); confirmed = null; result = null; issues = []; generalError = ''; reached = new Set(['intro', 'site']); display = defaultDisplayState(); refineOpen = false; setStep('site'); status.textContent = 'New scenario. Choose one or more values for each site condition.';
+        guideIndex = null; sampleFill = null; confirmedFill = null; sampleModeNote = false; sampleWalk = false; draft = freshDraft(manifest); confirmed = null; result = null; issues = []; generalError = ''; reached = new Set(['intro']); display = defaultDisplayState(); refineOpen = false; setStep('intro'); status.textContent = NEW_SCENARIO_STATUS;
       }
       else if (action === 'retry-restore') void restoreResults();
       else if (action === 'plus' || action === 'minus') { invalidate(); const field = target.dataset.field as 'slipMin' | 'slipMax' | 'offsetMax'; draft[field] = stepDecimal(draft[field], action === 'plus' ? 1 : -1); issues = issues.filter(item => item.field !== field); render(); status.textContent = `${field === 'slipMin' ? 'Minimum' : 'Maximum'}: ${draft[field]} m.`; }
@@ -1137,11 +1212,20 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     if (input.dataset.number) {
       invalidate();
       const field = input.dataset.number as 'slipMin' | 'slipMax' | 'offsetMax';
-      draft[field] = input.value; issues = issues.filter(item => item.field !== field);
-      input.removeAttribute('aria-invalid'); const error = $(`#gx-error-${field}`); if (error) { error.hidden = true; error.textContent = ''; }
+      // The edited field's message clears at once (§12.1), and so does any other
+      // movement message the edit has corrected (lowering the minimum below the maximum).
+      draft[field] = input.value;
+      const holding = validateDraft(draft, manifest).issues;
+      issues = issues.filter(item => item.field !== field && (item.step !== 'movement' || holding.some(h => h.field === item.field && h.message === item.message)));
+      for (const name of ['slipMin', 'slipMax', 'offsetMax'] as const) {
+        if (issue(name)) continue;
+        $(`#gx-${name}`)?.removeAttribute('aria-invalid');
+        const error = $(`#gx-error-${name}`); if (error) { error.hidden = true; error.textContent = ''; }
+      }
       refreshMovementFeedback();
       checkSampleFill();
       refreshAnnotations();
+      refreshReadiness();
       if (restoredNotice) { restoredNotice = false; $('.gx-restored')?.remove(); }
       if (logOffNotice) { logOffNotice = false; $('.gx-log-off')?.remove(); }
       persist();

@@ -8,7 +8,7 @@ import { expect, test } from '@playwright/test';
 import { pointer } from '../support';
 import {
   INTRO_HEADING, MOVEMENT_HEADING, RESULTS_HEADING, REVIEW_HEADING, SESSION_KEY, SITE_HEADING,
-  action, confirmGolden, confirmedCount, countText, explorerReady, gotoExplore, heading, setChecked, stepButton, storedRecord,
+  action, confirmGolden, confirmedCount, countText, explorerReady, gotoExplore, heading, setChecked, expectStepClosed, stepButton, storedRecord,
   REGRESSION, holdRegression, pickSample, settleFrames, typeEntry,
 } from '../explore-support';
 
@@ -62,9 +62,13 @@ test('a corrupt record requires Start a new scenario and is kept until then', as
   await expect(page.locator('.gx-restored')).toHaveCount(0);
   expect(await page.evaluate((key) => sessionStorage.getItem(key), SESSION_KEY)).toBe('{"record":1,');
   await page.locator('#gx-restore-new').click();
-  await expect(heading(page)).toHaveText(SITE_HEADING);
+  // The fresh start is the opening step, with both entry points (§12.2).
+  await expect(heading(page)).toHaveText(INTRO_HEADING);
+  await expect(page.locator('.gx-restore-blocked')).toHaveCount(0);
+  await expect(action(page, 'Build your scenario')).toHaveCount(1);
+  await expect(page.locator('#gx-sample-trigger')).toHaveCount(1);
   const fresh = await storedRecord(page);
-  expect(fresh!.step).toBe('site');
+  expect(fresh!.step).toBe('intro');
   expect(fresh!.confirmed).toBeNull();
 });
 
@@ -79,7 +83,7 @@ test('a record from another data release requires the explicit fresh start', asy
   await explorerReady(page);
   await expect(page.locator('.gx-restore-blocked')).toContainText('The data release changed since this tab last used it.');
   expect(await page.evaluate((key) => sessionStorage.getItem(key), SESSION_KEY)).toBe(other);
-  await expect(stepButton(page, 'site')).toBeDisabled();
+  await expectStepClosed(page, 'site');
 });
 
 /** A new context with the running project's viewport and device emulation. */
@@ -234,7 +238,7 @@ test('typing during a stalled restore cancels it in place', async ({ page }) => 
   await settleFrames(page);
   await expect(page.locator('.gx-restore-retry')).toContainText(INTERRUPTED);
   await expect(page.locator('.gx-restored')).toHaveCount(0);
-  await expect(stepButton(page, 'results')).toBeDisabled();
+  await expectStepClosed(page, 'results');
   await page.unroute(REGRESSION);
   await page.locator('#gx-retry-restore').click();
   await expect(stepButton(page, 'results')).toBeEnabled();

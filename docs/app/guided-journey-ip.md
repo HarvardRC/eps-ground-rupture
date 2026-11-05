@@ -1753,6 +1753,169 @@ Not verified: screen-reader reading of the new messages, touch, and
 engines other than Chromium; the fade test uses the Web Animations API
 as Chromium implements it.
 
+### Readiness guidance and a new scenario, 2026-11-05 (G-22)
+
+G-22 ran under the D-47 release, after G-21, to guided DDD §§12.1–12.2.
+
+**Strings: the owner's approval.** The owner approved these verbatim on
+2026-11-05, in person, through the planning session, having seen the
+screenshots. This was the owner's own approval, not a delegated one.
+
+- Still-needed line: "Still needed: {names joined by ' · '}.", for
+  example "Still needed: Sediment depth · Sediment density."
+- Summary after an unsuccessful click: "Choose values for {n} conditions
+  before continuing.", and for one condition "Choose a value for 1
+  condition before continuing."
+- Condition names, used as the links: Fault angle, Sediment depth,
+  Sediment density, Sediment strength and structure, Minimum fault slip,
+  Maximum fault slip, Maximum surface offset, Scarp types, Simulation
+  stages.
+- New-scenario announcement: "New scenario. Build your scenario or try a
+  prefilled sample." It replaces "New scenario. Choose one or more values
+  for each site condition."
+- The step list changes no strings.
+
+The owner also approved the seven interpretations below, which §12.1
+leaves open:
+
+- **Placement.** The line and the summary share one slot directly above
+  the forward footer. The summary replaces the line after an unsuccessful
+  click and shrinks as each condition is corrected. Once it is empty, the
+  line resumes.
+- **Where.** The guidance appears on Site conditions, Fault movement, the
+  Results refinements and the walkthrough's two editing stops. It covers
+  the current step's conditions only. A block found on another step keeps
+  its routing to that step, which then shows its own summary.
+- **Links.** A group's link focuses its fieldset, and a numeric field's
+  link focuses the input. Neither is a navigation: the fragment never
+  reaches the theme's instant navigation.
+- **Announcements.** The summary takes the focus and is read from there.
+  An unsuccessful click no longer also writes the alert region. The one
+  exception is a block landing on the review step, which has no slot:
+  there the alert still says the messages.
+- **Movement.** The summary takes the focus on this step too. Numeric
+  fields keep their own `aria-invalid` and outline.
+- **Group emphasis.** An empty site group shows a red boundary with a
+  heavier left edge, plus its message. The scarp-types group shows a red
+  left edge. The checkboxes carry no invalid mark.
+- **Start a new scenario.** It lands on the opening step with focus on
+  its heading, and only step 1 is open in the list. The blocked-record
+  fresh start lands there too, offering both entry points.
+
+Considered and left unchanged (owner choice, 2026-11-05): the
+walkthrough's Back stays disabled at its first stop. It is bounded tour
+navigation, not a progression refusal, and outside D-47's scope.
+
+**Before and after.**
+
+- Before: an unsuccessful Continue focused the first group's Select all.
+  Every checkbox of an empty group, Select all included, carried
+  `aria-invalid` and a red outline. The alert repeated each message, and
+  nothing near the button said what was missing before the attempt.
+- After: the neutral line names what is missing before any attempt, with
+  no red marking on arrival. An unsuccessful click shows the summary and
+  focuses it, and the per-group messages stay. The group boundary carries
+  the error. A corrected condition clears its message and its summary
+  entry at once. A movement edit also clears another field's message
+  once it no longer holds, for example lowering the minimum below the
+  maximum. Leaving a step ends its attempt.
+- Before: unreached steps, and Results before results existed, were
+  disabled buttons in the step list.
+- After: they are plain non-interactive entries with a dashed number.
+  The step list's click behavior is unchanged.
+- Before: Start a new scenario landed on Site conditions, past the only
+  sample entry point.
+- After: it lands on the opening step.
+- The forward actions stay enabled. Show results still disables only
+  while it calculates.
+
+**Review.** The independent review found nothing blocking. It confirmed
+that only `src/explore/` and the specs changed, and that Material's
+instant navigation listens on the body in the bubble phase, so stopping
+the link click at the explorer keeps the theme from handling it. Its
+findings, applied:
+
+- **Walkthrough stops.** The Scarp-types stop's line also showed at the
+  Stages stop, where its link had no target. Each stop now names only
+  the field it shows.
+- **Review-step fallback.** A block falling back to the review step
+  announced nothing. It now says the messages.
+- **Focus.** Readiness links had no ids, so an asynchronous re-render
+  could drop their focus. They now carry ids.
+- **Cross-field correction.** A movement correction to the other end left
+  the corrected message standing. It now clears.
+- **Smaller fixes:**
+  - the summary's title is a heading;
+  - the fieldset no longer repeats its checkboxes' description;
+  - leaving a step ends its attempt;
+  - a current step shown as an entry keeps its highlight;
+  - the invalid boundary no longer shifts the layout;
+  - the link handler finds its target from the field, not from the href.
+
+The re-review of those fixes found no blocking or should-fix issue. Of
+its nits:
+
+- Applied: selecting the current step's own entry in the step list no
+  longer ends its attempt.
+- Applied: under forced colors, which draw no box-shadow, the invalid
+  site-group boundary thickens instead.
+- Noted, not changed: the scarp-types emphasis still widens its left
+  edge, which moves its contents by a few pixels.
+- Noted, not changed: a repeated identical block on the review step
+  rewrites the alert with the same text, which some screen readers may
+  not repeat. The behavior predates this task.
+
+**Implementation note.** In the first build the readiness links' fragment
+reached the theme's instant navigation, which remounted the explorer and
+lost the focus and the summary. The explorer now handles the click
+itself, and a spec checks that the URL is unchanged.
+
+Tests and specs, in both lane projects:
+
+- `explore-validation`:
+  - the line before an attempt and its updates;
+  - no red marking on arrival on either step;
+  - links that focus their group or field without changing the URL;
+  - the summary's group role, name, heading, links, focus and shrinking;
+  - group boundaries without checkbox invalid marks;
+  - numeric fields keeping theirs;
+  - the cross-field correction;
+  - the attempt ending when the step is left;
+  - closed step entries;
+  - a new axe pass over the line, the site summary and the movement
+    summary, scoped to the explorer's region.
+- `explore-validation` also checks that the step's own list entry keeps
+  the attempt.
+- `explore-walkthrough`: each editing stop's own line, and the empty
+  scarp-types attempt focusing the summary.
+- `explore-draft-boundary`, `explore-continuity`, `explore-sample` and
+  `explore-layout`: Start a new scenario at the opening step, with its
+  announcement, both entry points and closed steps. The layout pass adds
+  the opening step after a reset, the line and the summary.
+- `explore-journey` and `explore-race`: closed steps are asserted as
+  entries, not disabled buttons.
+
+At this verification, on `task/g-22-guidance` at `468d6b1`, over
+`2821ac0`:
+
+- **Build and unit tests.** The pinned Node suite passed all 447 tests,
+  and typechecking and the bundles passed. The strict publication and
+  preview builds passed, with `explore-072b6d043fa4.js` and
+  `explore-78aa7a0b997c.css`. The `/scenario/` bundles
+  `app-26490347afd0.js` and `app-08bebc049c15.css` were unchanged. All
+  31 hook tests passed.
+- **Document checks.** Relative links resolved, PDD agreement passed,
+  and traceability reported no gap rows.
+- **Lane.** The full lane passed 283 and skipped 5, with no failure,
+  twice in a row, at load averages of 15 to 16.
+- **Guided specs.** All 130 passed in `desktop` and `mobile`.
+- **Earlier runs.** Before the re-review nits, the same commands had
+  passed at `2278970` (283 twice, 130) and at `444a2e0` (283 twice,
+  130).
+
+Not verified: screen-reader reading of the line, the summary and the
+step entries; touch; engines other than Chromium.
+
 ## Separate CI investigation
 
 The reported job `126383105016` belongs to historical run
