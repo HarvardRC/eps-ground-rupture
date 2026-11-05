@@ -1116,6 +1116,195 @@ engines other than Chromium. The README licensing table does not
 yet mention third-party photographs; that is outside G-15 and left
 to the owner.
 
+### Sample presentation rework, 2026-11-05 (G-18)
+
+G-18 ran under the renewal extension of 2026-11-04. It was first
+built to PDD D-43, then held and reworked when the owner adopted
+D-44 and guided DDD §10.5 before the merge (the owner revision
+above). The branch was rebased onto the owner's docs commits
+`8f809b8` and `c5e121d`; neither changed G-18's scope.
+
+**The dialog (§10.5).** **Try a prefilled sample** on the
+introduction opens a native modal `<dialog>` titled "Try a
+prefilled sample".
+
+- It holds two selectable cards, titled by their inputs: "Lower
+  fault angles" (30° and 40°; surface offset up to 3 m) and "Steeper
+  fault angles" (60° and 70°; surface offset up to 1.3 m). The
+  descriptors name the offset only.
+- The cards form a radio group labelled "Samples", with one tab
+  stop. The arrow keys move the selection and wrap; Home and End
+  reach the ends. The dialog opens with the first card selected.
+- The selected card's preview shows its values under the review
+  page's labels, the offset and slip ranges, and the slip framing
+  note. Selecting a card never changes the draft; the specs compare
+  the stored record before and after.
+- **Use this sample** applies the selection on a fresh draft. On any
+  other draft, including a confirmed scenario or a pending restore,
+  the replacement question becomes the dialog's next step: "Replace
+  your current choices with the {sample} sample?", with focus on
+  **Keep my choices**.
+- Escape at either step, Cancel, and Keep my choices close the
+  dialog with nothing changed, and return focus to the trigger. Tab
+  is held inside the dialog and reaches every focusable item in
+  document order.
+
+**Notice and footer.** After a fill, Site conditions and Fault
+movement both show "Prefilled with the {sample} sample. You can
+change any value." The first draft edit, checked by comparing the
+draft with the fill's values, turns it into "Started from the
+{sample} sample · Modified". Once Modified, it stays Modified. The
+notice stays until another fill replaces it or Start a new scenario
+clears it.
+
+- A mode switch is not an edit. While a sample is active, the first
+  switch shows and announces the note "The two modes are separate
+  assumptions. Each selects a different set of simulations, so
+  results can differ." The note stays on Fault movement.
+- Discard changes returns to the notice of the fill the confirmed
+  scenario started from. The Modified flag of that fill carries over
+  while it is still the working fill, so Discard never shows it as
+  Prefilled again. A confirmation made without a sample discards
+  the notice with the draft.
+- After a fill, Site conditions offers only **Continue to fault
+  movement** as its primary action, with **Return to review** as a
+  secondary one when review was reached. The ordinary footer
+  returns once the reader moves past Site conditions.
+- Until G-19, the G-15 **About this sample** disclosure stays under
+  the notice on Site conditions, with the notice's lifetime.
+
+**Both-mode prefills.** Each sample fills both movement modes;
+offset mode stays active.
+
+- Kern: 0–1.3 m offset, and 1.6–1.9 m slip. The preview frames the
+  slip as "The slip range spans Bawden (2001)'s two patch estimates,
+  1.6 m and 1.9 m, used as an example band." It is never presented
+  as an uncertainty interval.
+- Illustrative: 0–3 m offset, and 3–5 m slip, an agent selection
+  under the PDD §2.3 delegation. The band lies inside the release's
+  modeled slip coverage (0–5.0135 m in the manifest), ends near its
+  top at the value the page's own **Set maximum to 5 m** shortcut
+  uses, and starts at the sample's 3 m offset scale. It is not a
+  conversion of the offset. The preview says "The slip range is an
+  example band within the simulations' coverage."
+- `sampleDraft` throws, rather than shrinking the sample, if a
+  release does not accept a sample's slip window. In slip mode both
+  windows are accepted with no coverage warning; offset mode keeps
+  G-14's observed coverage states.
+
+**Owner approval, 2026-11-05 (relayed through the planning
+session).** The owner approved:
+
+- strings 1–8 exactly as sent: the trigger and its hint, the dialog
+  title, the card titles and descriptors, the preview labels and
+  both slip notes, the dialog buttons, the replacement question and
+  its buttons, both notice forms, and the mode-switch note;
+- choices a–d: {sample} in sentences is the card title in lower
+  case; the dialog opens with the first card selected; Escape,
+  Cancel, and Keep my choices close the whole dialog unchanged; the
+  mode-switch note appears on the first switch, is announced once,
+  and stays until replacement or a new scenario;
+- the review-driven Discard rule above, in place of choice (e), as
+  the §10.5-compliant rule;
+- the screen-reader group label "Samples";
+- the consequence of interpretation (a): after a fill, a mode
+  switch, and Show results, the notice still says "Prefilled…",
+  and the mode-switch note flags the switch.
+
+**Owner decision R, 2026-11-05: the notice survives a reload.**
+Before this decision, a reload restored the draft and the
+confirmation (§9.2) but dropped the notice. The owner chose to keep
+it, as a small §9.2 extension within D-38's display-choices scope.
+
+- The record's display choices now hold `sample` (the working
+  fill's `{id, modified}`) and `confirmedSample` (the confirmed
+  scenario's fill, with `current` saying whether it is still the
+  working fill). Without the second, Discard after a reload could
+  not return to the right notice.
+- Both keys are validated like the rest of the record: a known
+  sample id, boolean flags, no extra keys, and no confirmed fill
+  without a confirmed scenario and a working fill. A record written
+  before the keys existed restores without a notice rather than
+  being refused.
+- A restored fill rebuilds its values from the served release; a
+  sample the release no longer supports drops only the notice (and
+  with it the confirmed scenario's fill).
+- Three things are derived or reset on reload rather than stored,
+  so a reload can differ slightly from the moment before it:
+  - the mode-switch note returns only while the draft is in the
+    mode the sample did not set, so it is gone after a switch back
+    to offset mode;
+  - the story disclosure restores closed;
+  - the sequential footer does not return: Site conditions shows
+    the ordinary footer, which offers **Return to review** first
+    when a confirmed scenario exists.
+
+**Reviews.** The independent review of the D-43 build found five
+issues: the chooser lost across an asynchronous re-render, opening
+and closing clearing the restore notice, focus moving twice into
+the question, a pending restore treated as a fresh draft for the
+silent fill, and vacuous spec assertions. All were fixed; the D-44
+rework replaced most of that code, keeping the pending-restore rule
+and the dialog's initial focus. The re-review of the D-44 rework
+found nothing blocking. Its fixes: Discard never un-Modifies a fill,
+the Tab trap covers every focusable item, the card group has its
+own label, and new specs cover discard, the in-place Modified
+update, and previewing over a confirmed scenario. The review of the
+decision-R change found nothing blocking. Its two fixes, applied: a
+confirmed fill is dropped with a working fill that cannot be
+rebuilt, so the next save never writes a record the validator
+refuses; and records from before the sample keys are normalised in
+`loadSession` instead of inside the validator. It also noted the
+three reload differences listed above, now recorded here.
+
+Tests and specs:
+
+- State tests: both-mode prefills validate in slip mode; a release
+  that does not cover a sample's slip window throws; `holdsSample`
+  treats a mode switch and set order as no edit and every field
+  edit as one.
+- Session tests: the sample keys round-trip; a record without them
+  loads with nulls; nine kinds of tampering are refused.
+- The §9.5 sample spec, for both samples: the cards and preview;
+  keyboard operation; the fresh fill in both modes with the mode
+  note; the notice's Modified form and lifetime; the confirmed
+  scenario and the question; Discard; the notice, story, and mode
+  note across reloads; Discard after a reload; the dialog across a
+  settling restore; and the story disclosure. The layout spec fits
+  the open dialog, a preview, and the open story at 320 px and
+  1,024 px.
+
+At this verification, on `task/g-18-sample-rework` rebased onto
+`c5e121d`:
+
+- The pinned Node suite passed all 435 tests; typechecking and the
+  bundles passed. Strict publication and preview builds passed with
+  `explore-4d7bf5d8a62d.js` and `explore-35adcbc6a1cb.css`. The
+  `/scenario/` bundles `app-26490347afd0.js` and
+  `app-08bebc049c15.css` were unchanged. All 31 hook tests passed.
+- Relative links resolved (5,511 in 61 files), PDD agreement passed,
+  and traceability reported no gap rows.
+- The guided specs passed 96 of 96 in `desktop` and `mobile`. The
+  sample, layout, and continuity specs passed 180 of 180 over three
+  repeats.
+- The full lane passed 247 and skipped 5, with one failure outside
+  G-18: `a11y.spec.ts`, "axe: the failure states", on `/scenario/`,
+  reports `color-contrast (serious): .md-top` — the theme's Back to
+  top button — in the unavailable and incompatible-settings states.
+  The same spec failed the same way 3 of 3 on the base commit
+  `c5e121d`, built and run in the same worktree. This branch changes
+  none of the spec, its support module, the `/scenario/` page, or
+  its bundles. The spec passed in the lane on 2026-11-05 earlier in
+  this task and has failed intermittently once before, so it is
+  recorded as a pre-existing, environment-dependent failure (the
+  machine's load average was about 12 throughout) and reported to
+  the planning session rather than fixed under G-18. CI does not run
+  the browser lane.
+
+Not verified: screen-reader reading of the dialog, the radio group,
+and the notice; touch operation of the cards; and engines other
+than Chromium.
+
 ## Separate CI investigation
 
 The reported job `126383105016` belongs to historical run

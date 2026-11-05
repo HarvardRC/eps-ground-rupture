@@ -31,6 +31,17 @@ export const heading = (page: Page) => page.locator('#gx-heading');
 export const action = (page: Page, name: string) => page.locator('#gre-explore .gx-main button', { hasText: name });
 export const stepButton = (page: Page, step: 'intro' | 'site' | 'movement' | 'review' | 'results') =>
   page.locator(`#gre-explore .gx-steps button[data-step="${step}"]`);
+/**
+ * Choose a prefilled sample through the introduction's dialog (guided DDD
+ * §10.5): open it, select the card, and Use this sample. Over a non-fresh
+ * draft the replacement question follows.
+ */
+export async function pickSample(page: Page, id: 'illustrative' | 'kern'): Promise<void> {
+  await page.locator('#gx-sample-trigger').click();
+  await page.locator(`#gx-sample-${id}`).click();
+  await expect(page.locator(`#gx-sample-${id}`)).toHaveAttribute('aria-checked', 'true');
+  await page.locator('#gx-sample-apply').click();
+}
 export const confirmedCount = (page: Page) => page.locator('.gx-context .gx-section-head strong');
 export const countText = (n: number): string => `${formatCount(n)} matching records`;
 

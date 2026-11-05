@@ -9,7 +9,7 @@ import { pointer } from '../support';
 import {
   INTRO_HEADING, MOVEMENT_HEADING, RESULTS_HEADING, REVIEW_HEADING, SESSION_KEY, SITE_HEADING,
   action, confirmGolden, confirmedCount, countText, explorerReady, gotoExplore, heading, setChecked, stepButton, storedRecord,
-  REGRESSION, holdRegression, settleFrames, typeEntry,
+  REGRESSION, holdRegression, pickSample, settleFrames, typeEntry,
 } from '../explore-support';
 
 test.describe.configure({ timeout: 120_000 });
@@ -58,7 +58,7 @@ test('a corrupt record requires Start a new scenario and is kept until then', as
   await expect(heading(page)).toHaveText(INTRO_HEADING);
   await expect(page.locator('.gx-restore-blocked')).toContainText('The work saved in this tab could not be read.');
   await expect(action(page, 'Build your scenario')).toHaveCount(0);
-  await expect(page.locator('.gx-sample-choice')).toHaveCount(0);
+  await expect(page.locator('#gx-sample-trigger')).toHaveCount(0);
   await expect(page.locator('.gx-restored')).toHaveCount(0);
   expect(await page.evaluate((key) => sessionStorage.getItem(key), SESSION_KEY)).toBe('{"record":1,');
   await page.locator('#gx-restore-new').click();
@@ -112,7 +112,7 @@ test('a new tab and a new browser context start fresh', async ({ page, browser }
 
 test('a Review reload in offset mode shows the conversion without a confirmation', async ({ page }) => {
   await gotoExplore(page);
-  await page.locator('#gx-sample-illustrative').click();
+  await pickSample(page, 'illustrative');
   await action(page, 'Continue to fault movement').click();
   await page.locator('#gx-offset-feedback table').waitFor();
   await action(page, 'Review scenario').click();

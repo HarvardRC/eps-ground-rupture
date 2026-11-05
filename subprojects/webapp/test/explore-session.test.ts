@@ -50,6 +50,8 @@ function display(): DisplayChoices {
     chartDataOpen: { scarp_height: false, dzw: true, scarp_dip: false },
     exampleOpen: true,
     refineOpen: false,
+    sample: { id: 'kern', modified: true },
+    confirmedSample: { id: 'illustrative', modified: false, current: false },
   };
 }
 
@@ -57,7 +59,9 @@ function record(overrides: Partial<SessionRecord> = {}): SessionRecord {
   const confirmed = sampleDraft(manifest, 'illustrative');
   const draft = cloneDraft(confirmed);
   draft.mode = 'slip'; draft.slipMax = '9x'; draft.faultDip = [];
-  return { record: 1, dataVersion: 'data-v1', step: 'results', draft, confirmed, display: display(), ...overrides };
+  // Without a confirmation there is no confirmed scenario's fill.
+  const shown = overrides.confirmed === null ? { ...display(), confirmedSample: null } : display();
+  return { record: 1, dataVersion: 'data-v1', step: 'results', draft, confirmed, display: shown, ...overrides };
 }
 
 function stored(storage: MemoryStorage): Record<string, unknown> {
@@ -90,7 +94,7 @@ describe('session record round trip', () => {
     const value = stored(storage);
     assert.deepEqual(Object.keys(value).sort(), ['confirmed', 'dataVersion', 'display', 'draft', 'record', 'step']);
     assert.deepEqual(Object.keys(value.display as object).sort(),
-      ['chartDataOpen', 'exampleOpen', 'logScale', 'measurement', 'readoff', 'refineOpen', 'view']);
+      ['chartDataOpen', 'confirmedSample', 'exampleOpen', 'logScale', 'measurement', 'readoff', 'refineOpen', 'sample', 'view']);
     const text = storage.items.get(SESSION_KEY)!;
     for (const forbidden of ['matchingRecords', 'selection', 'perMeasurement', 'histogramLog', 'measurements', 'softwareVersion', 'guide', 'sequence', 'stats']) {
       assert.equal(text.includes(forbidden), false, forbidden);
@@ -102,6 +106,39 @@ describe('session record round trip', () => {
     saveSession(storage, record());
     clearSession(storage);
     assert.equal(loadSession(storage), 'absent');
+  });
+});
+
+describe('the sample notice in the record (owner decision R, 2026-11-05)', () => {
+  test('a fill still current round-trips with its Modified state', () => {
+    const storage = new MemoryStorage();
+    const original = record({ display: { ...display(), sample: { id: 'kern', modified: false }, confirmedSample: { id: 'kern', modified: false, current: true } } });
+    saveSession(storage, original);
+    assert.deepEqual(classifySession(loadSession(storage), 'data-v1', manifest), { kind: 'restore', record: original });
+  });
+
+  test('no fill at all round-trips as nulls', () => {
+    const storage = new MemoryStorage();
+    const original = record({ display: { ...display(), sample: null, confirmedSample: null } });
+    saveSession(storage, original);
+    assert.deepEqual(loadSession(storage), original);
+  });
+
+  test('a record from before the sample keys restores without a notice', () => {
+    const storage = new MemoryStorage();
+    const value = JSON.parse(JSON.stringify(record())) as Record<string, any>;
+    delete value.display.sample; delete value.display.confirmedSample;
+    storage.items.set(SESSION_KEY, JSON.stringify(value));
+    const loaded = loadSession(storage);
+    assert.notEqual(loaded, 'invalid');
+    assert.equal(loaded !== 'invalid' && loaded !== 'absent' && loaded.display.sample, null);
+    assert.equal(loaded !== 'invalid' && loaded !== 'absent' && loaded.display.confirmedSample, null);
+  });
+
+  test('a confirmed fill without a confirmed scenario is unreadable', () => {
+    const storage = new MemoryStorage();
+    storage.items.set(SESSION_KEY, JSON.stringify(record({ step: 'site', confirmed: null, display: display() })));
+    assert.equal(loadSession(storage), 'invalid');
   });
 });
 
@@ -133,6 +170,16 @@ describe('unrestorable records', () => {
       v => { v.display.view.dzw = 'log'; },
       v => { v.display.result = {}; },
       v => { v.confirmed.offsetMax = 3; },
+      // The sample notice's state (owner decision R, 2026-11-05).
+      v => { delete v.display.confirmedSample; },
+      v => { v.display.sample = { id: 'loma-prieta', modified: false }; },
+      v => { v.display.sample = { id: 'kern', modified: 'yes' }; },
+      v => { v.display.sample = { id: 'kern' }; },
+      v => { v.display.sample = { id: 'kern', modified: false, values: {} }; },
+      v => { v.display.sample = 'kern'; },
+      v => { v.display.confirmedSample = { id: 'kern', modified: false }; },
+      v => { v.display.confirmedSample.current = true; },
+      v => { v.display.sample = null; },
     ];
     for (const tamper of cases) {
       const storage = new MemoryStorage();
