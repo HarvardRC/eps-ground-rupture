@@ -474,6 +474,10 @@ demonstration is deliberate (D-37). State tests cover completeness,
 validity against the fixture manifest, canonical ordering, the
 fresh slip entries, and the missing-member throw.
 
+The next phase's §10 (D-42) replaces the single action with a
+chooser and adds a second sample; this section's values, flow, and
+status line are the baseline it amends.
+
 ### 9.2 Same-tab continuity (D-38)
 
 Add `src/explore/session.ts`, a pure serialization module plus a
@@ -622,3 +626,78 @@ Specs assert the visible text and ARIA states that §§3–5 and
 §§9.1–9.3 name; they invent no values. Touch-device and
 cross-engine coverage stay outside this lane and remain recorded as
 outstanding in the execution record.
+
+## 10. Sample scenarios (D-42, next phase)
+
+[PDD §2.3's sample-scenarios block](pdd.md#23-user-journeys)
+governs this section. It amends §9.1 for the next phase; nothing
+here joins the second increment. Tasks G-14 and G-15 in
+[the plan's next phase](guided-journey-ip.md#next-phase-owner-instruction-2026-11-04)
+carry it.
+
+### 10.1 Two samples and the chooser (G-14)
+
+`explore/state.ts` replaces `sampleDraft` with named builders:
+
+```ts
+sampleDraft(manifest: Manifest, sample: SampleId): Draft;
+```
+
+`SampleId` is `'illustrative' | 'kern'`. The illustrative builder
+keeps §9.1's values exactly. The Kern builder returns a fresh
+draft whose `faultDip` holds the members for 60° and 70°, with
+mode `offset` and `offsetMax` `'1.3'`; its sediment, depth, and
+density completion values are agent selections under the PDD §2.3
+delegation, chosen from the manifest and named in the evidence.
+Both builders throw when any member is missing from the manifest;
+a sample must not silently shrink to the values that exist.
+
+The introduction replaces **Try sample inputs** with a chooser:
+one secondary action beside **Build your scenario** offering both
+samples by name, singular in form, each labeled as sample values,
+not recommended site values. The arrangement — two buttons or one
+disclosure — and the final strings are agent selections under the
+PDD §2.3 delegation. D-37's flow applies to either sample
+unchanged: silent fill from a fresh draft with no confirmed
+scenario, the inline ask-before-replace otherwise, whole-draft
+replacement on **Use the sample**, never a browser dialog, and no
+effect on confirmed results. The §9.1 status line now names the
+chosen sample. The Kern offset of 1.3 m at 60° and 70° may sit
+inside or outside per-dip coverage; either way the ordinary §3
+coverage behavior is the demonstration, as with D-37's deliberate
+30° warning — verify and record the observed state in the G-14
+evidence. The §9.5 sample spec (item 5) parameterizes over both
+samples and asserts the chooser's keyboard operation.
+
+### 10.2 Sample stories (G-15)
+
+After a sample fill, Site conditions offers one closed disclosure
+under the §9.1 status line — **About this sample** — per sample,
+presentation state, never part of Draft:
+
+- The illustrative story anchors its scale to the 1999 M 7.6
+  Chi-Chi earthquake as the published figures page already frames
+  it (`subprojects/mkdocs/docs/figures.md`): meters of offset on
+  the Chelungpu fault, a school running track lifted about 2.5 m
+  and preserved in place. It states plainly that the values are
+  illustrative, of that scale, and model no event.
+- The Kern story names the 1952 M 7.36 Kern County earthquake on
+  the White Wolf fault — the magnitude is the site's constant —
+  and says the release's field measurements include the Buwalda &
+  St. Amand (1955) digitisation the dashboards overlay, which a
+  later guided field overlay (next phase, PDD §4.4) would compare
+  against. Its anchors: a dip near 75° in the geodetic record and
+  about 1.3 m of maximum surface elevation change. The same
+  anchored-not-modeled sentence applies.
+
+A story may carry one or two images under `assets/explore/`, each
+with alt text and a visible credit naming author and license; the
+images join the page's published assets under the §6 inventory
+rules. Public-domain or CC BY / CC BY-SA files only: verify the
+license on the source's own page per file and record source URL,
+author, license, and verification date in the G-15 evidence.
+Candidates to verify: the USGS ScienceBase Bealville bent-track
+photograph (stated U.S. public domain) for Kern; the Wikimedia
+Commons Chelungpu preservation-site photographs for the
+illustrative story. Story texts are reader-facing scientific
+prose: CR-10 approval precedes the merge.

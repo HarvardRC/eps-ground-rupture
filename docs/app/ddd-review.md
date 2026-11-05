@@ -1747,6 +1747,22 @@ The owner accepted the second-increment documents in `adf8fed`
   presentable report as a recorded task: guided task G-13 in the
   next-phase queue, after its design section and D-14.
 
+## Owner instruction on sample scenarios (2026-11-04)
+
+Reviewing the delivered increment, the owner found the
+introduction's plural **Try sample inputs** misleading beside its
+single sample and asked for a second sample based on Kern County.
+The 1952 M 7.36 event is already the project's field dataset: the
+Buwalda & St. Amand (1955) digitisation the dashboards overlay
+(`docs/datasets.md`), redistribution confirmed 2026-09-18. PDD
+D-42 records the decision — two named samples behind one chooser,
+the second anchored at fault angles 60° and 70° with a 1.3 m
+maximum vertical offset, each with a short story and licensed
+images, values anchored to the named event's scale and never
+presented as modeling it. Guided DDD §10 holds the design; guided
+tasks G-14 and G-15 join the next-phase queue (D-41). No
+scientific rule changed; story texts follow CR-10.
+
 ## References
 
 - [`docs/app/ddd.md` — Ground Rupture Explorer — detailed design document](ddd.md).

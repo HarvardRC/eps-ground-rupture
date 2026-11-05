@@ -120,10 +120,14 @@ availability schedules it; it may run before the team
 demonstration. Advertising still follows D-39. Nothing below joins
 the current kickoff: each item first needs its guided DDD section
 and, where named, a product decision, accepted the ordinary way.
+G-14 and G-15 arrive with guided DDD §10 and PDD D-42 drafted
+2026-11-04; the commit that carries them is their acceptance.
 
 | Task | Prerequisite | Exact work and authority | Completion |
 | --- | --- | --- | --- |
 | G-13 | Next phase; a guided DDD report section, to be drafted; PDD D-40 (P2) and D-14 | Implement the result report: one action on confirmed results producing a single self-contained HTML or PDF document pairing the §6.1 provenance and scenario summary with the rendered charts and D-14 caption strips, the §4.2 statistics table, and every active caveat, per [PDD §6.5](pdd.md#65-result-report-d-40-p2). | Fixed by its design section when drafted; the §6.1 content rules and D-14 caption requirements apply unchanged. |
+| G-14 | Next phase; PDD D-42; guided DDD §10.1 | Replace the introduction's single sample action with the chooser; add the Kern builder — fault angles 60° and 70°, offset 1.3 m, completion values delegated and named in the evidence — validated against the manifest like §9.1's; name the chosen sample in the status line; parameterize the §9.5 sample spec over both samples; verify the 60–70° offset coverage and record the observed state. | Guided DDD §10.1 holds for both samples; D-37's confirm-replace flow is unchanged; the specs pass in the lane's desktop and mobile projects. |
+| G-15 | Next phase; G-14; PDD D-42; guided DDD §10.2 | Add the **About this sample** disclosures: the illustrative story anchored to Chi-Chi scale as the figures page frames it; the Kern story at the site's M 7.36 with the Buwalda & St. Amand digitisation and the future field-overlay tie-in; at most two images each under `assets/explore/` with alt text and visible credits; per-file license verification (public domain or CC BY / CC BY-SA) with source URL, author, license, and date recorded in the evidence. | Disclosures render per guided DDD §10.2 after either fill; CR-10 approval of the story texts is recorded; the licensing evidence is complete; a spec covers the disclosure. |
 
 Queued definitions and decisions, with their authorities:
 

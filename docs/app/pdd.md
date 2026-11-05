@@ -138,11 +138,12 @@ named in the last column carry the detail.
 | D-34 | Result refinements use the scenario's draft and confirmation flow. | FR-S6–S8, FR-G3 | Product owner | Decided (2026-11-04) | Refine results opens population and scarp-type controls. Their edits join the draft and apply together through Review scenario → Show results; review requires one or more scarp types. Discard restores confirmed refinements; Start a new scenario restores all-stages/all-types defaults. Measurement and chart-view choices take effect immediately. §2.3 and §3.7; D-35 accepts the first control presentation. |
 | D-35 | First refinement presentation and stage explanation. | FR-S6–S8, FR-G3, CR-3 | Product owner | Decided (2026-11-04) | Refinement layout, stage-choice explanation and example, scarp explanations and schematic illustrations, empty-selection validation, and review/discard flow accepted. §3.7. Invented data and sketches are presentation aids, not scientific validation or accessibility certification. The separate-route implementation supplement in §2.3 distinguishes authorized agent choices from owner decisions. |
 | D-36 | Clearer results controls and an optional results walkthrough. | FR-O1, FR-S6–S8, FR-G3, NFR-5 | Product owner | Decided (2026-11-04) | The shared results-controls direction and optional five-stop walkthrough are approved. The owner selected Choice cards for normal browsing, with a short explanatory question for each measurement. §4.1 preserves the draft/review/confirmation boundary and labels detailed integration choices as delegated implementation decisions. |
-| D-37 | Sample inputs on the guided introduction. | §5.1, C1 | Product owner | Decided (2026-11-04) | Try sample inputs fills the approved illustrative scenario, completed with 5 m depth and Dense density, and opens site conditions; a non-fresh draft is replaced only after an explicit confirmation. §2.3; the completion values and the replacement rule are agent selections under the §2.3 delegation. |
+| D-37 | Sample inputs on the guided introduction. | §5.1, C1 | Product owner | Decided (2026-11-04) | Try sample inputs fills the approved illustrative scenario, completed with 5 m depth and Dense density, and opens site conditions; a non-fresh draft is replaced only after an explicit confirmation. §2.3; the completion values and the replacement rule are agent selections under the §2.3 delegation. D-42 subsequently adds a second named sample and a chooser. |
 | D-38 | Same-tab continuity at `/explore/`. | §5.1, FR-S8 | Product owner | Decided (2026-11-04) | Scope delegated to the implementing agent and recorded: same-tab reload and back/forward restoration restore the draft, confirmed settings, step, and display choices and recompute results, with a visible notice; a new tab or later visit starts fresh. §2.3 and §7.3. |
 | D-39 | Guided publication path; `/scenario/` paused. | §2.2, R-11 | Product owner | Decided (2026-11-04) | `/explore/` joins the unlisted prototype deployment; a team demonstration and the redistribution-license decision precede advertising it. `/scenario/` stays deployed unlisted without further UX investment and is no longer the activation candidate. §2.3. |
 | D-40 | Result-report export. | FR-D1, FR-D2 | Product owner | Decided (2026-11-04) | One self-contained document pairing the §6.1 provenance and scenario summary with rendered charts and statistics; builds on D-14. The owner set it P2; guided task G-13 carries it in the next-phase queue (D-41). §6.5. |
-| D-41 | Next-phase queue for the deliberate deferrals. | §2.2 | Product owner | Decided (2026-11-04) | Every deliberate deferral of the guided redesign is queued as the phase after the second increment: the D-39 reconciliation list, family view, shared links, between-visit recovery, scenario import, the result report (G-13), remaining browser coverage, and the paused `/scenario/` rework decision. Team availability schedules the phase; it may precede the team demonstration. Advertising still follows D-39. §2.3. |
+| D-41 | Next-phase queue for the deliberate deferrals. | §2.2 | Product owner | Decided (2026-11-04) | Every deliberate deferral of the guided redesign is queued as the phase after the second increment: the D-39 reconciliation list, family view, shared links, between-visit recovery, scenario import, the result report (G-13), the sample scenarios and stories (D-42: G-14, G-15), remaining browser coverage, and the paused `/scenario/` rework decision. Team availability schedules the phase; it may precede the team demonstration. Advertising still follows D-39. §2.3. |
+| D-42 | Two named sample scenarios with stories. | §5.1, C1, CR-10 | Product owner | Decided (2026-11-04) | One chooser offers two named samples: D-37's illustrative scenario, unchanged, and a second anchored to the 1952 M 7.36 Kern County earthquake — fault angles 60° and 70°, maximum vertical surface offset 1.3 m, completion values delegated as in D-37. Each carries a short story with licensed images; values are anchored to the named event's scale, never presented as modeling it. §2.3; guided DDD §10; tasks G-14 and G-15 in the next-phase queue (D-41). |
 
 ---
 
@@ -505,7 +506,8 @@ decision.
   it fills silently; otherwise the action asks before replacing the
   reader's entries, offering **Use the sample** and **Keep my
   choices**, and replaces the whole draft — both movement modes and
-  refinements — only on the former.
+  refinements — only on the former. The next phase adds a second
+  named sample and a chooser (D-42, 2026-11-04, below).
 
 - **Same-tab continuity (D-38, scope delegated).** Within one
   browser tab, the guided page keeps the reader's work across
@@ -558,11 +560,39 @@ marks for the guided bundle and the §9 quality bars; the §10.3
 acceptance walkthroughs re-pointed to the guided page; touch and
 cross-engine browser coverage beyond the second increment's lane;
 the result report (D-40, §6.5), set P2 and recorded as guided task
-G-13; and the `/scenario/` engineer-sandbox rework decision left
-open by D-39. The
+G-13; the sample chooser, second sample, and sample stories
+(D-42), recorded as guided tasks G-14 and G-15; and the
+`/scenario/` engineer-sandbox rework decision left open by D-39. The
 [guided plan's next phase](guided-journey-ip.md#next-phase-owner-instruction-2026-11-04)
-holds the queue's task view; every item still needs its design
-section or product decision before execution.
+holds the queue's task view; most items still need their design
+section or product decision before execution, while the sample
+tasks (D-42, below) arrive with both drafted.
+
+**Sample scenarios (D-42, 2026-11-04).** The next phase replaces
+the introduction's single sample action with a chooser offering
+two named samples, each labeled as sample values, not recommended
+site values. The first is D-37's approved illustrative scenario,
+unchanged. The second anchors to the 1952 M 7.36 Kern County
+earthquake on the White Wolf fault, whose digitised surface
+measurements the data release already carries
+(`docs/datasets.md`): fault angles 60° and 70°, a maximum vertical
+surface offset of 1.3 m, completion values remaining agent
+selections under the standing delegation. Anchored, never modeled:
+each sample says its values are of the named event's scale and
+reproduce no event. The anchors follow the published record — a
+steep White Wolf dip near 75°
+([Stein & Thatcher 1981](https://ui.adsabs.harvard.edu/abs/1981JGR....86.4913S/abstract);
+[Bawden 2000](https://zenodo.org/records/1231281)) and about
+1.3 m of maximum surface elevation change
+([SCEDC](https://scedc.caltech.edu/earthquake/kern1952.html)) —
+and the magnitude is the site's own constant. Each sample carries
+a short story behind a closed disclosure, with at most two images,
+public domain or CC BY / CC BY-SA only, license verified per file
+at its source and credited visibly; the
+[USGS ScienceBase Bealville photograph](https://www.sciencebase.gov/catalog/item/51dd6f2be4b0f72b4471a1d7)
+is the Kern candidate. Story texts follow CR-10. Guided DDD §10
+holds the design; guided tasks G-14 and G-15 carry it in the
+next-phase queue above.
 
 **Approved introduction (product owner, 2026-11-03).**
 
