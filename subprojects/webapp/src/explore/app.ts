@@ -20,7 +20,7 @@ import { statsRows, unclassifiedLine } from '../views/stats-table';
 import { computeResult } from './compute';
 import { DEFINITIONS, type DefinitionKey } from './glossary';
 import { classifySession, clearSession, loadSession, saveSession, type DisplayChoices, type SessionRecord } from './session';
-import { cloneDraft, draftChanged, freshDraft, offsetShortcut, sampleDraft, sedimentGroup, stepDecimal, validateDraft, type Draft, type Issue, type Step } from './state';
+import { cloneDraft, draftChanged, freshDraft, offsetShortcut, isSampleId, sampleDraft, sedimentGroup, stepDecimal, validateDraft, type Draft, type Issue, type SampleId, type Step } from './state';
 
 export interface ExplorerOptions {
   vintage: Vintage;
@@ -57,6 +57,12 @@ const glossary = (anchor: string, label = 'Read the glossary'): string => link(`
 const help = (title: string, text: string, anchor: string): string => `<details class="gx-help"><summary>${escape(title)}</summary><p>${escape(text)} ${glossary(anchor)}</p></details>`;
 const term = (key: DefinitionKey, label: string): string => `<button type="button" class="gx-term" data-explain="${key}" data-glossary-source="${DEFINITIONS[key].source}" aria-label="${escape(label)}: explanation">${escape(label)}</button>`;
 const button = (action: string, label: string, primary = false, extra = ''): string => `<button type="button" class="gx-button${primary ? ' gx-primary' : ''}" data-action="${action}" ${extra}>${label}</button>`;
+/** The chooser's sample names (guided DDD §10.1), used in the question and the status line after "the". */
+const SAMPLES: readonly { id: SampleId; label: string; name: string }[] = [
+  { id: 'illustrative', label: 'Illustrative sample', name: 'illustrative sample' },
+  { id: 'kern', label: 'Kern County 1952 sample', name: 'Kern County 1952 sample' },
+];
+const sampleName = (id: SampleId): string => SAMPLES.find(sample => sample.id === id)!.name;
 const populationName = (population: string): string => population === 'one_state_per_trial' ? 'Last stage within the slip range' : 'All stages within the slip range';
 const sedimentName = (pair: SedimentPair): string => `${sedimentGroup(pair.set).replace(' sediment', '')}: ${pair.sedimentStrength}`;
 
@@ -75,8 +81,9 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   let guideIndex: 0 | 1 | 2 | 3 | 4 | null = null;
   let exampleOpen = false;
   // Sample-input presentation state (guided DDD §9.1), never part of Draft.
-  let sampleAsk = false;
-  let sampleArrived = false;
+  // Each holds the sample's identity so the question, the fill, and the status line name the one chosen.
+  let sampleAsk: SampleId | null = null;
+  let sampleArrived: SampleId | null = null;
   // Same-tab continuity (guided DDD §9.2). `continuity` turns off for the
   // mount when storage is unavailable or a save fails; `blocked` holds an
   // unrestorable record until the explicit fresh start; `restoreTarget` is
@@ -213,14 +220,15 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   /** The introduction's actions, the unrestorable-record choice (§9.2), or the inline sample-replacement question (§9.1). */
   function introActions(): string {
     if (blocked) return `<div class="gx-footer gx-warning gx-restore-blocked"><p>${blocked === 'data-changed' ? 'The data release changed since this tab last used it.' : 'The work saved in this tab could not be read.'} Your earlier choices have not been restored.</p><div>${button('new', 'Start a new scenario', true, 'id="gx-restore-new"')}</div></div>`;
-    if (sampleAsk) return `<div class="gx-footer gx-sample-confirm" role="group" aria-labelledby="gx-sample-question"><p id="gx-sample-question" tabindex="-1"><strong>Replace your current choices with the sample inputs?</strong></p><div>${button('sample-use', 'Use the sample', true)}${button('sample-keep', 'Keep my choices')}</div></div>`;
-    return `<footer class="gx-footer gx-intro-actions"><div>${button('start', 'Build your scenario', true)}${button('sample', 'Try sample inputs', false, 'id="gx-sample" aria-describedby="gx-sample-hint"')}</div><p id="gx-sample-hint" class="gx-hint">Sample inputs, not recommended site values.</p></footer>`;
+    if (sampleAsk) return `<div class="gx-footer gx-sample-confirm" role="group" aria-labelledby="gx-sample-question"><p id="gx-sample-question" tabindex="-1"><strong>Replace your current choices with the ${escape(sampleName(sampleAsk))}?</strong></p><div>${button('sample-use', 'Use the sample', true, `data-sample="${sampleAsk}"`)}${button('sample-keep', 'Keep my choices', false, `data-sample="${sampleAsk}"`)}</div></div>`;
+    const samples = SAMPLES.map(sample => button('sample', escape(sample.label), false, `id="gx-sample-${sample.id}" data-sample="${sample.id}" aria-describedby="gx-sample-hint"`)).join('');
+    return `<footer class="gx-footer gx-intro-actions"><div>${button('start', 'Build your scenario', true)}<div class="gx-sample-choice" role="group" aria-labelledby="gx-sample-label"><span id="gx-sample-label">Try a sample:</span>${samples}</div></div><p id="gx-sample-hint" class="gx-hint">Sample values, not recommended site values.</p></footer>`;
   }
 
-  /** Fill the whole draft with the sample and open Site conditions; the confirmation, results, and walkthrough are untouched. */
-  function useSample(): void {
-    const sample = sampleDraft(manifest);
-    draft = sample; issues = []; sampleAsk = false; sampleArrived = true;
+  /** Fill the whole draft with the named sample and open Site conditions; the confirmation, results, and walkthrough are untouched. */
+  function useSample(id: SampleId): void {
+    const sample = sampleDraft(manifest, id);
+    draft = sample; issues = []; sampleAsk = null; sampleArrived = id;
     setStep('site');
   }
 
@@ -239,7 +247,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   }
 
   function siteView(): string {
-    return `${heading('Describe the site conditions', 'Choose one or more values for each condition.')}${sampleArrived ? '<p class="gx-sample-status" role="status">These are sample inputs, not recommended site values. Change anything.</p>' : ''}<div class="gx-site-grid">${siteGroup('faultDip', 'Fault angle', 'How steeply the fault is tilted, measured from horizontal.', 'fault-dip')}${siteGroup('depth', 'Sediment depth', 'The thickness of the sediment layer above the fault.', 'sediment-depth')}${siteGroup('density', 'Sediment density', 'How tightly the sediment is packed.', 'sediment-strength')}${siteGroup('sediment', 'Sediment strength and structure', 'Choose uniform material or a layered profile. You can include more than one possibility.', 'set')}</div><footer class="gx-footer">${button('intro', 'Back')}${reached.has('review') ? button('review', 'Return to review', true) : button('site-next', 'Continue to fault movement', true)}</footer>`;
+    return `${heading('Describe the site conditions', 'Choose one or more values for each condition.')}${sampleArrived ? `<p class="gx-sample-status" role="status">Filled with the ${escape(sampleName(sampleArrived))}: sample values, not recommended site values. Change anything.</p>` : ''}<div class="gx-site-grid">${siteGroup('faultDip', 'Fault angle', 'How steeply the fault is tilted, measured from horizontal.', 'fault-dip')}${siteGroup('depth', 'Sediment depth', 'The thickness of the sediment layer above the fault.', 'sediment-depth')}${siteGroup('density', 'Sediment density', 'How tightly the sediment is packed.', 'sediment-strength')}${siteGroup('sediment', 'Sediment strength and structure', 'Choose uniform material or a layered profile. You can include more than one possibility.', 'set')}</div><footer class="gx-footer">${button('intro', 'Back')}${reached.has('review') ? button('review', 'Return to review', true) : button('site-next', 'Continue to fault movement', true)}</footer>`;
   }
 
   function numeric(field: 'slipMin' | 'slipMax' | 'offsetMax', label: string, required: boolean): string {
@@ -438,8 +446,8 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     if (!alive()) return;
     closeHelp();
     // Sample presentation belongs to one screen each; leaving it clears it.
-    if (step !== 'site') sampleArrived = false;
-    if (step !== 'intro') sampleAsk = false;
+    if (step !== 'site') sampleArrived = null;
+    if (step !== 'intro') sampleAsk = null;
     chartObserver?.disconnect(); chartObserver = null;
     const active = document.activeElement as HTMLElement | null;
     const activeId = active && shell.contains(active) ? active.id : '';
@@ -732,12 +740,13 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       const chart = target.dataset.chart as 'histogram' | 'cumulative' | undefined;
       if (chart) { display = { ...display, view: { ...display.view, [display.measurement]: chart } }; render(); return; }
       const action = target.dataset.action;
-      if (action === 'sample') {
+      const sample = isSampleId(target.dataset.sample) ? target.dataset.sample : null;
+      if (action === 'sample' && sample) {
         // Fill silently only over an untouched fresh draft with nothing confirmed.
-        if (confirmed === null && !draftChanged(draft, freshDraft(manifest))) useSample();
-        else { sampleAsk = true; render('gx-sample-question'); }
-      } else if (action === 'sample-use') useSample();
-      else if (action === 'sample-keep') { sampleAsk = false; render('gx-sample'); }
+        if (confirmed === null && !draftChanged(draft, freshDraft(manifest))) useSample(sample);
+        else { sampleAsk = sample; render('gx-sample-question'); }
+      } else if (action === 'sample-use' && sample) useSample(sample);
+      else if (action === 'sample-keep' && sample) { sampleAsk = null; render(`gx-sample-${sample}`); }
       else if (action === 'start' || action === 'site') setStep('site');
       else if (action === 'intro') setStep('intro');
       else if (action === 'movement') setStep('movement');
@@ -763,7 +772,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
         // Clear the record before the fresh state is saved (§9.2), including an unrestorable one.
         if (options.storage) clearSession(options.storage);
         blocked = null; restoreTarget = null; restoreError = ''; busy = false;
-        guideIndex = null; sampleArrived = false; draft = freshDraft(manifest); confirmed = null; result = null; issues = []; generalError = ''; reached = new Set(['intro', 'site']); display = defaultDisplayState(); refineOpen = false; setStep('site'); status.textContent = 'New scenario. Choose one or more values for each site condition.';
+        guideIndex = null; sampleArrived = null; draft = freshDraft(manifest); confirmed = null; result = null; issues = []; generalError = ''; reached = new Set(['intro', 'site']); display = defaultDisplayState(); refineOpen = false; setStep('site'); status.textContent = 'New scenario. Choose one or more values for each site condition.';
       }
       else if (action === 'retry-restore') void restoreResults();
       else if (action === 'plus' || action === 'minus') { navigationVersion += 1; const field = target.dataset.field as 'slipMin' | 'slipMax' | 'offsetMax'; draft[field] = stepDecimal(draft[field], action === 'plus' ? 1 : -1); issues = issues.filter(item => item.field !== field); render(); status.textContent = `${field === 'slipMin' ? 'Minimum' : 'Maximum'}: ${draft[field]} m.`; }

@@ -11,6 +11,7 @@ import {
   draftChanged,
   freshDraft,
   offsetShortcut,
+  isSampleId,
   sampleDraft,
   sedimentGroup,
   stepDecimal,
@@ -294,61 +295,90 @@ describe('exact decimal adjustment and offset shortcut', () => {
   });
 });
 
-describe('sample inputs (guided DDD §9.1)', () => {
-  test('the sample is complete, valid, canonical, and offset-mode', () => {
-    const sample = sampleDraft(manifest);
-    assert.deepEqual(sample.faultDip, [30, 40]);
-    assert.deepEqual(sample.depth, [5]);
-    assert.deepEqual(sample.density, ['Dense']);
-    assert.deepEqual(sample.sediment.map(pair => sedimentGroup(pair.set) + ': ' + pair.sedimentStrength),
-      ['Layered sediment: Strong', 'Uniform sediment: Strong']);
-    assert.equal(sample.mode, 'offset');
-    assert.equal(sample.offsetMax, '3');
-    const judged = validateDraft(sample, manifest);
-    assert.deepEqual(judged.issues, []);
-    assert.ok(judged.scenario);
-    // The editable sample is already in the scenario's canonical order.
-    assert.deepEqual(judged.scenario.faultDip, sample.faultDip);
-    assert.deepEqual(judged.scenario.depth, sample.depth);
-    assert.deepEqual(judged.scenario.density, sample.density);
-    assert.deepEqual(judged.scenario.sediment, sample.sediment);
-    assert.deepEqual([...sample.sediment].sort(compareSedimentPairs), sample.sediment);
-    assert.deepEqual(judged.scenario.window, { mode: 'offset', offsetMax: '3' });
-  });
+describe('sample inputs (guided DDD §§9.1, 10.1)', () => {
+  const EXPECTED = {
+    illustrative: {
+      faultDip: [30, 40], depth: [5], density: ['Dense'], strength: 'Strong', offsetMax: '3',
+      members: [['fault_dip', 30, /30° fault angle/], ['fault_dip', 40, /40° fault angle/], ['depth', 5, /5 m sediment depth/], ['density', 'Dense', /Dense sediment density/]],
+    },
+    kern: {
+      faultDip: [60, 70], depth: [10], density: ['Medium'], strength: 'Moderate', offsetMax: '1.3',
+      members: [['fault_dip', 60, /60° fault angle/], ['fault_dip', 70, /70° fault angle/], ['depth', 10, /10 m sediment depth/], ['density', 'Medium', /Medium sediment density/]],
+    },
+  } as const;
 
-  test('slip entries, population, and scarp classes keep fresh defaults', () => {
-    const sample = sampleDraft(manifest), fresh = freshDraft(manifest);
-    assert.equal(sample.slipMin, fresh.slipMin);
-    assert.equal(sample.slipMax, fresh.slipMax);
-    assert.equal(sample.population, fresh.population);
-    assert.deepEqual(sample.scarpClass, fresh.scarpClass);
-    assert.equal(draftChanged(sample, fresh), true);
-    // Each call returns independent arrays.
-    const other = sampleDraft(manifest);
-    assert.notEqual(other.sediment[0], sample.sediment[0]);
-    other.faultDip.push(20);
-    assert.deepEqual(sampleDraft(manifest).faultDip, [30, 40]);
-  });
+  for (const id of ['illustrative', 'kern'] as const) {
+    const expected = EXPECTED[id];
 
-  test('a missing member throws instead of shrinking the sample', () => {
-    const without = (column: 'fault_dip' | 'depth' | 'density', value: number | string): Manifest => ({
-      ...manifest,
-      trialColumns: {
-        ...manifest.trialColumns,
-        [column]: (manifest.trialColumns[column] as readonly (number | string)[]).filter(v => v !== value),
-      },
+    test(`the ${id} sample is complete, valid, canonical, and offset-mode`, () => {
+      const sample = sampleDraft(manifest, id);
+      assert.deepEqual(sample.faultDip, expected.faultDip);
+      assert.deepEqual(sample.depth, expected.depth);
+      assert.deepEqual(sample.density, expected.density);
+      assert.deepEqual(sample.sediment.map(pair => sedimentGroup(pair.set) + ': ' + pair.sedimentStrength),
+        [`Layered sediment: ${expected.strength}`, `Uniform sediment: ${expected.strength}`]);
+      assert.equal(sample.mode, 'offset');
+      assert.equal(sample.offsetMax, expected.offsetMax);
+      const judged = validateDraft(sample, manifest);
+      assert.deepEqual(judged.issues, []);
+      assert.ok(judged.scenario);
+      // The editable sample is already in the scenario's canonical order.
+      assert.deepEqual(judged.scenario.faultDip, sample.faultDip);
+      assert.deepEqual(judged.scenario.depth, sample.depth);
+      assert.deepEqual(judged.scenario.density, sample.density);
+      assert.deepEqual(judged.scenario.sediment, sample.sediment);
+      assert.deepEqual([...sample.sediment].sort(compareSedimentPairs), sample.sediment);
+      assert.deepEqual(judged.scenario.window, { mode: 'offset', offsetMax: expected.offsetMax });
     });
-    assert.throws(() => sampleDraft(without('fault_dip', 30)), /30° fault angle/);
-    assert.throws(() => sampleDraft(without('fault_dip', 40)), /40° fault angle/);
-    assert.throws(() => sampleDraft(without('depth', 5)), /5 m sediment depth/);
-    assert.throws(() => sampleDraft(without('density', 'Dense')), /Dense sediment density/);
-    for (const group of ['Uniform', 'Layered']) {
-      const pruned: Manifest = {
+
+    test(`the ${id} sample keeps fresh slip entries, population, and scarp classes`, () => {
+      const sample = sampleDraft(manifest, id), fresh = freshDraft(manifest);
+      assert.equal(sample.slipMin, fresh.slipMin);
+      assert.equal(sample.slipMax, fresh.slipMax);
+      assert.equal(sample.population, fresh.population);
+      assert.deepEqual(sample.scarpClass, fresh.scarpClass);
+      assert.equal(draftChanged(sample, fresh), true);
+      // Each call returns independent arrays.
+      const other = sampleDraft(manifest, id);
+      assert.notEqual(other.sediment[0], sample.sediment[0]);
+      other.faultDip.push(20);
+      assert.deepEqual(sampleDraft(manifest, id).faultDip, expected.faultDip);
+    });
+
+    test(`a missing ${id} member throws instead of shrinking the sample`, () => {
+      const without = (column: 'fault_dip' | 'depth' | 'density', value: number | string): Manifest => ({
         ...manifest,
-        armStrengthStates: manifest.armStrengthStates.filter(pair =>
-          !(sedimentGroup(pair.set) === `${group} sediment` && pair.sedimentStrength === 'Strong')),
-      };
-      assert.throws(() => sampleDraft(pruned), new RegExp(`${group}: Strong`));
-    }
+        trialColumns: {
+          ...manifest.trialColumns,
+          [column]: (manifest.trialColumns[column] as readonly (number | string)[]).filter(v => v !== value),
+        },
+      });
+      for (const [column, value, message] of expected.members) assert.throws(() => sampleDraft(without(column, value), id), message);
+      for (const group of ['Uniform', 'Layered']) {
+        const pruned: Manifest = {
+          ...manifest,
+          armStrengthStates: manifest.armStrengthStates.filter(pair =>
+            !(sedimentGroup(pair.set) === `${group} sediment` && pair.sedimentStrength === expected.strength)),
+        };
+        assert.throws(() => sampleDraft(pruned, id), new RegExp(`${group}: ${expected.strength}`));
+      }
+    });
+  }
+
+  test('the two samples differ and neither builder depends on the other', () => {
+    assert.equal(draftChanged(sampleDraft(manifest, 'illustrative'), sampleDraft(manifest, 'kern')), true);
+    // Removing a Kern-only member leaves the illustrative builder intact, and vice versa.
+    const no70: Manifest = { ...manifest, trialColumns: { ...manifest.trialColumns, fault_dip: manifest.trialColumns.fault_dip.filter(v => v !== 70) } };
+    assert.deepEqual(sampleDraft(no70, 'illustrative').faultDip, [30, 40]);
+    const no30: Manifest = { ...manifest, trialColumns: { ...manifest.trialColumns, fault_dip: manifest.trialColumns.fault_dip.filter(v => v !== 30) } };
+    assert.deepEqual(sampleDraft(no30, 'kern').faultDip, [60, 70]);
+  });
+});
+
+describe('sample identifiers', () => {
+  test('isSampleId accepts exactly the named samples', () => {
+    assert.equal(isSampleId('illustrative'), true);
+    assert.equal(isSampleId('kern'), true);
+    for (const other of [undefined, null, '', 'Kern', 'toString', '__proto__', 'constructor', 1]) assert.equal(isSampleId(other), false);
   });
 });

@@ -1,6 +1,8 @@
-// explore-sample.spec.ts (guided DDD §9.5 item 5): sample inputs — the
-// silent fresh fill, both ask-before-replace outcomes, and confirmed
-// results untouched (§9.1, PDD D-37).
+// explore-sample.spec.ts (guided DDD §9.5 item 5, parameterized by
+// §10.1): the sample chooser — each sample's silent fresh fill, both
+// ask-before-replace outcomes with the chosen sample keeping its
+// identity, confirmed results untouched, and keyboard operation
+// (§§9.1, 10.1; PDD D-37, D-42).
 
 import { expect, test, type Page } from '@playwright/test';
 import {
@@ -9,8 +11,30 @@ import {
 
 test.describe.configure({ timeout: 120_000 });
 
-const STATUS = 'These are sample inputs, not recommended site values. Change anything.';
-const QUESTION = 'Replace your current choices with the sample inputs?';
+const HINT = 'Sample values, not recommended site values.';
+
+const SAMPLES = [
+  {
+    id: 'illustrative',
+    label: 'Illustrative sample',
+    name: 'illustrative sample',
+    site: ['30°', '40°', '5 m', 'Dense', 'Uniform sediment: Strong', 'Layered sediment: Strong'],
+    offsetMax: '3',
+  },
+  {
+    id: 'kern',
+    label: 'Kern County 1952 sample',
+    name: 'Kern County 1952 sample',
+    site: ['60°', '70°', '10 m', 'Medium', 'Uniform sediment: Moderate', 'Layered sediment: Moderate'],
+    offsetMax: '1.3',
+  },
+] as const;
+
+type Sample = (typeof SAMPLES)[number];
+
+const chooser = (page: Page, sample: Sample) => page.locator(`#gx-sample-${sample.id}`);
+const status = (sample: Sample) => `Filled with the ${sample.name}: sample values, not recommended site values. Change anything.`;
+const question = (sample: Sample) => `Replace your current choices with the ${sample.name}?`;
 
 /** The checked site choices by accessible name, in page order. */
 const checkedSite = (page: Page) =>
@@ -18,69 +42,148 @@ const checkedSite = (page: Page) =>
     inputs.map((input) => input.getAttribute('aria-label') ?? input.closest('label')!.textContent!.trim()),
   );
 
-test('a fresh draft fills silently, labeled as sample inputs', async ({ page }) => {
-  let dialogs = 0;
-  page.on('dialog', (d) => { dialogs += 1; void d.dismiss(); });
-  await gotoExplore(page);
-  await expect(page.locator('#gx-sample')).toHaveText('Try sample inputs');
-  await expect(page.locator('#gx-sample')).toHaveAttribute('aria-describedby', 'gx-sample-hint');
-  await expect(page.locator('#gx-sample-hint')).toHaveText('Sample inputs, not recommended site values.');
-  await page.locator('#gx-sample').click();
+/** The chosen sample filled the draft and opened Site conditions, naming itself. */
+async function expectFilled(page: Page, sample: Sample): Promise<void> {
   await expect(heading(page)).toHaveText(SITE_HEADING);
-  await expect(page.locator('.gx-sample-status')).toHaveText(STATUS);
+  await expect(page.locator('.gx-sample-status')).toHaveText(status(sample));
   await expect(page.locator('.gx-sample-status')).toHaveAttribute('role', 'status');
-  expect(await checkedSite(page)).toEqual(['30°', '40°', '5 m', 'Dense', 'Uniform sediment: Strong', 'Layered sediment: Strong']);
+  expect(await checkedSite(page)).toEqual([...sample.site]);
+}
 
-  await action(page, 'Continue to fault movement').click();
-  await expect(page.locator('.gx-sample-status')).toHaveCount(0);
-  await expect(page.locator('#gx-mode-offset')).toBeChecked();
-  await expect(page.locator('#gx-offsetMax')).toHaveValue('3');
-  // The deliberate coverage demonstration at 30° (D-37), not at 40°.
-  await expect(page.locator('#gx-offset-feedback .gx-warning')).toContainText('At 30°');
-  await expect(page.locator('#gx-offset-feedback .gx-warning')).not.toContainText('At 40°');
-  expect(dialogs).toBe(0);
-});
-
-test('with a confirmed scenario, Keep my choices keeps them and Use the sample replaces only the draft', async ({ page }) => {
-  let dialogs = 0;
-  page.on('dialog', (d) => { dialogs += 1; void d.dismiss(); });
+test('the chooser offers both samples by name, labeled as sample values', async ({ page }) => {
   await gotoExplore(page);
-  const ref = await confirmGolden(page, 'GS-6');
-  const count = countText(ref.counts.matching_records);
-  await page.locator('#gx-refine-button').click();
-  await setChecked(page, '#gx-population-one_state_per_trial', true);
-
-  await stepButton(page, 'intro').click();
-  await page.locator('#gx-sample').click();
-  await expect(page.locator('#gx-sample-question')).toHaveText(QUESTION);
-  await expect(page.locator('#gx-sample-question')).toBeFocused();
-  await expect(action(page, 'Build your scenario')).toHaveCount(0);
-  await action(page, 'Keep my choices').click();
-  await expect(page.locator('#gx-sample')).toBeFocused();
-  await stepButton(page, 'results').click();
-  await expect(page.locator('#gx-population-one_state_per_trial')).toBeChecked();
-
-  await stepButton(page, 'intro').click();
-  await page.locator('#gx-sample').click();
-  await action(page, 'Use the sample').click();
-  await expect(heading(page)).toHaveText(SITE_HEADING);
-  await expect(page.locator('.gx-sample-status')).toHaveText(STATUS);
-  await stepButton(page, 'results').click();
-  await expect(confirmedCount(page)).toHaveText(count);
-  await expect(page.locator('.gx-pending')).toContainText('You have unapplied changes');
-  await expect(page.locator('#gx-population-all_stages')).toBeChecked();
-  expect(dialogs).toBe(0);
+  await expect(page.locator('#gx-sample-label')).toHaveText('Try a sample:');
+  await expect(page.locator('.gx-sample-choice')).toHaveAttribute('role', 'group');
+  await expect(page.locator('.gx-sample-choice')).toHaveAttribute('aria-labelledby', 'gx-sample-label');
+  await expect(page.locator('.gx-sample-choice button')).toHaveText(SAMPLES.map((s) => s.label));
+  for (const sample of SAMPLES) await expect(chooser(page, sample)).toHaveAttribute('aria-describedby', 'gx-sample-hint');
+  await expect(page.locator('#gx-sample-hint')).toHaveText(HINT);
+  await expect(page.getByRole('button', { name: 'Try sample inputs' })).toHaveCount(0);
 });
 
-test('an edited draft without a confirmation also asks first', async ({ page }) => {
+for (const sample of SAMPLES) {
+  test(`${sample.id}: a fresh draft fills silently with the named sample`, async ({ page }) => {
+    let dialogs = 0;
+    page.on('dialog', (d) => { dialogs += 1; void d.dismiss(); });
+    await gotoExplore(page);
+    await chooser(page, sample).click();
+    await expectFilled(page, sample);
+
+    await action(page, 'Continue to fault movement').click();
+    await expect(page.locator('.gx-sample-status')).toHaveCount(0);
+    await expect(page.locator('#gx-mode-offset')).toBeChecked();
+    await expect(page.locator('#gx-offsetMax')).toHaveValue(sample.offsetMax);
+    await page.locator('#gx-offset-feedback table').waitFor();
+    if (sample.id === 'illustrative') {
+      // The deliberate coverage demonstration at 30° (D-37), not at 40°.
+      await expect(page.locator('#gx-offset-feedback .gx-warning')).toContainText('At 30°');
+      await expect(page.locator('#gx-offset-feedback .gx-warning')).not.toContainText('At 40°');
+    } else {
+      // The observed state recorded in the G-14 evidence: 1.3 m is within
+      // per-dip coverage at both 60° and 70°, so no warning appears.
+      await expect(page.locator('#gx-offset-feedback .gx-warning')).toHaveCount(0);
+      await expect(page.locator('#gx-offset-feedback tbody tr')).toHaveCount(2);
+      for (const dip of ['60°', '70°']) {
+        await expect(page.locator('#gx-offset-feedback tbody tr', { hasText: dip })).toContainText('Within range');
+      }
+    }
+    expect(dialogs).toBe(0);
+  });
+
+  test(`${sample.id}: with a confirmed scenario, Keep my choices keeps them and Use the sample replaces only the draft`, async ({ page }) => {
+    let dialogs = 0;
+    page.on('dialog', (d) => { dialogs += 1; void d.dismiss(); });
+    await gotoExplore(page);
+    const ref = await confirmGolden(page, 'GS-6');
+    const count = countText(ref.counts.matching_records);
+    await page.locator('#gx-refine-button').click();
+    await setChecked(page, '#gx-population-one_state_per_trial', true);
+
+    await stepButton(page, 'intro').click();
+    await chooser(page, sample).click();
+    await expect(page.locator('#gx-sample-question')).toHaveText(question(sample));
+    await expect(page.locator('#gx-sample-question')).toBeFocused();
+    await expect(action(page, 'Build your scenario')).toHaveCount(0);
+    await action(page, 'Keep my choices').click();
+    // Focus returns to the option that asked, not to the other one.
+    await expect(chooser(page, sample)).toBeFocused();
+    await stepButton(page, 'results').click();
+    await expect(page.locator('#gx-population-one_state_per_trial')).toBeChecked();
+
+    await stepButton(page, 'intro').click();
+    await chooser(page, sample).click();
+    await expect(page.locator('#gx-sample-question')).toHaveText(question(sample));
+    await action(page, 'Use the sample').click();
+    await expectFilled(page, sample);
+    await stepButton(page, 'results').click();
+    await expect(confirmedCount(page)).toHaveText(count);
+    await expect(page.locator('.gx-pending')).toContainText('You have unapplied changes');
+    await expect(page.locator('#gx-population-all_stages')).toBeChecked();
+    expect(dialogs).toBe(0);
+  });
+}
+
+test('an edited draft without a confirmation asks first, and each option keeps its identity', async ({ page }) => {
   await gotoExplore(page);
   await action(page, 'Build your scenario').click();
   await setChecked(page, '#gx-faultDip-0', true);
   await stepButton(page, 'intro').click();
-  await page.locator('#gx-sample').click();
-  await expect(page.locator('#gx-sample-question')).toHaveText(QUESTION);
+  const [illustrative, kern] = SAMPLES;
+
+  await chooser(page, illustrative).click();
+  await expect(page.locator('#gx-sample-question')).toHaveText(question(illustrative));
   await action(page, 'Keep my choices').click();
+  await expect(chooser(page, illustrative)).toBeFocused();
+
+  // Asking about one sample and then the other names the second.
+  await chooser(page, kern).click();
+  await expect(page.locator('#gx-sample-question')).toHaveText(question(kern));
+  await action(page, 'Keep my choices').click();
+  await expect(chooser(page, kern)).toBeFocused();
   await action(page, 'Build your scenario').click();
   await expect(page.locator('#gx-faultDip-0')).toBeChecked();
   await expect(page.locator('.gx-sample-status')).toHaveCount(0);
+
+  await stepButton(page, 'intro').click();
+  await chooser(page, kern).click();
+  await action(page, 'Use the sample').click();
+  await expectFilled(page, kern);
+
+  // From a filled Kern draft, the illustrative option asks and replaces with its own values.
+  await stepButton(page, 'intro').click();
+  await chooser(page, illustrative).click();
+  await expect(page.locator('#gx-sample-question')).toHaveText(question(illustrative));
+  await action(page, 'Use the sample').click();
+  await expectFilled(page, illustrative);
+});
+
+test('the chooser works from the keyboard', async ({ page }) => {
+  await gotoExplore(page);
+  const [illustrative, kern] = SAMPLES;
+  await action(page, 'Build your scenario').focus();
+  await page.keyboard.press('Tab');
+  await expect(chooser(page, illustrative)).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(chooser(page, kern)).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expectFilled(page, kern);
+
+  // Back on the introduction with a non-fresh draft: the question, then Keep and Use by keyboard.
+  await stepButton(page, 'intro').click();
+  await chooser(page, illustrative).focus();
+  await page.keyboard.press('Space');
+  await expect(page.locator('#gx-sample-question')).toBeFocused();
+  await expect(page.locator('#gx-sample-question')).toHaveText(question(illustrative));
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('button', { name: 'Use the sample' })).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('button', { name: 'Keep my choices' })).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(chooser(page, illustrative)).toBeFocused();
+  // Ask again and accept by keyboard: Enter asks, Tab reaches Use the sample.
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#gx-sample-question')).toBeFocused();
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Enter');
+  await expectFilled(page, illustrative);
 });

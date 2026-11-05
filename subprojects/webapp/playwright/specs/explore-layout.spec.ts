@@ -17,7 +17,7 @@ for (const width of [320, 1024] as const) {
     await gotoExplore(page);
     const fits = async (where: string) => expect(await overflows(page), `${where} at ${width} px`).toBe(false);
     await fits('introduction');
-    await page.locator('#gx-sample').click();
+    await page.locator('#gx-sample-illustrative').click();
     await fits('site conditions with the sample status');
     // Start a new scenario returns to unanswered site conditions.
     await page.locator('.gx-restart button').click();

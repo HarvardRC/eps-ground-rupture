@@ -43,33 +43,55 @@ export function sedimentGroup(set: string): string {
   return set;
 }
 
+/** The named samples of the introduction's chooser (PDD D-42; guided DDD §10.1). */
+export type SampleId = 'illustrative' | 'kern';
+
+/** Each sample's values; the Record type makes every SampleId carry its own. */
+const SAMPLE_VALUES: Record<SampleId, { dips: number[]; depth: number; density: string; strength: string; offsetMax: string }> = {
+  illustrative: { dips: [30, 40], depth: 5, density: 'Dense', strength: 'Strong', offsetMax: '3' },
+  kern: { dips: [60, 70], depth: 10, density: 'Medium', strength: 'Moderate', offsetMax: '1.3' },
+};
+
+/** Narrow an untrusted string, such as a `data-sample` attribute, to a SampleId. */
+export const isSampleId = (value: unknown): value is SampleId =>
+  typeof value === 'string' && Object.prototype.hasOwnProperty.call(SAMPLE_VALUES, value);
+
 /**
- * The approved illustrative scenario (PDD D-37; guided DDD §9.1): fault
- * angles 30° and 40°, 5 m depth, Dense density, Uniform: Strong and
- * Layered: Strong sediment, and a 0–3 m vertical surface offset. Every
- * member comes from the manifest dictionaries; a missing member throws
- * rather than shrinking the sample.
+ * A named sample draft (PDD D-37 and D-42; guided DDD §§9.1, 10.1).
+ *
+ * - `illustrative`: the approved scenario, unchanged from D-37 — fault
+ *   angles 30° and 40°, 5 m depth, Dense density, Uniform: Strong and
+ *   Layered: Strong sediment, and a 0–3 m vertical surface offset.
+ * - `kern`: anchored to the scale of the 1952 Kern County earthquake —
+ *   fault angles 60° and 70° and a 0–1.3 m vertical surface offset
+ *   (D-42); its 10 m depth, Medium density, and Uniform: Moderate and
+ *   Layered: Moderate sediment are agent selections under the PDD §2.3
+ *   delegation, recorded in the G-14 evidence.
+ *
+ * Every member comes from the manifest dictionaries; a missing member
+ * throws rather than shrinking the sample.
  */
-export function sampleDraft(manifest: Manifest): Draft {
+export function sampleDraft(manifest: Manifest, sample: SampleId): Draft {
   const columns = manifest.trialColumns;
   const member = <T>(values: readonly T[], value: T, label: string): T => {
-    if (!values.includes(value)) throw new Error(`Sample inputs: this data release has no ${label}.`);
+    if (!values.includes(value)) throw new Error(`Sample: this data release has no ${label}.`);
     return value;
   };
-  const sediment = (['Uniform', 'Layered'] as const).map(group => {
+  const sediments = (strength: string): Draft['sediment'] => (['Uniform', 'Layered'] as const).map(group => {
     const pairs = manifest.armStrengthStates.filter(pair =>
-      sedimentGroup(pair.set) === `${group} sediment` && pair.sedimentStrength === 'Strong');
-    if (pairs.length !== 1) throw new Error(`Sample inputs: this data release has no single ${group}: Strong sediment.`);
+      sedimentGroup(pair.set) === `${group} sediment` && pair.sedimentStrength === strength);
+    if (pairs.length !== 1) throw new Error(`Sample: this data release has no single ${group}: ${strength} sediment.`);
     return { set: pairs[0].set, sedimentStrength: pairs[0].sedimentStrength };
   }).sort(compareSedimentPairs);
+  const spec = SAMPLE_VALUES[sample];
   return {
     ...freshDraft(manifest),
-    faultDip: [member(columns.fault_dip, 30, '30° fault angle'), member(columns.fault_dip, 40, '40° fault angle')],
-    depth: [member(columns.depth, 5, '5 m sediment depth')],
-    density: [member(columns.density, 'Dense', 'Dense sediment density')],
-    sediment,
+    faultDip: spec.dips.map(dip => member(columns.fault_dip, dip, `${dip}° fault angle`)),
+    depth: [member(columns.depth, spec.depth, `${spec.depth} m sediment depth`)],
+    density: [member(columns.density, spec.density, `${spec.density} sediment density`)],
+    sediment: sediments(spec.strength),
     mode: 'offset',
-    offsetMax: '3',
+    offsetMax: spec.offsetMax,
   };
 }
 

@@ -714,6 +714,103 @@ authorized legacy-DDD amendments for G-08 only, so §7.5 was left
 unchanged. It now describes the legacy specs only; the guided specs
 are §9.5's.
 
+### Sample chooser, 2026-11-04 (G-14)
+
+G-14 ran under the owner's release and grant renewal of 2026-11-04
+([Commands](#commands)). `sampleDraft(manifest, sample)` now takes
+a `SampleId`, `'illustrative' | 'kern'`, and reads each sample's
+values from one table typed `Record<SampleId, …>`. The illustrative
+sample keeps §9.1's values unchanged. The Kern sample fills fault
+angles 60° and 70°, offset mode, and a 1.3 m maximum (PDD D-42).
+Both builders take every member from the manifest and throw on a
+missing one. `isSampleId` narrows the clicked button's
+`data-sample` attribute to a known sample.
+
+Agent selections under the PDD §2.3 delegation (guided DDD §10.1),
+named here as the row requires:
+
+- Kern completion values: 10 m sediment depth, Medium density, and
+  the Uniform: Moderate and Layered: Moderate pairs. These are sample
+  values for a demonstration, chosen from the manifest; they are not
+  a characterization of the White Wolf fault site. All four are
+  present in data release `data-v1`.
+- The chooser is two buttons, not a disclosure. A `role="group"`
+  labeled `Try a sample:` holds **Illustrative sample** and
+  **Kern County 1952 sample**, beside **Build your scenario**. Each
+  button is described by the hint `Sample values, not recommended
+  site values.`; **Try sample inputs** is gone.
+- The question reads `Replace your current choices with the
+  illustrative sample?` (or `the Kern County 1952 sample?`). The
+  status line reads `Filled with the illustrative sample: sample
+  values, not recommended site values. Change anything.` (or the
+  Kern name), still `role="status"` and cleared when the reader
+  leaves Site conditions. **Use the sample** and **Keep my
+  choices** are unchanged. Keep my choices returns focus to the
+  button that asked.
+
+D-37's flow is otherwise unchanged for both samples. It still
+fills silently from a fresh draft with nothing confirmed and
+otherwise asks inline. It still replaces the whole draft only on
+Use the sample, never opens a browser dialog, and never changes
+confirmed results. The sample state is presentation state; the
+session record stores neither the question nor the status line.
+
+Observed 60–70° coverage. On the strict preview with the pinned
+data release `data-v1`, the Kern sample's 1.3 m offset converts to
+about 0.01–1.51 m of slip at 60° and 0.01–1.39 m at 70°, both
+**Within range** of the modeled 0–5.0135 m, so no coverage warning
+appears. This agrees with the external live check on the deployed
+page. The confirmed Kern sample returned 1,011 matching records
+with all charts rendered. The spec asserts the Within-range state
+at both angles, so a change in data or conversion fails the lane
+rather than silently changing the demonstration.
+
+Tests and specs:
+
+- State tests now run over both samples: completeness, validity,
+  canonical order, offset mode, fresh slip entries and
+  refinements, independent copies, and each missing member. One
+  test removes a member only one sample uses, to show the builders
+  are independent; another checks `isSampleId`.
+- The §9.5 sample spec (item 5) is parameterized over both samples:
+  - the chooser's names, group, and hint;
+  - each sample's silent fill, with its site values and offset;
+  - its coverage: the 30° warning for the illustrative sample, and
+    no warning, with both rows Within range, for Kern;
+  - Keep and Use with a confirmed scenario, which leave the
+    confirmed count unchanged and focus the asking button;
+  - each option keeping its identity when the reader asks about one
+    and then the other, from an edited draft and from a filled
+    Kern draft;
+  - keyboard operation: Tab order through the chooser, Enter and
+    Space, and Keep and Use by keyboard.
+- The continuity and layout specs now use the illustrative button.
+
+At this verification:
+
+- The pinned Node suite passed all 422 tests; typechecking and the
+  bundles passed. Strict publication and preview builds passed
+  with `explore-faeb1b0a595d.js` and `explore-cbf963b397ab.css`.
+  The `/scenario/` bundles `app-26490347afd0.js` and
+  `app-08bebc049c15.css` were unchanged. All 31 hook tests passed.
+- 5,504 relative links in 61 Markdown files resolved; PDD agreement
+  passed; traceability linted 491 rows with no gaps.
+- The guided specs passed 64 of 64 (32 each in `desktop` and
+  `mobile`), and the sample spec passed 42 of 42 over three repeats.
+- The full lane, run before the review clean-ups (`isSampleId`, the
+  value table, and the singular error prefix), passed 215, skipped
+  5, and failed 1: the legacy `/scenario/` `axe: the failure states`
+  spec, the same environment-dependent `.md-top` contrast failure
+  recorded under G-12 at its base. The guided specs alone were
+  rerun after the clean-ups.
+
+Independent review passed with no blocking finding. The three
+clean-ups above came from its nits. Its one should-fix was this
+evidence.
+
+Not verified: screen-reader announcement of the renamed status
+line, touch, and engines other than Chromium.
+
 ## Separate CI investigation
 
 The reported job `126383105016` belongs to historical run
