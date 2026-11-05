@@ -332,6 +332,10 @@
 #gre-explore fieldset[tabindex="-1"]:focus:not(:focus-visible) { outline: none; }
 #gre-explore .gx-site-group.gx-invalid { border-color: var(--gx-danger); box-shadow: 0 0 0 1px var(--gx-danger), inset 5px 0 0 var(--gx-danger); }
 #gre-explore #gx-group-scarpClass.gx-invalid { border-left: 6px solid var(--gx-danger); padding-left: 14px; }
+/* Forced colors draw no box-shadow: the invalid boundary thickens instead. */
+@media (forced-colors: active) {
+  #gre-explore .gx-site-group.gx-invalid { border-width: 3px; }
+}
 /* The step list is a sequence indicator: entries not yet open are plain text, not disabled controls. */
 #gre-explore .gx-steps .gx-step-entry { display: flex; gap: 8px; align-items: center; padding: 9px 10px; color: var(--gx-muted); font-size: .8rem; }
 #gre-explore .gx-steps .gx-step-entry[aria-current="step"] { color: var(--gx-accent); font-weight: 700; background: #ece1df; border-radius: 6px; }

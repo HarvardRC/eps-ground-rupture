@@ -136,6 +136,10 @@ test('movement entries route review back to the first invalid field', async ({ p
   // A single numeric field keeps its own invalid mark (§12.1).
   await expect(page.locator('#gx-slipMax')).toHaveAttribute('aria-invalid', 'true');
   await expect(page.locator('#gx-error-slipMax')).toHaveText('Enter the maximum fault slip in metres.');
+  // The step's own entry in the list is no departure: the attempt stays.
+  await stepButton(page, 'movement').click();
+  await expect(summary).toHaveCount(1);
+  await expect(page.locator('#gx-error-slipMax')).toHaveText('Enter the maximum fault slip in metres.');
   await summary.getByRole('link', { name: 'Maximum fault slip' }).click();
   await expect(page.locator('#gx-slipMax')).toBeFocused();
 

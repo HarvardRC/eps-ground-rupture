@@ -880,7 +880,8 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     if (next !== 'results') guideIndex = null;
     invalidate(); restoredNotice = false; logOffNotice = false;
     // Leaving a step ends its attempt: coming back shows the neutral line, not the old summary (§12.1).
-    issues = issues.filter(item => item.step !== step);
+    // Staying on it (its own entry in the step list) keeps the attempt.
+    if (next !== step) issues = issues.filter(item => item.step !== step);
     step = next; reached.add(next); generalError = ''; alert.textContent = ''; render('gx-heading', true);
     if (next === 'movement' && draft.mode === 'offset') void ensureRegression();
   }
