@@ -1916,6 +1916,163 @@ At this verification, on `task/g-22-guidance` at `468d6b1`, over
 Not verified: screen-reader reading of the line, the summary and the
 step entries; touch; engines other than Chromium.
 
+### Review-round fixes, 2026-11-05 (G-23)
+
+G-23 ran under the D-47 release, after G-22's merge, to guided DDD
+§§12.3–12.7.
+
+**Strings.** The only changed string is the mode-switch note, approved
+verbatim in §12.7: "The sample has separate example values for each
+mode; one is not converted from the other. Switching modes can change
+the results." No other string was added or changed, so nothing else
+passed through the gate. copy.json and the copy deck are untouched: the
+note is the guided-only `MODE_NOTE`. The historical row quoting the
+earlier note (G-18) stays as written. §12.7 supersedes that row's text.
+
+Measured in Chromium. "Desktop" is the lane's desktop project at
+1280 × 720.
+
+**The floating Back to top control (§12.3).**
+
+- Before: on the movement step, the theme's control was rendered
+  (`display: block`) and revealed on scrolling up, floating over the
+  content, as the owner's screenshot showed.
+- After: on the guided page the control is not rendered
+  (`display: none`). It is gone from view, from the tab order and from
+  the accessibility tree.
+- How:
+  - The rule sits in the guided stylesheet, which only the guided page
+    loads, inside its content. A `body:has(#gre-explore)` scope keeps it
+    to a page that holds the explorer.
+  - The glossary, reached from the guided page by the theme's instant
+    navigation, and the existing explorer still render and reveal it.
+  - G-21's settled-wait axe helper is unchanged for the pages that keep
+    the control.
+
+**Sample dialog actions (§12.4).**
+
+- Before: at 1280 × 720 the dialog scrolled as a whole. **Use this
+  sample** and **Cancel** sat at 1,449 px (lower fault angles) and
+  1,458 px (steeper fault angles) from the viewport's top, below the
+  preview.
+- After: the dialog's body scrolls under a persistent footer. The
+  actions sit at 638–685 px for both samples, inside the 720 px viewport
+  and uncovered, at the top of the preview and at its end. The body
+  scrolls about 1,430 px of preview in 606 px. The photograph, the
+  background and the sources stay in the preview, per §10.2.
+- The replacement question uses the same footer.
+- Below 280 px of viewport height (for example 1280 × 720 at 400% zoom)
+  a fixed footer would leave the preview almost no room. There the whole
+  dialog scrolls instead, so the actions are never clipped. A 568 × 320
+  landscape phone keeps the footer.
+
+**Required marks (§12.5).**
+
+- Before: "Minimum (m)" carried no mark and "Maximum (m)" carried
+  Required, although clearing the minimum blocked review.
+- After: both read "Required". The initial minimum stays 0. A cleared
+  minimum still blocks review with "Enter the minimum fault slip in
+  metres."
+
+**Explanation styling (§12.6).**
+
+- Before: the sample notice, the per-field annotations and the mode note
+  used the warning-family wash: background `#fff5df` with a `#bc966b`
+  edge.
+- After: they use the neutral wash: background `--gx-wash` (`#f5f1eb`)
+  with a `--gx-muted` (`#605b58`) edge.
+- Text contrast on that wash:
+
+  | Text | Contrast |
+  | --- | --- |
+  | Ink | 13.2:1 |
+  | Muted | 5.95:1 |
+  | Links | 7.8:1 |
+
+- Coverage and interpretation warnings keep `.gx-warning` (`#fff2ed`
+  with a `#ad4b33` edge).
+- Other tan-edged elements stay as they are, because §12.6 names only
+  the three explanations: the dialog frame, the pending-changes banner,
+  the log-scale notice and the provisional flag.
+- Axe passes over the explorer with the notice, the annotations and the
+  note shown, in both lane projects.
+
+**Mode-switch note (§12.7).** Before: "The two modes are separate
+assumptions. Each selects a different set of simulations, so results can
+differ." After: the approved text above.
+
+**Review.** The independent review found nothing blocking and confirmed
+that only `src/explore/` and the specs changed. Its findings, applied:
+
+- **Back to top spec.** It could not fail, because the theme hides the
+  control by opacity, which Playwright counts as visible. It now asserts
+  the computed display on each page, and the theme's reveal where the
+  control stays, scrolling up in steps as the theme needs.
+- **Short viewports.** At very low heights the footer could crowd out
+  the preview or be clipped. The fallback above handles this.
+- **Smaller fixes:**
+  - the spec reaches the movement step it describes;
+  - it uses the suite's `setChecked`;
+  - redundant assertions are gone;
+  - the dialog body gets scroll padding and no trailing margin;
+  - the note's two comments are merged into one.
+
+Two re-reviews followed, and the second found nothing further. The
+first re-review confirmed those fixes and the 280 px threshold. It added
+two items, both applied:
+
+- the existing-explorer leg now waits for that app's mount, whose scroll
+  to its panel could otherwise race the reveal;
+- the 320 × 180 spec asserts the fallback itself: the dialog is the only
+  scroller, the title shows at the top and Cancel once scrolled to.
+  Before, it would have passed without the fallback.
+
+Also applied from the first re-review: scroll padding on the dialog
+inside the fallback, and wording that no longer claims "never clipped".
+
+Not applied, the second re-review's optional suggestion: resetting the
+dialog's scroll before the title check. That check is deterministic in
+the pinned Chromium.
+
+Tests and specs, in both lane projects:
+
+- The new `explore-review-round` spec covers:
+  - Back to top: hidden on the guided page, rendered and revealed on the
+    glossary (after instant navigation) and on the existing explorer;
+  - each sample's dialog: actions in view and uncovered at both ends of
+    the scrolling preview, and the dialog itself not scrolling;
+  - the short-viewport fallback at 320 × 180;
+  - both Required marks, the initial minimum, and the cleared minimum's
+    block;
+  - the neutral wash on the three explanations, with `.gx-warning`
+    keeping caution on a coverage warning;
+  - the §12.7 text;
+  - axe over the explanations and over the dialog with its footer.
+- `explore-sample`: the mode-note constant is the §12.7 text.
+
+At this verification, on `task/g-23-review-fixes` at `2012f3a`, over
+`a906a18` (G-22's merge):
+
+- **Build and unit tests.** The pinned Node suite passed all 447 tests,
+  and typechecking and the bundles passed.
+- **Site builds.** The strict publication and preview builds passed,
+  with `explore-4aad44a22392.js` and `explore-b60ac1064581.css`.
+- **Unchanged.** The `/scenario/` bundles `app-26490347afd0.js` and
+  `app-08bebc049c15.css` did not change.
+- **Hooks and document checks.** All 31 hook tests passed. Relative
+  links resolved, PDD agreement passed, and traceability reported no
+  gap rows.
+- **Lane.** The full lane passed 297 and skipped 5, with no failure,
+  twice in a row, at load averages of 14 to 15.
+- **Guided specs.** All 144 passed in `desktop` and `mobile`. The new
+  spec also passed 70 of 70 over five repeats in both projects.
+- **Earlier runs.** The same commands had passed at `f771352` (295
+  twice, 142) and at `84b07e2` (297 twice, 144).
+
+Not verified: screen-reader reading, touch scrolling inside the dialog,
+real zoom (the short-viewport case was set by viewport size), and
+engines other than Chromium.
+
 ## Separate CI investigation
 
 The reported job `126383105016` belongs to historical run
