@@ -144,7 +144,8 @@ named in the last column carry the detail.
 | D-40 | Result-report export. | FR-D1, FR-D2 | Product owner | Decided (2026-11-04) | One self-contained document pairing the §6.1 provenance and scenario summary with rendered charts and statistics; builds on D-14. The owner set it P2; guided task G-13 carries it in the next-phase queue (D-41). §6.5. |
 | D-41 | Next-phase queue for the deliberate deferrals. | §2.2 | Product owner | Decided (2026-11-04) | Every deliberate deferral of the guided redesign is queued as the phase after the second increment: the D-39 reconciliation list, family view, shared links, between-visit recovery, scenario import, the result report (G-13), the sample scenarios and stories (D-42: G-14, G-15), remaining browser coverage, and the paused `/scenario/` rework decision. Team availability schedules the phase; it may precede the team demonstration. Advertising still follows D-39. §2.3. |
 | D-42 | Two named sample scenarios with stories. | §5.1, C1, CR-10 | Product owner | Decided (2026-11-04) | One chooser offers two named samples: D-37's illustrative scenario, unchanged, and a second anchored to the 1952 M 7.36 Kern County earthquake — fault angles 60° and 70°, maximum vertical surface offset 1.3 m, completion values delegated as in D-37. Each carries a short story and up to two licensed images where suitable verified files exist; values are anchored to the named event's scale, never presented as modeling it. §2.3; guided DDD §10; tasks G-14 and G-15 in the next-phase queue (D-41). D-43 subsequently reworks the presentation. |
-| D-43 | Sample presentation rework. | §5.1, C1, CR-10 | Product owner | Decided (2026-11-04) | Reviewing the built result, the owner replaced the two sample buttons with one **Try a prefilled sample** action opening a scale-named listbox; made the replacement confirmation a modal dialog (never a browser dialog, as before); reworded the prefill notice and made it persist across the input steps; put the story panel behind a prominent Where these values come from trigger on both input steps; restored the sequential walk after a fill; prefilled both movement modes (the Kern slip window anchored to Bawden 2001's 1.6–1.9 m, the illustrative delegated); and added CR-10 per-field annotations. §2.3; guided DDD §§10.3–10.4; tasks G-18 and G-19. |
+| D-43 | Sample presentation rework. | §5.1, C1, CR-10 | Product owner | Decided (2026-11-04) | Reviewing the built result, the owner replaced the two sample buttons with one **Try a prefilled sample** action opening a scale-named listbox; made the replacement confirmation a modal dialog (never a browser dialog, as before); reworded the prefill notice and made it persist across the input steps; put the story panel behind a prominent Where these values come from trigger on both input steps; restored the sequential walk after a fill; prefilled both movement modes (the Kern slip window anchored to Bawden 2001's 1.6–1.9 m, the illustrative delegated); and added CR-10 per-field annotations. §2.3; guided DDD §§10.3–10.4; tasks G-18 and G-19. D-44 subsequently revises the presentation. |
+| D-44 | Sample presentation revision after external review. | §5.1, C1, CR-10 | Product owner | Decided (2026-11-05) | Before the G-18 merge, a relayed external review revised the D-43 presentation and the owner adopted it: a preview dialog of two selectable cards named by inputs (Lower fault angles — 30° and 40°, offset up to 3 m; Steeper fault angles — 60° and 70°, offset up to 1.3 m), event context and photographs in the previews, preview without changing the draft, the replacement question as the dialog's next step; the notice gains a "Started from the {sample} sample · Modified" form with background and photos reachable until the draft is replaced; the trigger reads Why these sample values?; the slip prefills stand with Bawden 2001's 1.6 m and 1.9 m framed as two patch estimates used as an example band, plus a visible mode-switch note; the shared story sentence becomes "These examples help you try the tool. They do not reconstruct either earthquake." (CR-10). §2.3; guided DDD §10.5; the revised G-18 and G-19. |
 
 ---
 
@@ -623,6 +624,34 @@ evidence. Short per-field annotations appear while a sample is
 active, their texts following CR-10; all exact strings return to
 the owner for approval before the affected merges. Guided DDD
 §§10.3–10.4 hold the design; guided tasks G-18 and G-19 carry it.
+
+**Sample presentation revision (D-44, 2026-11-05).** A relayed
+external review, read before the G-18 merge, revised the D-43
+presentation and the owner adopted it. The chooser is one action —
+**Try a prefilled sample** — opening a small dialog of two
+selectable cards named by their inputs: **Lower fault angles**
+(30° and 40°; surface offset up to 3 m) and **Steeper fault
+angles** (60° and 70°; surface offset up to 1.3 m). A selected
+card previews its values, background, and photographs without
+changing the draft; **Use this sample** applies it, and when a
+draft would be replaced, the D-43 modal question becomes the next
+step of the same dialog. The event connections live in the
+previews, not the titles, and the stories' shared sentence
+becomes "These examples help you try the tool. They do not
+reconstruct either earthquake." under CR-10. The prefill notice
+reads "Prefilled with the {sample} sample. You can change any
+value." and, after the first edit, "Started from the {sample}
+sample · Modified"; the background trigger — **Why these sample
+values?**, helper "Background, photos and sources" — stays
+reachable until the draft is replaced or a new scenario starts.
+Per-field annotations update or clear when their value changes.
+The D-43 slip prefills stand — 1.6–1.9 m for Kern, framed as
+Bawden 2001's two patch estimates used as an example band, 3–5 m
+delegated for the illustrative sample — and a visible note on
+switching movement modes says the modes are separate assumptions
+that select different simulations. Everything else in D-43 holds.
+Guided DDD §10.5 holds the design; the revised G-18 and G-19
+carry it.
 
 **Approved introduction (product owner, 2026-11-03).**
 

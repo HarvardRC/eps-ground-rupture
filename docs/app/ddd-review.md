@@ -1817,6 +1817,22 @@ annotations. Guided DDD §§10.3–10.4 hold the design; tasks G-18
 and G-19 are released on the standing terms, with exact strings
 returning to the owner before the affected merges.
 
+## External review of the D-43 presentation (2026-11-05)
+
+Before the G-18 merge, the owner relayed an external review of
+the D-43 design and the built strings and adopted its
+presentation package as PDD D-44: the preview-card chooser, the
+input-named samples with event context moved into the previews,
+the Started from · Modified notice with background and photos
+outliving edits, the Why these sample values? trigger, and the
+plainer shared story sentence (CR-10). On the review's
+movement-mode point the owner kept the D-43 slip prefills with an
+explicit mode-switch note, and Bawden 2001's 1.6 m and 1.9 m are
+framed as two patch estimates used as an example band, not an
+uncertainty interval. Guided DDD §10.5 holds the design; the
+G-18 and G-19 rows are rewritten; the built G-18 stays unmerged
+pending the rework and the string gates.
+
 ## References
 
 - [`docs/app/ddd.md` — Ground Rupture Explorer — detailed design document](ddd.md).

@@ -762,3 +762,45 @@ Owner review of the built §§10.1–10.2 supersedes parts of both:
 - Annotation and trigger texts are reader-facing scientific
   prose: CR-10 — the exact strings go to the owner for approval
   before the merge, like the §10.2 stories.
+
+### 10.5 Review revision (D-44)
+
+A relayed external review, read before the G-18 merge, revises
+§§10.3–10.4 as follows; everything not named here stands.
+
+- The chooser: **Try a prefilled sample** opens a small dialog of
+  two selectable cards, not a listbox. Card titles name inputs —
+  **Lower fault angles** (30° and 40°; surface offset up to 3 m);
+  **Steeper fault angles** (60° and 70°; surface offset up to
+  1.3 m) — and each card holds the key values, the story's
+  background with its photographs, and the sources. Selecting a
+  card previews it without changing the draft; **Use this
+  sample** applies it; when the draft is not fresh, the §10.3
+  modal question becomes the dialog's next step. The cards form
+  one tab stop with arrow movement; Escape closes without
+  applying.
+- Names and event wording: the Chi-Chi and Kern County
+  connections appear in the previews and stories only. The shared
+  story sentence becomes "These examples help you try the tool.
+  They do not reconstruct either earthquake." — a CR-10 story
+  edit replacing §10.2's anchored-not-modeled sentence.
+- The prefill notice: "Prefilled with the {sample} sample. You
+  can change any value." After the first edit it becomes "Started
+  from the {sample} sample · Modified" and keeps that form;
+  replacement or Start a new scenario removes it. The background
+  trigger — **Why these sample values?**, helper "Background,
+  photos and sources" — follows the notice's lifetime, not the
+  first edit.
+- Per-field annotations (§10.4) update or clear when their
+  control's value changes, so a sample explanation never reads as
+  justifying a reader's own value.
+- Movement modes: the §10.3 prefills stand. The Kern slip window
+  is presented as Bawden 2001's two patch estimates — 1.6 m and
+  1.9 m — used as an example band, never as an uncertainty
+  interval; card descriptors name the offset only. While a sample
+  is active, switching movement modes shows a short note that the
+  two modes are separate assumptions selecting different
+  simulations; its text follows the string gates.
+- The §9.5 specs follow: card preview without draft change, the
+  apply and replace steps, the notice's Modified form, trigger
+  persistence, annotation updates, and the mode-switch note.
