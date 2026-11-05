@@ -9,8 +9,8 @@
 
 import { expect, test, type Page } from '@playwright/test';
 import {
-  MOVEMENT_HEADING, SITE_HEADING, action, confirmGolden, confirmedCount, countText, gotoExplore, heading, pickSample,
-  setChecked, stepButton, typeEntry,
+  MOVEMENT_HEADING, SITE_HEADING, action, confirmGolden, confirmedCount, countText, explorerReady, gotoExplore, heading,
+  holdRegression, pickSample, setChecked, settleFrames, stepButton, typeEntry,
 } from '../explore-support';
 
 test.describe.configure({ timeout: 120_000 });
@@ -56,6 +56,7 @@ const checkedSite = (page: Page) =>
 /** The chosen sample filled the draft and opened Site conditions, naming itself once. */
 async function expectFilled(page: Page, sample: Sample): Promise<void> {
   await expect(heading(page)).toHaveText(SITE_HEADING);
+  await expect(heading(page)).toBeFocused();
   await expect(notice(page)).toHaveText(noticeText(sample));
   // Announced once through the shared status region, not by the standing notice.
   await expect(announced(page)).toHaveText(noticeText(sample));
@@ -78,7 +79,8 @@ test('Try a prefilled sample opens a listbox naming both samples by scale, with 
   await expect(trigger(page)).toHaveAttribute('aria-expanded', 'false');
   await expect(trigger(page)).toHaveAccessibleDescription(HINT);
   await expect(list(page)).toBeHidden();
-  await expect(page.locator('.gx-sample-choice')).toHaveCount(0);
+  // One sample action: the introduction's only buttons are Build your scenario and the trigger.
+  await expect(page.locator('.gx-intro-actions button')).toHaveText(['Build your scenario', /^Try a prefilled sample/]);
 
   await trigger(page).click();
   await expect(trigger(page)).toHaveAttribute('aria-expanded', 'true');
@@ -117,6 +119,11 @@ for (const sample of SAMPLES) {
     await expect(option(page, first)).toHaveAttribute('aria-selected', 'false');
     await page.keyboard.press('ArrowDown');
     await expect(option(page, last)).toBeFocused();
+    await page.keyboard.press('ArrowUp');
+    await expect(option(page, first)).toBeFocused();
+    await expect(option(page, first)).toHaveAttribute('aria-selected', 'true');
+    await page.keyboard.press('ArrowUp');
+    await expect(option(page, first)).toBeFocused();
     await page.keyboard.press('Home');
     await expect(option(page, first)).toBeFocused();
     await page.keyboard.press('End');
@@ -208,7 +215,7 @@ for (const sample of SAMPLES) {
     await expect(notice(page)).toHaveCount(0);
     await expect(page.locator('.gx-sample-story')).toHaveCount(0);
 
-    // A site edit clears a fresh fill as well.
+    // A site edit clears a fill as well (this one replaces the edited draft through the dialog).
     await stepButton(page, 'intro').click();
     await pickSample(page, sample.id);
     await action(page, 'Use the sample').click();
@@ -267,9 +274,82 @@ for (const sample of SAMPLES) {
     await expect(page.locator('#gx-population-all_stages')).toBeChecked();
     await stepButton(page, 'site').click();
     await expect(page.locator('.gx-footer .gx-primary')).toHaveText('Return to review');
+    await expect(notice(page)).toHaveText(noticeText(sample));
+    // A refinement is a draft edit too: it clears the notice.
+    await stepButton(page, 'results').click();
+    await setChecked(page, '#gx-population-one_state_per_trial', true);
+    await stepButton(page, 'site').click();
+    await expect(notice(page)).toHaveCount(0);
     expect(dialogs).toBe(0);
   });
 }
+
+test('an open listbox and an open dialog survive the re-render of a settling restore', async ({ page }) => {
+  await gotoExplore(page);
+  await confirmGolden(page, 'GS-1');
+  await stepButton(page, 'intro').click();
+  const [first, last] = SAMPLES;
+
+  // Hold the restore's conversion data so it settles while the listbox is open.
+  let release = await holdRegression(page);
+  await page.reload();
+  await explorerReady(page);
+  await expect(page.locator('.gx-restoring')).toHaveCount(1);
+  await trigger(page).focus();
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('ArrowDown');
+  await expect(option(page, last)).toBeFocused();
+  release();
+  await expect(page.locator('.gx-restoring')).toHaveCount(0);
+  await settleFrames(page);
+  await expect(list(page)).toBeVisible();
+  await expect(trigger(page)).toHaveAttribute('aria-expanded', 'true');
+  await expect(option(page, last)).toBeFocused();
+  await expect(option(page, last)).toHaveAttribute('aria-selected', 'true');
+  await page.keyboard.press('ArrowUp');
+  await expect(option(page, first)).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(trigger(page)).toBeFocused();
+
+  // The same for the dialog: still modal, focus on the same choice, Escape still keeps.
+  release = await holdRegression(page);
+  await page.reload();
+  await explorerReady(page);
+  await expect(page.locator('.gx-restoring')).toHaveCount(1);
+  await pickSample(page, last.id);
+  await expectAsked(page, last);
+  await page.keyboard.press('Tab');
+  await expect(page.locator('#gx-sample-use')).toBeFocused();
+  release();
+  await expect(page.locator('.gx-restoring')).toHaveCount(0);
+  await settleFrames(page);
+  expect(await dialog(page).evaluate((node) => node.matches(':modal'))).toBe(true);
+  await expect(page.locator('#gx-sample-use')).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(dialog(page)).toHaveCount(0);
+  await expect(trigger(page)).toBeFocused();
+  await stepButton(page, 'results').click();
+  await expect(page.locator('.gx-context')).toBeVisible();
+});
+
+test('opening and closing the listbox is neither a navigation nor an edit: the restore notice stays', async ({ page }) => {
+  await gotoExplore(page);
+  await action(page, 'Build your scenario').click();
+  await setChecked(page, '#gx-faultDip-0', true);
+  await stepButton(page, 'intro').click();
+  await page.reload();
+  await explorerReady(page);
+  await expect(page.locator('.gx-restored')).toHaveCount(1);
+  await trigger(page).click();
+  await page.keyboard.press('Escape');
+  await trigger(page).click();
+  await trigger(page).click();
+  await expect(page.locator('.gx-restored')).toHaveCount(1);
+  // Choosing a sample acts, and the notice goes with it.
+  await pickSample(page, 'illustrative');
+  await expect(page.locator('.gx-restored')).toHaveCount(0);
+  await action(page, 'Keep my choices').click();
+});
 
 test('an edited draft without a confirmation asks first, and each option keeps its identity', async ({ page }) => {
   await gotoExplore(page);

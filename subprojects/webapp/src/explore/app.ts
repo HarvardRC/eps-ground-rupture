@@ -244,7 +244,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
 
   /** The modal replacement question (§10.3): never a browser dialog; opened by `render`. */
   function sampleDialog(id: SampleId): string {
-    return `<dialog class="gx-sample-dialog" id="gx-sample-dialog" aria-labelledby="gx-sample-question"><h2 id="gx-sample-question">Replace your current choices with the ${escape(sampleName(id))} values?</h2><div class="gx-dialog-actions">${button('sample-use', 'Use the sample', true, `id="gx-sample-use" data-sample="${id}"`)}${button('sample-keep', 'Keep my choices', false, `id="gx-sample-keep" data-sample="${id}"`)}</div></dialog>`;
+    return `<dialog class="gx-sample-dialog" id="gx-sample-dialog" aria-labelledby="gx-sample-question"><h2 id="gx-sample-question">Replace your current choices with the ${escape(sampleName(id))} values?</h2><div class="gx-dialog-actions">${button('sample-use', 'Use the sample', true, `id="gx-sample-use" data-sample="${id}"`)}${button('sample-keep', 'Keep my choices', false, `id="gx-sample-keep" data-sample="${id}" autofocus`)}</div></dialog>`;
   }
 
   const sampleList = () => $<HTMLUListElement>('#gx-sample-list');
@@ -274,10 +274,10 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     if (returnFocus) trigger?.focus();
   }
 
-  /** A chosen sample fills silently over an untouched fresh draft with nothing confirmed, and asks otherwise. */
+  /** A chosen sample fills silently over an untouched fresh draft with nothing confirmed or awaiting restoration, and asks otherwise. */
   function chooseSample(id: SampleId): void {
     closeSampleList(false);
-    if (confirmed === null && !draftChanged(draft, freshDraft(manifest))) useSample(id);
+    if (confirmed === null && restoreTarget === null && !draftChanged(draft, freshDraft(manifest))) useSample(id);
     else { sampleAsk = id; render('gx-sample-keep'); }
   }
 
@@ -545,11 +545,19 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     const activeKey = active && shell.contains(active) ? controlKey(active) : null;
     const matchingControls = () => [...shell.querySelectorAll<HTMLElement>('button, input')].filter(node => controlKey(node) === activeKey);
     const activePosition = activeKey === null ? -1 : matchingControls().indexOf(active!);
+    // An open sample listbox stays open across an asynchronous re-render (a restore settling).
+    const listSelected = sampleList()?.hidden === false ? sampleOptions().findIndex(option => option.getAttribute('aria-selected') === 'true') : null;
     const views: Record<Step, () => string> = { intro: introView, site: siteView, movement: movementView, review: reviewView, results: () => result ? resultsView() : heading('Explore your scenario', 'See the range of simulated measurements for the scenario you confirmed.') };
     shell.innerHTML = `<header class="gx-brand"><strong>Ground Rupture Explorer</strong><span>Research companion</span></header>${navigation()}<main class="gx-main">${restoredNotice ? '<p class="gx-restored" role="status">Restored the work in this tab.</p>' : ''}${logOffNotice ? `<p class="gx-log-off" role="status">${escape(copyText('ddd5.10.recoveryLogScaleOff'))}</p>` : ''}${generalError ? `<div class="gx-warning" role="alert">${escape(generalError)}</div>` : ''}${restorePanel()}${views[step]()}${step !== 'intro' ? `<div class="gx-restart">${button('new', 'Start a new scenario')}</div>` : ''}</main>${support()}`;
     shell.querySelectorAll<HTMLInputElement>('input[data-mixed]').forEach(input => { input.indeterminate = input.dataset.mixed === 'true'; });
     const dialog = $<HTMLDialogElement>('#gx-sample-dialog');
     if (dialog && !dialog.open) dialog.showModal();
+    const list = sampleList();
+    if (listSelected !== null && list && !dialog) {
+      list.hidden = false;
+      $('#gx-sample-trigger')?.setAttribute('aria-expanded', 'true');
+      sampleOptions().forEach((option, i) => option.setAttribute('aria-selected', String(i === listSelected)));
+    }
     refreshMovementFeedback();
     if (step === 'results') {
       drawChart();
@@ -840,8 +848,11 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     // the one-time log-scale status likewise. A click that does not
     // re-render (a successful download) must not leave the dismissed
     // log-scale line on screen (G-17), so its element goes with its flag.
-    restoredNotice = false; logOffNotice = false;
-    $('.gx-log-off')?.remove();
+    // Opening or closing the sample listbox is neither a navigation nor an edit.
+    if (target.dataset.action !== 'sample-menu') {
+      restoredNotice = false; logOffNotice = false;
+      $('.gx-log-off')?.remove();
+    }
     try {
       const measurement = target.dataset.measurement as MeasurementName | undefined;
       if (measurement) { display = { ...display, measurement }; render(); return; }
