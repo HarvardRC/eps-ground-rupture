@@ -4,12 +4,12 @@
 // (§9.2, PDD D-38 and §7.3); a stalled restore is cancelled as soon as
 // the reader supersedes it (G-16).
 
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { pointer } from '../support';
 import {
   INTRO_HEADING, MOVEMENT_HEADING, RESULTS_HEADING, REVIEW_HEADING, SESSION_KEY, SITE_HEADING,
   action, confirmGolden, confirmedCount, countText, explorerReady, gotoExplore, heading, setChecked, stepButton, storedRecord,
-  typeEntry,
+  REGRESSION, holdRegression, settleFrames, typeEntry,
 } from '../explore-support';
 
 test.describe.configure({ timeout: 120_000 });
@@ -159,20 +159,6 @@ test('a save failing mid-session clears the older record, so reload starts fresh
 // G-16: a stalled restore must not hold the busy state once the reader
 // supersedes it. The regression response is held for the whole test;
 // navigation cancels the restore at once (§9.2, step 3).
-const REGRESSION = '**/regression-*.json.gz';
-
-/** Hold every regression response until the returned release is called. */
-async function holdRegression(page: Page): Promise<() => void> {
-  let release!: () => void;
-  const held = new Promise<void>((resolve) => { release = resolve; });
-  await page.route(REGRESSION, async (route) => { await held; await route.continue(); });
-  return release;
-}
-
-/** Two animation frames and a task, so pending continuations run. */
-const settleFrames = (page: Page) =>
-  page.evaluate(() => new Promise<void>((done) => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(done, 0)))));
-
 const INTERRUPTED = 'Restoring the results was interrupted.';
 
 test('superseding a stalled restore releases Show results at once, and the late fetch changes nothing', async ({ page }) => {
@@ -208,6 +194,15 @@ test('superseding a stalled restore releases Show results at once, and the late 
   await page.waitForResponse(REGRESSION);
   await settleFrames(page);
   await expect(heading(page)).toHaveText(RESULTS_HEADING);
+  await expect(page.locator('.gx-restored')).toHaveCount(0);
+  // Prove the held response was processed before the remaining checks: the
+  // offset conversion table renders only once the regression has loaded.
+  await stepButton(page, 'movement').click();
+  await setChecked(page, '#gx-mode-offset', true);
+  await page.locator('#gx-offset-feedback table').waitFor();
+  await settleFrames(page);
+  await stepButton(page, 'results').click();
+  await expect(heading(page)).toHaveText(RESULTS_HEADING);
   await expect(confirmedCount(page)).toHaveText(count!);
   await expect(page.locator('.gx-context')).toContainText('Movement: 0–1 m fault slip');
   await expect(page.locator('.gx-restored')).toHaveCount(0);
@@ -218,7 +213,7 @@ test('superseding a stalled restore releases Show results at once, and the late 
   await expect(action(page, 'Show results')).toBeEnabled();
 });
 
-test('typing during a stalled restore cancels it without a re-render', async ({ page }) => {
+test('typing during a stalled restore cancels it in place', async ({ page }) => {
   await gotoExplore(page);
   await confirmGolden(page, 'GS-1');
   await stepButton(page, 'movement').click();
@@ -234,6 +229,8 @@ test('typing during a stalled restore cancels it without a re-render', async ({ 
   await expect(page.locator('.gx-restore-retry')).toContainText(INTERRUPTED);
   release();
   await page.waitForResponse(REGRESSION);
+  // Prove the held response was processed: the conversion table renders only once the regression has loaded.
+  await page.locator('#gx-offset-feedback table').waitFor();
   await settleFrames(page);
   await expect(page.locator('.gx-restore-retry')).toContainText(INTERRUPTED);
   await expect(page.locator('.gx-restored')).toHaveCount(0);

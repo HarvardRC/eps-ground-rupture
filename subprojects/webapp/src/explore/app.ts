@@ -670,7 +670,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       if (!checked.scenario) { busy = false; showIssues(checked.issues); return; }
       const computed = computeResult(vintage, checked.scenario, sequence + 1, regression);
       confirmed = snapshot; result = computed; sequence += 1; busy = false; issues = []; refineOpen = false; guideIndex = null; alert.textContent = '';
-      restoreTarget = null; restoreError = ''; restoredNotice = false; logOffNotice = false;
+      restoreTarget = null; restoring = false; restoreError = ''; restoredNotice = false; logOffNotice = false;
       adjustLogScale(computed);
       step = 'results'; reached.add('results');
       render('gx-heading', true);

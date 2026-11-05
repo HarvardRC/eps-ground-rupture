@@ -3,27 +3,14 @@
 // stale review or restore applies afterwards (navigationVersion, §5.2,
 // §9.2).
 
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { gs } from '../support';
 import {
-  MOVEMENT_HEADING, SITE_HEADING, action, chooseMovement, chooseSite, explorerReady, gotoExplore, heading, stepButton,
+  MOVEMENT_HEADING, REGRESSION, SITE_HEADING, action, chooseMovement, chooseSite, explorerReady, gotoExplore, heading,
+  holdRegression, settleFrames, stepButton,
 } from '../explore-support';
 
 test.describe.configure({ timeout: 120_000 });
-
-const REGRESSION = '**/regression-*.json.gz';
-
-/** Hold every regression response until the returned release is called. */
-async function holdRegression(page: Page): Promise<() => void> {
-  let release!: () => void;
-  const held = new Promise<void>((resolve) => { release = resolve; });
-  await page.route(REGRESSION, async (route) => { await held; await route.continue(); });
-  return release;
-}
-
-/** Two animation frames and a task, so pending continuations run. */
-const settleFrames = (page: Page) =>
-  page.evaluate(() => new Promise<void>((done) => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(done, 0)))));
 
 test('navigating away during a held offset review keeps the reader where they went', async ({ page }) => {
   const ref = gs('GS-1');
