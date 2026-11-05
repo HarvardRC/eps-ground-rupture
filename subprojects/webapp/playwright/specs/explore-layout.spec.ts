@@ -19,6 +19,9 @@ for (const width of [320, 1024] as const) {
     await fits('introduction');
     await page.locator('#gx-sample-illustrative').click();
     await fits('site conditions with the sample status');
+    await page.locator('details.gx-sample-story summary').click();
+    await page.locator('details.gx-sample-story img').scrollIntoViewIfNeeded();
+    await fits('site conditions with the sample story open');
     // Start a new scenario returns to unanswered site conditions.
     await page.locator('.gx-restart button').click();
     await action(page, 'Continue to fault movement').click();

@@ -959,6 +959,131 @@ recorded here for a later decision.
 Not verified: touch, engines other than Chromium, and
 screen-reader behaviour when the status line is removed.
 
+### Sample stories, 2026-11-04 (G-15)
+
+G-15 ran under the owner's release and grant renewal of 2026-11-04
+([Commands](#commands)). After either sample fill, Site conditions
+shows a closed **About this sample** disclosure under the status
+line (guided DDD §10.2).
+
+- The disclosure is presentation state: its open state lives in
+  `storyOpen`, survives the re-renders of Site conditions, resets on
+  every fill, and leaves with the status line. Neither the draft nor
+  the session record holds it.
+- The texts live in `src/explore/stories.ts`. Both stories carry the
+  same sentence: `These are sample values anchored to that
+  earthquake's scale; they reproduce no event and model no
+  particular site.`
+- Each story has one image, with alt text, a caption, and a visible
+  credit naming author, licence, and title. Links use the page's
+  new-tab helper.
+- The images are project images, not application assets. They live
+  at `subprojects/mkdocs/docs/images/sample-chichi-kuangfu-track.jpg`
+  and `…/sample-kern-bealville-tracks.jpg`, each resized to 960 px
+  wide. They publish at `images/`, each with one line in
+  `publication-allowlist.txt`, and the page references them as
+  `../images/…`. Nothing enters `assets/explore/`.
+
+**Licence verification, per file, 2026-11-04.**
+
+| File | Source | Author | Licence | Verification |
+| --- | --- | --- | --- | --- |
+| `sample-chichi-kuangfu-track.jpg` | Wikimedia Commons, [Ruin of the destructed running tracks at the 921 Earthquake Museum of Taiwan 2024-09-21.jpg](https://commons.wikimedia.org/wiki/File:Ruin_of_the_destructed_running_tracks_at_the_921_Earthquake_Museum_of_Taiwan_2024-09-21.jpg), from [Flickr 54010394084](https://www.flickr.com/photos/presidentialoffice/54010394084/) | Liu Shu fu / Office of the President, Taiwan | CC BY 2.0 | Commons page licence and FlickreviewR pass (cc-by-2.0, reviewed 2024-09-22); Flickr page licence id 4, CC BY 2.0; SHA-1 of the downloaded original `3d3919eed2eb9ccfee6b7e38a5ae17b859b3f552` matched Commons |
+| `sample-kern-bealville-tracks.jpg` | USGS ScienceBase item [51dd6f2be4b0f72b4471a1d7](https://www.sciencebase.gov/catalog/item/51dd6f2be4b0f72b4471a1d7), file `kdh00001.jpg` | Donald H. Kupfer (photographer), 1952; U.S. Geological Survey (data owner) | U.S. public domain | The item's `rights` field: "This USGS product is considered to be in the U.S. public domain." Read through the item's JSON API because the HTML page refuses automated requests |
+
+The ScienceBase item also records that the photograph was published
+in California Division of Mines Bulletin 171 (1955). The
+public-domain statement is USGS's own, on its source page.
+
+A second CC BY 2.0 file was verified the same way and left out to
+keep the disclosure short: the Chelungpu fault trench exhibit, from
+the same photographer (Flickr 54010493650).
+
+Story sources. The illustrative story follows
+`subprojects/mkdocs/docs/figures.md`, Figure 1: the M 7.6 Chi-Chi
+earthquake, the bridge, and the Shih-Kang Dam's roughly 8 m of
+uplift. The 2.5 m playground lift comes from the
+[Tri-Mountain NSA page](https://www.trimt-nsa.gov.tw/en/attraction/857/),
+checked 2026-11-04.
+
+No scholarly companion was verified. Angelier et al. (2003,
+*Journal of Structural Geology* 25(3): 351–370) studies the
+Kuangfu stadium scarp, but its figure could not be read. Lee et al.
+report 2.2 ± 0.1 m average and 2.5 m maximum at the nearby Wufeng
+trench, which is a different site. The Tri-Mountain page gives the
+earthquake as "magnitude 7.3"; the story uses M 7.6, as the figures
+page frames it.
+
+The Kern story uses PDD D-42's anchors: the dip near 75° from Stein
+& Thatcher (1981) and Bawden (2001), and SCEDC's "rise of about 1.3
+meters". M 7.36 is the site's constant. The Buwalda & St. Amand
+sentence follows `docs/datasets.md`, under which the lead author
+digitised part of the 1955 report.
+
+Tests and specs:
+
+- New state tests check:
+  - one story per sample;
+  - the shared sentence in both stories;
+  - each story's §10.2 anchors;
+  - that the figures citation's anchor still exists;
+  - that each image is a committed, allowlisted JPEG whose
+    `width` and `height` match the file, with alt text, a caption,
+    and a credit naming a CC BY licence or public domain.
+- The §9.5 sample spec covers, for both samples:
+  - the closed disclosure and its summary;
+  - the sample's own text and not the other's;
+  - the image loading from `../images/`;
+  - the credit;
+  - four new-tab links, each with its screen-reader hint;
+  - the open state kept across a re-render, gone after leaving
+    Site, and closed again on a new fill.
+- The layout spec checks 320 px and 1,024 px with the disclosure
+  open.
+
+At this verification, on `dev-v.0.4.x` after G-17:
+
+- The pinned Node suite passed all 429 tests; typechecking and the
+  bundles passed. Strict publication and preview builds passed with
+  `explore-4a5711e9c99a.js` and `explore-daf816cb719a.css`, and both
+  images published under `images/` through the allowlist. The
+  `/scenario/` bundles `app-26490347afd0.js` and
+  `app-08bebc049c15.css` were unchanged. All 31 hook tests passed.
+- Relative links resolved, PDD agreement passed, and traceability
+  linted 491 rows with no gaps.
+- The guided specs passed 74 of 74 in `desktop` and `mobile`. The
+  sample and layout specs passed 66 of 66 over three repeats.
+- The full lane, run on the first text revision, passed 224 and
+  skipped 5, with no failure. Only the story strings, the alt text,
+  and the tests changed after that run.
+
+The independent review passed the code. Its findings on the texts
+were applied before the owner's review. It asked for one shared
+anchored-not-modeled sentence and for the fault angles to stay out
+of the Chi-Chi claim. It asked to say "part of" the 1955 survey,
+digitised by the lead author, and to stop attaching "geodetic" to
+the 1.3 m. It asked for alt text that matches the photograph, for
+the CC work title in the credit, and for pinned anchors and
+non-vacuous link checks in the tests.
+
+**Owner approval, 2026-11-04 (CR-10, relayed through the planning
+session).** The owner approved the revised story texts exactly as
+they stand in `src/explore/stories.ts`, with both images and one
+image per story. The trench photograph stays out by the owner's
+choice after viewing it. On the open points:
+
+- the Kern wording "the scale of that elevation change" stands;
+- the field-overlay sentence is confirmed as written;
+- the Tri-Mountain citation alone supports the 2.5 m lift, with
+  nothing further to verify now, as §10.2 allows;
+- a README line for third-party photographs is approved, but stays
+  outside G-15 for the owner's own commit.
+
+Not verified: screen-reader reading of the disclosure, touch, and
+engines other than Chromium. The README licensing table does not
+yet mention third-party photographs; that is outside G-15 and left
+to the owner.
+
 ## Separate CI investigation
 
 The reported job `126383105016` belongs to historical run

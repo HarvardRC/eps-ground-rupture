@@ -20,6 +20,7 @@ import { statsRows, unclassifiedLine } from '../views/stats-table';
 import { computeResult } from './compute';
 import { DEFINITIONS, type DefinitionKey } from './glossary';
 import { classifySession, clearSession, loadSession, saveSession, type DisplayChoices, type SessionRecord } from './session';
+import { STORIES, type StoryLink } from './stories';
 import { cloneDraft, draftChanged, freshDraft, offsetShortcut, isSampleId, sampleDraft, sedimentGroup, stepDecimal, validateDraft, type Draft, type Issue, type SampleId, type Step } from './state';
 
 export interface ExplorerOptions {
@@ -84,6 +85,8 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   // Each holds the sample's identity so the question, the fill, and the status line name the one chosen.
   let sampleAsk: SampleId | null = null;
   let sampleArrived: SampleId | null = null;
+  // The story disclosure's open state across re-renders of Site conditions (§10.2); every fill starts closed.
+  let storyOpen = false;
   // Same-tab continuity (guided DDD §9.2). `continuity` turns off for the
   // mount when storage is unavailable or a save fails; `blocked` holds an
   // unrestorable record until the explicit fresh start; `restoreTarget` is
@@ -230,8 +233,16 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   /** Fill the whole draft with the named sample and open Site conditions; the confirmation, results, and walkthrough are untouched. */
   function useSample(id: SampleId): void {
     const sample = sampleDraft(manifest, id);
-    draft = sample; issues = []; sampleAsk = null; sampleArrived = id;
+    draft = sample; issues = []; sampleAsk = null; sampleArrived = id; storyOpen = false;
     setStep('site');
+  }
+
+  /** The closed "About this sample" disclosure under the sample status line (guided DDD §10.2). */
+  function storyView(id: SampleId): string {
+    const story = STORIES[id];
+    const sourceLink = (item: StoryLink): string => link(item.href, item.label);
+    const figures = story.images.map(image => `<figure class="gx-story-figure"><img src="${escape(image.src)}" width="${image.width}" height="${image.height}" alt="${escape(image.alt)}" loading="lazy" decoding="async"><figcaption>${escape(image.caption)} <span class="gx-credit">${escape(image.credit.text)}${image.credit.license ? ` ${sourceLink(image.credit.license)}.` : ''} ${sourceLink(image.credit.source)}</span></figcaption></figure>`).join('');
+    return `<details class="gx-sample-story" id="gx-sample-story"${storyOpen ? ' open' : ''}><summary>About this sample</summary>${story.paragraphs.map(text => `<p>${escape(text)}</p>`).join('')}${figures}<p class="gx-story-sources">Sources: ${story.sources.map(sourceLink).join('; ')}.</p></details>`;
   }
 
   function siteGroup(field: 'faultDip' | 'depth' | 'density' | 'sediment', title: string, hint: string, anchor: string): string {
@@ -249,7 +260,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   }
 
   function siteView(): string {
-    return `${heading('Describe the site conditions', 'Choose one or more values for each condition.')}${sampleArrived ? `<p class="gx-sample-status" role="status">Filled with the ${escape(sampleName(sampleArrived))}: sample values, not recommended site values. Change anything.</p>` : ''}<div class="gx-site-grid">${siteGroup('faultDip', 'Fault angle', 'How steeply the fault is tilted, measured from horizontal.', 'fault-dip')}${siteGroup('depth', 'Sediment depth', 'The thickness of the sediment layer above the fault.', 'sediment-depth')}${siteGroup('density', 'Sediment density', 'How tightly the sediment is packed.', 'sediment-strength')}${siteGroup('sediment', 'Sediment strength and structure', 'Choose uniform material or a layered profile. You can include more than one possibility.', 'set')}</div><footer class="gx-footer">${button('intro', 'Back')}${reached.has('review') ? button('review', 'Return to review', true) : button('site-next', 'Continue to fault movement', true)}</footer>`;
+    return `${heading('Describe the site conditions', 'Choose one or more values for each condition.')}${sampleArrived ? `<p class="gx-sample-status" role="status">Filled with the ${escape(sampleName(sampleArrived))}: sample values, not recommended site values. Change anything.</p>${storyView(sampleArrived)}` : ''}<div class="gx-site-grid">${siteGroup('faultDip', 'Fault angle', 'How steeply the fault is tilted, measured from horizontal.', 'fault-dip')}${siteGroup('depth', 'Sediment depth', 'The thickness of the sediment layer above the fault.', 'sediment-depth')}${siteGroup('density', 'Sediment density', 'How tightly the sediment is packed.', 'sediment-strength')}${siteGroup('sediment', 'Sediment strength and structure', 'Choose uniform material or a layered profile. You can include more than one possibility.', 'set')}</div><footer class="gx-footer">${button('intro', 'Back')}${reached.has('review') ? button('review', 'Return to review', true) : button('site-next', 'Continue to fault movement', true)}</footer>`;
   }
 
   function numeric(field: 'slipMin' | 'slipMax' | 'offsetMax', label: string, required: boolean): string {
@@ -861,6 +872,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     const details = event.target;
     if (!(details instanceof HTMLDetailsElement) || !shell.contains(details)) return;
     if (details.id === 'gx-stage-example') { exampleOpen = details.open; persist(); }
+    if (details.id === 'gx-sample-story') storyOpen = details.open;
     if (details.id === `gre-${display.measurement}-data`) { display = { ...display, chartDataOpen: { ...display.chartDataOpen, [display.measurement]: details.open } }; persist(); }
   }, { capture: true, signal });
   signal.addEventListener('abort', () => { closeHelp(); chartObserver?.disconnect(); downloadUrls.forEach(url => URL.revokeObjectURL(url)); downloadUrls.clear(); }, { once: true });
