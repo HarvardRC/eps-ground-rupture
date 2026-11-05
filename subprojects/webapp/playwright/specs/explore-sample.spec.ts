@@ -661,17 +661,18 @@ for (const sample of SAMPLES) {
 
 // Per-field annotations (guided DDD §§10.4, 10.5): beside each prefilled
 // control while it still holds the sample's value, clearing (and
-// returning) with that value alone, never announced on their own.
+// returning) with that value alone, never announced on their own. They
+// name the events as the stories do (owner ruling on choice f, 2026-11-05).
 const ANNOTATION = {
   illustrative: {
-    faultDip: 'A sample choice; the background earthquake does not set these angles.',
-    offsetMax: 'Of the scale of the surface offsets in the sample’s background: meters of uplift, including about 2.5 m at a school playground.',
+    faultDip: 'A sample choice; the 1999 Chi-Chi earthquake does not set these angles.',
+    offsetMax: 'Of the scale of the surface offsets in the sample’s background: meters of uplift, including about 2.5 m at a school playground in the 1999 Chi-Chi earthquake.',
     slip: 'An example band within the simulations’ coverage. It is not converted from the surface offset.',
     sources: { faultDip: 0, offsetMax: 2, slip: 0 },
   },
   kern: {
-    faultDip: 'Geodetic studies put the dip of the fault in the sample’s background near 75°; the sample uses the two steepest modeled angles.',
-    offsetMax: 'The scale of the largest surface elevation change in the sample’s background, about 1.3 m.',
+    faultDip: 'Geodetic studies put the White Wolf fault’s dip near 75°; the sample uses the two steepest modeled angles.',
+    offsetMax: 'The scale of the largest surface elevation change in the 1952 Kern County earthquake, about 1.3 m.',
     slip: 'Bawden (2001)’s two patch estimates, 1.6 m and 1.9 m, used as an example band, not an uncertainty range.',
     sources: { faultDip: 2, offsetMax: 1, slip: 1 },
   },
@@ -712,6 +713,10 @@ for (const sample of SAMPLES) {
     await setChecked(page, '#gx-depth-0', !(await page.locator('#gx-depth-0').isChecked()));
     await expect(note(page, 'depth')).toHaveCount(0);
     await expect(note(page, 'density')).toHaveText(SAMPLE_CHOICE);
+    // Select all is a value change too.
+    await setChecked(page, '#gx-density-all', true);
+    await expect(note(page, 'density')).toHaveCount(0);
+    await expect(note(page, 'sediment')).toHaveText(SAMPLE_CHOICE);
 
     // Fault movement: the offset annotation below the entry, updated in place while typing.
     await action(page, 'Continue to fault movement').click();
@@ -719,7 +724,8 @@ for (const sample of SAMPLES) {
     await page.locator('#gx-offset-feedback table').waitFor();
     await expect(note(page, 'offsetMax')).toContainText(straight(expected.offsetMax));
     await expect(note(page, 'offsetMax').locator('a')).toHaveCount(expected.sources.offsetMax);
-    await expect(note(page, 'offsetMax')).not.toContainText(sample.id === 'kern' ? 'Kern' : 'Taiwan');
+    // The stories' full source labels (owner ruling on choice f, 2026-11-05).
+    await expect(note(page, 'offsetMax').locator('a').last()).toContainText(sample.id === 'kern' ? 'SCEDC, 1952 Kern County earthquake' : 'Tri-Mountain National Scenic Area, 921 Earthquake Museum of Taiwan');
     const input = page.locator('#gx-offsetMax');
     await input.evaluate((node) => node.setAttribute('data-probe', 'kept'));
     await typeEntry(page, 'offsetMax', '2');
@@ -728,9 +734,17 @@ for (const sample of SAMPLES) {
     await expect(input).toBeFocused();
     await typeEntry(page, 'offsetMax', sample.offsetMax);
     await expect(note(page, 'offsetMax')).toContainText(straight(expected.offsetMax));
-    // The + button is a value change as well.
+    // The steppers are value changes as well: + clears it, − back to the sample's value restores it.
     await page.getByRole('button', { name: 'Increase maximum by 0.1 m' }).click();
     await expect(note(page, 'offsetMax')).toHaveCount(0);
+    await page.getByRole('button', { name: 'Decrease maximum by 0.1 m' }).click();
+    await expect(input).toHaveValue(sample.offsetMax);
+    await expect(note(page, 'offsetMax')).toContainText(straight(expected.offsetMax));
+    // So is the coverage shortcut.
+    await page.locator('[data-action="offset-shortcut"]').click();
+    await expect(input).not.toHaveValue(sample.offsetMax);
+    await expect(note(page, 'offsetMax')).toHaveCount(0);
+    await typeEntry(page, 'offsetMax', sample.offsetMax);
 
     // Slip mode: the slip range's annotation, cleared by either entry.
     await setChecked(page, '#gx-mode-slip', true);
@@ -741,11 +755,40 @@ for (const sample of SAMPLES) {
     await typeEntry(page, 'slipMin', sample.slipMin);
     await expect(note(page, 'slip')).toContainText(straight(expected.slip));
 
-    // They survive a reload with the notice, and leave with it.
+    // They survive a reload with the notice.
     await page.reload();
     await explorerReady(page);
     await expect(note(page, 'slip')).toContainText(straight(expected.slip));
+
+    // Replacing the sample with the other one brings the other's annotations.
+    const other = SAMPLES.find((s) => s.id !== sample.id)!;
+    await stepButton(page, 'intro').click();
+    await pickSample(page, other.id);
+    await action(page, 'Use the sample').click();
+    await expect(note(page, 'faultDip')).toContainText(straight(ANNOTATION[other.id].faultDip));
+    await expect(page.locator('.gx-annotation')).toHaveCount(4);
+
+    // And they leave with the notice.
     await page.locator('.gx-restart button').click();
     await expect(page.locator('.gx-annotation')).toHaveCount(0);
+  });
+
+  test(`${sample.id}: focus on the trigger or an annotation's source survives the conversion data's re-render`, async ({ page }) => {
+    await gotoExplore(page);
+    await pickSample(page, sample.id);
+    for (const target of ['#gx-sample-story-trigger', '#gx-annotation-offsetMax-source-0']) {
+      await stepButton(page, 'site').click();
+      const release = await holdRegression(page);
+      await page.reload();
+      await explorerReady(page);
+      await action(page, 'Continue to fault movement').click();
+      await expect(page.locator('#gx-offset-feedback table')).toHaveCount(0);
+      await page.locator(target).focus();
+      release();
+      await page.locator('#gx-offset-feedback table').waitFor();
+      await settleFrames(page);
+      await expect(page.locator(target)).toBeFocused();
+      await page.unrouteAll();
+    }
   });
 }

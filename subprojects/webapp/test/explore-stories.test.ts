@@ -108,16 +108,23 @@ describe('value annotations (guided DDD §§10.4, 10.5)', () => {
     }
   });
 
-  test('annotations link only their own story\'s sources and keep the event names to the stories', () => {
+  test('annotations link only their own story\'s sources, under the stories\' labels', () => {
     for (const id of SAMPLE_IDS) {
       for (const field of FIELDS) {
-        const note = ANNOTATIONS[id][field];
-        for (const source of note.sources) assert.ok(STORIES[id].sources.some(item => item.href === source.href), `${id} ${field}: ${source.label}`);
-        const shown = [note.text, ...note.sources.map(source => source.label)].join(' ');
-        for (const name of ['Chi-Chi', 'Chelungpu', 'Kern', 'White Wolf', 'Taiwan', 'California', '1999', '1952', 'Museum']) {
-          assert.equal(shown.includes(name), false, `${id} ${field} names ${name}`);
-        }
+        for (const source of ANNOTATIONS[id][field].sources) assert.ok(STORIES[id].sources.includes(source), `${id} ${field}: ${source.label}`);
       }
+    }
+  });
+
+  test('annotations name the events and the fault as the stories do (owner ruling, 2026-11-05)', () => {
+    assert.match(ANNOTATIONS.illustrative.offsetMax.text, /in the 1999 Chi-Chi earthquake\.$/);
+    assert.match(ANNOTATIONS.illustrative.faultDip.text, /1999 Chi-Chi earthquake/);
+    assert.match(ANNOTATIONS.kern.faultDip.text, /^Geodetic studies put the White Wolf fault's dip near 75°/);
+    assert.match(ANNOTATIONS.kern.offsetMax.text, /1952 Kern County earthquake/);
+    // Every named event is the sample's own.
+    for (const field of FIELDS) {
+      assert.equal(/Kern|White Wolf|1952/.test(ANNOTATIONS.illustrative[field].text), false, field);
+      assert.equal(/Chi-Chi|Chelungpu|1999/.test(ANNOTATIONS.kern[field].text), false, field);
     }
   });
 

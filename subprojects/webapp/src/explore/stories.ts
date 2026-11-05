@@ -96,46 +96,44 @@ export interface Annotation {
   readonly sources: readonly StoryLink[];
 }
 
-/**
- * A story source for an annotation; `short` relabels a source whose title
- * names the event, since the names stay in the previews and stories (§10.5).
- */
-const link = (id: SampleId, label: string, short?: string): StoryLink => {
+/** A source of the sample's own story, by its label. */
+const link = (id: SampleId, label: string): StoryLink => {
   const found = STORIES[id].sources.find(source => source.label === label);
   if (!found) throw new Error(`Annotation: no ${label} source in the ${id} story.`);
-  return short ? { label: short, href: found.href } : found;
+  return found;
 };
 
 const SAMPLE_CHOICE: Annotation = { text: 'A sample choice, not a description of any real site.', sources: [] };
 
 /**
- * One or two sentences beside each prefilled control (§10.4). The event
- * names stay in the previews and stories (§10.5); an annotation speaks of
- * the sample's background and links the sources that apply.
+ * One or two sentences beside each prefilled control (§10.4), linking the
+ * sources that apply. They name the events and the fault as the stories
+ * do; only the card titles stay free of them (owner ruling on §10.5,
+ * 2026-11-05).
  */
 export const ANNOTATIONS: Record<SampleId, Record<AnnotatedField, Annotation>> = {
   illustrative: {
-    faultDip: { text: 'A sample choice; the background earthquake does not set these angles.', sources: [] },
+    faultDip: { text: 'A sample choice; the 1999 Chi-Chi earthquake does not set these angles.', sources: [] },
     depth: SAMPLE_CHOICE,
     density: SAMPLE_CHOICE,
     sediment: SAMPLE_CHOICE,
     offsetMax: {
-      text: 'Of the scale of the surface offsets in the sample\'s background: meters of uplift, including about 2.5 m at a school playground.',
-      sources: [link('illustrative', 'Chiama et al. (2025), Figure 1'), link('illustrative', 'Tri-Mountain National Scenic Area, 921 Earthquake Museum of Taiwan', 'Tri-Mountain National Scenic Area')],
+      text: 'Of the scale of the surface offsets in the sample\'s background: meters of uplift, including about 2.5 m at a school playground in the 1999 Chi-Chi earthquake.',
+      sources: [link('illustrative', 'Chiama et al. (2025), Figure 1'), link('illustrative', 'Tri-Mountain National Scenic Area, 921 Earthquake Museum of Taiwan')],
     },
     slip: { text: 'An example band within the simulations\' coverage. It is not converted from the surface offset.', sources: [] },
   },
   kern: {
     faultDip: {
-      text: 'Geodetic studies put the dip of the fault in the sample\'s background near 75°; the sample uses the two steepest modeled angles.',
+      text: 'Geodetic studies put the White Wolf fault\'s dip near 75°; the sample uses the two steepest modeled angles.',
       sources: [link('kern', 'Stein and Thatcher (1981)'), link('kern', 'Bawden (2001)')],
     },
     depth: SAMPLE_CHOICE,
     density: SAMPLE_CHOICE,
     sediment: SAMPLE_CHOICE,
     offsetMax: {
-      text: 'The scale of the largest surface elevation change in the sample\'s background, about 1.3 m.',
-      sources: [link('kern', 'SCEDC, 1952 Kern County earthquake', 'SCEDC')],
+      text: 'The scale of the largest surface elevation change in the 1952 Kern County earthquake, about 1.3 m.',
+      sources: [link('kern', 'SCEDC, 1952 Kern County earthquake')],
     },
     slip: {
       text: 'Bawden (2001)\'s two patch estimates, 1.6 m and 1.9 m, used as an example band, not an uncertainty range.',
