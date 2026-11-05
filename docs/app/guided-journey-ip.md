@@ -112,18 +112,32 @@ independent review passed, no open owner question, branch current
 with `dev-v.0.4.x` — and everything outside this grant keeps the
 main plan's rules.
 
+**Renewal, 2026-11-04.** The owner renewed the grant on the same
+terms for the released next-phase tasks G-14–G-17
+([Next phase](#next-phase-owner-instruction-2026-11-04)).
+
 ## Next phase (owner instruction, 2026-11-04)
 
 The owner queued every deliberate deferral as the phase after this
 increment ([PDD D-41](pdd.md#1-decision-register)). Team
 availability schedules it; it may run before the team
-demonstration. Advertising still follows D-39. Nothing below joins
-the current kickoff: each item first needs its guided DDD section
-and, where named, a product decision, accepted the ordinary way.
+demonstration. Advertising still follows D-39. Nothing below
+joined the second increment's kickoff: each item first needs its
+guided DDD section and, where named, a product decision, accepted
+the ordinary way.
 G-14 and G-15 arrive with guided DDD §10 and PDD D-42 drafted
 2026-11-04; the commit that carries them is their acceptance.
 G-16 and G-17 record the external review's defects of 2026-11-04
 against §§9.2–9.3 behavior; the owner schedules any earlier run.
+
+**Owner release, 2026-11-04.** The owner released G-14–G-17 for
+execution ahead of the rest of the phase and handed the run to the
+implementing session. This instruction is the ask to create task
+branches, push them, and open pull requests against `dev-v.0.4.x`,
+and the [Commands](#commands) renewal covers their merges. Story
+texts under CR-10 (G-15) go to the owner for approval before that
+merge. The queue's other items stay queued; advertising still
+follows D-39.
 
 | Task | Prerequisite | Exact work and authority | Completion |
 | --- | --- | --- | --- |

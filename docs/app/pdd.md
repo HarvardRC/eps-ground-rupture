@@ -588,10 +588,9 @@ steep White Wolf dip near 75°
 and the magnitude is the site's own constant. Each sample carries
 a short story behind a closed disclosure, with up to two images
 where a suitable file verifies — public domain or
-CC BY / CC BY-SA only, license verified per file at its source,
-credited visibly, and published as a project image under the
-legacy DDD §6.1 arm (b) allowlist, never inside the application
-subtree; the
+CC BY / CC BY-SA only, license verified per file at its source
+and credited visibly, published as guided DDD §10.2 specifies;
+the
 [USGS ScienceBase Bealville photograph](https://www.sciencebase.gov/catalog/item/51dd6f2be4b0f72b4471a1d7)
 is the Kern candidate. Story texts follow CR-10. Guided DDD §10
 holds the design; guided tasks G-14 and G-15 carry it in the

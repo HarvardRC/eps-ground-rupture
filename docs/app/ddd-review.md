@@ -1772,12 +1772,13 @@ Gradle staging sync deletes extras and the hook's subtree
 exactness rejects them — to committed project images under the
 arm (b) allowlist (guided DDD §10.2); the images are explicitly
 optional in PDD D-42 and §2.3, reconciling the DDD's wording; the
-2.5 m claim now cites the museum's official page, which states the
-playground lift, instead of the figures page, which frames the
-bridge and the dam (the review's proposed scholarly companion
-stays to verify in G-15); and the joint-inversion citation is
-Bawden 2001, per its Zenodo record. Two source-confirmed defects
-join the next-phase queue: G-16 (P2 — a pending restore's busy
+2.5 m claim now cites the government scenic-area page about the
+museum, which states the playground lift, instead of the figures
+page, which frames the bridge and the dam (the review's proposed
+scholarly companion stays to verify in G-15); and the
+joint-inversion citation is Bawden 2001, per its Zenodo record.
+Two source-confirmed defects join the next-phase queue: G-16 (P2
+— a pending restore's busy
 state disables Show results for drafts that need no conversion
 data until the fetch settles) and G-17 (P3 — a successful download
 leaves the dismissed log-scale notice visible; reproduced live).
@@ -1788,6 +1789,17 @@ screen and exported statistics (2,880 records, 2,770 valid
 widths); and the proposed Kern inputs — 60° and 70° at 1.3 m —
 both showed Within range. G-14 gains the chooser-identity spec
 clause.
+
+## Owner release of the sample and review tasks (2026-11-04)
+
+The owner released guided tasks G-14–G-17 ahead of the next
+phase's remaining queue, renewed the autonomous-execution grant on
+the G-08–G-12 terms for them, and handed the run to the
+implementing session, with questions routed through the planning
+session. CR-10 story-text approval (G-15) precedes that merge. The
+release and renewal are recorded in the guided plan's next-phase
+and Commands sections, with the main plan's contract exceptions
+extended the same day.
 
 ## References
 

@@ -680,8 +680,8 @@ presentation state, never part of Draft:
   it (`subprojects/mkdocs/docs/figures.md`): meters of offset on
   the Chelungpu fault at the collapsed bridge and the Shih-Kang
   Dam. The preserved school grounds lifted about 2.5 m carry their
-  own citation — the museum's official page states the playground
-  lift
+  own citation — the scenic-area administration's page about the
+  museum states the playground lift
   ([Tri-Mountain NSA](https://www.trimt-nsa.gov.tw/en/attraction/857/)),
   with any scholarly companion verified during G-15. The story
   states plainly that the values are illustrative, of that scale,
