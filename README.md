@@ -162,7 +162,7 @@ Then:
 
 ## Licensing
 
-Four kinds of material are published here, under four different terms. Reuse the
+Five kinds of material are published here, each under its own terms. Reuse the
 one that matches what you are taking.
 
 | Material | Terms |
@@ -171,6 +171,7 @@ one that matches what you are taking.
 | **Prose** — the companion site's written content and this repository's documentation | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) — see `LICENSE-docs` |
 | **Derived data exports** — the files of each data vintage, which the Ground Rupture Explorer loads, published as assets of this repository's `data-vN` prereleases | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), with attribution to each source — assumed until the research group confirms it; see [`data/REDISTRIBUTION.md`](data/REDISTRIBUTION.md) |
 | **Figures from the paper** — the pre-typeset originals shown on the companion site | © The Author(s) 2025. Shown under the publisher's author-sharing terms: **non-commercial use, no derivatives**, with the full citation alongside each figure. |
+| **Third-party photographs** — historical and museum photographs shown with the guided explorer's sample stories | Each file under its own licence, named in the visible credit beside it — U.S. public domain or [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) — with author and source linked there. Not covered by the prose licence above. |
 
 Two things those terms do **not** cover:
 
