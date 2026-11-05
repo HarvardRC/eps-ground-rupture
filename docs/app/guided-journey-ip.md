@@ -1305,6 +1305,148 @@ Not verified: screen-reader reading of the dialog, the radio group,
 and the notice; touch operation of the cards; and engines other
 than Chromium.
 
+### Sample background and annotations, 2026-11-05 (G-19)
+
+G-19 ran under the renewal extension of 2026-11-04, after G-18, to
+guided DDD §§10.4 and 10.5 (PDD D-43, D-44).
+
+**The trigger.** The G-15 **About this sample** disclosure becomes
+the closed **Why these sample values?** trigger, with the helper
+"Background, photos and sources" in its summary.
+
+- It stands directly under the prefill notice on both Site
+  conditions and Fault movement and follows the notice's lifetime:
+  it stays through edits and the Modified form, and leaves only on
+  replacement or Start a new scenario. Since G-18's decision R, it
+  also survives a reload.
+- Its open state carries between the two steps, closes on every new
+  fill, and restores closed after a reload (choice h).
+- Inside it is the §10.2 story material, unchanged except for the
+  shared sentence below.
+
+**The card preview.** Under the selected card's values and slip
+note, the preview carries the same story material: the paragraphs,
+the photograph with caption and credit, and the sources, under the
+heading "Why these sample values?". Its links are in the dialog's
+Tab order between the cards and **Use this sample**. Licensing is
+unchanged: the same two images and credits, so the G-15 licence
+evidence stays valid.
+
+**The shared sentence (CR-10).** In both stories, "These are sample
+values anchored to that earthquake's scale; they reproduce no event
+and model no particular site." becomes "These examples help you try
+the tool. They do not reconstruct either earthquake." The rest of
+each paragraph stands.
+
+**Annotations.** While a sample is active, each prefilled control
+carries a short annotation at the end of its group or below its
+entry, so it never moves the control being used.
+
+- An annotation shows only while its own control holds the sample's
+  value (`fieldHoldsSample`): sets compare without order, entries as
+  typed text, like `holdsSample`. Any change clears it, including
+  "3" → "3.0" or a third fault angle, and the sample's value again
+  brings it back (choice g). Checkboxes, Select all, the steppers,
+  and the shortcuts re-render; typing updates the movement
+  annotation in place, redrawing only when it comes or goes.
+- Movement annotations follow the active mode: offset in offset
+  mode, slip in slip mode (choice i).
+- They are plain text in reading order, outside every live region
+  and every `aria-describedby`, so they are never announced on
+  their own.
+- The trigger's summary and the annotations' source links carry
+  ids, so focus on them survives the re-render when the conversion
+  data arrives.
+
+Final annotation strings:
+
+| Control | Lower fault angles | Steeper fault angles |
+| --- | --- | --- |
+| Fault angle | "These angles are sample choices, not taken from the 1999 Chi-Chi earthquake." | "Geodetic studies put the White Wolf fault's dip near 75°; the sample uses the two steepest modeled angles." — Stein and Thatcher (1981); Bawden (2001) |
+| Sediment depth, density, strength and structure | "A sample choice, not a description of any real site." | the same |
+| Surface-offset maximum | "Of the scale of the surface offsets in the sample's background: meters of uplift, including about 2.5 m at a school playground in the 1999 Chi-Chi earthquake." — Chiama et al. (2025), Figure 1; Tri-Mountain National Scenic Area, 921 Earthquake Museum of Taiwan | "The scale of the largest surface elevation change in the 1952 Kern County earthquake, about 1.3 m." — SCEDC, 1952 Kern County earthquake |
+| Slip range | "An example band within the simulations' coverage. It is not converted from the surface offset." | "Bawden (2001)'s two patch estimates, 1.6 m and 1.9 m, used as an example band, not an uncertainty range." — Bawden (2001) |
+
+In the Lower offset annotation, the Figure 1 link supports the
+meters of uplift and the Tri-Mountain page supports the 2.5 m, as
+recorded in G-15; the links follow the sentence's order.
+
+**Approvals, 2026-11-05 (relayed through the planning session).**
+
+- The owner approved the trigger and helper, the card preview's
+  story material and heading, and the revised shared sentence
+  (CR-10) exactly as sent, and confirmed choices g, h, and i.
+- The owner approved the annotations with choice (f) overturned:
+  §10.5's "previews and stories only" governs the card titles, not
+  the annotations, which name the events and the White Wolf fault
+  as the stories do, with the stories' full link labels. The owner
+  covered these insertions without a further round; the planning
+  session is amending the §10.5 sentence to match.
+- The illustrative fault-angle sentence was then revised, approved
+  under the owner's overnight delegation of 2026-11-05, relayed by
+  the planning session. The approved form, "A sample choice; the
+  1999 Chi-Chi earthquake does not set these angles.", could be
+  read as a claim about the Chelungpu fault's own dip; the
+  independent review raised this, and the sentence above replaces
+  it, matching the story's "sample choices".
+- The info-icon overlap on the trigger's summary is the shared
+  disclosure pattern that G-21 (§11.3) covers; G-19 leaves it.
+
+**Review.** The independent review found no blocking defect. Its
+findings, applied:
+
+- focus could fall to the page body when the conversion data
+  re-rendered Fault movement with focus on the trigger or a source
+  link; both now carry ids, and a spec checks it;
+- the fault-angle wording above;
+- specs for Select all, the steppers, the coverage shortcut, and
+  replacement by the other sample;
+- stale comments, and the in-place refresh comparing escaped HTML.
+
+Tests and specs:
+
+- Story tests: the shared sentence appears once in each story and
+  the old one is gone; every sample annotates every control in one
+  or two sentences; annotations link only their own story's sources
+  under the stories' labels; each names its own sample's event and
+  never the other's; the Kern anchors stand.
+- State tests: `fieldHoldsSample` holds for the fill, a mode switch,
+  and set order, and fails for each control's own edits only.
+- The §9.5 sample spec, for both samples:
+  - the preview's story material, image, credit, and sources, and
+    not the other sample's;
+  - the Tab order through the preview's links;
+  - the trigger under the notice on both steps, its summary and
+    helper, its open state across steps and through Modified, and
+    closed on a new fill;
+  - the annotations on both steps: their texts and links, outside
+    live regions and descriptions, clearing with their own value
+    and returning, in place while typing, through Select all, the
+    steppers, the shortcut, the mode switch, a reload, replacement,
+    and Start a new scenario;
+  - focus kept across the conversion re-render.
+
+At this verification, on `task/g-19-sample-background` rebased
+onto `5385b93`:
+
+- The pinned Node suite passed all 441 tests; typechecking and the
+  bundles passed. Strict publication and preview builds passed with
+  `explore-c74f3a5830d5.js` and `explore-8c72500af305.css`. The
+  `/scenario/` bundles `app-26490347afd0.js` and
+  `app-08bebc049c15.css` were unchanged. All 31 hook tests passed.
+- Relative links resolved (5,511 in 61 files), PDD agreement passed,
+  and traceability reported no gap rows.
+- On the final tree, the full lane passed 256 and skipped 5, with no
+  failure. One commit earlier, which differed only in the
+  illustrative fault-angle string, the lane passed 255 with one
+  failure, the pre-existing `a11y.spec.ts` `.md-top` contrast check
+  recorded under G-18 and now assigned to G-21. In that same run,
+  the sample and layout specs passed 156 of 156 over three repeats
+  in `desktop` and `mobile`.
+
+Not verified: screen-reader reading of the trigger, the preview's
+story, and the annotations; touch; and engines other than Chromium.
+
 ## Separate CI investigation
 
 The reported job `126383105016` belongs to historical run
