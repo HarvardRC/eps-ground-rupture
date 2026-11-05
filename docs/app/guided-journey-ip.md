@@ -116,6 +116,10 @@ main plan's rules.
 terms for the released next-phase tasks G-14–G-17
 ([Next phase](#next-phase-owner-instruction-2026-11-04)).
 
+**Renewal extension, 2026-11-04.** The owner extended the same
+terms to the rework tasks G-18 and G-19
+([Next phase](#next-phase-owner-instruction-2026-11-04)).
+
 ## Next phase (owner instruction, 2026-11-04)
 
 The owner queued every deliberate deferral as the phase after this
@@ -139,6 +143,13 @@ texts under CR-10 (G-15) go to the owner for approval before that
 merge. The queue's other items stay queued; advertising still
 follows D-39.
 
+**Owner release, 2026-11-04 (rework).** Reviewing the built
+samples, the owner decided D-43 and released G-18 and G-19 on the
+first release's terms; the [Commands](#commands) renewal extension
+covers their merges. Exact chooser, notice, trigger, and
+annotation strings go to the owner for approval before the
+affected merges.
+
 | Task | Prerequisite | Exact work and authority | Completion |
 | --- | --- | --- | --- |
 | G-13 | Next phase; a guided DDD report section, to be drafted; PDD D-40 (P2) and D-14 | Implement the result report: one action on confirmed results producing a single self-contained HTML or PDF document pairing the §6.1 provenance and scenario summary with the rendered charts and D-14 caption strips, the §4.2 statistics table, and every active caveat, per [PDD §6.5](pdd.md#65-result-report-d-40-p2). | Fixed by its design section when drafted; the §6.1 content rules and D-14 caption requirements apply unchanged. |
@@ -146,6 +157,8 @@ follows D-39.
 | G-15 | Next phase; G-14; PDD D-42; guided DDD §10.2 | Add the **About this sample** disclosures: the illustrative story anchored to Chi-Chi scale as the figures page frames it; the Kern story at the site's M 7.36 with the Buwalda & St. Amand digitisation and the future field-overlay tie-in; up to two images each, published as project images per guided DDD §10.2, with alt text and visible credits; per-file license verification (public domain or CC BY / CC BY-SA) with source URL, author, license, and date recorded in the evidence. | Disclosures render per guided DDD §10.2 after either fill; CR-10 approval of the story texts is recorded; the licensing evidence is complete; a spec covers the disclosure. |
 | G-16 | Next phase; guided DDD §9.2 | Release the restoration's busy state as soon as navigation or a superseding action invalidates a pending restore, instead of only after its conversion fetch settles — today a stalled restore disables Show results even for a slip-mode draft that needs no conversion data (`src/explore/app.ts`, `restoreResults`); the late continuation still leaves every shared flag alone. Extend the §9.5 continuity spec with the stalled-restore cancellation. | Show results enables as soon as the reader supersedes a pending restore; §9.2 restore outcomes unchanged; specs pass in the lane's desktop and mobile projects. |
 | G-17 | Next phase; guided DDD §9.3 | Clear the width log-scale-off notice consistently around downloads: after a zero-slip confirmation turns the log scale off, a successful download leaves the dismissed notice's element visible (`src/explore/app.ts`, `download`). Align the flag and the element, and cover log-on, zero-slip confirmation, then download in the §9.5 width spec. | The notice clears wherever its flag does; download contents unchanged; specs pass in the lane's desktop and mobile projects. |
+| G-18 | Released 2026-11-04; PDD D-43; guided DDD §10.3 | Rework the sample interaction: the **Try a prefilled sample** listbox with scale-named options and descriptors; the modal replacement confirmation; the reworded prefill notice persisting on both input steps; the sequential footer after a fill; both-mode prefills (Kern slip window 1.6–1.9 m per Bawden 2001; the illustrative slip window delegated and named in the evidence); extend the §9.5 specs accordingly. Final label and notice strings to the owner before merge. | Guided DDD §10.3 behaviors hold; D-27/D-30 draft boundaries unchanged; specs pass in the lane's desktop and mobile projects. |
+| G-19 | Released 2026-11-04; G-18; PDD D-43; guided DDD §10.4 | Move the story panel behind the prominent **Where these values come from** trigger on both input steps; add the per-field sample annotations with their sources; CR-10: annotation and trigger strings to the owner for approval before merge. | Guided DDD §10.4 holds; the §10.2 story content and licensing evidence stay valid inside the panel; specs cover the trigger and annotations in both lane projects. |
 
 Queued definitions and decisions, with their authorities:
 

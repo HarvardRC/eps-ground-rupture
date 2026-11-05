@@ -1801,6 +1801,22 @@ release and renewal are recorded in the guided plan's next-phase
 and Commands sections, with the main plan's contract exceptions
 extended the same day.
 
+## Owner review of the built samples (2026-11-04)
+
+Walking through the built chooser, stories, and fills, the owner
+decided the D-43 rework: one **Try a prefilled sample** action
+with a scale-named listbox, event-derived names rejected for the
+illustrative sample; a modal replacement confirmation; a reworded
+prefill notice persisting across the input steps; the story panel
+behind a prominent Where these values come from trigger, after
+the owner found the §10.2 disclosure too buried to notice; a
+sequential footer after a fill, fixing the Return-to-review trap;
+both movement modes prefilled, the Kern slip window anchored to
+Bawden 2001 and the illustrative delegated; and CR-10 per-field
+annotations. Guided DDD §§10.3–10.4 hold the design; tasks G-18
+and G-19 are released on the standing terms, with exact strings
+returning to the owner before the affected merges.
+
 ## References
 
 - [`docs/app/ddd.md` — Ground Rupture Explorer — detailed design document](ddd.md).

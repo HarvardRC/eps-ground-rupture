@@ -713,3 +713,52 @@ photograph (stated U.S. public domain) for Kern; the Wikimedia
 Commons Chelungpu preservation-site photographs for the
 illustrative story. Story texts are reader-facing scientific
 prose: CR-10 approval precedes the merge.
+
+### 10.3 Sample presentation rework (D-43, G-18)
+
+Owner review of the built §§10.1–10.2 supersedes parts of both:
+
+- One secondary action, **Try a prefilled sample**, replaces the
+  two sample buttons. It opens a listbox or an equivalent
+  accessible menu naming both samples by scale — Chi-Chi scale —
+  shallow fault (30°/40°); Kern County 1952 scale — steep fault
+  (60°/70°) — each option with a one-line descriptor. Final
+  strings go to the owner before merge.
+- The ask-before-replace confirmation renders as an accessible
+  modal dialog: the question and both choices inside it, focus
+  trapped, Escape dismissing as Keep my choices. §9.1's never a
+  browser dialog stands; this amends D-37's inline presentation.
+- The prefill notice reads "Prefilled with the {sample} values.
+  This is an illustration — change anything you wish." and shows
+  on Site conditions and Fault movement while the fill stands
+  unedited; the first draft edit or replacement clears it. For
+  this notice, §9.1's clear-on-leaving-the-step is superseded.
+- After a fill, Site conditions' primary action is Continue to
+  fault movement; Return to review stays available once reached.
+- Both movement modes prefill. The Kern slip window is 1.6–1.9 m
+  (Bawden 2001), independent of the model's offset-to-slip
+  conversion; the illustrative sample's slip window is an agent
+  selection under the PDD §2.3 delegation, named in the evidence.
+  Switching modes shows the prefilled values; validation and
+  conversion behavior are unchanged.
+- The §9.5 specs follow: the chooser's keyboard operation, the
+  modal's focus behavior, notice persistence, the sequential
+  footer, and both-mode prefills, parameterized over both samples.
+
+### 10.4 Story trigger and value annotations (D-43, G-19)
+
+- The story panel moves behind a prominent trigger — **Where
+  these values come from** — directly under the prefill notice on
+  both input steps, collapsed by default, the §10.2 content
+  unchanged inside: paragraphs, pictures, captions, credits, and
+  sources.
+- While a sample is active, short annotations appear beside the
+  prefilled controls — for example, by the fault angles: geodetic
+  studies put the White Wolf fault near 75°, and the sample uses
+  the two steepest modeled angles — one or two sentences each,
+  with the §10.2 source links where they apply. Floating or
+  inline is the agent's layout choice; annotations must not
+  obstruct input or be announced redundantly.
+- Annotation and trigger texts are reader-facing scientific
+  prose: CR-10 — the exact strings go to the owner for approval
+  before the merge, like the §10.2 stories.

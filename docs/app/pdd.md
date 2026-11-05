@@ -143,7 +143,8 @@ named in the last column carry the detail.
 | D-39 | Guided publication path; `/scenario/` paused. | §2.2, R-11 | Product owner | Decided (2026-11-04) | `/explore/` joins the unlisted prototype deployment; a team demonstration and the redistribution-license decision precede advertising it. `/scenario/` stays deployed unlisted without further UX investment and is no longer the activation candidate. §2.3. |
 | D-40 | Result-report export. | FR-D1, FR-D2 | Product owner | Decided (2026-11-04) | One self-contained document pairing the §6.1 provenance and scenario summary with rendered charts and statistics; builds on D-14. The owner set it P2; guided task G-13 carries it in the next-phase queue (D-41). §6.5. |
 | D-41 | Next-phase queue for the deliberate deferrals. | §2.2 | Product owner | Decided (2026-11-04) | Every deliberate deferral of the guided redesign is queued as the phase after the second increment: the D-39 reconciliation list, family view, shared links, between-visit recovery, scenario import, the result report (G-13), the sample scenarios and stories (D-42: G-14, G-15), remaining browser coverage, and the paused `/scenario/` rework decision. Team availability schedules the phase; it may precede the team demonstration. Advertising still follows D-39. §2.3. |
-| D-42 | Two named sample scenarios with stories. | §5.1, C1, CR-10 | Product owner | Decided (2026-11-04) | One chooser offers two named samples: D-37's illustrative scenario, unchanged, and a second anchored to the 1952 M 7.36 Kern County earthquake — fault angles 60° and 70°, maximum vertical surface offset 1.3 m, completion values delegated as in D-37. Each carries a short story and up to two licensed images where suitable verified files exist; values are anchored to the named event's scale, never presented as modeling it. §2.3; guided DDD §10; tasks G-14 and G-15 in the next-phase queue (D-41). |
+| D-42 | Two named sample scenarios with stories. | §5.1, C1, CR-10 | Product owner | Decided (2026-11-04) | One chooser offers two named samples: D-37's illustrative scenario, unchanged, and a second anchored to the 1952 M 7.36 Kern County earthquake — fault angles 60° and 70°, maximum vertical surface offset 1.3 m, completion values delegated as in D-37. Each carries a short story and up to two licensed images where suitable verified files exist; values are anchored to the named event's scale, never presented as modeling it. §2.3; guided DDD §10; tasks G-14 and G-15 in the next-phase queue (D-41). D-43 subsequently reworks the presentation. |
+| D-43 | Sample presentation rework. | §5.1, C1, CR-10 | Product owner | Decided (2026-11-04) | Reviewing the built result, the owner replaced the two sample buttons with one **Try a prefilled sample** action opening a scale-named listbox; made the replacement confirmation a modal dialog (never a browser dialog, as before); reworded the prefill notice and made it persist across the input steps; put the story panel behind a prominent Where these values come from trigger on both input steps; restored the sequential walk after a fill; prefilled both movement modes (the Kern slip window anchored to Bawden 2001's 1.6–1.9 m, the illustrative delegated); and added CR-10 per-field annotations. §2.3; guided DDD §§10.3–10.4; tasks G-18 and G-19. |
 
 ---
 
@@ -595,6 +596,33 @@ the
 is the Kern candidate. Story texts follow CR-10. Guided DDD §10
 holds the design; guided tasks G-14 and G-15 carry it in the
 next-phase queue above.
+
+**Sample presentation rework (D-43, 2026-11-04).** Reviewing the
+built samples, the owner reworked their presentation. One
+secondary action — **Try a prefilled sample** — opens a listbox
+naming the two samples by scale: Chi-Chi scale — shallow fault
+(30°/40°) and Kern County 1952 scale — steep fault (60°/70°),
+each option carrying a one-line descriptor; event-derived names
+stay excluded because the illustrative values are anchored to the
+event's scale, not taken from it. The replacement confirmation
+becomes an accessible modal dialog holding the question and both
+choices; the browser-dialog ban stands. The prefill notice reads
+"Prefilled with the {sample} values. This is an illustration —
+change anything you wish." and persists on Site conditions and
+Fault movement until the fill is edited or replaced. The story
+panel sits behind a prominent **Where these values come from**
+trigger under the notice on both input steps, collapsed by
+default, its §10.2 content unchanged. After a fill the walk is
+sequential again: Continue to fault movement is the primary
+action, review staying reachable. Both movement modes prefill:
+the Kern slip window is anchored to the 1.6–1.9 m of reverse slip
+in [Bawden 2001](https://zenodo.org/records/1231281) —
+independent of the model's own offset-to-slip conversion — and
+the illustrative slip window is an agent selection named in the
+evidence. Short per-field annotations appear while a sample is
+active, their texts following CR-10; all exact strings return to
+the owner for approval before the affected merges. Guided DDD
+§§10.3–10.4 hold the design; guided tasks G-18 and G-19 carry it.
 
 **Approved introduction (product owner, 2026-11-03).**
 
