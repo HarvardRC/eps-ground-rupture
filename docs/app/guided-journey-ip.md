@@ -1613,6 +1613,132 @@ At this verification, on `task/g-20-wording-polish` rebased onto
 Not verified: screen-reader reading of the new layout and labels,
 touch, and engines other than Chromium.
 
+### Defects and the `.md-top` determination, 2026-11-05 (G-21)
+
+G-21 ran under the D-45 release and the owner's addition of
+2026-11-05, after G-20, to guided DDD §11.3. The strings below are the
+audit's own, which D-45 approves verbatim.
+
+**Disclosure icon overlap.**
+
+- Before: every guided summary had `padding-left: 0` from the explorer's
+  stylesheet, while the theme draws its info icon absolutely at 12–32 px
+  and its chevron at the right. Measured on the sample trigger and the
+  help disclosures, the label started at 0 px, under the icon (audit
+  entry 12).
+- After: guided summaries keep the theme's own clearances, 2rem on the
+  left and 1.8rem on the right, in rem so they scale with the icon
+  (the theme sizes `html` at 125–150%, and readers may raise the
+  default font). Measured on every visible guided disclosure, on Site
+  conditions, Fault movement and Results, closed and open, and again
+  with the page font at 170%, each label clears the icon and the
+  chevron.
+- `/scenario/`'s disclosures were already clear (its own styles reserve
+  the space; measured on Advanced, the population help, and the chart
+  data), so it needed no change and its bundles are unchanged.
+
+**A first failed calculation.**
+
+- Before: any calculation failure said "Your previous confirmed scenario
+  and results have been kept", even when there were none.
+- After: "We couldn’t calculate results. Your entries are still here.
+  Select Show results to try again." On a recalculation with results
+  standing, "Your previous results are unchanged." comes before the last
+  sentence. The generic action error says "Your confirmed results have
+  not changed." only when results exist.
+
+**Version mismatch.**
+
+- Before: the message said to reload the page, but its only control was
+  **Try loading again**, which reran the same load.
+- After: a data or schema version mismatch says "This page and its
+  simulation data use incompatible versions. Reload the page to try
+  again. No results have been calculated." and offers **Reload page**,
+  which reloads. A loading failure keeps its message and **Try loading
+  again**.
+
+**The `.md-top` determination: a measurement artifact.** The recurring
+axe report (`color-contrast (serious): .md-top` in `/scenario/`'s
+unavailable and incompatible-settings states, G-18 to G-20) was measured
+directly:
+
+- In both states the page has scrolled when it mounts (by 84 px and
+  261 px), so the theme reveals its Back to top button with a 125 ms
+  opacity fade. Sampled 150 ms apart from the mount, its opacity read
+  0.15, then 1.
+- Settled at opacity 1, axe's contrast rule passes on the button
+  (`rgba(0, 0, 0, 0.54)` on white).
+- Mid-fade, the same rule fails at 1.67:1 (`#c8c8c8` on white): the text
+  blends toward the background. A loaded machine (load average 11–15)
+  let axe run inside the fade; an idle one did not, which is why the
+  report came and went.
+
+The contrast does not genuinely fail, so no style changes. The spec is
+stabilized instead: the a11y suite's axe helper waits two frames (the
+scroll handler that starts the fade runs a frame after the mount), then
+until no finite animation or transition is left running, before
+measuring. Infinite ones, such as spinners, and paused ones are not
+waited for. No exclusion was
+needed. A new test holds the button's fade-in partway with the Web
+Animations API and shows both sides: mid-fade the rule reports the
+violation, settled it passes, and the suite's helper then measures the
+whole state clean.
+
+**Review.** The independent review found nothing blocking and
+confirmed that only `src/explore/` and specs changed. Its findings,
+applied:
+
+- the first padding was in pixels while the theme sizes its icon in rem,
+  so a larger default font would have brought the overlap back; the
+  padding is now the theme's rem clearances, and the spec checks a
+  larger font;
+- the settled wait took one snapshot without waiting a frame, so it
+  could miss a fade starting a frame later, and a paused animation would
+  have hung it; it now waits two frames, loops, and skips paused ones;
+- the calculation message decided on earlier results after the attempt;
+  it now records whether they stood before it.
+
+Noted, not changed (outside §11.3's three defects; for the owner):
+- a missing page attribute or an error while setting up the explorer
+  lands in the loading-failure branch, whose retry cannot fix it;
+- mid-session, a version mismatch in the offset-conversion data still
+  shows the conversion's retry message and control.
+
+Tests and specs:
+
+- The new `explore-defects` spec, in both lane projects:
+  - every visible guided disclosure clears the icon and chevron, on
+    three steps and with disclosures open;
+  - a first failed calculation (conversion data served without the 20°
+    coefficients, so the calculation fails while the steps before it
+    render) says the new message and nothing about earlier results;
+  - a failed recalculation with results standing says they are
+    unchanged, and they are;
+  - a version mismatch offers only **Reload page**, which reloads into
+    a working explorer; a loading failure keeps **Try loading again**,
+    which loads again.
+- `a11y.spec.ts`: the settled helper, and the deterministic fade test.
+
+At this verification, on `task/g-21-defects` over `5134164`:
+
+- The pinned Node suite passed all 447 tests; typechecking and the
+  bundles passed. Strict publication and preview builds passed with
+  `explore-f5518d58970e.js` and `explore-1430b85a9dd0.css`. The
+  `/scenario/` bundles `app-26490347afd0.js` and `app-08bebc049c15.css`
+  were unchanged. All 31 hook tests passed.
+- Relative links resolved, PDD agreement passed, and traceability
+  reported no gap rows.
+- The full lane passed 281 and skipped 5, with no failure, twice in a
+  row, at load averages of 14 to 16: the conditions in which the
+  `.md-top` report used to appear. The a11y and defects specs passed 108
+  of 108 over three repeats in `desktop` and `mobile`, at load averages
+  of 15 to 19. Before the review fixes, two full lanes had also passed
+  281 with no failure.
+
+Not verified: screen-reader reading of the new messages, touch, and
+engines other than Chromium; the fade test uses the Web Animations API
+as Chromium implements it.
+
 ## Separate CI investigation
 
 The reported job `126383105016` belongs to historical run

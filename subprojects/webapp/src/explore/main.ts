@@ -43,14 +43,15 @@ function tabStorage(): Storage | null {
   }
 }
 
-function message(root: HTMLElement, title: string, detail: string, retry?: () => void): void {
+/** A startup message; its control, when present, does what its label says (guided DDD §11.3). */
+function message(root: HTMLElement, title: string, detail: string, control?: { label: string; run: () => void }): void {
   const box = document.createElement('section'); box.className = 'gx-loading';
   const h = document.createElement('h2'); h.textContent = title;
-  const p = document.createElement('p'); p.textContent = detail; p.setAttribute('role', retry ? 'alert' : 'status');
+  const p = document.createElement('p'); p.textContent = detail; p.setAttribute('role', control ? 'alert' : 'status');
   box.append(h, p);
-  if (retry) {
-    const b = document.createElement('button'); b.type = 'button'; b.textContent = 'Try loading again';
-    b.addEventListener('click', retry, { once: true }); box.append(b);
+  if (control) {
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = control.label;
+    b.addEventListener('click', control.run, { once: true }); box.append(b);
   }
   const links = document.createElement('p');
   for (const [href, label] of [['../scenario/', 'Existing explorer'], ['../data/', 'Data and citation'], ['../glossary/', 'Glossary']]) {
@@ -85,11 +86,16 @@ async function start(mount: Mount, tag: HTMLScriptElement): Promise<void> {
     mountExplorer(root, { vintage, stamps: { softwareVersion, dataVersion }, loadRegression: getRegression, signal: abort.signal, storage: tabStorage() });
   } catch (error) {
     if (!alive()) return;
-    const detail = error instanceof LoadError && (error.kind === 'data-version' || error.kind === 'schema-version')
-      ? 'The simulation data do not match the version supported by this page. Reload the page or use the existing explorer; no results have been calculated.'
-      : 'The simulation data could not be loaded or read. Check your connection and try again. This is a loading failure, not an empty scientific result.';
     console.error('Guided explorer startup:', error);
-    message(root, 'The explorer could not start', detail, () => { if (alive()) void start(mount, tag); });
+    // A version mismatch needs a fresh page, so its control reloads it; a
+    // loading failure may be transient, so its control loads again (§11.3).
+    if (error instanceof LoadError && (error.kind === 'data-version' || error.kind === 'schema-version')) {
+      message(root, 'The explorer could not start', 'This page and its simulation data use incompatible versions. Reload the page to try again. No results have been calculated.',
+        { label: 'Reload page', run: () => window.location.reload() });
+    } else {
+      message(root, 'The explorer could not start', 'The simulation data could not be loaded or read. Check your connection and try again. This is a loading failure, not an empty scientific result.',
+        { label: 'Try loading again', run: () => { if (alive()) void start(mount, tag); } });
+    }
   }
 }
 

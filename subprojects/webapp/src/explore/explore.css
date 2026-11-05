@@ -104,7 +104,8 @@
 #gre-explore .gx-site-group legend { margin: 0; padding: 0 5px; }
 #gre-explore .gx-site-group > p:first-of-type { margin: 3px 0 10px; color: var(--gx-muted); }
 #gre-explore .gx-help { color: var(--gx-muted); font-size: .8rem; margin: 8px 0 15px; }
-#gre-explore details summary { cursor: pointer; color: var(--gx-accent); font-weight: 550; padding: 7px 0; }
+/* The theme draws its info icon (.6rem from the left, 1rem wide) and its chevron (.4rem from the right, 1rem wide) on every summary; the label keeps the theme's own clearances, in rem so they scale with the icon (guided DDD §11.3). */
+#gre-explore details summary { cursor: pointer; color: var(--gx-accent); font-weight: 550; padding-block: 7px; padding-inline: 2rem 1.8rem; }
 #gre-explore details > p { margin: 8px 0 12px; }
 #gre-explore .gx-select-all { display: flex; align-items: center; gap: 9px; margin: 14px 0; font-size: .8rem; cursor: pointer; width: fit-content; padding: 4px 0; }
 #gre-explore .gx-choices { display: flex; flex-wrap: wrap; gap: 8px; }

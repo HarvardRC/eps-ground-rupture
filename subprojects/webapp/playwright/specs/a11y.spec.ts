@@ -45,8 +45,34 @@ const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 const LOADING = copyText('ddd5.11.loadingAnnouncement');
 const V = () => pointer().export_version;
 
+/**
+ * Waits for every finite animation and transition on the page to finish,
+ * so axe measures settled rendering (guided DDD §11.3). The theme's Back
+ * to top button fades in over 125 ms whenever a mount scrolls the page;
+ * mid-fade its text blends toward the background and reads as low
+ * contrast, which a loaded machine used to catch. Settled, it passes.
+ * Infinite animations (spinners) are left running.
+ */
+async function settled(page: Page): Promise<void> {
+  await page.evaluate(async () => {
+    const frame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    // Two frames first: a scroll's handler, and the fade it starts, land a frame after the mount.
+    await frame(); await frame();
+    // Then until none is left running, since finishing one may start another. A paused one never
+    // finishes and is not waited for.
+    for (let round = 0; round < 20; round++) {
+      const running = document.getAnimations().filter((animation) =>
+        animation.playState === 'running' && animation.effect?.getComputedTiming().iterations !== Infinity);
+      if (!running.length) return;
+      await Promise.all(running.map((animation) => animation.finished.catch(() => undefined)));
+      await frame();
+    }
+  });
+}
+
 /** Runs axe with the §7.5 tags, records the engine version as the `axe-core-version` annotation, and asserts zero violations (soft, so every state is reported). */
 async function axe(page: Page, testInfo: TestInfo, state: string): Promise<void> {
+  await settled(page);
   const results = await new AxeBuilder({ page }).withTags(TAGS).analyze();
   if (!testInfo.annotations.some((a) => a.type === 'axe-core-version')) {
     testInfo.annotations.push({ type: 'axe-core-version', description: results.testEngine.version });
@@ -126,6 +152,41 @@ test('axe: the failure states', async ({ page, browser }, testInfo) => {
   await expect(decision.locator('#gre-recovery dl')).toHaveCount(1);
   await axe(decision, testInfo, 'the incompatible-settings decision');
   for (const p of [unavailable, capability, decision]) await p.context().close();
+});
+
+test('axe measures the theme\'s Back to top button settled, not mid-fade (§11.3)', async ({ browser }, testInfo) => {
+  // The unavailable state scrolls on mount, so the button is shown.
+  const page = await (await browser.newContext({ baseURL: BASE_URL })).newPage();
+  const net = await new Net(page).install();
+  net.abort(manifest().files.scenario_artifact);
+  await page.goto('scenario/');
+  await mounted(page);
+  await settled(page);
+  const top = page.locator('.md-top');
+  const contrast = () => new AxeBuilder({ page }).include('.md-top').withRules(['color-contrast']).analyze();
+  // Settled and shown, the button's own colours meet the ratio.
+  expect(await top.evaluate((node) => getComputedStyle(node).opacity)).toBe('1');
+  const shown = await contrast();
+  expect(shown.violations).toEqual([]);
+  expect(shown.passes.map((v) => v.id)).toContain('color-contrast');
+  // Hidden at once, then shown again: held partway through its fade-in, the
+  // same rule reports the artifact the lane used to hit.
+  await top.evaluate((node) => {
+    node.setAttribute('hidden', '');
+    void getComputedStyle(node).opacity; // hiding is instant
+    node.removeAttribute('hidden');
+    void getComputedStyle(node).opacity; // showing starts the fade
+    const fade = node.getAnimations().find((a) => (a as CSSTransition).transitionProperty === 'opacity');
+    if (!fade) throw new Error('no opacity transition on .md-top');
+    fade.pause();
+    fade.currentTime = 40;
+  });
+  const fading = await contrast();
+  expect(fading.violations.map((v) => v.id)).toEqual(['color-contrast']);
+  // Released, the suite's helper waits for the fade to finish before measuring.
+  await top.evaluate((node) => { for (const a of node.getAnimations()) a.play(); });
+  await axe(page, testInfo, 'the unavailable state, measured after the fade');
+  await page.context().close();
 });
 
 // --------------------------------------------------------------------

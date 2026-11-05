@@ -897,6 +897,8 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     busy = true; generalError = ''; render();
     await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
     if (!alive() || version !== navigationVersion) { busy = false; return; }
+    // Whether results stood before this attempt, whatever happens inside it (§11.3).
+    const hadResults = result !== null;
     try {
       const snapshot = cloneDraft(draft);
       const checked = validateDraft(snapshot, manifest);
@@ -911,7 +913,8 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       status.textContent = `Results updated. ${formatCount(computed.selection.matchingRecords)} simulation stages match your confirmed scenario.${logOffNotice ? ` ${copyText('ddd5.10.recoveryLogScaleOff')}` : ''}`;
     } catch (error) {
       console.error('Guided calculation:', error); busy = false;
-      generalError = 'The results could not be calculated. Your previous confirmed scenario and results have been kept. Try Show results again.';
+      // Claim only what holds: earlier results are mentioned only when there are some (§11.3).
+      generalError = `We couldn’t calculate results. Your entries are still here.${hadResults ? ' Your previous results are unchanged.' : ''} Select Show results to try again.`;
       alert.textContent = generalError; render();
     }
   }
@@ -1045,7 +1048,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       else if (action === 'retry-regression') { $('#gx-offsetMax')?.focus(); void ensureRegression(); }
       else if (action === 'download') download();
     } catch (error) {
-      console.error('Guided interaction:', error); generalError = 'This action could not be completed. Your confirmed results have not changed.'; alert.textContent = generalError; render();
+      console.error('Guided interaction:', error); generalError = `This action could not be completed.${result ? ' Your confirmed results have not changed.' : ''}`; alert.textContent = generalError; render();
     }
   }, { signal });
 
