@@ -1447,6 +1447,172 @@ onto `5385b93`:
 Not verified: screen-reader reading of the trigger, the preview's
 story, and the annotations; touch; and engines other than Chromium.
 
+### Wording and presentation polish, 2026-11-05 (G-20)
+
+G-20 ran under the renewal extension and the D-45 release, after G-19,
+to guided DDD §§11.1–11.2. The audit is the owner's local file
+`notes/2026-11-05/explorer-wording-ux-audit.html` (reviewed at
+`635e59b`, 75 entries).
+
+**Ruling (A), 2026-11-05.** Four of §11.1's swaps live in shared code
+that `/scenario/` also bundles (`views/copy.json`, `views/stats-table.ts`),
+and `copy.json` is the PDD copy deck. Applying them there would have
+changed the `/scenario/` bundles, which must stay byte-identical, and
+amended the copy deck. The planning session ruled, under the owner's
+overnight delegation of 2026-11-05: the guided page gets the full
+adopted wording through a guided-only copy layer; `copy.json`, the PDD
+copy deck and `/scenario/` stay unchanged. Adopting the wording for
+`/scenario/` too (option B) is on the owner's morning list, with the
+slip Minimum "Required" mark (audit entry 16).
+
+**The copy overlay.** `src/explore/copy-overlay.ts` maps copy.json keys
+to their adopted texts with the same slots. `guided()` turns each
+registry template, slots captured, into the adopted one, and
+`guidedSvg()` does the same through a chart's tree. The guided page
+applies them to the shared builders' output only: notices and caveats,
+statistics row labels, chart accessible names and axis titles, the
+histogram-table caption, and the cumulative caption. A registry edit
+that changes a key's slots fails loudly. Adopting option B later means
+moving these texts into copy.json and deleting the calls.
+
+**Wording (§11.1).** On the guided page:
+
+- "matching records" → "matching simulation stages" (singular "stage"),
+  with the same term in the statistics hint, the empty-result heading,
+  the status lines, the introduction, and the no-measurement notice;
+- "valid measurements" → "measurements used" (singular "measurement
+  used"), in the panel count, the small-result and suppression notices,
+  the chart names and axis, the table caption, and the cumulative note;
+- "Valid count" → "Measurements used"; "Excluded null count" →
+  "Missing values (excluded)";
+- "Corresponding fault slip at depth" → "Estimated fault slip at depth";
+- "Your window includes" → "Your selected range includes";
+- "Histogram bin data" → "Histogram counts by value range";
+- "Browse freely" → "Exit walkthrough";
+- "Download results" → "Download data (ZIP)", described by "Matching
+  simulation stages, statistics, scenario settings and sources.";
+- the normalization phrase → the audit's two messages, chosen by the
+  rule the entry broke: "Enter 0 or a positive number, such as 0.5."
+  for malformed text, and "Use at most 16 characters, counting the
+  decimal point and the 0 before it." over either length limit. The
+  limits themselves are unchanged.
+
+The ZIP's contents are unchanged, including provenance.txt's "matching
+records: {count}", as the audit asks for export contents.
+
+**Presentation (§11.2).**
+
+- Results: "Your confirmed scenario" opens with its count, a compact
+  two-line summary in the review's own labels, and the partial-coverage
+  warning. The caveats and the unapplied-changes bar stay where they
+  were. Measurement choices, the chart and the statistics follow; **View
+  full scenario** comes after them, holding the full summary, the stage
+  explanation and the conversion table. It starts closed, keeps its open
+  state across re-renders, and is not persisted.
+- Walkthrough: "Results walkthrough · n of 5"; Back and Next repeat after
+  the stop's content.
+- Help: the four site-condition disclosures repeated their visible
+  sentence word for word, so each gives way to the existing "Read the
+  glossary" link at the end of that sentence. The two movement
+  disclosures add information and stay.
+- The Scarp dip card carries "Provisional data", the opening words of the
+  §5.4 notice, before selection.
+- Density reads Dense, Medium, Loose in the choices and every summary;
+  each choice keeps its own value.
+
+**Audit dispositions (all 75 entries).**
+
+- Addressed in G-20: 8, 11, 17, 33, 34, 35, 40, 55, 56 (the repeated
+  Back and Next; not sticky), 61.
+- Addressed in part (the parts §11.1 names): 19 ("Estimated fault slip at
+  depth"; "Simulation coverage / Fully covered / Not covered" not
+  adopted), 37 (the range wording; the rest of the sentence unchanged),
+  45 (the summary, and "measurements used" in the caption; "bin" stays),
+  59 ("measurements used" in the notices; thresholds and behaviour
+  unchanged), 75 (singular and plural for the new guided counts only).
+- Done in G-18 and G-19 (D-43, D-44): 25, 26, 27, 28, 32; 29 in part (the
+  shared sentence under CR-10).
+- For G-21 (§11.3): 12, 64, 67.
+- Keep, no change needed: 1, 5, 13, 15, 22, 23, 31, 42, 48, 50, 51, 52,
+  54, 60, 62, 63, 74.
+- Research, held for the research group: 9, 10, 29 (the rest), 38 (D-46,
+  proposed), 39.
+- Not adopted by D-45: 2, 3, 4, 6, 7, 14, 16, 18, 20, 21, 24, 30, 36, 41,
+  43, 44, 46, 47, 49, 53, 57, 58, 65, 66, 68, 69, 70, 71, 72.
+- Existing open item: 73 (D-10, the liability text).
+
+**Approvals, 2026-11-05.** Approved under the owner's overnight
+delegation of 2026-11-05, relayed by the planning session:
+
+- ruling (A), and the scope reading above (dispositions, entry 16 left
+  out);
+- the two refused-number messages and the download description, exactly
+  as listed above;
+- the overlay texts, with one substitution: the cumulative note ends
+  "Statistics and percentile read-offs rely on all measurements used for
+  this scenario.", avoiding a use/used echo;
+- the guided count wording, the compact summary, the "Provisional data"
+  mark, the help change, the walkthrough label and repeated navigation,
+  and the density order;
+- keeping "bin" in the table caption, and leaving the ZIP's contents
+  unchanged.
+
+**Review.** The independent review found nothing blocking and
+confirmed that nothing under `src/views/` or in any `/scenario/`-only
+file changed. Its findings, applied:
+
+- the chart overlay scanned every attribute, a full cumulative polyline
+  included, on each slider move (about 0.2 s a call in its timing); it
+  now rewrites only accessible names and text, and skips a template
+  whose literal text is absent;
+- an empty or multi-line slot, or one ending a template, could fail to
+  match silently; the patterns now cover them;
+- with both slip entries refused, the alert repeated the same message;
+  it now says each distinct message once, and each field keeps its own
+  error and description.
+
+Left as they are: the stage explanation's "record" wording next to the
+new terms, which §11.1 does not list.
+
+Tests and specs:
+
+- Overlay tests: every key exists and the registry keeps its own text;
+  filled registry texts become the adopted ones with their slots,
+  inside markup too; a chart tree is rewritten in attributes and text;
+  no adopted text keeps the replaced wording.
+- State tests: each refused entry gets the message for the rule it broke,
+  in both modes.
+- The new `explore-polish` spec, in both lane projects: the results
+  order and the compact summary, the warning visible and the table
+  behind the disclosure, its open state across a re-render; the adopted
+  wording on the page, the shared builders' output included, and none of
+  the replaced wording; the download's description; the Scarp dip mark;
+  density order; the help change; the two messages in the browser; Exit
+  walkthrough. The walkthrough spec checks the label and the repeated
+  navigation at every stop, and uses the lower Next once. Specs asserting
+  the old strings were updated.
+
+At this verification, on `task/g-20-wording-polish` rebased onto
+`5e863e1`:
+
+- The pinned Node suite passed all 447 tests; typechecking and the
+  bundles passed. Strict publication and preview builds passed with
+  `explore-504bd1c8f6a1.js` and `explore-2957d9d013fd.css`. The
+  `/scenario/` bundles `app-26490347afd0.js` and `app-08bebc049c15.css`
+  were unchanged, as ruling (A) requires. All 31 hook tests passed.
+- Relative links resolved (5,511 in 61 files), PDD agreement passed with
+  the copy deck untouched, and traceability reported no gap rows.
+- The guided specs passed 118 of 118 in `desktop` and `mobile` before
+  the review fixes. The polish, walkthrough, and layout specs passed 72
+  of 72 over three repeats after them.
+- The full lane passed 269 and skipped 5, with one failure outside G-20:
+  the pre-existing `a11y.spec.ts` `.md-top` contrast check on
+  `/scenario/` (load average about 15), recorded under G-18 and assigned
+  to G-21.
+
+Not verified: screen-reader reading of the new layout and labels,
+touch, and engines other than Chromium.
+
 ## Separate CI investigation
 
 The reported job `126383105016` belongs to historical run
