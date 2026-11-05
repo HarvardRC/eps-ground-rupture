@@ -868,11 +868,15 @@ At this verification:
 - The pinned Node suite passed all 417 tests; typechecking and the
   bundles passed. Strict publication and preview builds passed
   with `explore-b97a505fb764.js` and `explore-abe9a2aa7049.css`.
+  After rebasing onto the merged G-14, the suite passed all 422
+  tests and the builds passed with `explore-18adc509ae2e.js` and
+  `explore-cbf963b397ab.css`.
   The `/scenario/` bundles `app-26490347afd0.js` and
   `app-08bebc049c15.css` were unchanged. All 31 hook tests passed.
 - The doc checks below passed: relative links resolved, PDD
   agreement held, and traceability linted 491 rows with no gaps.
-- The guided specs passed 60 of 60 in `desktop` and `mobile`. The
+- The guided specs passed 60 of 60 in `desktop` and `mobile`, and
+  68 of 68 after the rebase onto G-14. The
   continuity and race specs passed 60 of 60 over three repeats.
 - The full lane passed 211, skipped 5, and failed 1: the legacy
   `/scenario/` `axe: the failure states` spec, the same failure
