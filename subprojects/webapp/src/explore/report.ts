@@ -133,6 +133,20 @@ function table(head: readonly string[], rows: readonly (readonly string[])[]): s
   return `<w:tbl><w:tblPr><w:tblW w:w="${COLUMNS[0] + COLUMNS[1]}" w:type="dxa"/><w:tblBorders><w:top ${BORDER}/><w:left ${BORDER}/><w:bottom ${BORDER}/><w:right ${BORDER}/><w:insideH ${BORDER}/><w:insideV ${BORDER}/></w:tblBorders><w:tblCellMar><w:left w:w="100" w:type="dxa"/><w:right w:w="100" w:type="dxa"/></w:tblCellMar></w:tblPr><w:tblGrid>${COLUMNS.map(width => `<w:gridCol w:w="${width}"/>`).join('')}</w:tblGrid>${header}${body}</w:tbl>`;
 }
 
+/** The scenario table's columns: the label column, then the value column to the 6.5-inch text width. */
+const SCENARIO_COLUMNS = [2600, 6760] as const;
+
+/** The scenario table's label shading: light gray, by direct formatting (§13.2). */
+export const SCENARIO_LABEL_FILL = 'E7E6E6';
+
+/** The scenario table (§13.2 item 1): one row per condition, its label cell shaded and bold. */
+function scenarioTable(input: RenderInput): string {
+  const cell = (value: string, column: number, label: boolean): string =>
+    `<w:tc><w:tcPr><w:tcW w:w="${SCENARIO_COLUMNS[column]}" w:type="dxa"/>${label ? `<w:shd w:val="clear" w:color="auto" w:fill="${SCENARIO_LABEL_FILL}"/>` : ''}</w:tcPr>${paragraph(run(value, { bold: label, size: SIZE.table }), { before: 20, after: 20 })}</w:tc>`;
+  const body = scenarioRows(input).map(([label, value]) => `<w:tr><w:trPr><w:cantSplit/></w:trPr>${cell(label, 0, true)}${cell(value, 1, false)}</w:tr>`).join('');
+  return `<w:tbl><w:tblPr><w:tblW w:w="${SCENARIO_COLUMNS[0] + SCENARIO_COLUMNS[1]}" w:type="dxa"/><w:tblBorders><w:top ${BORDER}/><w:left ${BORDER}/><w:bottom ${BORDER}/><w:right ${BORDER}/><w:insideH ${BORDER}/><w:insideV ${BORDER}/></w:tblBorders><w:tblCellMar><w:left w:w="100" w:type="dxa"/><w:right w:w="100" w:type="dxa"/></w:tblCellMar></w:tblPr><w:tblGrid>${SCENARIO_COLUMNS.map(width => `<w:gridCol w:w="${width}"/>`).join('')}</w:tblGrid>${body}</w:tbl>`;
+}
+
 /** The inline drawing of chart `n` (1-based): relationship `rId{n}`, extent at its CSS size, its accessible name as the description. */
 function drawing(n: number, description: string): string {
   const cx = REPORT_CHART_WIDTH * EMU_PER_PX;
@@ -192,6 +206,32 @@ export function scenarioSummary(input: RenderInput): string {
   return line.slice(0, -count.length);
 }
 
+/** The scenario table's row labels, in the summary's order (DDD §5.7): the PDD §3 input names. */
+export const SCENARIO_LABELS = ['Fault dip', 'Sediment strength and structure', 'Sediment depth', 'Sediment density', 'Displacement window', 'Population', 'Scarp filter'] as const;
+
+/** The summary tokens whose templates open with their condition's name; the table drops that name from the value. */
+const NAMED_TOKENS = ['ddd5.7.tokenDip', 'ddd5.7.tokenDepth', 'ddd5.7.tokenDensity', 'ddd5.7.tokenSlipWindow', 'ddd5.7.tokenScarpType'] as const;
+
+const capitalize = (value: string): string => value.charAt(0).toUpperCase() + value.slice(1);
+
+/**
+ * The scenario table's rows (§13.2 item 1): the one-line summary broken
+ * into its seven condition tokens, each value in the token's own words,
+ * the leading condition name dropped where the token's template opens
+ * with it ("dip 60° or 70°" → "60° or 70°").
+ */
+export function scenarioRows(input: RenderInput): readonly (readonly [string, string])[] {
+  const tokens = scenarioSummary(input).split(copyText('ddd5.7.summaryJoiner'));
+  if (tokens.length !== SCENARIO_LABELS.length) throw new Error(`report: the summary has ${tokens.length} tokens, not ${SCENARIO_LABELS.length}`);
+  const prefixes = NAMED_TOKENS.map(key => copyText(key).split('{')[0]);
+  return tokens.map((token, i) => {
+    const plain = i === 0 ? token.charAt(0).toLowerCase() + token.slice(1) : token;
+    const prefix = prefixes.find(p => plain.startsWith(p));
+    const value = prefix === undefined ? (i === 0 ? token : capitalize(token)) : capitalize(plain.slice(prefix.length));
+    return [SCENARIO_LABELS[i], value] as const;
+  });
+}
+
 /** A chart's caption (§13.2): the D-14 fields as document text, and the accuracy statement on the cumulative chart. */
 export function captionLines(input: RenderInput, stamps: VersionStamps, chart: Pick<ReportChart, 'measurement' | 'view'>): readonly string[] {
   return [
@@ -220,7 +260,8 @@ function documentBody(input: RenderInput, stamps: VersionStamps, generatedAt: Da
 
   // 1. The title block.
   parts.push(text(REPORT_TITLE, { bold: true, size: SIZE.title }, { after: 160 }));
-  parts.push(text(scenarioSummary(input), {}, { after: 80 }));
+  parts.push(scenarioTable(input));
+  parts.push(text('', { size: SIZE.caption }, { after: 60 }));
   parts.push(text(`${copyText('ddd5.9.labelGenerated')}: ${utcInstant(generatedAt)} · ${versionsLine(input, stamps)}`, { size: SIZE.caption }, { after: 200 }));
 
   // 2. Provenance: the blocks of provenance.txt, the same words.

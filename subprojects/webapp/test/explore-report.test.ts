@@ -29,7 +29,7 @@ import { computeResult } from '../src/explore/compute';
 import { guided } from '../src/explore/copy-overlay';
 import {
   captionLines, countLine, documentXml, GUIDED_MEMBER_NAMES, guidedArchive, REPORT_CHART_HEIGHT, REPORT_CHART_WIDTH,
-  REPORT_MEMBER, REPORT_PARTS, reportCharts, reportDocx, scenarioSummary, type Rasterize,
+  REPORT_MEMBER, REPORT_PARTS, reportCharts, reportDocx, SCENARIO_LABEL_FILL, SCENARIO_LABELS, scenarioRows, scenarioSummary, type Rasterize,
 } from '../src/explore/report';
 import { NO_MATCHES, PROVENANCE_HEADING, REPORT_TITLE } from '../src/explore/wording';
 import { defaultScenario, MEASUREMENT_NAMES, type Scenario } from '../src/state/state';
@@ -178,11 +178,44 @@ describe('report: the document (§13.2, §13.3)', () => {
   test('the order: title block, provenance, then the three measurements in the PDD §4.1 order', () => {
     const lines = paragraphs(documentXml(full, STAMPS, AT));
     assert.equal(lines[0], REPORT_TITLE);
-    assert.match(lines[2], new RegExp(`^${copyText('ddd5.9.labelGenerated').replace(/[()]/g, '\\$&')}: ${AT_ISO} · Software version: v0\\.4\\.0-test`));
+    // The scenario table's cells, label then value, row by row; a spacer; the generated line.
+    assert.deepEqual(lines.slice(1, 15), scenarioRows(full).flat());
+    assert.match(lines[16], new RegExp(`^${copyText('ddd5.9.labelGenerated').replace(/[()]/g, '\\$&')}: ${AT_ISO} · Software version: v0\\.4\\.0-test`));
     const at = (line: string): number => lines.indexOf(line);
     const order = [PROVENANCE_HEADING, ...MEASUREMENT_NAMES.map(measurementLabel)].map(at);
-    assert.ok(order.every(i => i > 2), JSON.stringify(order));
+    assert.ok(order.every(i => i > 16), JSON.stringify(order));
     assert.deepEqual([...order].sort((x, y) => x - y), order);
+  });
+
+  test('the scenario table: the summary\u2019s seven conditions, labelled, in their own words, the label column shaded', async () => {
+    const small = await decodeFixture(await buildFixture(stageCountSpec(12)));
+    const narrowed = computeResult(small, { ...defaultScenario(small.manifest), faultDip: [30, 70], depth: [10], density: ['Medium'], window: { mode: 'slip', min: '0.5', max: '2' }, population: 'one_state_per_trial' }, 5, null);
+    const rows = scenarioRows(narrowed);
+    assert.deepEqual(rows.map(([label]) => label), [...SCENARIO_LABELS]);
+    const values = rows.map(([, value]) => value);
+    assert.equal(values[0], '30° or 70°');
+    assert.equal(values[2], '10 m');
+    assert.equal(values[3], 'Medium');
+    assert.equal(values[4], '0.5–2 m');
+    assert.equal(values[5], 'One state per simulation trial');
+    assert.equal(values[6], 'All scarp types (no filter)');
+    // Rejoined, the values carry every token of the one-line summary (the captions' form).
+    const summary = scenarioSummary(narrowed).toLowerCase();
+    for (const value of values) assert.ok(summary.includes(value.toLowerCase()), value);
+    assert.deepEqual(scenarioRows(full).map(([, value]) => value), ['Any dip', 'Any sediment', 'Any depth', 'Any density', 'Slip: any', 'All recorded stages', 'All scarp types (no filter)']);
+
+    const xmlText = documentXml(narrowed, STAMPS, AT);
+    const table = xmlText.slice(xmlText.indexOf('<w:tbl>'), xmlText.indexOf('</w:tbl>'));
+    assert.equal((table.match(/<w:tr>/g) ?? []).length, 7);
+    assert.equal((table.match(new RegExp(`<w:shd w:val="clear" w:color="auto" w:fill="${SCENARIO_LABEL_FILL}"/>`, 'g')) ?? []).length, 7, 'every label cell, and only those');
+    for (const row of table.split('<w:tr>').slice(1)) {
+      const cells = row.split('<w:tc>').slice(1);
+      assert.equal(cells.length, 2);
+      assert.ok(cells[0].includes('<w:shd ') && cells[0].includes('<w:b/>'));
+      assert.ok(!cells[1].includes('<w:shd ') && !cells[1].includes('<w:b/>'));
+    }
+    // The captions keep the one-line form.
+    for (const chart of reportCharts(narrowed)) assert.equal(captionLines(narrowed, STAMPS, chart)[1], scenarioSummary(narrowed));
   });
 
   test('provenance renders every line of provenance.txt, in its words and order', () => {
@@ -264,7 +297,7 @@ describe('report: the document (§13.2, §13.3)', () => {
     assert.equal(reportCharts(noValid).length, 0);
     const xmlText = documentXml(noValid, STAMPS, AT);
     const lines = paragraphs(xmlText);
-    assert.equal((xmlText.match(/<w:tbl>/g) ?? []).length, 3);
+    assert.equal((xmlText.match(/<w:tbl>/g) ?? []).length, 4, 'the scenario table and three statistics tables');
     assert.equal(xmlText.includes('<w:drawing>'), false);
     for (const m of MEASUREMENT_NAMES) {
       const start = lines.indexOf(measurementLabel(m));
@@ -281,7 +314,7 @@ describe('report: the document (§13.2, §13.3)', () => {
     const lines = paragraphs(xmlText);
     assert.equal(lines.filter(line => line === NO_MATCHES).length, 3);
     for (const ref of plan.explainer) assert.ok(lines.includes(guided(noticeText(ref))));
-    assert.equal(xmlText.includes('<w:tbl>'), false);
+    assert.equal((xmlText.match(/<w:tbl>/g) ?? []).length, 1, 'the scenario table only');
     assert.equal(xmlText.includes('<w:drawing>'), false);
   });
 
