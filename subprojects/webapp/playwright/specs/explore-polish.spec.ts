@@ -8,13 +8,12 @@
 // link; the plain-language messages for refused numbers.
 
 import { expect, test, type Page } from '@playwright/test';
+import { DOWNLOAD_CONTENTS } from '../../src/explore/wording';
 import {
   action, confirmGolden, gotoExplore, pickSample, setChecked, stepButton, typeEntry,
 } from '../explore-support';
 
 test.describe.configure({ timeout: 120_000 });
-
-const DOWNLOAD_CONTENTS = 'Matching simulation stages, statistics, scenario settings and sources.';
 
 /** The illustrative sample confirmed as filled: offset mode, 30° partly covered, low slip included. */
 async function confirmIllustrative(page: Page): Promise<void> {

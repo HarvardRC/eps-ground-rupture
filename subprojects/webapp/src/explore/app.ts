@@ -5,13 +5,13 @@ import { convertWindows, rangeFlag } from '../convert/convert';
 import type { Vintage } from '../decode/decode';
 import type { Regression } from '../decode/fields';
 import { storedBounds } from '../engine/query';
-import { buildPackage, type VersionStamps } from '../download/package';
+import type { VersionStamps } from '../download/package';
 import { readDecimal, compareDecimals } from '../state/parse';
 import { defaultDisplayState, type MeasurementName, type SedimentPair } from '../state/state';
 import { quantileLinear } from '../stats/quantile';
 import { binTableSpec, quantityText } from '../views/chart-text';
-import { guided, guidedSvg } from './copy-overlay';
-import { histogramLogSpec, histogramSpec, histogramSvg, ecdfSpec, ecdfSvg } from '../views/charts';
+import { guided } from './copy-overlay';
+import { cumulativeChart, histogramBins, histogramChart } from './charts';
 import { copyText } from '../views/copy';
 import { toSvgElement } from '../views/dom/svg';
 import { displayRound, formatCount } from '../views/format';
@@ -19,6 +19,9 @@ import { CAVEAT_KEYS, selectNotices, noticeText } from '../views/notices';
 import type { RenderInput } from '../views/render-input';
 import { statsRows, unclassifiedLine } from '../views/stats-table';
 import { computeResult } from './compute';
+import { rasterizeSvg } from './rasterize';
+import { guidedArchive } from './report';
+import { DOWNLOAD_CONTENTS, matchingStages, measurementsUsed, REPORT_FAILED } from './wording';
 import { DEFINITIONS, type DefinitionKey } from './glossary';
 import { classifySession, clearSession, loadSession, saveSession, type DisplayChoices, type SessionRecord } from './session';
 import { ANNOTATIONS, STORIES, type AnnotatedField, type StoryLink } from './stories';
@@ -74,14 +77,8 @@ const sampleInfo = (id: SampleId) => SAMPLES.find(sample => sample.id === id)!;
 const sampleNotice = (id: SampleId, modified: boolean): string => modified
   ? `Started from the ${sampleInfo(id).name} sample · Modified`
   : `Prefilled with the ${sampleInfo(id).name} sample. You can change any value.`;
-/** What Download data (ZIP) holds, shown before the click (§11.1). */
-const DOWNLOAD_CONTENTS = 'Matching simulation stages, statistics, scenario settings and sources.';
 /** The Scarp dip card's mark before selection: the existing notice's own opening words (§11.2; PDD §5.4). */
 const PROVISIONAL_MARK = 'Provisional data';
-const plural = (n: number, one: string, many: string): string => `${formatCount(n)} ${n === 1 ? one : many}`;
-/** The adopted count wording (§11.1). */
-const matchingStages = (n: number): string => plural(n, 'matching simulation stage', 'matching simulation stages');
-const measurementsUsed = (n: number): string => plural(n, 'measurement used', 'measurements used');
 /** Density choices in physical order, Dense, Medium, Loose (§11.2); values outside it keep their place after. */
 const DENSITY_ORDER = ['Dense', 'Medium', 'Loose'];
 const densityRank = (value: string): number => { const i = DENSITY_ORDER.indexOf(value); return i < 0 ? DENSITY_ORDER.length : i; };
@@ -162,6 +159,8 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   let regressionPromise: Promise<boolean> | null = null;
   let regressionError = '';
   let busy = false;
+  /** The download's own busy flag (§13.1), released when delivery or failure settles. */
+  let downloading = false;
   // True while a restore owns `busy` (§9.2, step 3); `invalidate` releases it at once (G-16).
   let restoring = false;
   let navigationVersion = 0;
@@ -669,23 +668,14 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     if (!measurement.histogram || counts.valid < config.chartFloorBelow()) return;
     const width = Math.max(240, Math.floor(container.getBoundingClientRect().width));
     lastChartWidth = width;
-    const specInput = { measurement: m, decimals: config.displayDecimals(m), valid: counts.valid, scarpClasses: manifest.scarpClasses, palette: manifest.scarpClassPalette, familyView: false, fieldTicks: false };
     // The log scale applies to width's Distribution view only, through the shared builders (§9.3).
     const useLog = m === 'dzw' && display.view[m] === 'histogram' && display.logScale && result.histogramLog !== null;
-    const bins = useLog ? histogramLogSpec(result.histogramLog!, specInput) : histogramSpec(measurement.histogram, specInput);
+    const bins = histogramBins(result, m, useLog);
     const q = display.readoff[m] ?? 84;
-    const svg = display.view[m] === 'histogram' ? histogramSvg(bins, width) : ecdfSvg(ecdfSpec(measurement.values.sorted, { measurement: m, decimals: config.displayDecimals(m), valid: counts.valid, readoff: q, fieldTicks: false }), width);
     const caption = document.createElement('figcaption'); caption.id = `gre-${m}-cap`;
     caption.textContent = display.view[m] === 'cumulative' ? guided(copyText('pdd4.1.cumulativeAccuracy')) : useLog ? copyText('ddd5.12.logScaleNote') : 'Histogram intervals follow the distribution of matching measurements; the chart-data table lists their exact boundaries and counts.';
-    const chartElement = toSvgElement(guidedSvg(svg));
-    // The guided page uses larger type than the shared chart's original
-    // presentation. Adjust only its title ink, never data or geometry.
-    const cumulativeTitle = chartElement.querySelector('g[data-axis="cumulative"] text[transform]');
-    if (cumulativeTitle) cumulativeTitle.textContent = 'Measurements at or below (%)';
-    chartElement.querySelectorAll('g[data-axis] text[transform]').forEach(title => {
-      title.setAttribute('x', '14');
-      title.setAttribute('transform', `rotate(-90 14 ${title.getAttribute('y')})`);
-    });
+    // The guided presentation (overlay wording, larger-type axis titles) is the shared one of charts.ts, which the report also draws (§13.4).
+    const chartElement = toSvgElement(display.view[m] === 'histogram' ? histogramChart(bins, width) : cumulativeChart(result, m, width, q));
     container.replaceChildren(chartElement, caption);
     const legend = $('#gx-chart-legend');
     if (legend) legend.innerHTML = display.view[m] === 'histogram' ? manifest.scarpClasses.map(name => `<span><i style="background:${escape(manifest.scarpClassPalette[name])}" aria-hidden="true"></i>${escape(name)}</span>`).join('') : '';
@@ -984,18 +974,32 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     }
   }
 
-  function download(): void {
-    if (!result) return;
+  /**
+   * The guided download (§13.1): the four data members and report.docx,
+   * composed at one instant. A second activation while the archive is
+   * being assembled is ignored; a report failure still delivers the data
+   * files and says so (§13.5).
+   */
+  async function download(): Promise<void> {
+    if (!result || downloading) return;
+    const input = result;
+    downloading = true;
     try {
-      const archive = buildPackage(result, stamps, new Date());
+      const archive = await guidedArchive(input, stamps, new Date(), rasterizeSvg);
+      // A newer result (or a new scenario) replaced the one clicked while the archive was assembled: deliver nothing, and leave its status alone.
+      if (!alive() || result !== input) return;
+      if (archive.reportError !== null) console.error('Guided report:', archive.reportError);
       const url = URL.createObjectURL(new Blob([archive.bytes], { type: 'application/zip' })); downloadUrls.add(url);
       const anchor = document.createElement('a'); anchor.href = url; anchor.download = archive.fileName; root.append(anchor); anchor.click(); anchor.remove();
       setTimeout(() => { URL.revokeObjectURL(url); downloadUrls.delete(url); }, 1000);
-      status.textContent = 'Your confirmed result download is ready.';
+      status.textContent = archive.reportError === null ? 'Your confirmed result download is ready.' : REPORT_FAILED;
     } catch (error) {
       console.error('Guided download:', error);
+      if (!alive() || result !== input) return;
       generalError = 'The download could not be created. Your confirmed result is unchanged; select Download data (ZIP) to retry.';
       alert.textContent = generalError; render();
+    } finally {
+      downloading = false;
     }
   }
 
@@ -1122,7 +1126,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       else if (action === 'slip-shortcut') { invalidate(); draft.slipMax = '5'; issues = issues.filter(item => item.field !== 'slipMax'); render('gx-slipMax'); }
       else if (action === 'offset-shortcut' && regression) { invalidate(); const cap = offsetShortcut(draft.faultDip, regression, manifest.slipWindowBounds.max); if (cap !== null) draft.offsetMax = cap; issues = issues.filter(item => item.field !== 'offsetMax'); render('gx-offsetMax'); }
       else if (action === 'retry-regression') { $('#gx-offsetMax')?.focus(); void ensureRegression(); }
-      else if (action === 'download') download();
+      else if (action === 'download') void download();
     } catch (error) {
       console.error('Guided interaction:', error); generalError = `This action could not be completed.${result ? ' Your confirmed results have not changed.' : ''}`; alert.textContent = generalError; render();
     }
