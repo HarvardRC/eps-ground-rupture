@@ -990,10 +990,15 @@ flag, released when delivery or failure settles.
 The report is one self-contained Word document of the confirmed
 scenario. Its order:
 
-1. Title block: the document title (§13.7), the one-line scenario
-   summary in the DDD §5.8 wording (settings and population), and
-   the generated instant with the software and data-export
-   versions.
+1. Title block: the document title (§13.7); the scenario table —
+   one row per summary condition in the DDD §5.8 order, labels
+   the guided page's own condition names (the compact summary's
+   wording), values reusing the summary
+   tokens' own wording, the label column shaded light gray by
+   direct formatting (the owner's Word-check direction at the
+   G-13 gate, 2026-11-05, replacing the one-line summary here;
+   the captions keep that one-line form); and the generated
+   instant with the software and data-export versions.
 2. Provenance: the blocks of `provenance.txt` (DDD §5.9; PDD
    §6.1) rendered as paragraphs — citation, DesignSafe DOIs,
    versions, scenario settings, population, generation date, and
@@ -1105,10 +1110,10 @@ for anything the page already says.
 - Node tests cover the assembly as a pure function with injected
   fixture PNGs: the part set, well-formed XML, every image
   relationship resolving to a media part and every embed to a
-  relationship, the §13.2 order, captions carrying the D-14
-  fields, the suppression branch, the §13.5 fallback under a
-  failing injected rasterizer, and a fixed-scenario
-  `document.xml` snapshot.
+  relationship, the §13.2 order, the scenario table's rows and
+  shading, captions carrying the D-14 fields, the suppression
+  branch, the §13.5 fallback under a failing injected
+  rasterizer, and a fixed-scenario `document.xml` snapshot.
 - `zipcheck.py` passes over a guided archive produced by the Node
   tests: the outer layout, the nested part set, stored methods
   throughout, and the DDD §5.9 digests for the four text members.
