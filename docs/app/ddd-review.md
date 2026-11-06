@@ -1985,7 +1985,9 @@ fallback, the layout checker's guided case, and the strings:
 four new or changed texts gated to the owner, everything else
 reused verbatim from the registry and overlay. G-13's row now
 points at §13; the owner's acceptance and release open
-execution.
+execution. Both followed the same day: the acceptance in
+`b2ef316`, the release through the owner's gate, recorded in the
+guided plan.
 
 ## References
 
