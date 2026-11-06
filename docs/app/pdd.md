@@ -107,7 +107,7 @@ named in the last column carry the detail.
 | D-3 | Multi-dip behavior of the offset-to-slip assist. | FR-S5, §9.5-3 | Owner, research-group review | Proposed | Per-dip converted windows; §3.6. |
 | D-4 | Low-slip measurement-reliability policy. | DR-4, R-3, §9.5-4 | Research group | Interim | Document, do not filter; caveat in §4.6 and §5.9. |
 | D-5 | Scarp-dip correction status at release. | FR-O4, R-1, §9.5-5 | Research group | Interim | Provisional-data notice everywhere scarp dip appears; text in §5.4. |
-| D-6 | Kern County field-data group and principal-width rule. | FR-O6, R-4, §9.5-6 | Research group | Open | Walkthrough specified with the data slot pending; §4.7. |
+| D-6 | Kern County field-data group and principal-width rule. | FR-O6, R-4, §9.5-6 | Research group | Open | Walkthrough specified with the data slot pending; §4.7. FR-O6 is out of the v0.4 release (D-49, 2026-11-06): the question stays open for the example's post-MVP return and no longer gates the release. |
 | D-7 | Dominant-scarp-type rule for animation offers. | FR-D4, §9.5-7 | Product owner | Proposed | Most-frequent anchor, 10-point companion gap, 30 % floor — all over classified records; zero-classified suppresses the offer; §6.4. |
 | D-8 | Animation coverage required for public release. | FR-E1, R-13, §9.5-8 | Research group | Open | Page layout degrades per-type; §8.2. |
 | D-9 | Numeric performance and payload budgets. | NFR-3, DR-6, §9.5-9 | Product owner | Proposed | Budgets, test conditions, and the first-meaningful-render end point; §9.1. |
@@ -150,6 +150,7 @@ named in the last column carry the detail.
 | D-46 | Interpretation of negative scarp heights. | FR-O1, CR-10 | Product owner | Proposed (2026-11-05) | The Kern sample surfaces a −0.02 m scarp height while the description says height above the ground; the data contract retains negative measurements deliberately. The research group is asked for the interpretation; the application keeps showing the data unchanged, and the explanation lands as CR-10 text once the group answers. §2.3. |
 | D-47 | Progression guidance and review fixes. | FR-G3, NFR-5, CR-10 | Product owner | Decided (2026-11-05) | Reviewing the deployed build with a third external review (f3f94a7), the owner kept every progression control enabled with guidance instead of refusal: a neutral Still-needed line before the attempt; a visible focused summary linking each unfinished condition after an unsuccessful click, replacing the Select-all focus jump; group-boundary error emphasis without per-checkbox outlines; red marking only after an attempt (GOV.UK button guidance; W3C form-feedback guidance). The step list stays a sequence indicator without disabled buttons. Start a new scenario returns to the opening step. The same round: the theme's Back to top control leaves the guided page; the sample dialog keeps its actions in view; both slip endpoints carry the Required mark, adopting audit entry 16; sample explanations drop the caution coloring; the mode-switch note becomes "The sample has separate example values for each mode; one is not converted from the other. Switching modes can change the results." (CR-10). §2.3; guided DDD §12; tasks G-22 and G-23, sequenced after G-21. |
 | D-48 | P1.5 delivery band: the result report, then chart export. | FR-D2, D-14, D-40 | Product owner | Decided (2026-11-05) | Reviewing the parked backlog after the D-47 round, the owner created a band between the MVP and P2 and, the same day, set it release-blocking: v0.4 ships with both items, sequenced after the standing MVP graph, ahead of every remaining P2 item, and implemented at once rather than with the parked lane. The result report (D-40, §6.5; guided task G-13) comes first: a `.docx` built on the application's existing ZIP writer and delivered inside the FR-D1 download ZIP — no new control; the download description names it. Chart captions ride as document text carrying the D-14 fields. The standalone chart-image export (D-14, §6.3) follows as a thin action over the same rendering; D-14's on-image caption rule stays Proposed until an image ships alone. Execution waits only on the report's drafted design section, whose ZIP-layout amendment is guided-only so the `/scenario/` bundles stay byte-identical (D-39). The media index (ADR-0012) is not a prerequisite of either item and stays P2. §2.3; PRD §2.2. |
+| D-49 | FR-O6 (Kern County worked example) is out of the v0.4 release. | FR-O6, D-6, §4.7; PRD §2.2 and Appendix A | Product owner | Decided (2026-11-06) | The research group answered the owner's briefing question 3 on 2026-11-06, relayed by the owner: no need, at least for the MVP. FR-O6 moves from P1 to P2 in the PRD, its Appendix A row included; the §4.7 walkthrough specification and GS-3 stand for the example's post-MVP return; D-6 stays Open as the example's gate and leaves ADR-0017's pre-activation set (its amendment of the same date). The commit of the plan that cites this record drops T-48 from T-65's Depends-on (IP §3). |
 
 ---
 
@@ -1431,6 +1432,12 @@ against the field widths; (3) what the comparison does and does not
 establish (§5.7's framing). D-6 decides only the exact family and
 slip-cap filter and the field-data group; the preset ships only after
 it.
+
+**Deferred from v0.4 (D-49, 2026-11-06).** On the research group's
+answer to the owner's briefing — no need, at least for the MVP — the
+owner moved FR-O6 out of the v0.4 release, from P1 to P2. This
+section stands unchanged for the example's return; D-6 remains its
+gate and is no longer a release gate.
 
 ### 4.8 Inverse-mode results (FR-X2, P2)
 

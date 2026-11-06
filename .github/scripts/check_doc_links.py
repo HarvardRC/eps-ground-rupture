@@ -14,6 +14,11 @@ Each PATH is a Markdown file or a directory searched recursively. The
 default is every tracked Markdown file outside subprojects/mkdocs/docs/,
 whose pages MkDocs renders and its strict build checks.
 
+Pages under subprojects/mkdocs/docs/ are rendered by MkDocs, whose
+attr_list extension lets them declare anchors inline ({ #slip }).
+Repository Markdown may link into those pages, so for files under
+that directory the check also accepts attribute ids as anchors.
+
 Known simplifications: blockquotes nested inside list items, and
 reference-style links whose definitions sit in a different block, are
 followed only approximately; neither occurs in the repository today.
@@ -69,6 +74,7 @@ ID_ELEMENTS = {
 AUTOLINK = re.compile(r"<([A-Za-z][A-Za-z0-9+.-]{1,31}:[^\s<>]*|[\w.!#$%&'*+/=?^`{|}~-]+@[\w.-]+)>")
 ESCAPE = re.compile(r"\\([!-/:-@\[-`{-~])")
 SCHEME = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*:")
+MKDOCS_ATTR = re.compile(r"\{\s*:?\s*#([^\s{}]+)")
 
 
 def slug(text: str) -> str:
@@ -329,12 +335,34 @@ def collect_refs(lines: list[str]) -> dict[str, str]:
     return refs
 
 
+def attr_ids(lines: list[str]) -> set[str]:
+    """Anchors declared as attribute lists ({ #id }), outside fences.
+
+    MkDocs (attr_list) renders them on the pages under
+    subprojects/mkdocs/docs/; GitHub leaves them literal, so they
+    count as anchors only for files MkDocs renders.
+    """
+    ids: set[str] = set()
+    fence = ""
+    for line in lines:
+        opener = FENCE.match(line.lstrip(" >"))
+        if opener and (not fence or opener.group(2).startswith(fence)):
+            fence = "" if fence else opener.group(2)
+        if fence:
+            continue
+        for m in MKDOCS_ATTR.finditer(line):
+            ids.add(m.group(1))
+    return ids
+
+
 def scan(path: Path) -> Parsed:
     """Parse one Markdown file into its anchors and (line, target) links."""
     lines = path.read_text(encoding="utf-8-sig").split("\n")
     lines = [ln.expandtabs(4) for ln in lines]
     refs = collect_refs(lines)
     result = Parsed()
+    if MKDOCS_DOCS in path.resolve().as_posix():
+        result.anchors.update(attr_ids(lines))
     seen: dict[str, int] = {}
 
     def add_heading(raw: str) -> None:

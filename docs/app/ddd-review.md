@@ -1989,6 +1989,52 @@ execution. Both followed the same day: the acceptance in
 `b2ef316`, the release through the owner's gate, recorded in the
 guided plan.
 
+## Research-group answers: terms confirmed, Kern deferred (2026-11-06)
+
+The owner reworked the research-group briefing for publication
+("Questions for public release", `4eca4e7`; 460 insertions) and
+relayed the group's first two answers the same afternoon. Question 2
+— may we share the data files, and on what terms — came back: CC BY
+4.0 is good. That answers the licensing decision ADR-0017 deferred,
+and is recorded as that ADR's 2026-11-06 amendment: the owner adopts
+CC BY 4.0 for the derived data exports with per-source attribution;
+the per-source terms were already documented in
+`data/REDISTRIBUTION.md` (ODC-By, CC0 1.0, CC BY 4.0, and the Kern
+County compiler's written permission of 2026-09-18). That file is
+untouched today: a change of the stated terms alone is a new
+vintage, so the confirmed wording lands with the vintage the release
+pins, as ADR-0017 always provided.
+
+Question 3 — which Kern County measurements the worked example
+should compare — came back: no need, at least for MVP. That is not
+a D-6 decision. Finding 5 of the second implementation-plan review
+(2026-10-31, this ledger) established that only a release-scope
+amendment by the product owner takes FR-O6 out of the release, and
+IP §3 prescribes the record to the cell. This commit is that
+record: D-49 in the PDD register with the prescribed Decision text,
+FR-O6 from P1 to P2 in the PRD with its Appendix A row, the PDD
+§4.7 deferral note, and the ADR-0017 amendment taking D-6 out of
+the pre-activation set while it stays open for the example's
+post-MVP return. Both IP §3 checks pass against this commit; the
+separate commit of the plan that cites this record and drops T-48
+from T-65's Depends-on follows, as prescribed.
+
+The rework also linked six glossary terms by their MkDocs attribute
+anchors (`{ #slip }` and kin), which the link checker did not read:
+it collected heading and HTML anchors only, so seven links reported
+broken against a page where every target exists. The checker now
+collects attribute-list ids as anchors for files under
+`subprojects/mkdocs/docs/`, where MkDocs renders them, and the
+briefing keeps its precise term links.
+
+Still release-blocking from the briefing: question 1 (CR-10,
+scientific-content approval) and question 14's decisions with D-18;
+D-10's liability text stands apart as the owner's own. The owner's
+other two asks of the day — the min/max range controls on the
+guided Site conditions step and the research group's media
+collection — are design intake, taken up in their own entries when
+their decisions land.
+
 ## References
 
 - [`docs/app/ddd.md` — Ground Rupture Explorer — detailed design document](ddd.md).

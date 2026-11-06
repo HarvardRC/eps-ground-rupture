@@ -4,7 +4,8 @@
 - **Date**: 2026-10-30 (the owner's decision of the same day; drafted
   with the DDD correction pass); 2026-10-31, the deferral of the
   licensing decision made explicit after an external review of the
-  implementation plan; accepted 2026-10-31; amended 2026-11-01 (the amendment precedes References)
+  implementation plan; accepted 2026-10-31; amended
+  2026-11-01 and 2026-11-06 (the amendments precede References)
 - **Deciders**: Michael Bouzinier (project owner)
 
 ## Context
@@ -169,6 +170,29 @@ prototype notice, and its data under the stated assumption.
 > [ADR-0009 — GitHub Pages (via Actions) as site hosting](0009-github-pages-hosting.md)
 > records the admission of `dev-v.0.4.x` in its amendment of this
 > date. Every other decision of this ADR stands.
+
+> **Amendment 2026-11-06 (the deferred licensing decision answered;
+> D-6 out of the pre-activation set).** The owner relayed the
+> research group's answer to question 2 of
+> [the owner's briefing](../../notes/research-group-questions.md),
+> which put both halves of the deferred decision to the group:
+> CC BY 4.0 is good. The owner adopts it. The derived data exports
+> are offered under CC BY 4.0 with attribution to each source — the
+> assumption above, now confirmed — and the per-source terms stand
+> as `data/REDISTRIBUTION.md` documents them: ODC-By (the DEM
+> experiments), CC0 1.0 (FDHI), CC BY 4.0 (SURE), and the
+> compiler's written permission of 2026-09-18 (Kern County). The
+> mechanics are unchanged: the prototype's vintage keeps the
+> assumption wording, and the vintage the first software release
+> pins carries the confirmed terms, written into
+> `data/REDISTRIBUTION.md` and its `data-terms` copy when that
+> vintage is cut in the release sequence (IP §3–§4). Separately,
+> the owner's release-scope amendment of the same date (PDD D-49)
+> takes FR-O6, the Kern County worked example, out of the v0.4
+> release, so the decisions this ADR's Phase 2 records before
+> activation no longer include D-6; that decision stays open for
+> the example's post-MVP return. Every other decision of this ADR
+> stands.
 
 ## References
 

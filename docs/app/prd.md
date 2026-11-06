@@ -500,10 +500,11 @@ through US-3 and the requirements below.
   after the P1 graph, ahead of all remaining P2 work.
 
 - **P2:** shareable scenario URLs, inverse search, animations and
-  morphology education, the derived-magnitude display
-  aid (C10), reader-selected result content and display size (C12),
-  and only those additional exploration features that address a
-  documented gap in the existing dashboards (C8).
+  morphology education, the Kern County worked example (FR-O6,
+  moved out of v0.4 by PDD D-49, 2026-11-06), the derived-magnitude
+  display aid (C10), reader-selected result content and display
+  size (C12), and only those additional exploration features that
+  address a documented gap in the existing dashboards (C8).
 
 - **P3:** contact and request features.
 
@@ -1234,6 +1235,12 @@ deformation that the model does not represent.
 
 The product must include a worked example based on the 1952 Kern County
 earthquake.
+
+This requirement is P2: the product owner's release-scope amendment
+of 2026-11-06 (PDD D-49) moved it out of the v0.4 release, on the
+research group's answer that the comparison is not needed for the
+MVP. The requirement itself is unchanged, D-6 remains its gate, and
+the example returns in a later release.
 
 The example must show:
 
@@ -2234,7 +2241,7 @@ carry no priority of their own (—).
 | [FR-O3](#fr-o3-small-or-empty-result-sets) | Small or empty result sets | P1 | C2 | §5.2 |
 | [FR-O4](#fr-o4-scarp-dip-data-caveat) | Scarp-dip data caveat | P1 | C2 | §5.2 |
 | [FR-O5](#fr-o5-field-data-context) | Field-data context | P1 | C3 | §5.2 |
-| [FR-O6](#fr-o6-kern-county-worked-example) | Kern County worked example | P1 | C3 | §5.2 |
+| [FR-O6](#fr-o6-kern-county-worked-example) | Kern County worked example | P2 | C3 | §5.2 |
 | [FR-D1](#fr-d1-download-matching-simulation-records-and-statistics) | Download matching simulation records and statistics | P1 | C4 | §5.3 |
 | [FR-D2](#fr-d2-export-chart-images) | Export chart images | P1.5 | C4 | §5.3 |
 | [FR-D3](#fr-d3-link-to-the-complete-data-archive-and-paper) | Link to the complete data archive and paper | P1 | C5 | §5.3 |

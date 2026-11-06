@@ -1,6 +1,7 @@
 # Questions for the research group — Ground Rupture Explorer
 
-Compiled 2026-11-05; clarified 2026-11-06.
+Compiled 2026-11-05; clarified 2026-11-06; first answers recorded
+the same day.
 
 This note explains what we need to ask the research group, why we
 need the answers, and what the app does while we wait. It is written
@@ -37,7 +38,9 @@ Here, **before public release** means before it is advertised through
 site navigation and search, or published as the first software
 release. It does not mean before the group can try the prototype.
 
-Questions 1–3 need answers before that release. Question 14 also
+Question 1 still needs its answer before that release; questions 2
+and 3 were answered on 2026-11-06 and are recorded below. Question
+14 also
 needs a pre-release decision, including an owner decision about
 field comparisons in the guided app. Other questions concern
 temporary approaches already in use, proposed rules, or later
@@ -47,8 +50,8 @@ review phase.
 | # | Topic | When the answer is needed |
 | --- | --- | --- |
 | 1 | Scientific explanations in the app | Before public release |
-| 2 | Permission and license for sharing data | Before public release |
-| 3 | Kern County comparison with real measurements | Before public release |
+| 2 | Permission and license for sharing data | Answered 2026-11-06: CC BY 4.0 confirmed |
+| 3 | Kern County comparison with real measurements | Answered 2026-11-06: deferred past the MVP (PDD D-49) |
 | 4 | Reliability at small fault movements | Temporary warning in use |
 | 5 | Correction to scarp-slope measurements | Provisional notice in use |
 | 6 | Meaning of negative scarp heights | Values retained; explanation pending |
@@ -107,7 +110,15 @@ proof that every source permits the proposed use.
 **Answer needed:** documented source permissions and an agreed
 license for the exports before public release. Permission to share
 the digitised Kern County field data was already confirmed on
-2026-09-18; the broader question remains open.
+2026-09-18; the broader question was answered on 2026-11-06.
+
+**Answered 2026-11-06.** The group's answer, relayed by the owner:
+CC BY 4.0 is good. The owner adopts CC BY 4.0 for the derived data
+exports, with the per-source terms as documented in
+[the data redistribution record][redistribution]. The record is the
+2026-11-06 amendment of [ADR-0017][adr17]; the vintage pinned by the
+first software release carries the confirmed terms, as that decision
+already provides.
 
 ## 3. Which Kern County measurements should we compare with the models?
 
@@ -147,6 +158,14 @@ measurements could change the apparent agreement with the models.
 The current requirements include this worked example in the first
 public release. Deferring it would require an explicit scope change
 by the product owner.
+
+**Answered 2026-11-06.** The group's answer, relayed by the owner:
+no need, at least for the MVP. The owner took exactly the scope
+change described above: FR-O6 leaves the v0.4 release by the
+release-scope amendment recorded as PDD decision D-49 (2026-11-06),
+moving from P1 to P2. The walkthrough specification stands, and
+this question — which field-data group and which principal-width
+rule — stays open for the example's post-MVP return.
 
 ## 4. How should we handle results at very small fault movements?
 
@@ -420,8 +439,9 @@ questions for the group to settle alone:
   taking account of the source permissions requested in question 2.
 - **Guided-page release scope (D-39):** the owner must reconcile the
   guided app with the release requirements, including field
-  comparisons in question 14. Any deferral of the required Kern
-  worked example in question 3 also needs an explicit scope decision.
+  comparisons in question 14. The deferral of the Kern worked
+  example in question 3 needed its own scope decision; the owner
+  took it on 2026-11-06 (PDD D-49).
 
 Already settled, so we need not ask again:
 
