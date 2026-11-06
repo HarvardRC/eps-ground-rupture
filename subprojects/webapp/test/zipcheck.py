@@ -18,7 +18,7 @@ word/_rels/document.xml.rels, then word/media/chart-1.png ... chart-n.png,
 every part stored with flag_bits 0, an ASCII name, and the same date_time;
 every XML part well formed; each image relationship naming a media part,
 every media part named by one, and every r:embed resolving to one; each
-media part a PNG. Its bytes are never digested: PNG bytes vary by browser.
+media part a PNG; [Content_Types].xml declaring the main document and PNG. Its bytes are never digested: PNG bytes vary by browser.
 Standard library only. Prints one line per failure and exits 1 on any.
 """
 
@@ -46,6 +46,8 @@ PNG = b"\x89PNG\r\n\x1a\n"
 REL_NS = "{http://schemas.openxmlformats.org/package/2006/relationships}"
 R_EMBED = "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed"
 IMAGE_TYPE = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image"
+CT_NS = "{http://schemas.openxmlformats.org/package/2006/content-types}"
+MAIN_TYPE = "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"
 
 
 def instant(text: str) -> tuple[int, int, int, int, int, int]:
@@ -99,6 +101,14 @@ def check_report(data: bytes, expected_time: tuple) -> list[str]:
                     failures.append(f"{where}{name}: not well formed: {exc}")
             elif MEDIA.fullmatch(name) and not docx.read(name).startswith(PNG):
                 failures.append(f"{where}{name}: not a PNG")
+        types = parsed.get("[Content_Types].xml")
+        if types is not None:
+            defaults = {node.get("Extension"): node.get("ContentType") for node in types.iter(f"{CT_NS}Default")}
+            overrides = {node.get("PartName"): node.get("ContentType") for node in types.iter(f"{CT_NS}Override")}
+            if overrides.get("/word/document.xml") != MAIN_TYPE:
+                failures.append(f"{where}[Content_Types].xml: no main-document Override for /word/document.xml")
+            if media and defaults.get("png") != "image/png":
+                failures.append(f"{where}[Content_Types].xml: no image/png Default for the media parts")
         rels = parsed.get("word/_rels/document.xml.rels")
         document = parsed.get("word/document.xml")
         if rels is None or document is None:

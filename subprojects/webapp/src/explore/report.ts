@@ -180,7 +180,8 @@ function versionsLine(input: RenderInput, stamps: VersionStamps): string {
 }
 
 /**
- * The one-line scenario summary of DDD §5.7, settings and population
+ * The one-line scenario summary (`summaryText`, DDD §5.7; guided §13.2's
+ * "DDD §5.8 wording"), settings and population
  * (§13.2): `summaryText` without its closing count token, which the count
  * line gives in the page's wording.
  */
@@ -340,12 +341,13 @@ export interface GuidedArchive {
 export async function guidedArchive(input: RenderInput, stamps: VersionStamps, generatedAt: Date, rasterize: Rasterize): Promise<GuidedArchive> {
   const encoder = new TextEncoder();
   const members: ZipMember[] = packageTexts(input, stamps, generatedAt).map(member => ({ name: member.name, bytes: encoder.encode(member.text) }));
-  let reportError: unknown = null;
+  const fileName = downloadFileName(input.scenario, input.vintage.manifest, generatedAt);
   try {
-    members.push({ name: REPORT_MEMBER, bytes: await reportDocx(input, stamps, generatedAt, rasterize) });
+    const report = await reportDocx(input, stamps, generatedAt, rasterize);
+    return { fileName, bytes: zip([...members, { name: REPORT_MEMBER, bytes: report }], generatedAt), reportError: null };
   } catch (error) {
-    reportError = error ?? new Error('report: failed');
+    // Anything that fails once the report is involved, the outer archive included, leaves the report out (§13.5).
+    return { fileName, bytes: zip(members, generatedAt), reportError: error ?? new Error('report: failed') };
   }
-  return { fileName: downloadFileName(input.scenario, input.vintage.manifest, generatedAt), bytes: zip(members, generatedAt), reportError };
 }
 

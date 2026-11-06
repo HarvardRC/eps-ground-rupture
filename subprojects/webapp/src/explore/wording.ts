@@ -1,6 +1,8 @@
 // Guided wording shared by the page (app.ts) and the result report
 // (report.ts), so the report says nothing in a second wording (guided DDD
-// §13.7). The count wording is §11.1's; the download hint, the report's
+// §13.7). `matchingStages` and `measurementsUsed` are §11.1's count wording;
+// `missingExcluded` is the report's count-line phrase for §11.1's "Missing
+// values (excluded)" (owner gate, G-13); the download hint, the report's
 // failure line, its title, and its provenance heading are §13.7's.
 //
 // A browser-and-Node file (DDD §5.1): no DOM global, no DOM type.

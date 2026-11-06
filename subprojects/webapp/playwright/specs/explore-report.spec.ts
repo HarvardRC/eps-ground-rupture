@@ -123,3 +123,39 @@ test('a second activation while the archive is assembled is ignored', async ({ p
   const [again] = await Promise.all([page.waitForEvent('download'), downloadButton(page).click()]);
   expect(again.suggestedFilename()).toMatch(/\.zip$/);
 });
+
+test('a scenario replaced while the archive is assembled delivers nothing and keeps the newer status', async ({ page }) => {
+  await page.addInitScript(() => {
+    const original = HTMLCanvasElement.prototype.toBlob;
+    HTMLCanvasElement.prototype.toBlob = function toBlob(this: HTMLCanvasElement, callback: BlobCallback, ...rest: unknown[]): void {
+      setTimeout(() => original.call(this, callback, ...(rest as [string?, number?])), 300);
+    };
+  });
+  await confirmSample(page, 'illustrative');
+  let downloads = 0;
+  page.on('download', () => { downloads += 1; });
+  await downloadButton(page).click();
+  await page.locator('.gx-restart').getByRole('button', { name: 'Start a new scenario' }).click();
+  const fresh = page.getByRole('status').filter({ hasText: 'New scenario. Build your scenario or try a prefilled sample.' });
+  await expect(fresh).toHaveCount(1);
+  // Six slowed charts take about two seconds; wait well past them.
+  await page.waitForTimeout(4000);
+  expect(downloads).toBe(0);
+  await expect(fresh).toHaveCount(1);
+  await expect(page.getByRole('status').filter({ hasText: READY })).toHaveCount(0);
+});
+
+test('a canvas that never settles gives up the report and still delivers the data files', async ({ page }, testInfo) => {
+  test.setTimeout(90_000);
+  await page.addInitScript(() => {
+    HTMLCanvasElement.prototype.toBlob = function toBlob(): void { /* never calls back */ };
+  });
+  await confirmSample(page, 'illustrative');
+  const [download] = await Promise.all([page.waitForEvent('download', { timeout: 30_000 }), downloadButton(page).click()]);
+  await expect(page.getByRole('status').filter({ hasText: REPORT_FAILED })).toHaveCount(1);
+  const captured = await readDownload(download, testInfo, 'report-stalled');
+  expect([...captured.members.keys()]).toEqual([...PACKAGE_MEMBER_NAMES]);
+  // The button is free again.
+  const [again] = await Promise.all([page.waitForEvent('download', { timeout: 30_000 }), downloadButton(page).click()]);
+  expect(again.suggestedFilename()).toMatch(/\.zip$/);
+});

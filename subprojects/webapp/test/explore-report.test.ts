@@ -61,11 +61,14 @@ function recording(): { rasterize: Rasterize; calls: { svg: string; width: numbe
 let full: RenderInput;
 let mixed: RenderInput;
 let empty: RenderInput;
+let noValid: RenderInput;
+let large: Vintage;
 
 before(async () => {
-  const large: Vintage = await decodeFixture(await buildFixture(stageCountSpec(102)));
+  large = await decodeFixture(await buildFixture(stageCountSpec(102)));
   full = computeResult(large, defaultScenario(large.manifest), 1, null);
   empty = computeResult(large, { ...defaultScenario(large.manifest), scarpClass: [] }, 2, null);
+  noValid = computeResult(large, { ...defaultScenario(large.manifest), window: { mode: 'slip', min: '0', max: '0' } }, 4, null);
   const small: Vintage = await decodeFixture(await buildFixture(stageCountSpec(12)));
   const scenario: Scenario = { ...defaultScenario(small.manifest), faultDip: [30] };
   mixed = computeResult(small, scenario, 3, null);
@@ -137,6 +140,9 @@ describe('report: the .docx part set (§13.4)', () => {
     assert.deepEqual([...parts.keys()], [...REPORT_PARTS, ...charts.map((_, i) => `word/media/chart-${i + 1}.png`)]);
     for (const [name, bytes] of parts) if (!name.endsWith('.png')) assertWellFormed(decode(bytes), name);
     assert.match(decode(parts.get('[Content_Types].xml')), /<Default Extension="png" ContentType="image\/png"\/>/);
+    assert.match(decode(parts.get('[Content_Types].xml')), /<Override PartName="\/word\/document.xml" ContentType="application\/vnd.openxmlformats-officedocument.wordprocessingml.document.main\+xml"\/>/);
+    const ids = [...decode(parts.get('word/document.xml')).matchAll(/<wp:docPr id="(\d+)"/g)].map(m => Number(m[1]));
+    assert.deepEqual(ids, [1, 2, 3, 4, 5, 6], 'docPr ids unique, 1..n in order');
     assert.match(decode(parts.get('_rels/.rels')), /Target="word\/document.xml"/);
   });
 
@@ -150,7 +156,10 @@ describe('report: the .docx part set (§13.4)', () => {
   });
 
   test('the XML parts are deterministic; only the rasterizer sees the charts, at their CSS size', async () => {
-    assert.equal(documentXml(full, STAMPS, AT), documentXml(full, STAMPS, new Date(AT.getTime())));
+    // A result computed afresh from the same vintage and scenario gives the same document.
+    const again = computeResult(large, defaultScenario(large.manifest), 9, null);
+    assert.notEqual(again, full);
+    assert.equal(documentXml(again, STAMPS, new Date(AT.getTime())), documentXml(full, STAMPS, AT));
     const { rasterize, calls } = recording();
     const a = await reportDocx(full, STAMPS, AT, rasterize);
     const b = await reportDocx(full, STAMPS, AT, recording().rasterize);
@@ -215,7 +224,10 @@ describe('report: the document (§13.2, §13.3)', () => {
   });
 
   test('the chart set ignores the page toggles: linear histograms, the cumulative curve without a read-off', () => {
+    // A read-off marker would change the drawing; the report has none.
+    assert.notDeepEqual(cumulativeChart(full, 'scarp_height', REPORT_CHART_WIDTH, 84), cumulativeChart(full, 'scarp_height', REPORT_CHART_WIDTH, null));
     for (const chart of reportCharts(full)) {
+      assert.ok(!serializeSvg(chart.svg).includes('logarithmic'), 'never the log scale');
       const expected: SvgNode = chart.view === 'histogram'
         ? histogramChart(histogramBins(full, chart.measurement, false), REPORT_CHART_WIDTH)
         : cumulativeChart(full, chart.measurement, REPORT_CHART_WIDTH, null);
@@ -241,6 +253,23 @@ describe('report: the document (§13.2, §13.3)', () => {
       const at = lines.indexOf(notice, start);
       assert.ok(at > lines.indexOf('Standard deviation', start), `${m}: the notice follows the statistics table`);
       assert.equal(lines.filter(line => line === notice).length, 2, 'once in each suppressed section');
+    }
+  });
+
+  test('no valid measurement: tables still render, and the page notice stands in each section\u2019s charts', () => {
+    const plan = selectNotices(noValid, config);
+    assert.equal(plan.state, null);
+    assert.ok(noValid.selection.matchingRecords > 0);
+    for (const m of MEASUREMENT_NAMES) assert.equal(plan.panels[m]?.key, NOTICE_KEYS.noValid, m);
+    assert.equal(reportCharts(noValid).length, 0);
+    const xmlText = documentXml(noValid, STAMPS, AT);
+    const lines = paragraphs(xmlText);
+    assert.equal((xmlText.match(/<w:tbl>/g) ?? []).length, 3);
+    assert.equal(xmlText.includes('<w:drawing>'), false);
+    for (const m of MEASUREMENT_NAMES) {
+      const start = lines.indexOf(measurementLabel(m));
+      const at = lines.indexOf(guided(noticeText(plan.panels[m]!)), start);
+      assert.ok(at > lines.indexOf('Standard deviation', start), m);
     }
   });
 

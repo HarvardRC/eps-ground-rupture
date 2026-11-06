@@ -986,7 +986,8 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     downloading = true;
     try {
       const archive = await guidedArchive(input, stamps, new Date(), rasterizeSvg);
-      if (!alive()) return;
+      // A newer result (or a new scenario) replaced the one clicked while the archive was assembled: deliver nothing, and leave its status alone.
+      if (!alive() || result !== input) return;
       if (archive.reportError !== null) console.error('Guided report:', archive.reportError);
       const url = URL.createObjectURL(new Blob([archive.bytes], { type: 'application/zip' })); downloadUrls.add(url);
       const anchor = document.createElement('a'); anchor.href = url; anchor.download = archive.fileName; root.append(anchor); anchor.click(); anchor.remove();
@@ -994,7 +995,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       status.textContent = archive.reportError === null ? 'Your confirmed result download is ready.' : REPORT_FAILED;
     } catch (error) {
       console.error('Guided download:', error);
-      if (!alive()) return;
+      if (!alive() || result !== input) return;
       generalError = 'The download could not be created. Your confirmed result is unchanged; select Download data (ZIP) to retry.';
       alert.textContent = generalError; render();
     } finally {
