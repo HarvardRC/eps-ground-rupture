@@ -2085,6 +2085,210 @@ Not verified: screen-reader reading, touch scrolling inside the dialog,
 real zoom (the short-viewport case was set by viewport size), and
 engines other than Chromium.
 
+### Result report, 2026-11-05 (G-13)
+
+G-13 ran under the D-48 release, after G-23's merge, to guided DDD §13.
+The guided download (FR-D1) now carries `report.docx` as a fifth
+member, after the four DDD §5.9 members. The shared `packageTexts` and
+`zip.ts` are unchanged. The report is guided-only.
+
+**What was built.**
+
+- `src/explore/report.ts` assembles the report as a stored ZIP with the
+  §13.4 part set: `[Content_Types].xml`, `_rels/.rels`,
+  `word/document.xml`, `word/_rels/document.xml.rels`, and one
+  `word/media/chart-n.png` per chart. It uses direct formatting only,
+  with no styles part.
+- The fixed chart set is a distribution histogram (linear) and a
+  cumulative curve (no read-off marker) for each measurement the page
+  charts.
+- Rasterizing is injected. In the browser, `src/explore/rasterize.ts`
+  draws each chart's SVG on a canvas at twice its 600 × 300 CSS px, on
+  white, and encodes it as PNG. A chart that has not finished after
+  10 s counts as a failure.
+- The page and the report draw charts through one guided builder,
+  `src/explore/charts.ts`. The axis-title tweaks moved from DOM edits
+  into that builder, with the same output.
+- Guided wording that the page and the report share sits in
+  `src/explore/wording.ts`, so the report says nothing in a second
+  wording (§13.7).
+- **Fallback (§13.5).** If the report cannot be built, including a
+  non-PNG raster or a failure while writing the outer archive, the
+  download is the four-member archive and the status line is the
+  §13.7 failure line. A failure before the four members exist still
+  fails the whole download with the existing error message.
+- **Busy and stale results (§13.1).** A second activation while the
+  archive is assembled is ignored. If the result changes during
+  assembly, nothing is delivered and the newer status stays.
+- `test/zipcheck.py` gains `--members=`, accepting only the four-member
+  layout or the four plus `report.docx`. For the nested report it checks
+  stored entries, the part order, well-formed XML, PNG signatures, the
+  content types, and that every image relationship is used exactly
+  once. It runs under Python 3.9.
+
+**Strings and interpretations: the owner's own approval (2026-11-05,
+relayed by the planning session).**
+
+- The four §13.7 strings, as drafted:
+  - the hint under **Download data (ZIP)**: "Matching simulation stages,
+    statistics, scenario settings and sources, with a Word report of
+    this result (report.docx).";
+  - the failure line: "Your data download is ready. The Word report
+    could not be built this time, so the archive holds the data files
+    without it.";
+  - the title: "Ground Rupture Explorer — result report";
+  - the heading: "Provenance".
+- Interpretations (a)–(m), where §13 leaves wording or layout open:
+  - (a) The count line uses the §11.1 count wording, e.g. "N = 2,770
+    measurements used of 2,880 matching simulation stages (110 missing
+    values excluded)", with singulars where they apply.
+  - (b) The scenario summary is `summaryText` without its trailing
+    matching-records token.
+  - (c) Each caption opens with "{label with unit} · {view name}".
+  - (d) The versions line uses the provenance labels' words: "Software
+    version: X · Data-export version and date: Y (date)". The title
+    block's line is "Generated (UTC): {instant} · {versions line}".
+  - (e) "Cite: Chiama et al. (2025)" has no pointer phrase. The full
+    citation is in the Provenance section.
+  - (f) The cumulative chart has no read-off marker. The shared median
+    and 84th-percentile marks stay.
+  - (g) A legend line under each histogram: each scarp type after a ■
+    in its palette colour.
+  - (h) The width section carries the width-scope note and the dip
+    section the provisional notice, then the small-result warning, in
+    the page's order.
+  - (i) Below the chart floor, the page's suppression or no-valid
+    notice prints once, after the statistics table, in place of both
+    charts.
+  - (j) The empty state prints "No matching simulation stages" and the
+    explainer paragraphs, without the page's instruction to change a
+    condition.
+  - (k) The unclassified line (PDD §4.3) appears under each table,
+    without the page's missing-values hint.
+  - (l) The Provenance section reproduces `provenance.txt` verbatim, in
+    registry wording, so its caveats can differ from the page's guided
+    overlay.
+  - (m) US Letter with 1-inch margins; charts at 6.25 in, rasterized
+    at 2× on white; Word's default font; each image's alt text is the
+    chart's accessible name.
+
+**Word check: passed on both samples (the owner's own, 2026-11-05).**
+Both samples were built by the lane's Chromium from real downloads:
+
+| Sample | sha256 |
+| --- | --- |
+| Lower fault angles (`report-illustrative.docx`) | `375415ef0b8bf52e42f77c2a2cf84a133923e42b4e668a78eef65293e30ae833` |
+| Steeper fault angles (`report-kern.docx`) | `bafb9f4fa3f565f30ded262e665f146788ceab1496c08e58855a7406ff2135ad` |
+
+The one change asked for: the title block's summary line becomes a
+scenario table (the §13.2 item 1 amendment). The table has one row per
+summary condition in the summary's order, the label column bold and
+shaded light gray (`E7E6E6`) by direct formatting, and each value in
+its summary token's own words. The captions keep the one-line summary.
+The owner looked at the updated sample, `report-kern-table.docx`
+(`527e8f43fbdfe286d96f729e96014de56629eeea4221ef3b06e5e51338a1a264`),
+and answered "Looks right" (the owner's own, 2026-11-05). An earlier
+relay of the Kern hash carried a transcription slip. The value above
+was re-verified from the file.
+
+**Table labels: decided by the planning session, amendable by the
+owner.** The amendment first named "the §6.1 setting names", but §6.1
+has no such list, and the sample used the PDD §3 input names. The
+owner's answer did not pick a set. The planning session decided, under
+§13.7's no-second-wording rule, on the guided page's own condition
+names (the compact summary's wording): Fault angle, Sediment strength
+and structure, Sediment depth, Sediment density, Maximum surface offset
+or Fault slip (by the scenario's mode), Simulation stages, and Scarp
+types. The amended §13.2 line reads accordingly. This was not the
+owner's own pick, and the owner may amend it. The swap changed labels
+only. No sample was regenerated for a further gate, per the planning
+session.
+
+**Stamps: routed to the owner, outside G-13.** The owner noticed
+"Software version: 0.2.0". It comes from `CITATION.cff`'s
+`version: 0.2.0`, which the MkDocs build injects into both pages. The
+data stamp `data-v1` is the published vintage tag. Both are site-wide
+and pre-existing, and the report mirrors them as §6.2 requires, so
+G-13 changes nothing there. A version bump, if any, is the owner's own
+edit.
+
+**Review.** The independent review found nothing blocking. Its
+findings, applied in `042b402`:
+
+- **Stale delivery.** A result replaced during assembly could still
+  deliver the older archive and overwrite the newer status. Both paths
+  now check that the result is unchanged.
+- **Hung rasterizer.** A canvas that never answered left the button
+  busy forever. The 10 s timeout now falls back to the four files.
+- **Outer archive.** Writing the outer archive sat outside the
+  fallback. It is now inside it.
+- **Test gaps.** The tests now assert the main-document content
+  override, unique drawing ids, the no-valid branch, determinism
+  across a recomputed result, and the curve without a read-off.
+  `zipcheck.py` checks `[Content_Types].xml`.
+
+Not changed, the review's note that the Provenance section prints
+every caveat in registry wording rather than the page's filtered,
+guided set. That is approved interpretation (l).
+
+Tests and specs:
+
+- `test/explore-report.test.ts` (18 tests) covers:
+  - the part set, content types, relationships and drawing ids;
+  - determinism and the rasterizer calls;
+  - the document's order;
+  - the scenario table's labels in both modes, its values and its
+    shading;
+  - provenance, captions, statistics labels and notes;
+  - the chart set, the suppression and warning mix, the no-valid case
+    and the empty state;
+  - a snapshot of `word/document.xml`;
+  - the archive's members and the fallback for a throwing and a
+    non-PNG rasterizer;
+  - a failure before the four members;
+  - `zipcheck.py` on both layouts, wrong digests and a broken nested
+    report.
+- The new `explore-report` spec covers, in both lane projects:
+  - each sample's archive: `zipcheck.py` under the guided layout, one
+    1200 × 600 PNG per drawn chart, the table's labels, captions and
+    accuracy statements, the count lines and the generated line;
+  - a failing canvas: the four files and the failure line;
+  - a second click while assembling: one download;
+  - a new scenario while assembling: nothing delivered, the newer
+    status kept;
+  - a canvas that never settles: the four files after the timeout,
+    and the button free again.
+- `explore-download`, `explore-log-scale` and `explore-polish` now
+  expect the five-member archive and the new hint.
+
+At this verification, on `task/g-13-result-report` at `5d0122a`,
+rebased over `f93cede` (the owner's §13.2 amendment):
+
+- **Build and unit tests.** The pinned Node suite passed all 465 tests,
+  and typechecking and the bundles passed.
+- **Site builds.** The strict publication and preview builds passed,
+  with `explore-868e5ed51aa8.js` and `explore-b60ac1064581.css`.
+- **Unchanged.** The `/scenario/` bundles `app-26490347afd0.js` and
+  `app-08bebc049c15.css` did not change.
+- **Hooks and document checks.** All 31 hook tests passed. Relative
+  links resolved, PDD agreement passed, and traceability reported no
+  gap rows.
+- **Lane.** The full lane passed 309 and skipped 5, with no failure,
+  twice in a row, at load averages of 12 to 17.
+- **Guided specs.** All 156 passed in `desktop` and `mobile`.
+- **Earlier run.** The same commands had passed at `5921a30`, before
+  the review fixes and the table (463 Node tests; lane 305 twice;
+  guided 152).
+
+Not verified:
+
+- Word itself, by me. The Word check is the owner's, on the two
+  original samples. The table sample had the owner's look, and the
+  final labels had no sample gate.
+- Other word processors (LibreOffice, Pages, Google Docs).
+- Screen-reader reading of the document.
+- Browsers other than Chromium, including Safari's canvas encoding.
+
 ## Separate CI investigation
 
 The reported job `126383105016` belongs to historical run
