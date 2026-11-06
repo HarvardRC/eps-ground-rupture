@@ -9,6 +9,7 @@
     "src/main.ts",
     "src/explore/main.ts",
     "src/explore/app.ts",
+    "src/explore/rasterize.ts",
     "src/recovery.ts",
     "src/views/dom/**",
     "src/overlay/field-overlay.ts",

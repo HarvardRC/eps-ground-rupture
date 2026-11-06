@@ -6,7 +6,7 @@
 // and leaves the package unchanged (G-17).
 
 import { expect, test } from '@playwright/test';
-import { PACKAGE_MEMBER_NAMES } from '../../src/download/package';
+import { GUIDED_MEMBER_NAMES } from '../../src/explore/report';
 import { copyText } from '../../src/views/copy';
 import { gs, readDownload } from '../support';
 import { confirmGolden, gotoExplore, reconfirmMovement, storedRecord } from '../explore-support';
@@ -83,7 +83,7 @@ test('a download after the off-adjustment clears the notice and keeps the packag
   await expect(off).toHaveCount(0);
   await expect(page.getByRole('status').filter({ hasText: 'Your confirmed result download is ready.' })).toHaveCount(1);
   const captured = await readDownload(download, testInfo, 'explore-log-off');
-  expect([...captured.members.keys()]).toEqual([...PACKAGE_MEMBER_NAMES]);
+  expect([...captured.members.keys()]).toEqual([...GUIDED_MEMBER_NAMES]);
   const records = captured.members.get('records.csv')!.toString('utf8').trimEnd().split('\n');
   expect(records.length - 1).toBe(ref.counts.matching_records);
 

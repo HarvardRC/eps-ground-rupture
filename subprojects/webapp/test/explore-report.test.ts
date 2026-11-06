@@ -1,0 +1,347 @@
+// explore-report.test.ts (guided DDD §13.8): the result report's assembly
+// as a pure function with injected fixture PNGs, over results that
+// computeResult derives from code-built fixture vintages.
+//
+// - The §13.4 part set in order; well-formed XML; every image
+//   relationship resolving to a media part and every embed to a
+//   relationship; one image per drawn chart.
+// - The §13.2 order; captions carrying the D-14 fields; the cumulative
+//   accuracy statement; the provenance blocks in provenance.txt's words.
+// - The suppression branch, the small-result warning, and the empty state.
+// - The §13.5 fallback under a failing injected rasterizer.
+// - A fixed-scenario `document.xml` snapshot
+//   (test/snapshots/report-document.xml; REPORT_SNAPSHOT_UPDATE=1 rewrites it).
+// - test/zipcheck.py over the guided archive: the outer layout, the nested
+//   part set, stored throughout, the DDD §5.9 digests of the text members.
+
+import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { before, describe, test } from 'node:test';
+
+import * as config from '../src/config';
+import type { Vintage } from '../src/decode/decode';
+import { PACKAGE_MEMBER_NAMES, packageTexts, provenanceText, type VersionStamps } from '../src/download/package';
+import { cumulativeChart, guidedChart, histogramBins, histogramChart } from '../src/explore/charts';
+import { computeResult } from '../src/explore/compute';
+import { guided } from '../src/explore/copy-overlay';
+import {
+  captionLines, countLine, documentXml, GUIDED_MEMBER_NAMES, guidedArchive, REPORT_CHART_HEIGHT, REPORT_CHART_WIDTH,
+  REPORT_MEMBER, REPORT_PARTS, reportCharts, reportDocx, scenarioSummary, type Rasterize,
+} from '../src/explore/report';
+import { NO_MATCHES, PROVENANCE_HEADING, REPORT_TITLE } from '../src/explore/wording';
+import { defaultScenario, MEASUREMENT_NAMES, type Scenario } from '../src/state/state';
+import { measurementLabel } from '../src/views/chart-text';
+import { copyText } from '../src/views/copy';
+import { noticeText, NOTICE_KEYS, selectNotices } from '../src/views/notices';
+import type { RenderInput } from '../src/views/render-input';
+import { serializeSvg, type SvgNode } from '../src/views/svg';
+import { zip } from '../src/download/zip';
+import { buildFixture, decodeFixture, stageCountSpec } from './fixtures';
+
+const WEBAPP_DIR = fileURLToPath(new URL('../../', import.meta.url));
+const SNAPSHOT = `${WEBAPP_DIR}test/snapshots/report-document.xml`;
+const OUT_DIR = fileURLToPath(new URL('./report/', import.meta.url));
+
+const AT = new Date('2026-11-05T12:34:57Z');
+const AT_ISO = '2026-11-05T12:34:57Z';
+const STAMPS: VersionStamps = { softwareVersion: 'v0.4.0-test', dataVersion: 'data-v0-test' };
+
+/** A fixture PNG: the signature and an IHDR-shaped tail; the assembly checks the signature only. */
+const PNG = Uint8Array.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 13, 0x49, 0x48, 0x44, 0x52]);
+
+/** A rasterizer that records its calls and returns the fixture PNG. */
+function recording(): { rasterize: Rasterize; calls: { svg: string; width: number; height: number }[] } {
+  const calls: { svg: string; width: number; height: number }[] = [];
+  return { calls, rasterize: async (svg, width, height) => { calls.push({ svg, width, height }); return PNG; } };
+}
+
+let full: RenderInput;
+let mixed: RenderInput;
+let empty: RenderInput;
+
+before(async () => {
+  const large: Vintage = await decodeFixture(await buildFixture(stageCountSpec(102)));
+  full = computeResult(large, defaultScenario(large.manifest), 1, null);
+  empty = computeResult(large, { ...defaultScenario(large.manifest), scarpClass: [] }, 2, null);
+  const small: Vintage = await decodeFixture(await buildFixture(stageCountSpec(12)));
+  const scenario: Scenario = { ...defaultScenario(small.manifest), faultDip: [30] };
+  mixed = computeResult(small, scenario, 3, null);
+});
+
+// --------------------------------------------------------------------
+// A stored-ZIP reader and an XML well-formedness check
+// --------------------------------------------------------------------
+
+/** The members of a stored ZIP in local-header order. */
+function unzip(bytes: Uint8Array): Map<string, Uint8Array> {
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const out = new Map<string, Uint8Array>();
+  let p = 0;
+  while (view.getUint32(p, true) === 0x04034b50) {
+    assert.equal(view.getUint16(p + 8, true), 0, 'stored');
+    const size = view.getUint32(p + 18, true);
+    const nameLength = view.getUint16(p + 26, true);
+    const extra = view.getUint16(p + 28, true);
+    const name = new TextDecoder().decode(bytes.subarray(p + 30, p + 30 + nameLength));
+    const start = p + 30 + nameLength + extra;
+    out.set(name, bytes.subarray(start, start + size));
+    p = start + size;
+  }
+  return out;
+}
+
+const decode = (bytes: Uint8Array | undefined): string => new TextDecoder().decode(bytes);
+
+/** Throws unless `text` is one balanced element tree after its declaration, with no unescaped `&`. */
+function assertWellFormed(text: string, name: string): void {
+  const body = text.replace(/^<\?xml [^?]*\?>\n?/, '');
+  assert.ok(!/&(?!(amp|lt|gt|quot|apos);)/.test(body), `${name}: an unescaped &`);
+  const stack: string[] = [];
+  let roots = 0;
+  for (const match of body.matchAll(/<(\/?)([A-Za-z_][\w:.-]*)((?:\s+[\w:.-]+="[^"<]*")*)\s*(\/?)>/g)) {
+    const [, close, tag, , selfClose] = match;
+    if (close) assert.equal(stack.pop(), tag, `${name}: </${tag}> closes another element`);
+    else if (!selfClose) {
+      if (stack.length === 0) roots += 1;
+      stack.push(tag);
+    } else if (stack.length === 0) roots += 1;
+  }
+  assert.deepEqual(stack, [], `${name}: unclosed elements`);
+  assert.equal(roots, 1, `${name}: one root element`);
+  assert.equal(body.replace(/<[^>]*>/g, '').includes('<'), false);
+}
+
+/** The document's visible text in order, one entry per paragraph. */
+function paragraphs(documentXmlText: string): string[] {
+  return [...documentXmlText.matchAll(/<w:p>(.*?)<\/w:p>/g)].map(([, inner]) =>
+    [...inner.matchAll(/<w:t xml:space="preserve">([^<]*)<\/w:t>/g)].map(([, t]) => t.replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')).join(''),
+  );
+}
+
+async function docxParts(input: RenderInput): Promise<Map<string, Uint8Array>> {
+  return unzip(await reportDocx(input, STAMPS, AT, recording().rasterize));
+}
+
+// --------------------------------------------------------------------
+// The tests
+// --------------------------------------------------------------------
+
+describe('report: the .docx part set (§13.4)', () => {
+  test('the four fixed parts, then one PNG per chart, numbered in document order', async () => {
+    const parts = await docxParts(full);
+    const charts = reportCharts(full);
+    assert.equal(charts.length, 6, 'two charts for each of three measurements');
+    assert.deepEqual([...parts.keys()], [...REPORT_PARTS, ...charts.map((_, i) => `word/media/chart-${i + 1}.png`)]);
+    for (const [name, bytes] of parts) if (!name.endsWith('.png')) assertWellFormed(decode(bytes), name);
+    assert.match(decode(parts.get('[Content_Types].xml')), /<Default Extension="png" ContentType="image\/png"\/>/);
+    assert.match(decode(parts.get('_rels/.rels')), /Target="word\/document.xml"/);
+  });
+
+  test('every embed resolves to an image relationship, every relationship to a media part', async () => {
+    const parts = await docxParts(full);
+    const rels = [...decode(parts.get('word/_rels/document.xml.rels')).matchAll(/<Relationship Id="(rId\d+)" Type="[^"]*\/image" Target="([^"]+)"\/>/g)];
+    const embeds = [...decode(parts.get('word/document.xml')).matchAll(/r:embed="(rId\d+)"/g)].map(m => m[1]);
+    assert.equal(rels.length, 6);
+    assert.deepEqual(embeds, rels.map(m => m[1]));
+    for (const [, , target] of rels) assert.ok(parts.has(`word/${target}`), target);
+  });
+
+  test('the XML parts are deterministic; only the rasterizer sees the charts, at their CSS size', async () => {
+    assert.equal(documentXml(full, STAMPS, AT), documentXml(full, STAMPS, new Date(AT.getTime())));
+    const { rasterize, calls } = recording();
+    const a = await reportDocx(full, STAMPS, AT, rasterize);
+    const b = await reportDocx(full, STAMPS, AT, recording().rasterize);
+    assert.deepEqual(a, b);
+    assert.equal(calls.length, 6);
+    reportCharts(full).forEach((chart, i) => {
+      assert.ok(calls[i].svg.startsWith('<svg xmlns="http://www.w3.org/2000/svg" '), 'a standalone SVG');
+      assert.equal(calls[i].svg, serializeSvg({ ...chart.svg, attrs: [['xmlns', 'http://www.w3.org/2000/svg'], ...chart.svg.attrs] }));
+      assert.equal(calls[i].width, REPORT_CHART_WIDTH);
+      assert.equal(calls[i].height, REPORT_CHART_HEIGHT);
+    });
+  });
+});
+
+describe('report: the document (§13.2, §13.3)', () => {
+  test('the order: title block, provenance, then the three measurements in the PDD §4.1 order', () => {
+    const lines = paragraphs(documentXml(full, STAMPS, AT));
+    assert.equal(lines[0], REPORT_TITLE);
+    assert.match(lines[2], new RegExp(`^${copyText('ddd5.9.labelGenerated').replace(/[()]/g, '\\$&')}: ${AT_ISO} · Software version: v0\\.4\\.0-test`));
+    const at = (line: string): number => lines.indexOf(line);
+    const order = [PROVENANCE_HEADING, ...MEASUREMENT_NAMES.map(measurementLabel)].map(at);
+    assert.ok(order.every(i => i > 2), JSON.stringify(order));
+    assert.deepEqual([...order].sort((x, y) => x - y), order);
+  });
+
+  test('provenance renders every line of provenance.txt, in its words and order', () => {
+    const lines = paragraphs(documentXml(full, STAMPS, AT));
+    const start = lines.indexOf(PROVENANCE_HEADING) + 1;
+    const expected = provenanceText(full, STAMPS, AT).split('\n').filter(line => line !== '');
+    assert.deepEqual(lines.slice(start, start + expected.length), expected);
+  });
+
+  test('each chart is followed by its caption: the D-14 fields, and the accuracy statement on the cumulative chart', () => {
+    const xmlText = documentXml(full, STAMPS, AT);
+    const lines = paragraphs(xmlText);
+    const accuracy = guided(copyText('pdd4.1.cumulativeAccuracy'));
+    for (const chart of reportCharts(full)) {
+      const caption = captionLines(full, STAMPS, chart);
+      const first = lines.indexOf(caption[0]);
+      assert.ok(first > 0, caption[0]);
+      assert.deepEqual(lines.slice(first, first + caption.length), [...caption]);
+      assert.match(caption[0], new RegExp(`^${measurementLabel(chart.measurement).replace(/[()]/g, '\\$&')} · (Distribution|Cumulative)$`));
+      assert.equal(caption[1], scenarioSummary(full));
+      assert.match(caption[1], /all recorded stages · all scarp types \(no filter\)$/);
+      assert.equal(caption[2], countLine(full, chart.measurement));
+      assert.match(caption[3], /^Software version: v0\.4\.0-test · Data-export version and date: data-v0-test \(/);
+      assert.equal(caption[4], 'Cite: Chiama et al. (2025)');
+      assert.equal(caption.includes(accuracy), chart.view === 'cumulative');
+    }
+    assert.equal(countLine(full, 'scarp_height'), `N = ${full.selection.perMeasurement.scarp_height.valid} measurements used of 306 matching simulation stages (${full.selection.perMeasurement.scarp_height.excludedNull} missing values excluded)`);
+  });
+
+  test('the statistics tables carry the page row labels; scarp dip carries the provisional notice', () => {
+    const lines = paragraphs(documentXml(full, STAMPS, AT));
+    for (const label of ['Measurements used', 'Missing values (excluded)', 'Median', '16th percentile', '84th percentile', 'Standard deviation']) {
+      assert.equal(lines.filter(line => line === label).length, 3, label);
+    }
+    const dip = lines.indexOf(measurementLabel('scarp_dip'));
+    assert.equal(lines[dip + 1], copyText('pdd5.4.scarpDipNotice'));
+    const width = lines.indexOf(measurementLabel('dzw'));
+    assert.equal(lines[width + 1], copyText('pdd5.7.widthScopeNote'));
+  });
+
+  test('the chart set ignores the page toggles: linear histograms, the cumulative curve without a read-off', () => {
+    for (const chart of reportCharts(full)) {
+      const expected: SvgNode = chart.view === 'histogram'
+        ? histogramChart(histogramBins(full, chart.measurement, false), REPORT_CHART_WIDTH)
+        : cumulativeChart(full, chart.measurement, REPORT_CHART_WIDTH, null);
+      assert.deepEqual(chart.svg, expected);
+    }
+  });
+
+  test('below the chart floor the page notice takes the charts’ place; the small-result warning opens its section', async () => {
+    const plan = selectNotices(mixed, config);
+    assert.equal(plan.panels.scarp_height?.key, NOTICE_KEYS.warning);
+    assert.equal(plan.panels.dzw?.key, NOTICE_KEYS.suppression);
+    assert.equal(plan.panels.scarp_dip?.key, NOTICE_KEYS.suppression);
+    const charts = reportCharts(mixed);
+    assert.deepEqual(charts.map(c => `${c.measurement}:${c.view}`), ['scarp_height:histogram', 'scarp_height:cumulative']);
+    const parts = await docxParts(mixed);
+    assert.deepEqual([...parts.keys()].filter(name => name.endsWith('.png')), ['word/media/chart-1.png', 'word/media/chart-2.png']);
+    const lines = paragraphs(decode(parts.get('word/document.xml')));
+    const height = lines.indexOf(measurementLabel('scarp_height'));
+    assert.equal(lines[height + 1], guided(noticeText(plan.panels.scarp_height!)));
+    for (const m of ['dzw', 'scarp_dip'] as const) {
+      const start = lines.indexOf(measurementLabel(m));
+      const notice = guided(noticeText(plan.panels[m]!));
+      const at = lines.indexOf(notice, start);
+      assert.ok(at > lines.indexOf('Standard deviation', start), `${m}: the notice follows the statistics table`);
+      assert.equal(lines.filter(line => line === notice).length, 2, 'once in each suppressed section');
+    }
+  });
+
+  test('the empty state: each section names no match and explains, with no table or chart', () => {
+    const plan = selectNotices(empty, config);
+    assert.equal(plan.state, 'empty');
+    assert.equal(reportCharts(empty).length, 0);
+    const xmlText = documentXml(empty, STAMPS, AT);
+    const lines = paragraphs(xmlText);
+    assert.equal(lines.filter(line => line === NO_MATCHES).length, 3);
+    for (const ref of plan.explainer) assert.ok(lines.includes(guided(noticeText(ref))));
+    assert.equal(xmlText.includes('<w:tbl>'), false);
+    assert.equal(xmlText.includes('<w:drawing>'), false);
+  });
+
+  test('a fixed-scenario document.xml snapshot', () => {
+    const actual = documentXml(full, STAMPS, AT);
+    if (process.env.REPORT_SNAPSHOT_UPDATE === '1') writeFileSync(SNAPSHOT, actual);
+    assert.equal(actual, readFileSync(SNAPSHOT, 'utf8'));
+  });
+});
+
+describe('report: the guided chart presentation', () => {
+  test('guidedChart moves the vertical-axis titles to x = 14 and retitles the cumulative axis, nothing else', () => {
+    const titles = (node: SvgNode, axis: string | null = null, out: [string | null, SvgNode][] = []): [string | null, SvgNode][] => {
+      const own = node.attrs.find(([name]) => name === 'data-axis')?.[1] ?? axis;
+      if (node.tag === 'text' && node.attrs.some(([name]) => name === 'transform')) out.push([own, node]);
+      node.children.forEach(child => typeof child !== 'string' && titles(child, own, out));
+      return out;
+    };
+    const chart = cumulativeChart(full, 'scarp_height', 600, null);
+    const found = titles(chart);
+    assert.ok(found.length >= 1);
+    for (const [axis, node] of found) {
+      const y = node.attrs.find(([name]) => name === 'y')![1];
+      assert.equal(node.attrs.find(([name]) => name === 'x')![1], '14');
+      assert.equal(node.attrs.find(([name]) => name === 'transform')![1], `rotate(-90 14 ${y})`);
+      if (axis === 'cumulative') assert.deepEqual(node.children, ['Measurements at or below (%)']);
+    }
+    assert.deepEqual(guidedChart(chart), chart, 'idempotent on the guided chart');
+  });
+});
+
+describe('report: the guided archive (§13.1, §13.5, §13.6)', () => {
+  test('the four data members, then report.docx, at one instant', async () => {
+    const archive = await guidedArchive(full, STAMPS, AT, recording().rasterize);
+    assert.equal(archive.reportError, null);
+    const members = unzip(archive.bytes);
+    assert.deepEqual([...members.keys()], [...GUIDED_MEMBER_NAMES]);
+    const texts = packageTexts(full, STAMPS, AT);
+    texts.forEach(member => assert.equal(decode(members.get(member.name)), member.text));
+    assert.deepEqual(members.get(REPORT_MEMBER), await reportDocx(full, STAMPS, AT, recording().rasterize));
+    assert.match(archive.fileName, /\.zip$/);
+  });
+
+  test('a failing rasterizer leaves report.docx out entirely and says why', async () => {
+    const failing: Rasterize = async () => { throw new Error('no canvas'); };
+    const notPng: Rasterize = async () => new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    for (const rasterize of [failing, notPng]) {
+      const archive = await guidedArchive(full, STAMPS, AT, rasterize);
+      assert.ok(archive.reportError instanceof Error);
+      assert.deepEqual([...unzip(archive.bytes).keys()], [...PACKAGE_MEMBER_NAMES]);
+    }
+  });
+
+  test('a failure before the four members exist still fails the whole download', async () => {
+    const broken = { ...full, scenario: { ...full.scenario, window: { mode: 'offset' as const, offsetMax: '1' } }, windows: null, flags: null };
+    await assert.rejects(guidedArchive(broken as RenderInput, STAMPS, AT, recording().rasterize));
+  });
+
+  test('zipcheck.py accepts the guided archive and the fallback archive, each under its own layout', async () => {
+    mkdirSync(OUT_DIR, { recursive: true });
+    const guidedZip = `${OUT_DIR}guided.zip`;
+    const fallbackZip = `${OUT_DIR}fallback.zip`;
+    writeFileSync(guidedZip, (await guidedArchive(full, STAMPS, AT, recording().rasterize)).bytes);
+    writeFileSync(fallbackZip, (await guidedArchive(full, STAMPS, AT, async () => { throw new Error('no'); })).bytes);
+    const digests = packageTexts(full, STAMPS, AT).map(m => createHash('sha256').update(m.text, 'utf8').digest('hex'));
+    const zipcheck = (args: readonly string[]) => {
+      const run = spawnSync('python3', ['-I', 'test/zipcheck.py', ...args], { cwd: WEBAPP_DIR, encoding: 'utf8' });
+      assert.equal(run.error, undefined, `python3 must run: ${String(run.error)}`);
+      return { status: run.status, output: `${run.stdout}${run.stderr}` };
+    };
+    const layout = `--members=${GUIDED_MEMBER_NAMES.join(',')}`;
+    const ok = zipcheck([layout, guidedZip, AT_ISO, ...digests]);
+    assert.equal(ok.status, 0, ok.output);
+    assert.equal(zipcheck([fallbackZip, AT_ISO, ...digests]).status, 0, 'the fallback is the DDD §5.9 layout');
+    assert.equal(zipcheck([layout, fallbackZip, AT_ISO]).status, 1, 'the guided layout requires report.docx');
+    assert.equal(zipcheck([guidedZip, AT_ISO]).status, 1, 'the /scenario/ layout has no report.docx');
+    const wrong = [...digests];
+    wrong[0] = '0'.repeat(64);
+    assert.equal(zipcheck([layout, guidedZip, AT_ISO, ...wrong]).status, 1);
+
+    // A nested report missing a media part its relationships name.
+    const members = unzip((await guidedArchive(full, STAMPS, AT, recording().rasterize)).bytes);
+    const parts = unzip(members.get(REPORT_MEMBER)!);
+    parts.delete('word/media/chart-6.png');
+    const brokenDocx = zip([...parts].map(([name, bytes]) => ({ name, bytes })), AT);
+    const brokenZip = `${OUT_DIR}broken.zip`;
+    writeFileSync(brokenZip, zip([...members].map(([name, bytes]) => ({ name, bytes: name === REPORT_MEMBER ? brokenDocx : bytes })), AT));
+    const broken = zipcheck([layout, brokenZip, AT_ISO, ...digests]);
+    assert.equal(broken.status, 1);
+    assert.match(broken.output, /image relationships/);
+  });
+});
