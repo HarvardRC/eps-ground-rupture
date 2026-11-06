@@ -11,7 +11,7 @@ import { spawnSync } from 'node:child_process';
 import { expect, test, type Page } from '@playwright/test';
 import { PACKAGE_MEMBER_NAMES } from '../../src/download/package';
 import { guided } from '../../src/explore/copy-overlay';
-import { GUIDED_MEMBER_NAMES, REPORT_PARTS } from '../../src/explore/report';
+import { GUIDED_MEMBER_NAMES, REPORT_PARTS, scenarioLabels } from '../../src/explore/report';
 import { DOWNLOAD_CONTENTS, PROVENANCE_HEADING, REPORT_FAILED, REPORT_TITLE } from '../../src/explore/wording';
 import { copyText } from '../../src/views/copy';
 import { readDownload, unzipStored, WEBAPP_DIR } from '../support';
@@ -77,6 +77,8 @@ for (const id of ['illustrative', 'kern'] as const) {
     const document = report.get('word/document.xml')!.toString('utf8');
     expect((document.match(/<w:drawing>/g) ?? []).length).toBe(media.length);
     for (const text of [REPORT_TITLE, PROVENANCE_HEADING, copyText('pdd5.4.scarpDipNotice')]) expect(document).toContain(xmlEscape(text));
+    // Both samples confirm in offset mode: the scenario table's movement row carries that name.
+    for (const label of scenarioLabels('offset')) expect(document).toContain(`>${label}</w:t>`);
     expect((document.match(/Cite: Chiama et al\. \(2025\)/g) ?? []).length).toBe(media.length);
     expect((document.match(new RegExp(xmlEscape(guided(copyText('pdd4.1.cumulativeAccuracy'))).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) ?? []).length).toBe(drawn.length);
     for (const m of drawn) {

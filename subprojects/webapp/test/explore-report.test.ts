@@ -29,7 +29,7 @@ import { computeResult } from '../src/explore/compute';
 import { guided } from '../src/explore/copy-overlay';
 import {
   captionLines, countLine, documentXml, GUIDED_MEMBER_NAMES, guidedArchive, REPORT_CHART_HEIGHT, REPORT_CHART_WIDTH,
-  REPORT_MEMBER, REPORT_PARTS, reportCharts, reportDocx, SCENARIO_LABEL_FILL, SCENARIO_LABELS, scenarioRows, scenarioSummary, type Rasterize,
+  REPORT_MEMBER, REPORT_PARTS, reportCharts, reportDocx, SCENARIO_LABEL_FILL, scenarioLabels, scenarioRows, scenarioSummary, type Rasterize,
 } from '../src/explore/report';
 import { NO_MATCHES, PROVENANCE_HEADING, REPORT_TITLE } from '../src/explore/wording';
 import { defaultScenario, MEASUREMENT_NAMES, type Scenario } from '../src/state/state';
@@ -191,7 +191,9 @@ describe('report: the document (§13.2, §13.3)', () => {
     const small = await decodeFixture(await buildFixture(stageCountSpec(12)));
     const narrowed = computeResult(small, { ...defaultScenario(small.manifest), faultDip: [30, 70], depth: [10], density: ['Medium'], window: { mode: 'slip', min: '0.5', max: '2' }, population: 'one_state_per_trial' }, 5, null);
     const rows = scenarioRows(narrowed);
-    assert.deepEqual(rows.map(([label]) => label), [...SCENARIO_LABELS]);
+    // The guided page's own condition names (§13.2 item 1), the movement row named for the mode.
+    assert.deepEqual(rows.map(([label]) => label), ['Fault angle', 'Sediment strength and structure', 'Sediment depth', 'Sediment density', 'Fault slip', 'Simulation stages', 'Scarp types']);
+    assert.deepEqual(scenarioLabels('offset'), ['Fault angle', 'Sediment strength and structure', 'Sediment depth', 'Sediment density', 'Maximum surface offset', 'Simulation stages', 'Scarp types']);
     const values = rows.map(([, value]) => value);
     assert.equal(values[0], '30° or 70°');
     assert.equal(values[2], '10 m');

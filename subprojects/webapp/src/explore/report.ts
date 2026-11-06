@@ -206,8 +206,14 @@ export function scenarioSummary(input: RenderInput): string {
   return line.slice(0, -count.length);
 }
 
-/** The scenario table's row labels, in the summary's order (DDD §5.7): the PDD §3 input names. */
-export const SCENARIO_LABELS = ['Fault dip', 'Sediment strength and structure', 'Sediment depth', 'Sediment density', 'Displacement window', 'Population', 'Scarp filter'] as const;
+/**
+ * The scenario table's row labels, in the summary's order (DDD §5.7): the
+ * guided page's own condition names (§13.2 item 1, §13.7), the movement row
+ * named for the scenario's mode.
+ */
+export const MOVEMENT_LABELS = { offset: 'Maximum surface offset', slip: 'Fault slip' } as const;
+export const scenarioLabels = (mode: 'slip' | 'offset'): readonly string[] =>
+  ['Fault angle', 'Sediment strength and structure', 'Sediment depth', 'Sediment density', MOVEMENT_LABELS[mode], 'Simulation stages', 'Scarp types'];
 
 /** The summary tokens whose templates open with their condition's name; the table drops that name from the value. */
 const NAMED_TOKENS = ['ddd5.7.tokenDip', 'ddd5.7.tokenDepth', 'ddd5.7.tokenDensity', 'ddd5.7.tokenSlipWindow', 'ddd5.7.tokenScarpType'] as const;
@@ -221,14 +227,15 @@ const capitalize = (value: string): string => value.charAt(0).toUpperCase() + va
  * with it ("dip 60° or 70°" → "60° or 70°").
  */
 export function scenarioRows(input: RenderInput): readonly (readonly [string, string])[] {
+  const labels = scenarioLabels(input.scenario.window.mode);
   const tokens = scenarioSummary(input).split(copyText('ddd5.7.summaryJoiner'));
-  if (tokens.length !== SCENARIO_LABELS.length) throw new Error(`report: the summary has ${tokens.length} tokens, not ${SCENARIO_LABELS.length}`);
+  if (tokens.length !== labels.length) throw new Error(`report: the summary has ${tokens.length} tokens, not ${labels.length}`);
   const prefixes = NAMED_TOKENS.map(key => copyText(key).split('{')[0]);
   return tokens.map((token, i) => {
     const plain = i === 0 ? token.charAt(0).toLowerCase() + token.slice(1) : token;
     const prefix = prefixes.find(p => plain.startsWith(p));
     const value = prefix === undefined ? (i === 0 ? token : capitalize(token)) : capitalize(plain.slice(prefix.length));
-    return [SCENARIO_LABELS[i], value] as const;
+    return [labels[i], value] as const;
   });
 }
 
