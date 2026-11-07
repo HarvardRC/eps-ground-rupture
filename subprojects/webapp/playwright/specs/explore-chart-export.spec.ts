@@ -102,8 +102,51 @@ test('no export before confirmation, and none where the chart is suppressed', as
   await expect(page.locator('#gx-chart svg')).toHaveCount(1);
   await expect(exportButton(page)).toHaveCount(1);
   await page.locator('#gx-measurement-scarp_dip').click();
+  // The suppressed dip panel is on screen: its card pressed, the statistics table alone, one measurement used.
+  await expect(page.locator('#gx-measurement-scarp_dip')).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('.gx-analysis.gx-table-only .gx-statistics table')).toHaveCount(1);
+  await expect(page.locator('.gx-measurement .gx-section-head strong')).toHaveText('1 measurement used');
   await expect(page.locator('#gx-chart')).toHaveCount(0);
   await expect(exportButton(page)).toHaveCount(0);
+});
+
+test('a scenario replaced while an export is in flight saves nothing and keeps the newer status', async ({ page }) => {
+  await page.addInitScript(() => {
+    const original = HTMLCanvasElement.prototype.toBlob;
+    HTMLCanvasElement.prototype.toBlob = function toBlob(this: HTMLCanvasElement, callback: BlobCallback, ...rest: unknown[]): void {
+      setTimeout(() => original.call(this, callback, ...(rest as [string?, number?])), 800);
+    };
+  });
+  await confirmKern(page);
+  let downloads = 0;
+  page.on('download', () => { downloads += 1; });
+  await exportButton(page).click();
+  await page.locator('.gx-restart').getByRole('button', { name: 'Start a new scenario' }).click();
+  const fresh = page.getByRole('status').filter({ hasText: 'New scenario. Build your scenario or try a prefilled sample.' });
+  await expect(fresh).toHaveCount(1);
+  await page.waitForTimeout(2500);
+  expect(downloads).toBe(0);
+  await expect(fresh).toHaveCount(1);
+});
+
+test('the card\u2019s outcome stays with its measurement across a switch mid-flight', async ({ page }) => {
+  await page.addInitScript(() => {
+    const original = HTMLCanvasElement.prototype.toBlob;
+    HTMLCanvasElement.prototype.toBlob = function toBlob(this: HTMLCanvasElement, callback: BlobCallback, ...rest: unknown[]): void {
+      setTimeout(() => original.call(this, callback, ...(rest as [string?, number?])), 800);
+    };
+  });
+  await confirmKern(page);
+  const names: string[] = [];
+  page.on('download', d => names.push(d.suggestedFilename()));
+  await exportButton(page).click();
+  await page.locator('#gx-measurement-dzw').click();
+  await expect.poll(() => names.length).toBe(2);
+  expect(names[0]).toMatch(/-scarp-height-histogram\.png$/);
+  // The width card says nothing; the height card carries the outcome when the reader returns.
+  await expect(exportStatus(page)).toHaveText('');
+  await page.locator('#gx-measurement-scarp_height').click();
+  await expect(exportStatus(page)).toHaveText(CHART_EXPORT_READY);
 });
 
 test('a second activation while an export is in flight is ignored', async ({ page }) => {

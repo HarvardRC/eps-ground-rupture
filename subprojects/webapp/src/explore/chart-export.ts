@@ -122,7 +122,7 @@ export function exportChart(input: RenderInput, m: MeasurementName, kind: ChartK
 const STRIP = { size: 11, line: 15, pad: 16, top: 14, bottom: 12, font: 'system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' } as const;
 
 /** Characters per strip line: a conservative average advance of 0.56 em, so no line overruns the image. */
-const WRAP_AT = Math.floor((REPORT_CHART_WIDTH - 2 * STRIP.pad) / (STRIP.size * 0.56));
+export const WRAP_AT = Math.floor((REPORT_CHART_WIDTH - 2 * STRIP.pad) / (STRIP.size * 0.56));
 
 /** `text` broken at spaces into lines of at most `width` characters (a longer word stands alone). */
 export function wrap(text: string, width: number = WRAP_AT): readonly string[] {

@@ -17,7 +17,7 @@ import { mapRecord, REGRESSION_FIELDS, type Regression } from '../src/decode/fie
 import { provenanceText, type VersionStamps } from '../src/download/package';
 import { fileNameBase } from '../src/download/file-name';
 import {
-  buildChartExport, caveatTexts, CITE_LINE, composeExport, exportChart, exportFileNames, exportLegend, kindWords, panelNotes, PRODUCT_LINE, sidecarText, stripLines, wrap, type ExportRasterize,
+  buildChartExport, caveatTexts, CITE_LINE, composeExport, exportChart, exportFileNames, exportLegend, kindWords, WRAP_AT, panelNotes, PRODUCT_LINE, sidecarText, stripLines, wrap, type ExportRasterize,
 } from '../src/explore/chart-export';
 import { computeResult } from '../src/explore/compute';
 import { guided } from '../src/explore/copy-overlay';
@@ -116,6 +116,25 @@ describe('chart export: the strip (§16.2, §16.6)', () => {
   });
 });
 
+describe('chart export: the per-dip exceedance line (§16.6 item 2)', () => {
+  test('a converted window beyond the modeled maximum puts its per-dip line on the strip, as on the page', () => {
+    const beyond = computeResult(large, { ...defaultScenario(large.manifest), window: { mode: 'offset', offsetMax: '3' } }, 5, regression);
+    const perDip = caveatTexts(beyond).filter(text => !text.startsWith('Low-slip'));
+    assert.ok(perDip.length > 0, 'at least one dip exceeds the modeled maximum');
+    for (const line of perDip) assert.match(line, /^\d+°/);
+    const strip = stripLines(beyond, STAMPS, 'scarp_height', 'histogram');
+    for (const line of perDip) assert.equal(strip.filter(entry => entry === line).length, 1);
+  });
+
+  test('a window inside the modeled range carries no per-dip line', () => {
+    assert.deepEqual(caveatTexts(offset).filter(text => !text.startsWith('Low-slip')), []);
+  });
+
+  test('the logarithmic histogram is a different chart from the linear one', () => {
+    assert.notEqual(serializeSvg(exportChart(full, 'dzw', 'histogram-log', null)), serializeSvg(exportChart(full, 'dzw', 'histogram', null)));
+  });
+});
+
 describe('chart export: composition, sidecar, names, fallback (§§16.2–16.5)', () => {
   test('the composed SVG holds the chart at 600 × 300 and every strip word, wrapped within the line width', () => {
     const lines = stripLines(slip, STAMPS, 'scarp_dip', 'cumulative');
@@ -132,7 +151,8 @@ describe('chart export: composition, sidecar, names, fallback (§§16.2–16.5)'
     const texts = [...svg.matchAll(/<text [^>]*>([^<]*)<\/text>/g)].map(match => match[1]!.replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>'));
     const strip = texts.slice(texts.indexOf(PRODUCT_LINE));
     assert.equal(strip.join(' '), lines.join(' '));
-    for (const text of lines) for (const part of wrap(text)) assert.ok(part.length <= 98 || !part.includes(' '), part);
+    assert.equal(WRAP_AT, 92);
+    for (const part of strip) assert.ok(part.length <= WRAP_AT || !part.includes(' '), part);
     assert.match(svg, /font-weight="700">Ground Rupture Explorer — guided journey</);
   });
 
@@ -158,8 +178,8 @@ describe('chart export: composition, sidecar, names, fallback (§§16.2–16.5)'
   test('a recomputed result composes the same bytes', () => {
     const again = computeResult(large, { ...defaultScenario(large.manifest), window: { mode: 'slip', min: '0', max: '2' } }, 9, null);
     for (const [m, kind] of [['scarp_height', 'histogram'], ['dzw', 'histogram-log'], ['scarp_dip', 'cumulative']] as const) {
-      const a = composeExport(exportChart(slip, m, kind, 84), stripLines(slip, STAMPS, m, kind));
-      const b = composeExport(exportChart(again, m, kind, 84), stripLines(again, STAMPS, m, kind));
+      const a = composeExport(exportChart(slip, m, kind, 84), stripLines(slip, STAMPS, m, kind), exportLegend(slip, kind));
+      const b = composeExport(exportChart(again, m, kind, 84), stripLines(again, STAMPS, m, kind), exportLegend(again, kind));
       assert.equal(a.svg, b.svg, `${m} ${kind}`);
     }
   });
