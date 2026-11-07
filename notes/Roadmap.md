@@ -462,17 +462,19 @@ drills, is retired: the drills run against a stub `gh` instead.
   `dev-v.0.4.x`, the first of the release-branch order, replacing the
   PDD §5.1 placeholder in the PDD and in `scenario.md`.
 - **OA-2 — Kern County decision** (Phase 2; research group; before
-  T-63, the release vintage, and T-48, the Kern preset) — open:
+  T-48, the Kern preset; until 2026-11-06 also before T-63, the
+  release vintage) — open:
   [D-6](../docs/app/pdd.md#1-decision-register) (Kern County
   field-data group and principal-width rule), recorded in a dated PDD
-  commit that sets the D-6 row to `Decided (YYYY-MM-DD)`. The release
-  waits for it. Taking the preset out of this release is not a D-6
-  decision but a release-scope amendment of the PRD and the PDD, yours
-  as product owner, for which D-6 may give the reason; its record and
-  check are in
-  [IP §3 — Gates and release sequence](../docs/app/ip.md#3-gates-and-release-sequence),
-  and only once the IP cites it does T-48 leave the dependencies of
-  T-65, the release.
+  commit that sets the D-6 row to `Decided (YYYY-MM-DD)`. Until
+  2026-11-06 the release waited for it: your release-scope
+  amendment of that date (PDD D-49) — the record IP §3 prescribed,
+  taken as product owner, with D-6 as reason, not authority — is
+  cited by the IP's §3 Record of 2026-11-06, so T-48 left the
+  dependencies of T-65, the release, and OA-2 left T-63's. D-6,
+  still open, gates only the example's post-MVP return (ADR-0017
+  amendment of the same date); its record and check stay in
+  [IP §3 — Gates and release sequence](../docs/app/ip.md#3-gates-and-release-sequence).
 - **OA-14 — Field-overlay default set** (Phase 2; with the research
   group; before T-55 and T-63) — open. Record per field source the
   members of [D-18](../docs/app/pdd.md#1-decision-register)
