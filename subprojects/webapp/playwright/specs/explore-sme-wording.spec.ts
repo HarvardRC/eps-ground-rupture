@@ -133,3 +133,33 @@ test('the glossary carries the review’s definitions under unchanged anchors, a
   }
   await expect(page.locator('article')).not.toContainText('raised ridge');
 });
+
+test('the depth and scarp-height explanations carry the adopted definitions (§§15.6, 15.11)', async ({ page }) => {
+  const explanation = page.locator('#gx-definition');
+  await gotoExplore(page);
+  await pickSample(page, 'kern');
+  await page.locator('#gx-group-depth .gx-term[data-explain="depth"]').focus();
+  await expect(explanation).toBeVisible();
+  await expect(explanation).toContainText('The thickness of the sediment above bedrock.');
+  await action(page, 'Continue to fault slip').click();
+  await page.locator('#gx-offset-feedback table').waitFor();
+  await action(page, 'Review scenario').click();
+  await action(page, 'Show results').click();
+  await page.locator('.gx-measurement .gx-term[data-explain="scarp_height"]').focus();
+  await expect(explanation).toBeVisible();
+  await expect(explanation).toContainText('A pressure ridge can stand above the undeformed ground on the lifted side as well — that extra height is called additional uplift (Us − Ud).');
+});
+
+test('slip mode: the summary value drops its redundant tail under the Fault slip label (§15.11)', async ({ page }) => {
+  await gotoExplore(page);
+  await pickSample(page, 'illustrative');
+  await action(page, 'Continue to fault slip').click();
+  await page.locator('#gx-mode-slip').check();
+  await action(page, 'Review scenario').click();
+  await expect(page.locator('.gx-review-section').nth(1)).toContainText('3–5 m fault slip');
+  await action(page, 'Show results').click();
+  await page.locator('.gx-context').waitFor();
+  await expect(page.locator('.gx-context .gx-compact').nth(1)).toHaveText(/^Fault slip: 3–5 m · Included: /);
+  await page.locator('details#gx-full-scenario summary').click();
+  await expect(page.locator('details#gx-full-scenario p').first()).toHaveText('Fault slip: 3–5 m');
+});

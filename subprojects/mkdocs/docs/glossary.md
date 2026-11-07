@@ -69,8 +69,8 @@ Everything below is the vocabulary needed to read that.
   conditions — a given sediment depth, density, strength, fault dip. A
   **simulation stage** (the paper's model stage) is one saved point in a
   simulation as fault slip accumulates, taken every 0.05 m. A single
-  simulation can have many stages, each with its own SDC measurements. Hence 3,434 experiments but 346,834
-  stages.[^abstract] A row in the data is a stage, not an experiment.
+  simulation can have many stages, each with its own SDC measurements.
+  Hence 3,434 experiments but 346,834 stages.[^abstract] A row in the data is a stage, not an experiment.
 
 **Fault seed** { #fault-seed }
 : A modelling device, not a real-world feature: a built-in plane of weakness
@@ -104,7 +104,7 @@ Everything below is the vocabulary needed to read that.
 
 **Fault dip (fault angle)** { #fault-dip }
 : The angle of the fault plane measured from horizontal. It describes the
-  fault’s orientation. Fault dip is distinct from scarp dip. 20° is
+  fault's orientation. Fault dip is distinct from scarp dip. 20° is
   gently inclined; 70° is close to vertical. The simulations cover 20, 30,
   40, 45, 50, 60 and 70 degrees.
 
@@ -165,7 +165,7 @@ Figure 5 is the real thing — see [The paper](paper.md).*
 
 **Deformation zone width (DZW)** { #dzw }
 : The width of the primary surface-rupture deformation zone across the
-  fault. Depending on the paper’s measurement procedure, it spans from the
+  fault. Depending on the paper's measurement procedure, it spans from the
   first deformation identified on the hanging-wall side (such as uplift,
   fractures, or collapse features such as colluvial wedges) to the base of
   the scarp.[^dzw] It may not include every secondary fault or distant
