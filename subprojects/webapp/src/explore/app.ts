@@ -11,17 +11,18 @@ import { defaultDisplayState, type MeasurementName, type SedimentPair } from '..
 import { quantileLinear } from '../stats/quantile';
 import { binTableSpec, quantityText } from '../views/chart-text';
 import { guided } from './copy-overlay';
-import { cumulativeChart, histogramBins, histogramChart } from './charts';
+import { canChart as chartDrawn, cumulativeChart, histogramBins, histogramChart } from './charts';
 import { copyText } from '../views/copy';
 import { toSvgElement } from '../views/dom/svg';
 import { displayRound, formatCount } from '../views/format';
-import { CAVEAT_KEYS, selectNotices, noticeText } from '../views/notices';
+import { selectNotices, noticeText } from '../views/notices';
 import type { RenderInput } from '../views/render-input';
 import { statsRows, unclassifiedLine } from '../views/stats-table';
 import { computeResult } from './compute';
 import { rasterizeSvg } from './rasterize';
 import { guidedArchive } from './report';
-import { DOWNLOAD_CONTENTS, matchingStages, measurementsUsed, NEGATIVE_HEIGHT_NOTE, negativeHeights, REPORT_FAILED } from './wording';
+import { CHART_EXPORT_BUTTON, CHART_EXPORT_FAILED, CHART_EXPORT_READY, CHART_SIDECAR_BLOCKED, DOWNLOAD_CONTENTS, matchingStages, measurementsUsed, NEGATIVE_HEIGHT_NOTE, negativeHeights, REPORT_FAILED } from './wording';
+import { buildChartExport, caveatTexts, type ChartKind } from './chart-export';
 import { DEFINITIONS, type DefinitionKey } from './glossary';
 import { classifySession, clearSession, loadSession, saveSession, type DisplayChoices, type SessionRecord } from './session';
 import { ANNOTATIONS, STORIES, type AnnotatedField, type StoryLink } from './stories';
@@ -165,6 +166,9 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   let busy = false;
   /** The download's own busy flag (§13.1), released when delivery or failure settles. */
   let downloading = false;
+  // The chart-image export (§16.1): a per-card busy flag, and the card's status line kept across re-renders for the result it describes.
+  const exporting = new Set<MeasurementName>();
+  let exportStatus: { readonly input: RenderInput; readonly m: MeasurementName; readonly text: string } | null = null;
   // True while a restore owns `busy` (§9.2, step 3); `invalidate` releases it at once (G-16).
   let restoring = false;
   let navigationVersion = 0;
@@ -619,25 +623,15 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     const rows = statsRows(statistics, count, m, config);
     const unclassified = unclassifiedLine(result.selection.unclassified);
     const unit = m === 'scarp_dip' ? '°' : ' m';
-    const caveats = plan.caveats.filter(ref => {
-      if (ref.key === CAVEAT_KEYS.scarpDip) return false;
-      // The shared per-dip sentence specifically describes upper
-      // exceedance. The visible conversion table above handles a
-      // lower-only partial range without falsely claiming its maximum
-      // exceeds the simulations (guided DDD §5).
-      if (ref.key === CAVEAT_KEYS.perDip) {
-        const window = result!.windows?.find(w => w.faultDip === Number(ref.slots.Dip));
-        if (window) return storedBounds(window.lo, window.hi, manifest.slipWindowBounds.recordingStep)[1] > Math.round(manifest.slipWindowBounds.max / manifest.slipWindowBounds.recordingStep);
-      }
-      return true;
-    }).map(ref => `<p>${escape(guided(noticeText(ref)))}</p>`).join('');
+    // The caveat box: the shared list the chart export's strip also carries (§16.6).
+    const caveats = caveatTexts(result).map(text => `<p>${escape(text)}</p>`).join('');
     const canChart = count.valid >= config.chartFloorBelow() && statistics !== null;
     const statisticTable = `<section class="gx-statistics"><h4>Statistics</h4><p class="gx-hint">Matching simulation stages.</p><table><caption class="gx-sr-only">${MEASURE_NAMES[m]} statistics</caption><thead><tr><th>Statistic</th><th>Value</th></tr></thead><tbody>${rows.map((row, i) => `<tr><th scope="row">${i === 2 ? term('median', row.label) : i === 3 || i === 4 ? term('percentile', row.label) : escape(guided(row.label))}</th><td>${escape(row.value)}${i > 1 && row.value !== '—' ? unit : ''}</td></tr>`).join('')}</tbody></table>${unclassified ? `<p class="gx-hint">${escape(unclassified)}</p>` : ''}<p class="gx-hint">Missing values are excluded from this measurement's chart and statistics.</p></section>`;
     const selector = `<section class="gx-selector" aria-labelledby="gx-selector-heading"><div class="gx-selector-heading"><h3 id="gx-selector-heading">What would you like to examine?</h3>${button('guide-start', 'Walk me through results')}</div><div class="gx-measurement-cards" role="group" aria-label="Measurement">${MEASUREMENTS.map((measure, i) => `<button type="button" id="gx-measurement-${measure}" data-measurement="${measure}" aria-pressed="${m === measure}"><strong>${MEASURE_NAMES[measure]}</strong><span class="gx-card-question">${guidePrompts[i]}</span>${measure === 'scarp_dip' ? `<span class="gx-card-flag">${escape(PROVISIONAL_MARK)}</span>` : ''}<span class="gx-card-status" ${m === measure ? '' : 'aria-hidden="true"'}>${m === measure ? '<span aria-hidden="true">✓</span> Viewing' : '&nbsp;'}</span></button>`).join('')}</div></section>`;
     // Width's Distribution view offers the logarithmic scale exactly when the confirmed result has one (§9.3).
     const logOffered = m === 'dzw' && display.view[m] === 'histogram' && result.histogramLog !== null;
     const logToggle = logOffered ? `<label class="gx-log" for="gx-dzw-log"><input type="checkbox" id="gx-dzw-log" ${display.logScale ? 'checked' : ''}> ${escape(copyText('ddd5.8.logScaleLabel'))}</label>` : '';
-    const measurement = plan.state === 'empty' ? `<section class="gx-measurement"><h3>${term(m, MEASURE_NAMES[m])}</h3><p class="gx-hint">${DESCRIPTIONS[m]} ${glossary(GLOSSARY[m], 'About this measurement')}</p>${m === 'dzw' ? `<p class="gx-warning">${escape(guided(copyText('pdd5.7.widthScopeNote')))}</p>` : m === 'scarp_dip' ? `<p class="gx-warning">${escape(copyText('pdd5.4.scarpDipNotice'))}</p>` : ''}<section class="gx-empty"><h3>No matching simulation stages</h3>${plan.explainer.map(ref => `<p>${escape(guided(noticeText(ref)))}</p>`).join('')}<p>Change a condition or slip range, then review the scenario again.</p></section></section>` : `<section class="gx-measurement"><div class="gx-section-head"><h3>${term(m, MEASURE_NAMES[m])}</h3><strong>${measurementsUsed(count.valid)}</strong></div><p class="gx-hint">${DESCRIPTIONS[m]} ${glossary(GLOSSARY[m], 'About this measurement')}</p>${m === 'dzw' ? `<p class="gx-warning">${escape(guided(copyText('pdd5.7.widthScopeNote')))}</p>` : m === 'scarp_dip' ? `<p class="gx-warning">${escape(copyText('pdd5.4.scarpDipNotice'))}</p>` : ''}${warning ? `<p class="gx-warning">${escape(guided(noticeText(warning)))}</p>` : ''}${negativeHeights(result, m) ? `<p class="gx-note">${escape(NEGATIVE_HEIGHT_NOTE)}</p>` : ''}<div class="gx-analysis${canChart ? '' : ' gx-table-only'}">${canChart ? `<section class="gx-chart-side"><div class="gx-chart-choices" role="group" aria-label="Chart view"><button type="button" id="gx-chart-histogram" data-chart="histogram" aria-pressed="${display.view[m] === 'histogram'}">Distribution</button><button type="button" id="gx-chart-cumulative" data-chart="cumulative" aria-pressed="${display.view[m] === 'cumulative'}">Cumulative</button></div>${logToggle}<p class="gx-hint">${display.view[m] === 'histogram' ? 'How often each range appears among the matching measurements.' : 'The share of matching measurements at or below each value.'}</p><figure id="gx-chart"></figure><div id="gx-chart-legend" class="gx-chart-legend"></div>${display.view[m] === 'cumulative' ? `<div class="gx-percentile"><label for="gx-percentile">Percentile <output>${display.readoff[m] ?? 84}</output></label><input id="gx-percentile" type="range" min="0" max="100" step="1" value="${display.readoff[m] ?? 84}"><p id="gx-percentile-output" aria-live="polite"></p></div>` : ''}<div id="gx-chart-table"></div></section>` : ''}${statisticTable}</div><div class="gx-interpretation"><strong>Reading these results</strong><p>The median is the middle measurement; the 16th–84th percentile range describes the middle 68% of measurements. These summaries are not recommended design values. Choosing a design value requires engineering judgment.</p>${glossary('statistics-terms', 'Statistics explained')}</div></section>`;
+    const measurement = plan.state === 'empty' ? `<section class="gx-measurement"><h3>${term(m, MEASURE_NAMES[m])}</h3><p class="gx-hint">${DESCRIPTIONS[m]} ${glossary(GLOSSARY[m], 'About this measurement')}</p>${m === 'dzw' ? `<p class="gx-warning">${escape(guided(copyText('pdd5.7.widthScopeNote')))}</p>` : m === 'scarp_dip' ? `<p class="gx-warning">${escape(copyText('pdd5.4.scarpDipNotice'))}</p>` : ''}<section class="gx-empty"><h3>No matching simulation stages</h3>${plan.explainer.map(ref => `<p>${escape(guided(noticeText(ref)))}</p>`).join('')}<p>Change a condition or slip range, then review the scenario again.</p></section></section>` : `<section class="gx-measurement"><div class="gx-section-head"><h3>${term(m, MEASURE_NAMES[m])}</h3><strong>${measurementsUsed(count.valid)}</strong></div><p class="gx-hint">${DESCRIPTIONS[m]} ${glossary(GLOSSARY[m], 'About this measurement')}</p>${m === 'dzw' ? `<p class="gx-warning">${escape(guided(copyText('pdd5.7.widthScopeNote')))}</p>` : m === 'scarp_dip' ? `<p class="gx-warning">${escape(copyText('pdd5.4.scarpDipNotice'))}</p>` : ''}${warning ? `<p class="gx-warning">${escape(guided(noticeText(warning)))}</p>` : ''}${negativeHeights(result, m) ? `<p class="gx-note">${escape(NEGATIVE_HEIGHT_NOTE)}</p>` : ''}<div class="gx-analysis${canChart ? '' : ' gx-table-only'}">${canChart ? `<section class="gx-chart-side"><div class="gx-chart-choices" role="group" aria-label="Chart view"><button type="button" id="gx-chart-histogram" data-chart="histogram" aria-pressed="${display.view[m] === 'histogram'}">Distribution</button><button type="button" id="gx-chart-cumulative" data-chart="cumulative" aria-pressed="${display.view[m] === 'cumulative'}">Cumulative</button></div>${logToggle}<p class="gx-hint">${display.view[m] === 'histogram' ? 'How often each range appears among the matching measurements.' : 'The share of matching measurements at or below each value.'}</p><figure id="gx-chart"></figure><div id="gx-chart-legend" class="gx-chart-legend"></div><div class="gx-chart-actions">${button('chart-export', CHART_EXPORT_BUTTON, false, 'id="gx-chart-export"')}<p class="gx-hint gx-chart-export-status" id="gx-chart-export-status" role="status">${exportStatus !== null && exportStatus.input === result && exportStatus.m === m ? escape(exportStatus.text) : ''}</p></div>${display.view[m] === 'cumulative' ? `<div class="gx-percentile"><label for="gx-percentile">Percentile <output>${display.readoff[m] ?? 84}</output></label><input id="gx-percentile" type="range" min="0" max="100" step="1" value="${display.readoff[m] ?? 84}"><p id="gx-percentile-output" aria-live="polite"></p></div>` : ''}<div id="gx-chart-table"></div></section>` : ''}${statisticTable}</div><div class="gx-interpretation"><strong>Reading these results</strong><p>The median is the middle measurement; the 16th–84th percentile range describes the middle 68% of measurements. These summaries are not recommended design values. Choosing a design value requires engineering judgment.</p>${glossary('statistics-terms', 'Statistics explained')}</div></section>`;
     const controls = guideIndex === null ? `${refinementDisclosure()}${caveats ? `<div class="gx-warning">${caveats}</div>` : ''}${selector}` : `${guideHeader()}${caveats ? `<div class="gx-warning">${caveats}</div>` : ''}`;
     return `<div class="gx-section-head"><div>${heading('Explore your scenario', 'See the range of simulated measurements for the scenario you confirmed.')}</div>${button('review', 'Review scenario')}</div><section class="gx-context"><div class="gx-section-head"><h3>Your confirmed scenario</h3><strong>${matchingStages(result.selection.matchingRecords)}</strong></div>${compactSummary(confirmed)}${coverage(confirmed, 'warning')}</section>${dirty() ? `<div class="gx-pending"><div><strong>You have unapplied changes</strong><p>These results still describe your confirmed scenario.</p></div><div>${button('review', 'Return to review')}${button('discard', 'Discard changes')}</div></div>` : ''}${controls}${guideIndex !== null && guideIndex >= 3 ? guideEditor() : measurement}${guideNav(true)}${fullScenario(confirmed)}<footer class="gx-footer"><div>${button('site', 'Change geological site conditions')}${button('movement', 'Change fault slip')}</div>${button('download', 'Download data (ZIP)', true, 'aria-describedby="gx-download-contents"')}</footer><p class="gx-hint gx-download-contents" id="gx-download-contents">${escape(DOWNLOAD_CONTENTS)}</p><p class="gx-research">This research tool helps you forecast what could happen at a site with known conditions — probabilities from simulations, not a prediction of what will happen at a particular site. ${link('../scenario/#gre-disclaimer', 'Full disclaimer')}</p><p class="gx-hint">The ${link('../dashboards/distributions/', 'Distributions')} and ${link('../dashboards/model-vs-reality/', 'Model vs reality')} dashboards show broader datasets rather than this confirmed scenario. The ${link('../scenario/', 'existing explorer')} also offers field comparisons and additional chart controls.</p>`;
   }
@@ -979,6 +973,52 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     }
   }
 
+  /** Hand `bytes` to the browser as a download named `fileName`. */
+  function save(bytes: Uint8Array | string, type: string, fileName: string): void {
+    const url = URL.createObjectURL(new Blob([bytes], { type })); downloadUrls.add(url);
+    const anchor = document.createElement('a'); anchor.href = url; anchor.download = fileName; root.append(anchor); anchor.click(); anchor.remove();
+    setTimeout(() => { URL.revokeObjectURL(url); downloadUrls.delete(url); }, 1000);
+  }
+
+  /**
+   * The chart-image export (§16): the displayed chart of the confirmed
+   * result with its caption strip as a PNG, then its provenance sidecar.
+   * A second activation on the same card waits for the first to settle; a
+   * rasterizer failure saves nothing; a failed sidecar save is reported,
+   * not fatal (§16.3). A result replaced meanwhile delivers nothing.
+   */
+  async function exportChartImage(): Promise<void> {
+    if (!result) return;
+    const input = result, m = display.measurement;
+    if (exporting.has(m) || !chartDrawn(input, m)) return;
+    const kind: ChartKind = display.view[m] === 'cumulative' ? 'cumulative' : m === 'dzw' && display.logScale && input.histogramLog !== null ? 'histogram-log' : 'histogram';
+    const readoff = kind === 'cumulative' ? display.readoff[m] ?? 84 : null;
+    const say = (text: string): void => {
+      exportStatus = { input, m, text };
+      const node = $('#gx-chart-export-status');
+      if (node && result === input && display.measurement === m) node.textContent = text;
+    };
+    exporting.add(m);
+    try {
+      const files = await buildChartExport(input, stamps, m, kind, readoff, new Date(), rasterizeSvg);
+      if (!alive() || result !== input) return;
+      save(files.png, 'image/png', files.pngName);
+      try {
+        save(files.sidecar, 'text/plain;charset=utf-8', files.sidecarName);
+        say(CHART_EXPORT_READY);
+      } catch (error) {
+        console.error('Chart export sidecar:', error);
+        say(CHART_SIDECAR_BLOCKED);
+      }
+    } catch (error) {
+      console.error('Chart export:', error);
+      if (!alive() || result !== input) return;
+      say(CHART_EXPORT_FAILED);
+    } finally {
+      exporting.delete(m);
+    }
+  }
+
   /**
    * The guided download (§13.1): the four data members and report.docx,
    * composed at one instant. A second activation while the archive is
@@ -1132,6 +1172,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       else if (action === 'offset-shortcut' && regression) { invalidate(); const cap = offsetShortcut(draft.faultDip, regression, manifest.slipWindowBounds.max); if (cap !== null) draft.offsetMax = cap; issues = issues.filter(item => item.field !== 'offsetMax'); render('gx-offsetMax'); }
       else if (action === 'retry-regression') { $('#gx-offsetMax')?.focus(); void ensureRegression(); }
       else if (action === 'download') void download();
+      else if (action === 'chart-export') void exportChartImage();
     } catch (error) {
       console.error('Guided interaction:', error); generalError = `This action could not be completed.${result ? ' Your confirmed results have not changed.' : ''}`; alert.textContent = generalError; render();
     }
