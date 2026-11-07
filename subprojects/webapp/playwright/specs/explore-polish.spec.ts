@@ -63,8 +63,8 @@ test('the adopted wording reaches the guided page, the shared builders included'
   const rows = page.locator('.gx-statistics tbody th');
   await expect(rows.nth(0)).toHaveText('Measurements used');
   await expect(rows.nth(1)).toHaveText('Missing values (excluded)');
-  // The low-slip caveat, through the overlay.
-  await expect(page.locator('.gx-warning').filter({ hasText: 'very small slip values' })).toContainText('Your selected range includes very small slip values');
+  // The low-slip caveat: PDD §5.9's decided text (D-4), through the overlay.
+  await expect(page.locator('.gx-warning').filter({ hasText: 'Low-slip measurements' })).toContainText('Low-slip measurements may be less reliable. Below 0.5 m of fault slip, surface deformation can be difficult to distinguish from model roughness. These values are shown, but interpret them with caution.');
   // The chart's accessible name and the histogram table.
   await expect(page.locator('#gx-chart svg')).toHaveAttribute('aria-label', /histogram of [\d,]+ measurements used/);
   await expect(page.locator('#gx-chart svg')).toContainText('Measurements used');

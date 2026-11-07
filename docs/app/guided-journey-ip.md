@@ -2338,6 +2338,92 @@ Not verified:
 - Screen-reader reading of the document.
 - Browsers other than Chromium, including Safari's canvas encoding.
 
+### Decided low-slip caveat, 2026-11-06 (G-25)
+
+G-25 ran under the owner's release of 2026-11-06 (`059efdb`), after
+G-13's merge, to PDD §5.9's decided replacement (D-4, Decided
+2026-11-06).
+
+**String.** The guided overlay's `pdd5.9.lowSlipCaveat` entry now
+holds the research group's own text, verbatim from PDD §5.9: "Low-slip
+measurements may be less reliable. Below 0.5 m of fault slip, surface
+deformation can be difficult to distinguish from model roughness.
+These values are shown, but interpret them with caution." It replaces
+the D-45 variant ("Your selected range includes very small slip
+values, …"). The text is the group's, decided under D-4, so no string
+went through a gate. `copy.json` and the copy deck keep their bytes,
+per PDD §3.7's supersession pattern.
+
+**The report (interpretation (l) narrowed).** Before: the report's
+Provenance section printed `provenance.txt` verbatim in registry
+wording (G-13's interpretation (l)), so an overlay-only change would
+have left `report.docx` showing the registry caveat while the page
+showed the decided one. After: each Provenance line passes through
+the guided overlay, so the report shows the decided caveat, as the
+released row requires and §13.7's no-second-wording rule asks. Any
+other overlaid line there now reads in the guided wording too: today
+the small-result warning. `provenance.txt` in the same archive still
+carries the registry wording, untouched, from the shared
+`packageTexts`. The planning session relayed this reading of the row
+(2026-11-06). Its dated note narrowing (l), in the G-13 evidence, and
+the G-25 row amended to name the mechanism landed in the owner's commit
+`deb154d`, before this merge.
+
+**Review.** The independent review found nothing blocking.
+
+- It compared the overlay text with PDD §5.9 byte for byte.
+- It checked every overlay literal against what `provenanceText` can
+  emit, and found the low-slip caveat is the only Provenance line the
+  overlay can change.
+- It confirmed the fixtures fire the caveat where the tests say they do.
+- A mutation that removed the overlay pass failed both new report tests.
+- Its one note is about the owner's guided DDD, which this task does not
+  edit: §11.1's wording table still lists "Your window includes →
+  Your selected range includes" with no note that D-4 supersedes it
+  for the low-slip caveat. That note was routed to the planning
+  session.
+
+Tests and specs:
+
+- `explore-copy-overlay`: the overlay maps the registry caveat to the
+  decided text exactly.
+- `explore-report` (19 tests):
+  - the Provenance lines are `provenance.txt`'s lines through the
+    overlay, for a result with and without the caveat;
+  - a low-slip window puts the decided text in the report once and
+    the registry text nowhere in it, while `provenance.txt` keeps the
+    registry text;
+  - a result without a low-slip window carries no caveat.
+- `explore-polish` (both lane projects): the page's warning shows the
+  decided text.
+- `explore-report` spec (both lane projects): each sample's report
+  shows the decided text and not the registry one, and its
+  `provenance.txt` keeps the registry text.
+
+At this verification, on `task/g-25-low-slip-caveat` at `08e3e48`,
+over `059efdb` (the owner's release). The branch was then rebased onto
+`deb154d`, which changes documents only; the document checks passed
+again there:
+
+- **Build and unit tests.** The pinned Node suite passed all 466 tests,
+  and typechecking and the bundles passed.
+- **Site builds.** The strict publication and preview builds passed,
+  with `explore-1c2030edc2e9.js` and `explore-b60ac1064581.css`.
+- **Unchanged.** The `/scenario/` bundles `app-26490347afd0.js` and
+  `app-08bebc049c15.css` did not change.
+- **Hooks and document checks.** All 31 hook tests passed. Relative
+  links resolved, PDD agreement passed, and traceability reported no
+  gap rows.
+- **Lane.** The full lane passed 309 and skipped 5, with no failure,
+  twice in a row, at load averages of 12 to 17.
+- **Guided specs.** All 156 passed in `desktop` and `mobile`.
+- **Earlier run.** The same commands had passed at `5693df9`, the
+  overlay change alone (465 Node tests; lane 309 twice; guided 156).
+
+Not verified: screen-reader reading of the new warning, Word's
+rendering of the changed Provenance line (the structure is unchanged
+from G-13's checked samples), and browsers other than Chromium.
+
 ## Separate CI investigation
 
 The reported job `126383105016` belongs to historical run
