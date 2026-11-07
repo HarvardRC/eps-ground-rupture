@@ -1389,6 +1389,21 @@ precedent, amendable by the owner on sight:
    sentences verbatim, replacing the current three.
 6. The fault-slip help keeps its title and glossary link; only its
    body changes, to §15.4's sentences.
+7. The review's surface-offset definition gets its own glossary
+   entry — **Surface offset**, anchored `#surface-offset`, after
+   Slip in "Faults, in plain terms" — holding the review's text;
+   the Vertical separation entry stands. The briefing's
+   surface-offset term link retargets to the new anchor in the
+   same change, so the checker stays green in every state; the
+   guided offset-help link and the §5.11 first-use map keep
+   `#vertical-separation` until question 1's read-through.
+8. Two leftovers outside §15's original scope, decided by the owner
+   with the G-26 string approval (2026-11-06): the results empty
+   state says "Change a condition or slip range, then review the
+   scenario again."; and the results footer replaces the original
+   research-tool sentence with §15.2's amended forecast sentence,
+   keeping the Full disclaimer link — so the page carries one
+   framing, not two. Both join the assembled list.
 
 ## 16. Chart-image export (D-14, FR-D2)
 
