@@ -115,7 +115,7 @@ named in the last column carry the detail.
 | D-11 | Small-result warning threshold, chart floor, and empty-result diagnosis rule. | FR-O3 | Product owner | Proposed | Warn below 30 valid; suppress chart below 10; single-condition diagnosis; no-match state distinct from no-valid-measurement state; §4.5. |
 | D-12 | Unclassified records: population and display semantics. | FR-G2, FR-S7 | Product owner | Proposed | "All scarp types" applies no filter — unclassified records stay in the matching population (GS-0's 346,834); excluded from class-colored charts and class counts; §3.7, §4.3. |
 | D-13 | Scarp-family view availability and label. | FR-G2 | Product owner | Proposed | Toggle "Group collapse variants"; §3.7. |
-| D-14 | Chart-export provenance format. | FR-D2 (P1.5, D-48) | Product owner | Proposed | Caption strip + sidecar text; §6.3. |
+| D-14 | Chart-export provenance format. | FR-D2 (P1.5, D-48) | Product owner | Decided (2026-11-06) | Caption strip + sidecar text; §6.3. The owner adopted the proposed format on 2026-11-06: strip fields in the page's own wording (the §13.3 precedent), the §4.1 accuracy statement on cumulative images, the §6.1 provenance sidecar rendered through the guided overlay (the G-25 rule), and the displayed panel's active caveats on the strip (§5.4's everywhere-rule; CR-8). The PNG alone satisfies FR-D2's include branch; a blocked sidecar save is reported, not fatal. Guided DDD §16; task G-27, second in the D-48 band, before G-24. |
 | D-15 | Shared-link version notice. | FR-X1 (P2) | Product owner | Proposed | URLs carry no version stamp when links first ship (P2); notice rule for later; §7.2. |
 | D-16 | Browser and mobile baseline. | NFR-4 | Product owner | Proposed | Evergreen 12-month window; 360 px floor; §9.2. Browser window amended at owner review, 2026-11-01. |
 | D-17 | Accessibility conformance target. | NFR-5 | Product owner | Proposed | WCAG 2.2 AA for new pages; §9.3. |
@@ -1782,6 +1782,17 @@ summary (which always names the population, §3.7); the count line
 "Cite: Chiama et al. (2025)" with the pointer to the full citation.
 A cumulative-chart image also carries the §4.1 accuracy statement in
 that rendered strip. The export action pairs the image with the §6.1 provenance text.
+
+**Decided (2026-11-06).** The owner adopted this format as
+proposed: the on-image strip above (its fields in the page's own
+wording, the report's §13.3 precedent), the §4.1 accuracy
+statement on cumulative images, and the paired §6.1 provenance
+sidecar. The displayed panel's active caveats join the strip —
+§5.4's notice follows scarp dip everywhere it appears, and CR-8
+keeps warnings with results. The PNG alone satisfies FR-D2's
+include branch, so a blocked sidecar save is reported, not fatal.
+Delivery design: guided DDD §16; task G-27, second in the D-48
+band. The heading keeps its anchor.
 
 ### 6.4 Animation offer and dominance (FR-D4, P2; D-7 Proposed)
 

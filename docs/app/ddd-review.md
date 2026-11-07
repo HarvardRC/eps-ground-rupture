@@ -2155,6 +2155,85 @@ the slip-rate sentence — are built from the review's sentences,
 marked assembled in guided DDD §15, and listed for the research
 group's sight with the next briefing round.
 
+## The review's updated definitions (2026-11-06, verbatim)
+
+The implementing session found that guided DDD §15.9 adopted "the
+review's updated definitions" without the repository holding their
+text. This entry quotes the review's "Updated definitions" block
+in full, from Kristen Chiama's 2026-11-06 email; the only
+normalization is typographic — the LaTeX fragments are written
+Us − Ud. These are the source texts G-26 fits to the glossary's
+reader register; any sentence the fitting alters joins the
+assembled list for the group's sight.
+
+> - **Fault slip:** The displacement observed between the two
+>   sides of a fault as they move relative to one another. It is
+>   different from the vertical displacement measured at the
+>   ground surface. These models measure fault slip as the
+>   cumulative dip-slip on a fault relative to the fault dip.
+> - **Surface offset:** The resultant deformation and distance
+>   observed between the ground surfaces on opposite sides of a
+>   rupture. It describes surface displacement, not movement along
+>   the fault plane. It may differ from scarp height, especially
+>   where folding or additional uplift occurs.
+> - **Fault dip (fault angle):** The angle of the fault plane
+>   measured from horizontal. It describes the fault’s
+>   orientation. Fault dip is distinct from scarp dip.
+> - **Fault Scarp:** A step, slope, or ridge formed at the ground
+>   surface by fault slip and related deformation.
+> - **Surface deformation characteristics (SDC):** The measurable
+>   features that describe the shape, size, and extent of
+>   ground-surface deformation associated with a fault rupture.
+>   SDC includes scarp height, additional uplift (Us − Ud),
+>   deformation zone width (DZW), and scarp dip.
+>   - **Scarp height (SH):** The vertical height of the scarp,
+>     measured from the undeformed footwall surface to the highest
+>     point of the scarp. This is the total scarp height, so a
+>     pressure ridge can include uplift above the undeformed
+>     (flat) hanging-wall surface. Scarp height is therefore not
+>     always the same as the vertical displacement across the
+>     fault.
+>   - **Additional Uplift (Us − Ud):** Uplift of the scarp above
+>     the undeformed hanging-wall surface. Here, Us is total scarp
+>     height and Ud is vertical displacement on the fault at
+>     depth. This additional uplift is especially associated with
+>     pressure ridges, where backthrusting and folding can raise
+>     the surface above the hanging-wall level.
+>   - **Deformation zone width (DZW):** The width of the primary
+>     surface-rupture deformation zone across the fault. Depending
+>     on the paper’s measurement procedure, it spans from the
+>     first deformation identified on the hanging-wall side (such
+>     as uplift, fractures, or collapse features such as colluvial
+>     wedges) to the base of the scarp. It may not include every
+>     secondary fault or distant splay in a natural rupture.
+>   - **Scarp dip:** The angle of the scarp face measured from
+>     horizontal. It describes the slope at the surface, not the
+>     dip of the fault underground. It is measured from the
+>     maximum scarp height to the base of the scarp.
+>   - **Simulation stage:** One saved point in a simulation as
+>     fault slip accumulates. A single simulation can have many
+>     stages, each with its own SDC measurements.
+
+Sediment depth has no entry in this block; its definition —
+thickness of the sediment above bedrock — is the review's
+site-conditions note, already fixed as the §15.3 hint.
+
+## D-14 decided: the band's second item gets its design (2026-11-06)
+
+Asked which path unblocks G-24, the owner decided D-14 now. The
+decision adopts PDD §6.3's proposed format — the rendered caption
+strip plus the §6.1 provenance sidecar — with three fittings
+recorded in the register row and §6.3: the strip's fields read in
+the page's own wording (the report's §13.3 precedent); the
+displayed panel's active caveats join the strip, since §5.4
+requires the scarp-dip notice everywhere the measurement appears
+and CR-8 keeps warnings with results; and the sidecar renders
+through the guided overlay (the G-25 rule), leaving shared
+`packageTexts` untouched. Guided DDD §16 fixes the design; G-27
+carries it, second in the D-48 band — after G-26, before G-24 —
+released by the owner's commit of this entry. The band D-48 made
+release-blocking is now fully planned: G-13 done, G-27 released.
+
 ## References
 
 - [`docs/app/ddd.md` — Ground Rupture Explorer — detailed design document](ddd.md).

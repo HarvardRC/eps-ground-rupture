@@ -1343,7 +1343,12 @@ fault slip, surface offset, fault dip (fault angle), fault scarp,
 the surface-deformation-characteristics family (scarp height,
 additional uplift, deformation zone width, scarp dip), simulation
 stage, and sediment depth — keeping every anchor id unchanged.
-The briefing's terms list already follows.
+The source texts are quoted verbatim in the review record's
+entry "The review's updated definitions (2026-11-06, verbatim)";
+G-26 fits them to the glossary's reader register, and any
+sentence the fitting alters joins the assembled list for the
+group's sight. The briefing's short terms list is not replaced
+by them; its stage and width lines were already updated.
 
 ### 15.10 Acceptance
 
@@ -1354,3 +1359,86 @@ The briefing's terms list already follows.
   `/scenario/` bundles stay byte-identical.
 - The static landing text, the MkDocs glossary, and the dashboard
   page's term fix land in the same change.
+
+## 16. Chart-image export (D-14, FR-D2)
+
+PDD D-48 set the chart-image export second in the P1.5 band,
+release-blocking for v0.4, "a thin action over the same
+rendering" as the result report; the owner decided D-14 on
+2026-11-06, adopting PDD §6.3's strip-and-sidecar format. This
+section fixes the design task G-27 implements. Every change is
+guided-only — explore-local code and strings; the shared chart
+builders, `packageTexts`, and the `/scenario/` page keep their
+bytes (D-39).
+
+### 16.1 The action
+
+Each measurement card with a rendered chart gains one button
+under the chart, beside the chart-data disclosure: **Download
+this chart (PNG)**. It exports the chart as displayed — histogram
+or cumulative, linear or logarithmic — for the confirmed scenario
+(FR-D1's gate). No button renders while results are unconfirmed
+or where the chart is suppressed below the chart floor: there is
+no chart to export. A per-card busy flag ignores a second
+activation until delivery or failure settles, like the report's
+(§13.1).
+
+### 16.2 The image
+
+The exported PNG is the displayed chart's SVG rendered by the
+§13.4 rasterizer — 2× on white, the report's geometry — with the
+D-14 caption strip composed beneath it in the same image:
+
+- the product and page name ("Ground Rupture Explorer — guided
+  journey");
+- the measurement with its unit and the chart kind
+  ("Deformation zone width (m) — histogram, log scale");
+- the one-line scenario summary of §13.2, naming the population;
+- the count line in the page's own wording (§13.3's precedent for
+  the D-14 fields): "N = {used} measurements used of {matching}
+  matching simulation stages ({excluded} missing values
+  excluded)";
+- the software and data-export versions (the §6.2 stamps);
+- "Cite: Chiama et al. (2025)" with the pointer to the full
+  citation in the download's citation file and the site's How to
+  cite;
+- on a cumulative image, the PDD §4.1 accuracy statement.
+
+The displayed panel's active caveats — the low-slip caveat, the
+scarp-dip provisional notice, the width-scope note, the
+small-result warning — join the strip as single lines in the
+page's wording: PDD §5.4 requires the scarp-dip notice everywhere
+the measurement appears, and CR-8 keeps warnings with results, so
+an image circulating alone keeps its warnings.
+
+### 16.3 The sidecar
+
+The same activation saves a second file: the §6.1 provenance text
+rendered through the guided overlay (the G-25 rule), leaving the
+shared `packageTexts` untouched. The PNG's strip alone already
+satisfies FR-D2's include branch, so a blocked second save is
+reported in the card's status line and is not fatal.
+
+### 16.4 Naming
+
+Both files extend the FR-D1 download's base-name rule (§13.1):
+`{base}-{measurement}-{chart kind}.png` and
+`{base}-{measurement}-{chart kind}-provenance.txt`, the
+measurement slug per the §13.6 member convention and the chart
+kind one of `histogram`, `histogram-log`, `cumulative`.
+
+### 16.5 Acceptance
+
+- Node tests: the strip's fields from a scenario fixture in both
+  modes; the cumulative accuracy line; caveat lines present
+  exactly when active; deterministic bytes for a recomputed
+  result; the sidecar equal to the overlay-rendered provenance;
+  the rasterizer-failure fallback leaves no partial file and
+  reports in the status line.
+- Browser specs (both lane projects): the button on each rendered
+  chart and absent when suppressed or unconfirmed; a real PNG and
+  its sidecar download with plausible sizes; the busy flag; the
+  320/1024 px layouts; the `/scenario/` bundles byte-identical,
+  as in every guided task.
+- Exact strings — the button, status lines, and strip labels — go
+  to the owner before the merge.
