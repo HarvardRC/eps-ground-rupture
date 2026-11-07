@@ -9,8 +9,8 @@
 
 import { expect, test, type Page } from '@playwright/test';
 import { NEGATIVE_HEIGHT_NOTE } from '../../src/explore/wording';
-import { BASE_URL } from '../support';
-import { action, gotoExplore, heading, pickSample } from '../explore-support';
+import { BASE_URL, manifest } from '../support';
+import { action, gotoExplore, heading, pickSample, sedimentName, setChecked, siteChoice, typeEntry } from '../explore-support';
 
 const INTRO_LINE = 'Describe the geological site conditions and fault slip you want to investigate, then see the simulated results.';
 const FORECAST = 'This research tool helps you forecast what could happen at a site with known conditions — probabilities from simulations, not a prediction of what will happen at a particular site.';
@@ -91,7 +91,31 @@ test('results: the Fault slip summaries, the renamed actions, the width spelling
   await expect(page.locator('#gx-chart svg')).toHaveAttribute('aria-label', /^Deformation zone width \(m\): histogram/);
   await expect(page.locator('.gx-measurement .gx-note')).toHaveCount(0);
   await expect(page.locator('#gre-explore .gx-main')).not.toContainText(/deformation-zone/i);
+  // The results footer's framing follows the amended introduction (§15.11 item 8), its disclaimer link kept.
+  const footer = page.locator('#gre-explore .gx-main > .gx-research');
+  await expect(footer).toContainText(FORECAST);
+  await expect(footer.getByRole('link', { name: /Full disclaimer/ })).toHaveAttribute('href', '../scenario/#gre-disclaimer');
 });
+
+test('the empty state asks for a condition or slip range (§15.11 item 8)', async ({ page }) => {
+  // Random Heterogeneous is modeled only for dense, 10 m profiles (briefing question 8): at 5 m nothing matches.
+  const random = manifest().arm_strength_states.find(pair => /random/i.test(pair.sediment_strength));
+  expect(random, 'the manifest names a random-heterogeneous profile').toBeDefined();
+  await gotoExplore(page);
+  await action(page, 'Build your scenario').click();
+  await setChecked(page, '#gx-faultDip-all', true);
+  await siteChoice(page, 'depth', '5 m').click();
+  await setChecked(page, '#gx-density-all', true);
+  await siteChoice(page, 'sediment', sedimentName(random!)).click();
+  await action(page, 'Continue to fault slip').click();
+  await setChecked(page, '#gx-mode-slip', true);
+  await typeEntry(page, 'slipMin', '0');
+  await typeEntry(page, 'slipMax', '5');
+  await action(page, 'Review scenario').click();
+  await action(page, 'Show results').click();
+  await expect(page.locator('.gx-empty').first()).toContainText('Change a condition or slip range, then review the scenario again.');
+});
+
 
 test('the scarp-type overview and its diagram caption say pressure ridge (§15.6)', async ({ page }) => {
   await confirmKern(page);
