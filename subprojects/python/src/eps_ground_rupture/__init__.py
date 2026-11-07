@@ -1,3 +1,3 @@
 """eps-ground-rupture: data pipelines for 2D DEM earthquake-rupture analysis."""
 
-__version__ = "0.2.0"
+__version__ = "0.4.0"

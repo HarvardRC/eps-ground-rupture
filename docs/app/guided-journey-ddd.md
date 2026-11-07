@@ -827,7 +827,7 @@ a `/scenario/`-only file (D-39):
 | valid measurements | measurements used |
 | Excluded null count | Missing values (excluded) |
 | Corresponding fault slip at depth | Estimated fault slip at depth |
-| Your window includes | Your selected range includes |
+| Your window includes | Your selected range includes — superseded 2026-11-06: the low-slip caveat now carries D-4's decided text whole (PDD §5.9; task G-25), not this swap |
 | Histogram bin data | Histogram counts by value range |
 | Browse freely | Exit walkthrough |
 | Download results | Download data (ZIP) |
@@ -1359,6 +1359,36 @@ by them; its stage and width lines were already updated.
   `/scenario/` bundles stay byte-identical.
 - The static landing text, the MkDocs glossary, and the dashboard
   page's term fix land in the same change.
+
+### 15.11 Fitting decisions (2026-11-06, G-26 start)
+
+Six gaps the implementing session found between §15's strings and
+the page, decided by the planning session under D-51 and the §13.7
+precedent, amendable by the owner on sight:
+
+1. The two registry texts reaching the guided page with the
+   hyphenated spelling follow §15.7: the width-scope note through
+   an overlay entry, and the no-valid notice's lower-cased
+   measurement slot by a guided-side fix. Spelling only; the
+   registry baselines keep their bytes.
+2. The two remaining "raised … ridges" sentences — the offset
+   help's "raised surface ridges can make that estimate too large"
+   and the conversion hint's counterpart — say **pressure ridges**;
+   both altered sentences join the assembled list.
+3. The summaries' "Movement:" label follows the renamed block —
+   **Fault slip:** — and in slip mode the value drops its now
+   redundant tail: "Fault slip: 0–5 m" (offset mode keeps its mode
+   words, "Fault slip: 0–1.3 m surface offset"); the review hint
+   reads "as fault slip increases". The trimmed slip-mode value
+   joins the assembled list.
+4. The sediment-depth tooltip adopts the review's definition ("The
+   thickness of the sediment above bedrock."); the fault-angle
+   tooltip stands — "tilted" does not contradict "dipping" — and
+   every other tooltip waits for question 1's read-through.
+5. The static landing paragraph is the §15.2 amended block's two
+   sentences verbatim, replacing the current three.
+6. The fault-slip help keeps its title and glossary link; only its
+   body changes, to §15.4's sentences.
 
 ## 16. Chart-image export (D-14, FR-D2)
 
