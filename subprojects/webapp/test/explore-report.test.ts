@@ -6,7 +6,8 @@
 //   relationship resolving to a media part and every embed to a
 //   relationship; one image per drawn chart.
 // - The §13.2 order; captions carrying the D-14 fields; the cumulative
-//   accuracy statement; the provenance blocks in provenance.txt's words.
+//   accuracy statement; the provenance blocks of provenance.txt in the
+//   page's wording (the decided low-slip caveat, G-25).
 // - The suppression branch, the small-result warning, and the empty state.
 // - The §13.5 fallback under a failing injected rasterizer.
 // - A fixed-scenario `document.xml` snapshot
@@ -220,11 +221,27 @@ describe('report: the document (§13.2, §13.3)', () => {
     for (const chart of reportCharts(narrowed)) assert.equal(captionLines(narrowed, STAMPS, chart)[1], scenarioSummary(narrowed));
   });
 
-  test('provenance renders every line of provenance.txt, in its words and order', () => {
-    const lines = paragraphs(documentXml(full, STAMPS, AT));
-    const start = lines.indexOf(PROVENANCE_HEADING) + 1;
-    const expected = provenanceText(full, STAMPS, AT).split('\n').filter(line => line !== '');
-    assert.deepEqual(lines.slice(start, start + expected.length), expected);
+  test('provenance renders every line of provenance.txt in its order, in the page\u2019s wording', () => {
+    for (const input of [full, noValid]) {
+      const lines = paragraphs(documentXml(input, STAMPS, AT));
+      const start = lines.indexOf(PROVENANCE_HEADING) + 1;
+      const expected = provenanceText(input, STAMPS, AT).split('\n').filter(line => line !== '').map(line => guided(line));
+      assert.deepEqual(lines.slice(start, start + expected.length), expected);
+    }
+  });
+
+  test('a low-slip window: the report carries the decided caveat, provenance.txt keeps the registry text (G-25)', () => {
+    const decided = 'Low-slip measurements may be less reliable. Below 0.5 m of fault slip, surface deformation can be difficult to distinguish from model roughness. These values are shown, but interpret them with caution.';
+    const registry = copyText('pdd5.9.lowSlipCaveat');
+    assert.notEqual(registry, decided);
+    const lines = paragraphs(documentXml(noValid, STAMPS, AT));
+    assert.equal(lines.filter(line => line === decided).length, 1);
+    assert.ok(!lines.includes(registry));
+    const provenance = provenanceText(noValid, STAMPS, AT);
+    assert.ok(provenance.includes(registry));
+    assert.ok(!provenance.includes(decided));
+    // No low-slip window, no caveat.
+    assert.ok(!paragraphs(documentXml(full, STAMPS, AT)).includes(decided));
   });
 
   test('each chart is followed by its caption: the D-14 fields, and the accuracy statement on the cumulative chart', () => {
