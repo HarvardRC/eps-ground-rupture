@@ -47,6 +47,6 @@ export const negativeHeights = (input: { readonly measurements: { readonly [m: s
 
 /** The chart-image export's action and its card status lines (guided DDD §16; §16.6). */
 export const CHART_EXPORT_BUTTON = 'Download this chart (PNG)';
-export const CHART_EXPORT_READY = 'Your chart image is ready.';
+export const CHART_EXPORT_READY = 'Your chart image and its provenance file are downloading. If your browser asks to allow multiple downloads, allow it to get the provenance file.';
 export const CHART_EXPORT_FAILED = 'The chart image could not be created. Your results are unchanged; select Download this chart (PNG) to retry.';
 export const CHART_SIDECAR_BLOCKED = 'The chart image is ready, but its provenance file could not be saved.';
