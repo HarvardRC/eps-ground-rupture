@@ -214,7 +214,7 @@ for (const sample of SAMPLES) {
     await expectFilled(page, sample);
     await expect(action(page, 'Return to review')).toHaveCount(0);
 
-    await action(page, 'Continue to fault movement').click();
+    await action(page, 'Continue to fault slip').click();
     await expect(heading(page)).toHaveText(MOVEMENT_HEADING);
     await expect(notice(page)).toHaveText(prefilled(sample));
     await expect(modeNote(page)).toHaveCount(0);
@@ -249,7 +249,7 @@ for (const sample of SAMPLES) {
 
     // The slip-mode sample is a valid scenario on review.
     await action(page, 'Review scenario').click();
-    await expect(page.locator('.gx-review-section', { hasText: 'Edit fault movement' })).toContainText(`${sample.slipMin}–${sample.slipMax} m fault slip`);
+    await expect(page.locator('.gx-review-section', { hasText: 'Edit fault slip' })).toContainText(`${sample.slipMin}–${sample.slipMax} m fault slip`);
     await expect(page.locator('.gx-warning')).toHaveCount(0);
     await stepButton(page, 'site').click();
     await expect(notice(page)).toHaveText(prefilled(sample));
@@ -262,7 +262,7 @@ for (const sample of SAMPLES) {
     await gotoExplore(page);
     await pickSample(page, sample.id);
     await expectFilled(page, sample);
-    await action(page, 'Continue to fault movement').click();
+    await action(page, 'Continue to fault slip').click();
     await stepButton(page, 'intro').click();
     await stepButton(page, 'movement').click();
     await expect(notice(page)).toHaveText(prefilled(sample));
@@ -290,7 +290,7 @@ for (const sample of SAMPLES) {
     await expectFilled(page, sample);
     await setChecked(page, '#gx-depth-0', !(await page.locator('#gx-depth-0').isChecked()));
     await expect(notice(page)).toHaveText(modified(sample));
-    await action(page, 'Continue to fault movement').click();
+    await action(page, 'Continue to fault slip').click();
     await expect(notice(page)).toHaveText(modified(sample));
     await expect(modeNote(page)).toHaveCount(0);
 
@@ -350,7 +350,7 @@ for (const sample of SAMPLES) {
     await action(page, 'Use the sample').click();
     await expectFilled(page, sample);
     // After a fill the walk is sequential; review stays reachable.
-    await expect(page.locator('.gx-footer .gx-primary')).toHaveText('Continue to fault movement');
+    await expect(page.locator('.gx-footer .gx-primary')).toHaveText('Continue to fault slip');
     await expect(action(page, 'Return to review')).toBeVisible();
     await stepButton(page, 'results').click();
     await expect(confirmedCount(page)).toHaveText(count);
@@ -372,7 +372,7 @@ for (const sample of SAMPLES) {
   test(`${sample.id}: Discard changes returns to the notice of the fill the confirmation started from, never un-Modified`, async ({ page }) => {
     await gotoExplore(page);
     await pickSample(page, sample.id);
-    await action(page, 'Continue to fault movement').click();
+    await action(page, 'Continue to fault slip').click();
     await page.locator('#gx-offset-feedback table').waitFor();
     await action(page, 'Review scenario').click();
     await action(page, 'Show results').click();
@@ -427,7 +427,7 @@ for (const sample of SAMPLES) {
     await expect(page.locator('details.gx-sample-story')).not.toHaveAttribute('open');
 
     // A mode switch is not an edit; its note returns with the record while the draft is in the other mode.
-    await action(page, 'Continue to fault movement').click();
+    await action(page, 'Continue to fault slip').click();
     await page.locator('#gx-mode-slip').check();
     await expect(modeNote(page)).toHaveText(MODE_NOTE);
     await reload();
@@ -460,7 +460,7 @@ for (const sample of SAMPLES) {
     };
     await gotoExplore(page);
     await pickSample(page, sample.id);
-    await action(page, 'Continue to fault movement').click();
+    await action(page, 'Continue to fault slip').click();
     await page.locator('#gx-offset-feedback table').waitFor();
     await action(page, 'Review scenario').click();
     await action(page, 'Show results').click();
@@ -634,7 +634,7 @@ for (const sample of SAMPLES) {
     await expect(story).not.toContainText('reproduce no event');
 
     // The trigger stands on Fault movement too, under the notice and still open; and back on Site conditions.
-    await action(page, 'Continue to fault movement').click();
+    await action(page, 'Continue to fault slip').click();
     await expect(heading(page)).toHaveText(MOVEMENT_HEADING);
     await expect(page.locator('details.gx-sample-story')).toHaveAttribute('open');
     expect(await notice(page).evaluate((node) => node.nextElementSibling?.id)).toBe('gx-sample-story');
@@ -647,7 +647,7 @@ for (const sample of SAMPLES) {
     await expect(notice(page)).toHaveText(modified(sample));
     await expect(page.locator('details.gx-sample-story')).toHaveAttribute('open');
     // Modified is not the end of it: the trigger follows the notice's lifetime, not the first edit.
-    await action(page, 'Continue to fault movement').click();
+    await action(page, 'Continue to fault slip').click();
     await expect(page.locator('details.gx-sample-story')).toHaveCount(1);
     await stepButton(page, 'site').click();
 
@@ -719,7 +719,7 @@ for (const sample of SAMPLES) {
     await expect(note(page, 'sediment')).toHaveText(SAMPLE_CHOICE);
 
     // Fault movement: the offset annotation below the entry, updated in place while typing.
-    await action(page, 'Continue to fault movement').click();
+    await action(page, 'Continue to fault slip').click();
     // The conversion data re-renders the step once it loads; probe after that.
     await page.locator('#gx-offset-feedback table').waitFor();
     await expect(note(page, 'offsetMax')).toContainText(straight(expected.offsetMax));
@@ -781,7 +781,7 @@ for (const sample of SAMPLES) {
       const release = await holdRegression(page);
       await page.reload();
       await explorerReady(page);
-      await action(page, 'Continue to fault movement').click();
+      await action(page, 'Continue to fault slip').click();
       await expect(page.locator('#gx-offset-feedback table')).toHaveCount(0);
       await page.locator(target).focus();
       release();

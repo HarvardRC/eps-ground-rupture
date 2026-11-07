@@ -14,7 +14,7 @@ test('each mode keeps its own entries across switches', async ({ page }) => {
   await gotoExplore(page);
   await action(page, 'Build your scenario').click();
   for (const group of ['faultDip', 'depth', 'density', 'sediment']) await setChecked(page, `#gx-${group}-all`, true);
-  await action(page, 'Continue to fault movement').click();
+  await action(page, 'Continue to fault slip').click();
   await expect(page.locator('.gx-hint').filter({ hasText: 'Your entries are kept when you switch modes.' })).toHaveCount(1);
   await typeEntry(page, 'slipMin', '0.5');
   await typeEntry(page, 'slipMax', '1.5');

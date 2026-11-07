@@ -45,7 +45,7 @@ test('incomplete site conditions: the Still-needed line, then a focused summary 
 
   // The forward action stays enabled; an unsuccessful click answers with a
   // visible summary that takes the focus, not the first Select all.
-  const forward = action(page, 'Continue to fault movement');
+  const forward = action(page, 'Continue to fault slip');
   await expect(forward).toBeEnabled();
   await forward.click();
   await expect(heading(page)).toHaveText(SITE_HEADING);
@@ -107,11 +107,11 @@ test('axe: the Still-needed line, the summary, the emphasized groups, and the st
   await action(page, 'Build your scenario').click();
   await expect(page.locator('.gx-still-needed')).toBeVisible();
   await axeExplorer(page, 'site step with the Still-needed line');
-  await action(page, 'Continue to fault movement').click();
+  await action(page, 'Continue to fault slip').click();
   await expect(page.locator('#gx-issue-summary')).toBeFocused();
   await axeExplorer(page, 'site step after an unsuccessful attempt');
   for (const group of ['faultDip', 'depth', 'density', 'sediment']) await setChecked(page, `#gx-${group}-all`, true);
-  await action(page, 'Continue to fault movement').click();
+  await action(page, 'Continue to fault slip').click();
   await action(page, 'Review scenario').click();
   await expect(page.locator('#gx-issue-summary')).toBeFocused();
   await axeExplorer(page, 'movement step after an unsuccessful attempt');
@@ -122,7 +122,7 @@ test('movement entries route review back to the first invalid field', async ({ p
   await gotoExplore(page);
   await action(page, 'Build your scenario').click();
   for (const group of ['faultDip', 'depth', 'density', 'sediment']) await setChecked(page, `#gx-${group}-all`, true);
-  await action(page, 'Continue to fault movement').click();
+  await action(page, 'Continue to fault slip').click();
   const line = page.locator('.gx-still-needed');
   const summary = page.locator('#gx-issue-summary');
   await expect(line).toHaveText('Still needed: Maximum fault slip.');
@@ -166,7 +166,7 @@ test('movement entries route review back to the first invalid field', async ({ p
 
   // Back on Site, the step's own route forward still validates first.
   await stepButton(page, 'site').click();
-  await action(page, 'Continue to fault movement').click();
+  await action(page, 'Continue to fault slip').click();
   await action(page, 'Review scenario').click();
   await expect(heading(page)).toHaveText(MOVEMENT_HEADING);
   await expect(summary).toBeFocused();

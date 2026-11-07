@@ -24,7 +24,7 @@ test('draft edits leave the confirmed result until review, and Discard restores 
   await expect(page.locator('.gx-pending')).toContainText('You have unapplied changes');
   await expect(page.locator('.gx-pending')).toContainText('These results still describe your confirmed scenario.');
   await expect(confirmedCount(page)).toHaveText(count);
-  await expect(page.locator('.gx-context')).toContainText(`${window.min}–${window.max} m fault slip`);
+  await expect(page.locator('.gx-context')).toContainText(`Fault slip: ${window.min}–${window.max} m`);
 
   // A refinement edit joins the same draft.
   await page.locator('#gx-refine-button').click();
@@ -67,7 +67,7 @@ test('Start a new scenario clears the result and returns to the opening step, th
     await expect(page.locator(`#gx-group-${group} input[data-choice]:checked`)).toHaveCount(0);
   }
   for (const group of ['faultDip', 'depth', 'density', 'sediment']) await setChecked(page, `#gx-${group}-all`, true);
-  await action(page, 'Continue to fault movement').click();
+  await action(page, 'Continue to fault slip').click();
   await expect(page.locator('#gx-mode-slip')).toBeChecked();
   await expect(page.locator('#gx-slipMin')).toHaveValue('0');
   await expect(page.locator('#gx-slipMax')).toHaveValue('');

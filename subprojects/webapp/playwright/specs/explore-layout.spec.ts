@@ -33,10 +33,10 @@ for (const width of [320, 1024] as const) {
     await fits('opening step after Start a new scenario');
     await action(page, 'Build your scenario').click();
     await fits('site conditions with the Still-needed line');
-    await action(page, 'Continue to fault movement').click();
+    await action(page, 'Continue to fault slip').click();
     await fits('site validation summary');
     await chooseSite(page, ref.inputs);
-    await action(page, 'Continue to fault movement').click();
+    await action(page, 'Continue to fault slip').click();
     await chooseMovement(page, ref.inputs);
     await page.locator('#gx-offset-feedback table').waitFor();
     await fits('fault movement with conversions');

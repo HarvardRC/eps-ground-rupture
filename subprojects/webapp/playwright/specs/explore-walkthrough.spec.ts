@@ -9,7 +9,7 @@ import {
 
 test.describe.configure({ timeout: 120_000 });
 
-const STOPS = ['Scarp height', 'Deformation-zone width', 'Scarp dip', 'Simulation stages', 'Scarp types'] as const;
+const STOPS = ['Scarp height', 'Deformation zone width', 'Scarp dip', 'Simulation stages', 'Scarp types'] as const;
 const PROGRESS = ['Height', 'Width', 'Dip', 'Stages', 'Types'] as const;
 const PROMPTS = ['How high is the scarp?', 'How wide is the disturbed ground?', 'How steep is the scarp face?'] as const;
 const MEASURES = ['scarp_height', 'dzw', 'scarp_dip'] as const;

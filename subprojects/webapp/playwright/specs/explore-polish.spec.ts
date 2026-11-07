@@ -19,7 +19,7 @@ test.describe.configure({ timeout: 120_000 });
 async function confirmIllustrative(page: Page): Promise<void> {
   await gotoExplore(page);
   await pickSample(page, 'illustrative');
-  await action(page, 'Continue to fault movement').click();
+  await action(page, 'Continue to fault slip').click();
   await page.locator('#gx-offset-feedback table').waitFor();
   await action(page, 'Review scenario').click();
   await action(page, 'Show results').click();
@@ -32,7 +32,7 @@ test('the results screen: compact scenario and its warning first, results next, 
   await expect(context.locator('h3')).toHaveText('Your confirmed scenario');
   await expect(context.locator('.gx-compact')).toHaveText([
     'Fault angle: 30°; 40° · Sediment depth: 5 m · Sediment density: Dense · Sediment strength and structure: Layered: Strong; Uniform: Strong',
-    'Movement: 0–3 m surface offset · Included: All stages within the slip range · All scarp types (no filter)',
+    'Fault slip: 0–3 m surface offset · Included: All stages within the slip range · All scarp types (no filter)',
   ]);
   // The critical coverage warning stays visible; the conversion table does not repeat up here.
   await expect(context.locator('.gx-warning')).toContainText('The simulations do not cover the full requested range');
@@ -115,14 +115,14 @@ test('site help that only repeated its sentence gives way to the glossary link; 
   }
   await stepButton(page, 'intro').click();
   await pickSample(page, 'kern');
-  await action(page, 'Continue to fault movement').click();
+  await action(page, 'Continue to fault slip').click();
   await expect(page.locator('details.gx-help summary')).toHaveText(['How is surface offset related to fault slip?']);
 });
 
 test('a refused number says which rule it broke', async ({ page }) => {
   await gotoExplore(page);
   await pickSample(page, 'kern');
-  await action(page, 'Continue to fault movement').click();
+  await action(page, 'Continue to fault slip').click();
   await page.locator('#gx-offset-feedback table').waitFor();
   const error = page.locator('#gx-error-offsetMax');
   await typeEntry(page, 'offsetMax', 'abc');

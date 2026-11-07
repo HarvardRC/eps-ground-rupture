@@ -18,7 +18,7 @@ test('navigating away during a held offset review keeps the reader where they we
   const release = await holdRegression(page);
   await action(page, 'Build your scenario').click();
   await chooseSite(page, ref.inputs);
-  await action(page, 'Continue to fault movement').click();
+  await action(page, 'Continue to fault slip').click();
   await chooseMovement(page, ref.inputs);
   await expect(page.locator('.gx-movement [role="status"]')).toHaveText('Loading the offset conversion…');
   await action(page, 'Review scenario').click();
@@ -31,7 +31,7 @@ test('navigating away during a held offset review keeps the reader where they we
   await settleFrames(page);
   await expect(heading(page)).toHaveText(SITE_HEADING);
   // Prove the held response was processed before asserting nothing stale applied.
-  await action(page, 'Continue to fault movement').click();
+  await action(page, 'Continue to fault slip').click();
   await page.locator('#gx-offset-feedback table').waitFor();
   await expect(heading(page)).toHaveText(MOVEMENT_HEADING);
   // The stale review never applied: Review was never reached.
@@ -45,7 +45,7 @@ test('navigating away during a held restore applies no stale result', async ({ p
   await gotoExplore(page);
   await action(page, 'Build your scenario').click();
   await chooseSite(page, ref.inputs);
-  await action(page, 'Continue to fault movement').click();
+  await action(page, 'Continue to fault slip').click();
   await chooseMovement(page, ref.inputs);
   await action(page, 'Review scenario').click();
   await action(page, 'Show results').click();

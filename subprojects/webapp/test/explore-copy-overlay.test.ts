@@ -21,7 +21,12 @@ describe('guided copy overlay (§11.1)', () => {
   test('filled registry texts become the adopted texts, slots kept', () => {
     assert.equal(guided(copyText('ddd5.8.rowValidCount')), 'Measurements used');
     assert.equal(guided(copyText('ddd5.8.rowExcludedNullCount')), 'Missing values (excluded)');
-    assert.equal(guided(fillCopy('pdd5.8.smallResultWarning', { N: '7' })), 'Only 7 measurements can be used for this scenario — too few for a reliable distribution. Interpret with caution.');
+    assert.equal(guided(fillCopy('pdd5.8.smallResultWarning', { N: '7' })), 'Only 7 measurements can be used for this scenario. They are not less trustworthy — a very specific set of site conditions matches few simulations, so the distribution is coarse. Try adding more options to include a range of results.');
+    // The small-count reframe and the width spelling (guided DDD §§15.5, 15.7, 15.11).
+    assert.equal(guided(copyText('pdd5.8.suppressionNotice')), 'Fewer than 10 measurements can be used — too few to draw a distribution. They are not less trustworthy; the selection is very specific. Showing the statistics table only; try adding more options to include a range of results.');
+    assert.equal(guided(copyText('pdd5.11.dzwLabel')), 'Deformation zone width (m)');
+    assert.match(guided(copyText('pdd5.7.widthScopeNote')), /^Deformation zone width measures the main modeled rupture zone\./);
+    assert.equal(guided(fillCopy('pdd5.8.noValidMeasurement', { X: '12', measurement: 'deformation-zone width' })), '12 simulation stages match this scenario, but none has a deformation zone width value — no distribution can be computed. The stages appear in the Missing values (excluded) count of the statistics table.');
     assert.equal(guided(fillCopy('ddd5.11.histogramLabel', { label: 'Scarp height (m)', N: '1,011' })), 'Scarp height (m): histogram of 1,011 measurements used');
     // PDD §5.9's decided replacement (D-4), verbatim.
     assert.equal(guided(copyText('pdd5.9.lowSlipCaveat')), 'Low-slip measurements may be less reliable. Below 0.5 m of fault slip, surface deformation can be difficult to distinguish from model roughness. These values are shown, but interpret them with caution.');
@@ -40,7 +45,7 @@ describe('guided copy overlay (§11.1)', () => {
   });
 
   test('edge cases: an empty slot, a slot spanning lines, and geometry left alone and cheap', () => {
-    assert.equal(guided(fillCopy('pdd5.8.smallResultWarning', { N: '' })), 'Only  measurements can be used for this scenario — too few for a reliable distribution. Interpret with caution.');
+    assert.equal(guided(fillCopy('pdd5.8.smallResultWarning', { N: '' })), 'Only  measurements can be used for this scenario. They are not less trustworthy — a very specific set of site conditions matches few simulations, so the distribution is coarse. Try adding more options to include a range of results.');
     assert.equal(guided(fillCopy('ddd5.11.histogramLabel', { label: 'Two\nlines', N: '4' })), 'Two\nlines: histogram of 4 measurements used');
     const points = Array.from({ length: 512 }, (_, i) => `${i}.123,${(i * 7) % 300}.456`).join(' ');
     const tree = { tag: 'polyline', attrs: [['points', points], ['aria-label', 'Scarp height (m): histogram of 2 valid measurements']] as const, children: [] };

@@ -592,7 +592,7 @@ Already settled, so we need not ask again:
 [claude-copy]: https://claude.ai/artifact/YTiqx2kDjE5U4GqPq8ThqF
 [prototype]: https://harvardrc.github.io/eps-ground-rupture/explore/
 [slip]: ../subprojects/mkdocs/docs/glossary.md#slip
-[offset]: ../subprojects/mkdocs/docs/glossary.md#vertical-separation
+[offset]: ../subprojects/mkdocs/docs/glossary.md#surface-offset
 [fault-dip]: ../subprojects/mkdocs/docs/glossary.md#fault-dip
 [scarp]: ../subprojects/mkdocs/docs/glossary.md#scarp
 [dzw]: ../subprojects/mkdocs/docs/glossary.md#dzw

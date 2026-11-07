@@ -9,7 +9,7 @@ export const DEFINITIONS = {
   },
   depth: {
     source: 'sediment-depth',
-    text: 'The thickness of the layer of loose material above the fault.',
+    text: 'The thickness of the sediment above bedrock.',
   },
   density: {
     source: 'sediment-strength',
@@ -33,11 +33,11 @@ export const DEFINITIONS = {
   },
   scarpTypes: {
     source: 'scarp-classes',
-    text: 'The shapes produced by the simulations: an inclined slope, a raised ridge, or a direct offset. Each can also occur with collapse, giving six scarp types.',
+    text: 'The shapes produced by the simulations: an inclined slope, a pressure ridge, or a direct offset. Each can also occur with collapse, giving six scarp types.',
   },
   scarp_height: {
     source: 'scarp-height',
-    text: 'The total height of the scarp above the undeformed ground on the lower side of the fault. A raised ridge can add height beyond the fault’s own movement.',
+    text: 'The total height of the scarp above the undeformed ground on the lower side of the fault. A pressure ridge can stand above the undeformed ground on the lifted side as well — that extra height is called additional uplift (Us − Ud).',
   },
   dzw: {
     source: 'dzw',

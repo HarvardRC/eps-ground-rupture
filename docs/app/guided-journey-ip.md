@@ -2424,6 +2424,213 @@ Not verified: screen-reader reading of the new warning, Word's
 rendering of the changed Provenance line (the structure is unchanged
 from G-13's checked samples), and browsers other than Chromium.
 
+### Research group's wording, 2026-11-06 (G-26)
+
+G-26 ran under the owner's release of 2026-11-06 (`059efdb`), after
+G-25's merge, to guided DDD §15 (PDD D-51) and the planning session's
+§15.11 fitting decisions.
+
+**What changed on the guided page.**
+
+- **Steps (§15.1).** The step list, headings, buttons and review blocks
+  name the two steps **Geological site conditions** and **Fault slip**:
+  - headings "Describe the geological site conditions" and "Choose the
+    assumed fault slip";
+  - Continue to fault slip;
+  - Edit and Change geological site conditions;
+  - Edit and Change fault slip.
+- **Introduction (§15.2).** The heading's line and the forecast
+  sentence, the first two cards ("…geological site conditions and fault
+  slip…", "…cover your slip range."), and the static `/explore/`
+  paragraph are the amended block's sentences.
+- **Hints (§15.3).**
+  - Fault angle: "How steeply the fault is dipping, measured from the
+    horizontal. Also called fault dip."
+  - Sediment depth: "Thickness of the sediment above bedrock."
+  - Density and strength end "If unknown, select all." The two range
+    groups get theirs with §14 (G-24).
+  - The depth explanation takes the review's definition (§15.11 item
+    4). The other explanations stand until question 1's read-through.
+- **Fault-slip help (§15.4).** The disclosure keeps its title and
+  glossary link and holds §15.4's five sentences.
+- **Small-count notices (§15.5).** The 10–29 and 1–9 texts, through the
+  overlay.
+- **Pressure ridge (§§15.6, 15.11 item 2).** It replaces raised ridge in
+  five places: the scarp-type overview, the diagram caption, the
+  scarp-height explanation's second sentence, the offset help, and the
+  conversion hint.
+- **Width spelling (§§15.7, 15.11 item 1).** "Deformation zone width" on
+  the measurement cards, headings and walkthrough. It also reaches the
+  chart label and its data table's header, the width-scope note and the
+  no-valid notice's measurement name, through the overlay and a
+  guided-side spelling pass.
+- **Summaries (§15.11 item 3).** "Fault slip: 3–5 m" in slip mode and
+  "Fault slip: 0–1.3 m surface offset" in offset mode, in the compact
+  and full summaries. The review hint reads "as fault slip increases".
+- **Negative-height note (§15.8; D-46).** It joins the scarp-height
+  panel and the report's scarp-height section when the matched minimum
+  is below zero. The steeper-fault-angles sample shows it (minimum
+  −0.02 m). It uses §12.6's neutral explanation wash.
+- **Report (§15.7).** Its measurement headings, captions and Provenance
+  read in the guided wording. `provenance.txt` keeps the registry
+  spelling.
+
+`copy.json`, the copy deck and every `/scenario/` file keep their
+bytes (PDD §3.7).
+
+**Glossary and site pages (§15.9; §15.11 item 7).**
+
+- The MkDocs glossary adopts the research group's definitions, quoted
+  verbatim in the review record, for:
+  - fault slip;
+  - fault dip (fault angle);
+  - fault scarp;
+  - the SDC row;
+  - scarp height;
+  - additional uplift;
+  - deformation zone width;
+  - scarp dip;
+  - simulation stage;
+  - sediment depth.
+- 24 of the review's 26 sentences are verbatim; the two fitted ones are
+  in the assembled list below.
+- A new **Surface offset** `{ #surface-offset }` entry follows Fault
+  slip, with the review's text verbatim. Vertical separation stays as
+  it was, and so does the guided offset help's link to it.
+- Every existing anchor id is unchanged: 39 before, the same 39 plus
+  `#surface-offset` after.
+- Kept sentences sit beside the review's text: the dip coverage, "This
+  is what the simulations drive…", "The thing all of this ultimately
+  measures.", "A wide DZW means…", "It is near zero for simple
+  scarps…".
+- Term headings now read Fault slip, Fault scarp, Fault dip (fault
+  angle), and Experiment vs simulation stage.
+- The scarp-class table says pressure ridge. The Pressure ridge entry
+  and the model-vs-reality page say "pop-up structure", the group's own
+  alternative term (question 9), where "raised ridge" stood.
+- The briefing's `[offset]` link now points to `#surface-offset`.
+
+**Assembled strings, listed for the research group's sight:**
+
+1. The amended introduction (§15.2).
+2. The slip-rate sentence (§15.4).
+3. Both small-count notices (§15.5).
+4. The negative-height note (§15.8).
+5. The two "pressure ridges" sentences (§15.11 item 2).
+6. The trimmed slip-mode summary value, "Fault slip: 3–5 m" (§15.11
+   item 3).
+7. The fitted glossary sentences:
+   - "Additional uplift is the uplift of the scarp above the undeformed
+     hanging-wall surface." (review: "Uplift of the scarp above…");
+   - "A simulation stage (the paper's model stage) is one saved point in
+     a simulation as fault slip accumulates, taken every 0.05 m."
+     (review: "One saved point in a simulation as fault slip
+     accumulates.").
+8. The two "pop-up structure" sentences: the glossary's Pressure ridge
+   entry and the model-vs-reality page.
+9. The empty state: "Change a condition or slip range, then review the
+   scenario again." (§15.11 item 8).
+10. The results footer: §15.2's forecast sentence in place of "This is a
+    research tool; it does not predict what will happen at a particular
+    site.", its Full disclaimer link kept (§15.11 item 8).
+
+**Approval: the owner's own (2026-11-06, relayed by the planning
+session).**
+
+- **Approved:** the final strings as implemented. This covers §15's
+  strings, the §15.11 fittings, the glossary's fitted sentences and the
+  assembled list.
+- **Two further lines, both applied:**
+  - the empty state's "movement range" becomes "slip range";
+  - the results footer takes §15.2's forecast sentence.
+- **Record:** the decision is §15.11 item 8. Item 7 (the Surface offset
+  entry) and item 8 landed in the owner's commit `6ffc247`, before this
+  merge.
+
+**Review.** The independent review found nothing blocking. It compared
+§15's strings byte for byte and the glossary sentence by sentence
+against the verbatim block, and checked the anchors and the scope (no
+`copy.json` or `/scenario/` change).
+
+Applied:
+
+- **Slip-mode tail.** No spec checked that slip mode drops its tail.
+  The continuity spec and the new spec now assert it.
+- **Explanation texts.** No spec checked the scarp-height and depth
+  explanations. The new spec opens both and asserts their texts.
+- **Glossary tidying.** The two adopted sentences use the page's
+  straight apostrophe, and one pasted line is reflowed.
+
+Not applied:
+
+- **Spelling pass.** It is a substring pass over all guided text rather
+  than a pass scoped to the slot. Today it reaches only the intended
+  slot; the report test pins that `provenance.txt` keeps the hyphen.
+- **Two "movement" sentences.** The empty state's "Change a condition
+  or movement range…" and the results footer's "This is a research
+  tool; it does not predict…" are outside §15. They were not changed in
+  review: they went to the owner with the final strings, and the
+  owner's answer (above) changed both.
+
+Tests and specs:
+
+- Node:
+  - `explore-copy-overlay`: the two notices, the width label, the
+    width-scope note and the no-valid slot.
+  - `explore-report`: guided labels in the order, caption and notes
+    tests; the width spelling throughout the report while
+    `provenance.txt` keeps the registry's; the negative-height note
+    under scarp height only, below zero only, before the table; and a
+    regenerated snapshot.
+- New `explore-sme-wording` spec, in both lane projects:
+  - the introduction and the step list;
+  - the hints, the offset help, the conversion hint and the fault-slip
+    help;
+  - the review blocks and buttons;
+  - the results summaries, actions, width spelling and negative-height
+    note;
+  - the pressure-ridge overview;
+  - the two explanations;
+  - the slip-mode summary;
+  - the results footer and its disclaimer link;
+  - the empty state, built from a profile modeled only for dense 10 m
+    sediment chosen at 5 m;
+  - the JS-off landing text;
+  - the glossary's definitions under their anchors.
+- The renamed strings are updated across 14 existing guided specs and
+  the shared support module. The `explore-report` spec also asserts no
+  hyphenated width term in each sample's report.
+
+At this verification, on `task/g-26-sme-wording` at `0618a21`, over
+`d158b73` (the owner's 0.4.0 push, which carries §15.11 items 1–6).
+The branch was then rebased onto `6ffc247`, which adds §15.11 items 7–8
+to the guided DDD and changes nothing else; the document checks passed
+again there:
+
+- **Build and unit tests.** The pinned Node suite passed all 468 tests,
+  and typechecking and the bundles passed.
+- **Site builds.** The strict publication and preview builds passed,
+  with `explore-f93000bf36b8.js` and `explore-de946ea6defe.css`.
+- **Unchanged.** The `/scenario/` bundles `app-26490347afd0.js` and
+  `app-08bebc049c15.css` did not change.
+- **Hooks and document checks.** All 31 hook tests passed. Relative
+  links resolved, PDD agreement passed, and traceability reported no
+  gap rows.
+- **Lane.** The full lane passed 327 and skipped 5, with no failure,
+  twice in a row, at load averages of 12 to 14.
+- **Guided specs.** All 174 passed in `desktop` and `mobile`.
+- **Earlier runs.** The same commands had passed at `f9d8a82` (468;
+  lane 321 twice; guided 168) and at `37db5cb` (468; lane 325 twice;
+  guided 172).
+
+Not verified:
+
+- the research group's sight of the assembled strings, which goes with
+  the next briefing round;
+- screen-reader reading of the renamed steps and the note;
+- Word's rendering of the new report note;
+- browsers other than Chromium.
+
 ## Separate CI investigation
 
 The reported job `126383105016` belongs to historical run

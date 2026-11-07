@@ -51,7 +51,7 @@ Everything below is the vocabulary needed to read that.
 | **SURE** | the name of a database of **s**urface **ru**ptur**e**s | A second published field compilation — [see below](#sure). |
 | **IQR** | Interquartile Range | A spread measure — see [statistics](#statistics-terms). |
 | **OLS** | Ordinary Least Squares | The standard way of fitting a straight line to data. |
-| **SDC** | Surface Deformation Characteristics | The authors' umbrella term for the measured surface quantities: scarp height, DZW and scarp dip. |
+| **SDC** | Surface Deformation Characteristics | The measurable features that describe the shape, size, and extent of ground-surface deformation associated with a fault rupture. SDC includes scarp height, additional uplift (Us − Ud), deformation zone width (DZW), and scarp dip. |
 
 ## The simulations
 
@@ -64,12 +64,13 @@ Everything below is the vocabulary needed to read that.
   you can watch a rupture find its own way to the surface instead of telling
   it where to go.
 
-**Experiment vs model stage** { #model-stage }
+**Experiment vs simulation stage** { #model-stage }
 : An **experiment** is one complete simulation run with a fixed set of
   conditions — a given sediment depth, density, strength, fault dip. A
-  **model stage** is a single snapshot within that run, taken every 0.05 m
-  as the slip accumulates. Hence 3,434 experiments but 346,834
-  stages.[^abstract] A row in the data is a stage, not an experiment.
+  **simulation stage** (the paper's model stage) is one saved point in a
+  simulation as fault slip accumulates, taken every 0.05 m. A single
+  simulation can have many stages, each with its own SDC measurements.
+  Hence 3,434 experiments but 346,834 stages.[^abstract] A row in the data is a stage, not an experiment.
 
 **Fault seed** { #fault-seed }
 : A modelling device, not a real-world feature: a built-in plane of weakness
@@ -101,23 +102,33 @@ Everything below is the vocabulary needed to read that.
   and stays put. The names come from mining: a miner in a tunnel along the
   fault would hang a lamp on one wall and stand on the other.
 
-**Fault dip** { #fault-dip }
-: How steeply the fault plane is tilted, in degrees from horizontal. 20° is
+**Fault dip (fault angle)** { #fault-dip }
+: The angle of the fault plane measured from horizontal. It describes the
+  fault's orientation. Fault dip is distinct from scarp dip. 20° is
   gently inclined; 70° is close to vertical. The simulations cover 20, 30,
   40, 45, 50, 60 and 70 degrees.
 
-**Slip** { #slip }
-: How far the two blocks moved past each other *along* the fault. This is
-  what the simulations drive: slip is increased step by step, and the ground
-  surface re-measured at every 0.05 m.[^abstract]
+**Fault slip** { #slip }
+: The displacement observed between the two sides of a fault as they move
+  relative to one another. It is different from the vertical displacement
+  measured at the ground surface. These models measure fault slip as the
+  cumulative dip-slip on a fault relative to the fault dip. This is what the
+  simulations drive: slip is increased step by step, and the ground surface
+  re-measured at every 0.05 m.[^abstract]
+
+**Surface offset** { #surface-offset }
+: The resultant deformation and distance observed between the ground
+  surfaces on opposite sides of a rupture. It describes surface
+  displacement, not movement along the fault plane. It may differ from
+  scarp height, especially where folding or additional uplift occurs.
 
 **Coseismic** { #coseismic }
 : "During the earthquake" — as opposed to movement that accumulates slowly
   between earthquakes.
 
-**Scarp** { #scarp }
-: The step, slope or ridge left at the ground surface once slip reaches it.
-  The thing all of this ultimately measures.
+**Fault scarp** { #scarp }
+: A step, slope, or ridge formed at the ground surface by fault slip and
+  related deformation. The thing all of this ultimately measures.
 
 ## What gets measured
 
@@ -146,22 +157,25 @@ four, counting Us and Ud together as "uplift".)
 Figure 5 is the real thing — see [The paper](paper.md).*
 
 **Scarp height (Us)** { #scarp-height }
-: The total height of the scarp, measured from the top of the undeformed
-  footwall.[^measured] Where a pressure ridge forms it can exceed the
-  undeformed hanging-wall surface, because folding and secondary faults add
-  height on top of the fault's own movement.[^measured]
+: The vertical height of the scarp, measured from the undeformed footwall
+  surface to the highest point of the scarp. This is the total scarp
+  height, so a pressure ridge can include uplift above the undeformed
+  (flat) hanging-wall surface. Scarp height is therefore not always the
+  same as the vertical displacement across the fault.[^measured]
 
 **Deformation zone width (DZW)** { #dzw }
-: Measured from the *first* sign of vertical movement on the hanging wall —
-  uplift, cracking, or collapse — across to the base of the scarp on the
-  footwall side.[^dzw] It is a width spanning the disturbed ground, not a
-  distance out from the fault line. A wide DZW means the deformation was
-  spread out; a narrow one means it was concentrated.
+: The width of the primary surface-rupture deformation zone across the
+  fault. Depending on the paper's measurement procedure, it spans from the
+  first deformation identified on the hanging-wall side (such as uplift,
+  fractures, or collapse features such as colluvial wedges) to the base of
+  the scarp.[^dzw] It may not include every secondary fault or distant
+  splay in a natural rupture. A wide DZW means the deformation was spread
+  out; a narrow one means it was concentrated.
 
 **Scarp dip** { #scarp-dip }
-: The steepness of the scarp face itself, from the top of the scarp to its
-  toe, as an angle from horizontal.[^dzw] Not the same as the *fault* dip
-  underground.
+: The angle of the scarp face measured from horizontal. It describes the
+  slope at the surface, not the dip of the fault underground. It is
+  measured from the maximum scarp height to the base of the scarp.[^dzw]
 
 **Vertical displacement of the hanging wall (VD_HW)** { #vd-hw }
 : How far the upthrown side of the fault actually rose. It is the same
@@ -170,9 +184,11 @@ Figure 5 is the real thing — see [The paper](paper.md).*
   `VD_HW` is the column name it carries in the project's data.
 
 **Vertical uplift at depth (Ud)** and **additional uplift (Us − Ud)** { #us-ud }
-: Ud is how far the fault itself lifted the hanging wall. Us − Ud is
-  everything *else* that added height at the surface — folding, secondary
-  faulting — beyond the fault's own throw.[^measured] It is near zero for
+: Additional uplift is the uplift of the scarp above the undeformed
+  hanging-wall surface. Here, Us is total scarp height and Ud is vertical
+  displacement on the fault at depth. This additional uplift is especially
+  associated with pressure ridges, where backthrusting and folding can
+  raise the surface above the hanging-wall level.[^measured] It is near zero for
   simple scarps and positive for pressure ridges, which is what makes it
   diagnostic of scarp shape.
 
@@ -181,7 +197,7 @@ Figure 5 is the real thing — see [The paper](paper.md).*
 These are the experiment settings, and they appear as dashboard controls.
 
 **Sediment depth** { #sediment-depth }
-: How thick the layer of loose material above the fault is.
+: The thickness of the sediment above bedrock.
 
 **Density** and **sediment strength** { #sediment-strength }
 : How tightly packed the sediment is, and how well it resists being pulled
@@ -251,7 +267,7 @@ you will see in the dashboards' colour legends and axes:
 |---|---|
 | `Monoclinal` | [inclined slope](#monoclinal) |
 | `Monoclinal Collapse` | the same, after [collapse](#collapse) |
-| `Pressure Ridge` | [raised ridge](#pressure-ridge) |
+| `Pressure Ridge` | [pressure ridge](#pressure-ridge) |
 | `Pressure Ridge Collapse` | the same, after [collapse](#collapse) |
 | `Simple` | [direct offset](#simple) |
 | `Simple Collapse` | the same, after [collapse](#collapse) |
@@ -266,7 +282,7 @@ outside these categories.
   the steepest angle loose material can hold before sliding.[^monoclinal]
 
 **Pressure ridge** { #pressure-ridge }
-: A raised ridge, formed by folding and uplift where two fault strands dip
+: A pop-up structure, formed by folding and uplift where two fault strands dip
   towards each other — a forethrust and a backthrust — squeezing the material
   between them upward. Tends to form above shallowly-dipping faults.[^ridge]
 

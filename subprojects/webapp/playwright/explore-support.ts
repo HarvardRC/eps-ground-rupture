@@ -12,8 +12,8 @@ import { gs, manifest, type GoldenScenario, type Inputs } from './support';
 export const EXPLORE_PATH = 'explore/';
 export const SESSION_KEY = 'gre-explore-session';
 export const INTRO_HEADING = 'Use simulations to understand ground rupture.';
-export const SITE_HEADING = 'Describe the site conditions';
-export const MOVEMENT_HEADING = 'Choose the assumed fault movement';
+export const SITE_HEADING = 'Describe the geological site conditions';
+export const MOVEMENT_HEADING = 'Choose the assumed fault slip';
 export const REVIEW_HEADING = 'Review your scenario';
 export const RESULTS_HEADING = 'Explore your scenario';
 
@@ -117,7 +117,7 @@ export async function confirmGolden(page: Page, id: string): Promise<GoldenScena
   }
   await action(page, 'Build your scenario').click();
   await chooseSite(page, ref.inputs);
-  await action(page, 'Continue to fault movement').click();
+  await action(page, 'Continue to fault slip').click();
   await chooseMovement(page, ref.inputs);
   await action(page, 'Review scenario').click();
   await expect(heading(page)).toHaveText(REVIEW_HEADING);

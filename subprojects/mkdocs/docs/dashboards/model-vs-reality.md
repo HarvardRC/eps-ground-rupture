@@ -70,7 +70,7 @@ the field measurements do not carry one.[^spec]
 Colouring by scarp class splits the cloud into the six shapes the
 simulations produce: [`Monoclinal`](../glossary.md#monoclinal) and
 [`Pressure Ridge`](../glossary.md#pressure-ridge) — an inclined slope and a
-raised ridge respectively — [`Simple`](../glossary.md#simple), where the
+pop-up structure respectively — [`Simple`](../glossary.md#simple), where the
 fault offsets the surface directly, and a
 [`… Collapse`](../glossary.md#collapse) variant of each, where the
 oversteepened face gave way. To see each of the six as the model draws it

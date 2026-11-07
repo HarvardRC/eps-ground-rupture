@@ -10,9 +10,11 @@ hide:
 <div id="gre-explore" markdown="1">
 **Use simulations to understand ground rupture.**
 
-Describe the site conditions and fault movement you want to
-investigate, then see the simulated results. This is a research
-tool; it does not predict what will happen at a particular site.
+Describe the geological site conditions and fault slip you want
+to investigate, then see the simulated results. This research
+tool helps you forecast what could happen at a site with known
+conditions — probabilities from simulations, not a prediction
+of what will happen at a particular site.
 
 The interactive explorer needs JavaScript and a supported browser.
 Use a current stable version of Chrome, Edge, Firefox, or Safari.

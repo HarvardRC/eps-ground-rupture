@@ -33,3 +33,14 @@ export const REPORT_FAILED = 'Your data download is ready. The Word report could
 /** The report's title and its provenance heading (§13.7). */
 export const REPORT_TITLE = 'Ground Rupture Explorer — result report';
 export const PROVENANCE_HEADING = 'Provenance';
+
+/**
+ * The negative-height note (guided DDD §15.8; PDD D-46), assembled from the
+ * research group's answer: shown on the scarp-height panel and in the
+ * report's scarp-height section when the matched minimum is below zero.
+ */
+export const NEGATIVE_HEIGHT_NOTE = "Small negative heights are at the model's resolution — single particles are about 0.02 m — and can reflect smoothing or extra compaction at low slip, not measured subsidence.";
+
+/** Whether a result's scarp-height panel carries the negative-height note: its matched minimum is below zero. */
+export const negativeHeights = (input: { readonly measurements: { readonly [m: string]: { readonly stats: { readonly min: number } | null } } }, m: string): boolean =>
+  m === 'scarp_height' && (input.measurements[m]?.stats?.min ?? 0) < 0;
