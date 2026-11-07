@@ -17,7 +17,8 @@ export const GUIDED_COPY: Readonly<Record<string, string>> = {
   'pdd5.8.smallResultWarning': 'Only {N} measurements can be used for this scenario — too few for a reliable distribution. Interpret with caution.',
   'pdd5.8.suppressionNotice': 'Fewer than 10 measurements can be used — too few for a reliable distribution. Showing the statistics table only; interpret with caution.',
   'pdd5.8.noValidMeasurement': '{X} simulation stages match this scenario, but none has a {measurement} value — no distribution can be computed. The stages appear in the Missing values (excluded) count of the statistics table.',
-  'pdd5.9.lowSlipCaveat': 'Your selected range includes very small slip values, where automated measurements can be less reliable. The research group is reviewing measurement reliability at low slip; treat results near zero slip with extra caution.',
+  // PDD §5.9's decided replacement (D-4, 2026-11-06; task G-25), the research group's own text.
+  'pdd5.9.lowSlipCaveat': 'Low-slip measurements may be less reliable. Below 0.5 m of fault slip, surface deformation can be difficult to distinguish from model roughness. These values are shown, but interpret them with caution.',
   'ddd5.8.rowValidCount': 'Measurements used',
   'ddd5.8.rowExcludedNullCount': 'Missing values (excluded)',
   'ddd5.11.histogramLabel': '{label}: histogram of {N} measurements used',

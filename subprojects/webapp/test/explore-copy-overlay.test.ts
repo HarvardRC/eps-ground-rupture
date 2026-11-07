@@ -23,7 +23,8 @@ describe('guided copy overlay (§11.1)', () => {
     assert.equal(guided(copyText('ddd5.8.rowExcludedNullCount')), 'Missing values (excluded)');
     assert.equal(guided(fillCopy('pdd5.8.smallResultWarning', { N: '7' })), 'Only 7 measurements can be used for this scenario — too few for a reliable distribution. Interpret with caution.');
     assert.equal(guided(fillCopy('ddd5.11.histogramLabel', { label: 'Scarp height (m)', N: '1,011' })), 'Scarp height (m): histogram of 1,011 measurements used');
-    assert.match(guided(copyText('pdd5.9.lowSlipCaveat')), /^Your selected range includes very small slip values/);
+    // PDD §5.9's decided replacement (D-4), verbatim.
+    assert.equal(guided(copyText('pdd5.9.lowSlipCaveat')), 'Low-slip measurements may be less reliable. Below 0.5 m of fault slip, surface deformation can be difficult to distinguish from model roughness. These values are shown, but interpret them with caution.');
     // Inside larger markup too, and text it does not know passes unchanged.
     assert.equal(guided(`<svg aria-label="${fillCopy('ddd5.11.cumulativeLabel', { label: 'Scarp dip (°)', N: '12' })}">`), '<svg aria-label="Scarp dip (°): cumulative distribution of 12 measurements used">');
     assert.equal(guided('Nothing to change here.'), 'Nothing to change here.');

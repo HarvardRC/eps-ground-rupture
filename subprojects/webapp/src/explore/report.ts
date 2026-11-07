@@ -271,10 +271,13 @@ function documentBody(input: RenderInput, stamps: VersionStamps, generatedAt: Da
   parts.push(text('', { size: SIZE.caption }, { after: 60 }));
   parts.push(text(`${copyText('ddd5.9.labelGenerated')}: ${utcInstant(generatedAt)} · ${versionsLine(input, stamps)}`, { size: SIZE.caption }, { after: 200 }));
 
-  // 2. Provenance: the blocks of provenance.txt, the same words.
+  // 2. Provenance: the blocks of provenance.txt in the page's wording
+  // (§13.7): each line through the guided overlay, so a caveat the
+  // overlay rewords (the decided low-slip text, D-4) reads as on the page,
+  // while provenance.txt itself keeps the registry wording (G-25).
   parts.push(heading(PROVENANCE_HEADING));
   for (const block of provenanceText(input, stamps, generatedAt).split('\n\n')) {
-    const [label, ...lines] = block.split('\n').filter(line => line !== '');
+    const [label, ...lines] = block.split('\n').filter(line => line !== '').map(line => guided(line));
     if (label === undefined) continue;
     parts.push(text(label, { bold: true }, { after: 40, keepNext: lines.length > 0 }));
     lines.forEach((line, i) => parts.push(text(line, {}, { after: i === lines.length - 1 ? 160 : 40 })));

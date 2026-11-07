@@ -77,6 +77,11 @@ for (const id of ['illustrative', 'kern'] as const) {
     const document = report.get('word/document.xml')!.toString('utf8');
     expect((document.match(/<w:drawing>/g) ?? []).length).toBe(media.length);
     for (const text of [REPORT_TITLE, PROVENANCE_HEADING, copyText('pdd5.4.scarpDipNotice')]) expect(document).toContain(xmlEscape(text));
+    // Both samples' offset windows start at 0 m: the Provenance caveat is PDD §5.9's decided text (G-25),
+    // while provenance.txt in the same archive keeps the registry baseline.
+    expect(document).toContain(xmlEscape(guided(copyText('pdd5.9.lowSlipCaveat'))));
+    expect(document).not.toContain(xmlEscape(copyText('pdd5.9.lowSlipCaveat')));
+    expect(captured.members.get('provenance.txt')!.toString('utf8')).toContain(copyText('pdd5.9.lowSlipCaveat'));
     // Both samples confirm in offset mode: the scenario table's movement row carries that name.
     for (const label of scenarioLabels('offset')) expect(document).toContain(`>${label}</w:t>`);
     expect((document.match(/Cite: Chiama et al\. \(2025\)/g) ?? []).length).toBe(media.length);
