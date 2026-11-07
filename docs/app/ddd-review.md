@@ -2035,6 +2035,126 @@ guided Site conditions step and the research group's media
 collection — are design intake, taken up in their own entries when
 their decisions land.
 
+## Research-group review: questions 4–13 answered (2026-11-06)
+
+Kristen Chiama's written review of 2026-11-06 (17:14, to the owner,
+copying Shaw, Plesch, and Pontiggia; forwarded by the owner the
+same evening) answers briefing questions 4–9 and 11–13 in one
+pass, enriches 2 and 3 (the DesignSafe deposits:
+DOI 10.17603/ds2-xpq0-gw80 homogeneous, 10.17603/ds2-gfsj-pp60
+heterogeneous), leaves question 10 unanswered with question 1, and
+defers question 14 ("I'll circle back"). With 2 and 3 resolved,
+question 14 — D-18, the field-overlay set and analogue map — is
+the one research-side decision still gating the public release;
+D-10's liability text stays the owner's own.
+
+Records cut with this entry: D-3 Decided — the per-dip conversion
+approved as shipped; D-4 Decided — the 0.5 m trigger confirmed and
+the decided §5.9 text supplied, adopted on the guided page by G-25
+through the overlay while the registry baseline follows PDD
+§3.7's supersession pattern; D-46 Decided — negative heights at
+particle scale (resolution, smoothing, or low-slip compaction),
+display sentence with the question-1 texts; D-5 noted, still
+Interim (below); D-20 noted, still Open — research yes, but the
+fourth view needs a column the vintage lacks, foldable into the
+release vintage; and D-50 Decided with guided DDD §14 and task
+G-24 — the range controls the sponsor asked for on 2026-11-06 and
+the review independently requests.
+
+Verification against the served vintage (read-only, 2026-11-06,
+four lanes). Scarp dip: the pipeline ingests `Scarp_Dip` — no
+`Convert_Scarp_Dip` exists anywhere in the repository or the
+vintage — yet the Simple classes hold no negative dips (18,058
+values, +5.288° to +89.758°, mean 63.62°; Simple Collapse 12,290
+values, mean 74.85°), sitting in the corrected 50–70°-positive
+band the review describes; the manifest's negative minimum
+(−12.529°) is thirty rows in the Monoclinal and collapse classes.
+The ingested column is therefore plausibly the corrected series
+already; the notice stays until the group confirms it (the ask is
+drafted under briefing question 5). Strength labels: decoding the
+trial table confirms the review's mapping exactly — uniform Weak
+is cohesion 0.1 and 0.5 MPa, Moderate 1.0, Strong 1.5 and 2.0;
+the layered gradients are the letter profiles A, F, K / B, G, L /
+C, H, M; Cohesive Top Unit is Q at full depth-density coverage;
+Random Heterogeneous is R1–R10 and Alternating Strong-Weak is S,
+both modeled only for dense 10 m profiles.
+
+One finding of ours, not the review's: the two dense-10 m-only
+options combine freely with other depths and densities in both
+apps, where they silently contribute nothing — only a fully empty
+result draws a diagnostic (the PDD's GS-4 covers that case), and
+no surface states the restriction. Intake item 9 below.
+
+Intake from the review, each needing an owner decision, wording
+through question 1 / CR-10 where reader-facing: (1) the Step 1
+line — the group wants "forecast what could happen" alongside the
+no-site-prediction sentence; (2) renaming Step 2 "Geological site
+conditions"; (3) renaming the movement step "Fault slip", with a
+dip-slip clause and the 0.3 m/s model slip rate mentioned on the
+page; (4) "if unknown, select all" hints on the checkbox groups
+(the slider groups get theirs with §14); (5) the few-measurements
+notices reframed — few results reflect a narrow selection, not
+lower trust; suggest adding options; (6) "Deformation zone width"
+unhyphenated, against PRD CR-3's pinned spelling — a CR-3
+amendment if adopted; (7) more or reader-chosen histogram bins —
+a DD-5 contract amendment (shared rule, Python parity twin,
+fixtures) or a guided-local variant; sized, not scheduled; (8) the
+review defines sediment depth as thickness above bedrock where
+our hint says above the fault; (9) coverage disclosure for the
+dense-10 m-only options (our finding above); (10) the review's
+updated definitions block (fault slip, surface offset, fault dip,
+fault scarp, the SDC family, simulation stage) — a large down
+payment on question 1.
+
+Media: every model has animations — per-model MP4s of the
+sedimentary strata ("particles") and the bond networks
+("contacts") — never posted publicly, with the group's written
+statement of full rights to distribute: the documented permission
+R-12 requires. An SDC measurement GIF exists for R-14. The
+tokenized folder links stay out of this repository deliberately;
+curation (per scarp type versus per model), captions, credits,
+and hosting are product work for the ADR-0012 media index when
+access lands. The review also notes DesignSafe updates are slow
+at this volume, which supports release-asset hosting for the
+curated subset.
+
+The G-24 and G-25 rows join the guided plan with this entry; the
+owner's commit is their release. The D-5 confirmation and the
+thirty negative rows are asked under briefing question 5;
+questions 10 and 14 stay open with their sections.
+
+## Owner directive: the SME wording is the wording (2026-11-06)
+
+On the recorded answers the owner directed: use the wording the
+research group requested — they are the subject-matter experts.
+PDD D-51 records the adoption; guided DDD §15 fixes the strings;
+task G-26 implements them, released by the owner's commit of this
+entry, sequenced after G-25 and before G-24, which shares its
+files.
+
+The directive closes intake items 1–6, 8, and 10 of the entry
+above: the forecast framing, both step renames, the dip-slip and
+slip-rate sentences, the if-unknown hints, the small-count
+reframe, the unhyphenated spelling, the bedrock depth definition,
+and the glossary definitions. PRD CR-3 is amended for the
+spelling, with the whole PRD swept to the defining form; registry
+baselines (the §5.8 notices, the §5.11 label) stay per PDD §3.7's
+supersession pattern until the registry itself moves, so the
+`/scenario/` bundles keep their bytes. Still open from the
+intake: histogram bins (item 7, a DD-5 contract amendment),
+the coverage disclosure for the dense-10 m-only options (item 9),
+Us − Ud scheduling (D-20), the D-5 confirmation, and questions 10
+and 14.
+
+Two readings are recorded for the owner's veto on sight. The
+review's "Deformation zone width, no -" is read as "no hyphen",
+consistent with the review's own spelling throughout. And four
+strings the review implied but did not dictate — the assembled
+introduction, the small-count notices, the negative-height note,
+the slip-rate sentence — are built from the review's sentences,
+marked assembled in guided DDD §15, and listed for the research
+group's sight with the next briefing round.
+
 ## References
 
 - [`docs/app/ddd.md` — Ground Rupture Explorer — detailed design document](ddd.md).

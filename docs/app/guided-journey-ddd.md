@@ -1125,3 +1125,232 @@ for anything the page already says.
   byte-identical, as in every guided task.
 - The owner opens `report.docx` from a downloaded archive in Word
   and the evidence records the check (G-13's completion).
+
+## 14. Range controls on the site conditions (D-50)
+
+PDD D-50 (2026-11-06) replaces the per-value checkboxes of the two
+ordered numeric conditions — Fault angle and Sediment depth — with
+paired-thumb range controls on guided Step 2. The ask reached the
+owner from the project's sponsor on 2026-11-06, and the research
+group's review of the same date asks for the same control ("option
+for max to min values"). FR-S3 permits a range-style control that
+selects only modeled values; FR-S1 forbids implying simulations
+between them. Density and strength keep their checkboxes: their
+values are unordered labels. Every change is guided-only — no file
+served to `/scenario/` changes, and its bundles stay byte-identical
+(D-39); `/scenario/` keeps its checkboxes and typed dip-range
+assist.
+
+The owner accepted the checkbox replacement on one condition — that
+a non-contiguous selection has no real use in the guided journey.
+The recorded assessment: the journey describes one plausible site,
+and uncertainty about a site's dip or depth is an interval;
+selecting separated values while excluding the middle is a
+comparison workflow, which belongs to `/scenario/`'s checkboxes or
+to two runs of the journey; both shipped samples are contiguous.
+The choice stays amendable on sight.
+
+### 14.1 Control
+
+Each of the two groups renders one track with two thumbs — a pair
+of native range inputs labeled Minimum and Maximum whose steps are
+the indices of the modeled values from the manifest (seven fault
+angles: 20, 30, 40, 45, 50, 60, 70 degrees; three depths: 3, 5,
+10 m) — never interpolated positions. A fixed scale row under the
+track labels every modeled stop with its value; the track is a
+connector between stops, not a continuum: no position between
+stops is selectable, and each thumb's accessible value speaks the
+modeled value with its unit ("40 degrees"), not an index. The
+thumbs clamp against each other so Minimum never exceeds Maximum;
+arrow keys move one modeled stop per press.
+
+### 14.2 The set stays the state
+
+The draft and the scenario keep their `number[]` sets for fault
+angle and depth — D-26's "one or more values" unchanged — so
+`scenario.json`, the session record, the engine, the report, and
+the summaries are untouched. The thumbs render the set's minimum
+and maximum; a thumb move materializes the full contiguous set of
+modeled values inside the chosen bounds. A selection echo under
+each track names what the range selects — "Selected: 30°, 40°,
+45° — 3 of 7 modeled angles." — in a polite live region, so the
+control cannot read as continuous (FR-S1) and the review and
+results summaries keep their explicit value lists.
+
+A restored or prefilled set renders at its extremes without being
+rewritten: both samples are contiguous ([30, 40]; [60, 70]), but a
+pre-§14 session may hold gaps. The stored set stays the truth —
+the echo lists it verbatim and appends "(with gaps)" — until the
+reader moves a thumb, which materializes the contiguous range. No
+scenario changes silently on restore.
+
+### 14.3 Emptiness, hints, and Select all
+
+A range always selects at least one modeled value, so the two
+groups can never be empty: their Required mark and empty-group
+hint become unreachable and the D-47 readiness line simply never
+names them; `validateDraft`'s set rules stand with no change. The
+Select all checkbox leaves the two groups; in its place a **Full
+range** action sets both thumbs to the extremes, with the hint "If
+unknown, keep the full range." — the research group's 2026-11-06
+ask applied to the two ordered conditions (the checkbox groups'
+equivalent hint is a queued intake item). The group tooltip,
+glossary link, and sample annotations stay.
+
+### 14.4 Presentation
+
+`explore.css` only: the track and thumbs in both themes with
+visible focus, the scale row wrapping at 320 px without horizontal
+scroll, the echo line, and the Full range action styled as the
+existing tertiary actions. Charts, results, and the movement step
+are unchanged.
+
+### 14.5 Acceptance
+
+- State tests: a thumb move materializes the contiguous modeled
+  set; a restored gapped set stays verbatim until a move; sample
+  prefills render at their extremes; validation and readiness
+  behavior unchanged for the checkbox groups.
+- Browser specs (both lane projects): per-stop keyboard movement
+  with spoken modeled values, clamping, the echo's list and count,
+  Full range, and the 320/1024 px layouts; the `/scenario/`
+  bundles byte-identical, as in every guided task.
+- Exact strings — the labels, the echo pattern, the Full range
+  action, and the hint — go to the owner before the merge.
+
+## 15. SME wording adoption (D-51)
+
+PDD D-51 (2026-11-06): the owner directs that reader-facing
+wording follow the research group's supplied texts — they are the
+subject-matter experts. This section fixes the strings task G-26
+implements. Guided-only (D-39): explore-local strings and the
+D-45 overlay change; registry baselines stay per PDD §3.7's
+supersession pattern, and the `/scenario/` bundles stay
+byte-identical. Strings marked **assembled** are built from the
+review's own sentences where it gave substance without copy; they
+go back to the group for sight with the next briefing round.
+
+### 15.1 Steps and headings (the review's renames)
+
+- Step 2 name: **Geological site conditions** (was Site
+  conditions); heading **Describe the geological site
+  conditions**; buttons **Edit geological site conditions** and
+  **Change geological site conditions**; the review step's block
+  heading follows the new name.
+- Step 3 name: **Fault slip** (was Fault movement — the review:
+  "rather than fault movement, it is fault slip or fault
+  displacement"); heading **Choose the assumed fault slip**;
+  buttons **Continue to fault slip** and **Change fault slip**.
+- The stepper, step list, readiness lines, and session labels
+  follow the two names; the mode labels of CR-3 (**Fault slip at
+  depth**, **Vertical surface offset**) are already compliant and
+  do not change.
+
+### 15.2 Introduction (assembled)
+
+The PDD §2.3 amended block, replacing the second and third
+sentences of the 2026-11-03 introduction:
+
+> Describe the geological site conditions and fault slip you want
+> to investigate, then see the simulated results. This research
+> tool helps you forecast what could happen at a site with known
+> conditions — probabilities from simulations, not a prediction
+> of what will happen at a particular site.
+
+The intro grid's first card reads "Choose the modeled geological
+site conditions and fault slip you want to investigate."; the
+second card's "cover your movement range" becomes "cover your
+slip range"; the static `/explore/` landing text follows the
+amended block. The no-site-prediction clause stays, so CR-2 and
+CR-4 hold.
+
+### 15.3 Site-condition hints (the review's definitions)
+
+- Fault angle hint: **How steeply the fault is dipping, measured
+  from the horizontal. Also called fault dip.** (the bridge
+  sentence names the glossary term; the label itself stays Fault
+  angle).
+- Sediment depth hint: **Thickness of the sediment above
+  bedrock.** — replacing "above the fault".
+- The density and strength groups append **If unknown, select
+  all.** to their hints; the §14 range groups carry "If unknown,
+  keep the full range."
+
+### 15.4 Fault-slip help (the review's definition; the slip-rate
+sentence assembled)
+
+The "What is fault slip?" disclosure becomes:
+
+> Fault slip is the displacement between the two sides of a fault
+> as they move past each other. It is different from the vertical
+> displacement measured at the ground surface. These models
+> measure fault slip as cumulative dip-slip — movement along the
+> fault plane, parallel to its dip. The models run the fault at a
+> slip rate of 0.3 m/s — near coseismic slip rates, chosen so the
+> models stay stable.
+
+The first three sentences are the review's definition lightly
+fitted; the slip-rate sentence is assembled from its
+parenthetical.
+
+### 15.5 Small-count notices (assembled; overlay)
+
+- 10–29 used: **Only {N} measurements can be used for this
+  scenario. They are not less trustworthy — a very specific set
+  of site conditions matches few simulations, so the distribution
+  is coarse. Try adding more options to include a range of
+  results.**
+- 1–9 used: **Fewer than 10 measurements can be used — too few to
+  draw a distribution. They are not less trustworthy; the
+  selection is very specific. Showing the statistics table only;
+  try adding more options to include a range of results.**
+- The zero-valid and empty-scenario texts are unchanged.
+
+### 15.6 Pressure ridge and additional uplift (the review's
+terminology)
+
+"Raised ridge" leaves the guided strings. The scarp-type overview
+says **a pressure ridge** where it said a raised ridge, and the
+diagram caption follows. The scarp-height tooltip's second
+sentence becomes: **A pressure ridge can stand above the
+undeformed ground on the lifted side as well — that extra height
+is called additional uplift (Us − Ud).** The MkDocs glossary's
+plain-language column and the dashboard page's mention adopt the
+same terms (they ride with G-26).
+
+### 15.7 Deformation zone width (the review's spelling)
+
+Reader-facing guided surfaces spell the term **Deformation zone
+width**: the guided measurement names, the chart label through
+the overlay ("Deformation zone width (m)"), the intro text, the
+report labels, and the glossary link text. CR-3 is amended and
+the PRD swept; the sandbox registry keeps the hyphenated baseline
+until the registry moves.
+
+### 15.8 Negative-height note (assembled; D-46)
+
+When the scarp-height panel's matched minimum is below zero, a
+note joins the panel and the report's scarp-height section:
+
+> Small negative heights are at the model's resolution — single
+> particles are about 0.02 m — and can reflect smoothing or extra
+> compaction at low slip, not measured subsidence.
+
+### 15.9 Glossary content (the review's definitions)
+
+The MkDocs glossary adopts the review's updated definitions —
+fault slip, surface offset, fault dip (fault angle), fault scarp,
+the surface-deformation-characteristics family (scarp height,
+additional uplift, deformation zone width, scarp dip), simulation
+stage, and sediment depth — keeping every anchor id unchanged.
+The briefing's terms list already follows.
+
+### 15.10 Acceptance
+
+- Strings land exactly as §§15.1–15.9 give them; the assembled
+  strings are listed in the pull request for the group's sight.
+- The §9.5 specs asserting renamed steps, hints, notices, labels,
+  and the tooltip are updated; both lane projects pass; the
+  `/scenario/` bundles stay byte-identical.
+- The static landing text, the MkDocs glossary, and the dashboard
+  page's term fix land in the same change.

@@ -128,7 +128,7 @@ sites affected by thrust or reverse faults — faults along which one
 block of ground is pushed up and over the other, so a rupture can
 break and step the ground surface.
 
-It helps engineers explore modeled scarp height, deformation-zone width,
+It helps engineers explore modeled scarp height, deformation zone width,
 and scarp geometry for a fault-rupture scenario.
 
 The tool lets an engineer define a plausible site scenario using two
@@ -155,7 +155,7 @@ The main outputs are:
 
 - **Scarp height** — the vertical ground step that a structure may need
   to accommodate.
-- **Deformation-zone width** — the width of disturbed ground that a
+- **Deformation zone width** — the width of disturbed ground that a
   facility may need to avoid or cross with special design.
 - **Scarp dip** — the steepness of the scarp face, indicating whether
   the simulated surface rupture is a sharp step or a broad slope.
@@ -235,7 +235,7 @@ surface rupture:
 | Model measurement | Decision it supports | Meaning for the engineer |
 |---|---|---|
 | **Scarp height** | Accommodate | The vertical size of the ground step. It indicates the vertical offset that a structure crossing the rupture may need to tolerate. |
-| **Deformation-zone width (DZW)** | Avoid the rupture zone; accommodate | The width of the main modeled strip of ground disturbed by rupture. It helps indicate how much ground a facility may need to avoid, or how long a specially designed crossing section may need to be. |
+| **Deformation zone width (DZW)** | Avoid the rupture zone; accommodate | The width of the main modeled strip of ground disturbed by rupture. It helps indicate how much ground a facility may need to avoid, or how long a specially designed crossing section may need to be. |
 | **Scarp dip** | Accommodate | The steepness of the visible slope formed by the rupture. It helps distinguish a concentrated, step-like break from deformation spread across a broader and gentler slope. |
 
 The product reports each measured quantity as a **distribution**, not
@@ -267,7 +267,7 @@ do not describe every possible effect of a real earthquake.
 - **Scarp height** represents vertical surface offset. The product does
   not display an accompanying horizontal-shortening measurement.
 
-- **Deformation-zone width** is the width of the main modeled strip of
+- **Deformation zone width** is the width of the main modeled strip of
   ground disturbed by rupture. It may include the scarp itself and
   nearby bending, cracking, or uplift. Field compilations of real
   earthquakes rank measurements as **principal** (on the main rupture
@@ -309,7 +309,7 @@ Which records a result uses is governed by the population selection
 
 Across the ensemble, the simulations vary fault dip and near-surface
 sediment conditions. They measure several features of the resulting
-surface deformation, including scarp height, deformation-zone width, and
+surface deformation, including scarp height, deformation zone width, and
 scarp dip.
 
 The paper establishes the scientific basis for the product, but it is a
@@ -436,14 +436,14 @@ matching simulated surface-rupture measurements.
 
 In this document, **simulated surface-rupture measurements** means
 values measured from each simulation, including scarp height,
-deformation-zone width, and scarp dip.
+deformation zone width, and scarp dip.
 
 The scenario page is the product's primary contribution. It answers the
 question that the paper, archive, and existing dashboards cannot answer
 directly:
 
 > For conditions similar to my site and displacement scenario, what
-> values of scarp height, deformation-zone width, and scarp dip were
+> values of scarp height, deformation zone width, and scarp dip were
 > produced across the matching computer simulations?
 
 The product will remain part of the existing project website rather than
@@ -490,7 +490,7 @@ are defined in the product definition document (PDD), derived from US-1
 through US-3 and the requirements below.
 
 - **P1 / MVP (v0.4):** scenario inputs; distributions and statistics for
-  scarp height, deformation-zone width, and scarp dip; optional
+  scarp height, deformation zone width, and scarp dip; optional
   real-earthquake measurement context; downloadable simulation subsets
   and summary statistics; citations; and links to the paper and full
   data archive.
@@ -556,7 +556,7 @@ product.
 | ID | Capability | Mockup area | Existing assets to reuse | New work | Priority |
 |---|---|---|---|---|---|
 | **C1** | **Define a scenario** using fault dip, sediment properties, and a displacement range. | Advanced Search: “Search by DEM Model Parameters” | None. The current distributions dashboard can show one parameter at a time but cannot apply several scenario conditions together. | Scenario-input controls and combined filtering. | P1 |
-| **C2** | **View simulated surface-rupture measurements** for the selected scenario: scarp height, deformation-zone width, and scarp dip. | Advanced Search results panel | Existing distributions dashboard provides histogram patterns. | Filtered distributions, cumulative views, counts, and summary statistics. | P1 |
+| **C2** | **View simulated surface-rupture measurements** for the selected scenario: scarp height, deformation zone width, and scarp dip. | Advanced Search results panel | Existing distributions dashboard provides histogram patterns. | Filtered distributions, cumulative views, counts, and summary statistics. | P1 |
 | **C3** | **Compare the selected simulation results with measurements from past earthquakes.** | Worked example in mockup slides 6–7 | Existing field-data displays and the project's field-measurement export. | Optional field-data overlay on scenario results, with clear source and comparability caveats. | P1 |
 | **C4** | **Download the matching simulation records and their summary statistics**, with citations and scenario provenance. | “Download Selected Data” | None. | Download flow and provenance package. Plot-image export and scenario-linked animations follow in P2. | P1 |
 | **C5** | **Link to the complete research dataset and paper.** | “Download the full DEM dataset” | Existing citation material and How-to-cite components. | Links to the DesignSafe archive and paper; no re-hosting of the raw archive. | P1 |
@@ -580,7 +580,7 @@ this product:
   a PFDHA.
 
 - **Site-specific prediction.** The product will not predict the
-  displacement, deformation-zone width, or scarp shape that will occur
+  displacement, deformation zone width, or scarp shape that will occur
   at a particular site in a future earthquake.
 
 - **Design recommendations.** The product will not recommend a design
@@ -654,7 +654,7 @@ than the fault-slip input used by the simulations.
 
 - A way to define a scenario using engineering terms, ranges, and
   categories.
-- Simulated values of scarp height, deformation-zone width, and scarp
+- Simulated values of scarp height, deformation zone width, and scarp
   dip for matching computer simulations.
 - Counts, distributions, and percentiles, with prominent warnings for
   sparse results, missing measurements, or conditions outside the
@@ -765,7 +765,7 @@ the simulations.
 
 The engineer can then view the number of matching simulations and the
 distributions, median, and 84th percentile for scarp height,
-deformation-zone width, and scarp dip. The engineer can download the
+deformation zone width, and scarp dip. The engineer can download the
 matching simulation records and summary statistics for use in a design
 report.
 
@@ -782,7 +782,7 @@ main disturbed ground zone in order to determine the length of pipeline
 that may require special crossing design.
 
 **Expected result:** The engineer can define the site conditions and
-view the distribution of deformation-zone width, including the sample
+view the distribution of deformation zone width, including the sample
 size, median, 84th percentile, and full modeled range. The result makes
 clear that the width represents the main modeled rupture zone, not every
 possible separate deformation strand in a real earthquake.
@@ -820,7 +820,7 @@ known.
 produced surface deformation similar to the observation.
 
 **Expected result:** The product allows the user to specify an observed
-range of scarp height, deformation-zone width, or scarp dip and view the
+range of scarp height, deformation zone width, or scarp dip and view the
 distribution of fault dip, sediment conditions, and fault slip among
 matching simulations.
 
@@ -1119,7 +1119,7 @@ For each of the following measurements, the product must provide a
 distribution view of the matching simulation records:
 
 - scarp height;
-- deformation-zone width; and
+- deformation zone width; and
 - scarp dip.
 
 Each measurement must include, subject to the minimum-count rules in
@@ -1217,10 +1217,10 @@ silently. For width, the field comparison differs by source:
 
 - FDHI (the Fault Displacement Hazard Initiative compilation) provides
   fault-zone width (FZW);
-- the Kern County data provides deformation-zone width; and
+- the Kern County data provides deformation zone width; and
 - SURE (a worldwide database of surface ruptures) provides a
   fault-normal displacement component rather than a directly
-  equivalent deformation-zone width; where it is shown, the product
+  equivalent deformation zone width; where it is shown, the product
   must label it as a limited comparison rather than a width
   measurement.
 
@@ -1246,8 +1246,8 @@ The example must show:
 
 - a 30° fault dip;
 - the Pressure Ridge scarp type;
-- the relevant filtered simulation distribution for deformation-zone
-  width; and
+- the relevant filtered simulation distribution for deformation
+  zone width; and
 - field-width measurements drawn from the project's versioned
   per-measurement field export (one row per field measurement).
 
@@ -1418,7 +1418,7 @@ produced similar measurements.
 Users may specify a range for:
 
 - scarp height;
-- deformation-zone width; and/or
+- deformation zone width; and/or
 - scarp dip.
 
 For the matching simulations, the product must show the distribution of
@@ -1484,7 +1484,7 @@ education capability (C9) and is a P2 capability.
 
 The explanation must describe, in reader-facing language, that an
 automated image-analysis or computer-vision process measured features
-such as scarp height, deformation-zone width, and scarp dip from the
+such as scarp height, deformation zone width, and scarp dip from the
 simulated ground surface.
 
 The explanation must reuse existing project content and reference the
@@ -1607,7 +1607,7 @@ For example:
 
 - **Scarp height (m)**, not an internal column name;
 - **Fault slip at depth (m)**, not a dataset field name; and
-- **Deformation-zone width (m)**, not an abbreviated internal code
+- **Deformation zone width (m)**, not an abbreviated internal code
   without explanation.
 
 Labels, annotations, selected-value summaries, and explanatory text that
@@ -1831,7 +1831,7 @@ Preferred wording includes:
 
 - “conditional distributions of simulated surface-rupture measurements”;
 - “results from computer simulations matching the selected scenario”;
-- “modeled scarp height, deformation-zone width, and scarp dip”;
+- “modeled scarp height, deformation zone width, and scarp dip”;
 - “screening-level information for site investigation and design review”;
 - “bracketing uncertainty in the site conditions”; and
 - “the range of results produced by matching simulations.”
@@ -1872,11 +1872,11 @@ The product must use the following distinctions consistently:
 |---|---|
 | **Fault slip at depth** | The displacement applied to the fault in the computer simulations. |
 | **Anticipated vertical surface offset** | A user-provided scenario value that may be converted to fault slip at depth for the purpose of querying the simulations. |
-| **Simulated surface-rupture measurement** | A value measured from a computer simulation, such as scarp height, deformation-zone width, or scarp dip. |
+| **Simulated surface-rupture measurement** | A value measured from a computer simulation, such as scarp height, deformation zone width, or scarp dip. |
 | **Field measurement** | A measurement recorded after a real, past earthquake. |
 | **Modeled scarp type** | A classification assigned to a simulation result; it is an output of the simulation, not a site input. |
-| **Main modeled rupture zone** | The strip of disturbed ground that deformation-zone width measures. Field compilations rank field measurements as *principal* (main-trace) or *distributed*; the modeled zone corresponds to the principal band. |
-| **Deformation-zone width** | The width of the main modeled strip of disturbed ground. It does not represent every separate deformation strand that may occur in a real earthquake. |
+| **Main modeled rupture zone** | The strip of disturbed ground that deformation zone width measures. Field compilations rank field measurements as *principal* (main-trace) or *distributed*; the modeled zone corresponds to the principal band. |
+| **Deformation zone width** | The width of the main modeled strip of disturbed ground. It does not represent every separate deformation strand that may occur in a real earthquake. Spelled without a hyphen on the research group's instruction (2026-11-06; PDD D-51). |
 
 The product must spell out **distinct element method (DEM)** at first use
 in reader-facing content. It must not assume that readers interpret DEM
@@ -1947,7 +1947,7 @@ specialist terms to the project glossary when they first appear.
 Priority glossary terms include:
 
 - scarp height;
-- deformation-zone width;
+- deformation zone width;
 - scarp dip;
 - fault dip;
 - fault slip;
@@ -1973,7 +1973,7 @@ At a minimum, the product must present:
 - the provisional-data notice for scarp dip;
 - the explanation of the selected simulation population;
 - warnings for small, empty, or partly out-of-range result sets;
-- the limitation that deformation-zone width represents the main modeled
+- the limitation that deformation zone width represents the main modeled
   rupture zone rather than every possible distributed rupture strand;
   and
 - the warning that a slip-to-magnitude display is a derived relabeling,

@@ -104,9 +104,9 @@ named in the last column carry the detail.
 |---|---|---|---|---|---|
 | D-1 | P1 is the MVP and release target (v0.4). | §2.2, §9.5-1 | Product owner | Decided (2026-10-15) | Yes. Release target renumbered from v0.3 by the owner's decision of 2026-11-01. |
 | D-2 | Site entry point (the name is decided: Ground Rupture Explorer, 2026-10-15). | §9.5-2, R-11 | Owner + research group | Decided (2026-10-28) | §2.2; decided by the product owner alone, taking responsibility. |
-| D-3 | Multi-dip behavior of the offset-to-slip assist. | FR-S5, §9.5-3 | Owner, research-group review | Proposed | Per-dip converted windows; §3.6. |
-| D-4 | Low-slip measurement-reliability policy. | DR-4, R-3, §9.5-4 | Research group | Interim | Document, do not filter; caveat in §4.6 and §5.9. |
-| D-5 | Scarp-dip correction status at release. | FR-O4, R-1, §9.5-5 | Research group | Interim | Provisional-data notice everywhere scarp dip appears; text in §5.4. |
+| D-3 | Multi-dip behavior of the offset-to-slip assist. | FR-S5, §9.5-3 | Owner, research-group review | Decided (2026-11-06) | Per-dip converted windows; §3.6. The research group approved the proposed rule on 2026-11-06 (briefing question 13), naming the dip-slip geometry — vertical component = slip × sin(dip) — that §5.6's conversion already applies; shipped behavior unchanged. |
+| D-4 | Low-slip measurement-reliability policy. | DR-4, R-3, §9.5-4 | Research group | Decided (2026-11-06) | Document, do not filter; caveat in §4.6 and §5.9. The group confirmed the approach and the 0.5 m trigger and supplied the decided §5.9 text (briefing question 4, 2026-11-06): one trigger, no per-type variant — the paper's per-class plotting starts marked manual quality checking below about 0.5 m, not validity boundaries. The guided page adopts the text through the overlay (task G-25); the registry baseline follows §3.7's supersession pattern. Whether the no-window full-ensemble view needs its own notice stays open under R-3. |
+| D-5 | Scarp-dip correction status at release. | FR-O4, R-1, §9.5-5 | Research group | Interim | Provisional-data notice everywhere scarp dip appears; text in §5.4. Group answer 2026-11-06 (briefing question 5): the Simple-scarp dips were measured backwards, the correction lives in a `Convert Scarp Dip` column, and the published set is corrected and checked. The served vintage ingests `Scarp_Dip` — `Convert_Scarp_Dip` never reached this project — yet its Simple classes hold no negative dips (18,058 values, +5.3° to +89.8°, mean 63.6°; Simple Collapse mean 74.8°), consistent with the corrected series. The notice stands until the group confirms `DEM_dataset.csv`'s `Scarp_Dip` is the corrected series and that the 30 negative non-Simple rows (minimum −12.5°) are expected; the confirmation ask is drafted in the briefing. |
 | D-6 | Kern County field-data group and principal-width rule. | FR-O6, R-4, §9.5-6 | Research group | Open | Walkthrough specified with the data slot pending; §4.7. FR-O6 is out of the v0.4 release (D-49, 2026-11-06): the question stays open for the example's post-MVP return and no longer gates the release. |
 | D-7 | Dominant-scarp-type rule for animation offers. | FR-D4, §9.5-7 | Product owner | Proposed | Most-frequent anchor, 10-point companion gap, 30 % floor — all over classified records; zero-classified suppresses the offer; §6.4. |
 | D-8 | Animation coverage required for public release. | FR-E1, R-13, §9.5-8 | Research group | Open | Page layout degrades per-type; §8.2. |
@@ -121,7 +121,7 @@ named in the last column carry the detail.
 | D-17 | Accessibility conformance target. | NFR-5 | Product owner | Proposed | WCAG 2.2 AA for new pages; §9.3. |
 | D-18 | Field-overlay default set and per-source analogue map. | FR-O5 | Owner, research-group review | Proposed | §4.4. |
 | D-19 | Native full-dataset exploration panel in v0.4. | FR-G5, C8 | Product owner | Proposed | None — no documented gap; the five dashboards serve C8; recorded gap process in §2.4. |
-| D-20 | Us − Ud as a fourth displayed measurement. | FR-O1, R-10 | Owner + research group | Open | Out of the MVP; the results page reserves the slot; §4.1. |
+| D-20 | Us − Ud as a fourth displayed measurement. | FR-O1, R-10 | Owner + research group | Open | Out of the MVP; the results page reserves the slot; §4.1. The research side answered yes on 2026-11-06 (briefing question 11, with definitions). The served vintage carries no Us − Ud column, so the view needs a pipeline export change and a new data vintage (DDD §3.1 kept the column out); the owner may fold the column into the release vintage so the later P2 view needs no further one. The product decision — scheduling and presentation — stays open. |
 | D-21 | Success criteria and acceptance walkthroughs. | §2.2 | Product owner | Proposed | §10. |
 | D-22 | Default displacement-window state. | FR-S5, FR-S6, FR-S8 | Product owner | Superseded (2026-11-03) | The earlier no-active-window default ("slip: any") is replaced by D-31's editable minimum 0 m and required maximum. The no-window numerical reference cases remain calculation baselines; §3.4 and §10.2. |
 | D-23 | Reader-facing display precision per quantity. | FR-O2, §10.1 note | Product owner | Proposed | Scarp height and slip 0.01 m; width 0.1 m; scarp dip 1° (D-5 provisionality); counts exact; shares whole percent; §4.2. |
@@ -147,10 +147,12 @@ named in the last column carry the detail.
 | D-43 | Sample presentation rework. | §5.1, C1, CR-10 | Product owner | Decided (2026-11-04) | Reviewing the built result, the owner replaced the two sample buttons with one **Try a prefilled sample** action opening a scale-named listbox; made the replacement confirmation a modal dialog (never a browser dialog, as before); reworded the prefill notice and made it persist across the input steps; put the story panel behind a prominent Where these values come from trigger on both input steps; restored the sequential walk after a fill; prefilled both movement modes (the Kern slip window anchored to Bawden 2001's 1.6–1.9 m, the illustrative delegated); and added CR-10 per-field annotations. §2.3; guided DDD §§10.3–10.4; tasks G-18 and G-19. D-44 subsequently revises the presentation. |
 | D-44 | Sample presentation revision after external review. | §5.1, C1, CR-10 | Product owner | Decided (2026-11-05) | Before the G-18 merge, a relayed external review revised the D-43 presentation and the owner adopted it: a preview dialog of two selectable cards named by inputs (Lower fault angles — 30° and 40°, offset up to 3 m; Steeper fault angles — 60° and 70°, offset up to 1.3 m), event context and photographs in the previews, preview without changing the draft, the replacement question as the dialog's next step; the notice gains a "Started from the {sample} sample · Modified" form with background and photos reachable until the draft is replaced; the trigger reads Why these sample values?; the slip prefills stand with Bawden 2001's 1.6 m and 1.9 m framed as two patch estimates used as an example band, plus a visible mode-switch note; the shared story sentence becomes "These examples help you try the tool. They do not reconstruct either earthquake." (CR-10). §2.3; guided DDD §10.5; the revised G-18 and G-19. |
 | D-45 | Wording and UX polish from the second external audit. | FR-O1, FR-G3, NFR-5 | Product owner | Decided (2026-11-05) | The owner adopted the audit's wording table (matching simulation stages; measurements used; Missing values (excluded); Estimated fault slip at depth; Your selected range includes; Histogram counts by value range; Exit walkthrough; Download data (ZIP) with a contents description; a plain-language normalization explanation), the results-screen rework (compact summary and critical warnings with View full scenario, chart and measurement choices higher), the Results walkthrough · n of 5 label, help disclosures that add information, a provisional mark on the Scarp dip choice card, physical density ordering, and the overlap and message-truthfulness fixes. Audit: `notes/2026-11-05/explorer-wording-ux-audit.html`. §2.3; guided DDD §11; tasks G-20 and G-21, sequenced after G-19. |
-| D-46 | Interpretation of negative scarp heights. | FR-O1, CR-10 | Product owner | Proposed (2026-11-05) | The Kern sample surfaces a −0.02 m scarp height while the description says height above the ground; the data contract retains negative measurements deliberately. The research group is asked for the interpretation; the application keeps showing the data unchanged, and the explanation lands as CR-10 text once the group answers. §2.3. |
+| D-46 | Interpretation of negative scarp heights. | FR-O1, CR-10 | Product owner | Decided (2026-11-06) | The Kern sample surfaces a −0.02 m scarp height while the description says height above the ground; the data contract retains negative measurements deliberately. The research group answered on 2026-11-06 (briefing question 6): values of that size equal the model's particle diameter — a resolution and smoothing effect, or extra compaction at low slip — and may keep being reported; a model-resolution warning is welcome. The display sentence is assembled from the group's words under D-51 (guided DDD §15.8), goes back to the group for sight, and reaches the scarp-height panel and the report with task G-26. §2.3. |
 | D-47 | Progression guidance and review fixes. | FR-G3, NFR-5, CR-10 | Product owner | Decided (2026-11-05) | Reviewing the deployed build with a third external review (f3f94a7), the owner kept every progression control enabled with guidance instead of refusal: a neutral Still-needed line before the attempt; a visible focused summary linking each unfinished condition after an unsuccessful click, replacing the Select-all focus jump; group-boundary error emphasis without per-checkbox outlines; red marking only after an attempt (GOV.UK button guidance; W3C form-feedback guidance). The step list stays a sequence indicator without disabled buttons. Start a new scenario returns to the opening step. The same round: the theme's Back to top control leaves the guided page; the sample dialog keeps its actions in view; both slip endpoints carry the Required mark, adopting audit entry 16; sample explanations drop the caution coloring; the mode-switch note becomes "The sample has separate example values for each mode; one is not converted from the other. Switching modes can change the results." (CR-10). §2.3; guided DDD §12; tasks G-22 and G-23, sequenced after G-21. |
 | D-48 | P1.5 delivery band: the result report, then chart export. | FR-D2, D-14, D-40 | Product owner | Decided (2026-11-05) | Reviewing the parked backlog after the D-47 round, the owner created a band between the MVP and P2 and, the same day, set it release-blocking: v0.4 ships with both items, sequenced after the standing MVP graph, ahead of every remaining P2 item, and implemented at once rather than with the parked lane. The result report (D-40, §6.5; guided task G-13) comes first: a `.docx` built on the application's existing ZIP writer and delivered inside the FR-D1 download ZIP — no new control; the download description names it. Chart captions ride as document text carrying the D-14 fields. The standalone chart-image export (D-14, §6.3) follows as a thin action over the same rendering; D-14's on-image caption rule stays Proposed until an image ships alone. Execution waits only on the report's drafted design section, whose ZIP-layout amendment is guided-only so the `/scenario/` bundles stay byte-identical (D-39). The media index (ADR-0012) is not a prerequisite of either item and stays P2. §2.3; PRD §2.2. |
 | D-49 | FR-O6 (Kern County worked example) is out of the v0.4 release. | FR-O6, D-6, §4.7; PRD §2.2 and Appendix A | Product owner | Decided (2026-11-06) | The research group answered the owner's briefing question 3 on 2026-11-06, relayed by the owner: no need, at least for the MVP. FR-O6 moves from P1 to P2 in the PRD, its Appendix A row included; the §4.7 walkthrough specification and GS-3 stand for the example's post-MVP return; D-6 stays Open as the example's gate and leaves ADR-0017's pre-activation set (its amendment of the same date). The commit of the plan that cites this record drops T-48 from T-65's Depends-on (IP §3). |
+| D-50 | Guided Step 2 range controls for fault angle and sediment depth. | FR-S1, FR-S3, D-26, D-39 | Product owner | Decided (2026-11-06) | An ask relayed from the project's sponsor on 2026-11-06; the research group's review of the same date asks for the same control ("option for max to min values"). The two ordered numeric conditions move from per-value checkboxes to paired-thumb range controls that stop only at modeled values, every selected value echoed (FR-S1 forbids implying intermediates; FR-S3 permits a range-style control over modeled values). Scenario state keeps its `number[]` sets: thumbs render the set's extremes, a thumb move materializes the contiguous modeled range, and a restored set with gaps stays verbatim until a move. The owner accepted the replacement on the condition that non-contiguous selection has no real guided use; the recorded assessment — site uncertainty is an interval; comparing separated values belongs to `/scenario/`'s checkboxes or a second run; both samples are contiguous — satisfies it, amendable on sight. Density and strength keep checkboxes. Guided-only (D-39); guided DDD §14; task G-24 after the P1.5 band. |
+| D-51 | Reader-facing wording follows the research group's supplied texts. | CR-3, CR-10, D-45, D-46; PRD §7 | Product owner | Decided (2026-11-06) | The owner's directive on the 2026-11-06 review: the group are the subject-matter experts — use their wording. Adopted: the Geological site conditions step name; the Fault slip step name with the dip-slip clause and the 0.3 m/s slip-rate mention; the fault-dip and sediment-depth hints (depth is thickness above bedrock); the if-unknown hints; the forecast framing of the introduction (the no-site-prediction clause stays, CR-2 and CR-4 intact); pressure ridge and additional uplift (Us − Ud) in place of raised ridge; the unhyphenated Deformation zone width (CR-3 amended); and the review's updated glossary definitions. Where the review gave substance without copy — the small-count reframe, the negative-height note (D-46), the slip-rate sentence, the assembled introduction — the strings are built from the review's own sentences, marked assembled in guided DDD §15, and go back to the group for sight with the next briefing round. Guided surfaces adopt through explore-local strings and the D-45 overlay; registry baselines stay per §3.7's supersession pattern. Guided DDD §15; task G-26. |
 
 ---
 
@@ -739,6 +741,20 @@ only on the report's design section.
 > investigate, then see the simulated results. This is a research
 > tool; it does not predict what will happen at a particular site.
 
+**Amended introduction (D-51, 2026-11-06).** The research group's
+review reframes the line as a forecast and renames both inputs;
+the block below, assembled from the review's own words (guided
+DDD §15), supersedes the quote above and goes back to the group
+for sight:
+
+> **Use simulations to understand ground rupture.**
+>
+> Describe the geological site conditions and fault slip you want
+> to investigate, then see the simulated results. This research
+> tool helps you forecast what could happen at a site with known
+> conditions — probabilities from simulations, not a prediction
+> of what will happen at a particular site.
+
 This introduction is approved for the revised journey and appears in
 the `/explore/` candidate. The prototype's existing §5 copy remains the
 baseline for the rest of the wording review. Scientific-content
@@ -994,6 +1010,11 @@ conversions the research group never co-validated; it also reproduces
 US-1's narrative exactly (30° partly out of range while 40° is
 covered, each flagged individually). Direct-slip mode is unaffected:
 one window applies to all dips.
+
+**Decided (2026-11-06).** The research group approved the rule as
+proposed (briefing question 13): convert per angle — the dip-slip
+geometry, vertical component = slip × sin(dip). The heading keeps
+its anchor; the register row carries the status.
 
 ### 3.7 Population, scarp filter, family view, reset
 
@@ -1306,7 +1327,8 @@ width scaled to the matching range and count, with the bin rule stated in the
 panel's info note; axes linear by default; deformation-zone width may
 offer a log scale toggle where the matched range spans more than two
 decades. A fourth panel slot is reserved for Us − Ud (D-20, out of the
-MVP).
+MVP; the research side said yes on 2026-11-06 — the register row
+records the vintage prerequisite).
 
 ### 4.2 Statistics table (FR-O2)
 
@@ -1420,6 +1442,13 @@ Pressure-Ridge-family plotting start values recovered from the paper
 whether those need a higher or per-type trigger is part of the open
 R-3 decision. The trigger is never presented to readers as a validity
 boundary.
+
+**Decided (2026-11-06).** The research group confirmed the
+approach (briefing question 4): keep the values, warn from 0.5 m,
+no per-type trigger — the Simple families' later plotting starts
+reflected manual quality checks of the automated measurements, not
+validity boundaries. §5.9 records the decided text. The no-window
+question above stays open.
 
 ### 4.7 Kern County worked example (FR-O6, D-6 Open)
 
@@ -1551,6 +1580,12 @@ no-window numerical reference cases.
 > research group; the largest errors are concentrated in the Simple
 > scarp types. Treat scarp-dip results as provisional.
 
+**Group answer (2026-11-06).** The correction exists and the
+published set is reported corrected and checked (briefing question
+5); the notice stays until the group confirms the ingested
+`Scarp_Dip` column is the corrected series (D-5 — the register row
+holds the verification figures).
+
 ### 5.5 Statistics framing (CR-5)
 
 > These are statistics of the matching simulation records. The median
@@ -1614,12 +1649,29 @@ in its default view, overlay on or off:
 > No simulations match this scenario. Relaxing any one of
 > {condition(s)} alone would produce matches.
 
+**Decided reframe (D-51, 2026-11-06).** The research group asks
+the small-count notices to say the measurements are not less
+trustworthy — a very specific selection simply matches few
+simulations — and to suggest adding options. The guided texts
+assembled from those words live in guided DDD §15.5 and reach the
+page through the overlay (task G-26); the blockquotes above stay
+the registry baseline per §3.7's supersession pattern.
+
 ### 5.9 Low-slip caveat (D-4, Interim)
 
 > Your window includes very small slip values, where automated
 > measurements can be less reliable. The research group is reviewing
 > measurement reliability at low slip; treat results near zero slip
 > with extra caution.
+
+**Decided replacement (2026-11-06, briefing question 4).** The
+research group's text — "Low-slip measurements may be less reliable.
+Below 0.5 m of fault slip, surface deformation can be difficult to
+distinguish from model roughness. These values are shown, but
+interpret them with caution." — supersedes the quote above. The
+guided page adopts it through the overlay (task G-25); the
+blockquote above stays the registry baseline, byte for byte, per
+§3.7's supersession pattern until the registry itself moves.
 
 ### 5.10 Inverse-search framing (FR-X2)
 
@@ -1634,6 +1686,13 @@ Canonical labels: Scarp height (m) · Deformation-zone width (m) ·
 Scarp dip (°) · Fault dip (°) · Fault slip at depth (m) · Anticipated
 vertical surface offset (m) · Sediment depth (m) · Sediment density ·
 Sediment strength · Resulting scarp type.
+
+**Spelling amendment (D-51, 2026-11-06).** The research group
+writes the width term without a hyphen: **Deformation zone
+width**. CR-3 is amended; guided surfaces adopt the spelling
+through their own strings and the overlay label (task G-26), and
+the registry label above stays the baseline until the registry
+moves.
 
 First-use glossary links on product surfaces (site glossary anchors):
 scarp height `#scarp-height` · deformation-zone width `#dzw` · scarp

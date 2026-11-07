@@ -191,6 +191,28 @@ its merge. The §13.7 strings go to the owner for approval before
 the merge, and the owner's Word-open check joins the completion
 evidence. Nothing else leaves the queue.
 
+**Owner release, 2026-11-06 (range controls; decided caveat
+text).** On the sponsor's ask relayed 2026-11-06 and the research
+group's matching request in Kristen Chiama's review of the same
+date, the owner adopted PDD D-50 and guided DDD §14 and released
+G-24 on the standing terms, sequenced after the P1.5 band. The
+same review's question-4 answer decided D-4, and G-25 adopts the
+decided §5.9 text through the guided overlay; it is file-disjoint
+from the band and may run beside it. The [Commands](#commands)
+renewal extension covers their merges. Exact §14 strings go to
+the owner for approval before the G-24 merge. Nothing else leaves
+the queue; the owner's commit of this paragraph is the release.
+
+**Owner directive, 2026-11-06 (SME wording).** Reviewing the
+recorded answers, the owner directed that reader-facing wording
+follow the research group's supplied texts — they are the
+subject-matter experts. PDD D-51 and guided DDD §15 record the
+adopted strings; G-26 implements them on the standing terms,
+sequenced after G-25 and before G-24 (shared files). PRD CR-3's
+spelling is amended the same day. Strings §15 marks assembled go
+to the research group for sight with the next briefing round;
+the owner's commit of this paragraph is the release.
+
 | Task | Prerequisite | Exact work and authority | Completion |
 | --- | --- | --- | --- |
 | G-13 | Released 2026-11-05; guided DDD §13; PDD D-40 (P1.5 by D-48, release-blocking in v0.4, first in the band) and D-14 | Implement the result report exactly to guided DDD §13: `report.docx` composed beside the shared `packageTexts` and written by the shared `zip` writer into the FR-D1 download ZIP, the hint updated, no new control; document content, fixed chart set, `.docx` assembly, failure fallback, checker amendment, and strings per §§13.1–13.7 and [PDD §6.5](pdd.md#65-result-report-d-40-p2). | `report.docx` verified in the lane (outer members, nested parts, one image per non-suppressed chart, captions asserted); zipcheck covers the guided layout; Node tests cover the assembly and the failure fallback; the `/scenario/` bundles stay byte-identical; the owner's Word-open check is recorded in the evidence; the §6.1 content rules and D-14 caption fields apply unchanged. |
@@ -204,6 +226,9 @@ evidence. Nothing else leaves the queue.
 | G-21 | Released 2026-11-05; after G-19; PDD D-45; guided DDD §11.3 | Fix the disclosure icon overlap everywhere the pattern appears; make the first-calculation failure message claim only what exists; reconcile the version-mismatch message with its control; resolve the recurring `.md-top` axe contrast report per §11.3 (owner addition, 2026-11-05); extend the §9.5 specs. | Guided DDD §11.3 holds; the defects verified fixed or determined in both lane projects; the evidence records the before and after. |
 | G-22 | Released 2026-11-05; after G-21; PDD D-47; guided DDD §§12.1–12.2 | Keep progression enabled with the Still-needed line near each forward button; on an unsuccessful click render the visible focused summary linking each unfinished group, replacing the Select-all focus jump; emphasize the group boundary, ending per-checkbox outlines and invalid marks; render unreached steps, and Results before results exist, as non-interactive entries rather than disabled buttons; return Start a new scenario to the opening step; extend the §9.5 specs. Final strings to the owner before merge. | Guided DDD §§12.1–12.2 hold; specs pass in the lane's desktop and mobile projects; the evidence records the strings' approval. |
 | G-23 | Released 2026-11-05; after G-22; PDD D-47; guided DDD §§12.3–12.7 | Remove the theme's Back to top control from the guided page only; keep the sample dialog's actions in a persistent footer while the preview scrolls; mark both slip endpoints Required; give sample explanations the neutral treatment, keeping caution styling for coverage and interpretation warnings; reword the mode-switch note per §12.7; extend the §9.5 specs. | Guided DDD §§12.3–12.7 hold; specs pass in the lane's desktop and mobile projects; the evidence records each fix's before and after. |
+| G-24 | Released 2026-11-06; after the P1.5 band (G-13 done; a band row the owner adds later precedes it); PDD D-50; guided DDD §14 | Replace the Fault angle and Sediment depth checkbox groups with §14's paired-thumb range controls: modeled-stop-only thumbs over the manifest values, the labeled scale row, the selection echo with count, clamping, per-stop keyboard movement; sets stay the state — thumbs render the extremes, a move materializes the contiguous modeled range, restored gapped sets stay verbatim until a move, samples render at their extremes; Select all leaves the two groups for the **Full range** action and its "If unknown, keep the full range." hint; explore-only files (`app.ts`, `state.ts`, `explore.css`), state tests, and §9.5 spec updates per §14.5. Final strings to the owner before merge. | Guided DDD §14 holds; no position between modeled stops is selectable and the echo lists modeled values (FR-S1, FR-S3); specs pass in the lane's desktop and mobile projects; `/scenario/` bundles stay byte-identical; the evidence records the strings' approval. |
+| G-25 | Released 2026-11-06; file-disjoint from the band, may run beside it; PDD D-4 (Decided 2026-11-06); PDD §5.9 | Adopt the decided low-slip caveat text in the guided copy overlay (`pdd5.9.lowSlipCaveat`), replacing the D-45 variant; the report carries it through the existing plan; update the specs asserting the old wording. The registry baseline keeps its bytes per PDD §3.7's supersession pattern — no `/scenario/`-served file changes. | The guided page and `report.docx` show §5.9's decided text; specs pass in the lane's desktop and mobile projects; `/scenario/` bundles stay byte-identical. |
+| G-26 | Released 2026-11-06; after G-25, before G-24 (shared explore files); PDD D-51; guided DDD §15 | Implement the SME wording adoption exactly to §15: the step renames (Geological site conditions; Fault slip) across the stepper, headings, buttons, and review blocks; the amended introduction and the static landing text; the site-condition hints with the if-unknown lines; the fault-slip help with the dip-slip and 0.3 m/s sentences; the small-count reframe through the overlay; pressure ridge and additional uplift in place of raised ridge; the unhyphenated Deformation zone width on guided surfaces and the overlay label; the D-46 negative-height note on the scarp-height panel and in the report; the MkDocs glossary definition updates (anchors unchanged) and the dashboard page's term fix; update the §9.5 specs asserting old strings. The assembled strings are listed in the pull request for the group's sight. | Guided DDD §15 holds; specs pass in the lane's desktop and mobile projects; `/scenario/` bundles stay byte-identical; the evidence lists the assembled strings sent for the group's sight. |
 
 Queued definitions and decisions, with their authorities:
 

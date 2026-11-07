@@ -25,10 +25,10 @@ exists; edits to this file do not update that copy automatically.
 - **[Scarp][scarp]:** the step, slope, or ridge at the ground surface
   left by rupture. *Scarp height* measures its height; *scarp dip*
   measures the slope of its face, not the fault angle underground.
-- **[Deformation-zone width][dzw]:** the width of the disturbed
+- **[Deformation zone width][dzw]:** the width of the disturbed
   ground across the rupture.
 - **[Simulation stage][stage]:** one saved point in a simulation as
-  fault movement increases. One simulation has many stages, each
+  fault slip accumulates. One simulation has many stages, each
   with its own measurements.
 
 ## What needs an answer, and when?
@@ -39,30 +39,33 @@ site navigation and search, or published as the first software
 release. It does not mean before the group can try the prototype.
 
 Question 1 still needs its answer before that release; questions 2
-and 3 were answered on 2026-11-06 and are recorded below. Question
-14 also
+and 3 were answered on 2026-11-06 and are recorded below, and the
+group's written review of the same date answered questions 4–9, 11,
+12, and 13 in one pass — each answer is recorded under its
+question. Question 10 got no reply yet and stays with question 1.
+Question 14 — the group will come back to it — still
 needs a pre-release decision, including an owner decision about
-field comparisons in the guided app. Other questions concern
-temporary approaches already in use, proposed rules, or later
-features. **P2** means a later delivery priority, not the prototype
-review phase.
+field comparisons in the guided app. The remaining open questions
+concern temporary approaches already in use, proposed rules, or
+later features. **P2** means a later delivery priority, not the
+prototype review phase.
 
 | # | Topic | When the answer is needed |
 | --- | --- | --- |
 | 1 | Scientific explanations in the app | Before public release |
 | 2 | Permission and license for sharing data | Answered 2026-11-06: CC BY 4.0 confirmed |
 | 3 | Kern County comparison with real measurements | Answered 2026-11-06: deferred past the MVP (PDD D-49) |
-| 4 | Reliability at small fault movements | Temporary warning in use |
-| 5 | Correction to scarp-slope measurements | Provisional notice in use |
-| 6 | Meaning of negative scarp heights | Values retained; explanation pending |
-| 7 | Weak / Moderate / Strong in different models | Explanation pending |
-| 8 | Names of layered sediment arrangements | Before the planned P2 explanations |
-| 9 | Explanation of a raised ridge | Before adopting revised wording |
-| 10 | Scientific accuracy of the sample stories | Part of question 1 |
-| 11 | Additional uplift as another result | Later feature; outside the MVP |
-| 12 | Animations and other supporting material | Later educational pages |
-| 13 | Surface-offset conversion for several angles | Review of the proposed rule |
-| 14 | Which real measurements to show alongside results | Before public release; see scope note |
+| 4 | Reliability at small fault movements | Answered 2026-11-06: 0.5 m warning kept, text supplied (PDD D-4) |
+| 5 | Correction to scarp-slope measurements | Answered 2026-11-06: corrected; one confirmation still needed (PDD D-5) |
+| 6 | Meaning of negative scarp heights | Answered 2026-11-06: particle-scale resolution effect (PDD D-46) |
+| 7 | Weak / Moderate / Strong in different models | Answered 2026-11-06: parameter tables supplied |
+| 8 | Names of layered sediment arrangements | Answered 2026-11-06: arrangements described (see question 7) |
+| 9 | Explanation of a raised ridge | Answered 2026-11-06: pressure ridge, additional uplift (Us − Ud) |
+| 10 | Scientific accuracy of the sample stories | Part of question 1; no reply yet (2026-11-06) |
+| 11 | Additional uplift as another result | Answered 2026-11-06: yes — still a later feature (PDD D-20) |
+| 12 | Animations and other supporting material | Answered 2026-11-06: full collection, rights confirmed in writing |
+| 13 | Surface-offset conversion for several angles | Answered 2026-11-06: approved (PDD D-3) |
+| 14 | Which real measurements to show alongside results | Before public release; the group will circle back (2026-11-06) |
 
 The minimum viable product (**MVP**) is the initial agreed feature
 set. This table covers research questions, not every release task;
@@ -85,6 +88,17 @@ Question 10 identifies specific sample-story claims to check.
 
 **Why it matters:** a clear interface can still teach the wrong
 thing if its explanations are scientifically inaccurate.
+
+**Progress 2026-11-06.** The review's supplied texts are adopted
+as decided wording on the owner's directive (PDD D-51; guided DDD
+§15): the step renames, the definitions and hints, the pressure
+ridge and additional-uplift terminology, and the unhyphenated
+deformation zone width. A few strings had to be assembled from
+the review's sentences — the forecast line, the small-count
+notices, the negative-height note, the slip-rate sentence — and
+are listed for the group's sight. What remains of this question
+is the full prototype read-through: the statements the review did
+not touch, and question 10's story checks.
 
 ## 2. May we share the data files, and on what terms?
 
@@ -118,7 +132,12 @@ exports, with the per-source terms as documented in
 [the data redistribution record][redistribution]. The record is the
 2026-11-06 amendment of [ADR-0017][adr17]; the vintage pinned by the
 first software release carries the confirmed terms, as that decision
-already provides.
+already provides. The group's written review of the same date adds
+that the underlying experiments are already published on
+DesignSafe-CI — Chiama et al. 2024a (homogeneous),
+DOI 10.17603/ds2-xpq0-gw80, and 2024b (heterogeneous),
+DOI 10.17603/ds2-gfsj-pp60 — “should be safe to put under new CC
+license.”
 
 ## 3. Which Kern County measurements should we compare with the models?
 
@@ -191,6 +210,22 @@ and unreliable data**. The slip values at which the paper's plotted
 results begin also are not validated reliability cutoffs. The
 research group's answer must determine the final policy.
 
+**Answered 2026-11-06.** Keep the warning at 0.5 m of slip: even
+natural low-slip events leave very small surface displacements, and
+discrete measurements are hard to obtain. Keep showing the values,
+with the group's warning text, now the decided wording (PDD D-4,
+Decided 2026-11-06):
+
+> Low-slip measurements may be less reliable. Below 0.5 m of fault
+> slip, surface deformation can be difficult to distinguish from
+> model roughness. These values are shown, but interpret them with
+> caution.
+
+The hard-coded per-class starting slips in the paper's figures
+(0.25–1.85 m) marked where manually quality-checked measurements
+begin — the automated measurement struggled below about 0.5 m —
+not a validity boundary, so no per-type trigger is needed.
+
 ## 5. Are corrected scarp-slope measurements ready to use?
 
 **Reference: D-5; [scarp-dip notice][dip-notice].**
@@ -207,6 +242,22 @@ conditions must be met before we can remove it?
 **Current approach:** display the results with a “Provisional data”
 notice wherever scarp dip appears. We need a scientific decision,
 not just a wording change, before treating those values as final.
+
+**Answered 2026-11-06.** The Simple-scarp dips were accidentally
+measured backwards; the corrected values — about 50–70° positive,
+similar to the fault's own dip — live in a **Convert Scarp Dip**
+column that keeps the originals alongside, and the group reports
+the published measurements corrected, bad ones eliminated, and the
+plots checked. One confirmation is still needed before the notice
+comes down: the 26-column `DEM_dataset.csv` this project ingests
+has **no** `Convert_Scarp_Dip` column, and its `Scarp_Dip` values
+for the Simple classes are already all positive (18,058 values,
++5.3° to +89.8°, mean 63.6°; Simple Collapse mean 74.8°) —
+consistent with the corrected series. Please confirm that this
+column **is** the corrected one, and that the thirty negative
+values remaining in the Monoclinal and collapse classes (minimum
+−12.5°) are expected. PDD D-5 stays Interim, and the notice stays
+up, until that word arrives.
 
 ## 6. What should a reader understand from a negative scarp height?
 
@@ -227,6 +278,15 @@ on the scarp type or stage of the simulation?
 statistics, and downloads. We do not replace them with zero, remove
 them, or call them noise or subsidence without the group's answer.
 
+**Answered 2026-11-06.** A negative scarp height can still be
+reported: values of −0.02 m are the size of the model's particles,
+so this is a resolution and smoothing effect, or extra compaction
+at low slip. A warning about model resolution would be useful.
+Recorded as PDD D-46 (Decided 2026-11-06); the display sentence is
+assembled from this answer's words (guided DDD §15.8), goes back
+to the group for sight, and reaches the scarp-height panel with
+task G-26.
+
 ## 7. Does “Strong” mean the same thing in uniform and layered sediment?
 
 **Reference: wording audit, entry 9; [review record][audit].**
@@ -245,6 +305,23 @@ of the material arrangement if that would make the difference clear.
 selecting. Until the explanation is approved, the app must not
 imply that matching labels describe identical materials.
 
+**Answered 2026-11-06.** The group supplied the parameter tables.
+Density is set by gravitational settling and the inter-particle
+friction coefficient (Dense 0, Medium 0.25, Loose 0.5; measured
+porosities 0.156, 0.175, 0.184). Uniform (“homogeneous”) strength
+is the cohesion of the particle bonds: 0.1 and 0.5 MPa are Weak,
+1.0 Moderate, 1.5 and 2.0 Strong. Layered (“heterogeneous”) Weak,
+Moderate, and Strong are vertical gradients of 1 m layers,
+strongest at the base — the 3 m weak gradient, for example, is
+0.1, 0.5, 1.0 MPa top to bottom. The labels describe modeled bond
+strengths, not universal soil classes: strong reads as brittle or
+stiff sediment, weak as soft or unconsolidated. Decoding the
+served dataset confirms the mapping exactly (the review record of
+2026-11-06 holds the numbers). The supplied interpretation note
+and tables are the approved content for the planned per-option
+explanations; building that surface stays queued in the review
+record's intake.
+
 ## 8. What do the specialist sediment labels mean?
 
 **Reference: wording audit, entry 10; [review record][audit].**
@@ -261,6 +338,18 @@ Would a plainer display name be accurate? If so, what should it be?
 **Current approach:** keep the dataset names. The planned later
 explanations and sketches need scientific approval; we should not
 invent their meanings from the names alone.
+
+**Answered 2026-11-06** (with question 7's tables). **Random
+Heterogeneous**: ten non-repeating layer-strength sequences drawn
+from 0.1–2.0 MPa — modeled only for dense, 10 m deep profiles.
+**Cohesive Top Unit**: a 2.0 MPa crust over 1.0 MPa layers that
+act as unconsolidated sediment — modeled at every depth and
+density. **Alternating Strong-Weak**: alternating 2.0 and 0.1 MPa
+layers — also dense, 10 m only. The group's own name for the first
+is “Randomized strengths”; whether plainer display names replace
+the dataset names stays an open wording choice under question 1.
+The dense-10 m restriction on two of the three is stated nowhere a
+reader can see it — logged as intake in the review record.
 
 ## 9. How should we explain the extra height of a raised ridge?
 
@@ -282,6 +371,15 @@ reference level for the ridge's height.
 **Why it matters:** the explanation should help readers picture the
 shape without suggesting that two different measurements are
 interchangeable. The replacement remains a proposal.
+
+**Answered 2026-11-06.** “Raised ridge” is not the group's
+terminology: use **pressure ridge** (or pop-up structure), and
+describe the extra height as **additional uplift (Us − Ud)** — the
+height of the scarp above the undeformed surface of the lifted
+side, from backthrusting and folding at shallow fault dips. The
+proposed replacement sentence above is withdrawn in favor of
+wording built on those terms, adopted under PDD D-51 (guided DDD
+§15.6) and implemented by task G-26.
 
 ## 10. Are the sample stories' real-earthquake comparisons accurate?
 
@@ -331,6 +429,15 @@ add, and what explanation and qualifications would it need?
 **Status:** outside the current MVP. This is a later product decision
 with research-group input, not a question blocking the first release.
 
+**Answered 2026-11-06.** Yes — add it, with the definitions the
+review supplies (Us is total scarp height; Ud is vertical
+displacement on the fault at depth; the difference is the pressure
+ridge's extra “pop-up”). It stays outside the MVP: the served data
+vintage carries no Us − Ud column, so the view needs a pipeline
+export change and a new vintage. PDD D-20 records the yes and that
+sizing; the owner may fold the column into the release vintage so
+the later view needs no further one.
+
 ## 12. How complete must the animation collection be?
 
 **Reference: D-8 and R-13–R-15; [education and media pages][media].**
@@ -357,6 +464,20 @@ Two related requests have different consequences:
 **Status:** affects later educational and contact pages, not the
 current explorer's first release.
 
+**Answered 2026-11-06.** Every model has an animation: per-model
+folders hold MP4s of the sedimentary strata (“particles”) and of
+the bond networks showing internal deformation (“contacts”),
+organized by experiment series. The collection has never been
+posted publicly, and the group states in writing that the project
+has full rights to distribute it — the documented permission R-12
+requires. A GIF showing how the surface measurements were made
+exists for the measurement-process page (R-14). The group offers
+either per-scarp-type animations or exact per-model matches; that
+choice, captions, credits, and hosting are product work recorded
+as intake in the review record. The folder links stay out of this
+public repository deliberately until a curated, licensed subset is
+published through the project's own channel.
+
 ## 13. Should each selected fault angle have its own slip estimate?
 
 **Reference: D-3; [proposed conversion rule][conversion].**
@@ -380,6 +501,11 @@ we explain when results for several angles are combined?
 the reader enters fault slip directly, the same entered range
 applies to all selected angles; this question concerns the
 surface-offset conversion.
+
+**Answered 2026-11-06.** Yes — convert per angle; the geometry is
+the dip-slip relation (vertical component = slip × sin of the
+fault dip), which is what the shipped conversion already does.
+Recorded as PDD D-3, Decided 2026-11-06; no behavior changes.
 
 ## 14. Which real measurements should we compare with the results?
 
@@ -427,6 +553,10 @@ entry point also requires the owner to settle whether and how field
 comparisons belong in that guided app. The research group reviews
 the scientific comparisons; the owner records their product scope.
 
+**Status 2026-11-06.** The group will come back to this one (“I'll
+circle back”). With questions 2 and 3 resolved, this is the one
+research-side decision still gating the public release.
+
 ## Separate product-owner decisions
 
 These belong in the same review discussion, but are not scientific
@@ -437,6 +567,8 @@ questions for the group to settle alone:
   placeholder.
 - **Export license:** the owner decides the license with the team,
   taking account of the source permissions requested in question 2.
+  Decided with question 2's answer (2026-11-06): CC BY 4.0, the
+  ADR-0017 amendment of that date.
 - **Guided-page release scope (D-39):** the owner must reconcile the
   guided app with the release requirements, including field
   comparisons in question 14. The deferral of the Kern worked
