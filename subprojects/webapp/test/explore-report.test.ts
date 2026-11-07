@@ -32,9 +32,12 @@ import {
   captionLines, countLine, documentXml, GUIDED_MEMBER_NAMES, guidedArchive, REPORT_CHART_HEIGHT, REPORT_CHART_WIDTH,
   REPORT_MEMBER, REPORT_PARTS, reportCharts, reportDocx, SCENARIO_LABEL_FILL, scenarioLabels, scenarioRows, scenarioSummary, type Rasterize,
 } from '../src/explore/report';
-import { NO_MATCHES, PROVENANCE_HEADING, REPORT_TITLE } from '../src/explore/wording';
+import { NEGATIVE_HEIGHT_NOTE, negativeHeights, NO_MATCHES, PROVENANCE_HEADING, REPORT_TITLE } from '../src/explore/wording';
 import { defaultScenario, MEASUREMENT_NAMES, type Scenario } from '../src/state/state';
-import { measurementLabel } from '../src/views/chart-text';
+import { measurementLabel as registryLabel } from '../src/views/chart-text';
+
+/** The report's measurement label: the registry label in the page's wording (guided DDD §15.7). */
+const measurementLabel = (m: Parameters<typeof registryLabel>[0]): string => guided(registryLabel(m));
 import { copyText } from '../src/views/copy';
 import { noticeText, NOTICE_KEYS, selectNotices } from '../src/views/notices';
 import type { RenderInput } from '../src/views/render-input';
@@ -272,7 +275,7 @@ describe('report: the document (§13.2, §13.3)', () => {
     const dip = lines.indexOf(measurementLabel('scarp_dip'));
     assert.equal(lines[dip + 1], copyText('pdd5.4.scarpDipNotice'));
     const width = lines.indexOf(measurementLabel('dzw'));
-    assert.equal(lines[width + 1], copyText('pdd5.7.widthScopeNote'));
+    assert.equal(lines[width + 1], 'Deformation zone width measures the main modeled rupture zone. Real earthquakes can also produce separate deformation away from the main trace, which the model does not represent.');
   });
 
   test('the chart set ignores the page toggles: linear histograms, the cumulative curve without a read-off', () => {
@@ -306,6 +309,24 @@ describe('report: the document (§13.2, §13.3)', () => {
       assert.ok(at > lines.indexOf('Standard deviation', start), `${m}: the notice follows the statistics table`);
       assert.equal(lines.filter(line => line === notice).length, 2, 'once in each suppressed section');
     }
+  });
+
+  test('the width term is unhyphenated throughout the report (§15.7), provenance.txt keeping the registry spelling', () => {
+    for (const input of [full, noValid, mixed]) assert.doesNotMatch(documentXml(input, STAMPS, AT), /deformation-zone/i);
+    assert.match(provenanceText(full, STAMPS, AT), /Deformation-zone width \(m\): N = /);
+  });
+
+  test('the negative-height note: under scarp height when its matched minimum is below zero, nowhere else (§15.8)', () => {
+    const withMin = (input: RenderInput, m: 'scarp_height' | 'dzw', min: number): RenderInput => ({ ...input, measurements: { ...input.measurements, [m]: { ...input.measurements[m], stats: { ...input.measurements[m].stats!, min } } } });
+    const count = (input: RenderInput) => paragraphs(documentXml(input, STAMPS, AT)).filter(line => line === NEGATIVE_HEIGHT_NOTE).length;
+    assert.equal(count(withMin(full, 'scarp_height', 0)), 0, 'a zero minimum is not below zero');
+    assert.equal(count(withMin(withMin(full, 'scarp_height', 0.01), 'dzw', -0.02)), 0, 'only scarp height carries it');
+    const negative = withMin(full, 'scarp_height', -0.02);
+    const lines = paragraphs(documentXml(negative, STAMPS, AT));
+    assert.equal(lines.filter(line => line === NEGATIVE_HEIGHT_NOTE).length, 1);
+    const at = lines.indexOf(NEGATIVE_HEIGHT_NOTE);
+    assert.ok(at > lines.indexOf(measurementLabel('scarp_height')) && at < lines.indexOf('Statistic', lines.indexOf(measurementLabel('scarp_height'))), 'in the scarp-height section, before its table');
+    assert.ok(!negativeHeights(empty, 'scarp_height'), 'no statistics, no note');
   });
 
   test('no valid measurement: tables still render, and the page notice stands in each section\u2019s charts', () => {

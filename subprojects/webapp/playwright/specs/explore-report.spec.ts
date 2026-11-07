@@ -26,7 +26,7 @@ const xmlEscape = (text: string): string => text.replace(/&/g, '&amp;').replace(
 async function confirmSample(page: Page, id: 'illustrative' | 'kern'): Promise<void> {
   await gotoExplore(page);
   await pickSample(page, id);
-  await action(page, 'Continue to fault movement').click();
+  await action(page, 'Continue to fault slip').click();
   await page.locator('#gx-offset-feedback table').waitFor();
   await action(page, 'Review scenario').click();
   await action(page, 'Show results').click();
@@ -82,6 +82,8 @@ for (const id of ['illustrative', 'kern'] as const) {
     expect(document).toContain(xmlEscape(guided(copyText('pdd5.9.lowSlipCaveat'))));
     expect(document).not.toContain(xmlEscape(copyText('pdd5.9.lowSlipCaveat')));
     expect(captured.members.get('provenance.txt')!.toString('utf8')).toContain(copyText('pdd5.9.lowSlipCaveat'));
+    // The research group's width spelling throughout the report (guided DDD §15.7).
+    expect(document).not.toMatch(/deformation-zone/i);
     // Both samples confirm in offset mode: the scenario table's movement row carries that name.
     for (const label of scenarioLabels('offset')) expect(document).toContain(`>${label}</w:t>`);
     expect((document.match(/Cite: Chiama et al\. \(2025\)/g) ?? []).length).toBe(media.length);

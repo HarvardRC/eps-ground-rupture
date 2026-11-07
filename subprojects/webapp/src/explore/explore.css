@@ -360,3 +360,5 @@
  * This stylesheet loads only with the guided page, and the :has() scope
  * keeps the rule to a page holding the explorer. */
 body:has(#gre-explore) .md-top { display: none !important; }
+/* The negative-height note (guided DDD §15.8): an explanation, so the neutral wash of §12.6. */
+#gre-explore .gx-note { margin: 10px 0; padding: 10px 15px; border-left: 3px solid var(--gx-muted); background: var(--gx-wash); color: var(--gx-ink); font-size: .8rem; }

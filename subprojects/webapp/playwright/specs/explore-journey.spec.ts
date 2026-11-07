@@ -25,7 +25,7 @@ test('the five-step journey confirms GS-1 with the reference count', async ({ pa
   await expect(stepButton(page, 'site')).toHaveAttribute('aria-current', 'step');
   await chooseSite(page, ref.inputs);
 
-  await action(page, 'Continue to fault movement').click();
+  await action(page, 'Continue to fault slip').click();
   await expect(heading(page)).toHaveText(MOVEMENT_HEADING);
   await chooseMovement(page, ref.inputs);
 

@@ -14,11 +14,15 @@ import type { SvgNode } from '../views/svg';
 
 export const GUIDED_COPY: Readonly<Record<string, string>> = {
   'pdd4.1.cumulativeAccuracy': 'The curve may be simplified for display. Simplification changes cumulative percentages by less than 0.2 percentage points. Statistics and percentile read-offs rely on all measurements used for this scenario.',
-  'pdd5.8.smallResultWarning': 'Only {N} measurements can be used for this scenario — too few for a reliable distribution. Interpret with caution.',
-  'pdd5.8.suppressionNotice': 'Fewer than 10 measurements can be used — too few for a reliable distribution. Showing the statistics table only; interpret with caution.',
+  // The small-count reframe (guided DDD §15.5; PDD D-51), assembled from the research group's review.
+  'pdd5.8.smallResultWarning': 'Only {N} measurements can be used for this scenario. They are not less trustworthy — a very specific set of site conditions matches few simulations, so the distribution is coarse. Try adding more options to include a range of results.',
+  'pdd5.8.suppressionNotice': 'Fewer than 10 measurements can be used — too few to draw a distribution. They are not less trustworthy; the selection is very specific. Showing the statistics table only; try adding more options to include a range of results.',
   'pdd5.8.noValidMeasurement': '{X} simulation stages match this scenario, but none has a {measurement} value — no distribution can be computed. The stages appear in the Missing values (excluded) count of the statistics table.',
   // PDD §5.9's decided replacement (D-4, 2026-11-06; task G-25), the research group's own text.
   'pdd5.9.lowSlipCaveat': 'Low-slip measurements may be less reliable. Below 0.5 m of fault slip, surface deformation can be difficult to distinguish from model roughness. These values are shown, but interpret them with caution.',
+  // The research group's spelling (§15.7; PRD CR-3 as amended).
+  'pdd5.11.dzwLabel': 'Deformation zone width (m)',
+  'pdd5.7.widthScopeNote': 'Deformation zone width measures the main modeled rupture zone. Real earthquakes can also produce separate deformation away from the main trace, which the model does not represent.',
   'ddd5.8.rowValidCount': 'Measurements used',
   'ddd5.8.rowExcludedNullCount': 'Missing values (excluded)',
   'ddd5.11.histogramLabel': '{label}: histogram of {N} measurements used',
@@ -68,9 +72,17 @@ const REWRITES: readonly Rewrite[] = Object.entries(GUIDED_COPY)
   .sort(([a], [b]) => copyEntry(b).text.length - copyEntry(a).text.length)
   .map(([key, text]) => rewriteFor(key, text));
 
+/**
+ * Spellings the guided page adopts inside filled slots, where no template
+ * rewrite reaches: the research group's unhyphenated width term (guided DDD
+ * §§15.7, 15.11), as the no-valid notice's `{measurement}` value carries it.
+ */
+const SPELLINGS: readonly (readonly [string, string])[] = [['deformation-zone width', 'deformation zone width']];
+
 /** The adopted wording for text a shared builder produced from the registry. */
 export function guided(text: string): string {
-  return REWRITES.reduce((value, rewrite) => (value.includes(rewrite.literal) ? value.replace(rewrite.pattern, rewrite.replace) : value), text);
+  const rewritten = REWRITES.reduce((value, rewrite) => (value.includes(rewrite.literal) ? value.replace(rewrite.pattern, rewrite.replace) : value), text);
+  return SPELLINGS.reduce((value, [from, to]) => value.split(from).join(to), rewritten);
 }
 
 /** The chart attributes that carry words; geometry (points, paths, coordinates) is never scanned. */

@@ -27,8 +27,8 @@ test('the theme\'s Back to top control leaves the guided page only (§12.3)', as
   await gotoExplore(page);
   await action(page, 'Build your scenario').click();
   for (const group of ['faultDip', 'depth', 'density', 'sediment'] as const) await setChecked(page, `#gx-${group}-all`, true);
-  await action(page, 'Continue to fault movement').click();
-  await expect(page.locator('#gx-heading')).toHaveText('Choose the assumed fault movement');
+  await action(page, 'Continue to fault slip').click();
+  await expect(page.locator('#gx-heading')).toHaveText('Choose the assumed fault slip');
   await revealBackToTop(page);
   // The theme's control is there but never rendered: out of view, the tab order and the accessibility tree.
   await expect(page.locator('.md-top')).toHaveCount(1);
@@ -110,7 +110,7 @@ test('both slip endpoints carry the Required mark; the initial minimum stays 0 (
   await gotoExplore(page);
   await action(page, 'Build your scenario').click();
   for (const group of ['faultDip', 'depth', 'density', 'sediment'] as const) await setChecked(page, `#gx-${group}-all`, true);
-  await action(page, 'Continue to fault movement').click();
+  await action(page, 'Continue to fault slip').click();
   await expect(page.locator('label[for="gx-slipMin"] .gx-required')).toHaveText('Required');
   await expect(page.locator('label[for="gx-slipMax"] .gx-required')).toHaveText('Required');
   await expect(page.locator('#gx-slipMin')).toHaveValue('0');
@@ -128,7 +128,7 @@ test('sample explanations take the neutral treatment; warnings keep caution; the
   await expect(page.locator('.gx-sample-status')).toBeVisible();
   await expect(page.locator('.gx-annotation').first()).toBeVisible();
   for (const selector of ['.gx-sample-status', '.gx-annotation']) expect(await wash(selector)).toBe(WASH);
-  await action(page, 'Continue to fault movement').click();
+  await action(page, 'Continue to fault slip').click();
   await setChecked(page, '#gx-mode-slip', true);
   const note = page.locator('#gx-sample-mode-note');
   await expect(note).toHaveText('The sample has separate example values for each mode; one is not converted from the other. Switching modes can change the results.');

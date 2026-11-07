@@ -32,7 +32,7 @@ import { summaryText } from '../views/summary';
 import { serializeSvg, type SvgNode } from '../views/svg';
 import { canChart, cumulativeChart, histogramBins, histogramChart } from './charts';
 import { guided } from './copy-overlay';
-import { measurementsUsed, matchingStages, missingExcluded, NO_MATCHES, PROVENANCE_HEADING, REPORT_TITLE, STATISTIC_HEADING, VALUE_HEADING, VIEW_NAMES } from './wording';
+import { measurementsUsed, matchingStages, missingExcluded, NEGATIVE_HEIGHT_NOTE, negativeHeights, NO_MATCHES, PROVENANCE_HEADING, REPORT_TITLE, STATISTIC_HEADING, VALUE_HEADING, VIEW_NAMES } from './wording';
 
 /**
  * The browser-bound step (§13.4): `svg`, a standalone SVG document of
@@ -242,7 +242,7 @@ export function scenarioRows(input: RenderInput): readonly (readonly [string, st
 /** A chart's caption (§13.2): the D-14 fields as document text, and the accuracy statement on the cumulative chart. */
 export function captionLines(input: RenderInput, stamps: VersionStamps, chart: Pick<ReportChart, 'measurement' | 'view'>): readonly string[] {
   return [
-    `${measurementLabel(chart.measurement)} · ${VIEW_NAMES[chart.view]}`,
+    `${guided(measurementLabel(chart.measurement))} · ${VIEW_NAMES[chart.view]}`,
     scenarioSummary(input),
     countLine(input, chart.measurement),
     versionsLine(input, stamps),
@@ -253,7 +253,7 @@ export function captionLines(input: RenderInput, stamps: VersionStamps, chart: P
 
 /** The notes the page shows under a measurement's heading: width's scope note, scarp dip's provisional notice (PDD §5.4). */
 function measurementNotes(m: MeasurementName): readonly string[] {
-  if (m === 'dzw') return [copyText('pdd5.7.widthScopeNote')];
+  if (m === 'dzw') return [guided(copyText('pdd5.7.widthScopeNote'))];
   if (m === 'scarp_dip') return [copyText('pdd5.4.scarpDipNotice')];
   return [];
 }
@@ -287,7 +287,7 @@ function documentBody(input: RenderInput, stamps: VersionStamps, generatedAt: Da
   let n = 0;
   const unclassified = unclassifiedLine(input.selection.unclassified);
   for (const m of MEASUREMENT_NAMES) {
-    parts.push(heading(measurementLabel(m)));
+    parts.push(heading(guided(measurementLabel(m))));
     for (const note of measurementNotes(m)) parts.push(text(note));
     if (plan.state === 'empty') {
       parts.push(text(NO_MATCHES, { bold: true }, { keepNext: true }));
@@ -296,6 +296,8 @@ function documentBody(input: RenderInput, stamps: VersionStamps, generatedAt: Da
     }
     const notice: NoticeRef | null = plan.panels[m];
     if (notice !== null && notice.key === NOTICE_KEYS.warning) parts.push(text(guided(noticeText(notice))));
+    // The negative-height note (§15.8; D-46), where the page shows it.
+    if (negativeHeights(input, m)) parts.push(text(NEGATIVE_HEIGHT_NOTE));
     const counts = input.selection.perMeasurement[m];
     const unit = m === 'scarp_dip' ? '°' : ' m';
     const rows = statsRows(input.measurements[m].stats, counts, m, config).map((row, i) => [guided(row.label), `${row.value}${i > 1 && row.value !== copyText('ddd5.8.nullMark') ? unit : ''}`]);

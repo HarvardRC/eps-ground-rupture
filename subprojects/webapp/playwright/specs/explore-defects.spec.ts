@@ -37,7 +37,7 @@ test('every guided disclosure label clears the theme\'s icon and chevron', async
   await gotoExplore(page);
   await pickSample(page, 'illustrative');
   await expectClear(page, 'site conditions');
-  await action(page, 'Continue to fault movement').click();
+  await action(page, 'Continue to fault slip').click();
   await page.locator('#gx-offset-feedback table').waitFor();
   await expectClear(page, 'fault movement');
   await action(page, 'Review scenario').click();
@@ -64,7 +64,7 @@ async function conversionWithoutTwenty(page: Page): Promise<void> {
 }
 
 async function showOffsetResults(page: Page): Promise<void> {
-  await action(page, 'Continue to fault movement').click();
+  await action(page, 'Continue to fault slip').click();
   await page.locator('#gx-offset-feedback table').waitFor();
   await action(page, 'Review scenario').click();
   await action(page, 'Show results').click();
@@ -88,7 +88,7 @@ test('a failed recalculation says the earlier results are unchanged', async ({ p
   await gotoExplore(page);
   await pickSample(page, 'illustrative');
   // First results in slip mode, which needs no conversion.
-  await action(page, 'Continue to fault movement').click();
+  await action(page, 'Continue to fault slip').click();
   await setChecked(page, '#gx-mode-slip', true);
   await action(page, 'Review scenario').click();
   await action(page, 'Show results').click();
