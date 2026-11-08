@@ -1,0 +1,44 @@
+#cloud-config
+# The reference VM's first-boot setup (docs/app/ddd.md §7.6; DD-12).
+#
+# - The 24-hour shutdown is the first command, before any package work, so
+#   even a failed or hung setup bounds the VM's running time. It
+#   terminates the instance, because main.tf sets
+#   instance_initiated_shutdown_behavior = "terminate". It is a
+#   best-effort bound, not a cleanup: the key pair, the security group,
+#   and the local state stay until a terraform destroy.
+# - xvfb, for xvfb-run around the measure project.
+# - Node.js 22.12.0, the runtime pin of docs/app/ddd.md §2, verified
+#   against the release's SHASUMS256.txt, with node, npm, and npx on the
+#   default PATH. A change of that pin changes this file and run.mjs in
+#   the same commit.
+#
+# Chromium and its system dependencies are installed by step 5 of the
+# run (npx playwright install --with-deps chromium). A failure here makes
+# `cloud-init status --wait` exit non-zero, which fails step 3 and keeps
+# the VM for diagnosis.
+
+runcmd:
+  - [shutdown, -h, "+1440"]
+  - - bash
+    - -euo
+    - pipefail
+    - -c
+    - |
+      # Package work follows the shutdown, so a hung or failed install still
+      # leaves the VM bounded. The lock timeout waits out the boot-time
+      # unattended upgrades.
+      export DEBIAN_FRONTEND=noninteractive
+      apt-get -o DPkg::Lock::Timeout=900 update
+      apt-get -o DPkg::Lock::Timeout=900 install -y xvfb
+      cd "$(mktemp -d)"
+      base=https://nodejs.org/dist/v22.12.0
+      tarball=node-v22.12.0-linux-x64.tar.xz
+      curl -fsSL --retry 5 -o "$tarball" "$base/$tarball"
+      curl -fsSL --retry 5 -o SHASUMS256.txt "$base/SHASUMS256.txt"
+      grep "  $tarball\$" SHASUMS256.txt | sha256sum --check --strict -
+      tar -xJf "$tarball" -C /opt
+      for tool in node npm npx; do
+        ln -sf "/opt/node-v22.12.0-linux-x64/bin/$tool" "/usr/local/bin/$tool"
+      done
+      /usr/local/bin/node --version | grep -qx v22.12.0

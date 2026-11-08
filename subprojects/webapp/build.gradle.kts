@@ -78,6 +78,51 @@ val webappBrowserTest by tasks.registering(NpmTask::class) {
     npmCommand.set(listOf("run", "browser-test"))
 }
 
+// The performance reference environment (docs/app/ddd.md §2, task table;
+// §7.6): perf/run.mjs on the pinned runtime. Owner-invoked only — never
+// `check`, never CI. Nothing is read or checked while Gradle configures
+// this script: run.mjs checks the profile and terraform, and the doFirst
+// below checks egr.perf.target, when the task executes.
+val perfAwsProfile = providers.gradleProperty("egr.perf.awsProfile")
+val perfTarget = providers.gradleProperty("egr.perf.target")
+val perfProfileEnvironment = perfAwsProfile.map { mapOf("TF_VAR_aws_profile" to it) }.orElse(emptyMap())
+val mkdocsYml = rootProject.file("subprojects/mkdocs/mkdocs.yml")
+
+// Create or reconcile the reference VM, run the `measure` project on it,
+// and destroy it once the run has completed and its report is downloaded.
+val webappMeasureReference by tasks.registering(NodeTask::class) {
+    dependsOn(npmCi)
+    dependsOn(":subprojects:mkdocs:mkdocsPreview")
+    script.set(file("perf/run.mjs"))
+    args.set(listOf("run"))
+    environment.putAll(perfProfileEnvironment)
+    // -Pegr.perf.target=published measures the published site: its URL is
+    // the site_url of mkdocs.yml, read when the task executes.
+    environment.putAll(perfTarget.map { target ->
+        if (target != "published") emptyMap()
+        else {
+            val siteUrl = mkdocsYml.readLines()
+                .firstNotNullOfOrNull { Regex("""^site_url:\s*(\S+)\s*$""").find(it)?.groupValues?.get(1) }
+                ?: throw GradleException("site_url not found in $mkdocsYml")
+            mapOf("EGR_BASE_URL" to siteUrl)
+        }
+    }.orElse(emptyMap()))
+    doFirst {
+        val target = perfTarget.orNull
+        if (target != null && target != "published") {
+            throw GradleException("egr.perf.target must be 'published' (got '$target')")
+        }
+    }
+}
+
+// Destroy every resource the reference environment's state records.
+val webappMeasureDestroy by tasks.registering(NodeTask::class) {
+    dependsOn(npmCi)
+    script.set(file("perf/run.mjs"))
+    args.set(listOf("destroy"))
+    environment.putAll(perfProfileEnvironment)
+}
+
 tasks.named("check") {
     dependsOn(tscCheck, webappTest)
 }
