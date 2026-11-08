@@ -2631,6 +2631,192 @@ Not verified:
 - Word's rendering of the new report note;
 - browsers other than Chromium.
 
+### Chart-image export, 2026-11-06 (G-27)
+
+G-27 ran under the owner's release of 2026-11-06, after G-26's merge, to
+guided DDD §16 (PDD D-14, §6.3) and its §16.6 fitting decisions
+(`c4d56a5`). The planning session decided items 1–4 under the §13.7
+precedent, amendable by the owner on sight. The owner approved the
+strings and sample images that carry them. Items 5 and 6 are the
+owner's own.
+
+**What changed on the guided page.**
+
+- **The action (§16.1).** Each drawn chart of a confirmed result gains
+  **Download this chart (PNG)**. It sits after the percentile control,
+  just above the chart's data table. It appears only when the panel
+  draws a chart: no button before confirmation, and none on a panel
+  suppressed to table-only.
+- **The image (§16.2).**
+  - It shows the displayed chart: the histogram, the logarithmic width
+    histogram, or the cumulative curve with the reader's read-off
+    (84th percentile by default).
+  - The chart uses the report's 600 × 300 geometry, through the same
+    shared renderer.
+  - Histograms get a scarp-type legend row (§16.6 item 5, on the
+    report's interpretation (g)).
+  - Beneath sits the D-14 strip, wrapped at 92 characters:
+    - the product line;
+    - the measurement and kind in the page's words (Distribution;
+      Distribution, logarithmic scale; Cumulative);
+    - the §13.2 scenario summary;
+    - the count line and the versions;
+    - the citation pointer;
+    - the accuracy statement on cumulative images;
+    - every caveat and note the page shows with that chart. This
+      includes the per-dip exceedance line and the negative-height
+      note, but not the coverage block (§16.6 items 2–3).
+  - The image is rasterized at 2× by the §13.4 rasterizer, so it is
+    1200 px wide.
+- **The provenance file (§16.3).** A `-provenance.txt` sidecar in the
+  page's wording (the G-25 rule) follows the image.
+- **Names (§16.4; §16.6 item 1).** The files are named
+  `{base}-{slug}-{kind}.png` and `-provenance.txt`, with the slugs
+  `scarp-height`, `dzw`, `scarp-dip` and the kinds `histogram`,
+  `histogram-log`, `cumulative`.
+- **Failure and concurrency (§16.5).**
+  - A rasterizer failure, or output that isn't a PNG, saves nothing and
+    says so in the card.
+  - A failed sidecar save is reported but doesn't undo the image.
+  - A busy flag keyed by result and measurement ignores a second
+    activation.
+  - A result replaced mid-export saves nothing.
+  - The card's outcome stays with its card when the reader switches
+    measurement.
+- **Caveat box.** The page's caveat box now comes from the same shared
+  list as the strip (`caveatTexts`), so the two cannot drift.
+
+`copy.json`, the copy deck and every `/scenario/` file keep their bytes.
+
+**Strings.**
+
+1. Button: "Download this chart (PNG)".
+2. Ready: "Your chart image and its provenance file are downloading. If
+   your browser asks to allow multiple downloads, allow it to get the
+   provenance file." (§16.6 item 6).
+3. Failed: "The chart image could not be created. Your results are
+   unchanged; select Download this chart (PNG) to retry."
+4. Sidecar blocked: "The chart image is ready, but its provenance file
+   could not be saved."
+5. Strip: "Ground Rupture Explorer — guided journey", and "Cite: Chiama
+   et al. (2025). Full citation in the provenance file and on the
+   site's How to cite page."
+
+**Approval: the owner's own (2026-11-06, relayed by the planning
+session).** All three parts were approved:
+
+- **Strings and samples.** The planning session checked the three
+  sample PNGs against the hashes below and every string before showing
+  them.
+- **Legend row on histogram images.** Kept; recorded as §16.6 item 5.
+- **Ready line.** The proposed rewording was adopted, with no manual
+  fallback button (§16.6 item 6). The error line stays for failures
+  the page can detect.
+
+**Samples.** These were made at `5459fb3` (`9077a5e` after the rebase)
+with the scenario "Dip 60° or 70° · Moderate — uniform and layered ·
+depth 10 m · density Medium · offset 0–1.3 m", saved under the
+file-name base `kern`:
+
+- `kern-scarp-height-histogram.png`, SHA-256 `467ae22b…bcc1b5a`;
+- `kern-dzw-histogram-log.png`, SHA-256 `13855875…6117a`;
+- `kern-scarp-dip-cumulative.png`, SHA-256 `a7e9f6b2…584aa`.
+
+Each has its sidecar. The sidecars differ only in their Generated
+timestamp. The ready line changed after these samples were made; the
+images and sidecars do not carry it.
+
+**Review.** The independent review found nothing blocking. Applied
+(`9077a5e`):
+
+- **Placement.** The action moved after the percentile control, gated
+  by the same check as the export.
+- **Outcome.** A new export clears the card's earlier outcome.
+- **Busy flag.** It is keyed by result and measurement, so a stale
+  flight never blocks a new result's card.
+- **Live region.** The status line stays rendered while empty, so
+  screen readers announce its update.
+- **Tests.** New tests cover:
+  - the per-dip exceedance line;
+  - the log chart;
+  - determinism with the legend;
+  - a suppressed panel proven on screen;
+  - a scenario replaced mid-export;
+  - the outcome staying with its card across a switch.
+
+The review also read Chrome's multiple-downloads prompt as a way the
+sidecar could be blocked without the page knowing. That led to the
+owner's ready line (§16.6 item 6).
+
+An earlier browser run found that the composed SVG carried duplicate
+`width`/`height` attributes on the nested chart, which failed the
+export. It was fixed before review, and a Node test now rejects
+duplicate attributes.
+
+**Known cosmetic item, not changed.** On cumulative images, the
+"84th percentile" and "Median" labels start at the point where their
+guide meets the curve, so the curve crosses the label's first letter.
+The planning session noted it. The label geometry comes from `ecdfSvg`
+in the shared `src/views/charts.ts`, which also draws the page's and
+the report's cumulative charts and is part of the frozen `/scenario/`
+bundle. The export draws it exactly as the page does, and moving it
+would change `/scenario/` bytes. It is left for a later guided-only
+override, if the owner wants one.
+
+Tests and specs:
+
+- Node: the new `explore-chart-export` suite (15 tests) covers:
+  - the strip fields in slip and offset modes;
+  - the kind words;
+  - caveats and notes, and the per-dip exceedance line (with none
+    inside range);
+  - log versus linear;
+  - a well-formed composition with no duplicate attributes and every
+    line within the wrap width;
+  - the legend and the read-off marker;
+  - determinism;
+  - the sidecar and the names;
+  - `buildChartExport` on success, on a failing rasterizer and on
+    non-PNG output.
+- New `explore-chart-export` spec, in both lane projects (8 tests):
+  - export on each chart kind, checking names, 1200 px width and the
+    sidecar;
+  - no button before confirmation or on a suppressed panel;
+  - the busy flag;
+  - a failing canvas;
+  - a scenario replaced mid-export;
+  - the outcome staying with its card;
+  - 320 px and 1024 px layouts.
+
+At this verification, on `task/g-27-chart-export` at `4b2f1a0`, over
+`c4d56a5` (the owner's push, which carries §16.6):
+
+- **Build and unit tests.** The pinned Node suite passed all 483 tests,
+  and typechecking and the bundles passed.
+- **Site builds.** The strict publication and preview builds passed,
+  with `explore-3ad0d41cd412.js` and `explore-4ccb39408ad8.css`.
+- **Unchanged.** The `/scenario/` bundles `app-26490347afd0.js` and
+  `app-08bebc049c15.css` did not change.
+- **Hooks and document checks.** All 31 hook tests passed. Relative
+  links resolved, PDD agreement passed, and traceability reported no
+  gap rows.
+- **Lane.** The full lane passed 343 and skipped 5, with no failure,
+  twice in a row, at load averages of 15 to 31.
+- **Guided specs.** All 190 passed in `desktop` and `mobile`.
+- **Earlier runs.** The same commands had passed at `5459fb3`, after
+  the review's fixes and before the ready line (483 Node tests; lane
+  343 twice; guided 190), and at `3f38394`, before the review (480
+  Node tests; lane 339 twice; guided 186).
+
+Not verified:
+
+- Chrome's real multiple-downloads prompt, which the test browser
+  never shows, and so whether the sidecar arrives when a reader denies
+  it;
+- screen-reader announcement of the status line;
+- browsers other than Chromium;
+- the PNG's appearance when pasted into Word or slides.
+
 ## Separate CI investigation
 
 The reported job `126383105016` belongs to historical run
