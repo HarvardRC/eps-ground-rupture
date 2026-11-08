@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "eps-ground-rupture"
-version = "0.2.0"
+version = "0.4.0"
 description = "Data pipeline for 2D DEM earthquake-rupture analysis: tidy Parquet, DuckDB views pinned by tests, and the CSV exports behind the published Tableau dashboards."
 # The paper's author team plus the person who built the pipeline and site,
 # in the order the paper and site byline use. This is what CITATION.cff and

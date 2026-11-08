@@ -1265,6 +1265,21 @@ both adapted hints join the assembled list. The echo pattern is
 "Selected: 30°, 40°, 45° — 3 of 7 modeled angles.", with "(with
 gaps)" appended for a gapped restored set.
 
+7. A gesture answers an unanswered group only if a thumb's value
+   changed during it, even if it ends where it began; a tap or
+   click that never moves a thumb leaves the group unanswered, and
+   Full range stays the one-click way to choose every value. The
+   owner's decision with the G-24 string approval (2026-11-08).
+8. Each Full range button's accessible name names its group —
+   "Full range of fault angles", "Full range of sediment
+   depths" — keeping the visible text "Full range" (WCAG 2.5.3);
+   approved by the owner the same day.
+
+Known limitation, accepted: a restored set with gaps draws its
+fill across the unselected stops between its extremes, and the
+echo's "(with gaps)" carries the truth. Such sets come only from
+same-tab sessions saved before G-24 deployed.
+
 ## 15. SME wording adoption (D-51)
 
 PDD D-51 (2026-11-06): the owner directs that reader-facing

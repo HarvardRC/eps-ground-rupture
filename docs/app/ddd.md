@@ -9498,8 +9498,10 @@ load and its version check instead of re-mounting the old vintage
 under the new stamp. A missing attribute is a startup failure under
 [§5.10](#510-failure-states), never a silently unlabeled result.
 
-A release commit that changes only the version — `CITATION.cff`,
-with `.zenodo.json` — still runs both path-filtered workflows on its
+A release commit that changes only release metadata —
+`CITATION.cff`'s `date-released`, the version having been set to
+0.4.0 in `CITATION.cff` and `.zenodo.json` ahead of the release
+(2026-11-06) — still runs both path-filtered workflows on its
 push to the release branch, because both push filters name
 `CITATION.cff` ([§6.3](#63-ci-workflows)); the release merge's push
 to `main` runs them again, and its Companion site deploy re-stamps

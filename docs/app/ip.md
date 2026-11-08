@@ -4777,12 +4777,16 @@ the release is cut by the check OA-6 names: the newest
 `docs/app/approvals/zenodo-YYYY-MM-DD.md` holds one line for each of
 its two decisions; the G-1, G-4, G-5, and G-6 records of §3 in hand;
 T-63's vintage evidence and T-64's rehearsal records in hand.
-(2) On `dev-v.0.4.x`, set the `version` key in `CITATION.cff` and
-`.zenodo.json` to the version the OA-7 record names
-([PDD §9.4 — Releases](pdd.md#94-releases)), commit, and push: the
-release commit, whose push runs on `dev-v.0.4.x` — Tests, Companion
-site, which builds without deploying, and Doc links — are item 1's
-runs. (3) Before the merge, on the release
+(2) On `dev-v.0.4.x`, check that the `version` key in
+`CITATION.cff` and `.zenodo.json` reads the version the OA-7 record
+names ([PDD §9.4 — Releases](pdd.md#94-releases)) — both read
+0.4.0 since the owner set them ahead of the release (2026-11-06;
+no pre-release version string reaches either file, by the owner's
+rule of 2026-11-08) — set `date-released` in `CITATION.cff` to the
+release date, commit, and push: the release commit, whose push
+runs on `dev-v.0.4.x` — Tests, Companion site, which builds without
+deploying, and Doc links — are item 1's runs, because both push
+filters name `CITATION.cff`. (3) Before the merge, on the release
 commit ([DDD §7.7](ddd.md#77-site-validation-and-release-checklist):
 the checks run on the release branch before the merge that releases
 the change), fill a copy of `docs/app/release-checklist.md`: item 1
@@ -5417,7 +5421,13 @@ ID is reused; OA-15 is retired
   prints 1. A repository admin may also confirm the enabled line in
   the repository's webhook listing,
   `gh api repos/HarvardRC/eps-ground-rupture/hooks` — an optional
-  confirmation, not the check.
+  confirmation, not the check. Owner's rule (2026-11-08): no
+  pre-release version reaches Zenodo. Every data vintage is a
+  GitHub prerelease, and Zenodo may harvest prereleases, so the
+  integration is enabled only after T-63's vintage is published and
+  just before T-65 publishes the release, its prerelease handling
+  first tried on the Zenodo Sandbox; how later vintages avoid an
+  archived version is decided with it.
 - **OA-7** — the first release's contents and version, Phase 2,
   recorded before T-65 begins (tags v0.2.0–v0.2.2 exist, and OA-18
   adds the plain tag `v0.3.0`; no GitHub release yet; the owner
@@ -5582,7 +5592,10 @@ ID is reused; OA-15 is retired
   `main` by a merge commit, as `dev-v.0.2.x` was merged, and tags that
   commit `v0.3.0` with a plain git tag — no GitHub release, which
   ADR-0017 would count as a public release — while `CITATION.cff` and
-  `.zenodo.json` keep the version 0.2.0 until T-65. The merge changes
+  `.zenodo.json` keep the version 0.2.0 until T-65 (superseded
+  2026-11-06: the owner set both, and the Python package, to 0.4.0
+  ahead of the release; T-65's release commit sets `date-released`
+  instead). The merge changes
   no page of the site: the Companion site push run it starts
   republishes the same pages. The record is that merge commit and its
   tag on `origin`; its check, which the owner runs before OA-19, after
