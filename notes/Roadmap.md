@@ -390,8 +390,12 @@ drills, is retired: the drills run against a stub `gh` instead.
   every task) — open. Create `dev-v.0.4.x` from `main` and push it;
   every task branch starts there, and every task pull request targets
   it.
-- **OA-1 — Data-terms record** (Phase 1, then Phase 2; before T-18,
-  then T-63) — open. Phase 1: commit, on `dev-v.0.4.x`,
+- ~~**OA-1 — Data-terms record**~~ (Phase 1, then Phase 2; before
+  T-18, then T-63) — **recorded**: Phase 1 with T-18's first vintage
+  (2026-11-03); Phase 2 on 2026-11-08, the line
+  `Confirmed: 2026-11-08` in `data/REDISTRIBUTION.md`, landed with
+  OA-13's texts. The Phase-1 instructions follow for the record.
+  Phase 1: commit, on `dev-v.0.4.x`,
   `data/REDISTRIBUTION.md` stating that the licensing decision is
   deferred to Phase 2 (ADR-0017; OA-13)
   and, as an assumption, the current terms — code Apache-2.0, prose
@@ -480,8 +484,14 @@ drills, is retired: the drills run against a stub `gh` instead.
   members of [D-18](../docs/app/pdd.md#1-decision-register)
   (Field-overlay default set and per-source analogue map) as Decided
   in a dated PDD commit.
-- **OA-13 — Final licensing texts** (Phase 2; with the research group;
-  before T-63) — open. The licensing decision that ADR-0017 defers:
+- ~~**OA-13 — Final licensing texts**~~ (Phase 2; with the research
+  group; before T-63) — **recorded 2026-11-08**: ODC-By 1.0 for the
+  DEM-derived data exports, as the DEM licence's section 4.2(a)
+  requires, and CC BY 4.0 for the field-data export, charts, and
+  reports (ADR-0017's amendments of 2026-11-06 and 2026-11-08), in
+  `data/REDISTRIBUTION.md` and `README.md`; the release vintage,
+  T-63, carries it. The original action follows. The licensing decision
+  that ADR-0017 defers:
   the terms under which the project offers the derived data exports,
   and whether each source's terms permit redistributing data derived
   from it, one named input being §4.2(a) of ODC-By 1.0, the DEM

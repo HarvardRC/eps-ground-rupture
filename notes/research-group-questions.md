@@ -139,6 +139,13 @@ DOI 10.17603/ds2-xpq0-gw80, and 2024b (heterogeneous),
 DOI 10.17603/ds2-gfsj-pp60 — “should be safe to put under new CC
 license.”
 
+**Refined 2026-11-08.** ODC-By 1.0, the DEM experiments' licence,
+requires a publicly conveyed derivative database to stay under it
+(its section 4.2(a)), so the owner set the DEM-derived data exports
+to ODC-By 1.0. Charts, reports, and the field-data export stay
+under CC BY 4.0, with the notice the DEM licence asks for
+(ADR-0017's amendment of 2026-11-08).
+
 ## 3. Which Kern County measurements should we compare with the models?
 
 **Reference: D-6; [Kern County worked-example requirement][kern-prd]

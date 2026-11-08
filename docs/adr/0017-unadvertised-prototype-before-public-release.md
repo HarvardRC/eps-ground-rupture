@@ -5,7 +5,8 @@
   with the DDD correction pass); 2026-10-31, the deferral of the
   licensing decision made explicit after an external review of the
   implementation plan; accepted 2026-10-31; amended
-  2026-11-01 and 2026-11-06 (the amendments precede References)
+  2026-11-01, 2026-11-06, and 2026-11-08 (the amendments precede
+  References)
 - **Deciders**: Michael Bouzinier (project owner)
 
 ## Context
@@ -193,6 +194,27 @@ prototype notice, and its data under the stated assumption.
 > activation no longer include D-6; that decision stays open for
 > the example's post-MVP return. Every other decision of this ADR
 > stands.
+
+> **Amendment 2026-11-08 (export licences fitted to ODC-By 1.0).**
+> Before the confirmed terms were recorded, the owner reviewed the
+> DEM experiments' licence, ODC-By 1.0, which asks more than
+> attribution: its section 4.2(a) requires anyone who publicly
+> conveys a derivative database to do so "only under the terms of
+> this License". The data exports built from the DEM experiments —
+> the scenario artifact, the regression export, the reference
+> results, and the matching-records file of each scenario
+> download — are such databases, so they are distributed under
+> ODC-By 1.0 with attribution, not CC BY 4.0. Charts, chart images,
+> reports, and the site's pages are produced works in the licence's
+> terms — images or text resulting from a query — which section 4.3
+> lets carry any licence with a notice that the content came from
+> the DEM experiments and is available under ODC-By 1.0; they stay
+> under CC BY 4.0 with that notice. The field-data export, which
+> uses no DEM data, stays under CC BY 4.0. The 2026-11-06
+> amendment's adoption of CC BY 4.0 stands for everything except the
+> DEM-derived databases. `data/REDISTRIBUTION.md` records the final
+> terms with its confirmed record; guided task G-28 adds the
+> notices to the pages and downloads.
 
 ## References
 

@@ -2256,6 +2256,36 @@ on sight. If the owner prefers the opposite reconciliation —
 withdrawing the if-unknown hints instead — the hints revert and
 these amendments do too.
 
+## Export licences fitted to ODC-By 1.0 (2026-11-08)
+
+Recording the confirmed terms, the owner asked whether attributing
+the DesignSafe-CI deposits made CC BY 4.0 fine for every export.
+The licence text answered no for one class: ODC-By 1.0 section
+4.2(a) requires a publicly conveyed derivative database — "a
+database based upon the Database", any adaptation or alteration —
+to be conveyed "only under the terms of this License". Produced
+works — "a work (such as an image, audiovisual material, text, or
+sounds)" resulting from a query — need only section 4.3's notice.
+The test applied: an output that is itself rows a reader can query
+again is a database; a picture, prose, or a summary on a page is a
+produced work. The owner chose the clean split over relying on
+permission from all five DEM authors: the scenario artifact, the
+regression export, the reference results, and each download's
+`records.csv` go under ODC-By 1.0; the field-data export, charts,
+chart images, reports, and pages stay under CC BY 4.0 with the
+notice. The ADR-0017 amendment of 2026-11-08 records it;
+`data/REDISTRIBUTION.md` carries the confirmed record dated
+2026-11-08 with the licence URL and notice, which every vintage
+copies (section 4.2(b)); guided task G-28 adds the notices to the
+pages, the download readme, the report, and the chart strip.
+
+Outside the repository's code, two places follow from the same
+rule and are the owner's: the release's attached plotting CSVs
+(T-65) are DEM-derived databases, so the release notes name ODC-By
+1.0 and the notice for them; and the Tableau Public workbooks let
+readers download their underlying data, so their descriptions carry
+the same notice and licence link.
+
 ## References
 
 - [`docs/app/ddd.md` — Ground Rupture Explorer — detailed design document](ddd.md).

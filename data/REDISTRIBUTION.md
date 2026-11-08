@@ -7,14 +7,19 @@ served by the companion site to the scenario page. Every vintage
 carries a byte-for-byte copy of this file as its
 `data-terms-<hash>.txt`, and the vintage's release notes repeat it.
 
-Assumed 2026-11-03: code Apache-2.0, prose CC BY 4.0, derived data exports CC BY 4.0 with per-source attribution — pending research-group confirmation
+Confirmed: 2026-11-08
 
-These terms are assumed: they are the project's current licensing,
-which the project owner applies while the research group reviews the
-prototype. The licensing decision is deferred until that review, as
-the repository's ADR-0017 records; a later vintage will carry the
-confirmed terms. The assumed terms are not evidence that any source
-permits redistribution.
+These terms are confirmed. The research group confirmed the
+licensing on 2026-11-06, and the project owner set the final terms
+on 2026-11-08, as the repository's ADR-0017 records in its
+amendments of those dates. The DEM experiments are published under
+the Open Data Commons Attribution License (ODC-By 1.0), whose
+section 4.2(a) requires a publicly conveyed derivative database to
+stay under that licence, so every export built from them is
+distributed under ODC-By 1.0; the field-data export, which uses no
+DEM data, is distributed under CC BY 4.0. Each source's own terms,
+below, still apply to that source's data. Vintages published before
+this confirmation keep the assumed record they carried.
 
 ## Terms
 
@@ -22,7 +27,16 @@ permits redistribution.
 |---|---|
 | Code — the Python pipeline, the scenario application, the site's build configuration, scripts and styling | Apache-2.0 (the repository's `LICENSE`) |
 | Prose — the companion site's written content and the repository's documentation | CC BY 4.0 (the repository's `LICENSE-docs`) |
-| Derived data exports — the files of each data vintage | CC BY 4.0, with attribution to each source an export draws on (below) |
+| Derived data exports built from the DEM experiments — the scenario artifact, the regression export, and the reference results of each data vintage | ODC-By 1.0 (https://opendatacommons.org/licenses/by/1-0/), with attribution to the DEM experiments (below) |
+| Field-data export — the field-data file of each data vintage | CC BY 4.0, with attribution to each source it draws on (below) |
+
+The notice ODC-By 1.0 asks for, carried by every export and every
+chart, image, or report built from the DEM experiments:
+
+> Contains information from the Homogeneous and Heterogeneous 2D DEM
+> Experiments (Chiama et al. 2024a, 2024b; DesignSafe-CI), which is
+> made available here under the Open Data Commons Attribution License
+> (ODC-By 1.0).
 
 The raw input datasets are not redistributed here: they stay with their
 publishers, under their own terms. `data/README.md` names each one.
