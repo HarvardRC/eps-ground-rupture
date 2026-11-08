@@ -5,7 +5,7 @@
 
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
-import { action, gotoExplore, pickSample, setChecked } from '../explore-support';
+import { action, answerEverySite, gotoExplore, pickSample, setChecked } from '../explore-support';
 import { mounted, settle } from '../support';
 
 test.describe.configure({ timeout: 120_000 });
@@ -26,7 +26,7 @@ const topDisplay = (page: Page) => page.locator('.md-top').evaluate((n) => getCo
 test('the theme\'s Back to top control leaves the guided page only (§12.3)', async ({ page }, info) => {
   await gotoExplore(page);
   await action(page, 'Build your scenario').click();
-  for (const group of ['faultDip', 'depth', 'density', 'sediment'] as const) await setChecked(page, `#gx-${group}-all`, true);
+  await answerEverySite(page);
   await action(page, 'Continue to fault slip').click();
   await expect(page.locator('#gx-heading')).toHaveText('Choose the assumed fault slip');
   await revealBackToTop(page);
@@ -109,7 +109,7 @@ test('a very short viewport scrolls the whole dialog, so the preview stays reada
 test('both slip endpoints carry the Required mark; the initial minimum stays 0 (§12.5)', async ({ page }) => {
   await gotoExplore(page);
   await action(page, 'Build your scenario').click();
-  for (const group of ['faultDip', 'depth', 'density', 'sediment'] as const) await setChecked(page, `#gx-${group}-all`, true);
+  await answerEverySite(page);
   await action(page, 'Continue to fault slip').click();
   await expect(page.locator('label[for="gx-slipMin"] .gx-required')).toHaveText('Required');
   await expect(page.locator('label[for="gx-slipMax"] .gx-required')).toHaveText('Required');

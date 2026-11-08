@@ -95,7 +95,7 @@ const projectContext = (browser: import('@playwright/test').Browser) => {
 test('a new tab and a new browser context start fresh', async ({ page, browser }) => {
   await gotoExplore(page);
   await action(page, 'Build your scenario').click();
-  await setChecked(page, '#gx-faultDip-0', true);
+  await page.locator('#gx-faultDip-full').click();
   const tab = await page.context().newPage();
   await tab.goto('explore/');
   await explorerReady(tab);
@@ -144,7 +144,7 @@ test('a save failing mid-session clears the older record, so reload starts fresh
     await tab.goto('explore/');
     await explorerReady(tab);
     await tab.locator('#gre-explore .gx-main button', { hasText: 'Build your scenario' }).click();
-    for (const id of ['#gx-faultDip-0', '#gx-depth-0', '#gx-density-0']) await tab.locator(id).click();
+    for (const id of ['#gx-faultDip-full', '#gx-depth-full', '#gx-density-0']) await tab.locator(id).click();
     expect(await tab.evaluate((key) => sessionStorage.getItem(key), SESSION_KEY)).toBeNull();
     // The failed save switched this mount back to the first-version wording.
     await tab.locator('#gre-explore .gx-steps button[data-step="intro"]').click();

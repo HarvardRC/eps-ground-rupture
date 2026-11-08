@@ -12,7 +12,7 @@ import { expect, test, type Download, type Page } from '@playwright/test';
 import { CHART_EXPORT_BUTTON, CHART_EXPORT_FAILED, CHART_EXPORT_READY } from '../../src/explore/wording';
 import { copyText } from '../../src/views/copy';
 import { manifest } from '../support';
-import { action, gotoExplore, overflows, pickSample, sedimentName, setChecked, siteChoice, typeEntry } from '../explore-support';
+import { action, chooseRange, gotoExplore, overflows, pickSample, sedimentName, setChecked, siteChoice, typeEntry } from '../explore-support';
 
 test.describe.configure({ timeout: 120_000 });
 
@@ -87,8 +87,8 @@ test('no export before confirmation, and none where the chart is suppressed', as
   const random = manifest().arm_strength_states.find(pair => /random/i.test(pair.sediment_strength))!;
   await gotoExplore(page);
   await action(page, 'Build your scenario').click();
-  await siteChoice(page, 'faultDip', '20°').click();
-  await siteChoice(page, 'depth', '10 m').click();
+  await chooseRange(page, 'faultDip', 0, 0);
+  await chooseRange(page, 'depth', 2, 2);
   await siteChoice(page, 'density', 'Dense').click();
   await siteChoice(page, 'sediment', sedimentName(random)).click();
   await action(page, 'Continue to fault slip').click();

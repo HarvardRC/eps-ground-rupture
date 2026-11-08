@@ -54,7 +54,7 @@ export const confirmedCount = (page: Page) => page.locator('.gx-context .gx-sect
 /** The confirmed count in the adopted wording (guided DDD §11.1). */
 export const countText = (n: number): string => `${formatCount(n)} matching simulation ${n === 1 ? 'stage' : 'stages'}`;
 
-type Group = 'faultDip' | 'depth' | 'density' | 'sediment';
+type Group = 'density' | 'sediment';
 
 /**
  * Set a checkbox or radio by clicking it, then assert the state through a
@@ -76,12 +76,76 @@ export const siteChoice = (page: Page, group: Group, name: string) =>
 export const sedimentName = (pair: { readonly set: string; readonly sediment_strength: string }): string =>
   `${sedimentGroup(pair.set)}: ${pair.sediment_strength}`;
 
-/** Select exactly the golden inputs' site values, using Select all where the input is the whole dictionary. */
+type RangeGroup = 'faultDip' | 'depth';
+
+/** A range group's thumb (guided DDD §14.1). */
+export const thumb = (page: Page, group: RangeGroup, end: 'min' | 'max') => page.locator(`#gx-${group}-${end}`);
+
+/** A range group's selection echo (§14.2). */
+export const echo = (page: Page, group: RangeGroup) => page.locator(`#gx-echo-${group}`);
+
+/** Press `key` on a thumb `times` times, the way a keyboard reader moves it one modeled stop per press. */
+export async function pressThumb(page: Page, group: RangeGroup, end: 'min' | 'max', key: string, times = 1): Promise<void> {
+  await thumb(page, group, end).focus();
+  for (let i = 0; i < times; i += 1) await page.keyboard.press(key);
+}
+
+/**
+ * Answer a range group with the modeled stops `lo`…`hi` by keyboard, from
+ * any state: Full range when that is the whole scale; otherwise both thumbs
+ * to the ends (a press at an end moves nothing), then each in to its stop.
+ */
+export async function chooseRange(page: Page, group: RangeGroup, lo: number, hi: number): Promise<void> {
+  const values = group === 'faultDip' ? manifest().trial_columns.fault_dip : manifest().trial_columns.depth;
+  const last = values.length - 1;
+  if (lo === 0 && hi === last) {
+    await page.locator(`#gx-${group}-full`).click();
+  } else {
+    await pressThumb(page, group, 'min', 'Home');
+    await pressThumb(page, group, 'max', 'End');
+    await pressThumb(page, group, 'max', 'ArrowLeft', last - hi);
+    await pressThumb(page, group, 'min', 'ArrowRight', lo);
+  }
+  const unit = group === 'faultDip' ? '°' : ' m';
+  const chosen = values.slice(lo, hi + 1).map((v) => `${v}${unit}`).join(', ');
+  await expect(echo(page, group)).toHaveText(`Selected: ${chosen} — ${hi - lo + 1} of ${values.length} modeled ${group === 'faultDip' ? 'angles' : 'depths'}.`);
+}
+
+/**
+ * Edit a non-empty range by one stop on a thumb, and return the press that
+ * undoes it: the minimum in by one where the range is wider than one stop,
+ * otherwise out by one.
+ */
+export async function nudgeRange(page: Page, group: RangeGroup): Promise<() => Promise<void>> {
+  const lo = Number(await thumb(page, group, 'min').inputValue());
+  const hi = Number(await thumb(page, group, 'max').inputValue());
+  const [end, key, back]: ['min' | 'max', string, string] = lo < hi ? ['min', 'ArrowRight', 'ArrowLeft'] : lo > 0 ? ['min', 'ArrowLeft', 'ArrowRight'] : ['max', 'ArrowRight', 'ArrowLeft'];
+  await pressThumb(page, group, end, key);
+  return () => pressThumb(page, group, end, back);
+}
+
+/** Answer every site condition with everything: Full range on both ranges, Select all on both checkbox groups. */
+export async function answerEverySite(page: Page): Promise<void> {
+  for (const group of ['faultDip', 'depth'] as const) await page.locator(`#gx-${group}-full`).click();
+  for (const group of ['density', 'sediment'] as const) await setChecked(page, `#gx-${group}-all`, true);
+}
+
+/** Answer a range group with a contiguous set of modeled values. */
+async function chooseRangeValues(page: Page, group: RangeGroup, wanted: readonly number[]): Promise<void> {
+  const values = group === 'faultDip' ? manifest().trial_columns.fault_dip : manifest().trial_columns.depth;
+  const indices = wanted.map((v) => values.indexOf(v)).sort((a, b) => a - b);
+  if (indices.some((i) => i < 0) || indices[indices.length - 1] - indices[0] + 1 !== indices.length) {
+    throw new Error(`explore-support: the guided ${group} range cannot select ${wanted.join(', ')}`);
+  }
+  await chooseRange(page, group, indices[0], indices[indices.length - 1]);
+}
+
+/** Select exactly the golden inputs' site values: ranges for angle and depth, Select all where a checkbox input is the whole dictionary. */
 export async function chooseSite(page: Page, inputs: Inputs): Promise<void> {
   const m = manifest();
+  await chooseRangeValues(page, 'faultDip', inputs.fault_dip);
+  await chooseRangeValues(page, 'depth', inputs.depth);
   const groups: readonly [Group, readonly string[], readonly string[]][] = [
-    ['faultDip', m.trial_columns.fault_dip.map((d) => `${d}°`), inputs.fault_dip.map((d) => `${d}°`)],
-    ['depth', m.trial_columns.depth.map((d) => `${d} m`), inputs.depth.map((d) => `${d} m`)],
     ['density', [...m.trial_columns.density], [...inputs.density]],
     ['sediment', m.arm_strength_states.map(sedimentName), inputs.sediment.map(sedimentName)],
   ];
@@ -131,8 +195,8 @@ export async function confirmGolden(page: Page, id: string): Promise<GoldenScena
 export async function reconfirmMovement(page: Page, id: string): Promise<GoldenScenario> {
   const ref = gs(id);
   await stepButton(page, 'site').click();
-  // Clear each group (Select all on, then off), then choose the new values.
-  for (const group of ['faultDip', 'depth', 'density', 'sediment'] as const) {
+  // Clear each checkbox group (Select all on, then off), then choose the new values; the ranges are set from any state.
+  for (const group of ['density', 'sediment'] as const) {
     await setChecked(page, `#gx-${group}-all`, true);
     await setChecked(page, `#gx-${group}-all`, false);
   }
