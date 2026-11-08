@@ -216,6 +216,15 @@ prototype notice, and its data under the stated assumption.
 > terms with its confirmed record; guided task G-28 adds the
 > notices to the pages and downloads.
 
+> **Amendment 2026-11-08 (the guided page listed ahead of the
+> release).** The owner decided to link `/explore/` from the site
+> navigation before the v0.4 release (PDD D-52). When a deploy carries
+> that link, `/explore/` stops being an unadvertised prototype;
+> `/scenario/` stays one. The software release remains T-65's GitHub
+> release, and the release gates stand — G-5 among them, so no deploy
+> lists the page while its disclaimer still carries the D-10
+> placeholder.
+
 ## References
 
 - [HLDD — Licensing and media permissions](../app/hldd.md#licensing-and-media-permissions);

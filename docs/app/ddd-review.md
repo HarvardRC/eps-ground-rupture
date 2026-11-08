@@ -2286,6 +2286,22 @@ rule and are the owner's: the release's attached plotting CSVs
 readers download their underlying data, so their descriptions carry
 the same notice and licence link.
 
+## The explorer in the sidebar (2026-11-08)
+
+The owner directed that `/explore/`, not `/scenario/`, be linked
+from the site navigation ahead of the release: PDD D-52 records it,
+with an ADR-0017 amendment and task G-29. D-39's preconditions for
+advertising are read as met — the licence decision recorded the
+same day, and the owner's 2026-11-06 walkthrough of `/explore/` with
+the research group's lead author as the team demonstration, a
+reading the owner may amend. Two consequences carry into G-29:
+site-checks arm (d) exempts only unlisted pages from its ban on
+links to unlisted pages, so the listed `/explore/` loses its links
+into `/scenario/`; and G-5 holds the deploy that would publish the
+listing until the D-10 text replaces the placeholder in the page's
+disclaimer. The release reconciliation, still in drafting, takes
+the next decision number and amends T-55 to match.
+
 ## References
 
 - [`docs/app/ddd.md` — Ground Rupture Explorer — detailed design document](ddd.md).
