@@ -383,7 +383,7 @@ def _publication_boundary(
             yield SCENARIO_PAGE, "the published existing explorer is not unlisted (not_in_nav, PDD D-39)"
         if EXPLORE_PAGE in present:
             if EXPLORE_PAGE in unlisted_pages:
-                yield EXPLORE_PAGE, "the published guided page is unlisted; it is listed in the nav (PDD D-52)"
+                yield EXPLORE_PAGE, "the published guided page is unlisted; it must be listed in the nav (PDD D-52)"
             else:
                 explore = {"explore/", "explore/index.html"}
                 if not explore & _sitemap_paths(site, root):

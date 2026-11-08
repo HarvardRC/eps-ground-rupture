@@ -55,12 +55,25 @@ test('Full disclaimer goes to the page\'s own disclaimer', async ({ page }) => {
   await link.click();
   // It stays on the page: no instant navigation, so the explorer keeps its results.
   await expect(page.locator('#gre-explore-disclaimer')).toBeInViewport();
+  // Its first line clears the theme's sticky header.
+  const header = (await page.locator('.md-header').boundingBox())!;
+  const top = (await page.locator('#gre-explore-disclaimer').boundingBox())!.y;
+  expect(top).toBeGreaterThanOrEqual(header.y + header.height - 1);
   await expect(page.locator('#gre-explore-disclaimer')).toBeFocused();
   await page.waitForTimeout(500);
   await expect(page.locator('#gre-explore-disclaimer')).toBeInViewport();
   await expect(heading(page)).toHaveText(RESULTS_HEADING);
   await expect(page.locator('#gre-explore .gx-loading')).toHaveCount(0);
   expect(new URL(page.url()).pathname).toMatch(/\/explore\/$/);
+});
+
+test('the built explorer module names no /scenario/ page', async ({ page, request }) => {
+  // Links the hook cannot see (built at run time) come only from this module.
+  await gotoExplore(page);
+  const src = await page.locator('#gre-explore-app').getAttribute('src');
+  const body = await (await request.get(new URL(src!, page.url()).href)).text();
+  expect(body).not.toMatch(/\.\.\/scenario\/(?!data\/)/);
+  expect(body).not.toMatch(/existing explorer/i);
 });
 
 test('a startup failure offers Data and citation and Glossary, not the existing explorer', async ({ page }) => {

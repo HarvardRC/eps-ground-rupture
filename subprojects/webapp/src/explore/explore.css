@@ -383,6 +383,8 @@
 #gre-explore .gx-issue-summary h3 { margin: 0 0 6px; font-size: .9rem; font-weight: 650; letter-spacing: 0; color: var(--gx-danger); }
 #gre-explore .gx-issue-summary ul { margin: 0; padding-left: 1.2em; }
 #gre-explore .gx-issue-summary, #gre-explore fieldset[tabindex="-1"] { scroll-margin-top: 80px; }
+/* The page's own disclaimer, outside the mount, reached in place by Full disclaimer (PDD D-52): clear of the sticky header. */
+#gre-explore-disclaimer { scroll-margin-top: 80px; }
 #gre-explore fieldset[tabindex="-1"]:focus:not(:focus-visible) { outline: none; }
 #gre-explore .gx-site-group.gx-invalid { border-color: var(--gx-danger); box-shadow: 0 0 0 1px var(--gx-danger), inset 5px 0 0 var(--gx-danger); }
 #gre-explore #gx-group-scarpClass.gx-invalid { border-left: 6px solid var(--gx-danger); padding-left: 14px; }
