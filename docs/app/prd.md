@@ -883,8 +883,10 @@ the interaction choices that remain open.
 
 Site conditions must require explicit choices of one or more modeled
 values. A fresh scenario must not silently include every value for
-an unanswered condition. Selecting all values is a convenience,
-not guidance for a reader who is unsure what to choose.
+an unanswered condition. Selecting all values is a convenience the
+reader chooses; on the research group's advice (PDD D-51,
+2026-11-06) the page suggests it for a condition the reader does
+not know, and it never applies by default.
 
 Changes to site conditions or assumed displacement remain a draft
 until the reader reviews and confirms them. Displayed results must

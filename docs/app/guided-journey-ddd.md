@@ -1195,7 +1195,10 @@ range** action sets both thumbs to the extremes, with the hint "If
 unknown, keep the full range." — the research group's 2026-11-06
 ask applied to the two ordered conditions (the checkbox groups'
 equivalent hint is a queued intake item). The group tooltip,
-glossary link, and sample annotations stay.
+glossary link, and sample annotations stay. §14.6 (2026-11-08)
+supersedes this paragraph's "never empty", its hint, and its
+queued-intake note: fresh and emptied groups are unanswered, per
+PRD §5.1 and D-26.
 
 ### 14.4 Presentation
 
@@ -1217,6 +1220,50 @@ are unchanged.
   bundles byte-identical, as in every guided task.
 - Exact strings — the labels, the echo pattern, the Full range
   action, and the hint — go to the owner before the merge.
+
+### 14.6 Fitting decisions (2026-11-08, G-24 start)
+
+Six gaps the implementing session found between §14 and the page,
+decided by the planning session; the PRD governs item 1. Each is
+amendable by the owner on sight, and the strings go to the owner
+with screenshots before the merge.
+
+1. Fresh and emptied groups are unanswered. PRD §5.1 ("A fresh
+   scenario must not silently include every value for an
+   unanswered condition") and D-26 govern, so a new draft keeps
+   its empty fault-angle and depth sets, and §14.3's "never
+   empty" holds only once a group is answered. An empty group
+   parks its thumbs at the scale ends, muted, with no
+   selected-segment fill; the echo reads "Selected: none — 0 of 7
+   modeled angles." (depths: "Selected: none — 0 of 3 modeled
+   depths."); the hint below reads "Move a thumb or choose Full
+   range to continue."; and each thumb's spoken value adds ",
+   not chosen". The first thumb move answers the group with the
+   contiguous range between the two thumbs' new positions; Full
+   range answers it with every value. The readiness line names
+   empty groups as before; `validateDraft` and the sample
+   touched-check are unchanged.
+2. A restored empty set (a pre-§14 session) renders the same
+   empty state.
+3. The Required mark stays on all four legends, always: every
+   condition is required, and dropping the mark on two would
+   read as optional.
+4. Thumb names: "Minimum fault angle", "Maximum fault angle",
+   "Minimum sediment depth", "Maximum sediment depth"; spoken
+   values in the page's units, "40 degrees" and "5 metres".
+5. Stops are evenly spaced. An ordinal scale suits FR-S1 better
+   than a proportional axis, on which 45° would read as an
+   intermediate value; scale labels are not clickable.
+6. Full range is a tertiary button in Select all's place, always
+   enabled; it sets the full contiguous set, clearing gaps and
+   answering an empty group.
+
+The range groups' hints end "If unknown, select the full range."
+— not §14.3's "keep", since a fresh group is not full; the verb
+follows the research group's own "if unknown, select all", and
+both adapted hints join the assembled list. The echo pattern is
+"Selected: 30°, 40°, 45° — 3 of 7 modeled angles.", with "(with
+gaps)" appended for a gapped restored set.
 
 ## 15. SME wording adoption (D-51)
 
@@ -1274,7 +1321,8 @@ CR-4 hold.
   bedrock.** — replacing "above the fault".
 - The density and strength groups append **If unknown, select
   all.** to their hints; the §14 range groups carry "If unknown,
-  keep the full range."
+  select the full range." (§14.6, 2026-11-08; first written
+  "keep the full range").
 
 ### 15.4 Fault-slip help (the review's definition; the slip-rate
 sentence assembled)

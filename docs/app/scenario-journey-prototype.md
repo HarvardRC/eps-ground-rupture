@@ -119,6 +119,10 @@ condition. Removing the last value leaves the condition incomplete.
 Uniform and layered sediment share one required selection; Uniform:
 Strong alone is valid.
 
+*Superseded in part (2026-11-06, PDD D-51):* on the research
+group's advice the page suggests Select all for a condition the
+reader does not know; it still never applies by default.
+
 Before an attempt to continue, an empty condition says **Choose
 one or more values to continue**. Continue with missing selections
 shows condition-specific errors and moves focus to the first

@@ -127,7 +127,7 @@ named in the last column carry the detail.
 | D-23 | Reader-facing display precision per quantity. | FR-O2, §10.1 note | Product owner | Proposed | Scarp height and slip 0.01 m; width 0.1 m; scarp dip 1° (D-5 provisionality); counts exact; shares whole percent; §4.2. |
 | D-24 | Independent display preferences, including small laptop windows and later tablet and phone views. | FR-G6, C12, NFR-4 | Product owner | Decided (2026-11-03) | Scope agreed: P2 reader choice of visible result components and display size and layout within the existing application; §4.9. Until then, §9.1 uses a temporary 1280 × 1080 measurement window. The detailed P2 choices listed in §4.9 remain open before implementation. |
 | D-25 | Guided first-use scenario journey. | §5.1, C1, CR-1 | Product owner | Decided (2026-11-03) | Sequence and introductory copy agreed: understand purpose → describe site conditions → choose assumed displacement → review scenario → explore and interpret matching results. MVP scope; §2.3 records the approved introduction, D-26–D-36, and the first implementation scope. |
-| D-26 | Explicit site-condition selections. | FR-S1–S4, FR-S8 | Product owner | Decided (2026-11-03) | Fresh site conditions are unanswered and require one or more values. Select all selects every value as a convenience; it is not advice for uncertainty. Empty selections remain incomplete. §2.3. |
+| D-26 | Explicit site-condition selections. | FR-S1–S4, FR-S8 | Product owner | Decided (2026-11-03) | Fresh site conditions are unanswered and require one or more values. Select all selects every value as a convenience; it is not advice for uncertainty. Empty selections remain incomplete. §2.3. The clause that Select all is not advice for uncertainty is superseded by D-51 (2026-11-06): on the research group's advice, the hints say "If unknown, select all." Fresh conditions stay unanswered, the D-50 range groups included (guided DDD §14.6). |
 | D-27 | Review before results change. | C1, FR-G3, NFR-3 | Product owner | Decided (2026-11-03) | Site-condition and displacement edits remain a draft until Review scenario → Show results. Retained results stay associated with the previously confirmed scenario. §2.3; step navigation follows D-30 and refinements follow D-34. The §2.3 supplement bounds initial browser navigation and recovery at /explore/. |
 | D-28 | Preserve entries across displacement-mode switches. | FR-S5 | Product owner | Decided (2026-11-03) | Keep fault-slip and surface-offset entries separately within the draft. Switching back restores that mode's entries; only the selected mode contributes to the scenario. No silent conversion or erasure. §3.5; restarting follows D-29. The §2.3 supplement bounds initial recovery at /explore/. |
 | D-29 | Discard edits or start a new scenario. | FR-S8 | Product owner | Decided (2026-11-03) | Discard changes returns to the last confirmed scenario and its results, restoring both modes' entries as they stood at confirmation. Start a new scenario clears the reader's entries in both modes and current results, restores fresh defaults under D-31, then returns to unanswered site conditions. §2.3 and §3.7. |
@@ -228,8 +228,10 @@ marked **Required**. The instruction is:
   condition shows **Choose one or more values to continue**.
 - **Select all** selects and highlights every available value in
   that condition, exactly as individual selection would. It is a
-  convenience; do not recommend it because the reader is unsure,
-  or suggest that a broad selection is inherently useful.
+  convenience and never applies by default. On the research
+  group's advice (D-51, 2026-11-06), each hint suggests it for a
+  condition the reader does not know; do not suggest that a broad
+  selection is inherently useful.
 - The checkbox is unchecked for no selections, mixed for a subset,
   and checked when every value is selected, including when the
   reader selected them individually. Clicking an unchecked or

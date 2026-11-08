@@ -2234,6 +2234,28 @@ carries it, second in the D-48 band — after G-26, before G-24 —
 released by the owner's commit of this entry. The band D-48 made
 release-blocking is now fully planned: G-13 done, G-27 released.
 
+## D-26 reconciled with D-51; G-24's fresh state (2026-11-08)
+
+Two inconsistencies surfaced at G-24's start, both from the
+planning session's own drafting. First, D-51 adopted the research
+group's "If unknown, select all." hints, merged with G-26, while
+PRD §5.1, PDD §2.3, D-26, and the prototype record still said
+Select all is not guidance for a reader who is unsure. The owner's
+later directive governs, and conforming amendments now say so:
+Select all is a convenience the page suggests for a condition the
+reader does not know, and it never applies by default. Second,
+guided DDD §14.3 called the D-50 range groups "never empty",
+which would have let a fresh scenario include every fault angle
+and depth unanswered — against PRD §5.1 ("A fresh scenario must
+not silently include every value for an unanswered condition")
+and D-26. §14.6 corrects it: fresh and emptied range groups are
+unanswered, with a defined empty state, and their hint says
+"select the full range", not "keep". The implementing session's
+other five G-24 gaps are decided in §14.6, amendable by the owner
+on sight. If the owner prefers the opposite reconciliation —
+withdrawing the if-unknown hints instead — the hints revert and
+these amendments do too.
+
 ## References
 
 - [`docs/app/ddd.md` — Ground Rupture Explorer — detailed design document](ddd.md).
