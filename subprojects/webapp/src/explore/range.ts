@@ -5,8 +5,6 @@
 
 export type RangeField = 'faultDip' | 'depth';
 
-export const RANGE_FIELDS: readonly RangeField[] = ['faultDip', 'depth'];
-
 export const isRangeField = (field: string): field is RangeField => field === 'faultDip' || field === 'depth';
 
 /** §14.3 as amended by §14.6: the closing line of the two range groups' hints, after G-26's §15.3 hints. */
@@ -15,11 +13,17 @@ export const RANGE_IF_UNKNOWN = 'If unknown, select the full range.';
 /** §14.3: the action that sets both thumbs to the extremes; it also answers an empty group (§14.6 item 6). */
 export const FULL_RANGE = 'Full range';
 
+/** Full range's accessible name (it contains the visible one): two such buttons share a step. */
+export function fullRangeName(field: RangeField): string {
+  return `Full range of ${NOUNS_LONG[field]}`;
+}
+
 /** The hint under an unanswered (empty) range group: a fresh one, or a restored empty set (§14.6 items 1–2). */
 export const RANGE_EMPTY_HINT = 'Move a thumb or choose Full range to continue.';
 
 const NAMES: Record<RangeField, string> = { faultDip: 'fault angle', depth: 'sediment depth' };
 const NOUNS: Record<RangeField, string> = { faultDip: 'angles', depth: 'depths' };
+const NOUNS_LONG: Record<RangeField, string> = { faultDip: 'fault angles', depth: 'sediment depths' };
 
 /** A modeled stop as the scale row and the echo show it: "40°", "5 m". */
 export function stopLabel(field: RangeField, value: number): string {

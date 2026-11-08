@@ -27,7 +27,7 @@ import { DEFINITIONS, type DefinitionKey } from './glossary';
 import { classifySession, clearSession, loadSession, saveSession, type DisplayChoices, type SessionRecord } from './session';
 import { ANNOTATIONS, STORIES, type AnnotatedField, type StoryLink } from './stories';
 import { cloneDraft, draftChanged, fieldHoldsSample, freshDraft, holdsSample, offsetShortcut, isSampleId, sampleDraft, sedimentGroup, stepDecimal, validateDraft, type Draft, type Issue, type SampleId, type Step } from './state';
-import { echoText, FULL_RANGE, isRangeField, RANGE_EMPTY_HINT, RANGE_IF_UNKNOWN, rangeBounds, rangeSet, spokenValue, stopLabel, thumbName, type RangeField } from './range';
+import { echoText, FULL_RANGE, fullRangeName, isRangeField, RANGE_EMPTY_HINT, RANGE_IF_UNKNOWN, rangeBounds, rangeSet, spokenValue, stopLabel, thumbName, type RangeField } from './range';
 
 export interface ExplorerOptions {
   vintage: Vintage;
@@ -118,6 +118,8 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   const { vintage, stamps, signal } = options;
   const manifest = vintage.manifest;
   let draft = freshDraft(manifest);
+  /** The range a pointer is dragging, and the stop it is anchored at when it began on stacked thumbs. */
+  let rangeDrag: { field: RangeField; anchor: number | null } | null = null;
   let confirmed: Draft | null = null;
   let result: RenderInput | null = null;
   let step: Step = 'intro';
@@ -507,7 +509,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     const place = (i: number): string => `style="--gx-at:${last ? i / last : 0}"`;
     const stops = values.map((_, i) => `<i ${place(i)}></i>`).join('');
     const scale = values.map((value, i) => `<span ${place(i)}>${escape(stopLabel(field, value))}</span>`).join('');
-    return `<fieldset class="gx-site-group gx-range-group${issue(field) ? ' gx-invalid' : ''}" id="gx-group-${field}" tabindex="-1"><legend>${term(field, title)} <span class="gx-required">Required</span></legend><p>${hint} ${glossary(anchor)}</p><div class="gx-range-actions">${button('full-range', FULL_RANGE, false, `id="gx-${field}-full" data-field="${field}"`)}</div><div class="gx-range" id="gx-range-${field}" style="${layout.style}" data-top="${layout.top}" data-empty="${layout.empty}"><div class="gx-range-track" aria-hidden="true"><span class="gx-range-fill"></span>${stops}</div>${thumb('min', lo)}${thumb('max', hi)}</div><div class="gx-range-scale" aria-hidden="true">${scale}</div><p class="gx-range-echo" id="gx-echo-${field}" aria-live="polite">${escape(echoText(field, values, draft[field]))}</p>${issueHtml(field)}<p class="gx-hint" id="gx-empty-${field}"${empty && !issue(field) ? '' : ' hidden'}>${escape(RANGE_EMPTY_HINT)}</p>${annotationSlot(field)}</fieldset>`;
+    return `<fieldset class="gx-site-group gx-range-group${issue(field) ? ' gx-invalid' : ''}" id="gx-group-${field}" tabindex="-1"><legend>${term(field, title)} <span class="gx-required">Required</span></legend><p>${hint} ${glossary(anchor)}</p><div class="gx-range-actions">${button('full-range', FULL_RANGE, false, `id="gx-${field}-full" data-field="${field}" aria-label="${escape(fullRangeName(field))}"`)}</div><div class="gx-range" id="gx-range-${field}" style="${layout.style}" data-top="${layout.top}" data-empty="${layout.empty}"><div class="gx-range-track" aria-hidden="true"><span class="gx-range-fill"></span>${stops}</div>${thumb('min', lo)}${thumb('max', hi)}</div><div class="gx-range-labels"><div class="gx-range-scale" aria-hidden="true">${scale}</div></div><p class="gx-range-echo" id="gx-echo-${field}" aria-live="polite">${escape(echoText(field, values, draft[field]))}</p>${issueHtml(field)}<p class="gx-hint" id="gx-empty-${field}"${empty && !issue(field) ? '' : ' hidden'}>${escape(RANGE_EMPTY_HINT)}</p>${annotationSlot(field)}</fieldset>`;
   }
 
   /**
@@ -515,9 +517,9 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
    * (§14.2): the draft takes `set`, and the thumbs, fill, echo, messages,
    * annotation, readiness line, and sample notice follow. An unchanged set
    * is no edit at all. During a thumb's move (`live`) nothing in the group
-   * changes size or thumb style — either ends a pointer drag in Chromium — so
-   * the hint and message only turn invisible, and `settleRange` collapses
-   * them, restyles the thumbs, and redraws the annotation on release.
+   * changes size — that ends a pointer drag in Chromium — so the hint and
+   * message only turn invisible, and `settleRange` collapses them and
+   * redraws the annotation on release.
    */
   function setRange(field: RangeField, set: number[], live = false): void {
     const values = rangeValues(field), last = values.length - 1;
@@ -531,7 +533,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     const { lo, hi } = rangeBounds(values, draft[field]);
     const empty = !values.some(value => draft[field].includes(value));
     const box = $(`#gx-range-${field}`);
-    if (box) { const layout = rangeLayout(lo, hi, last, empty); box.setAttribute('style', layout.style); box.dataset.top = layout.top; }
+    if (box) { const layout = rangeLayout(lo, hi, last, empty); box.setAttribute('style', layout.style); box.dataset.top = layout.top; box.dataset.empty = layout.empty; }
     for (const [end, at] of [['min', lo], ['max', hi]] as const) {
       const thumb = $<HTMLInputElement>(`#gx-${field}-${end}`);
       if (!thumb) continue;
@@ -549,11 +551,8 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     if (!live) settleRange(field);
   }
 
-  /** The group's look after a range edit, once no thumb is held (see `setRange`). */
+  /** The group's layout after a range edit, once no thumb is held (see `setRange`). */
   function settleRange(field: RangeField): void {
-    const values = rangeValues(field);
-    const box = $(`#gx-range-${field}`);
-    if (box) box.dataset.empty = String(!values.some(value => draft[field].includes(value)));
     for (const id of [`gx-error-${field}`, `gx-empty-${field}`]) {
       const node = $(`#${id}`);
       if (!node || node.style.visibility !== 'hidden') continue;
@@ -1358,6 +1357,13 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       // so a restored set with gaps stays verbatim.
       const end = input.dataset.end === 'min' ? 'min' : 'max';
       const values = rangeValues(range), was = rangeBounds(values, draft[range]);
+      // A pointer drag that began on stacked thumbs moves whichever bound lies
+      // the way the pointer goes: only the top thumb can be grabbed there.
+      if (rangeDrag?.field === range && rangeDrag.anchor !== null) {
+        const at = Number(input.value), anchor = rangeDrag.anchor;
+        setRange(range, rangeSet(values, Math.min(anchor, at), Math.max(anchor, at)), true);
+        return;
+      }
       const other = end === 'min' ? was.hi : was.lo;
       const at = end === 'min' ? Math.min(Number(input.value), other) : Math.max(Number(input.value), other);
       if (at === (end === 'min' ? was.lo : was.hi)) { input.value = String(at); return; }
@@ -1391,8 +1397,19 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     }
   }, { signal });
 
+  // A pointer on a thumb starts a drag; on stacked thumbs it is anchored at their stop (see the input handler).
+  shell.addEventListener('pointerdown', event => {
+    const input = event.target;
+    const range = input instanceof HTMLInputElement ? input.dataset.range : undefined;
+    if (range === undefined || !isRangeField(range)) { rangeDrag = null; return; }
+    const { lo, hi } = rangeBounds(rangeValues(range), draft[range]);
+    const answered = rangeValues(range).some(value => draft[range].includes(value));
+    rangeDrag = { field: range, anchor: answered && lo === hi ? lo : null };
+  }, { capture: true, signal });
   // A drag that ends where it began fires no `change`; its release still settles the ranges (see `setRange`).
-  document.addEventListener('pointerup', () => { if (step === 'site') for (const field of ['faultDip', 'depth'] as const) settleRange(field); }, { capture: true, signal });
+  const endDrag = (): void => { rangeDrag = null; if (step === 'site') for (const field of ['faultDip', 'depth'] as const) settleRange(field); };
+  document.addEventListener('pointerup', endDrag, { capture: true, signal });
+  document.addEventListener('pointercancel', endDrag, { capture: true, signal });
 
   shell.addEventListener('toggle', event => {
     const details = event.target;

@@ -6,6 +6,7 @@ import { describe, test } from 'node:test';
 import {
   echoText,
   FULL_RANGE,
+  fullRangeName,
   hasGaps,
   isRangeField,
   RANGE_EMPTY_HINT,
@@ -29,6 +30,10 @@ describe('guided range controls', () => {
     assert.equal(thumbName('faultDip', 'max'), 'Maximum fault angle');
     assert.equal(thumbName('depth', 'min'), 'Minimum sediment depth');
     assert.equal(thumbName('depth', 'max'), 'Maximum sediment depth');
+    // The accessible name contains the visible one (WCAG 2.5.3).
+    assert.equal(fullRangeName('faultDip'), 'Full range of fault angles');
+    assert.equal(fullRangeName('depth'), 'Full range of sediment depths');
+    assert.ok(fullRangeName('depth').startsWith(FULL_RANGE));
   });
 
   test('stops and spoken values carry the modeled value and unit, never an index', () => {
