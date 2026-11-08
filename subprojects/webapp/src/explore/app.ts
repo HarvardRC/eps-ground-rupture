@@ -27,6 +27,7 @@ import { DEFINITIONS, type DefinitionKey } from './glossary';
 import { classifySession, clearSession, loadSession, saveSession, type DisplayChoices, type SessionRecord } from './session';
 import { ANNOTATIONS, STORIES, type AnnotatedField, type StoryLink } from './stories';
 import { cloneDraft, draftChanged, fieldHoldsSample, freshDraft, holdsSample, offsetShortcut, isSampleId, sampleDraft, sedimentGroup, stepDecimal, validateDraft, type Draft, type Issue, type SampleId, type Step } from './state';
+import { echoText, FULL_RANGE, fullRangeName, isRangeField, RANGE_EMPTY_HINT, RANGE_IF_UNKNOWN, rangeBounds, rangeSet, spokenValue, stopLabel, thumbName, type RangeField } from './range';
 
 export interface ExplorerOptions {
   vintage: Vintage;
@@ -117,6 +118,12 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   const { vintage, stamps, signal } = options;
   const manifest = vintage.manifest;
   let draft = freshDraft(manifest);
+  /**
+   * The range a pointer is on: the stop it is anchored at when it began on
+   * stacked thumbs, and whether a thumb's value changed during the gesture
+   * (only a real move answers a group, §14.6 item 7).
+   */
+  let rangeDrag: { field: RangeField; anchor: number | null; moved: boolean } | null = null;
   let confirmed: Draft | null = null;
   let result: RenderInput | null = null;
   let step: Step = 'intro';
@@ -415,14 +422,14 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   }
 
   /** A movement entry's annotation in a slot that typing can update in place. */
-  function annotationSlot(field: 'offsetMax' | 'slip'): string {
+  function annotationSlot(field: 'offsetMax' | 'slip' | RangeField): string {
     const html = annotation(field);
     return `<div id="gx-annotation-slot-${field}" data-note="${html ? 'shown' : 'cleared'}">${html}</div>`;
   }
 
   /** Typing changes a movement entry without a re-render: redraw its annotation in place. */
   function refreshAnnotations(): void {
-    for (const field of ['offsetMax', 'slip'] as const) {
+    for (const field of ['offsetMax', 'slip', 'faultDip', 'depth'] as const) {
       const slot = $(`#gx-annotation-slot-${field}`);
       const html = annotation(field), shown = html ? 'shown' : 'cleared';
       // Redraw only when the annotation comes or goes, never on every keystroke.
@@ -466,10 +473,10 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     if (slot.dataset.body !== body) { slot.innerHTML = body; slot.dataset.body = body; }
   }
 
-  function siteGroup(field: 'faultDip' | 'depth' | 'density' | 'sediment', title: string, hint: string, anchor: string): string {
+  function siteGroup(field: 'density' | 'sediment', title: string, hint: string, anchor: string): string {
     const choices: { value: string; label: string; group?: string; selected: boolean }[] = field === 'sediment'
       ? manifest.armStrengthStates.map((pair, i) => ({ value: String(i), label: pair.sedimentStrength, group: sedimentGroup(pair.set), selected: draft.sediment.some(p => p.set === pair.set && p.sedimentStrength === pair.sedimentStrength) }))
-      : orderChoices(field, (field === 'faultDip' ? manifest.trialColumns.fault_dip : field === 'depth' ? manifest.trialColumns.depth : manifest.trialColumns.density).map((value, i) => ({ value: String(i), label: `${value}${field === 'faultDip' ? '°' : field === 'depth' ? ' m' : ''}`, selected: (draft[field] as readonly (string | number)[]).includes(value) })));
+      : orderChoices(field, manifest.trialColumns.density.map((value, i) => ({ value: String(i), label: value, selected: draft.density.includes(value) })));
     const selectedCount = choices.filter(c => c.selected).length;
     let lastGroup = '';
     const content = choices.map(choice => {
@@ -480,8 +487,87 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     return `<fieldset class="gx-site-group${issue(field) ? ' gx-invalid' : ''}" id="gx-group-${field}" tabindex="-1"><legend>${term(field, title)} <span class="gx-required">Required</span></legend><p>${hint} ${glossary(anchor)}</p><label class="gx-select-all"><input type="checkbox" id="gx-${field}-all" data-all="${field}" aria-describedby="gx-error-${field}" ${selectedCount === choices.length ? 'checked' : ''} data-mixed="${selectedCount > 0 && selectedCount < choices.length}"> Select all</label><div class="gx-choices">${content}</div>${issueHtml(field)}${selectedCount === 0 && !issue(field) ? '<p class="gx-hint">Choose one or more values to continue.</p>' : ''}${annotation(field)}</fieldset>`;
   }
 
+  /** The modeled values of a range condition, in ascending order (§14.1). */
+  function rangeValues(field: RangeField): number[] {
+    return [...(field === 'faultDip' ? manifest.trialColumns.fault_dip : manifest.trialColumns.depth)].sort((a, b) => a - b);
+  }
+
+  /** The track's fill between the thumbs, and which thumb sits on top when they meet (the one that can still move). */
+  function rangeLayout(lo: number, hi: number, last: number, empty: boolean): { style: string; top: string; empty: string } {
+    const at = (i: number): string => String(last ? i / last : 0);
+    return { style: `--gx-lo:${at(lo)};--gx-hi:${at(hi)}`, top: lo === hi && hi === last ? 'min' : 'max', empty: String(empty) };
+  }
+
+  /**
+   * A paired-thumb range over the modeled values (guided DDD §14.1–§14.3):
+   * two native range inputs whose steps are the stops' indices, a scale
+   * row naming every stop, and the echo listing what the range selects.
+   * The draft's set stays the truth (§14.2); the thumbs show its extremes.
+   */
+  function rangeGroup(field: RangeField, title: string, hint: string, anchor: string): string {
+    const values = rangeValues(field), last = values.length - 1;
+    const { lo, hi } = rangeBounds(values, draft[field]);
+    const empty = !values.some(value => draft[field].includes(value));
+    const layout = rangeLayout(lo, hi, last, empty);
+    const thumb = (end: 'min' | 'max', at: number): string => `<input type="range" id="gx-${field}-${end}" data-range="${field}" data-end="${end}" min="0" max="${last}" step="1" value="${at}" aria-label="${escape(thumbName(field, end))}" aria-valuetext="${escape(spokenValue(field, values[at], empty))}" aria-describedby="gx-error-${field}">`;
+    const place = (i: number): string => `style="--gx-at:${last ? i / last : 0}"`;
+    const stops = values.map((_, i) => `<i ${place(i)}></i>`).join('');
+    const scale = values.map((value, i) => `<span ${place(i)}>${escape(stopLabel(field, value))}</span>`).join('');
+    return `<fieldset class="gx-site-group gx-range-group${issue(field) ? ' gx-invalid' : ''}" id="gx-group-${field}" tabindex="-1"><legend>${term(field, title)} <span class="gx-required">Required</span></legend><p>${hint} ${glossary(anchor)}</p><div class="gx-range-actions">${button('full-range', FULL_RANGE, false, `id="gx-${field}-full" data-field="${field}" aria-label="${escape(fullRangeName(field))}"`)}</div><div class="gx-range" id="gx-range-${field}" style="${layout.style}" data-top="${layout.top}" data-empty="${layout.empty}"><div class="gx-range-track" aria-hidden="true"><span class="gx-range-fill"></span>${stops}</div>${thumb('min', lo)}${thumb('max', hi)}</div><div class="gx-range-labels"><div class="gx-range-scale${values.length > 4 ? ' gx-range-dense' : ''}" aria-hidden="true">${scale}</div></div><p class="gx-range-echo" id="gx-echo-${field}" aria-live="polite">${escape(echoText(field, values, draft[field]))}</p>${issueHtml(field)}<p class="gx-hint" id="gx-empty-${field}"${empty && !issue(field) ? '' : ' hidden'}>${escape(RANGE_EMPTY_HINT)}</p>${annotationSlot(field)}</fieldset>`;
+  }
+
+  /**
+   * A range edit, applied in place so a drag and the live echo survive
+   * (§14.2): the draft takes `set`, and the thumbs, fill, echo, messages,
+   * annotation, readiness line, and sample notice follow. An unchanged set
+   * is no edit at all. During a thumb's move (`live`) nothing in the group
+   * changes size — that ends a pointer drag in Chromium — so the hint and
+   * message only turn invisible, and `settleRange` collapses them and
+   * redraws the annotation on release.
+   */
+  function setRange(field: RangeField, set: number[], live = false): void {
+    const values = rangeValues(field), last = values.length - 1;
+    // Any range interaction ends the restored and log-off notices, as other draft edits do.
+    restoredNotice = false; logOffNotice = false; $('.gx-restored')?.remove(); $('.gx-log-off')?.remove();
+    const same = set.length === draft[field].length && set.every((value, i) => value === draft[field][i]);
+    if (!same) {
+      invalidate(); draft[field] = set;
+      issues = issues.filter(item => item.field !== field);
+    }
+    const { lo, hi } = rangeBounds(values, draft[field]);
+    const empty = !values.some(value => draft[field].includes(value));
+    const box = $(`#gx-range-${field}`);
+    if (box) { const layout = rangeLayout(lo, hi, last, empty); box.setAttribute('style', layout.style); box.dataset.top = layout.top; box.dataset.empty = layout.empty; }
+    for (const [end, at] of [['min', lo], ['max', hi]] as const) {
+      const thumb = $<HTMLInputElement>(`#gx-${field}-${end}`);
+      if (!thumb) continue;
+      if (thumb.value !== String(at)) thumb.value = String(at);
+      thumb.setAttribute('aria-valuetext', spokenValue(field, values[at], empty));
+    }
+    if (same) return;
+    const echo = $(`#gx-echo-${field}`), text = echoText(field, values, draft[field]);
+    if (echo && echo.textContent !== text) echo.textContent = text;
+    $(`#gx-group-${field}`)?.classList.remove('gx-invalid');
+    for (const id of [`gx-error-${field}`, `gx-empty-${field}`]) { const node = $(`#${id}`); if (node && !node.hidden) node.style.visibility = 'hidden'; }
+    checkSampleFill();
+    refreshReadiness();
+    persist();
+    if (!live) settleRange(field);
+  }
+
+  /** The group's layout after a range edit, once no thumb is held (see `setRange`). */
+  function settleRange(field: RangeField): void {
+    for (const id of [`gx-error-${field}`, `gx-empty-${field}`]) {
+      const node = $(`#${id}`);
+      if (!node || node.style.visibility !== 'hidden') continue;
+      node.hidden = true; node.style.visibility = '';
+      if (id.startsWith('gx-error-')) node.textContent = '';
+    }
+    refreshAnnotations();
+  }
+
   function siteView(): string {
-    return `${heading('Describe the geological site conditions', 'Choose one or more values for each condition.')}${sampleNoticeView()}<div class="gx-site-grid">${siteGroup('faultDip', 'Fault angle', 'How steeply the fault is dipping, measured from the horizontal. Also called fault dip.', 'fault-dip')}${siteGroup('depth', 'Sediment depth', 'Thickness of the sediment above bedrock.', 'sediment-depth')}${siteGroup('density', 'Sediment density', `How tightly the sediment is packed. ${IF_UNKNOWN}`, 'sediment-strength')}${siteGroup('sediment', 'Sediment strength and structure', `Choose uniform material or a layered profile. You can include more than one possibility. ${IF_UNKNOWN}`, 'set')}</div>${readiness('site')}<footer class="gx-footer">${button('intro', 'Back')}${reached.has('review') && !sampleWalk ? button('review', 'Return to review', true) : `<div>${reached.has('review') ? button('review', 'Return to review') : ''}${button('site-next', 'Continue to fault slip', true)}</div>`}</footer>`;
+    return `${heading('Describe the geological site conditions', 'Choose one or more values for each condition.')}${sampleNoticeView()}<div class="gx-site-grid">${rangeGroup('faultDip', 'Fault angle', `How steeply the fault is dipping, measured from the horizontal. Also called fault dip. ${RANGE_IF_UNKNOWN}`, 'fault-dip')}${rangeGroup('depth', 'Sediment depth', `Thickness of the sediment above bedrock. ${RANGE_IF_UNKNOWN}`, 'sediment-depth')}${siteGroup('density', 'Sediment density', `How tightly the sediment is packed. ${IF_UNKNOWN}`, 'sediment-strength')}${siteGroup('sediment', 'Sediment strength and structure', `Choose uniform material or a layered profile. You can include more than one possibility. ${IF_UNKNOWN}`, 'set')}</div>${readiness('site')}<footer class="gx-footer">${button('intro', 'Back')}${reached.has('review') && !sampleWalk ? button('review', 'Return to review', true) : `<div>${reached.has('review') ? button('review', 'Return to review') : ''}${button('site-next', 'Continue to fault slip', true)}</div>`}</footer>`;
   }
 
   function numeric(field: 'slipMin' | 'slipMax' | 'offsetMax', label: string, required: boolean): string {
@@ -1171,6 +1257,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       }
       else if (action === 'retry-restore') void restoreResults();
       else if (action === 'plus' || action === 'minus') { invalidate(); const field = target.dataset.field as 'slipMin' | 'slipMax' | 'offsetMax'; draft[field] = stepDecimal(draft[field], action === 'plus' ? 1 : -1); issues = issues.filter(item => item.field !== field); render(); status.textContent = `${field === 'slipMin' ? 'Minimum' : 'Maximum'}: ${draft[field]} m.`; }
+      else if (action === 'full-range' && isRangeField(target.dataset.field ?? '')) { const field = target.dataset.field as RangeField; setRange(field, rangeValues(field)); }
       else if (action === 'slip-shortcut') { invalidate(); draft.slipMax = '5'; issues = issues.filter(item => item.field !== 'slipMax'); render('gx-slipMax'); }
       else if (action === 'offset-shortcut' && regression) { invalidate(); const cap = offsetShortcut(draft.faultDip, regression, manifest.slipWindowBounds.max); if (cap !== null) draft.offsetMax = cap; issues = issues.filter(item => item.field !== 'offsetMax'); render('gx-offsetMax'); }
       else if (action === 'retry-regression') { $('#gx-offsetMax')?.focus(); void ensureRegression(); }
@@ -1234,6 +1321,12 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     // `change` is neither an edit nor a navigation, so it clears no notice
     // and cancels nothing (§9.3, G-17).
     if (input.id === 'gx-percentile') return;
+    // A range thumb is applied on `input`, in place (§14.2); its closing `change` settles the group's look.
+    if (input.dataset.range !== undefined) {
+      const range = input.dataset.range;
+      if (isRangeField(range)) settleRange(range);
+      return;
+    }
     invalidate(); restoredNotice = false; logOffNotice = false;
     if (input.name === 'gx-mode') {
       draft.mode = input.value as 'slip' | 'offset'; issues = issues.filter(item => item.step !== 'movement');
@@ -1249,9 +1342,6 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     if (field === 'sediment') {
       const values = manifest.armStrengthStates;
       draft.sediment = values.filter((value, i) => all ? input.checked : i === index ? input.checked : draft.sediment.some(p => p.set === value.set && p.sedimentStrength === value.sedimentStrength)).map(pair => ({ ...pair }));
-    } else if (field === 'faultDip' || field === 'depth') {
-      const values = field === 'faultDip' ? manifest.trialColumns.fault_dip : manifest.trialColumns.depth;
-      draft[field] = values.filter((value, i) => all ? input.checked : i === index ? input.checked : draft[field].includes(value));
     } else if (field === 'density' || field === 'scarpClass') {
       const values = field === 'density' ? manifest.trialColumns.density : manifest.scarpClasses;
       draft[field] = values.filter((value, i) => all ? input.checked : i === index ? input.checked : draft[field].includes(value));
@@ -1263,7 +1353,27 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   shell.addEventListener('input', event => {
     const input = event.target;
     if (!(input instanceof HTMLInputElement)) return;
-    if (input.dataset.number) {
+    const range = input.dataset.range;
+    if (range !== undefined && isRangeField(range)) {
+      // The thumbs clamp against each other (§14.1). A move answers the group
+      // with the contiguous modeled range between the two thumbs (§14.2,
+      // §14.6 item 1); a press that cannot move the thumb changes nothing,
+      // so a restored set with gaps stays verbatim.
+      const end = input.dataset.end === 'min' ? 'min' : 'max';
+      const values = rangeValues(range), was = rangeBounds(values, draft[range]);
+      if (rangeDrag?.field === range) rangeDrag.moved = true;
+      // A pointer drag that began on stacked thumbs moves whichever bound lies
+      // the way the pointer goes: only the top thumb can be grabbed there.
+      if (rangeDrag?.field === range && rangeDrag.anchor !== null) {
+        const at = Number(input.value), anchor = rangeDrag.anchor;
+        setRange(range, rangeSet(values, Math.min(anchor, at), Math.max(anchor, at)), true);
+        return;
+      }
+      const other = end === 'min' ? was.hi : was.lo;
+      const at = end === 'min' ? Math.min(Number(input.value), other) : Math.max(Number(input.value), other);
+      if (at === (end === 'min' ? was.lo : was.hi)) { input.value = String(at); return; }
+      setRange(range, end === 'min' ? rangeSet(values, at, other) : rangeSet(values, other, at), true);
+    } else if (input.dataset.number) {
       invalidate();
       const field = input.dataset.number as 'slipMin' | 'slipMax' | 'offsetMax';
       // The edited field's message clears at once (§12.1), and so does any other
@@ -1291,6 +1401,24 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       persist();
     }
   }, { signal });
+
+  // A pointer on a thumb starts a drag; on stacked thumbs it is anchored at their stop (see the input handler).
+  shell.addEventListener('pointerdown', event => {
+    const input = event.target;
+    const range = input instanceof HTMLInputElement ? input.dataset.range : undefined;
+    if (range === undefined || !isRangeField(range)) { rangeDrag = null; return; }
+    const { lo, hi } = rangeBounds(rangeValues(range), draft[range]);
+    const answered = rangeValues(range).some(value => draft[range].includes(value));
+    rangeDrag = { field: range, anchor: answered && lo === hi ? lo : null, moved: false };
+  }, { capture: true, signal });
+  // A drag that ends where it began fires no `change`; its release still settles its range (see `setRange`).
+  // A tap or click that never changed a thumb's value settles nothing: the group stays as it was (§14.6 item 7).
+  const endDrag = (): void => {
+    const ended = rangeDrag; rangeDrag = null;
+    if (ended?.moved && step === 'site') settleRange(ended.field);
+  };
+  document.addEventListener('pointerup', endDrag, { capture: true, signal });
+  document.addEventListener('pointercancel', endDrag, { capture: true, signal });
 
   shell.addEventListener('toggle', event => {
     const details = event.target;

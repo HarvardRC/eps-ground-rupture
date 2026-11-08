@@ -10,7 +10,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { NEGATIVE_HEIGHT_NOTE } from '../../src/explore/wording';
 import { BASE_URL, manifest } from '../support';
-import { action, gotoExplore, heading, pickSample, sedimentName, setChecked, siteChoice, typeEntry } from '../explore-support';
+import { action, chooseRange, gotoExplore, heading, pickSample, sedimentName, setChecked, siteChoice, typeEntry } from '../explore-support';
 
 const INTRO_LINE = 'Describe the geological site conditions and fault slip you want to investigate, then see the simulated results.';
 const FORECAST = 'This research tool helps you forecast what could happen at a site with known conditions — probabilities from simulations, not a prediction of what will happen at a particular site.';
@@ -47,9 +47,9 @@ test('site-condition hints, the fault-slip step, and the review blocks (§§15.1
   await expect(page.locator('#gx-group-depth > p').first()).toContainText('Thickness of the sediment above bedrock.');
   await expect(page.locator('#gx-group-density > p').first()).toContainText('How tightly the sediment is packed. If unknown, select all.');
   await expect(page.locator('#gx-group-sediment > p').first()).toContainText('You can include more than one possibility. If unknown, select all.');
-  // §15.3 gives the if-unknown line to density and strength only; the range groups get theirs with §14.
-  await expect(page.locator('#gx-group-faultDip > p').first()).not.toContainText('If unknown');
-  await expect(page.locator('#gx-group-depth > p').first()).not.toContainText('If unknown');
+  // The range groups keep §15.3's hints and close with §14's line, as amended by §14.6.
+  await expect(page.locator('#gx-group-faultDip > p').first()).toContainText('Also called fault dip. If unknown, select the full range.');
+  await expect(page.locator('#gx-group-depth > p').first()).toContainText('Thickness of the sediment above bedrock. If unknown, select the full range.');
 
   await action(page, 'Continue to fault slip').click();
   await expect(heading(page)).toHaveText('Choose the assumed fault slip');
@@ -103,8 +103,8 @@ test('the empty state asks for a condition or slip range (§15.11 item 8)', asyn
   expect(random, 'the manifest names a random-heterogeneous profile').toBeDefined();
   await gotoExplore(page);
   await action(page, 'Build your scenario').click();
-  await setChecked(page, '#gx-faultDip-all', true);
-  await siteChoice(page, 'depth', '5 m').click();
+  await page.locator('#gx-faultDip-full').click();
+  await chooseRange(page, 'depth', 1, 1);
   await setChecked(page, '#gx-density-all', true);
   await siteChoice(page, 'sediment', sedimentName(random!)).click();
   await action(page, 'Continue to fault slip').click();

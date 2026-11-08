@@ -3,9 +3,7 @@
 
 import { expect, test } from '@playwright/test';
 import { gs } from '../support';
-import {
-  action, confirmGolden, gotoExplore, setChecked, stepButton, typeEntry,
-} from '../explore-support';
+import { action, answerEverySite, confirmGolden, gotoExplore, setChecked, stepButton, typeEntry } from '../explore-support';
 
 test.describe.configure({ timeout: 120_000 });
 
@@ -13,7 +11,7 @@ test('each mode keeps its own entries across switches', async ({ page }) => {
   const offset = gs('GS-1').inputs.offset_max!;
   await gotoExplore(page);
   await action(page, 'Build your scenario').click();
-  for (const group of ['faultDip', 'depth', 'density', 'sediment']) await setChecked(page, `#gx-${group}-all`, true);
+  await answerEverySite(page);
   await action(page, 'Continue to fault slip').click();
   await expect(page.locator('.gx-hint').filter({ hasText: 'Your entries are kept when you switch modes.' })).toHaveCount(1);
   await typeEntry(page, 'slipMin', '0.5');

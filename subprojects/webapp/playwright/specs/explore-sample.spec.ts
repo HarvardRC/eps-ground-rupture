@@ -12,7 +12,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import {
   INTRO_HEADING, MOVEMENT_HEADING, SITE_HEADING, action, confirmGolden, confirmedCount, countText, explorerReady,
-  gotoExplore, heading, holdRegression, pickSample, setChecked, settleFrames, stepButton, storedRecord, typeEntry,
+  gotoExplore, heading, holdRegression, nudgeRange, pickSample, setChecked, settleFrames, stepButton, storedRecord, typeEntry,
 } from '../explore-support';
 
 test.describe.configure({ timeout: 120_000 });
@@ -29,7 +29,8 @@ const SAMPLES = [
     title: 'Lower fault angles',
     descriptor: '30° and 40°; surface offset up to 3 m',
     name: 'lower fault angles',
-    site: ['30°', '40°', '5 m', 'Dense', 'Uniform sediment: Strong', 'Layered sediment: Strong'],
+    site: ['Dense', 'Uniform sediment: Strong', 'Layered sediment: Strong'],
+    ranges: ['Selected: 30°, 40° — 2 of 7 modeled angles.', 'Selected: 5 m — 1 of 3 modeled depths.'],
     preview: ['30°; 40°', '5 m', 'Dense', 'Layered: Strong; Uniform: Strong', '0–3 m', '3–5 m'],
     slipNote: 'The slip range is an example band within the simulations’ coverage.',
     offsetMax: '3', slipMin: '3', slipMax: '5',
@@ -39,7 +40,8 @@ const SAMPLES = [
     title: 'Steeper fault angles',
     descriptor: '60° and 70°; surface offset up to 1.3 m',
     name: 'steeper fault angles',
-    site: ['60°', '70°', '10 m', 'Medium', 'Uniform sediment: Moderate', 'Layered sediment: Moderate'],
+    site: ['Medium', 'Uniform sediment: Moderate', 'Layered sediment: Moderate'],
+    ranges: ['Selected: 60°, 70° — 2 of 7 modeled angles.', 'Selected: 10 m — 1 of 3 modeled depths.'],
     preview: ['60°; 70°', '10 m', 'Medium', 'Layered: Moderate; Uniform: Moderate', '0–1.3 m', '1.6–1.9 m'],
     slipNote: 'The slip range spans Bawden (2001)’s two patch estimates, 1.6 m and 1.9 m, used as an example band.',
     offsetMax: '1.3', slipMin: '1.6', slipMax: '1.9',
@@ -59,7 +61,7 @@ const prefilled = (sample: Sample) => `Prefilled with the ${sample.name} sample.
 const modified = (sample: Sample) => `Started from the ${sample.name} sample · Modified`;
 const question = (sample: Sample) => `Replace your current choices with the ${sample.name} sample?`;
 
-/** The checked site choices by accessible name, in page order. */
+/** The checked site choices by accessible name, in page order (the two checkbox groups; the ranges speak through their echoes). */
 const checkedSite = (page: Page) =>
   page.locator('.gx-site-grid input[data-choice]:checked').evaluateAll((inputs) =>
     inputs.map((input) => input.getAttribute('aria-label') ?? input.closest('label')!.textContent!.trim()),
@@ -75,6 +77,8 @@ async function expectFilled(page: Page, sample: Sample): Promise<void> {
   await expect(announced(page)).toHaveText(prefilled(sample));
   await expect(notice(page)).not.toHaveAttribute('role');
   expect(await checkedSite(page)).toEqual([...sample.site]);
+  // The ranges render the sample's sets at their extremes (guided DDD §14.2).
+  await expect(page.locator('.gx-range-echo')).toHaveText([...sample.ranges]);
 }
 
 /** The dialog is open and modal on its card step, `sample` selected and previewed. */
@@ -288,7 +292,7 @@ for (const sample of SAMPLES) {
     await expectAsked(page, sample);
     await action(page, 'Use the sample').click();
     await expectFilled(page, sample);
-    await setChecked(page, '#gx-depth-0', !(await page.locator('#gx-depth-0').isChecked()));
+    await nudgeRange(page, 'depth');
     await expect(notice(page)).toHaveText(modified(sample));
     await action(page, 'Continue to fault slip').click();
     await expect(notice(page)).toHaveText(modified(sample));
@@ -388,12 +392,12 @@ for (const sample of SAMPLES) {
     await expect(notice(page)).toHaveText(modified(sample));
 
     // Confirmed while Modified; a further edit and a discard keep the same fill's notice.
-    await setChecked(page, '#gx-faultDip-0', !(await page.locator('#gx-faultDip-0').isChecked()));
+    await nudgeRange(page, 'faultDip');
     await action(page, 'Return to review').click();
     await action(page, 'Show results').click();
     await page.locator('.gx-context').waitFor();
     await stepButton(page, 'site').click();
-    await setChecked(page, '#gx-depth-0', !(await page.locator('#gx-depth-0').isChecked()));
+    await nudgeRange(page, 'depth');
     await stepButton(page, 'results').click();
     await discard();
     await stepButton(page, 'site').click();
@@ -536,7 +540,7 @@ test('an open dialog survives the re-render of a settling restore, at either ste
 test('opening, browsing, and closing the dialog is neither a navigation nor an edit: the restore notice stays', async ({ page }) => {
   await gotoExplore(page);
   await action(page, 'Build your scenario').click();
-  await setChecked(page, '#gx-faultDip-0', true);
+  await page.locator('#gx-faultDip-full').click();
   await stepButton(page, 'intro').click();
   await page.reload();
   await explorerReady(page);
@@ -554,7 +558,7 @@ test('opening, browsing, and closing the dialog is neither a navigation nor an e
 test('an edited draft without a confirmation asks first, and each card keeps its identity', async ({ page }) => {
   await gotoExplore(page);
   await action(page, 'Build your scenario').click();
-  await setChecked(page, '#gx-faultDip-0', true);
+  await page.locator('#gx-faultDip-full').click();
   await stepButton(page, 'intro').click();
   const [illustrative, kern] = SAMPLES;
 
@@ -566,7 +570,7 @@ test('an edited draft without a confirmation asks first, and each card keeps its
   await expectAsked(page, kern);
   await action(page, 'Keep my choices').click();
   await action(page, 'Build your scenario').click();
-  await expect(page.locator('#gx-faultDip-0')).toBeChecked();
+  await expect(page.locator('#gx-echo-faultDip')).toContainText('7 of 7 modeled angles');
   await expect(notice(page)).toHaveCount(0);
 
   await stepButton(page, 'intro').click();
@@ -643,7 +647,7 @@ for (const sample of SAMPLES) {
     await page.locator('details.gx-sample-story summary').click();
     await stepButton(page, 'site').click();
     await expect(page.locator('details.gx-sample-story')).toHaveAttribute('open');
-    await setChecked(page, '#gx-faultDip-0', true);
+    await nudgeRange(page, 'faultDip');
     await expect(notice(page)).toHaveText(modified(sample));
     await expect(page.locator('details.gx-sample-story')).toHaveAttribute('open');
     // Modified is not the end of it: the trigger follows the notice's lifetime, not the first edit.
@@ -703,14 +707,12 @@ for (const sample of SAMPLES) {
     expect(await page.locator('[aria-describedby*="gx-annotation"]').count()).toBe(0);
 
     // A change clears that control's annotation only; the sample's value again brings it back.
-    const box = page.locator('#gx-faultDip-0');
-    const was = await box.isChecked();
-    await setChecked(page, '#gx-faultDip-0', !was);
+    const undo = await nudgeRange(page, 'faultDip');
     await expect(note(page, 'faultDip')).toHaveCount(0);
     await expect(page.locator('.gx-annotation')).toHaveCount(3);
-    await setChecked(page, '#gx-faultDip-0', was);
+    await undo();
     await expect(note(page, 'faultDip')).toContainText(straight(expected.faultDip));
-    await setChecked(page, '#gx-depth-0', !(await page.locator('#gx-depth-0').isChecked()));
+    await nudgeRange(page, 'depth');
     await expect(note(page, 'depth')).toHaveCount(0);
     await expect(note(page, 'density')).toHaveText(SAMPLE_CHOICE);
     // Select all is a value change too.

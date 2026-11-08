@@ -2817,6 +2817,258 @@ Not verified:
 - browsers other than Chromium;
 - the PNG's appearance when pasted into Word or slides.
 
+### Range controls on the site conditions, 2026-11-08 (G-24)
+
+G-24 ran under the owner's release of 2026-11-06 (`059efdb`), once the
+P1.5 band was complete (G-13, PR #87; G-27, PR #90). It follows guided
+DDD §14 (PDD D-50) and §14.6's six fitting decisions (owner push
+`77e1689`), which the planning session made on 2026-11-08 and which
+are amendable by the owner on sight. Item 1 follows PRD §5.1 and D-26,
+reconciled in the same push.
+
+**What changed on the guided page.**
+
+- **Control (§14.1).** Fault angle and Sediment depth each render one
+  track with two native range inputs.
+  - Their steps are the indices of the modeled stops: 20, 30, 40, 45,
+    50, 60, 70°, and 3, 5, 10 m.
+  - The stops are evenly spaced, as ordinal stops (§14.6 item 5).
+  - A scale row under the track names every stop. It is not clickable
+    and is hidden from assistive technology; the thumbs and the echo
+    speak the values.
+  - The thumbs clamp against each other. Arrow keys move one stop,
+    and Home and End reach the ends.
+  - Each thumb is named "Minimum fault angle", "Maximum sediment
+    depth", and so on. It speaks "40 degrees" or "5 metres" (§14.6
+    item 4).
+- **The set stays the state (§14.2).** The draft keeps its `number[]`
+  sets, so `scenario.json`, the session record, the engine, the
+  report and the summaries are untouched.
+  - The thumbs render the set's extremes.
+  - A move answers the group with the contiguous modeled range between
+    the thumbs.
+  - A polite live echo lists every selected value and the count.
+  - A restored set with gaps is listed verbatim, marked "(with gaps)",
+    until a thumb moves. Nothing changes on restore.
+- **Unanswered (§14.6 items 1–2).** A fresh scenario stays unanswered.
+  PRD §5.1 says "A fresh scenario must not silently include every
+  value for an unanswered condition", and D-26 agrees. So §14.3's
+  "never empty" holds only once a group is answered.
+  - A fresh, or restored empty, range group parks its thumbs at the
+    ends, muted, with no fill.
+  - Each thumb's spoken value adds ", not chosen".
+  - The echo reads "Selected: none — 0 of 7 modeled angles." (or "0 of 3
+    modeled depths"), above the hint "Move a thumb or choose Full range
+    to continue."
+  - The readiness line, `validateDraft` and the sample's
+    touched-check are unchanged.
+- **Full range (§14.3; §14.6 item 6).** A tertiary action in Select
+  all's place. It answers or widens a group and is a no-op at full
+  range.
+- **Required mark (§14.6 item 3).** All four legends keep it.
+- **Hints.** The range groups keep §15.3's hints, which close with
+  "If unknown, select the full range." (§14.3 as amended by §14.6).
+- **Presentation (§14.4).** `explore.css` only:
+  - the track, fill, stops and 24 px thumbs;
+  - the page's focus ring, drawn as a shadow because Chromium paints no
+    outline on a range thumb;
+  - a scale row that fits 320 px without horizontal scroll. In a
+    narrow group, the seven angle labels stagger onto two rows (a size
+    container on the scale row's own wrapper), so they stay apart under
+    WCAG 1.4.12 text spacing. The three depth labels stay on one row;
+  - system colors for the track, fill, stops, thumbs and focus ring in
+    forced-colors mode;
+  - the echo line;
+  - Full range styled as an underlined text action. Its accessible name
+    names its condition ("Full range of fault angles").
+- **Pointer drags.** Edits apply in place, without a re-render, so a
+  drag and the live echo survive.
+  - Chromium ends a range drag when anything in the group changes size
+    mid-drag (found while testing: hiding the unanswered hint did it).
+    So while a thumb is held, the hint, any message, and the sample
+    annotation keep their space. The hint and message only turn
+    invisible, and the annotation stays. The group collapses them and
+    redraws the annotation on release: `change`, or `pointerup` and
+    `pointercancel` for a drag that ends where it began. The fill and
+    the answered thumbs follow the drag live. This is why the switch
+    from unanswered to answered finishes on release.
+  - A size container around the thumbs also stopped Chromium from
+    laying them out after an attribute change. The container wraps the
+    scale row only.
+  - On stacked thumbs (one value), only the top thumb can be grabbed. A
+    drag that starts there moves whichever bound lies the way the
+    pointer goes, so a sample's single 5 m depth widens to 3 m by
+    pointer. The keyboard moves each thumb as itself.
+
+Density and strength keep their checkboxes, Select all, and "If
+unknown, select all." `copy.json`, the copy deck and every `/scenario/`
+file keep their bytes.
+
+**Strings.**
+
+1. Thumb names: "Minimum fault angle", "Maximum fault angle",
+   "Minimum sediment depth", "Maximum sediment depth".
+2. Spoken values: "40 degrees", "5 metres". While the group is
+   unanswered, ", not chosen" is added.
+3. Echo: "Selected: 30°, 40°, 45° — 3 of 7 modeled angles."; with gaps,
+   "Selected: 30°, 50° — 2 of 7 modeled angles (with gaps)."; unanswered,
+   "Selected: none — 0 of 7 modeled angles." / "Selected: none — 0 of 3
+   modeled depths."
+4. Unanswered hint: "Move a thumb or choose Full range to continue."
+5. Action: "Full range". Its accessible names are "Full range of fault
+   angles" and "Full range of sediment depths".
+6. Hints: "How steeply the fault is dipping, measured from the
+   horizontal. Also called fault dip. If unknown, select the full
+   range." and "Thickness of the sediment above bedrock. If unknown,
+   select the full range."
+
+**Approval: the owner's own (2026-11-08, relayed by the planning
+session).**
+
+- **Approved:** the strings and the screenshots at 1024 and 320 px,
+  light and dark, of the unanswered, answered and restored-with-gaps
+  states, together with the Full range accessible names.
+- **Only real moves answer (§14.6 item 7).** A gesture answers an
+  unanswered group only if a thumb's value changed during it, even if
+  the thumb ends where it began. A tap or click that changes no value
+  leaves the group unanswered. Full range stays the one-click way to
+  choose every value. As built, a stray press already fired no `input`
+  and so changed nothing. The release now settles a range only after a
+  real move (`764fe8e`), and new specs click and tap each parked thumb
+  at and off its center.
+- **Echo per stop (§14.6 item 8).** The echo updates at every stop
+  during a drag, with no debounce. Accepted as built.
+- **Accepted limitation.** A restored set with gaps draws its fill
+  across the stops it does not select; "(with gaps)" in the echo shows
+  the true selection.
+- **Record:** §14.6 items 7–8 and the limitation are staged in the
+  main checkout for the owner's next push. The owner cleared the merge
+  on green without waiting for that push.
+
+**Review.** The independent review found nothing blocking. It traced
+the clamp, move and gapped-set logic, event order, re-renders, sample
+and session flows, and the /scenario/ import graph, and drove the built
+site with probe scripts. Applied (`adf9e96`, `97022af`):
+
+- **Forced colors.** The ring vanished with the box-shadow, and the
+  track and fill were backgrounds. They now use system colors.
+- **Stacked thumbs mid-scale.** Only the top thumb could be grabbed, so
+  a single value could not widen downward by pointer. A drag that
+  starts on stacked thumbs now moves the bound on the pointer's side.
+- **Fill during the first drag.** It now follows live. The review found
+  that showing the fill and restyling the thumbs did not end a drag;
+  only size changes do, and only those wait for release.
+- **Text spacing.** Scale labels overlapped under WCAG 1.4.12 at 320
+  px. They now stagger in a narrow group.
+- **Test gaps.** The 24 px check measured the input rather than the
+  thumb, and the alignment, touch, Page Up/Down, persistence, gapped
+  Full range and focus-ring checks were missing. All are added, with
+  measurements taken from pixels.
+- **Nits applied.** `pointercancel` now settles a drag; Full range
+  gets a distinct accessible name; an unused export is removed.
+
+Not applied:
+
+- **Echo noise.** About 11 polite updates during one sweep. §14.2 asks
+  for a polite live echo, and debouncing it would also delay the
+  visible text.
+- **Silent presses at the parked ends.** These are native range
+  behavior; the hint guides the reader.
+- **A restored set holding an unmodeled value.** It is listed without
+  that value. A data-version change already blocks such a restore.
+
+Raised to the owner with the strings: a drag on an unanswered group
+that returns to its start answers it with every value. The owner's
+answer is §14.6 item 7 (above).
+
+Tests and specs:
+
+- Node: a new `explore-range` suite (8 tests) covers:
+  - the owner-gated strings;
+  - stop labels and spoken values, with ", not chosen";
+  - the contiguous materialization, including crossed and out-of-scale
+    indices;
+  - the extremes, with an empty set parked at the ends;
+  - the echo's list and count;
+  - the unanswered echo;
+  - "(with gaps)";
+  - which fields are ranges.
+- New `explore-range-controls` spec, in both lane projects:
+  - the unanswered state (parked, no fill, "not chosen", Required, the
+    hint, the hints, the readiness line, nothing stored);
+  - per-stop keyboard movement with spoken values, clamping both ways,
+    Home and End, and Page Up and Page Down;
+  - the echo's list and count;
+  - Full range answering, widening, doing nothing at full range, and
+    clearing a restored gap, with its accessible name;
+  - a sample at its extremes;
+  - a restored gapped set kept verbatim, with a restored empty set
+    unanswered, until a move materializes the range;
+  - mouse drags (desktop project):
+    - the fill drawn mid-drag while the hint keeps its space;
+    - a drag back to its start;
+    - the minimum reachable when the thumbs meet at the right end;
+    - stacked thumbs mid-scale dragged both ways;
+    - a sample's single depth widened downward, its annotation kept
+      until release;
+  - a touch drag through the DevTools protocol (mobile project);
+  - stray presses that move no thumb leave the group unanswered: a
+    click (desktop) and a tap (mobile) at and off each parked thumb's
+    center, and a click on a sample's stacked thumbs (§14.6 item 7);
+  - an answered range surviving a reload and leaving the step;
+  - 320 and 1024 px layouts: no horizontal scroll; labels inside the
+    group, never overlapping, and centered under their stops; the
+    thumbs' 24 px measured from pixels;
+  - WCAG 1.4.12 text spacing at 320 px;
+  - the focus ring found in pixels on the keyboard-focused thumb, gone
+    from the unfocused one, and distinct in forced colors;
+  - axe on unanswered, answered, and after an unsuccessful attempt.
+- The existing guided specs now drive the ranges through shared helpers
+  (`chooseRange`, `answerEverySite`, `nudgeRange`) where they ticked
+  angle or depth boxes. Their assertions are unchanged except where the
+  old ones described checkboxes that no longer exist:
+  - The emptied-group route from Results now uses density, since a
+    range cannot be emptied once answered.
+  - The readiness-follows-edits check uses density.
+  - The sample-fill check reads the ranges' echoes.
+
+At this verification, on `task/g-24-range-controls` at `764fe8e`, over
+`77e1689` (the owner's push, which carries §14.6 items 1–6 and the
+D-26/D-51 reconciliation):
+
+- **Build and unit tests.** The pinned Node suite passed all 491 tests,
+  and typechecking and the bundles passed.
+- **Site builds.** The strict publication and preview builds passed,
+  with `explore-e34a1ee2a740.js` and `explore-4e8eb68fcf59.css`.
+- **Unchanged.** The `/scenario/` bundles `app-26490347afd0.js` and
+  `app-08bebc049c15.css` did not change.
+- **Hooks and document checks.** All 31 hook tests passed. Relative
+  links resolved, PDD agreement passed, and traceability reported no
+  gap rows.
+- **Lane.** The full lane passed 370 and skipped 10, with no failure,
+  twice in a row, at load averages of 12 to 18. The five new skips are
+  pointer tests that each run in one project: mouse on desktop, touch
+  on mobile.
+- **Guided specs.** 217 passed and 5 were skipped, in `desktop` and
+  `mobile`.
+- **Earlier run.** The same commands had passed at `97022af`, after
+  the review's fixes and before item 7's change (491 Node tests; lane
+  368 passed and 8 skipped, twice; guided 215 and 3).
+
+Not verified:
+
+- screen-reader announcement of the thumbs' values, ", not chosen",
+  and the echo;
+- touch dragging on a real phone (the mobile project's touch drag is
+  emulated through the DevTools protocol);
+- Firefox and Safari: the `-moz-` thumb styles are untested, and the
+  lane is Chromium only;
+- the resize-ends-drag behavior in other engines;
+- TalkBack speaking `aria-valuetext` rather than a percentage on a
+  native range;
+- forced colors on a real Windows high-contrast theme (emulated
+  only).
+
 ## Separate CI investigation
 
 The reported job `126383105016` belongs to historical run

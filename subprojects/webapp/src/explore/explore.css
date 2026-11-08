@@ -121,6 +121,48 @@
 #gre-explore details > p { margin: 8px 0 12px; }
 #gre-explore .gx-select-all { display: flex; align-items: center; gap: 9px; margin: 14px 0; font-size: .8rem; cursor: pointer; width: fit-content; padding: 4px 0; }
 #gre-explore .gx-choices { display: flex; flex-wrap: wrap; gap: 8px; }
+/* Range controls for fault angle and sediment depth (guided DDD §14.4). Two
+ * native range inputs share one track; the thumbs travel between --gx-thumb/2
+ * insets, and the track, stops, and scale labels use the same insets, so every
+ * label sits under its stop. Only the thumbs take the pointer. */
+#gre-explore .gx-range-group { --gx-thumb: 24px; }
+#gre-explore .gx-range-actions { margin: 4px 0 6px; }
+#gre-explore .gx-range-actions .gx-button { padding: 7px 0; border: 0; color: var(--gx-accent); background: transparent; font-weight: 550; text-decoration: underline; text-underline-offset: 3px; }
+#gre-explore .gx-range-actions .gx-button:hover { background: transparent; color: #591427; }
+#gre-explore .gx-range { position: relative; height: 44px; }
+#gre-explore .gx-range-track { position: absolute; left: calc(var(--gx-thumb) / 2); right: calc(var(--gx-thumb) / 2); top: 50%; height: 4px; margin-top: -2px; border-radius: 2px; background: var(--gx-line); }
+#gre-explore .gx-range-fill { position: absolute; top: 0; bottom: 0; left: calc(var(--gx-lo) * 100%); right: calc((1 - var(--gx-hi)) * 100%); border-radius: 2px; background: var(--gx-accent); }
+#gre-explore .gx-range[data-empty="true"] .gx-range-fill { display: none; }
+#gre-explore .gx-range-track i { position: absolute; top: 50%; left: calc(var(--gx-at) * 100%); width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%; background: var(--gx-paper); border: 2px solid #a59d92; }
+#gre-explore .gx-range input[type="range"] { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; padding: 0; background: transparent; pointer-events: none; -webkit-appearance: none; appearance: none; }
+#gre-explore .gx-range input[type="range"]:focus { outline: none; }
+#gre-explore .gx-range input[data-end="max"] { z-index: 2; }
+#gre-explore .gx-range[data-top="min"] input[data-end="min"] { z-index: 3; }
+#gre-explore .gx-range input[type="range"]::-webkit-slider-runnable-track { background: transparent; border: 0; }
+#gre-explore .gx-range input[type="range"]::-moz-range-track { background: transparent; border: 0; }
+#gre-explore .gx-range input[type="range"]::-webkit-slider-thumb { pointer-events: auto; -webkit-appearance: none; appearance: none; box-sizing: border-box; width: var(--gx-thumb); height: var(--gx-thumb); border-radius: 50%; background: var(--gx-accent); border: 3px solid var(--gx-paper); box-shadow: 0 0 0 1px var(--gx-accent); cursor: grab; }
+#gre-explore .gx-range input[type="range"]::-moz-range-thumb { pointer-events: auto; width: var(--gx-thumb); height: var(--gx-thumb); box-sizing: border-box; border-radius: 50%; background: var(--gx-accent); border: 3px solid var(--gx-paper); box-shadow: 0 0 0 1px var(--gx-accent); cursor: grab; }
+#gre-explore .gx-range[data-empty="true"] input[type="range"]::-webkit-slider-thumb { background: var(--gx-paper); box-shadow: 0 0 0 2px #8a837a; }
+#gre-explore .gx-range[data-empty="true"] input[type="range"]::-moz-range-thumb { background: var(--gx-paper); box-shadow: 0 0 0 2px #8a837a; }
+/* The page's focus ring, drawn as a shadow: Chromium paints no outline on a range thumb. */
+#gre-explore .gx-range input[type="range"]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 1px var(--gx-accent), 0 0 0 3px var(--gx-paper), 0 0 0 6px #376eba; }
+#gre-explore .gx-range input[type="range"]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 1px var(--gx-accent), 0 0 0 3px var(--gx-paper), 0 0 0 6px #376eba; }
+#gre-explore .gx-range[data-empty="true"] input[type="range"]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 2px #8a837a, 0 0 0 3px var(--gx-paper), 0 0 0 6px #376eba; }
+#gre-explore .gx-range[data-empty="true"] input[type="range"]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 2px #8a837a, 0 0 0 3px var(--gx-paper), 0 0 0 6px #376eba; }
+/* The container is the scale row's own wrapper: in Chromium, a size container
+ * around the thumbs stopped laying them out after their attributes changed. */
+#gre-explore .gx-range-labels { container-type: inline-size; }
+#gre-explore .gx-range-scale { position: relative; height: 1.4rem; margin: 0 0 8px; font-size: .8rem; color: var(--gx-muted); }
+#gre-explore .gx-range-scale span { position: absolute; top: 0; left: calc(var(--gx-thumb) / 2 + (100% - var(--gx-thumb)) * var(--gx-at)); transform: translateX(-50%); white-space: nowrap; }
+#gre-explore .gx-range-scale span:first-child { transform: translateX(calc(var(--gx-thumb) / -2)); }
+#gre-explore .gx-range-scale span:last-child { transform: translateX(calc(-100% + var(--gx-thumb) / 2)); }
+#gre-explore .gx-range-echo { margin: 0; font-size: .8rem; font-weight: 550; }
+/* A narrow group staggers a many-stop scale onto two rows, so neighbors are two
+ * stops apart and every stop keeps its label, even under WCAG 1.4.12 text spacing. */
+@container (max-width: 400px) {
+  #gre-explore .gx-range-dense { height: 2.7rem; }
+  #gre-explore .gx-range-dense span:nth-child(even) { top: 1.3rem; }
+}
 #gre-explore .gx-choice { display: inline-flex; align-items: center; gap: 9px; min-height: 44px; padding: 9px 12px; border: 1px solid var(--gx-line); border-radius: 6px; background: white; cursor: pointer; }
 #gre-explore .gx-choice:hover { border-color: var(--gx-accent); }
 #gre-explore .gx-choice.gx-selected { background: #f2e7e6; border-color: var(--gx-accent); color: #691e2d; }
@@ -347,6 +389,17 @@
 /* Forced colors draw no box-shadow: the invalid boundary thickens instead. */
 @media (forced-colors: active) {
   #gre-explore .gx-site-group.gx-invalid { border-width: 3px; }
+  /* The range's track, fill, stops, thumbs and focus ring in system colors (§14.4). */
+  #gre-explore .gx-range-track, #gre-explore .gx-range input[type="range"] { forced-color-adjust: none; }
+  #gre-explore .gx-range-track { background: GrayText; }
+  #gre-explore .gx-range-fill { background: Highlight; }
+  #gre-explore .gx-range-track i { background: Canvas; border-color: CanvasText; }
+  #gre-explore .gx-range input[type="range"]::-webkit-slider-thumb { background: Highlight; border-color: Canvas; box-shadow: 0 0 0 1px CanvasText; }
+  #gre-explore .gx-range input[type="range"]::-moz-range-thumb { background: Highlight; border-color: Canvas; box-shadow: 0 0 0 1px CanvasText; }
+  #gre-explore .gx-range[data-empty="true"] input[type="range"]::-webkit-slider-thumb { background: Canvas; box-shadow: 0 0 0 2px GrayText; }
+  #gre-explore .gx-range[data-empty="true"] input[type="range"]::-moz-range-thumb { background: Canvas; box-shadow: 0 0 0 2px GrayText; }
+  #gre-explore .gx-range input[type="range"]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 2px Canvas, 0 0 0 5px CanvasText; }
+  #gre-explore .gx-range input[type="range"]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 2px Canvas, 0 0 0 5px CanvasText; }
 }
 /* The step list is a sequence indicator: entries not yet open are plain text, not disabled controls. */
 #gre-explore .gx-steps .gx-step-entry { display: flex; gap: 8px; align-items: center; padding: 9px 10px; color: var(--gx-muted); font-size: .8rem; }

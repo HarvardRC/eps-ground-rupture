@@ -5,10 +5,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { manifest } from '../support';
-import {
-  MOVEMENT_HEADING, RESULTS_HEADING, SITE_HEADING,
-  action, confirmGolden, confirmedCount, countText, gotoExplore, heading, setChecked, expectStepClosed, stepButton, typeEntry,
-} from '../explore-support';
+import { action, answerEverySite, pressThumb, confirmedCount, confirmGolden, countText, expectStepClosed, gotoExplore, heading, MOVEMENT_HEADING, RESULTS_HEADING, setChecked, SITE_HEADING, stepButton, typeEntry } from '../explore-support';
 
 test.describe.configure({ timeout: 120_000 });
 
@@ -31,9 +28,9 @@ test('incomplete site conditions: the Still-needed line, then a focused summary 
   await expect(page.locator('#gre-explore .gx-invalid, #gre-explore [aria-invalid="true"]')).toHaveCount(0);
   await expect(page.locator('#gre-explore .gx-field-error:visible')).toHaveCount(0);
   // It follows the conditions as they change.
-  await setChecked(page, '#gx-faultDip-0', true);
-  await expect(line).toHaveText('Still needed: Sediment depth · Sediment density · Sediment strength and structure.');
-  await setChecked(page, '#gx-faultDip-0', false);
+  await setChecked(page, '#gx-density-0', true);
+  await expect(line).toHaveText('Still needed: Fault angle · Sediment depth · Sediment strength and structure.');
+  await setChecked(page, '#gx-density-0', false);
   await expect(line).toHaveText('Still needed: Fault angle · Sediment depth · Sediment density · Sediment strength and structure.');
   // Each name moves focus to its group, without leaving the step.
   const url = page.url();
@@ -60,17 +57,20 @@ test('incomplete site conditions: the Still-needed line, then a focused summary 
     ['density', 'Choose one or more sediment densities.'],
     ['sediment', 'Choose one or more sediment strength and structure values.'],
   ] as const) {
-    // The group boundary and its message carry the error; the checkboxes carry no invalid marks.
+    // The group boundary and its message carry the error; the checkboxes and thumbs carry no invalid marks.
     await expect(page.locator(`#gx-error-${group}`)).toHaveText(message);
     await expect(page.locator(`#gx-group-${group}`)).toHaveClass(/gx-invalid/);
     await expect(page.locator(`#gx-group-${group} input[aria-invalid]`)).toHaveCount(0);
-    await expect(page.locator(`#gx-${group}-0`)).toHaveAttribute('aria-describedby', `gx-error-${group}`);
+    const control = group === 'faultDip' || group === 'depth' ? `#gx-${group}-min` : `#gx-${group}-0`;
+    await expect(page.locator(control)).toHaveAttribute('aria-describedby', `gx-error-${group}`);
   }
+  // While its message shows, an unanswered range drops its own hint (§14.6 item 1).
+  await expect(page.locator('#gx-empty-faultDip')).toBeHidden();
   // The focused summary speaks for itself; no alert repeats it.
   await expect(page.getByRole('alert').filter({ hasText: 'Choose' })).toHaveCount(0);
 
   // A corrected condition clears its message at once and leaves the summary.
-  await setChecked(page, '#gx-faultDip-0', true);
+  await pressThumb(page, 'faultDip', 'min', 'ArrowRight');
   await expect(page.locator('#gx-error-faultDip')).toBeHidden();
   await expect(page.locator('#gx-group-faultDip')).not.toHaveClass(/gx-invalid/);
   await expect(summary.getByRole('heading')).toHaveText('Choose values for 3 conditions before continuing.');
@@ -79,7 +79,7 @@ test('incomplete site conditions: the Still-needed line, then a focused summary 
   // Another attempt focuses the summary again.
   await forward.click();
   await expect(summary).toBeFocused();
-  await setChecked(page, '#gx-depth-all', true);
+  await page.locator('#gx-depth-full').click();
   await setChecked(page, '#gx-density-all', true);
   await expect(summary.getByRole('heading')).toHaveText('Choose a value for 1 condition before continuing.');
   await expect(summary.getByRole('link')).toHaveText(['Sediment strength and structure']);
@@ -110,7 +110,7 @@ test('axe: the Still-needed line, the summary, the emphasized groups, and the st
   await action(page, 'Continue to fault slip').click();
   await expect(page.locator('#gx-issue-summary')).toBeFocused();
   await axeExplorer(page, 'site step after an unsuccessful attempt');
-  for (const group of ['faultDip', 'depth', 'density', 'sediment']) await setChecked(page, `#gx-${group}-all`, true);
+  await answerEverySite(page);
   await action(page, 'Continue to fault slip').click();
   await action(page, 'Review scenario').click();
   await expect(page.locator('#gx-issue-summary')).toBeFocused();
@@ -121,7 +121,7 @@ test('movement entries route review back to the first invalid field', async ({ p
   const max = String(manifest().slip_window_bounds.max);
   await gotoExplore(page);
   await action(page, 'Build your scenario').click();
-  for (const group of ['faultDip', 'depth', 'density', 'sediment']) await setChecked(page, `#gx-${group}-all`, true);
+  await answerEverySite(page);
   await action(page, 'Continue to fault slip').click();
   const line = page.locator('.gx-still-needed');
   const summary = page.locator('#gx-issue-summary');
@@ -202,15 +202,16 @@ test('a review attempt from Results routes back to the first invalid earlier ste
   const count = countText(ref.counts.matching_records);
 
   // An emptied site group: review from Results returns to Site, focused on that group.
+  // (A range cannot be emptied, so a checkbox group stands in, guided DDD §14.3.)
   await stepButton(page, 'site').click();
-  await setChecked(page, '#gx-depth-all', false);
+  await setChecked(page, '#gx-density-all', false);
   await stepButton(page, 'results').click();
   await page.locator('.gx-main > .gx-section-head').getByRole('button', { name: 'Review scenario' }).click();
   await expect(heading(page)).toHaveText(SITE_HEADING);
   await expect(page.locator('#gx-issue-summary')).toBeFocused();
-  await expect(page.locator('#gx-issue-summary').getByRole('link')).toHaveText(['Sediment depth']);
-  await expect(page.locator('#gx-error-depth')).toHaveText('Choose one or more sediment depths.');
-  await setChecked(page, '#gx-depth-all', true);
+  await expect(page.locator('#gx-issue-summary').getByRole('link')).toHaveText(['Sediment density']);
+  await expect(page.locator('#gx-error-density')).toHaveText('Choose one or more sediment densities.');
+  await setChecked(page, '#gx-density-all', true);
 
   // An invalid slip entry: review from Results returns to Movement, focused on the field.
   await stepButton(page, 'movement').click();

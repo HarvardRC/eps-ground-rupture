@@ -62,11 +62,15 @@ test('Start a new scenario clears the result and returns to the opening step, th
   for (const step of ['site', 'movement', 'review', 'results'] as const) await expectStepClosed(page, step);
   await action(page, 'Build your scenario').click();
   await expect(heading(page)).toHaveText(SITE_HEADING);
-  for (const group of ['faultDip', 'depth', 'density', 'sediment']) {
+  // The ranges are unanswered again (guided DDD §14.6 item 1); the checkbox groups are clear.
+  await expect(page.locator('#gx-echo-faultDip')).toHaveText('Selected: none — 0 of 7 modeled angles.');
+  await expect(page.locator('#gx-echo-depth')).toHaveText('Selected: none — 0 of 3 modeled depths.');
+  for (const group of ['density', 'sediment']) {
     await expect(page.locator(`#gx-${group}-all`)).not.toBeChecked();
     await expect(page.locator(`#gx-group-${group} input[data-choice]:checked`)).toHaveCount(0);
   }
-  for (const group of ['faultDip', 'depth', 'density', 'sediment']) await setChecked(page, `#gx-${group}-all`, true);
+  for (const group of ['faultDip', 'depth']) await page.locator(`#gx-${group}-full`).click();
+  for (const group of ['density', 'sediment']) await setChecked(page, `#gx-${group}-all`, true);
   await action(page, 'Continue to fault slip').click();
   await expect(page.locator('#gx-mode-slip')).toBeChecked();
   await expect(page.locator('#gx-slipMin')).toHaveValue('0');
