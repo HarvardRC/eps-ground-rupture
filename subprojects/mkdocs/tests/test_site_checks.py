@@ -164,8 +164,8 @@ def page_file(name: str) -> SimpleNamespace:
     )
 
 
-class GuidedUnlistedTest(unittest.TestCase):
-    """Guided DDD §9.4: the publication tree serves explore/ unlisted."""
+class GuidedListedTest(unittest.TestCase):
+    """PDD D-52: the publication tree lists explore/; scenario/ stays unlisted (D-39)."""
 
     def setUp(self) -> None:
         self.temporary = tempfile.TemporaryDirectory()
@@ -175,19 +175,19 @@ class GuidedUnlistedTest(unittest.TestCase):
         self.scenario = page_file("scenario")
         self.addCleanup(patch.stopall)
         patch.object(checks, "_drafts", []).start()
-        patch.object(checks, "_unlisted", [self.explore, self.scenario]).start()
+        patch.object(checks, "_unlisted", [self.scenario]).start()
         patch.object(checks, "_command", "build").start()
         self.publication = SimpleNamespace(site_url=SITE_URL, config_file_path="/x/mkdocs.yml")
         self.preview = SimpleNamespace(site_url=SITE_URL, config_file_path="/x/mkdocs.preview.yml")
-        # The unlisted guided page links to the unlisted existing explorer
-        # and to itself (owner ruling 2026-11-05); listed pages link only to
-        # listed pages.
-        self.write("explore/index.html", '<a href="../scenario/">x</a><a href="./">x</a>')
+        # The listed guided page links to itself and its own disclaimer; the
+        # unlisted existing explorer links to itself; the nav links the
+        # guided page from every listed page.
+        self.write("explore/index.html", '<a href="./#gre-explore-disclaimer">x</a><a href="../glossary/">x</a>')
         self.write("scenario/index.html", '<a href="./#gre-disclaimer">x</a>')
-        self.write("index.html", '<a href="glossary/">x</a>')
-        self.write("glossary/index.html", '<a href="../">x</a>')
-        self.sitemap(["", "glossary/"])
-        self.search(["", "glossary/", "glossary/#slip"])
+        self.write("index.html", '<nav><a href="explore/">E</a></nav><a href="glossary/">x</a>')
+        self.write("glossary/index.html", '<nav><a href="../explore/">E</a></nav><a href="../">x</a>')
+        self.sitemap(["", "glossary/", "explore/"])
+        self.search(["", "glossary/", "glossary/#slip", "explore/", "explore/#gre-explore-disclaimer"])
 
     def write(self, path: str, text: str) -> None:
         target = self.site / path
@@ -209,45 +209,51 @@ class GuidedUnlistedTest(unittest.TestCase):
         found = self.findings(config)
         self.assertTrue(any(fragment in why for _path, why in found), found)
 
-    def test_guided_page_may_link_to_existing_explorer(self) -> None:
+    def test_listed_guided_page_passes(self) -> None:
         self.assertEqual(self.findings(self.publication), [])
 
-    def test_listed_page_linking_to_guided_page_fails(self) -> None:
-        self.write("index.html", '<a href="explore/">x</a>')
-        self.reject(self.publication, "resolves to the unlisted explore.md")
-
-    def test_rendered_nav_link_to_guided_page_fails(self) -> None:
-        self.write("glossary/index.html", '<nav><a href="../explore/index.html">E</a></nav>')
-        self.reject(self.publication, "resolves to the unlisted explore.md")
-
-    def test_sitemap_entry_for_guided_page_fails(self) -> None:
-        self.sitemap(["", "explore/"])
-        self.reject(self.publication, "lists the unlisted explore.md")
-
-    def test_search_entry_for_guided_page_fails(self) -> None:
-        self.search(["", "explore/#gre-explore"])
-        self.reject(self.publication, "indexes the unlisted explore.md")
-
-    def test_guided_page_not_unlisted_fails(self) -> None:
-        patch.object(checks, "_unlisted", [self.scenario]).start()
-        self.reject(self.publication, "guided page is not unlisted")
-
-    def test_advertised_guided_page_linking_to_existing_explorer_fails(self) -> None:
-        # Advertising /explore/ (it leaves the unlisted pages) trips arm (d)
-        # on its existing-explorer link, forcing that decision consciously.
-        patch.object(checks, "_unlisted", [self.scenario]).start()
+    def test_guided_page_linking_to_existing_explorer_fails(self) -> None:
+        # Listed, the guided page may no longer link the unlisted /scenario/.
+        self.write("explore/index.html", '<a href="../scenario/">x</a>')
         self.reject(self.publication, "resolves to the unlisted scenario.md")
+
+    def test_guided_page_disclaimer_link_to_existing_explorer_fails(self) -> None:
+        self.write("explore/index.html", '<a href="../scenario/#gre-disclaimer">x</a>')
+        self.reject(self.publication, "resolves to the unlisted scenario.md")
+
+    def test_unlisted_guided_page_fails(self) -> None:
+        patch.object(checks, "_unlisted", [self.explore, self.scenario]).start()
+        self.reject(self.publication, "guided page is unlisted")
+
+    def test_guided_page_missing_from_sitemap_fails(self) -> None:
+        self.sitemap(["", "glossary/"])
+        self.reject(self.publication, "does not list the guided explore/ page")
+
+    def test_guided_page_missing_from_search_fails(self) -> None:
+        self.search(["", "glossary/"])
+        self.reject(self.publication, "does not index the guided explore/ page")
+
+    def test_existing_explorer_not_unlisted_fails(self) -> None:
+        patch.object(checks, "_unlisted", []).start()
+        self.reject(self.publication, "existing explorer is not unlisted")
 
     def test_existing_explorer_link_from_listed_page_still_fails(self) -> None:
         self.write("glossary/index.html", '<a href="../scenario/">x</a>')
         self.reject(self.publication, "resolves to the unlisted scenario.md")
 
+    def test_sitemap_entry_for_existing_explorer_fails(self) -> None:
+        self.sitemap(["", "glossary/", "explore/", "scenario/"])
+        self.reject(self.publication, "lists the unlisted scenario.md")
+
+    def test_search_entry_for_existing_explorer_fails(self) -> None:
+        self.search(["", "explore/", "scenario/#gre-disclaimer"])
+        self.reject(self.publication, "indexes the unlisted scenario.md")
+
     def test_preview_keeps_its_coverage(self) -> None:
-        # The preview keeps both pages in its sitemap for instant navigation
-        # (docs/app/ddd.md §6.1) and checks only its drafts.
+        # The preview keeps the unlisted page in its sitemap for instant
+        # navigation (docs/app/ddd.md §6.1) and checks only its drafts.
         self.sitemap(["", "explore/", "scenario/"])
-        self.write("index.html", '<a href="explore/">x</a>')
-        patch.object(checks, "_unlisted", [self.scenario]).start()
+        self.write("index.html", '<a href="scenario/">x</a>')
         self.assertEqual(self.findings(self.preview), [])
 
     def test_preview_still_rejects_drafts(self) -> None:
@@ -260,15 +266,17 @@ class GuidedUnlistedTest(unittest.TestCase):
         self.assertIn(("media/dev/clip.mp4", "the output of the drafted media/dev/clip.mp4"), found)
         self.assertIn(("explore/index.html", "an href or src resolves to the drafted media/dev/clip.mp4"), found)
 
-    def test_publication_sitemap_drops_guided_page(self) -> None:
+    def test_publication_sitemap_keeps_guided_page_and_drops_existing_explorer(self) -> None:
         rendered = (
             f'<urlset xmlns="{SITEMAP_NS}">\n'
             f"    <url>\n         <loc>{SITE_URL}</loc>\n    </url>\n"
             f"    <url>\n         <loc>{SITE_URL}explore/</loc>\n    </url>\n"
+            f"    <url>\n         <loc>{SITE_URL}scenario/</loc>\n    </url>\n"
             "</urlset>\n"
         )
         out = checks.on_post_template(rendered, template_name="sitemap.xml", config=self.publication)
-        self.assertNotIn("explore/", out)
+        self.assertNotIn("scenario/", out)
+        self.assertIn(f"<loc>{SITE_URL}explore/</loc>", out)
         self.assertIn(f"<loc>{SITE_URL}</loc>", out)
         kept = checks.on_post_template(rendered, template_name="sitemap.xml", config=self.preview)
         self.assertEqual(kept, rendered)
@@ -284,21 +292,31 @@ class GuidedUnlistedTest(unittest.TestCase):
 
 
 class PublicationConfigTest(unittest.TestCase):
-    """The committed configurations serve explore/ unlisted (guided DDD §9.4)."""
+    """The committed configurations list explore/ in the nav (PDD D-52) and
+    keep scenario/ unlisted (PDD D-39)."""
 
     def setUp(self) -> None:
         cwd = os.getcwd()
         os.chdir(MKDOCS_ROOT)
         self.addCleanup(os.chdir, cwd)
 
-    def test_both_pages_unlisted_in_publication_and_preview(self) -> None:
+    def test_guided_page_listed_and_existing_explorer_unlisted(self) -> None:
         from mkdocs.config import load_config
         from mkdocs.structure.files import get_files
 
         for name in ("mkdocs.yml", "mkdocs.preview.yml"):
             levels = {f.src_uri: f.inclusion for f in get_files(load_config(name))}
-            for page in ("explore.md", "scenario.md"):
-                self.assertIs(levels[page], InclusionLevel.NOT_IN_NAV, (name, page))
+            self.assertIs(levels["scenario.md"], InclusionLevel.NOT_IN_NAV, name)
+            self.assertIs(levels["explore.md"], InclusionLevel.INCLUDED, name)
+
+    def test_guided_page_sits_after_dashboards_before_data(self) -> None:
+        from mkdocs.config import load_config
+
+        for name in ("mkdocs.yml", "mkdocs.preview.yml"):
+            titles = [next(iter(item)) for item in load_config(name)["nav"]]
+            at = titles.index("Ground Rupture Explorer")
+            self.assertEqual(titles[at - 1 : at + 2], ["Dashboards", "Ground Rupture Explorer", "Data"], name)
+            self.assertEqual(load_config(name)["nav"][at], {"Ground Rupture Explorer": "explore.md"}, name)
 
     def test_guided_page_and_assets_are_not_drafted(self) -> None:
         from mkdocs.config import load_config
@@ -313,10 +331,11 @@ class PublicationConfigTest(unittest.TestCase):
                 f"{name}: stage the guided assets (exploreAssets) before these tests",
             )
 
-    def test_guided_page_keeps_search_exclusion(self) -> None:
+    def test_guided_page_is_searchable_and_keeps_its_toc_hidden(self) -> None:
         text = (MKDOCS_ROOT / "docs" / "explore.md").read_text(encoding="utf-8")
         front = text.split("---", 2)[1]
-        self.assertRegex(front, r"search:\s*\n\s+exclude:\s*true")
+        self.assertNotRegex(front, r"search:")
+        self.assertRegex(front, r"hide:\s*\n\s+-\s*toc")
 
 
 if __name__ == "__main__":

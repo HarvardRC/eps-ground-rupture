@@ -35,11 +35,12 @@ arms of §6.1:
     resolves to it; in a publication build, for every unlisted page, its
     URL is absent from sitemap.xml and from search/search_index.json, and
     no href or src in any other built page resolves to it, except in a page
-    that is itself published unlisted (owner ruling 2026-11-05, G-08: today
-    exactly the guided explore/index.html's link to the existing explorer,
-    guided-journey-ddd.md §6); and in a publication build that outputs
-    explore/index.html, the guided page is one of the unlisted pages
-    (PDD D-39);
+    that is itself published unlisted (owner ruling 2026-11-05, G-08); in a
+    publication build that outputs scenario/index.html, the existing
+    explorer is one of the unlisted pages (PDD D-39); and in one that
+    outputs explore/index.html, the guided page is listed — not among the
+    unlisted pages, and present in sitemap.xml and search/search_index.json
+    (PDD D-52) — so it may link to no unlisted page;
 (e) Tableau exclusion: no built page carries a <script> whose src begins
     with https://public.tableau.com/javascripts/api/, and every built page
     carries a <script> whose src ends with javascripts/tableau-loader.js.
@@ -373,14 +374,24 @@ def _publication_boundary(
     present = set(paths)
     checked = [(f, "drafted") for f in _drafts]
     unlisted_pages: set[str] = set()
-    if _publication_build(config):
+    publication = _publication_build(config)
+    root = _site_root(config.site_url)
+    if publication:
         checked += [(f, "unlisted") for f in _unlisted]
         unlisted_pages = {f.dest_uri for f in _unlisted}
-        if EXPLORE_PAGE in present and EXPLORE_PAGE not in unlisted_pages:
-            yield EXPLORE_PAGE, "the published guided page is not unlisted (not_in_nav, PDD D-39)"
+        if SCENARIO_PAGE in present and SCENARIO_PAGE not in unlisted_pages:
+            yield SCENARIO_PAGE, "the published existing explorer is not unlisted (not_in_nav, PDD D-39)"
+        if EXPLORE_PAGE in present:
+            if EXPLORE_PAGE in unlisted_pages:
+                yield EXPLORE_PAGE, "the published guided page is unlisted; it is listed in the nav (PDD D-52)"
+            else:
+                explore = {"explore/", "explore/index.html"}
+                if not explore & _sitemap_paths(site, root):
+                    yield SITEMAP, "does not list the guided explore/ page (PDD D-52)"
+                if not explore & _search_paths(site):
+                    yield SEARCH_INDEX, "does not index the guided explore/ page (PDD D-52)"
     if not checked:
         return
-    root = _site_root(config.site_url)
     in_sitemap = _sitemap_paths(site, root)
     in_search = _search_paths(site)
     # Each site-relative URL path that addresses a checked file, mapped to it.

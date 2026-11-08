@@ -54,7 +54,7 @@ function message(root: HTMLElement, title: string, detail: string, control?: { l
     b.addEventListener('click', control.run, { once: true }); box.append(b);
   }
   const links = document.createElement('p');
-  for (const [href, label] of [['../scenario/', 'Existing explorer'], ['../data/', 'Data and citation'], ['../glossary/', 'Glossary']]) {
+  for (const [href, label] of [['../data/', 'Data and citation'], ['../glossary/', 'Glossary']]) {
     if (links.childNodes.length) links.append(' · ');
     const a = document.createElement('a'); a.href = href; a.textContent = label; a.target = '_blank'; a.rel = 'noopener'; links.append(a);
   }
