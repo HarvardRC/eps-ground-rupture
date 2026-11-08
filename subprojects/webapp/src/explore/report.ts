@@ -187,7 +187,7 @@ export function countLine(input: RenderInput, m: MeasurementName): string {
 }
 
 /** The software and data-export versions, in the provenance labels' words. */
-function versionsLine(input: RenderInput, stamps: VersionStamps): string {
+export function versionsLine(input: RenderInput, stamps: VersionStamps): string {
   const manifest = input.vintage.manifest;
   const data = fillCopy('ddd5.9.dataExportLine', { export_version: manifest.exportVersion, export_date: manifest.exportDate });
   return `${copyText('ddd5.9.labelSoftwareVersion')}: ${stamps.softwareVersion} · ${copyText('ddd5.9.labelDataExport')}: ${data}`;
