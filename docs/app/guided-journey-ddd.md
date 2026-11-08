@@ -1487,3 +1487,42 @@ kind one of `histogram`, `histogram-log`, `cumulative`.
   as in every guided task.
 - Exact strings — the button, status lines, and strip labels — go
   to the owner before the merge.
+
+### 16.6 Fitting decisions (2026-11-06, G-27 start)
+
+Four gaps between §16 and the page, decided by the planning session
+under the §13.7 precedent, amendable by the owner on sight; the
+exact strings still go to the owner with sample images before the
+merge:
+
+1. Measurement slugs in the file names: `scarp-height`, `dzw`,
+   `scarp-dip` — hyphenated like the chart kinds, `dzw` being the
+   site's established abbreviation (the glossary anchor and the
+   abbreviations list).
+2. The strip carries everything the page shows with that chart,
+   one line each in the page's wording: the caveat box (the
+   low-slip caveat and, when shown, the per-dip exceedance line),
+   the panel notes (the scarp-dip notice, the width-scope note,
+   the small-result warning), and the §15.8 negative-height note,
+   which postdates §16.2's list. The scenario-level coverage block
+   stays with the scenario summary: it is multi-paragraph and not
+   the chart's own, and the per-dip line carries the exceedance.
+3. A cumulative image includes the page's current percentile
+   read-off marker — the export is the chart as displayed, unlike
+   the report's fixed set — at the report's fixed geometry
+   (600 × 300 CSS px at 2×), independent of the on-screen width.
+4. Chart-kind wording follows the page, not §16.2's lower-case
+   example, per §13.7's no-second-wording rule: "{label} —
+   Distribution", "{label} — Distribution, logarithmic scale",
+   "{label} — Cumulative".
+5. Histogram images carry the page's scarp-type legend row under
+   the chart — the report's approved interpretation (g) for the
+   same need — and cumulative images carry none, as on the page.
+   Confirmed by the owner with the G-27 string approval
+   (2026-11-06).
+6. The ready status line covers the browser's multiple-download
+   prompt, which the page cannot observe: "Your chart image and
+   its provenance file are downloading. If your browser asks to
+   allow multiple downloads, allow it to get the provenance
+   file." The error line stays for detectable failures; no manual
+   fallback button in v0.4. Owner's choice, 2026-11-06.
