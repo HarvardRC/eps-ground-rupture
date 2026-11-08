@@ -237,7 +237,7 @@ test('a pointer drags a thumb to a modeled stop', async ({ page }) => {
   await page.mouse.up();
   await expect(echo(page, 'faultDip')).toHaveText('Selected: 20°, 30°, 40°, 45°, 50° — 5 of 7 modeled angles.');
   await expect(page.locator('#gx-empty-faultDip')).toBeHidden();
-  // A drag that returns to where it began still settles on release.
+  // A drag that changed a thumb's value answers the group even when it returns to where it began (§14.6 item 7).
   const depth = thumb(page, 'depth', 'max');
   const dbox = (await depth.boundingBox())!;
   const dy = dbox.y + dbox.height / 2, dend = dbox.x + dbox.width - half;
@@ -293,6 +293,53 @@ test('a sample with one depth widens downward by pointer (stacked thumbs)', asyn
   await page.mouse.up();
   await expect(echo(page, 'depth')).toHaveText('Selected: 3 m, 5 m — 2 of 3 modeled depths.');
   await expect(page.locator('#gx-annotation-depth')).toHaveCount(0);
+});
+
+/** A group still unanswered: the echo, no fill, the hint, and nothing stored. */
+async function expectUnanswered(page: Page, group: 'faultDip' | 'depth'): Promise<void> {
+  await expect(echo(page, group)).toHaveText(group === 'faultDip' ? NONE_ANGLES : NONE_DEPTHS);
+  await expect(page.locator(`#gx-range-${group}`)).toHaveAttribute('data-empty', 'true');
+  await expect(page.locator(`#gx-range-${group} .gx-range-fill`)).toBeHidden();
+  await expect(page.locator(`#gx-empty-${group}`)).toBeVisible();
+  await expect(page.locator(`#gx-empty-${group}`)).not.toHaveCSS('visibility', 'hidden');
+  expect((await storedRecord(page))?.draft[group]).toEqual([]);
+}
+
+test('a stray click that moves no thumb leaves the group unanswered (§14.6 item 7)', async ({ page }) => {
+  test.skip(test.info().project.name === 'mobile', 'the mobile project taps, below');
+  await openSite(page);
+  for (const group of ['faultDip', 'depth'] as const) {
+    const box = (await thumb(page, group, 'min').boundingBox())!;
+    const y = box.y + box.height / 2;
+    // On each parked thumb: its center, and off-center within the thumb.
+    for (const x of [box.x + 12, box.x + 6, box.x + 18, box.x + box.width - 12, box.x + box.width - 18]) {
+      await page.mouse.click(x, y);
+      await expectUnanswered(page, group);
+    }
+  }
+  await expect(page.locator('.gx-still-needed')).toHaveText('Still needed: Fault angle · Sediment depth · Sediment density · Sediment strength and structure.');
+  // On stacked thumbs of an answered single value, a click changes nothing either.
+  // The stray clicks left the draft untouched, so the sample fills without asking.
+  await action(page, 'Back').click();
+  await pickSample(page, 'illustrative');
+  const box = (await thumb(page, 'depth', 'max').boundingBox())!;
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  await expect(echo(page, 'depth')).toHaveText('Selected: 5 m — 1 of 3 modeled depths.');
+  await expect(page.locator('#gx-annotation-depth')).toHaveCount(1);
+});
+
+test('a stray tap that moves no thumb leaves the group unanswered (§14.6 item 7)', async ({ page }) => {
+  test.skip(test.info().project.name !== 'mobile', 'the desktop project clicks, above');
+  await openSite(page);
+  for (const group of ['faultDip', 'depth'] as const) {
+    await thumb(page, group, 'min').scrollIntoViewIfNeeded();
+    const box = (await thumb(page, group, 'min').boundingBox())!;
+    const y = box.y + box.height / 2;
+    for (const x of [box.x + 12, box.x + 6, box.x + box.width - 12, box.x + box.width - 18]) {
+      await page.touchscreen.tap(x, y);
+      await expectUnanswered(page, group);
+    }
+  }
 });
 
 test('a touch drags a thumb to a modeled stop', async ({ page }) => {

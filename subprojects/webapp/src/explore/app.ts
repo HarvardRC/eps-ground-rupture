@@ -118,8 +118,12 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   const { vintage, stamps, signal } = options;
   const manifest = vintage.manifest;
   let draft = freshDraft(manifest);
-  /** The range a pointer is dragging, and the stop it is anchored at when it began on stacked thumbs. */
-  let rangeDrag: { field: RangeField; anchor: number | null } | null = null;
+  /**
+   * The range a pointer is on: the stop it is anchored at when it began on
+   * stacked thumbs, and whether a thumb's value changed during the gesture
+   * (only a real move answers a group, §14.6 item 7).
+   */
+  let rangeDrag: { field: RangeField; anchor: number | null; moved: boolean } | null = null;
   let confirmed: Draft | null = null;
   let result: RenderInput | null = null;
   let step: Step = 'intro';
@@ -1357,6 +1361,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       // so a restored set with gaps stays verbatim.
       const end = input.dataset.end === 'min' ? 'min' : 'max';
       const values = rangeValues(range), was = rangeBounds(values, draft[range]);
+      if (rangeDrag?.field === range) rangeDrag.moved = true;
       // A pointer drag that began on stacked thumbs moves whichever bound lies
       // the way the pointer goes: only the top thumb can be grabbed there.
       if (rangeDrag?.field === range && rangeDrag.anchor !== null) {
@@ -1404,10 +1409,14 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     if (range === undefined || !isRangeField(range)) { rangeDrag = null; return; }
     const { lo, hi } = rangeBounds(rangeValues(range), draft[range]);
     const answered = rangeValues(range).some(value => draft[range].includes(value));
-    rangeDrag = { field: range, anchor: answered && lo === hi ? lo : null };
+    rangeDrag = { field: range, anchor: answered && lo === hi ? lo : null, moved: false };
   }, { capture: true, signal });
-  // A drag that ends where it began fires no `change`; its release still settles the ranges (see `setRange`).
-  const endDrag = (): void => { rangeDrag = null; if (step === 'site') for (const field of ['faultDip', 'depth'] as const) settleRange(field); };
+  // A drag that ends where it began fires no `change`; its release still settles its range (see `setRange`).
+  // A tap or click that never changed a thumb's value settles nothing: the group stays as it was (§14.6 item 7).
+  const endDrag = (): void => {
+    const ended = rangeDrag; rangeDrag = null;
+    if (ended?.moved && step === 'site') settleRange(ended.field);
+  };
   document.addEventListener('pointerup', endDrag, { capture: true, signal });
   document.addEventListener('pointercancel', endDrag, { capture: true, signal });
 
