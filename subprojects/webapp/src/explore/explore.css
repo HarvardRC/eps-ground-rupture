@@ -157,11 +157,11 @@
 #gre-explore .gx-range-scale span:first-child { transform: translateX(calc(var(--gx-thumb) / -2)); }
 #gre-explore .gx-range-scale span:last-child { transform: translateX(calc(-100% + var(--gx-thumb) / 2)); }
 #gre-explore .gx-range-echo { margin: 0; font-size: .8rem; font-weight: 550; }
-/* A narrow group staggers the scale onto two rows, so neighbors are two stops
- * apart and every stop keeps its label, even under WCAG 1.4.12 text spacing. */
+/* A narrow group staggers a many-stop scale onto two rows, so neighbors are two
+ * stops apart and every stop keeps its label, even under WCAG 1.4.12 text spacing. */
 @container (max-width: 400px) {
-  #gre-explore .gx-range-scale { height: 2.7rem; }
-  #gre-explore .gx-range-scale span:nth-child(even) { top: 1.3rem; }
+  #gre-explore .gx-range-dense { height: 2.7rem; }
+  #gre-explore .gx-range-dense span:nth-child(even) { top: 1.3rem; }
 }
 #gre-explore .gx-choice { display: inline-flex; align-items: center; gap: 9px; min-height: 44px; padding: 9px 12px; border: 1px solid var(--gx-line); border-radius: 6px; background: white; cursor: pointer; }
 #gre-explore .gx-choice:hover { border-color: var(--gx-accent); }
