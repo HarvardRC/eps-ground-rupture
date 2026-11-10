@@ -5,8 +5,8 @@
   with the DDD correction pass); 2026-10-31, the deferral of the
   licensing decision made explicit after an external review of the
   implementation plan; accepted 2026-10-31; amended
-  2026-11-01, 2026-11-06, and 2026-11-08 (the amendments precede
-  References)
+  2026-11-01, 2026-11-06, 2026-11-08, and 2026-11-09 (the
+  amendments precede References)
 - **Deciders**: Michael Bouzinier (project owner)
 
 ## Context
@@ -224,6 +224,15 @@ prototype notice, and its data under the stated assumption.
 > release, and the release gates stand — G-5 among them, so no deploy
 > lists the page while its disclaimer still carries the D-10
 > placeholder.
+
+> **Amendment 2026-11-09 (D-18 out of the pre-activation set; D-10
+> decided).** The owner moved FR-O5, the field overlay, out of the
+> v0.4 release (PDD D-53), so the decisions this ADR's Phase 2
+> records before activation no longer include D-18; it stays open
+> for the overlay's post-MVP return. The same day the owner decided
+> D-10: the standing disclaimer carries the Apache License 2.0's
+> warranty and liability terms. Of the pre-activation decisions,
+> none remains open.
 
 ## References
 

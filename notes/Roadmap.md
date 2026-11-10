@@ -483,7 +483,9 @@ drills, is retired: the drills run against a stub `gh` instead.
   group; before T-55 and T-63) — open. Record per field source the
   members of [D-18](../docs/app/pdd.md#1-decision-register)
   (Field-overlay default set and per-source analogue map) as Decided
-  in a dated PDD commit.
+  in a dated PDD commit. Off the v0.4 release path since 2026-11-09:
+  you moved FR-O5 to P2 (PDD D-53), so this waits for the overlay's
+  return after the MVP.
 - ~~**OA-13 — Final licensing texts**~~ (Phase 2; with the research
   group; before T-63) — **recorded 2026-11-08**: ODC-By 1.0 for the
   DEM-derived data exports, as the DEM licence's section 4.2(a)

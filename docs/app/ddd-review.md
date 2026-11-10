@@ -2314,6 +2314,19 @@ release-branch order OA-3 was written for; OA-3's entry records
 the early landing. No deploy now lists a page with placeholder
 liability text.
 
+## FR-O5 deferred to P2 (2026-11-09)
+
+The owner moved the field overlay out of the v0.4 release, as
+D-49 did the Kern example: PDD D-53, FR-O5 from P1 to P2 with its
+Appendix A row, the §4.4 note, and an ADR-0017 amendment taking
+D-18 out of the pre-activation set. Research question 14 no
+longer gates the release; OA-14 left the Depends-on of T-63 and
+T-55 in the same commit, the owner having directed one commit
+for record and plan. With D-10 decided the same day, no
+pre-activation decision of ADR-0017 remains open. Checklist
+items and walkthrough steps that assume an overlay on the
+activated page are for the release reconciliation to amend.
+
 ## References
 
 - [`docs/app/ddd.md` — Ground Rupture Explorer — detailed design document](ddd.md).

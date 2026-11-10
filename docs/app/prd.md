@@ -501,7 +501,9 @@ through US-3 and the requirements below.
 
 - **P2:** shareable scenario URLs, inverse search, animations and
   morphology education, the Kern County worked example (FR-O6,
-  moved out of v0.4 by PDD D-49, 2026-11-06), the derived-magnitude
+  moved out of v0.4 by PDD D-49, 2026-11-06), the field overlay
+  (FR-O5, moved out of v0.4 by PDD D-53, 2026-11-09), the
+  derived-magnitude
   display aid (C10), reader-selected result content and display
   size (C12), and only those additional exploration features that
   address a documented gap in the existing dashboards (C8).
@@ -1196,6 +1198,11 @@ documentation or a footnote.
 
 The product must allow users to overlay selected measurements from past
 earthquakes on the distribution of matching simulation results.
+
+This requirement is P2: the product owner moved it out of the v0.4
+release on 2026-11-09 (PDD D-53). The requirement stands for its
+return after the MVP; meanwhile the guided page points readers to
+the Model vs reality dashboard for comparisons with real ruptures.
 
 Field measurements are optional context, not part of the filtered
 simulation population. The interface must keep them visually and
@@ -2242,7 +2249,7 @@ carry no priority of their own (—).
 | [FR-O2](#fr-o2-summary-statistics) | Summary statistics | P1 | C2 | §5.2 |
 | [FR-O3](#fr-o3-small-or-empty-result-sets) | Small or empty result sets | P1 | C2 | §5.2 |
 | [FR-O4](#fr-o4-scarp-dip-data-caveat) | Scarp-dip data caveat | P1 | C2 | §5.2 |
-| [FR-O5](#fr-o5-field-data-context) | Field-data context | P1 | C3 | §5.2 |
+| [FR-O5](#fr-o5-field-data-context) | Field-data context | P2 | C3 | §5.2 |
 | [FR-O6](#fr-o6-kern-county-worked-example) | Kern County worked example | P2 | C3 | §5.2 |
 | [FR-D1](#fr-d1-download-matching-simulation-records-and-statistics) | Download matching simulation records and statistics | P1 | C4 | §5.3 |
 | [FR-D2](#fr-d2-export-chart-images) | Export chart images | P1.5 | C4 | §5.3 |
