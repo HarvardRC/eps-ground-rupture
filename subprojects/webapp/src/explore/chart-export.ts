@@ -90,6 +90,8 @@ export function stripLines(input: RenderInput, stamps: VersionStamps, m: Measure
     countLine(input, m),
     versionsLine(input, stamps),
     CITE_LINE,
+    // The notice ODC-By 1.0 asks for, carried by every chart image (G-28).
+    copyText('ddd5.9.licenceNotice'),
     ...(kind === 'cumulative' ? [guided(copyText('pdd4.1.cumulativeAccuracy'))] : []),
     ...caveatTexts(input),
     ...panelNotes(input, m),

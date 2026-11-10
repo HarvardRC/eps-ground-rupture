@@ -26,6 +26,7 @@ import { crc32 as zlibCrc32 } from 'node:zlib';
 import { describe, test } from 'node:test';
 
 import { crc32, dosDateTime, zip, type ZipMember } from '../src/download/zip';
+import { copyText } from '../src/views/copy';
 
 /** The subproject directory: this compiled file lives in its build/test/. */
 const WEBAPP_DIR = fileURLToPath(new URL('../../', import.meta.url));
@@ -50,12 +51,15 @@ function generator(seed: number): () => number {
 }
 
 /** The four package members (§5.9) with fixed contents, non-ASCII text and an empty member among them. */
+/** provenance.txt's closing Licences block (G-28), which zipcheck.py requires in every layout. */
+const LICENCES = ['ddd5.9.labelLicences', 'ddd5.9.licenceData', 'ddd5.9.licenceWorks', 'ddd5.9.licenceNotice'].map((key) => `${copyText(key)}\n`).join('') + '\n';
+
 function members(): ZipMember[] {
   const encoder = new TextEncoder();
   return [
     { name: 'records.csv', bytes: encoder.encode('trial,slip\nT-a,0.0005\n') },
     { name: 'statistics.csv', bytes: encoder.encode('measurement,label\nscarp_dip,Scarp dip (°)\n') },
-    { name: 'provenance.txt', bytes: encoder.encode('Caveats\n60°: converted slip ≈ 5.62 m — beyond\n\n') },
+    { name: 'provenance.txt', bytes: encoder.encode(`Caveats\n60°: converted slip ≈ 5.62 m — beyond\n\n${LICENCES}`) },
     { name: 'scenario.json', bytes: new Uint8Array(0) },
   ];
 }
@@ -184,5 +188,19 @@ describe('zip: the independent reader', () => {
     const digests = input.map((m) => createHash('sha256').update(m.bytes).digest('hex'));
     digests[2] = '0'.repeat(64);
     assert.equal(zipcheck([FIXTURE_ZIP, AT_ISO, ...digests]).status, 1);
+  });
+
+  test('zipcheck.py rejects a provenance.txt without the Licences block or with another notice (G-28)', () => {
+    mkdirSync(fileURLToPath(new URL('./zip/', import.meta.url)), { recursive: true });
+    const encoder = new TextEncoder();
+    const withProvenance = (text: string) => members().map((m) => (m.name === 'provenance.txt' ? { ...m, bytes: encoder.encode(text) } : m));
+    writeFileSync(FIXTURE_ZIP, zip(withProvenance('Caveats\nnone\n\n'), AT));
+    const missing = zipcheck([FIXTURE_ZIP, AT_ISO]);
+    assert.equal(missing.status, 1);
+    assert.match(missing.output, /expected Licences and 3/);
+    writeFileSync(FIXTURE_ZIP, zip(withProvenance(LICENCES.replace('ODC-By 1.0).\n\n', 'ODC-By).\n\n')), AT));
+    const altered = zipcheck([FIXTURE_ZIP, AT_ISO]);
+    assert.equal(altered.status, 1);
+    assert.match(altered.output, /is not the ODC-By 1\.0 notice/);
   });
 });

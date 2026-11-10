@@ -80,6 +80,9 @@ slip, consistent with independent published estimates.[^kern]
 
 [Open full-size on Tableau Public](https://public.tableau.com/app/profile/michael.bouzinier/viz/dem-slip-regression-public/SlipRegressionKernInference){ .embed-fallback } <button class="cite-open" type="button">How to cite</button>
 
+Contains information from the Homogeneous and Heterogeneous 2D DEM Experiments (Chiama et al. 2024a, 2024b; DesignSafe-CI), which is made available here under the [Open Data Commons Attribution License (ODC-By 1.0)](https://opendatacommons.org/licenses/by/1-0/).
+{ .licence-notice }
+
 ## What the printed figure cannot do
 
 The paper's Figure 14 shows this analysis once, at one fault geometry.

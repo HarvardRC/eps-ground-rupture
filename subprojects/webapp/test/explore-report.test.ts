@@ -358,6 +358,17 @@ describe('report: the document (§13.2, §13.3)', () => {
     assert.equal(xmlText.includes('<w:drawing>'), false);
   });
 
+  test('the Provenance section ends with the licences and the ODC-By 1.0 notice (G-28)', () => {
+    const lines = paragraphs(documentXml(full, STAMPS, AT));
+    const at = lines.lastIndexOf('Licences');
+    assert.ok(at > 0, 'a Licences label in the Provenance section');
+    assert.deepEqual(lines.slice(at + 1, at + 4), [
+      copyText('ddd5.9.licenceData'),
+      copyText('ddd5.9.licenceWorks'),
+      'Contains information from the Homogeneous and Heterogeneous 2D DEM Experiments (Chiama et al. 2024a, 2024b; DesignSafe-CI), which is made available here under the Open Data Commons Attribution License (ODC-By 1.0).',
+    ]);
+  });
+
   test('a fixed-scenario document.xml snapshot', () => {
     const actual = documentXml(full, STAMPS, AT);
     if (process.env.REPORT_SNAPSHOT_UPDATE === '1') writeFileSync(SNAPSHOT, actual);

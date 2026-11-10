@@ -89,7 +89,8 @@ function caveatLines(input: RenderInput): string[] {
 }
 
 /**
- * `provenance.txt` (§5.9): the nine blocks in the PDD §6.1 order, each
+ * `provenance.txt` (§5.9): the ten blocks in the PDD §6.1 order — the
+ * tenth, Licences, after Caveats (G-28) — each
  * its label line, its content lines, and one empty line, every line
  * ending in LF.
  */
@@ -121,6 +122,8 @@ export function provenanceText(input: RenderInput, stamps: VersionStamps, genera
     ],
     ['ddd5.9.labelGenerated', [utcInstant(generatedAt)]],
     ['ddd5.9.labelCaveats', caveatLines(input)],
+    // The licences of the download's files and the notice ODC-By 1.0 asks for (data/REDISTRIBUTION.md).
+    ['ddd5.9.labelLicences', [copyText('ddd5.9.licenceData'), copyText('ddd5.9.licenceWorks'), copyText('ddd5.9.licenceNotice')]],
   ];
   return blocks.map(([labelKey, lines]) => [copyText(labelKey), ...lines, ''].map((line) => `${line}\n`).join('')).join('');
 }

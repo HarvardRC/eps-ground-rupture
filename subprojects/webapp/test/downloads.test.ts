@@ -373,7 +373,7 @@ describe('statistics.csv', () => {
 // --------------------------------------------------------------------
 
 describe('provenance.txt', () => {
-  test('the nine label lines in the PDD §6.1 order, each block closed by an empty line', () => {
+  test('the ten label lines in the PDD §6.1 order, each block closed by an empty line', () => {
     const text = member(inputOf({ vintage: vintage('N100'), indices: [1] }), 'provenance.txt');
     const blocks = provenanceBlocks(text);
     assert.deepEqual(
@@ -388,9 +388,22 @@ describe('provenance.txt', () => {
         'Counts',
         'Generated (UTC)',
         'Caveats',
+        'Licences',
       ],
     );
     assert.ok(!text.includes('\r'), 'LF line ends');
+  });
+
+  test('block 10: the licences of the download, then the notice ODC-By 1.0 asks for (G-28)', () => {
+    const text = member(inputOf({ vintage: vintage('N100'), indices: [1] }), 'provenance.txt');
+    const licences = provenanceBlocks(text).at(-1)!;
+    assert.deepEqual(licences, [
+      'Licences',
+      'records.csv and statistics.csv: Open Data Commons Attribution License (ODC-By 1.0), https://opendatacommons.org/licenses/by/1-0/',
+      'Charts, chart images, and reports built from these results: Creative Commons Attribution 4.0 International (CC BY 4.0), https://creativecommons.org/licenses/by/4.0/',
+      'Contains information from the Homogeneous and Heterogeneous 2D DEM Experiments (Chiama et al. 2024a, 2024b; DesignSafe-CI), which is made available here under the Open Data Commons Attribution License (ODC-By 1.0).',
+    ]);
+    assert.ok(text.endsWith('(ODC-By 1.0).\n\n'), 'the notice closes the file, its block ended by an empty line');
   });
 
   test('blocks 1–8: citation, DOIs, both version stamps, settings, population, counts, instant', () => {

@@ -33,6 +33,9 @@ which is turned off or unavailable in this browser.</p></noscript>
 <!-- /copy -->
 </div>
 
+Contains information from the Homogeneous and Heterogeneous 2D DEM Experiments (Chiama et al. 2024a, 2024b; DesignSafe-CI), which is made available here under the [Open Data Commons Attribution License (ODC-By 1.0)](https://opendatacommons.org/licenses/by/1-0/).
+{ .licence-notice }
+
 <div id="gre-disclaimer" markdown="1">
 <!-- copy:docs/app/pdd.md#51-standing-disclaimer-cr-4-d-10-open -->
 Ground Rupture Explorer is a research tool and may be revised as the

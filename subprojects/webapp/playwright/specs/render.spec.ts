@@ -164,7 +164,12 @@ test('the no-JS fallback body is inside #gre-root in the page source, its five l
   const disclaimer = source.indexOf('<div id="gre-disclaimer">');
   expect(root).toBeGreaterThanOrEqual(0);
   expect(disclaimer).toBeGreaterThan(root);
-  const body = source.slice(root, disclaimer);
+  // The fallback body ends at the application's mount; the ODC-By 1.0 notice
+  // (G-28) follows it, before the disclaimer, and is checked on its own.
+  const notice = source.indexOf('<p class="licence-notice">');
+  expect(notice).toBeGreaterThan(root);
+  expect(disclaimer).toBeGreaterThan(notice);
+  const body = source.slice(root, notice);
   expect(body).toContain('Ground Rupture Explorer shows conditional results from a published');
   expect(body).toContain('The interactive controls require JavaScript and a supported browser');
   expect(body).toContain('<noscript>');

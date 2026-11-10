@@ -71,6 +71,8 @@ describe('chart export: the strip (§16.2, §16.6)', () => {
       versionsLine(slip, STAMPS),
       CITE_LINE,
     ]);
+    // Every chart image carries the notice ODC-By 1.0 asks for, right after the citation (G-28).
+    assert.equal(lines[6], 'Contains information from the Homogeneous and Heterogeneous 2D DEM Experiments (Chiama et al. 2024a, 2024b; DesignSafe-CI), which is made available here under the Open Data Commons Attribution License (ODC-By 1.0).');
     assert.equal(PRODUCT_LINE, 'Ground Rupture Explorer — guided journey');
     assert.match(lines[2]!, /slip 0–2 m/);
     assert.match(lines[3]!, /^N = [\d,]+ measurements? used of [\d,]+ matching simulation stages? \([\d,]+ missing values? excluded\)$/);
@@ -81,7 +83,9 @@ describe('chart export: the strip (§16.2, §16.6)', () => {
     const lines = stripLines(offset, STAMPS, 'scarp_height', 'cumulative');
     assert.equal(lines[1], 'Scarp height (m) — Cumulative');
     assert.match(lines[2]!, /offset 0–1 m \(converted to slip per dip\)/);
-    assert.equal(lines[6], guided(copyText('pdd4.1.cumulativeAccuracy')));
+    // The ODC-By 1.0 notice follows the citation (G-28), then the accuracy statement.
+    assert.equal(lines[6], copyText('ddd5.9.licenceNotice'));
+    assert.equal(lines[7], guided(copyText('pdd4.1.cumulativeAccuracy')));
   });
 
   test('kind words follow the page: Distribution, its logarithmic scale, Cumulative', () => {
@@ -97,7 +101,7 @@ describe('chart export: the strip (§16.2, §16.6)', () => {
     // A window starting at 0 m: the decided low-slip text, once.
     assert.deepEqual(caveatTexts(slip), [DECIDED_LOW_SLIP]);
     const height = stripLines(withMin(slip, 'scarp_height', 0.01), STAMPS, 'scarp_height', 'histogram');
-    assert.deepEqual(height.slice(6), [DECIDED_LOW_SLIP]);
+    assert.deepEqual(height.slice(7), [DECIDED_LOW_SLIP]);
     // Width: its scope note in the research group's spelling.
     assert.deepEqual(panelNotes(full, 'dzw'), [guided(copyText('pdd5.7.widthScopeNote'))]);
     assert.match(panelNotes(full, 'dzw')[0]!, /^Deformation zone width measures/);
@@ -112,7 +116,7 @@ describe('chart export: the strip (§16.2, §16.6)', () => {
     assert.match(warning[0]!, /^Only \d+ measurements can be used for this scenario\. They are not less trustworthy/);
     // The strip ends with the caveat box, then the panel notes.
     const strip = stripLines(slip, STAMPS, 'dzw', 'histogram');
-    assert.deepEqual(strip.slice(6), [...caveatTexts(slip), ...panelNotes(slip, 'dzw')]);
+    assert.deepEqual(strip.slice(7), [...caveatTexts(slip), ...panelNotes(slip, 'dzw')]);
   });
 });
 
