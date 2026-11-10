@@ -6448,8 +6448,9 @@ a null statistic ([§5.4](#54-statistics)) is an empty field in both
 of its columns. Line ends and quoting are those of `records.csv`: LF
 line ends and RFC 4180 quoting.
 
-**`provenance.txt`.** UTF-8 plain text with LF line ends: nine
-blocks in exactly the order of PDD §6.1, each a label line (labels
+**`provenance.txt`.** UTF-8 plain text with LF line ends: ten
+blocks in exactly the order of PDD §6.1 — its nine, then the
+Licences block added on 2026-11-09 — each a label line (labels
 fixed here), its content lines, and one empty line.
 
 | Block | Label | Content |
@@ -6463,6 +6464,7 @@ fixed here), its content lines, and one empty line.
 | 7 | `Counts` | `matching records: {count}`, then one line `{label}: N = {N}` per panel, in canonical order, counts through `formatCount` |
 | 8 | `Generated (UTC)` | `generatedAt` as `YYYY-MM-DDTHH:MM:SSZ` |
 | 9 | `Caveats` | one line per active caveat, or `none` |
+| 10 | `Licences` | three fixed lines: the data licence, the licence of charts and reports, and the ODC-By 1.0 notice |
 
 "As plain text" means the source's Markdown emphasis and link syntax
 removed, the words otherwise verbatim; blocks 1 and 2 are fixed-here
@@ -6486,6 +6488,29 @@ they stand here verbatim — block 1's line, then block 2's two lines:
 > "Heterogeneous 2D DEM Experiments," in Influence of sediment depth,
 > sediment strength, fault dip, and slip on fault scarp morphology,
 > DesignSafe-CI. DOI: 10.17603/ds2-gfsj-pp60
+
+Block 10 (2026-11-09; PDD §6.1, guided task G-28) writes three
+fixed-here lines, the same in every package on either page: the
+licence of the two CSV files, the licence of produced works, and
+the notice of `data/REDISTRIBUTION.md`, verbatim. The registry
+keys are `ddd5.9.labelLicences`, `ddd5.9.licenceData`,
+`ddd5.9.licenceWorks`, and `ddd5.9.licenceNotice`; the second line
+names no file, because `/scenario/`'s package holds neither a
+report nor a chart image. The guided page, the result report, and
+the chart-image strip read the notice from the same entry. The
+three lines:
+
+> records.csv and statistics.csv: Open Data Commons Attribution
+> License (ODC-By 1.0), https://opendatacommons.org/licenses/by/1-0/
+
+> Charts, chart images, and reports built from these results:
+> Creative Commons Attribution 4.0 International (CC BY 4.0),
+> https://creativecommons.org/licenses/by/4.0/
+
+> Contains information from the Homogeneous and Heterogeneous 2D DEM
+> Experiments (Chiama et al. 2024a, 2024b; DesignSafe-CI), which is
+> made available here under the Open Data Commons Attribution License
+> (ODC-By 1.0).
 
 Block 9 writes, one line each, the `caveats` of the `NoticePlan`
 that `selectNotices(input, cfg)` ([§5.8](#58-view-layer)) returns
@@ -6525,7 +6550,7 @@ table, and the provenance text — but no serialization; the fourth
 member, `scenario.json`, is a user-visible addition that gives the
 package machine identity, so it closes only with the owner's
 acceptance of this section (DD-11), while `provenance.txt` keeps the
-nine PDD blocks unchanged.
+PDD blocks unchanged.
 
 **File naming.** The archive name instantiates the
 [PDD §6.2 — File naming](pdd.md#62-file-naming) template verbatim —

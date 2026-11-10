@@ -1589,3 +1589,35 @@ merge:
    allow multiple downloads, allow it to get the provenance
    file." The error line stays for detectable failures; no manual
    fallback button in v0.4. Owner's choice, 2026-11-06.
+
+## 17. Licence notices (G-28)
+
+The licences set on 2026-11-08 (ADR-0017, amendment of that date;
+`data/REDISTRIBUTION.md`) ask that the ODC-By 1.0 notice travel
+with the DEM-derived data and with everything built from it. The
+owner accepted these placements on 2026-11-09; the texts are the
+four fixed lines of [DDD §5.9](ddd.md#59-downloads), read from the
+registry so no surface carries a second wording.
+
+- **Results page.** The notice stands under the displayed chart,
+  after the legend and before the chart's download action, with
+  the licence's name linked to its text. A result too small to
+  chart shows the notice under its statistics table (the owner's
+  decision of 2026-11-09); an empty result shows no simulation
+  numbers and no notice.
+- **Download.** `provenance.txt` ends with the Licences block
+  (PDD §6.1's tenth block): the data licence for the two CSV
+  files, the licence of charts and reports, and the notice.
+- **Report.** The Provenance section of §13.2 renders the blocks
+  of `provenance.txt`, so it ends with the same Licences block.
+- **Chart image.** The strip of §16.2 carries the notice after
+  the citation line; the sidecar of §16.3 is the provenance text
+  and ends with the Licences block.
+- **Other pages.** `/scenario/` shows the notice in a static
+  paragraph after the application and above its disclaimer, and
+  each dashboard page shows it under the embedded dashboard; a
+  site test holds both to `data/REDISTRIBUTION.md`'s sentence.
+
+`/scenario/`'s bundle changes with this task, the one recorded
+exception to D-39's byte-identity (the owner's confirmation of
+2026-11-08).

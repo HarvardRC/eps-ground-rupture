@@ -13,13 +13,26 @@ license: Apache-2.0
 repository-code: https://github.com/HarvardRC/eps-ground-rupture
 url: https://harvardrc.github.io/eps-ground-rupture/
 abstract: >-
-  A reproducible pipeline and companion website for the 2D distinct element
-  method (DEM) surface-rupture analyses of Chiama et al. (2025). The pipeline
-  cleans the published model outputs and field compilations into tidy Parquet,
-  derives thirteen DuckDB views pinned by tests, and exports the CSV tables
-  behind five interactive Tableau Public dashboards. The site documents what
-  each dashboard answers, how every number is computed, and where each departs
-  from the printed figures.
+  A reproducible data-processing pipeline and companion website for the two-
+  dimensional distinct element method (DEM) surface-rupture analyses of Chiama
+  et al. (2025). The website brings together five interactive Tableau Public
+  dashboards and the Ground Rupture Explorer. The pipeline cleans and
+  organizes published simulation outputs and field measurements into Parquet
+  tables, defines analytical views in DuckDB, checks results with automated
+  tests, and exports the data used by the dashboards and explorer. The site
+  explains the analyses and documents differences from the paper's published
+  figures.
+
+  The Ground Rupture Explorer lets readers choose modeled geological
+  conditions and a range of fault slip (movement), then examine the
+  corresponding results from existing simulations. It shows distributions and
+  summary statistics for scarp height, deformation zone width, and scarp dip.
+  Readers can download a ZIP containing the matching simulation records and
+  summary statistics as CSV files, the scenario settings, a record of data
+  sources and versions, and a Microsoft Word report containing the scenario,
+  statistics, and charts. Each chart can also be saved as an image. This
+  research tool helps readers investigate simulated ground rupture. It does
+  not predict what will happen at a particular site.
 keywords:
   - earthquake
   - surface rupture

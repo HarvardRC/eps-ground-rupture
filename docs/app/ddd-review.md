@@ -2336,6 +2336,19 @@ P2 view brings its own vintage, with its encoding decided
 alongside that view's design. D-20's product decision stays
 Open.
 
+## Licences block in the download (2026-11-09)
+
+The owner accepted the implementer's five G-28 proposals: the
+licence lines join `provenance.txt` as a tenth block (PDD §6.1,
+DDD §5.9) and no README member is added; `records.csv` and
+`statistics.csv` carry ODC-By 1.0, charts and reports CC BY 4.0
+with the notice; the notice is `data/REDISTRIBUTION.md`'s sentence
+verbatim, shown under the guided page's chart, in a paragraph on
+`/scenario/`, and under each dashboard. The second line is the
+implementer's neutral form, staged by the planning session for
+the owner's sight: one string serves both pages, and
+`/scenario/`'s package has no report or chart image to name.
+
 ## References
 
 - [`docs/app/ddd.md` — Ground Rupture Explorer — detailed design document](ddd.md).

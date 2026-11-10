@@ -1767,6 +1767,14 @@ and each displayed measurement's valid-measurement N; the generation
 date; and every active caveat (scarp-dip provisional notice, low-slip
 caveat, partial-coverage note).
 
+**Licences block (2026-11-09).** A tenth block, Licences, closes
+the provenance text after the caveats: the licence of the two CSV
+files, the licence of charts and reports, and the notice ODC-By 1.0
+asks for, as `data/REDISTRIBUTION.md` words it (ADR-0017, amendment
+of 2026-11-08; guided task G-28). The summary-statistics table is
+distributed under ODC-By 1.0 like the records, the owner's decision
+of 2026-11-09.
+
 Field measurements shown in the overlay are not included in the scenario
 download. The overlay identifies the source and provides links or
 citations for obtaining the field data separately.
