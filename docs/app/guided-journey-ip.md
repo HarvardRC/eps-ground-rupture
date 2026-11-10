@@ -3262,6 +3262,145 @@ Not verified:
 - screen-reader reading of the in-place disclaimer move;
 - browsers other than Chromium.
 
+### Licence notices, 2026-11-09 (G-28)
+
+G-28 ran under the owner's release of 2026-11-08 (ADR-0017 amendment of
+that date; the notice in `data/REDISTRIBUTION.md`; owner push
+`fce5945`), after G-29 and before the release vintage (T-63).
+
+ODC-By 1.0 section 4.2(a) keeps publicly conveyed derivative databases
+under ODC-By, so the DEM-derived data is ODC-By 1.0. Produced works —
+charts, chart images, reports, pages — stay under CC BY 4.0 with the
+section 4.3 notice.
+
+**Owner decisions, 2026-11-09 (relayed by the planning session).**
+
+1. **No readme member.** The ZIP gains no readme. `provenance.txt`
+   gains a tenth block, Licences, after Caveats.
+2. **Licences by file.** `records.csv` and `statistics.csv` are under
+   ODC-By 1.0. Charts, chart images, and reports are under CC BY 4.0
+   with the notice. `scenario.json` and `provenance.txt` carry no
+   licence line.
+3. **Where the strings live.** DDD §5.9 holds them as registry entries
+   `ddd5.9.labelLicences`, `licenceData`, `licenceWorks`, and
+   `licenceNotice` (parts 16–19). The owner's commit `efc696f` records
+   them, with PDD §6.1's paragraph on the tenth block and guided DDD §17
+   on the placements.
+4. **Placement:**
+   - on the guided page, directly under the displayed chart;
+   - on a result too small to chart, under its statistics table (the
+     owner's later answer);
+   - on the hidden `/scenario/` page, a static paragraph after the
+     application;
+   - under each embedded dashboard.
+
+   In every case the licence's name links to its text.
+5. **Text.** The notice is the `data/REDISTRIBUTION.md` sentence
+   verbatim. The works line takes its neutral form: "Charts, chart
+   images, and reports built from these results", which the owner
+   accepted with `efc696f`. The owner saw the placements, the samples,
+   and the four strings, and raised no change.
+
+The owner confirmed in this session that the change to the hidden
+`/scenario/` page, its shared download text and so its bundle, is
+intended. It is this task's one byte-identity exception, and
+`/scenario/` stays unlisted.
+
+**Surfaces and their notices.**
+
+| Surface | What it carries |
+| --- | --- |
+| `provenance.txt` (both pages' downloads) | Last block, Licences: `records.csv and statistics.csv: Open Data Commons Attribution License (ODC-By 1.0), https://opendatacommons.org/licenses/by/1-0/`; `Charts, chart images, and reports built from these results: Creative Commons Attribution 4.0 International (CC BY 4.0), https://creativecommons.org/licenses/by/4.0/`; the notice |
+| `report.docx` (guided download) | The same Licences block, ending its Provenance section |
+| Chart image (guided, PNG) | The notice in the strip, after the citation |
+| Chart image's provenance file | The same Licences block |
+| Guided results page | The notice directly under the displayed chart; on a table-only result, under the statistics table; none on an empty result |
+| `/scenario/` page | The notice in a paragraph after the application, before the disclaimer |
+| Dashboard pages | The notice under each of the seven embedded dashboards on the five pages |
+
+The notice reads: "Contains information from the Homogeneous and
+Heterogeneous 2D DEM Experiments (Chiama et al. 2024a, 2024b;
+DesignSafe-CI), which is made available here under the Open Data
+Commons Attribution License (ODC-By 1.0)."
+
+**Styling.** On the site pages the notice is small and muted (the
+site's fallback-link style), and `extra.css`'s cache-buster is bumped.
+The tighter top margin applies only under dashboards: on the
+`/scenario/` page it overlapped the application and blocked clicks,
+which the existing lane caught before review.
+
+**Bundles.** The `/scenario/` module changes, from
+`app-26490347afd0.js` to `app-066e39f81672.js`, by the shared download
+text. Its stylesheet `app-08bebc049c15.css` and the data are
+unchanged.
+
+**Review.** The independent review found nothing blocking. It overlaid
+the planning session's staged documents and found the PDD-agreement
+check passing. Applied:
+
+- **Zip checker.** It requires the three lines exactly and the file's
+  closing empty line. Tests reject an unclosed block, another licence
+  on the data line, and a guided report whose document lost the
+  notice.
+- **Chart sidecar.** The spec checks its closing Licences block.
+- **Site test.** It compares the registry notice exactly with
+  `data/REDISTRIBUTION.md`'s blockquote.
+- **Table-only results.** The review asked about them, the owner
+  decided, and the notice is under the table (`1d5a240`).
+
+Tests and specs:
+
+- **Node:**
+  - provenance: ten labels, and block 10's exact lines;
+  - strip: the notice after the citation;
+  - report: the Provenance section ends with the Licences lines;
+  - the regenerated `document.xml` snapshot;
+  - zip reader: the fixture with its Licences block, and the
+    rejections above.
+- **Site** (`test_licence_notice.py`):
+  - the registry notice equals `data/REDISTRIBUTION.md`;
+  - every embedded dashboard and the `/scenario/` page carry it,
+    linked, the `/scenario/` one between the mount and the disclaimer.
+- **New `explore-licence` spec**, in both lane projects:
+  - the guided notice under the chart, and under the table on a
+    table-only result;
+  - none on an empty result;
+  - the guided download's `provenance.txt` and `report.docx`;
+  - the `/scenario/` notice below its application, and its download;
+  - every dashboard's notices.
+- **Existing specs.** `render.spec` counts the fallback body's links up
+  to the notice, and `explore-chart-export.spec` checks the sidecar.
+
+At this verification, on `task/g-28-licence-notices` at `5344177`, over
+`efc696f` (the owner's commit of the strings and §17):
+
+- **Build and unit tests.** The pinned Node suite passed all 494 tests,
+  and typechecking and the bundles passed.
+- **Site builds.** The strict publication and preview builds passed,
+  with `explore-00e1827422a1.js` and `explore-2eabbd6235db.css`, and
+  the `/scenario/` module `app-066e39f81672.js` (its stylesheet
+  `app-08bebc049c15.css` unchanged).
+- **Hooks and document checks.** All 37 hook and site tests passed.
+  Relative links resolved, PDD agreement passed with the four new
+  registry entries, and traceability reported no gap rows.
+- **Lane.** The full lane passed 391 and skipped 11, with no failure,
+  twice in a row, at load averages of 12 to 26.
+- **Guided specs.** 238 passed and 6 were skipped, in `desktop` and
+  `mobile`.
+- **Earlier run.** The same commands had passed at `74fbd0b`, before
+  the review and the table-only notice (lane 389 passed and 11 skipped,
+  twice; guided 236 and 6). PDD agreement failed there only on the four
+  entries, as expected before the owner's commit.
+
+Not verified:
+
+- the notice in Word's rendering of `report.docx` and in image viewers;
+- screen-reader reading of the guided notice (the link adds "opens in
+  a new tab");
+- axe on the dashboard pages' small muted text (the same colour as the
+  existing fallback links);
+- browsers other than Chromium.
+
 ## Separate CI investigation
 
 The reported job `126383105016` belongs to historical run
