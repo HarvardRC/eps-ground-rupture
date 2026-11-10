@@ -45,6 +45,21 @@ test('no state of the guided page links into /scenario/', async ({ page }) => {
   await expect(page.locator('.gx-support nav a')).toHaveText([/^Research paper/, /^Data and citation/, /^Glossary/]);
 });
 
+test('the results hint points to the dashboards, Model vs reality for real surface ruptures', async ({ page }) => {
+  await gotoExplore(page);
+  await confirmGolden(page, 'GS-1');
+  // The owner's sentence (2026-11-09) replaces the existing-explorer pointer.
+  const hint = page.locator('#gre-explore .gx-main > .gx-research + .gx-hint');
+  await expect(hint).toHaveText('The Distributions (opens in a new tab) and Model vs reality (opens in a new tab) dashboards show broader datasets rather than this confirmed scenario. Model vs reality (opens in a new tab) also overlays measurements from real surface ruptures on the full simulation set.');
+  const links = hint.locator('a');
+  await expect(links).toHaveCount(3);
+  for (const [i, href] of [[0, '../dashboards/distributions/'], [1, '../dashboards/model-vs-reality/'], [2, '../dashboards/model-vs-reality/']] as const) {
+    await expect(links.nth(i)).toHaveAttribute('href', href);
+    await expect(links.nth(i)).toHaveAttribute('target', '_blank');
+    await expect(links.nth(i)).toHaveAttribute('rel', 'noopener');
+  }
+});
+
 test('Full disclaimer goes to the page\'s own disclaimer', async ({ page }) => {
   await gotoExplore(page);
   await confirmGolden(page, 'GS-1');
