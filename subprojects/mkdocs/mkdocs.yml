@@ -87,6 +87,7 @@ nav:
       - Per-event boxplots: dashboards/per-event-boxplots.md
       - Slip regression: dashboards/slip-regression.md
       - Distributions: dashboards/distributions.md
+  - Ground Rupture Explorer: explore.md
   - Data: data.md
   - The paper: paper.md
   - Figures: figures.md
@@ -152,14 +153,14 @@ exclude_docs: |
 # entirely (out of the site tree, sitemap.xml, and the search index) while
 # `mkdocs serve` still builds it; mkdocs.preview.yml drafts only media/dev/.
 # `not_in_nav` only declares a nav omission deliberate. The site checks hook
-# fails every build whose output crosses the boundary. scenario.md and the
-# guided explore.md are unlisted prototypes (PDD D-39; guided-journey-ddd.md
-# §9.4): published, with no nav, sitemap, or search entry.
+# fails every build whose output crosses the boundary. scenario.md is an
+# unlisted prototype (PDD D-39): published, with no nav, sitemap, or search
+# entry, and no listed page links it. The guided explore.md is listed in the
+# nav, after Dashboards (PDD D-52).
 draft_docs: |
   media/dev/
 not_in_nav: |
   scenario.md
-  explore.md
 hooks:
   - hooks/site_checks.py
 

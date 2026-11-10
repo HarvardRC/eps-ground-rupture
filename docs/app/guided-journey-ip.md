@@ -3091,6 +3091,164 @@ Not verified:
 - forced colors on a real Windows high-contrast theme (emulated
   only).
 
+### The explorer in the sidebar, 2026-11-09 (G-29)
+
+G-29 ran under the owner's decision of 2026-11-08 (PDD D-52; ADR-0017
+amendment of the same date; owner push `5de3f10`), after T-59 and
+ahead of G-28.
+
+**What changed.**
+
+- **Navigation.** `mkdocs.yml` lists `Ground Rupture Explorer:
+  explore.md` after Dashboards and before Data. `explore.md` leaves
+  `not_in_nav`, and `scenario.md` stays there (D-39). The preview
+  configuration inherits both.
+- **Search.** `explore.md` drops its search exclusion and keeps
+  `hide: toc`.
+- **Site checks, arm (d)** (`hooks/site_checks.py`). In a publication
+  build:
+  - the guided page must not be unlisted, and must be in `sitemap.xml`
+    and `search/search_index.json`;
+  - `scenario/` must stay unlisted;
+  - no listed page may link `scenario/`, so the exemption covers only
+    pages that are themselves unlisted.
+
+  Preview builds still check drafts only.
+- **The guided page's links into `/scenario/`.** There were four, one
+  more than the row named. All four are removed:
+  1. the supporting links' "Existing explorer";
+  2. the startup and failure messages' "Existing explorer";
+  3. the results hint's sentence "The existing explorer also offers
+     field comparisons and additional chart controls.";
+  4. the static landing sentence "The existing explorer remains
+     available separately.", which the hook found once the page was
+     listed.
+
+  In place of the third, the hint carries the owner's sentence (below).
+- **Full disclaimer.** It points to the page's own
+  `#gre-explore-disclaimer` and moves there in place, as the readiness
+  links do. The theme's instant navigation treated the fragment as a
+  page change and remounted the explorer, which scrolled the page back
+  (found while testing). Focus moves to the disclaimer, which clears
+  the sticky header on narrow screens.
+- **Unchanged.** `copy.json`, the copy deck, and every `/scenario/`
+  file keep their bytes. The `/scenario/` bundles are byte-identical.
+
+**Results hint, as approved.** "The Distributions and Model vs reality
+dashboards show broader datasets rather than this confirmed scenario.
+Model vs reality also overlays measurements from real surface ruptures
+on the full simulation set." The links go to
+`../dashboards/distributions/` and to `../dashboards/model-vs-reality/`
+(twice), in the page's new-tab link style.
+
+**Approval: the owner's own (2026-11-09, relayed by the planning
+session).**
+
+- **Approved as built:** the four removals of the existing explorer,
+  and Full disclaimer moving in place to the page's own disclaimer.
+- **One addition, the owner's choice:** the results hint's sentence
+  linking Model vs reality (above), after the dashboards sentence. It
+  is added in `b273e35`, and a spec asserts the hint's text and its
+  three links.
+
+**Built site.** `sitemap.xml` and the search index list `explore/` and
+not `scenario/`. No built page links `scenario/` except `scenario/`
+itself. The explorer's footer reads "Previous: Distributions" and
+"Next: Data".
+
+**Deploy (G-5), resolved.** G-5 bars a deploy that lists a page whose
+disclaimer still carries the D-10 placeholder. The owner decided D-10
+on 2026-11-09 (`ee80547`, "Disclaimer of Warranty"): the placeholder in
+PDD §5.1 and in both pages' disclaimer blocks became a sentence derived
+from Apache-2.0. G-29 is rebased onto that commit, and the built
+`explore/index.html` carries no placeholder. So G-5 no longer holds a
+deploy that lists `/explore/`. Deploys stay the owner's; nothing
+deploys from this task.
+
+**Review.** The independent review found nothing blocking. Applied:
+
+- **Disclaimer under the header.** On a narrow screen the disclaimer
+  landed under the theme's sticky header, because the in-place move
+  never makes it `:target`. It now has its own `scroll-margin-top`,
+  and the spec checks its top against the header.
+- **Bundle guard.** A spec checks that the built explorer module
+  contains no `/scenario/` page link and no "existing explorer". Those
+  are links the hook's static scan cannot see.
+- **Hook message.** It now says the guided page must be listed.
+
+Reported to the owner, not changed (the owner's text):
+
+- the guided DDD's "retain access to the existing explorer" (line 228)
+  and §9.4;
+- the DDD's arm (d) text requiring the guided page to be unlisted;
+- PDD D-39's unlisted deployment, and its line that field comparisons
+  remain available in the existing explorer;
+- ADR-0020's "unadvertised implementation candidate";
+- the G-08 row.
+
+Tests and specs:
+
+- **Hook** (`test_site_checks.py`). A new `GuidedListedTest` covers:
+  - the listed page passing;
+  - the guided page linking `scenario/` (its disclaimer included)
+    failing;
+  - the guided page unlisted, or missing from the sitemap or search,
+    failing;
+  - `scenario/` not unlisted, linked from a listed page, or in the
+    sitemap or search, failing;
+  - the preview keeping its coverage;
+  - the sitemap pruning keeping `explore/`.
+
+  `PublicationConfigTest` checks the nav position and inclusion in
+  both configurations, and the front matter.
+- **New `explore-nav` spec**, in both lane projects:
+  - the sidebar order and link (desktop; the theme folds the sidebar
+    into a drawer on narrow screens);
+  - no `/scenario/` link on the intro, site and results steps or in
+    the supporting links;
+  - the results hint's text, the owner's sentence included, with its
+    three new-tab links;
+  - Full disclaimer moving in place, focused and clear of the header,
+    without remounting the explorer;
+  - the bundle guard;
+  - the startup failure's links.
+- **`explore-sme-wording`** now asserts the in-page disclaimer link.
+
+At this verification, on `task/g-29-explorer-nav` at `b273e35`, over
+`ee80547` (the owner's D-10 text):
+
+- **Build and unit tests.** The pinned Node suite passed all 491 tests,
+  and typechecking and the bundles passed.
+- **Site builds.** The strict publication and preview builds passed,
+  with `explore-550907cfffd2.js` and `explore-2eabbd6235db.css`. The
+  built sitemap lists `explore/` and not `scenario/`, and the built
+  guided page carries no D-10 placeholder.
+- **Unchanged.** The `/scenario/` bundles `app-26490347afd0.js` and
+  `app-08bebc049c15.css` did not change.
+- **Hooks and document checks.** All 34 hook tests passed. Relative
+  links resolved, PDD agreement passed, and traceability reported no
+  gap rows.
+- **Lane.** The full lane passed 381 and skipped 11, with no failure,
+  twice in a row, at load averages of 12 to 22.
+- **Guided specs.** 228 passed and 6 were skipped, in `desktop` and
+  `mobile`.
+- **Rebase.** The branch was then rebased over `555383d` and `f1c3295`,
+  the owner's documentation-only commits that defer the field overlay.
+  At the merged head the document checks and the strict build were run
+  again.
+- **Earlier run.** The same commands had passed at `267db77`, before
+  the review and the owner's sentence (lane 377 passed and 11 skipped,
+  twice; guided 224 and 6).
+
+Not verified:
+
+- the sidebar entry in the theme's mobile drawer (asserted on desktop
+  only);
+- search finding the page in the published site (the hook checks the
+  index in publication builds; the lane serves the preview);
+- screen-reader reading of the in-place disclaimer move;
+- browsers other than Chromium.
+
 ## Separate CI investigation
 
 The reported job `126383105016` belongs to historical run

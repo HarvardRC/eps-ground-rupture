@@ -1,6 +1,4 @@
 ---
-search:
-  exclude: true
 hide:
   - toc
 ---
@@ -27,7 +25,6 @@ the interactive explorer open a separate tab to preserve your work.
 
 Read [the paper](paper.md), [data and citation](data.md),
 [the glossary](glossary.md), or [the dashboards](index.md).
-The [existing explorer](scenario.md) remains available separately.
 See the [full disclaimer](#gre-explore-disclaimer) below.
 
 <noscript><p>The interactive controls and results need JavaScript,

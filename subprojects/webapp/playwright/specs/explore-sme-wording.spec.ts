@@ -91,10 +91,11 @@ test('results: the Fault slip summaries, the renamed actions, the width spelling
   await expect(page.locator('#gx-chart svg')).toHaveAttribute('aria-label', /^Deformation zone width \(m\): histogram/);
   await expect(page.locator('.gx-measurement .gx-note')).toHaveCount(0);
   await expect(page.locator('#gre-explore .gx-main')).not.toContainText(/deformation-zone/i);
-  // The results footer's framing follows the amended introduction (§15.11 item 8), its disclaimer link kept.
+  // The results footer's framing follows the amended introduction (§15.11 item 8); its disclaimer link
+  // is the page's own disclaimer, since the listed page links no unlisted page (PDD D-52).
   const footer = page.locator('#gre-explore .gx-main > .gx-research');
   await expect(footer).toContainText(FORECAST);
-  await expect(footer.getByRole('link', { name: /Full disclaimer/ })).toHaveAttribute('href', '../scenario/#gre-disclaimer');
+  await expect(footer.getByRole('link', { name: /Full disclaimer/ })).toHaveAttribute('href', '#gre-explore-disclaimer');
 });
 
 test('the empty state asks for a condition or slip range (§15.11 item 8)', async ({ page }) => {
