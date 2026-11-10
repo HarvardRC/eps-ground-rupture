@@ -36,8 +36,12 @@ which is turned off or unavailable in this browser.</p></noscript>
 <div id="gre-disclaimer" markdown="1">
 <!-- copy:docs/app/pdd.md#51-standing-disclaimer-cr-4-d-10-open -->
 Ground Rupture Explorer is a research tool and may be revised as the
-research develops. It is provided without warranty, subject to
-[the project's liability limitations — text pending, D-10]. It shows
+research develops. It is provided on an "AS IS" basis, without
+warranties or conditions of any kind, either express or implied, and
+its authors and contributors are not liable for damages arising out
+of its use, as the Apache License, Version 2.0, under which it is
+released, sets out (Disclaimer of Warranty; Limitation of
+Liability). It shows
 conditional results from a published computer-simulation ensemble.
 It does not provide earthquake occurrence rates, annual
 probabilities, return periods, probability-of-exceedance results,

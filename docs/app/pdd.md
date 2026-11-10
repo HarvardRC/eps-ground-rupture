@@ -111,7 +111,7 @@ named in the last column carry the detail.
 | D-7 | Dominant-scarp-type rule for animation offers. | FR-D4, §9.5-7 | Product owner | Proposed | Most-frequent anchor, 10-point companion gap, 30 % floor — all over classified records; zero-classified suppresses the offer; §6.4. |
 | D-8 | Animation coverage required for public release. | FR-E1, R-13, §9.5-8 | Research group | Open | Page layout degrades per-type; §8.2. |
 | D-9 | Numeric performance and payload budgets. | NFR-3, DR-6, §9.5-9 | Product owner | Proposed | Budgets, test conditions, and the first-meaningful-render end point; §9.1. |
-| D-10 | Liability-limitation text referenced by CR-4. | FR-G4/CR-4, §9.5-10 | Product owner | Open | Placeholder marked in §5.1; must be authored or sourced before release. |
+| D-10 | Liability-limitation text referenced by CR-4. | FR-G4/CR-4, §9.5-10 | Product owner | Decided (2026-11-09) | Placeholder marked in §5.1; must be authored or sourced before release. The owner sourced the text from the project's own licence: the standing disclaimer now carries the Apache License 2.0's "AS IS" warranty disclaimer and limitation of liability in place of the placeholder, in §5.1 and on both explorer pages. |
 | D-11 | Small-result warning threshold, chart floor, and empty-result diagnosis rule. | FR-O3 | Product owner | Proposed | Warn below 30 valid; suppress chart below 10; single-condition diagnosis; no-match state distinct from no-valid-measurement state; §4.5. |
 | D-12 | Unclassified records: population and display semantics. | FR-G2, FR-S7 | Product owner | Proposed | "All scarp types" applies no filter — unclassified records stay in the matching population (GS-0's 346,834); excluded from class-colored charts and class counts; §3.7, §4.3. |
 | D-13 | Scarp-family view availability and label. | FR-G2 | Product owner | Proposed | Toggle "Group collapse variants"; §3.7. |
@@ -1535,8 +1535,12 @@ Full text, reachable from every product surface, short form near
 results (§5.2):
 
 > Ground Rupture Explorer is a research tool and may be revised as the
-> research develops. It is provided without warranty, subject to
-> [the project's liability limitations — text pending, D-10]. It shows
+> research develops. It is provided on an "AS IS" basis, without
+> warranties or conditions of any kind, either express or implied, and
+> its authors and contributors are not liable for damages arising out
+> of its use, as the Apache License, Version 2.0, under which it is
+> released, sets out (Disclaimer of Warranty; Limitation of
+> Liability). It shows
 > conditional results from a published computer-simulation ensemble.
 > It does not provide earthquake occurrence rates, annual
 > probabilities, return periods, probability-of-exceedance results,

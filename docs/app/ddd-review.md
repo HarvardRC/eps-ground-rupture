@@ -2302,6 +2302,18 @@ listing until the D-10 text replaces the placeholder in the page's
 disclaimer. The release reconciliation, still in drafting, takes
 the next decision number and amends T-55 to match.
 
+## D-10 decided: the disclaimer takes Apache's words (2026-11-09)
+
+With G-29's sidebar listing waiting on G-5, the owner asked why
+the liability text could not simply be written, and decided it:
+the standing disclaimer carries the Apache License 2.0's own
+warranty disclaimer and limitation of liability — the software's
+licence — in place of the placeholder. The text lands in PDD §5.1
+and in both explorer pages' disclaimer blocks, ahead of the
+release-branch order OA-3 was written for; OA-3's entry records
+the early landing. No deploy now lists a page with placeholder
+liability text.
+
 ## References
 
 - [`docs/app/ddd.md` — Ground Rupture Explorer — detailed design document](ddd.md).

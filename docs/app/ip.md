@@ -5343,6 +5343,11 @@ ID is reused; OA-15 is retired
   and links cite, `#51-standing-disclaimer-cr-4-d-10-open` among
   them, or updates every reference in the same commit
   ([DDD §5.13](ddd.md#513-application-configuration), steps 3 and 7).
+  Recorded 2026-11-09, ahead of this order: the owner took the text
+  from the Apache License 2.0 and landed it early, in `explore.md`'s
+  `#gre-explore-disclaimer` block as well, so that G-5 no longer
+  holds a deploy that lists `/explore/` (PDD D-52). The
+  release-branch order therefore begins at T-52.
 - **OA-4** — the research group's approval of the reader-facing texts
   (G-4, [SC-7](pdd.md#101-success-criteria) (scientific sign-off)),
   Phase 2, after T-55's activation commit and before T-65's release
