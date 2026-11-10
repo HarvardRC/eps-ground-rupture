@@ -2327,6 +2327,15 @@ pre-activation decision of ADR-0017 remains open. Checklist
 items and walkthrough steps that assume an overlay on the
 activated page are for the release reconciliation to amend.
 
+## Release vintage without Us − Ud (2026-11-09)
+
+The owner decided that the v0.4 release vintage carries no
+Us − Ud column (PDD D-20's row). A published vintage never
+changes, so the choice had to precede T-63's export; the later
+P2 view brings its own vintage, with its encoding decided
+alongside that view's design. D-20's product decision stays
+Open.
+
 ## References
 
 - [`docs/app/ddd.md` — Ground Rupture Explorer — detailed design document](ddd.md).
