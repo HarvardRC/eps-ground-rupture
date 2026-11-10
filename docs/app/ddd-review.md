@@ -2349,6 +2349,17 @@ implementer's neutral form, staged by the planning session for
 the owner's sight: one string serves both pages, and
 `/scenario/`'s package has no report or chart image to name.
 
+## README in the download (2026-11-10)
+
+The G-28 record above says no README member is added; that held
+for G-28. The owner then asked for one, and approved its text on
+2026-11-10 after an outside review the owner brought: guided DDD
+§18 holds the text, the changed hint and status line, and the two
+questions for the research group. The planning session checked
+the review's statistical claims against DDD §5.4 (linear
+percentiles; the n − 1 standard deviation, null below two
+values) before they entered the text. Task G-30.
+
 ## References
 
 - [`docs/app/ddd.md` — Ground Rupture Explorer — detailed design document](ddd.md).
