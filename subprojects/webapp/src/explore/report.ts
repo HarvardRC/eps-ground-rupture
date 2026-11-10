@@ -1,6 +1,7 @@
 // The result report of guided DDD §13 (PDD §6.5, D-40, D-48): the guided
-// download's archive, composed here from the four shared text members of
-// DDD §5.9 (`packageTexts`, unchanged) and `report.docx` last, written by
+// download's archive, composed here from README.txt first (G-30), the four
+// shared text members of DDD §5.9 (`packageTexts`, unchanged), and
+// `report.docx` last, written by
 // the shared `zip` writer (unchanged) at the handler's one `generatedAt`.
 //
 // `report.docx` is itself a stored ZIP of the minimal OOXML part set of

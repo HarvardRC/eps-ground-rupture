@@ -176,17 +176,25 @@ def check_readme(archive: zipfile.ZipFile, names: tuple[str, ...]) -> list[str]:
     failures: list[str] = []
     if "\r" in text or not text.endswith("\n"):
         failures.append(f"{README}: not LF-ended text")
-    lines = text.split("\n")
-    named = {part for line in lines for part in line.split(", ")}
+    # Entries are the unindented lines of each section; descriptions are indented
+    # and never count as naming anything. Sections start at their heading.
+    sections: dict[str, set[str]] = {}
+    current = ""
+    for line in text.split("\n"):
+        if line in ("Files", "records.csv columns", "statistics.csv columns"):
+            current = line
+        elif line and not line.startswith(" ") and current:
+            sections.setdefault(current, set()).update(line.split(", "))
     for name in names:
-        if name not in named:
+        if name not in sections.get("Files", set()):
             failures.append(f"{README}: does not name the member {name}")
-    if REPORT not in names and REPORT in named:
-        failures.append(f"{README}: names {REPORT}, which the archive does not carry")
+    if REPORT not in names and REPORT in text:
+        failures.append(f"{README}: mentions {REPORT}, which the archive does not carry")
     for csv in ("records.csv", "statistics.csv"):
         if csv in names:
-            header = archive.read(csv).decode("utf-8").split("\n", 1)[0].split(",")
-            missing = [column for column in header if column not in named]
+            header = archive.read(csv).decode("utf-8-sig").split("\n", 1)[0].split(",")
+            listed = sections.get(f"{csv} columns", set())
+            missing = [column.strip('"') for column in header if column.strip('"') not in listed]
             if missing:
                 failures.append(f"{README}: does not describe the {csv} columns {missing!r}")
     return failures

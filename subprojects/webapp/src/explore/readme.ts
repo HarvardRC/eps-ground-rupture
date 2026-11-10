@@ -10,7 +10,7 @@
 // Plain UTF-8, LF line ends, every line ending in LF. A browser-and-Node
 // file: no DOM global, no DOM type.
 
-import { RECORDS_CSV_COLUMNS, STATISTICS_CSV_COLUMNS } from '../decode/fields';
+import { RECORDS_CSV_COLUMNS } from '../decode/fields';
 
 export const README_MEMBER = 'README.txt';
 
@@ -25,7 +25,7 @@ function memberEntries(withReport: boolean): readonly Entry[] {
     [README_MEMBER, 'This file.'],
     ['records.csv', 'The matching simulation stages, one row per stage.'],
     ['statistics.csv', 'Summary statistics of the matching measurements, one row per measurement.'],
-    ['provenance.txt', 'The paper citation, the data DOIs, the software and data versions, the scenario settings, the counts, the caveats, and the licences.'],
+    ['provenance.txt', 'The paper citation, the data DOIs, the software and data versions, the scenario settings, the population, the counts, the time the download was made, the caveats, and the licences.'],
     ['scenario.json', 'The confirmed scenario’s settings, in machine-readable form.'],
     ...(withReport ? [['report.docx', 'A Word report of this result, with its charts.'] as const] : []),
   ];
@@ -34,14 +34,14 @@ function memberEntries(withReport: boolean): readonly Entry[] {
 /** The records.csv columns, in the file's order (RECORDS_CSV_COLUMNS). */
 export const RECORDS_COLUMN_TEXTS: Readonly<Record<(typeof RECORDS_CSV_COLUMNS)[number], string>> = {
   trial: 'The simulation the stage belongs to, by its identifier.',
-  fault_dip: 'Fault angle, in degrees. How steeply the fault is tilted, measured in degrees from horizontal. A smaller angle describes a shallower fault.',
-  sediment_strength: 'Sediment strength and structure: a uniform material (Weak, Moderate, or Strong) or a layered profile (Alternating Strong-Weak, Cohesive Top Unit, or Random Heterogeneous). Strength describes how well sediment resists being pulled apart.',
-  cohesion: 'How strongly the simulated particles are bonded to one another — the model’s handle on sediment strength. A number for uniform sediment; a letter code for a layered profile.',
+  fault_dip: 'Fault angle. How steeply the fault is tilted, measured in degrees from horizontal. A smaller angle describes a shallower fault.',
+  sediment_strength: 'Sediment strength: Weak, Moderate, or Strong, which occur in both uniform and layered sediment (the set column tells them apart), or one of three layered profiles: Alternating Strong-Weak, Cohesive Top Unit, or Random Heterogeneous. Strength describes how well sediment resists being pulled apart.',
+  cohesion: 'How strongly the simulated particles are bonded to one another — the model’s handle on sediment strength. For uniform sediment, a number in pascals (1.00E+05 is 0.1 MPa); for layered sediment, the profile’s code (such as K or R1).',
   set: 'Homogeneous or Heterogeneous: whether the sediment is one uniform material top to bottom, or layered with different strengths.',
   depth: 'Sediment depth, in metres. The thickness of the sediment above bedrock.',
   density: 'Sediment density (Dense, Medium, or Loose). How tightly packed the sediment is.',
   slip: 'Fault slip at this stage, in metres. How far the two blocks of rock move past each other along the fault. The simulations increase this movement step by step.',
-  scarp_height: 'Scarp height, in metres. The total height of the scarp above the undeformed ground on the lower side of the fault.',
+  scarp_height: 'Scarp height, in metres. The total height of the scarp above the undeformed ground on the lower side of the fault. Small negative heights are at the model’s resolution — single particles are about 0.02 m — and can reflect smoothing or extra compaction at low slip, not measured subsidence.',
   dzw: 'Deformation zone width, in metres. The width from the first sign of vertical ground movement on the raised side to the base of the scarp on the lower side.',
   scarp_dip: 'Scarp dip, in degrees. The angle of the scarp face from horizontal, from its top to its base. This is different from the angle of the fault underground.',
   scarp_class: 'Scarp type: one of the six shapes produced by the simulations — Monoclinal, Pressure Ridge, or Simple, each with or without Collapse. Empty for the zero-slip initial stages, which carry no scarp type.',
@@ -50,7 +50,7 @@ export const RECORDS_COLUMN_TEXTS: Readonly<Record<(typeof RECORDS_CSV_COLUMNS)[
 /** The statistics.csv columns: each of the first eleven alone, then the seven full-precision columns as one entry. */
 export const STATISTICS_COLUMN_TEXTS: readonly Entry[] = [
   ['measurement', 'The measurement: scarp_height, dzw, or scarp_dip.'],
-  ['label', 'The measurement’s name and unit, as the page shows them.'],
+  ['label', 'The measurement’s name and unit.'],
   ['valid', 'The number of measurements used.'],
   ['excluded_null', 'The number of matching stages without this measurement (missing values, excluded).'],
   ['median', 'The middle of the sorted measurements, also called the 50th percentile.'],
@@ -75,17 +75,12 @@ export function readmeText(withReport: boolean): string {
     `records.csv columns${LF}${LF}${RECORDS_CSV_COLUMNS.map(name => entry([name, RECORDS_COLUMN_TEXTS[name]])).join('')}`,
     `An empty field means the stage has no recorded value for that column.${LF}`,
     `statistics.csv columns${LF}${LF}${STATISTICS_COLUMN_TEXTS.map(entry).join('')}`,
-    `Values are in the unit of the measurement’s label. An empty field means the statistic could not be computed, for example when no measurement is used.${LF}`,
+    `The statistics are in the unit of the measurement’s label; valid and excluded_null are counts. An empty field means the statistic could not be computed: none when no measurement is used, and no standard deviation from a single measurement.${LF}`,
     `The citation, the caveats, and the licences of these files are in provenance.txt.${LF}`,
   ].join(LF);
 }
 
-/** Every statistics.csv column the README names, for the coverage test. */
+/** Every statistics.csv column the README names; the Node test holds it to STATISTICS_CSV_COLUMNS. */
 export function readmeStatisticsColumns(): readonly string[] {
   return STATISTICS_COLUMN_TEXTS.flatMap(([names]) => names.split(', '));
-}
-
-// The README must name every column of both headers; a header change fails here at load.
-for (const name of STATISTICS_CSV_COLUMNS) {
-  if (!readmeStatisticsColumns().includes(name)) throw new Error(`readme: statistics.csv column ${name} is not described`);
 }

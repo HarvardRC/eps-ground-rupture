@@ -1118,7 +1118,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   }
 
   /**
-   * The guided download (§13.1): the four data members and report.docx,
+   * The guided download (§13.1): README.txt, the four data members, and report.docx,
    * composed at one instant. A second activation while the archive is
    * being assembled is ignored; a report failure still delivers the data
    * files and says so (§13.5).

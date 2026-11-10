@@ -52,7 +52,7 @@ describe('README.txt (G-30)', () => {
     }
   });
 
-  test('the page’s own wording carries the measurements', () => {
+  test('the page’s wording carries the measurements, verbatim where it is reused', () => {
     const text = readmeText(true);
     assert.ok(text.includes('The thickness of the sediment above bedrock.'));
     assert.ok(text.includes('The middle of the sorted measurements, also called the 50th percentile.'));
@@ -94,7 +94,11 @@ describe('zipcheck.py and README.txt', () => {
     assert.match(missing.output, /does not describe the records\.csv columns \['scarp_dip'\]/);
     const report = check(readmeText(true), 'report');
     assert.equal(report.status, 1);
-    assert.match(report.output, /names report\.docx, which the archive does not carry/);
+    assert.match(report.output, /mentions report\.docx, which the archive does not carry/);
+    // A description that happens to mention a column never stands in for its entry.
+    const masked = check(readmeText(false).replace('\ndzw\n', '\ndzw_\n'), 'masked');
+    assert.equal(masked.status, 1);
+    assert.match(masked.output, /does not describe the records\.csv columns \['dzw'\]/);
     const crlf = check(readmeText(false).split('\n').join('\r\n'), 'crlf');
     assert.equal(crlf.status, 1);
     assert.match(crlf.output, /not LF-ended text/);
