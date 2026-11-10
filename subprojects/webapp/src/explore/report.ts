@@ -395,12 +395,12 @@ export interface GuidedArchive {
  * members exist throws, as the shared package does; a failure while
  * building the report leaves it out entirely (§13.5) and is returned.
  */
-export async function guidedArchive(input: RenderInput, stamps: VersionStamps, generatedAt: Date, rasterize: Rasterize): Promise<GuidedArchive> {
+export async function guidedArchive(input: RenderInput, stamps: VersionStamps, generatedAt: Date, rasterize: Rasterize, explorerUrl = ''): Promise<GuidedArchive> {
   const encoder = new TextEncoder();
   const members: ZipMember[] = packageTexts(input, stamps, generatedAt).map(member => ({ name: member.name, bytes: encoder.encode(member.text) }));
   const fileName = downloadFileName(input.scenario, input.vintage.manifest, generatedAt);
   // README.txt opens the archive (G-30), naming the report only when the archive carries it.
-  const readme = (withReport: boolean): ZipMember => ({ name: README_MEMBER, bytes: encoder.encode(readmeText(withReport)) });
+  const readme = (withReport: boolean): ZipMember => ({ name: README_MEMBER, bytes: encoder.encode(readmeText(withReport, explorerUrl)) });
   try {
     const report = await reportDocx(input, stamps, generatedAt, rasterize);
     return { fileName, bytes: zip([readme(true), ...members, { name: REPORT_MEMBER, bytes: report }], generatedAt), reportError: null };

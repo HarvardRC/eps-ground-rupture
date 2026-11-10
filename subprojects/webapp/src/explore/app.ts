@@ -1128,7 +1128,9 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
     const input = result;
     downloading = true;
     try {
-      const archive = await guidedArchive(input, stamps, new Date(), rasterizeSvg);
+      // The README names the explorer by the page's canonical address, the site's configured URL (G-30).
+      const canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.href ?? '';
+      const archive = await guidedArchive(input, stamps, new Date(), rasterizeSvg, canonical);
       // A newer result (or a new scenario) replaced the one clicked while the archive was assembled: deliver nothing, and leave its status alone.
       if (!alive() || result !== input) return;
       if (archive.reportError !== null) console.error('Guided report:', archive.reportError);

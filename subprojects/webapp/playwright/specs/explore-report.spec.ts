@@ -106,7 +106,8 @@ test('a failing canvas still delivers the data files and says the report is miss
   const captured = await readDownload(download, testInfo, 'report-fallback');
   expect([...captured.members.keys()]).toEqual([...GUIDED_FALLBACK_MEMBER_NAMES]);
   // Without the report, the README names only what the archive carries (G-30).
-  expect(captured.members.get('README.txt')!.toString('utf8')).toBe(readmeText(false));
+  const canonical = await page.locator('link[rel="canonical"]').getAttribute('href');
+  expect(captured.members.get('README.txt')!.toString('utf8')).toBe(readmeText(false, canonical!));
   const check = spawnSync('python3', ['-I', 'test/zipcheck.py', `--members=${GUIDED_FALLBACK_MEMBER_NAMES.join(',')}`, captured.path, captured.instant], { cwd: WEBAPP_DIR, encoding: 'utf8' });
   expect(`${check.status} ${check.stdout}${check.stderr}`).toBe('0 ');
 });

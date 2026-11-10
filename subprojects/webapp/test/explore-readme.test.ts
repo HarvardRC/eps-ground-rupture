@@ -43,6 +43,12 @@ describe('README.txt (G-30)', () => {
     for (const column of STATISTICS_CSV_COLUMNS) assert.ok(listed.includes(column), column);
   });
 
+  test('the explorer’s address stands under the title when given', () => {
+    const text = readmeText(true, 'https://harvardrc.github.io/eps-ground-rupture/explore/');
+    assert.ok(text.startsWith('Ground Rupture Explorer — scenario download\nhttps://harvardrc.github.io/eps-ground-rupture/explore/\n\n'));
+    assert.ok(!text.includes('confirmed'), 'no "confirmed" anywhere (the owner, 2026-11-10)');
+  });
+
   test('plain text: LF line ends, a final LF, no tab, and the pointer to provenance.txt', () => {
     for (const text of [readmeText(true), readmeText(false)]) {
       assert.ok(!text.includes('\r') && !text.includes('\t'));
