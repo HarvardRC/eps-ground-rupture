@@ -58,6 +58,9 @@ measure, on a shared axis, for the two quantities the paper compares:
 
 [Open full-size on Tableau Public](https://public.tableau.com/app/profile/michael.bouzinier/viz/per-event-box-plots-public/Per-EventBoxplotsModelvsField){ .embed-fallback } <button class="cite-open" type="button">How to cite</button>
 
+Contains information from the Homogeneous and Heterogeneous 2D DEM Experiments (Chiama et al. 2024a, 2024b; DesignSafe-CI), which is made available here under the [Open Data Commons Attribution License (ODC-By 1.0)](https://opendatacommons.org/licenses/by/1-0/).
+{ .licence-notice }
+
 ### Why the width axis is logarithmic
 
 The width panels use a fixed
@@ -117,6 +120,9 @@ so you can narrow the 23 events to a comparable subset.
 </div>
 
 [Open full-size on Tableau Public](https://public.tableau.com/app/profile/michael.bouzinier/viz/per-event-box-plots-public/Per-EventBoxplotsVSSURE){ .embed-fallback } <button class="cite-open" type="button">How to cite</button>
+
+Contains information from the Homogeneous and Heterogeneous 2D DEM Experiments (Chiama et al. 2024a, 2024b; DesignSafe-CI), which is made available here under the [Open Data Commons Attribution License (ODC-By 1.0)](https://opendatacommons.org/licenses/by/1-0/).
+{ .licence-notice }
 
 !!! info "How each panel is filtered, and where the magnitudes come from"
     The FDHI panels keep only measurements the compilation marks as

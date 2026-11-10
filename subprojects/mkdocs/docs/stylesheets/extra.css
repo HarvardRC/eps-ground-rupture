@@ -228,6 +228,20 @@ a.embed-fallback {
   color: var(--md-default-fg-color--light);
 }
 
+/* The ODC-By 1.0 notice the DEM data's licence asks for, under each embedded
+ * dashboard and on the existing explorer (data/REDISTRIBUTION.md; G-28). */
+p.licence-notice {
+  font-size: 0.75rem;
+  color: var(--md-default-fg-color--light);
+}
+
+/* Under a dashboard it joins the "Open full-size" line above it. Elsewhere
+ * (the existing explorer's page) it keeps its own margin, so it never
+ * overlaps the application above it. */
+.tableau-fit + p + p.licence-notice {
+  margin-top: -1rem;
+}
+
 /* "How to cite" — the button, and the modal it opens.
  *
  * Behaviour lives in docs/javascripts/cite-modal.js; these rules are the

@@ -86,6 +86,9 @@ defined in
 
 [Open full-size on Tableau Public](https://public.tableau.com/app/profile/michael.bouzinier/viz/dem-model-vs-reality-public/Dashboard1DEMCloudHistoricOverlays){ .embed-fallback } <button class="cite-open" type="button">How to cite</button>
 
+Contains information from the Homogeneous and Heterogeneous 2D DEM Experiments (Chiama et al. 2024a, 2024b; DesignSafe-CI), which is made available here under the [Open Data Commons Attribution License (ODC-By 1.0)](https://opendatacommons.org/licenses/by/1-0/).
+{ .licence-notice }
+
 ## Viable combinations
 
 The same workbook carries a second view: a **coverage matrix**. Pick any two
@@ -107,6 +110,9 @@ one no observed earthquake happens to occupy.
 </div>
 
 [Open full-size on Tableau Public](https://public.tableau.com/app/profile/michael.bouzinier/viz/dem-model-vs-reality-public/ViableCombinations){ .embed-fallback } <button class="cite-open" type="button">How to cite</button>
+
+Contains information from the Homogeneous and Heterogeneous 2D DEM Experiments (Chiama et al. 2024a, 2024b; DesignSafe-CI), which is made available here under the [Open Data Commons Attribution License (ODC-By 1.0)](https://opendatacommons.org/licenses/by/1-0/).
+{ .licence-notice }
 
 ## Where this comes from
 

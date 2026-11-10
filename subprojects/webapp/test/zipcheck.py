@@ -19,6 +19,11 @@ every part stored with flag_bits 0, an ASCII name, and the same date_time;
 every XML part well formed; each image relationship naming a media part,
 every media part named by one, and every r:embed resolving to one; each
 media part a PNG; [Content_Types].xml declaring the main document and PNG. Its bytes are never digested: PNG bytes vary by browser.
+In both layouts provenance.txt must end with the Licences block of G-28
+(data/REDISTRIBUTION.md): records.csv and statistics.csv under ODC-By 1.0
+with its URL, the produced works under CC BY 4.0 with its URL, then the
+notice ODC-By 1.0 asks for; in the guided layout report.docx's document
+must carry that notice too.
 Standard library only. Prints one line per failure and exits 1 on any.
 """
 
@@ -47,6 +52,18 @@ REL_NS = "{http://schemas.openxmlformats.org/package/2006/relationships}"
 R_EMBED = "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed"
 IMAGE_TYPE = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image"
 CT_NS = "{http://schemas.openxmlformats.org/package/2006/content-types}"
+ODC_BY_URL = "https://opendatacommons.org/licenses/by/1-0/"
+CC_BY_URL = "https://creativecommons.org/licenses/by/4.0/"
+NOTICE = (
+    "Contains information from the Homogeneous and Heterogeneous 2D DEM Experiments "
+    "(Chiama et al. 2024a, 2024b; DesignSafe-CI), which is made available here under the "
+    "Open Data Commons Attribution License (ODC-By 1.0)."
+)
+DATA_LINE = f"records.csv and statistics.csv: Open Data Commons Attribution License (ODC-By 1.0), {ODC_BY_URL}"
+WORKS_LINE = (
+    "Charts, chart images, and reports built from these results: "
+    f"Creative Commons Attribution 4.0 International (CC BY 4.0), {CC_BY_URL}"
+)
 MAIN_TYPE = "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"
 
 
@@ -130,6 +147,21 @@ def check_report(data: bytes, expected_time: tuple) -> list[str]:
     return failures
 
 
+def check_licences(provenance: str) -> list[str]:
+    """G-28: provenance.txt's last block is Licences — data, works, notice —
+    closed, like every block, by one empty line."""
+    if not provenance.endswith("\n\n"):
+        return ["provenance.txt: the last block is not closed by an empty line"]
+    last = provenance[:-2].split("\n\n")[-1].split("\n")
+    if len(last) != 4 or last[0] != "Licences":
+        return [f"provenance.txt: the last block is {last[:1]!r} with {len(last) - 1} lines, expected Licences and 3"]
+    failures: list[str] = []
+    for got, want, what in zip(last[1:], (DATA_LINE, WORKS_LINE, NOTICE), ("data licence line", "works licence line", "notice")):  # noqa: B905 - both 3
+        if got != want:
+            failures.append(f"provenance.txt: the {what} {got!r} is not {want!r}")
+    return failures
+
+
 def check(path: str, when: str, digests: list[str], members: tuple[str, ...] = MEMBERS) -> list[str]:
     failures: list[str] = []
     expected_time = instant(when)
@@ -152,8 +184,17 @@ def check(path: str, when: str, digests: list[str], members: tuple[str, ...] = M
                 actual = hashlib.sha256(archive.read(info)).hexdigest()
                 if actual != digest.lower():
                     failures.append(f"{info.filename}: SHA-256 {actual}, expected {digest}")
+        if "provenance.txt" in names:
+            failures += check_licences(archive.read("provenance.txt").decode("utf-8"))
         if members[-1] == REPORT and REPORT in names:
-            failures += check_report(archive.read(REPORT), expected_time)
+            report = archive.read(REPORT)
+            failures += check_report(report, expected_time)
+            try:
+                with zipfile.ZipFile(io.BytesIO(report)) as docx:
+                    if NOTICE not in docx.read("word/document.xml").decode("utf-8"):
+                        failures.append("report.docx: word/document.xml lacks the ODC-By 1.0 notice")
+            except (KeyError, zipfile.BadZipFile) as exc:
+                failures.append(f"report.docx: the notice could not be read: {exc}")
     return failures
 
 

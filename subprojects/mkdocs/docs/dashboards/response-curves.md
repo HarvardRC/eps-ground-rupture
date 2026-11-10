@@ -132,6 +132,9 @@ difference a cohesive top unit makes at the same slip and dip.
 
 [Open full-size on Tableau Public](https://public.tableau.com/app/profile/michael.bouzinier/viz/dem-response-curve-public/DEMResponseCurves){ .embed-fallback } <button class="cite-open" type="button">How to cite</button>
 
+Contains information from the Homogeneous and Heterogeneous 2D DEM Experiments (Chiama et al. 2024a, 2024b; DesignSafe-CI), which is made available here under the [Open Data Commons Attribution License (ODC-By 1.0)](https://opendatacommons.org/licenses/by/1-0/).
+{ .licence-notice }
+
 ## Where this comes from
 
 This is **chart family 2** in the project's inventory, which maps it to the

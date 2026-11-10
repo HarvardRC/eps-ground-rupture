@@ -142,7 +142,7 @@ extra_css:
   # every browser that had seen the site before showed the old chrome until a
   # hard reload. MkDocs passes the query through to the <link> and still writes
   # the file, so nothing else changes.
-  - stylesheets/extra.css?v=20260916
+  - stylesheets/extra.css?v=20261109
 
 # The abbreviation definitions are an include, not a page.
 exclude_docs: |
