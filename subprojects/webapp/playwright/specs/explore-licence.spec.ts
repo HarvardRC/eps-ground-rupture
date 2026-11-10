@@ -7,8 +7,8 @@
 
 import { expect, test } from '@playwright/test';
 import { copyText } from '../../src/views/copy';
-import { captureDownload, gotoScenario, provenanceBlock, readDownload, unzipStored } from '../support';
-import { confirmGolden, gotoExplore } from '../explore-support';
+import { captureDownload, gotoScenario, manifest, provenanceBlock, readDownload, unzipStored } from '../support';
+import { action, chooseRange, confirmGolden, gotoExplore, sedimentName, setChecked, siteChoice, stepButton, typeEntry } from '../explore-support';
 
 test.describe.configure({ timeout: 120_000 });
 
@@ -49,6 +49,40 @@ test('the guided page: the notice under the chart, and the Licences block in the
   const document = unzipStored(captured.members.get('report.docx')!).get('word/document.xml')!.toString('utf8');
   // The report's Provenance section carries the same three lines (none holds an XML-escaped character).
   for (const line of LICENCES) expect(document).toContain(line);
+});
+
+test('a result too small to chart shows the notice under its statistics table; an empty result shows none', async ({ page }) => {
+  // Random Heterogeneous at dense 10 m and 20°, slip 0–0.15 m: scarp dip has one measurement, below the chart floor.
+  const random = manifest().arm_strength_states.find((pair) => /random/i.test(pair.sediment_strength))!;
+  await gotoExplore(page);
+  await action(page, 'Build your scenario').click();
+  await chooseRange(page, 'faultDip', 0, 0);
+  await chooseRange(page, 'depth', 2, 2);
+  await siteChoice(page, 'density', 'Dense').click();
+  await siteChoice(page, 'sediment', sedimentName(random)).click();
+  await action(page, 'Continue to fault slip').click();
+  await setChecked(page, '#gx-mode-slip', true);
+  await typeEntry(page, 'slipMin', '0');
+  await typeEntry(page, 'slipMax', '0.15');
+  await action(page, 'Review scenario').click();
+  await action(page, 'Show results').click();
+  await page.locator('.gx-context').waitFor();
+  await page.locator('#gx-measurement-scarp_dip').click();
+  await expect(page.locator('#gx-chart')).toHaveCount(0);
+  const notice = page.locator('#gx-licence-notice');
+  await expect(notice).toHaveCount(1);
+  // Directly under the statistics table, the licence linked (owner's decision, 2026-11-09).
+  expect(await notice.evaluate((node) => node.previousElementSibling?.classList.contains('gx-statistics'))).toBe(true);
+  await expect(notice.getByRole('link')).toHaveAttribute('href', ODC_BY_URL);
+  await expect(notice).toContainText('Contains information from the Homogeneous and Heterogeneous 2D DEM Experiments');
+
+  // An empty result shows no simulation values, and no notice: Random Heterogeneous is modeled only at 10 m.
+  await stepButton(page, 'site').click();
+  await chooseRange(page, 'depth', 1, 1);
+  await stepButton(page, 'review').click();
+  await action(page, 'Show results').click();
+  await expect(page.locator('.gx-empty').first()).toBeVisible();
+  await expect(page.locator('#gx-licence-notice')).toHaveCount(0);
 });
 
 test('the existing explorer: the notice after its application, and the Licences block in its download', async ({ page }, testInfo) => {
