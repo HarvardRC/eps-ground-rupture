@@ -456,5 +456,18 @@ describe('report: the guided archive (§13.1, §13.5, §13.6)', () => {
     const broken = zipcheck([layout, brokenZip, AT_ISO, ...digests]);
     assert.equal(broken.status, 1);
     assert.match(broken.output, /image relationships/);
+
+    // A nested report whose document lost the ODC-By 1.0 notice (G-28).
+    const clean = unzip(members.get(REPORT_MEMBER)!);
+    const notice = copyText('ddd5.9.licenceNotice');
+    const text = new TextDecoder().decode(clean.get('word/document.xml')!);
+    assert.ok(text.includes(notice));
+    clean.set('word/document.xml', new TextEncoder().encode(text.split(notice).join('Contains information.')));
+    const noNoticeDocx = zip([...clean].map(([name, bytes]) => ({ name, bytes })), AT);
+    const noNoticeZip = `${OUT_DIR}no-notice.zip`;
+    writeFileSync(noNoticeZip, zip([...members].map(([name, bytes]) => ({ name, bytes: name === REPORT_MEMBER ? noNoticeDocx : bytes })), AT));
+    const noNotice = zipcheck([layout, noNoticeZip, AT_ISO, ...digests]);
+    assert.equal(noNotice.status, 1);
+    assert.match(noNotice.output, /report\.docx: word\/document\.xml lacks the ODC-By 1\.0 notice/);
   });
 });

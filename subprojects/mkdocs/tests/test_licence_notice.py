@@ -41,11 +41,16 @@ class LicenceNoticeTest(unittest.TestCase):
         self.assertEqual(LINK.sub(r"\1", markdown), registry_notice(), where)
 
     def test_registry_notice_is_the_redistribution_sentence(self) -> None:
-        # The quoted notice of data/REDISTRIBUTION.md, its lines joined.
-        quoted = " ".join(
-            line[2:].strip() for line in REDISTRIBUTION.read_text(encoding="utf-8").splitlines() if line.startswith("> ")
-        )
-        self.assertIn(registry_notice(), quoted)
+        # The blockquote directly after "The notice ODC-By 1.0 asks for", its lines joined.
+        lines = REDISTRIBUTION.read_text(encoding="utf-8").splitlines()
+        start = next(i for i, line in enumerate(lines) if line.startswith("The notice ODC-By 1.0 asks for"))
+        quote = []
+        for line in lines[start + 1 :]:
+            if line.startswith("> "):
+                quote.append(line[2:].strip())
+            elif quote:
+                break
+        self.assertEqual(" ".join(quote), registry_notice())
 
     def test_every_embedded_dashboard_carries_the_notice(self) -> None:
         for name in DASHBOARDS:

@@ -50,10 +50,10 @@ function generator(seed: number): () => number {
   };
 }
 
-/** The four package members (§5.9) with fixed contents, non-ASCII text and an empty member among them. */
 /** provenance.txt's closing Licences block (G-28), which zipcheck.py requires in every layout. */
 const LICENCES = ['ddd5.9.labelLicences', 'ddd5.9.licenceData', 'ddd5.9.licenceWorks', 'ddd5.9.licenceNotice'].map((key) => `${copyText(key)}\n`).join('') + '\n';
 
+/** The four package members (§5.9) with fixed contents, non-ASCII text and an empty member among them. */
 function members(): ZipMember[] {
   const encoder = new TextEncoder();
   return [
@@ -201,6 +201,14 @@ describe('zip: the independent reader', () => {
     writeFileSync(FIXTURE_ZIP, zip(withProvenance(LICENCES.replace('ODC-By 1.0).\n\n', 'ODC-By).\n\n')), AT));
     const altered = zipcheck([FIXTURE_ZIP, AT_ISO]);
     assert.equal(altered.status, 1);
-    assert.match(altered.output, /is not the ODC-By 1\.0 notice/);
+    assert.match(altered.output, /the notice .* is not /);
+    // A Licences block not closed by an empty line.
+    writeFileSync(FIXTURE_ZIP, zip(withProvenance(LICENCES.slice(0, -1)), AT));
+    const unclosed = zipcheck([FIXTURE_ZIP, AT_ISO]);
+    assert.equal(unclosed.status, 1);
+    assert.match(unclosed.output, /not closed by an empty line/);
+    // A data line naming another licence.
+    writeFileSync(FIXTURE_ZIP, zip(withProvenance(LICENCES.replace('records.csv and statistics.csv: Open Data Commons Attribution License (ODC-By 1.0)', 'records.csv and statistics.csv: CC BY 4.0')), AT));
+    assert.equal(zipcheck([FIXTURE_ZIP, AT_ISO]).status, 1);
   });
 });

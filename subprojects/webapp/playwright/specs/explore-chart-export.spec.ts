@@ -59,10 +59,12 @@ test('each rendered chart offers the export; the PNG and its sidecar download wi
   expect(height.sidecarName).toBe(height.pngName.replace(/\.png$/, '-provenance.txt'));
   const [w, h] = pngSize(height.png);
   expect(w).toBe(1200);
-  // The strip lies beneath the 600 px-high chart: at least its seven fixed lines plus the Kern sample's notes.
-  expect(h).toBeGreaterThan(600 + 2 * 7 * 15);
+  // The strip lies beneath the 600 px-high chart: at least its eight fixed lines (the ODC-By 1.0 notice among them) plus the Kern sample's notes.
+  expect(h).toBeGreaterThan(600 + 2 * 8 * 15);
   expect(height.png.length).toBeGreaterThan(20_000);
   expect(height.sidecar).toContain('Paper citation');
+  // The sidecar closes with the Licences block and the notice ODC-By 1.0 asks for (G-28).
+  expect(height.sidecar.endsWith(`Licences\n${copyText('ddd5.9.licenceData')}\n${copyText('ddd5.9.licenceWorks')}\n${copyText('ddd5.9.licenceNotice')}\n\n`)).toBe(true);
   expect(height.sidecar).toContain(DECIDED_LOW_SLIP);
   expect(height.sidecar).not.toContain(copyText('pdd5.9.lowSlipCaveat'));
   await expect(exportStatus(page)).toHaveText(CHART_EXPORT_READY);

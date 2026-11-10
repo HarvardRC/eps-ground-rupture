@@ -13,7 +13,8 @@
 //   first, second, and second trial's names and site conditions.
 // - The `statistics.csv` display columns equal `displayRound` of the
 //   injected values; both version stamps.
-// - The nine provenance label lines in the PDD §6.1 order, block 5 equal
+// - The ten provenance label lines in the PDD §6.1 order (the tenth,
+//   Licences, closing the file with the ODC-By 1.0 notice, G-28), block 5 equal
 //   to `settingsText` of the snapshot, block 8 the `generatedAt` instant;
 //   on an offset-mode input with a `partly_out` dip and a converted window
 //   starting below `t_s`, block 9 equal, line for line, to the `caveats`

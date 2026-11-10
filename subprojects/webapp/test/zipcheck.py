@@ -59,6 +59,11 @@ NOTICE = (
     "(Chiama et al. 2024a, 2024b; DesignSafe-CI), which is made available here under the "
     "Open Data Commons Attribution License (ODC-By 1.0)."
 )
+DATA_LINE = f"records.csv and statistics.csv: Open Data Commons Attribution License (ODC-By 1.0), {ODC_BY_URL}"
+WORKS_LINE = (
+    "Charts, chart images, and reports built from these results: "
+    f"Creative Commons Attribution 4.0 International (CC BY 4.0), {CC_BY_URL}"
+)
 MAIN_TYPE = "application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"
 
 
@@ -143,18 +148,17 @@ def check_report(data: bytes, expected_time: tuple) -> list[str]:
 
 
 def check_licences(provenance: str) -> list[str]:
-    """G-28: provenance.txt's last block is Licences — data, works, notice."""
-    last = provenance.rstrip("\n").split("\n\n")[-1].split("\n")
+    """G-28: provenance.txt's last block is Licences — data, works, notice —
+    closed, like every block, by one empty line."""
+    if not provenance.endswith("\n\n"):
+        return ["provenance.txt: the last block is not closed by an empty line"]
+    last = provenance[:-2].split("\n\n")[-1].split("\n")
     if len(last) != 4 or last[0] != "Licences":
         return [f"provenance.txt: the last block is {last[:1]!r} with {len(last) - 1} lines, expected Licences and 3"]
     failures: list[str] = []
-    data, works, notice = last[1:]
-    if not (data.startswith("records.csv and statistics.csv:") and "ODC-By 1.0" in data and data.endswith(ODC_BY_URL)):
-        failures.append(f"provenance.txt: the data licence line {data!r} lacks the CSVs, ODC-By 1.0, or its URL")
-    if not ("CC BY 4.0" in works and works.endswith(CC_BY_URL)):
-        failures.append(f"provenance.txt: the works licence line {works!r} lacks CC BY 4.0 or its URL")
-    if notice != NOTICE:
-        failures.append(f"provenance.txt: the notice {notice!r} is not the ODC-By 1.0 notice")
+    for got, want, what in zip(last[1:], (DATA_LINE, WORKS_LINE, NOTICE), ("data licence line", "works licence line", "notice")):  # noqa: B905 - both 3
+        if got != want:
+            failures.append(f"provenance.txt: the {what} {got!r} is not {want!r}")
     return failures
 
 
