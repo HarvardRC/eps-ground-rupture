@@ -44,7 +44,7 @@ export const RECORDS_COLUMN_TEXTS: Readonly<Record<(typeof RECORDS_CSV_COLUMNS)[
   scarp_height: 'Scarp height, in metres. The total height of the scarp above the undeformed ground on the lower side of the fault. Small negative heights are at the model’s resolution — single particles are about 0.02 m — and can reflect smoothing or extra compaction at low slip, not measured subsidence.',
   dzw: 'Deformation zone width, in metres. The width from the first sign of vertical ground movement on the raised side to the base of the scarp on the lower side.',
   scarp_dip: 'Scarp dip, in degrees. The angle of the scarp face from horizontal, from its top to its base. This is different from the angle of the fault underground.',
-  scarp_class: 'Scarp type: one of the six shapes produced by the simulations — Monoclinal, Pressure Ridge, or Simple, each with or without Collapse. Empty for the zero-slip initial stages, which carry no scarp type.',
+  scarp_class: 'Scarp type: one of the six shapes produced by the simulations — Monoclinal, Pressure Ridge, or Simple, each with or without Collapse. Blank for the zero-slip initial stages, which carry no scarp type.',
 };
 
 /** The statistics.csv columns: each of the first eleven alone, then the seven full-precision columns as one entry. */
