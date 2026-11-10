@@ -29,7 +29,7 @@ import { cumulativeChart, guidedChart, histogramBins, histogramChart } from '../
 import { computeResult } from '../src/explore/compute';
 import { guided } from '../src/explore/copy-overlay';
 import {
-  captionLines, countLine, documentXml, GUIDED_MEMBER_NAMES, guidedArchive, REPORT_CHART_HEIGHT, REPORT_CHART_WIDTH,
+  captionLines, countLine, documentXml, GUIDED_FALLBACK_MEMBER_NAMES, GUIDED_MEMBER_NAMES, guidedArchive, REPORT_CHART_HEIGHT, REPORT_CHART_WIDTH,
   REPORT_MEMBER, REPORT_PARTS, reportCharts, reportDocx, SCENARIO_LABEL_FILL, scenarioLabels, scenarioRows, scenarioSummary, type Rasterize,
 } from '../src/explore/report';
 import { NEGATIVE_HEIGHT_NOTE, negativeHeights, NO_MATCHES, PROVENANCE_HEADING, REPORT_TITLE } from '../src/explore/wording';
@@ -415,7 +415,7 @@ describe('report: the guided archive (§13.1, §13.5, §13.6)', () => {
     for (const rasterize of [failing, notPng]) {
       const archive = await guidedArchive(full, STAMPS, AT, rasterize);
       assert.ok(archive.reportError instanceof Error);
-      assert.deepEqual([...unzip(archive.bytes).keys()], [...PACKAGE_MEMBER_NAMES]);
+      assert.deepEqual([...unzip(archive.bytes).keys()], [...GUIDED_FALLBACK_MEMBER_NAMES]);
     }
   });
 
@@ -439,7 +439,9 @@ describe('report: the guided archive (§13.1, §13.5, §13.6)', () => {
     const layout = `--members=${GUIDED_MEMBER_NAMES.join(',')}`;
     const ok = zipcheck([layout, guidedZip, AT_ISO, ...digests]);
     assert.equal(ok.status, 0, ok.output);
-    assert.equal(zipcheck([fallbackZip, AT_ISO, ...digests]).status, 0, 'the fallback is the DDD §5.9 layout');
+    const fallbackLayout = `--members=${GUIDED_FALLBACK_MEMBER_NAMES.join(',')}`;
+    assert.equal(zipcheck([fallbackLayout, fallbackZip, AT_ISO, ...digests]).status, 0, 'the fallback is README.txt and the DDD §5.9 layout');
+    assert.equal(zipcheck([fallbackZip, AT_ISO]).status, 1, 'the fallback opens with README.txt, unlike the /scenario/ layout');
     assert.equal(zipcheck([layout, fallbackZip, AT_ISO]).status, 1, 'the guided layout requires report.docx');
     assert.equal(zipcheck([guidedZip, AT_ISO]).status, 1, 'the /scenario/ layout has no report.docx');
     const wrong = [...digests];

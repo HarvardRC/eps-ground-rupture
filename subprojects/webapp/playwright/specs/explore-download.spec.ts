@@ -6,6 +6,7 @@
 
 import { expect, test } from '@playwright/test';
 import { GUIDED_MEMBER_NAMES, REPORT_PARTS } from '../../src/explore/report';
+import { readmeText } from '../../src/explore/readme';
 import { pointer, readDownload, scenarioJson, unzipStored } from '../support';
 import { confirmGolden, gotoExplore, stepButton, typeEntry } from '../explore-support';
 
@@ -25,6 +26,8 @@ test('the confirmed package downloads while the draft differs', async ({ page },
   ]);
   const captured = await readDownload(download, testInfo, 'explore');
   expect([...captured.members.keys()]).toEqual([...GUIDED_MEMBER_NAMES]);
+  // README.txt opens the archive, the approved text exactly (G-30).
+  expect(captured.members.get('README.txt')!.toString('utf8')).toBe(readmeText(true));
   const report = unzipStored(captured.members.get('report.docx')!);
   expect([...report.keys()]).toEqual([...REPORT_PARTS]);
   const document = report.get('word/document.xml')!.toString('utf8');

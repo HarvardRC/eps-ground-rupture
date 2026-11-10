@@ -18,6 +18,7 @@
 // A browser-and-Node file (DDD §5.1): no DOM global, no DOM type.
 
 import * as config from '../config';
+import { README_MEMBER, readmeText } from './readme';
 import { PACKAGE_MEMBER_NAMES, packageTexts, provenanceText, utcInstant, type VersionStamps } from '../download/package';
 import { downloadFileName } from '../download/file-name';
 import { zip, type ZipMember } from '../download/zip';
@@ -44,7 +45,9 @@ export type Rasterize = (svg: string, width: number, height: number) => Promise<
 export const REPORT_MEMBER = 'report.docx';
 
 /** The guided archive's members, in order (§13.6). */
-export const GUIDED_MEMBER_NAMES = [...PACKAGE_MEMBER_NAMES, REPORT_MEMBER] as const;
+export const GUIDED_MEMBER_NAMES = [README_MEMBER, ...PACKAGE_MEMBER_NAMES, REPORT_MEMBER] as const;
+/** The guided archive without its report (§13.5 fallback): README.txt, then the shared package. */
+export const GUIDED_FALLBACK_MEMBER_NAMES = [README_MEMBER, ...PACKAGE_MEMBER_NAMES] as const;
 
 /** The fixed parts of `report.docx`, before its media (§13.4). */
 export const REPORT_PARTS = ['[Content_Types].xml', '_rels/.rels', 'word/document.xml', 'word/_rels/document.xml.rels'] as const;
@@ -395,12 +398,14 @@ export async function guidedArchive(input: RenderInput, stamps: VersionStamps, g
   const encoder = new TextEncoder();
   const members: ZipMember[] = packageTexts(input, stamps, generatedAt).map(member => ({ name: member.name, bytes: encoder.encode(member.text) }));
   const fileName = downloadFileName(input.scenario, input.vintage.manifest, generatedAt);
+  // README.txt opens the archive (G-30), naming the report only when the archive carries it.
+  const readme = (withReport: boolean): ZipMember => ({ name: README_MEMBER, bytes: encoder.encode(readmeText(withReport)) });
   try {
     const report = await reportDocx(input, stamps, generatedAt, rasterize);
-    return { fileName, bytes: zip([...members, { name: REPORT_MEMBER, bytes: report }], generatedAt), reportError: null };
+    return { fileName, bytes: zip([readme(true), ...members, { name: REPORT_MEMBER, bytes: report }], generatedAt), reportError: null };
   } catch (error) {
     // Anything that fails once the report is involved, the outer archive included, leaves the report out (§13.5).
-    return { fileName, bytes: zip(members, generatedAt), reportError: error ?? new Error('report: failed') };
+    return { fileName, bytes: zip([readme(false), ...members], generatedAt), reportError: error ?? new Error('report: failed') };
   }
 }
 
