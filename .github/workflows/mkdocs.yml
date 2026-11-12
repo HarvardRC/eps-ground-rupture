@@ -64,6 +64,14 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # Gradle 8.10.2 runs on JDK 8–23 (ADR-0001); the runner image's default
+      # JDK moved past that on ubuntu-26.04, so every job that runs the
+      # wrapper pins JDK 21 first (G-31).
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+
       - name: Webapp checks
         run: ./gradlew :subprojects:webapp:check
 
@@ -87,6 +95,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+
+      # Gradle 8.10.2 runs on JDK 8–23 (ADR-0001); the runner image's default
+      # JDK moved past that on ubuntu-26.04, so every job that runs the
+      # wrapper pins JDK 21 first (G-31).
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
 
       - uses: actions/setup-python@v7
         with:
