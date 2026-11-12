@@ -11,7 +11,10 @@ text member in order), each text member's bytes match its digest.
 
 The expected list (guided DDD §13.6) is records.csv, statistics.csv,
 provenance.txt, and scenario.json by default, the /scenario/ layout of DDD
-§5.9; or those four and report.docx, the guided layout. For the guided
+§5.9; or README.txt, those four, and report.docx, the guided layout; or
+README.txt and those four, the guided layout whose report could not be
+built (§13.5). README.txt (G-30) must be plain UTF-8 with LF line ends and
+name every member present and every column of both CSV headers. For the guided
 layout report.docx is opened as a nested archive and must hold the §13.4
 part set: [Content_Types].xml, _rels/.rels, word/document.xml,
 word/_rels/document.xml.rels, then word/media/chart-1.png ... chart-n.png,
@@ -39,7 +42,8 @@ from xml.etree import ElementTree
 
 MEMBERS = ("records.csv", "statistics.csv", "provenance.txt", "scenario.json")
 REPORT = "report.docx"
-LAYOUTS = (MEMBERS, (*MEMBERS, REPORT))
+README = "README.txt"
+LAYOUTS = (MEMBERS, (README, *MEMBERS), (README, *MEMBERS, REPORT))
 REPORT_PARTS = (
     "[Content_Types].xml",
     "_rels/.rels",
@@ -162,6 +166,40 @@ def check_licences(provenance: str) -> list[str]:
     return failures
 
 
+def check_readme(archive: zipfile.ZipFile, names: tuple[str, ...]) -> list[str]:
+    """G-30: README.txt opens the guided archive, plain UTF-8 with LF line ends,
+    naming every member present and every column of both CSV headers."""
+    try:
+        text = archive.read(README).decode("utf-8")
+    except UnicodeDecodeError as exc:
+        return [f"{README}: not UTF-8: {exc}"]
+    failures: list[str] = []
+    if "\r" in text or not text.endswith("\n"):
+        failures.append(f"{README}: not LF-ended text")
+    # Entries are the unindented lines of each section; descriptions are indented
+    # and never count as naming anything. Sections start at their heading.
+    sections: dict[str, set[str]] = {}
+    current = ""
+    for line in text.split("\n"):
+        if line in ("Files", "records.csv columns", "statistics.csv columns"):
+            current = line
+        elif line and not line.startswith(" ") and current:
+            sections.setdefault(current, set()).update(line.split(", "))
+    for name in names:
+        if name not in sections.get("Files", set()):
+            failures.append(f"{README}: does not name the member {name}")
+    if REPORT not in names and REPORT in text:
+        failures.append(f"{README}: mentions {REPORT}, which the archive does not carry")
+    for csv in ("records.csv", "statistics.csv"):
+        if csv in names:
+            header = archive.read(csv).decode("utf-8-sig").split("\n", 1)[0].split(",")
+            listed = sections.get(f"{csv} columns", set())
+            missing = [column.strip('"') for column in header if column.strip('"') not in listed]
+            if missing:
+                failures.append(f"{README}: does not describe the {csv} columns {missing!r}")
+    return failures
+
+
 def check(path: str, when: str, digests: list[str], members: tuple[str, ...] = MEMBERS) -> list[str]:
     failures: list[str] = []
     expected_time = instant(when)
@@ -186,6 +224,8 @@ def check(path: str, when: str, digests: list[str], members: tuple[str, ...] = M
                     failures.append(f"{info.filename}: SHA-256 {actual}, expected {digest}")
         if "provenance.txt" in names:
             failures += check_licences(archive.read("provenance.txt").decode("utf-8"))
+        if members[0] == README and names[:1] == (README,):
+            failures += check_readme(archive, names)
         if members[-1] == REPORT and REPORT in names:
             report = archive.read(REPORT)
             failures += check_report(report, expected_time)

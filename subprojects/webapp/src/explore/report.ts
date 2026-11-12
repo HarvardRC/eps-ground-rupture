@@ -1,6 +1,7 @@
 // The result report of guided DDD §13 (PDD §6.5, D-40, D-48): the guided
-// download's archive, composed here from the four shared text members of
-// DDD §5.9 (`packageTexts`, unchanged) and `report.docx` last, written by
+// download's archive, composed here from README.txt first (G-30), the four
+// shared text members of DDD §5.9 (`packageTexts`, unchanged), and
+// `report.docx` last, written by
 // the shared `zip` writer (unchanged) at the handler's one `generatedAt`.
 //
 // `report.docx` is itself a stored ZIP of the minimal OOXML part set of
@@ -18,6 +19,7 @@
 // A browser-and-Node file (DDD §5.1): no DOM global, no DOM type.
 
 import * as config from '../config';
+import { README_MEMBER, readmeText } from './readme';
 import { PACKAGE_MEMBER_NAMES, packageTexts, provenanceText, utcInstant, type VersionStamps } from '../download/package';
 import { downloadFileName } from '../download/file-name';
 import { zip, type ZipMember } from '../download/zip';
@@ -44,7 +46,9 @@ export type Rasterize = (svg: string, width: number, height: number) => Promise<
 export const REPORT_MEMBER = 'report.docx';
 
 /** The guided archive's members, in order (§13.6). */
-export const GUIDED_MEMBER_NAMES = [...PACKAGE_MEMBER_NAMES, REPORT_MEMBER] as const;
+export const GUIDED_MEMBER_NAMES = [README_MEMBER, ...PACKAGE_MEMBER_NAMES, REPORT_MEMBER] as const;
+/** The guided archive without its report (§13.5 fallback): README.txt, then the shared package. */
+export const GUIDED_FALLBACK_MEMBER_NAMES = [README_MEMBER, ...PACKAGE_MEMBER_NAMES] as const;
 
 /** The fixed parts of `report.docx`, before its media (§13.4). */
 export const REPORT_PARTS = ['[Content_Types].xml', '_rels/.rels', 'word/document.xml', 'word/_rels/document.xml.rels'] as const;
@@ -391,16 +395,18 @@ export interface GuidedArchive {
  * members exist throws, as the shared package does; a failure while
  * building the report leaves it out entirely (§13.5) and is returned.
  */
-export async function guidedArchive(input: RenderInput, stamps: VersionStamps, generatedAt: Date, rasterize: Rasterize): Promise<GuidedArchive> {
+export async function guidedArchive(input: RenderInput, stamps: VersionStamps, generatedAt: Date, rasterize: Rasterize, explorerUrl = ''): Promise<GuidedArchive> {
   const encoder = new TextEncoder();
   const members: ZipMember[] = packageTexts(input, stamps, generatedAt).map(member => ({ name: member.name, bytes: encoder.encode(member.text) }));
   const fileName = downloadFileName(input.scenario, input.vintage.manifest, generatedAt);
+  // README.txt opens the archive (G-30), naming the report only when the archive carries it.
+  const readme = (withReport: boolean): ZipMember => ({ name: README_MEMBER, bytes: encoder.encode(readmeText(withReport, explorerUrl)) });
   try {
     const report = await reportDocx(input, stamps, generatedAt, rasterize);
-    return { fileName, bytes: zip([...members, { name: REPORT_MEMBER, bytes: report }], generatedAt), reportError: null };
+    return { fileName, bytes: zip([readme(true), ...members, { name: REPORT_MEMBER, bytes: report }], generatedAt), reportError: null };
   } catch (error) {
     // Anything that fails once the report is involved, the outer archive included, leaves the report out (§13.5).
-    return { fileName, bytes: zip(members, generatedAt), reportError: error ?? new Error('report: failed') };
+    return { fileName, bytes: zip([readme(false), ...members], generatedAt), reportError: error ?? new Error('report: failed') };
   }
 }
 

@@ -3401,6 +3401,169 @@ Not verified:
   existing fallback links);
 - browsers other than Chromium.
 
+### README in the download, 2026-11-11 (G-30)
+
+G-30 ran under the owner's release of 2026-11-09 (the dated paragraph
+and the G-30 row; owner push `efc696f`), after G-28. The approved text
+is recorded in guided DDD §18 (owner push `6989e55`).
+
+**What changed.**
+
+- **The archive.** The guided page's download ZIP opens with
+  `README.txt`, composed beside the shared `packageTexts` in
+  `src/explore/readme.ts`, as `report.docx` is (G-13). The shared
+  download code and the `/scenario/` package are unchanged.
+  - The guided layout is `README.txt`, the four DDD §5.9 members, then
+    `report.docx`.
+  - When the report cannot be built (§13.5), it is `README.txt` and the
+    four members, and the README names only what the archive carries.
+- **What the README holds.**
+  - The title, with the explorer's address beneath it. The address is
+    read at download time from the page's canonical link, which the site
+    writes from its configured URL.
+  - What the archive contains, what a stage is and how the Simulation
+    stages choice decides the rows, and that these are simulation
+    results, not site predictions.
+  - One entry per member.
+  - The meaning and unit of every `records.csv` and `statistics.csv`
+    column, with the blank-field notes and the statistics' method
+    (linear interpolation; the n − 1 denominator).
+  - The pointer to `provenance.txt` for the citation, the caveats, and
+    the licences.
+  - Plain UTF-8, LF line ends.
+- **The download hint and the report-failure line** now say "a report
+  … in Microsoft Word format", and the hint names the README.
+- **The zip checker** (`test/zipcheck.py`) gains both guided layouts with
+  `README.txt` first. It checks that the README is UTF-8 with LF line
+  ends, that its Files section names every member present, and that each
+  CSV section names every column of that file's header. Description
+  lines never count as naming anything. It also checks that the README
+  never mentions an absent report.
+
+**Approval: the owner's own (relayed by the planning session).**
+
+- **2026-11-10, revisions.** The owner asked for "Report in Microsoft
+  Word format", and for the explorer's address under the title. Their
+  combined revision, built on an outside review, set:
+  - the three-paragraph opening, with no "confirmed";
+  - the trial, fault-angle, sediment-strength, cohesion, `valid`,
+    `excluded_null`, `sd`, and `_full` wording;
+  - the blank-field notes and the methods line.
+
+  The planning session checked the review's claims against DDD §5.4,
+  and this task checked them against the code: `quantileLinear`,
+  `sampleSd`'s n − 1, `sd` null below two measurements, and the `_full`
+  columns written before `displayRound`.
+- **2026-11-10, approval.** "Yes, approve with these two changes":
+  - the scarp-type entry's "Blank for the zero-slip initial stages, which
+    carry no scarp type.";
+  - the status line "Your data download is ready. The report in
+    Microsoft Word format could not be built this time, so the archive
+    holds the data files without it."
+
+  The download hint is approved as built: "Matching simulation stages,
+  statistics, scenario settings and sources, with a report of this
+  result in Microsoft Word format (report.docx) and a README.txt that
+  describes each file."
+- **The record.** Guided DDD §18 (`6989e55`) holds the approved README
+  in a fenced block, with the hint and the status line. At this task's
+  head, the README the code produces with the report present, under the
+  site's configured address, is byte-identical to §18's fenced text. The
+  hint and the status line in `src/explore/wording.ts` equal §18's
+  quoted strings.
+
+**Lines sent for the research group's sight.**
+
+- **Reused from the page's own wording** (the guided tooltips; verbatim
+  unless marked):
+  - "The thickness of the sediment above bedrock."
+  - "How tightly packed the sediment is."
+  - "How far the two blocks of rock move past each other along the
+    fault. The simulations increase this movement step by step."
+  - the first sentences of scarp height and deformation zone width;
+  - both scarp-dip sentences;
+  - "Strength describes how well sediment resists being pulled apart.";
+  - the median sentence;
+  - "They bound the middle 68% of the distribution." (fitted);
+  - the scarp-type sentence (fitted);
+  - the approved negative-height note.
+- **Fitted from the site glossary:** `set` and `mean`.
+- **Assembled:** everything else. That includes the new fault-angle line
+  ("Smaller angles describe more gently inclined faults."), which
+  replaces the page tooltip's "A smaller angle describes a shallower
+  fault" here; the page itself is unchanged and the wording goes to the
+  group.
+- **Open with the group** (§18): what the trial identifiers (such as
+  `D10_K_dip20_FS0.25`) encode, and whether the page's own fault-dip
+  tooltip should change.
+
+**Review.** The independent review found one blocking error, fixed
+before approval.
+
+- **The blocking error.** The first text called Weak, Moderate, and
+  Strong uniform sediment only. The data holds them in layered sediment
+  too (567 layered trials, the page's "Layered: Weak/Moderate/Strong"),
+  so a reader filtering on "Strong" would have mixed the two.
+- **Also applied:**
+  - cohesion's unit, pascals, as the response-curves page shows it;
+  - the `label` line no longer claims the page's spelling;
+    `statistics.csv` writes the registry's "Deformation-zone width (m)";
+  - the negative-height note;
+  - the zip checker reads each section's entries only, after a
+    description mentioning `dzw` had masked a missing entry (a test now
+    covers it);
+  - the import-time column check is removed, since the Node test holds
+    it.
+
+Tests and specs:
+
+- **Node** (`test/explore-readme.test.ts`):
+  - the README first, naming every member, with the report only when
+    carried;
+  - every column of both files, `records.csv` in order;
+  - the explorer's address under the title, and no "confirmed";
+  - LF-only plain text and the closing pointer;
+  - the reused page wording;
+  - the checker accepting the fallback layout, and rejecting a missing
+    column, a masked one, an absent report mentioned, and CR line ends.
+
+  `explore-report.test.ts` checks both layouts with the checker.
+- **Specs.**
+  - `explore-download` compares the real download's README with the
+    approved text, the canonical address equal to the site's URL plus
+    `explore/`.
+  - `explore-report` does the same for the report-less archive and
+    checks it with the checker's fallback layout.
+  - `explore-report` and `explore-polish` assert the hint.
+
+At this verification, on `task/g-30-download-readme` at `854b9a5`, over
+`6989e55` (the owner's commit of guided DDD §18):
+
+- **Build and unit tests.** The pinned Node suite passed all 501 tests,
+  and typechecking and the bundles passed.
+- **Site builds.** The strict publication and preview builds passed,
+  with `explore-c3681e3fecd0.js` and `explore-2eabbd6235db.css`.
+- **Unchanged.** The `/scenario/` bundles `app-066e39f81672.js` and
+  `app-08bebc049c15.css` did not change.
+- **Hooks and document checks.** All 37 hook and site tests passed.
+  Relative links resolved, PDD agreement passed, and traceability
+  reported no gap rows.
+- **Lane.** The full lane passed 391 and skipped 11, with no failure,
+  twice in a row, at load averages of 10 to 18.
+- **Guided specs.** 238 passed and 6 were skipped, in `desktop` and
+  `mobile`.
+- **Earlier run.** The same commands had passed at `285a558`, the first
+  text, before the review and the owner's revisions (Node 500; lane 391
+  passed and 11 skipped, twice; guided 238 and 6).
+
+Not verified:
+
+- how mail clients and spreadsheet tools on Windows show the README's
+  UTF-8 punctuation (the em dashes and curly apostrophes) without a
+  byte-order mark;
+- screen-reader reading of the updated hint;
+- browsers other than Chromium.
+
 ## Separate CI investigation
 
 The reported job `126383105016` belongs to historical run

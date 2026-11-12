@@ -25,10 +25,10 @@ export const VALUE_HEADING = 'Value';
 export const NO_MATCHES = 'No matching simulation stages';
 
 /** What Download data (ZIP) holds, shown before the click (§11.1; §13.7). */
-export const DOWNLOAD_CONTENTS = 'Matching simulation stages, statistics, scenario settings and sources, with a Word report of this result (report.docx).';
+export const DOWNLOAD_CONTENTS = 'Matching simulation stages, statistics, scenario settings and sources, with a report of this result in Microsoft Word format (report.docx) and a README.txt that describes each file.';
 
 /** The status line after a delivery without the report (§13.5, §13.7). */
-export const REPORT_FAILED = 'Your data download is ready. The Word report could not be built this time, so the archive holds the data files without it.';
+export const REPORT_FAILED = 'Your data download is ready. The report in Microsoft Word format could not be built this time, so the archive holds the data files without it.';
 
 /** The report's title and its provenance heading (§13.7). */
 export const REPORT_TITLE = 'Ground Rupture Explorer — result report';

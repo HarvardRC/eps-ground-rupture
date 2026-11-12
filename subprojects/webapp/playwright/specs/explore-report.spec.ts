@@ -9,9 +9,9 @@
 
 import { spawnSync } from 'node:child_process';
 import { expect, test, type Page } from '@playwright/test';
-import { PACKAGE_MEMBER_NAMES } from '../../src/download/package';
 import { guided } from '../../src/explore/copy-overlay';
-import { GUIDED_MEMBER_NAMES, REPORT_PARTS, scenarioLabels } from '../../src/explore/report';
+import { GUIDED_FALLBACK_MEMBER_NAMES, GUIDED_MEMBER_NAMES, REPORT_PARTS, scenarioLabels } from '../../src/explore/report';
+import { readmeText } from '../../src/explore/readme';
 import { DOWNLOAD_CONTENTS, PROVENANCE_HEADING, REPORT_FAILED, REPORT_TITLE } from '../../src/explore/wording';
 import { copyText } from '../../src/views/copy';
 import { readDownload, unzipStored, WEBAPP_DIR } from '../support';
@@ -104,8 +104,11 @@ test('a failing canvas still delivers the data files and says the report is miss
   await expect(page.getByRole('status').filter({ hasText: REPORT_FAILED })).toHaveCount(1);
   await expect(page.getByRole('alert').filter({ hasText: 'could not be created' })).toHaveCount(0);
   const captured = await readDownload(download, testInfo, 'report-fallback');
-  expect([...captured.members.keys()]).toEqual([...PACKAGE_MEMBER_NAMES]);
-  const check = spawnSync('python3', ['-I', 'test/zipcheck.py', captured.path, captured.instant], { cwd: WEBAPP_DIR, encoding: 'utf8' });
+  expect([...captured.members.keys()]).toEqual([...GUIDED_FALLBACK_MEMBER_NAMES]);
+  // Without the report, the README names only what the archive carries (G-30).
+  const canonical = await page.locator('link[rel="canonical"]').getAttribute('href');
+  expect(captured.members.get('README.txt')!.toString('utf8')).toBe(readmeText(false, canonical!));
+  const check = spawnSync('python3', ['-I', 'test/zipcheck.py', `--members=${GUIDED_FALLBACK_MEMBER_NAMES.join(',')}`, captured.path, captured.instant], { cwd: WEBAPP_DIR, encoding: 'utf8' });
   expect(`${check.status} ${check.stdout}${check.stderr}`).toBe('0 ');
 });
 
@@ -163,7 +166,7 @@ test('a canvas that never settles gives up the report and still delivers the dat
   const [download] = await Promise.all([page.waitForEvent('download', { timeout: 30_000 }), downloadButton(page).click()]);
   await expect(page.getByRole('status').filter({ hasText: REPORT_FAILED })).toHaveCount(1);
   const captured = await readDownload(download, testInfo, 'report-stalled');
-  expect([...captured.members.keys()]).toEqual([...PACKAGE_MEMBER_NAMES]);
+  expect([...captured.members.keys()]).toEqual([...GUIDED_FALLBACK_MEMBER_NAMES]);
   // The button is free again.
   const [again] = await Promise.all([page.waitForEvent('download', { timeout: 30_000 }), downloadButton(page).click()]);
   expect(again.suggestedFilename()).toMatch(/\.zip$/);
