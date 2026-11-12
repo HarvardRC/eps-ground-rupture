@@ -3576,6 +3576,60 @@ Not verified:
 - screen-reader reading of the updated hint;
 - browsers other than Chromium.
 
+### JDK 21 for the Gradle jobs, 2026-11-11 (G-31)
+
+G-31 ran under the owner's decision of 2026-11-11 ("Yes, fix it here
+now", relayed by the planning session; the record is DDD §6.3, JDK for
+the Gradle jobs, and the G-31 row, owner push `59a1a69`), before G-30's
+merge.
+
+**Why.** GitHub's `ubuntu-latest` runner moved to ubuntu-26.04, whose
+default JDK is 25. The Gradle 8.10.2 wrapper runs on JDK 8–23
+(ADR-0001), so every job that runs it stopped at start-up with "What
+went wrong: 25.0.5". That is how PR #96 (G-30) failed, in run
+43151790440 on ubuntu-26.04. The last green run before it, 42758276907
+on 2026-11-10, was on ubuntu-24.04. No workflow had pinned a JDK.
+
+**What changed** (PR #97, merge `47f2b3b`).
+
+- **The fix.** The three jobs that run the wrapper install Temurin JDK
+  21 with `actions/setup-java@v6`, right after checkout and before their
+  first Gradle step:
+  - `tests.yml`'s `webapp-test`;
+  - `mkdocs.yml`'s `webapp-bundle`;
+  - `mkdocs.yml`'s `build`.
+
+  `@v6` is the action's current major tag, pinned bare-major as every
+  other action in these files is.
+- **Unchanged.** `pytest`, `links`, and `deploy` run no Gradle and are
+  untouched. `runs-on` stays `ubuntu-latest`, the wrapper stays 8.10.2,
+  and every other step stays.
+- **Docs.** `docs/setup.md` notes that CI installs JDK 21.
+
+**Evidence from the logs.**
+
+- **PR #97's green run.** All three Gradle jobs (webapp-test
+  130971516194, webapp-bundle 130971516689, build 130971913364) report
+  "Image: ubuntu-26.04". Each logs the `actions/setup-java@v6` step with
+  "Distribution: temurin" and "Version: 21.0.13+9". The Gradle steps
+  run with `JAVA_HOME=/opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/21.0.13-9/x64`,
+  and no job reports "What went wrong".
+- **PR #96 (G-30), rebased onto `47f2b3b`.** Its CI passed on the same
+  image, for example webapp-test 130972955242 with "Image:
+  ubuntu-26.04" and "Version: 21.0.13+9", and it merged as `2bae382`.
+
+**Review.** An independent review passed. It covered:
+
+- every wrapper job, each with the step before its first Gradle call;
+- the diff scope (two workflow files and one line of `docs/setup.md`);
+- valid YAML;
+- the pin style and the action's current major;
+- the image, the Java version, and `JAVA_HOME` in each Gradle job's log.
+
+Not verified: the owner's manual deploy run (`workflow_dispatch`),
+which uses the same `build` job and so the same step; it has not run
+since this change.
+
 ## Separate CI investigation
 
 The reported job `126383105016` belongs to historical run
