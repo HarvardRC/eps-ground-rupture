@@ -156,7 +156,7 @@ approves it, incorporating any amendments agreed during review.
 | [ADR-0014](../adr/0014-committed-content-hashed-artifacts.md), amended by [ADR-0019](../adr/0019-release-based-data-identity.md) | **Data publication and versioning.** Store the application data files as GitHub release assets; commit only a pointer manifest that selects a published data release and its exact asset checksums. Publish compressed simulation data and use filenames that change when file content changes. Deploy only the pinned data vintage; retain earlier vintages as release assets. Derived data keeps its source terms: it never enters the repository, and each release carries it as a data asset. | [§5.4 Pinned, versioned artifacts](#54-pinned-versioned-artifacts-adr-0014), [§7.3 Delivery and caching](#73-delivery-and-caching) |
 | [ADR-0015](../adr/0015-golden-scenario-parity.md) | **Data and calculation verification.** Verify two things separately: that the exported application data preserves the pipeline's approved records and values, and that the application's filtering and statistics reproduce independently calculated pipeline results for predefined test scenarios. The pipeline also supplies the surface-offset-to-slip conversion coefficients, so the application does not maintain a separate copy of those numbers. | [§5.6 Reference results and verification](#56-reference-results-and-verification-adr-0015), [§5.7 Conversion coefficients](#57-conversion-coefficients-adr-0015), [§9 Testing and release architecture](#9-testing-and-release-architecture) |
 | [ADR-0016](../adr/0016-performance-reference-environment.md) | **Performance reference environment.** Measure the performance budgets on an AWS virtual machine of fixed specification, defined by a Terraform configuration in the repository: each measurement run creates it if it does not exist, runs against the locally built site, and destroys it when the run succeeds. Each time budget is judged at the 95th percentile of 30 measured runs. | [Performance budgets](#performance-budgets), [§7.1 Performance estimates and verification](#71-performance-estimates-and-verification) |
-| [ADR-0017](../adr/0017-unadvertised-prototype-before-public-release.md) | **Prototype before public release.** Deploy the application first as an unadvertised prototype — no navigation entry, excluded from site search and the sitemap, marked as a prototype, with the licensing decision deferred and the current licensing stated as an assumption — so the research group can review it; approvals, the D-10 text and the licensing decision are required at activation and at the first software release, not at the prototype deployment. Its amendment of 2026-11-01 deploys the prototype by the owner's manual runs of the site workflow on the development branch, `dev-v.0.4.x`, until the release sequence begins; pushes deploy only from `main`, which alone deploys after the first release. | [Static hosting](#static-hosting), [Licensing and media permissions](#licensing-and-media-permissions), [§9 Testing and release architecture](#9-testing-and-release-architecture) |
+| [ADR-0017](../adr/0017-unadvertised-prototype-before-public-release.md) | **Prototype before public release.** Deploy the application first as an unadvertised prototype — no navigation entry, excluded from site search and the sitemap, marked as a prototype, with the licensing decision deferred and the current licensing stated as an assumption — so the research group can review it; approvals, the D-10 text and the licensing decision are required at activation and at the first software release, not at the prototype deployment. Its amendment of 2026-11-01 deploys the prototype by the owner's manual runs of the site workflow on the development branch, `dev-v.0.4.x`, until the release sequence begins; pushes deploy only from `main`, which alone deploys after the first release. Its amendment of 2026-11-12 drops the pre-release deploy stop (OA-21 retired unexecuted), makes the listed explorer public before the release, and defers the scenario page's activation past v0.4.0. | [Static hosting](#static-hosting), [Licensing and media permissions](#licensing-and-media-permissions), [§9 Testing and release architecture](#9-testing-and-release-architecture) |
 | [ADR-0018](../adr/0018-manifest-defined-stage-count.md) | **Uniform stage count per vintage.** The manifest records a measured count N shared by every trial, and queries use N as their stride. Schema 1 requires at least two stages per trial; the current dataset's 101 stages remain a completeness check, not a universal format constant. | [§5.2 Simulation data organization](#52-simulation-data-organization-adr-0013), [§5.3 Records rather than precomputed summaries](#53-records-rather-than-precomputed-summaries-adr-0013) |
 | [ADR-0019](../adr/0019-release-based-data-identity.md) | **Data identity.** Pin data by the published dedicated data release and its exact filenames and SHA-256 checksums. A bare tag, a draft release, or a release not marked as a prerelease is insufficient. Exporter commits identify code provenance only. | [§5.4 Pinned, versioned artifacts](#54-pinned-versioned-artifacts-adr-0014), [Data refresh and deployment](#data-refresh-and-deployment) |
 
@@ -192,8 +192,10 @@ deploying; a release merges that branch into `main`. Before that
 release the owner also deploys the unadvertised prototype of
 [ADR-0017](../adr/0017-unadvertised-prototype-before-public-release.md)
 (amendment of 2026-11-01) from `dev-v.0.4.x`, by manual runs of the
-workflow, from the prototype deployment until the changes that
-prepare the release begin to land on that branch; meanwhile the live
+workflow, from the prototype deployment until the release merge — the
+owner dropped the pre-release deploy stop on 2026-11-12
+([ADR-0017](../adr/0017-unadvertised-prototype-before-public-release.md),
+amendment of that date) — and meanwhile the live
 site serves that branch's build, while `main` holds none of the
 implementation. After the first release, only `main` is deployed.
 
@@ -403,9 +405,13 @@ The product must preserve the project's licensing requirements:
 
 Third-party photographs and other externally owned media must not be
 included in a public release until the required permissions have been
-confirmed. A public release is the activated site — the scenario page
-in the site's navigation — or a tagged GitHub release, whose source
-archive feeds the project's planned Zenodo record. An unadvertised
+confirmed. A public release is the deployed site once a deployment
+lists a product page in the site's navigation — from the deploy that
+carries the explorer's navigation entry (PDD D-52;
+[ADR-0017](../adr/0017-unadvertised-prototype-before-public-release.md),
+amendments of 2026-11-08 and 2026-11-12) — or a tagged GitHub
+release, whose source archive feeds the project's planned Zenodo
+record. An unadvertised
 prototype deployment for the research group's review is not a public
 release ([ADR-0017](../adr/0017-unadvertised-prototype-before-public-release.md)); it never
 carries a third-party photograph without documented permission.

@@ -331,10 +331,11 @@ runs in the two phases of
 **Phase 1** builds the application and deploys it, with
 its first data vintage, as an unlisted prototype at the site's final
 address for the research group to try, under the current licensing
-stated as an assumption; **Phase 2** records their approvals and
-decisions, the deferred licensing decision among them, activates the
-page and cuts the v0.4 release — v0.4.0, the explorer's first
-software release. By your decisions of 2026-11-01, `dev-v.0.3.x`
+stated as an assumption; **Phase 2** records the research group's
+answers, pins the vintage under the confirmed terms, and cuts the
+v0.4 release; the scenario page's activation moved past v0.4.0, and
+your deploys continue until the release merge (PDD D-54; ADR-0017,
+amendment of 2026-11-12). By your decisions of 2026-11-01, `dev-v.0.3.x`
 carries the design only and, after your commit accepting the DDD and
 the IP, merges into `main` as the design state, tagged `v0.3.0` with
 no GitHub release (OA-18); the implementation then runs on
@@ -344,9 +345,10 @@ receives the implementation once, with the release merge (T-65).
 Pull requests and pushes to `dev-v.0.4.x` build and check without
 deploying; you deploy it by manual runs of the Companion site
 workflow while the `github-pages` environment admits it, from OA-20
-— the first run is T-54's — until OA-21, just before OA-3's commit,
-so from T-54's run until the release the live site serves its build
-while `main` stays at the design state. After the release,
+— the first run is T-54's — until you remove the branch after the
+release merge (OA-21 retired 2026-11-12; T-65, step (8)), so from
+T-54's run until the release the live site serves its build while
+`main` stays at the design state. After the release,
 `dev-v.0.5.x`, created from `main`, takes every later change.
 Each bullet gives the action's ID, phase, what it is, the task it must
 precede, and its status. The record each action leaves and the check
@@ -377,19 +379,23 @@ drills, is retired: the drills run against a stub `gh` instead.
   its other Proposed mentions, its "(Proposed)" labels included, is
   made in the HLDD, `docs/adr/README.md`, the DDD, the IP,
   `docs/app/ddd-review.md`, and this file.
-- **OA-18 — Design state on `main`** (Phase 1; once your commit
+- ~~**OA-18 — Design state on `main`**~~ (Phase 1; once your commit
   accepting the DDD and the IP is on `dev-v.0.3.x`, before OA-19 and
-  every task) — open. Merge `dev-v.0.3.x`, which carries the design
+  every task) — **done 2026-11-02**: `v0.3.0` tags the merge commit
+  `5dcadfb`, dated 2026-11-02 and an ancestor of `main`. The original
+  action follows. Merge `dev-v.0.3.x`, which carries the design
   only, into `main` by a merge commit, as `dev-v.0.2.x` was merged,
   and tag that commit `v0.3.0` — a plain git tag, no GitHub release.
   No page, site configuration, or docs-toolchain pin changes, so the
   push run it starts republishes the same site; `CITATION.cff` and
   `.zenodo.json` keep 0.2.0 until v0.4.0. `main` then takes no other
   merge until the release.
-- **OA-19 — Create `dev-v.0.4.x`** (Phase 1; after OA-18, before
-  every task) — open. Create `dev-v.0.4.x` from `main` and push it;
-  every task branch starts there, and every task pull request targets
-  it.
+- ~~**OA-19 — Create `dev-v.0.4.x`**~~ (Phase 1; after OA-18, before
+  every task) — **done 2026-11-02**: the branch exists with `v0.3.0`
+  as an ancestor (OA-19's check exits 0), and its first own commit,
+  `622203b`, is dated 2026-11-02. The original action follows. Create
+  `dev-v.0.4.x` from `main` and push it; every task branch starts
+  there, and every task pull request targets it.
 - ~~**OA-1 — Data-terms record**~~ (Phase 1, then Phase 2; before
   T-18, then T-63) — **recorded**: Phase 1 with T-18's first vintage
   (2026-11-03); Phase 2 on 2026-11-08, the line
@@ -424,8 +430,13 @@ drills, is retired: the drills run against a stub `gh` instead.
   line does not. Phase 2: once the
   research group confirms, replace the `Assumed` record line by
   `Confirmed: YYYY-MM-DD` (with OA-13).
-- **OA-10 — Ruleset on `dev-v.0.4.x` and `main`** (Phase 1; after
-  T-23 has run once, before T-54) — open. One ruleset targeting
+- ~~**OA-10 — Ruleset on `dev-v.0.4.x` and `main`**~~ (Phase 1; after
+  T-23 has run once, before T-54) — **done (verified 2026-11-12)**:
+  the active ruleset "Required checks" targets `main` (the default
+  branch) and `dev-v.0.4.x`, requiring the checks `pytest`,
+  `webapp-test`, `webapp-bundle`, `build` and `links`, not strict,
+  with the admin bypass Always allow and no linear-history rule. The
+  original action follows. One ruleset targeting
   exactly `dev-v.0.4.x` and `main`, never a `dev-v.*` pattern:
   required checks `pytest`, `webapp-test`, `webapp-bundle`, `build`
   and `links`; not strict; admins may bypass, in the bypass mode
@@ -433,11 +444,14 @@ drills, is retired: the drills run against a stub `gh` instead.
   `dev-v.0.4.x`; no linear-history rule, since the pointer merges into
   `dev-v.0.4.x` and the release merge into `main` are merge commits.
   After the release, `dev-v.0.5.x` joins its targets.
-- **OA-20 — Let `dev-v.0.4.x` deploy** (Phase 1; before T-54) — open.
-  Add `dev-v.0.4.x` to the deployment branches of the `github-pages`
-  environment, which admitted `main` alone on 2026-11-01. Pull
-  requests and pushes still never deploy from it; a manual run of
-  Companion site on `dev-v.0.4.x` does, the first being T-54's.
+- ~~**OA-20 — Let `dev-v.0.4.x` deploy**~~ (Phase 1; before T-54) —
+  **done (verified 2026-11-12)**: the deployment-branch policies of
+  the `github-pages` environment print `["dev-v.0.4.x","main"]`. The
+  original action follows. Add `dev-v.0.4.x` to the deployment
+  branches of the `github-pages` environment, which admitted `main`
+  alone on 2026-11-01. Pull requests and pushes still never deploy
+  from it; a manual run of Companion site on `dev-v.0.4.x` does, the
+  first being T-54's.
 - **OA-9 — Owner-run tasks** (both phases) — open. Phase 1: run T-18,
   merge T-54 and deploy it with a manual run of Companion site on
   `dev-v.0.4.x`, then share the page's address with the research
@@ -450,17 +464,16 @@ drills, is retired: the drills run against a stub `gh` instead.
 - **OA-8 — Photograph permissions** (either phase; before any
   third-party photograph enters a deploy or the release archive) —
   open; the MVP ships none (the media index is P2).
-- **OA-21 — Stop deploying `dev-v.0.4.x`** (Phase 2; after T-64, just
-  before OA-3's commit) — open. Remove `dev-v.0.4.x` from the
-  deployment branches of the `github-pages` environment, so that no
-  run deploys the release-order commits — the D-10 text, the glossary
-  additions, the activation, the release commit — before the release
-  merge. An emergency data withdrawal in that interval never
-  re-admits it: a manual run on `main` deploys the design-state site,
-  which takes the scenario page and its data off the site until the
-  release.
-- **OA-3 — Liability text** (Phase 2; after OA-21, before T-52 and
-  T-55) — open. Author or source the text of
+- ~~**OA-21 — Stop deploying `dev-v.0.4.x`**~~ (Phase 2; after T-64,
+  just before OA-3's commit) — **retired 2026-11-12, unexecuted**: you
+  dropped the pre-release deploy stop (PDD D-54; ADR-0017, amendment
+  of 2026-11-12). Your manual runs keep deploying `dev-v.0.4.x` until
+  the release merge; after the merge you remove the branch from the
+  `github-pages` environment (T-65, step (8)).
+- ~~**OA-3 — Liability text**~~ (Phase 2; after OA-21, before T-52 and
+  T-55) — **done 2026-11-09** (commit `ee80547`; the D-10 text stands
+  in PDD §5.1 and both disclaimer blocks). The original action
+  follows. Author or source the text of
   [D-10](../docs/app/pdd.md#1-decision-register) (Liability-limitation
   text referenced by CR-4) and land it in one dated commit on
   `dev-v.0.4.x`, the first of the release-branch order, replacing the
@@ -514,9 +527,10 @@ drills, is retired: the drills run against a stub `gh` instead.
   — **done 2026-10-31**: `ami-0d6dd9e8265d48906`, Canonical's
   `ubuntu-noble-24.04-amd64-server-20261023`, read with the `egr-perf`
   profile; T-59 writes it as the `ami_id` default.
-- **OA-4 — Text approval** (Phase 2; research group; after T-55's
-  activation commit and once `dev-v.0.4.x` carries every task T-65
-  needs, before T-65's release merge) — open. Commit
+- **OA-4 — Text approval** (Phase 2; research group; after T-52's
+  glossary commit (T-55 left the order: PDD D-54) and once
+  `dev-v.0.4.x` carries every task T-65 needs, before T-65's release
+  merge) — open. Commit
   the dated record `docs/app/approvals/sc7-YYYY-MM-DD.md` of
   [SC-7](../docs/app/pdd.md#101-success-criteria) (scientific
   sign-off), naming the approved texts, the `data_tag`, and the

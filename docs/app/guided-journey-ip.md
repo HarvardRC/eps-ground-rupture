@@ -268,6 +268,17 @@ implements it on the standing terms, begun on the owner's words of
 the same day ("Yes, fix it here now"); G-30 merges after it. The
 owner's commit of this paragraph is the release.
 
+**Owner decision, 2026-11-12 (the explorer on the home page).** The home
+page describes only the dashboards, and the first try-out of
+`docs/testing/acceptance-try-outs.md` expects a tester to find the
+explorer from it. The owner decided to add one sentence and a link
+introducing the explorer to the home page's body text (PDD D-54). The
+sentence is assembled from the citation description's explorer paragraph
+(`CITATION.cff`, owner-approved) and is marked assembled under D-51
+and routed for the research group's sight with the OA-4 sign-off
+package. Exact strings go to the owner before the merge; the owner's
+commit of this paragraph is the release.
+
 | Task | Prerequisite | Exact work and authority | Completion |
 | --- | --- | --- | --- |
 | G-13 | Released 2026-11-05; guided DDD §13; PDD D-40 (P1.5 by D-48, release-blocking in v0.4, first in the band) and D-14 | Implement the result report exactly to guided DDD §13: `report.docx` composed beside the shared `packageTexts` and written by the shared `zip` writer into the FR-D1 download ZIP, the hint updated, no new control; document content, fixed chart set, `.docx` assembly, failure fallback, checker amendment, and strings per §§13.1–13.7 and [PDD §6.5](pdd.md#65-result-report-d-40-p2). | `report.docx` verified in the lane (outer members, nested parts, one image per non-suppressed chart, captions asserted); zipcheck covers the guided layout; Node tests cover the assembly and the failure fallback; the `/scenario/` bundles stay byte-identical; the owner's Word-open check is recorded in the evidence; the §6.1 content rules and D-14 caption fields apply unchanged. |
@@ -289,6 +300,7 @@ owner's commit of this paragraph is the release.
 | G-29 | Released 2026-11-08 (PDD D-52); after T-59, ahead of G-28 | List `/explore/` in the site navigation (PDD D-52): in `mkdocs.yml`, the nav entry `Ground Rupture Explorer: explore.md` after Dashboards and before Data, and `explore.md` out of `not_in_nav` (`scenario.md` stays); `explore.md`'s search exclusion removed (`hide: toc` stays); site-checks arm (d) and its tests updated — `/explore/` listed and in the sitemap and search index, `/scenario/` still unlisted with no listed page linking it — so `/explore/`'s links into `/scenario/` change: the results footer's Full disclaimer link points to the page's own `#gre-explore-disclaimer` block, and the links to the existing explorer are removed or reworded without a link; update the specs asserting them. Final strings to the owner before merge. | The strict builds and the hook pass with `/explore/` listed and `/scenario/` unlisted; no listed page links `/scenario/`; specs pass in the lane's desktop and mobile projects; the `/scenario/` bundles stay byte-identical; the evidence records that the listed page's deploy waits on G-5 (the D-10 text). |
 | G-30 | Released 2026-11-09 (the owner's decision of that date); after G-28, before the OA-4 text record | Add a `README.txt` member to the guided page's download ZIP, composed beside the shared `packageTexts` as `report.docx` is (G-13), so the shared download code and the `/scenario/` package do not change: what the package is, one line per member saying what it holds, the meaning and unit of each `records.csv` and `statistics.csv` column in the glossary's and the page's own wording (D-51; assembled lines marked for the research group's sight), and a pointer to `provenance.txt` for the citation, the caveats, and the licences. Plain UTF-8 text with LF line ends, first in the archive; the zip checker's guided layout, the download hint if it names the members, and the specs updated. Final strings to the owner before merge. | The guided ZIP opens with `README.txt` naming every member and every CSV column; zipcheck covers the guided layout; specs pass in the lane's desktop and mobile projects; `/scenario/` bundles stay byte-identical; the evidence lists the assembled lines sent for the group's sight and records the strings' approval. |
 | G-31 | Released 2026-11-11 (the owner's decision of that date); before G-30's merge | Install JDK 21 for the Gradle jobs (DDD §6.3, JDK for the Gradle jobs): in `.github/workflows/tests.yml` (`webapp-test`) and `.github/workflows/mkdocs.yml` (`webapp-bundle`, `build`), add an `actions/setup-java` step — distribution Temurin, Java 21 — before each job's first Gradle step. Nothing else changes: `runs-on: ubuntu-latest`, the 8.10.2 wrapper, and every other step stay; `docs/setup.md` may note that CI installs JDK 21. | A green run's log shows each of the three jobs starting Gradle on Java 21 on the current `ubuntu-latest` image; CI is green on the pull request and on `dev-v.0.4.x` after the merge; G-30's pull request (#96) then passes CI and merges; the `/scenario/` bundles stay byte-identical; the evidence quotes the Java and image lines. |
+| G-32 | Released 2026-11-12 (PDD D-54); after G-31 | Introduce the explorer on the home page: in `subprojects/mkdocs/docs/index.md`, one sentence with the `explore.md` link as its own paragraph directly after the dashboard cards `</div>`, assembled from the `CITATION.cff` explorer paragraph (D-51; the assembled line marked for the research group's sight): "And the **Ground Rupture Explorer** lets you choose modeled geological conditions and a range of fault slip, then examine the corresponding results from the same simulations." — "Ground Rupture Explorer" carrying the `explore.md` link. Nothing else on the page changes; final strings to the owner before merge. | The home page introduces the explorer and links `explore.md`; the strict builds and the site checks hook pass; the `/scenario/` bundles stay byte-identical; the evidence records the assembled wording routed for the group's sight. |
 
 Queued definitions and decisions, with their authorities:
 
@@ -3567,6 +3579,10 @@ At this verification, on `task/g-30-download-readme` at `854b9a5`, over
 - **Earlier run.** The same commands had passed at `285a558`, the first
   text, before the review and the owner's revisions (Node 500; lane 391
   passed and 11 skipped, twice; guided 238 and 6).
+
+(A later force-push replaced `854b9a5` on the task branch; the merged
+commit of pull request #96, `bb1b0ab`, carries the same change — note of
+2026-11-12.)
 
 Not verified:
 

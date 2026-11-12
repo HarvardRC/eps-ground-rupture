@@ -28,8 +28,9 @@ specifies:
   environment admits that branch: `main` always, and `dev-v.0.4.x` (the
   unlisted prototype) from owner action
   [OA-20 — `dev-v.0.4.x` admitted to deploy](../../docs/app/ip.md#4-owner-and-research-group-actions)
-  until
-  [OA-21 — `dev-v.0.4.x` removed from the deployments](../../docs/app/ip.md#4-owner-and-research-group-actions).
+  until the owner removes it after the release merge (OA-21 retired
+  2026-11-12, unexecuted; step (8) of
+  [IP T-65 — v0.4 release (owner)](../../docs/app/ip.md#t-65--v04-release-owner)).
   A manual run on any other branch builds, then fails at the environment
   in `deploy` and deploys nothing.
 - Pushes to other branches trigger nothing.

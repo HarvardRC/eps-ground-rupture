@@ -27,6 +27,16 @@ public on GitHub.
 > under Decision, below, with this exception; outside it, the
 > environment admits `main` alone.
 
+> **Amendment 2026-11-12 (the pre-release stop dropped).** OA-21 is
+> retired unexecuted
+> ([ADR-0017](0017-unadvertised-prototype-before-public-release.md),
+> amendment of 2026-11-12): the environment keeps admitting
+> `dev-v.0.4.x` until the owner removes it after the v0.4.0 release
+> merge
+> ([IP T-65 — v0.4 release (owner)](../app/ip.md#t-65--v04-release-owner),
+> step (8)). Outside that window the environment admits `main` alone,
+> as before.
+
 ## Decision
 
 **GitHub Pages, deployed by GitHub Actions** from this repo:

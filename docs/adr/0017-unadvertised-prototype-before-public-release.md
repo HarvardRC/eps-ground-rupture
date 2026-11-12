@@ -5,8 +5,8 @@
   with the DDD correction pass); 2026-10-31, the deferral of the
   licensing decision made explicit after an external review of the
   implementation plan; accepted 2026-10-31; amended
-  2026-11-01, 2026-11-06, 2026-11-08, and 2026-11-09 (the
-  amendments precede References)
+  2026-11-01, 2026-11-06, 2026-11-08, 2026-11-09, and 2026-11-12
+  (the amendments precede References)
 - **Deciders**: Michael Bouzinier (project owner)
 
 ## Context
@@ -233,6 +233,54 @@ prototype notice, and its data under the stated assumption.
 > D-10: the standing disclaimer carries the Apache License 2.0's
 > warranty and liability terms. Of the pre-activation decisions,
 > none remains open.
+
+> **Amendment 2026-11-12 (the pre-release deploy stop dropped; the
+> explorer public before the release; the scenario page's activation
+> deferred).** The owner decided on 2026-11-12 to drop the pre-release
+> deploy stop: owner action OA-21 of
+> [IP §4 — Owner and research-group actions](../app/ip.md#4-owner-and-research-group-actions)
+> is retired unexecuted, and the owner's manual runs of the Companion
+> site workflow on `dev-v.0.4.x` continue to deploy, at the owner's
+> discretion, until the release merge; the owner removes `dev-v.0.4.x`
+> from the `github-pages` environment after that merge
+> ([IP T-65 — v0.4 release (owner)](../app/ip.md#t-65--v04-release-owner),
+> step (8)), and from then on only `main` deploys, as before. The
+> stop's purpose is gone: the D-10 text landed on 2026-11-09, and the
+> explorer the next deploy lists carries the research group's own
+> wording (PDD D-51). With the 2026-11-08 amendment's navigation entry
+> deployed, `/explore/` becomes public before the v0.4.0 release. The
+> scenario page is not activated at v0.4.0: T-55 leaves the
+> release-branch order and T-65's preconditions, `/scenario/` stays an
+> unlisted prototype through the release, and the queued D-39 rework
+> decision owns its future. The public-release definition follows: a
+> public release is the deployed site once a deployment lists a
+> product page in the site's navigation — the first being the owner's
+> next manual run, which carries the D-52 entry — or a tagged GitHub
+> release; the release checklist and gates still attach to the
+> software release (amendment of 2026-11-08). The research group reads
+> in two steps (the owner's decision of 2026-11-09): an informal read
+> of the deployed explorer after that deploy, then the formal sign-off
+> of one listing of every reader-facing text (OA-4), which still
+> postdates every release-branch commit that changes a listed text and
+> precedes the release merge. The remaining human release checks run
+> on the deployed site after a deploy (the owner's decisions of
+> 2026-11-09): the acceptance walkthroughs are the try-outs of
+> `docs/testing/acceptance-try-outs.md` run on the deployed explorer,
+> the assistive-technology pass uses VoiceOver with Safari, and the
+> engine-and-mobile pass includes at least one real phone. One
+> consequence is accepted explicitly: until T-63 pins the
+> confirmed-record vintage, the listed site serves the pinned vintage
+> whose terms file still carries the assumption wording of its export
+> date — the confirmed terms themselves are recorded in
+> `data/REDISTRIBUTION.md` (amendments of 2026-11-06 and 2026-11-08)
+> and shown by the G-28 notices — and the rule of
+> [DDD §4.4](../app/ddd.md#44-licensing-archival-distribution-and-release-attachments)
+> that the release pins a vintage with the confirmed record stands. An
+> emergency data withdrawal before the release merge is a revert on
+> `dev-v.0.4.x` deployed by the owner's manual run
+> ([DDD §4.3](../app/ddd.md#43-retention-rollback-recovery-and-withdrawal));
+> the design-state fallback on `main` remains available. Every other
+> decision of this ADR stands.
 
 ## References
 

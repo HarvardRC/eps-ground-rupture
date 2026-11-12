@@ -155,6 +155,7 @@ named in the last column carry the detail.
 | D-51 | Reader-facing wording follows the research group's supplied texts. | CR-3, CR-10, D-45, D-46; PRD §7 | Product owner | Decided (2026-11-06) | The owner's directive on the 2026-11-06 review: the group are the subject-matter experts — use their wording. Adopted: the Geological site conditions step name; the Fault slip step name with the dip-slip clause and the 0.3 m/s slip-rate mention; the fault-dip and sediment-depth hints (depth is thickness above bedrock); the if-unknown hints; the forecast framing of the introduction (the no-site-prediction clause stays, CR-2 and CR-4 intact); pressure ridge and additional uplift (Us − Ud) in place of raised ridge; the unhyphenated Deformation zone width (CR-3 amended); and the review's updated glossary definitions. Where the review gave substance without copy — the small-count reframe, the negative-height note (D-46), the slip-rate sentence, the assembled introduction — the strings are built from the review's own sentences, marked assembled in guided DDD §15, and go back to the group for sight with the next briefing round. Guided surfaces adopt through explore-local strings and the D-45 overlay; registry baselines stay per §3.7's supersession pattern. Guided DDD §15; task G-26. |
 | D-52 | `/explore/` is linked from the site navigation ahead of the v0.4 release. | D-2, D-39, ADR-0017, G-5 | Product owner | Decided (2026-11-08) | The owner's instruction of 2026-11-08: link the explorer, not `/scenario/`, from the sidebar. The entry sits where D-2 placed the scenario page — after Dashboards, before Data — under the page's own title, Ground Rupture Explorer; `/explore/` joins search and the sitemap; `/scenario/` stays unlisted. D-39's two preconditions for advertising: the licence decision is recorded (ADR-0017, amendment of 2026-11-08), and the planning session reads the owner's 2026-11-06 walkthrough of `/explore/` with the research group's lead author as the team demonstration, amendable by the owner. Listing ends `/explore/`'s exemption to link the unlisted `/scenario/` (site-checks arm (d)), so its links there are retargeted or removed. The link reaches readers only with the owner's next deploy, and G-5 governs that deploy: no deploy lists the page while its disclaimer still carries the D-10 placeholder. Task G-29; the release reconciliation amends T-55 to match. |
 | D-53 | FR-O5 (field-data context) is out of the v0.4 release. | FR-O5, D-18, §4.4; PRD Appendix A; ADR-0017 | Product owner | Decided (2026-11-09) | The owner deferred the field overlay to P2, after the MVP: it exists only on the unlisted `/scenario/` page, and building it on `/explore/` waits on research question 14 (D-18), which has no date. FR-O5 moves from P1 to P2 in the PRD, its Appendix A row included; §4.4 stands for the overlay's return; D-18 stays Proposed as its gate and leaves ADR-0017's pre-activation set (its amendment of the same date), so OA-14 no longer precedes the release vintage or the activation (IP T-63, T-55). `/scenario/` keeps its overlay, unlisted, on the Proposed set; the guided results link the Model vs reality dashboard for field comparisons (G-29). |
+| D-54 | The pre-release deploy stop is dropped; v0.4.0 ships the guided explorer public; `/scenario/` is not activated at v0.4.0. | D-2, D-39, D-52; ADR-0017; PRD CR-10, NFR-2 | Product owner | Decided (2026-11-12) | The owner's decision of 2026-11-12: the owner's manual deploys of `dev-v.0.4.x` continue at his discretion until the release merge — OA-21 is retired unexecuted (ADR-0017, amendment of 2026-11-12) — so the explorer listed by D-52 becomes public with the next deploy, before the release. T-55 (the scenario page's activation) leaves the release-branch order and T-65's preconditions; `/scenario/` stays an unlisted prototype, its rework decision queued (D-39). The remaining human release checks run on the deployed site after a deploy, per the owner's decisions of 2026-11-09: the try-outs of `docs/testing/acceptance-try-outs.md` as the acceptance walkthroughs (§10.3; D-21 stays Proposed), the assistive-technology pass with VoiceOver and Safari, and at least one real phone in the engine pass. The research group reads in two steps (the owner's decision of 2026-11-09): an informal read of the deployed explorer, then the formal sign-off of one listing of every reader-facing text (OA-4). The same day the owner decided to introduce the explorer on the home page with one sentence and a link (guided task G-32; assembled wording routed for the group's sight). IP §3, Record of 2026-11-12. |
 
 ---
 
@@ -552,6 +553,17 @@ decision.
   field-overlay decision for the guided page, and the §9 quality
   bars. Activation remains a separate owner step; this decision
   deploys and advertises nothing by itself.
+
+**Supplement (2026-11-12).** The reconciliation the paragraph above
+required is recorded: D-54 and ADR-0017's amendment of 2026-11-12 drop
+the pre-release deploy stop, make the listed explorer public with the
+owner's next deploy, and keep `/scenario/` an unlisted prototype past
+v0.4.0. Of the activation-contract items above: the §10.3 walkthrough
+venue is recorded (D-54; §10.3), the §4.4 field-overlay decision for the
+guided page is D-53, and the licence decision is recorded (ADR-0017,
+amendments of 2026-11-06 and 2026-11-08); the D-2 entry-point
+re-pointing and the §9.1 budget definition for the guided page stay
+queued (the guided implementation plan, Queued definitions).
 
 The owner also kept the existing copy baseline on 2026-11-04; small
 clarifications may ride along with tasks without reopening §5. The
@@ -2150,6 +2162,14 @@ US-1 through US-3 are executed as scripted demos against the golden
 scenarios before release; US-4 and US-5 join when their capabilities
 ship. Each walkthrough's pass condition is its story's "Expected
 result" paragraph plus the relevant SC rows.
+
+For v0.4.0 the owner decided (2026-11-09, recorded 2026-11-12 with D-54)
+that the human acceptance session runs on the deployed site, after a
+deploy, and that the try-outs of `docs/testing/acceptance-try-outs.md`
+are the acceptance walkthroughs for the explorer this release ships.
+D-21 stays Proposed: the scenario each of US-2 and US-3 drives is still
+the owner's pending designation, and the scripted golden-scenario demos
+stand for the scenario page's own activation release.
 
 ---
 

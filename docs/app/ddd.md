@@ -212,7 +212,9 @@ independently redefine scientific or statistical behavior.
   review, deployed from `dev-v.0.4.x` by the owner's manual runs
   under the ADR's amendment of 2026-11-01, then the public release —
   are publication states of
-  [§6.1](#61-build-outputs-asset-paths-and-page-scaffold). A change,
+  [§6.1](#61-build-outputs-asset-paths-and-page-scaffold). ADR-0017's
+  amendment of 2026-11-12 defers the scenario page's activation past
+  v0.4.0 and drops the pre-release deploy stop. A change,
   or a new decision such as these, completes the repository's ADR
   process before dependent work proceeds. For ADR-0016 and ADR-0017
   that is the owner's acceptance of 2026-10-31, owner actions OA-12
@@ -3017,8 +3019,9 @@ line; `T` is empty when no such tag exists:
    confirms the terms (the record is no evidence that a source permits
    the redistribution: ADR-0017 defers the confirmation the HLDD
    requires "before its first public upload", for the prototype's
-   vintages, to activation and the first software release); from
-   Phase 2, the confirmed record that replaces it, a line equal to
+   vintages, to the first software release; the terms were confirmed
+   on 2026-11-06 and 2026-11-08, in its amendments of those dates);
+   from Phase 2, the confirmed record that replaces it, a line equal to
    `Confirmed: YYYY-MM-DD`; in both,
    `YYYY-MM-DD` matches `[0-9]{4}-[0-9]{2}-[0-9]{2}` and every other
    character is as written; `README.md` and `LICENSE-docs` each
@@ -3628,12 +3631,15 @@ question, source by source, to the licensing decision of Phase 2.
 §4.2 step 1 refuses publication until both texts are in place. This
 document cites that gate, never grants it. A published vintage is
 never modified (§4.2), so a vintage exported under the assumed
-record serves only the unlisted prototype of
-[§6.1](#61-build-outputs-asset-paths-and-page-scaffold): the release
-that activates the scenario page, and every release after it, pins
-a vintage whose terms file holds the confirmed record
+record is never the vintage a software release pins: the v0.4.0
+release, and every release after it, pins a vintage whose terms
+file holds the confirmed record
 ([§7.7](#77-site-validation-and-release-checklist), item 17) — a new
-vintage when the pinned one holds the assumed record. A
+vintage when the pinned one holds the assumed record. Until T-63
+pins it, the listed site serves the pinned vintage, whose terms file
+carries the assumption wording of its export date; the confirmed
+terms are recorded in `data/REDISTRIBUTION.md` and shown by the G-28
+notices (ADR-0017, amendment of 2026-11-12). A
 `data-v0-test` development export, which is never published, needs
 no such file; without it, the export writes an empty terms file
 ([§4.1](#41-export-task-and-validation) step 4).
@@ -5973,8 +5979,9 @@ entry. Some texts are not in the registry; each is authored once
 between copy markers: in `scenario.md`
 ([§6.1](#61-build-outputs-asset-paths-and-page-scaffold)), the PDD
 §5.1 standing disclaimer, in the `#gre-disclaimer` section, so the
-bundle never carries its pending D-10 slot, which stands there as
-PDD §5.1's bracketed text verbatim, and the §5.10 no-JS
+bundle never carried its pending D-10 slot, which stood there as
+PDD §5.1's bracketed text verbatim until OA-3's commit of
+2026-11-09 replaced it with the D-10 text, and the §5.10 no-JS
 fallback body, inside `#gre-root`, which must stand before any
 script runs; and in `glossary.md`, a page the application never
 renders, the two glossary additions of
@@ -9089,9 +9096,13 @@ phases of
    unless that page is itself published unlisted (owner ruling,
    2026-11-05; arm (d), below); its results header shows the
    prototype notice ([§5.8](#58-view-layer));
-3. *activated* (Phase 2, the public release): nav entry, search and
-   sitemap inclusion, no prototype notice — the activation commit
-   below.
+3. *activated* (a release after v0.4.0: the owner's decision of
+   2026-11-12 deferred the scenario page's activation past the first
+   software release —
+   [ADR-0017](../adr/0017-unadvertised-prototype-before-public-release.md),
+   amendment of 2026-11-12; the queued D-39 rework decision owns its
+   return): nav entry, search and sitemap inclusion, no prototype
+   notice — the activation commit below.
 
 In the draft state `subprojects/mkdocs/mkdocs.yml` carries:
 
@@ -9107,21 +9118,24 @@ hooks:
 ```
 
 The unlisted prototype is not a public release — "A public release
-is the activated site — the scenario page in the site's navigation —
-or a tagged GitHub release"
+is the deployed site once a deployment lists a product page in the
+site's navigation — from the deploy that carries the explorer's
+navigation entry (PDD D-52; ADR-0017, amendments of 2026-11-08 and
+2026-11-12) — or a tagged GitHub release"
 ([Licensing and media permissions](hldd.md#licensing-and-media-permissions))
-— so it shows its unapproved copy, PDD §5.1's pending D-10 slot
-included, as drafted (ADR-0017), and the approval that reader-facing
-texts need "before a public release that introduces or changes them"
+— so it shows its unapproved copy, as drafted (ADR-0017), and the
+approval that reader-facing texts need "before a public release that
+introduces or changes them"
 ([CR-10 — Scientific-content approval](prd.md#cr-10-scientific-content-approval))
-is recorded before the release merge that deploys the activated page
+is recorded before the release merge
 ([§7.7](#77-site-validation-and-release-checklist), SC-7 approval
 record). Deploying it is
 the owner's decision under ADR-0017, which approves none of that copy
 and is no evidence that a source permits redistribution: the vintage
 it serves carries the assumed terms beside each source's own terms
 ([§4.4](#44-licensing-archival-distribution-and-release-attachments),
-Vintage terms) until the licensing decision of Phase 2.
+Vintage terms) until T-63 pins the confirmed-record vintage
+(ADR-0017, amendment of 2026-11-12).
 `media/dev/` stays drafted permanently
 ([§6.4](#64-product-pages-beyond-the-scenario-page-p2p3)).
 `not_in_nav` stays until activation because the preview build, and
@@ -9250,12 +9264,15 @@ commit to `subprojects/mkdocs/mkdocs.yml`: remove `scenario.md` and
 the `not_in_nav` block and the `hooks` entry. Its pull request merges
 into `dev-v.0.4.x`, whose push run builds without deploying; the owner's
 first manual run of Companion site on `dev-v.0.4.x` then deploys the
-unlisted page with the staged bundle and the checksum-verified data, and
-each later prototype update is another such run until owner action
-[OA-21](ip.md#4-owner-and-research-group-actions) ends them
-([§6.3](#63-ci-workflows), Branches;
+unlisted page with the staged bundle and the checksum-verified data,
+and each later update is another such run, until the release merge
+(the owner dropped the pre-release deploy stop and retired OA-21 on
+2026-11-12:
 [ADR-0017](../adr/0017-unadvertised-prototype-before-public-release.md),
-amendment of 2026-11-01). Until the release merge the live site serves
+amendment of 2026-11-12; [§6.3](#63-ci-workflows), Branches). Since
+PDD D-52's navigation entry merged, such a run also lists
+`/explore/`: the first one publishes the listed explorer before the
+release. Until the release merge the live site serves
 the build of `dev-v.0.4.x` that the last such run deployed, while `main`
 stays at the design state.
 
@@ -9274,14 +9291,15 @@ delete the front matter of `scenario.md`, whose only key is
 prototype notice ([§5.8](#58-view-layer)).
 The release run of the browser lane
 ([§7.7](#77-site-validation-and-release-checklist), item 4) is taken
-on the release branch, `dev-v.0.4.x`, which carries the activation
-commit — the branch on which §7.7 runs its pre-merge checks —
+on the release branch that carries the activation commit — the
+branch on which §7.7 runs its pre-merge checks —
 "Before the merge that releases the change"
 ([Data refresh and deployment](hldd.md#data-refresh-and-deployment),
-step 7). The activation commit reaches the live site only with the
-release merge: owner action OA-21, taken before the release
-sequence, ends every deployment from `dev-v.0.4.x`
-([§6.3](#63-ci-workflows), Branches). From that commit on, the page
+step 7). The activation ships in a release after v0.4.0, through the
+then-current development branch and its release merge (ADR-0017,
+amendment of 2026-11-12;
+[IP §3 — Gates and release sequence](ip.md#3-gates-and-release-sequence),
+Record of 2026-11-12). From that commit on, the page
 participates in the site's navigation, search, sitemap, and strict
 build like every other page
 ([Existing-site integration](hldd.md#existing-site-integration)).
@@ -9647,27 +9665,29 @@ Before v0.4.0 the unlisted prototype of
 [§6.1](#61-build-outputs-asset-paths-and-page-scaffold) reaches the live
 site only by the owner's manual runs of Companion site on `dev-v.0.4.x`
 (`gh workflow run mkdocs.yml --ref dev-v.0.4.x`), which the
-`github-pages` environment admits from owner action OA-20, taken before
-the prototype deployment, until owner action OA-21
-([ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md),
-amendment of 2026-11-01). No such run precedes the prototype deployment,
+`github-pages` environment admits from owner action OA-20, taken
+before the prototype deployment, until the owner removes the branch
+after the release merge (OA-21 retired unexecuted:
+[ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md),
+amendment of 2026-11-12; IP T-65, step (8)). No such run precedes
+the prototype deployment,
 so `main`'s design state stays live until then; from it until the
 release merge the live site serves the build of `dev-v.0.4.x` that the
 last such run deployed — the unlisted page and every other site change
-of the branch. OA-21 removes `dev-v.0.4.x` from the environment's policy
-just before the first commit of the release-branch order of
-[IP §3 — Gates and release sequence](ip.md#3-gates-and-release-sequence),
-owner action OA-3's commit of the [D-10](pdd.md#1-decision-register)
-(Liability-limitation text referenced by CR-4) text, so that commit, the
-glossary commit of
-[§6.4](#64-product-pages-beyond-the-scenario-page-p2p3), and the
-activation commit of §6.1 stay unpublished until the release merge, as
-[§7.7](#77-site-validation-and-release-checklist) (SC-7 approval record)
-requires. A data withdrawal in that interval reaches the live site by a
-manual run on `main`
+of the branch. The owner's manual runs may deploy the release-branch
+commits before the merge: the owner dropped the pre-release deploy
+stop on 2026-11-12 (ADR-0017, amendment of that date). The SC-7
+approval record of
+[§7.7](#77-site-validation-and-release-checklist) still postdates
+every release-branch commit that changes a listed text and precedes
+the release merge, under the two-step read of
+[IP §3 — Gates and release sequence](ip.md#3-gates-and-release-sequence)
+(Record of 2026-11-12). A data withdrawal in that interval is a
+revert on `dev-v.0.4.x` deployed by the owner's manual run, with
+the manual run on `main` — which deploys the design state and so
+takes the scenario page and its data off the site — as the fallback
 ([§4.3](#43-retention-rollback-recovery-and-withdrawal), Withdrawal,
-step 4), which deploys the design state and so takes the scenario page
-and its data off the site until the release merge. After the release
+step 4). After the release
 only `main` deploys: no later release branch is admitted to the
 environment.
 
@@ -9846,11 +9866,13 @@ push runs. The jobs:
   builds as validation without deploying, a push to `main` deploys, and
   a manual run deploys from the branch it runs on; and the environment's
   deployment-branch policy admits `main` always and `dev-v.0.4.x` from
-  owner action OA-20 until owner action OA-21 (Branches, above;
+  owner action OA-20 until the owner removes it after the release
+  merge (Branches, above;
   [ADR-0009](../adr/0009-github-pages-hosting.md) and
   [ADR-0017](../adr/0017-unadvertised-prototype-before-public-release.md),
-  amendments of 2026-11-01), so a manual run on any other branch fails
-  at the environment and deploys nothing. The workflow's header comment,
+  amendments of 2026-11-01 and 2026-11-12), so a manual run on any
+  other branch fails at the environment and deploys nothing. The
+  workflow's header comment,
   its comments at `workflow_dispatch` and `deploy`, and the Publishing
   model list of `subprojects/mkdocs/DEPLOY.md` are rewritten to state
   this. Only this job holds `pages: write` and `id-token: write`; every
@@ -10368,19 +10390,21 @@ step 8 lists for the SC-7 review:
   product shows is a recommended design value.
 ```
 
-Both are public reader-facing texts, so they ship only after their
+Both are public reader-facing texts that the
 [SC-7](pdd.md#101-success-criteria) approval
 ([CR-10 — Scientific-content approval](prd.md#cr-10-scientific-content-approval)),
 the research group's record under owner action OA-4 of the
-[implementation plan, §4](ip.md#4-owner-and-research-group-actions).
+[implementation plan, §4](ip.md#4-owner-and-research-group-actions),
+covers before the release merge.
 `glossary.md` is a published page that no `draft_docs` entry holds
-back, so the two entries become public with the release merge that
-activates the scenario page
-([§6.1](#61-build-outputs-asset-paths-and-page-scaffold)), after
-that approval and never before it: their commit lands on `dev-v.0.4.x`
-after owner action [OA-21](ip.md#4-owner-and-research-group-actions) has
-ended the manual prototype runs ([§6.3](#63-ci-workflows), Branches), so
-no such run deploys them.
+back, so the two entries become public with the first deploy after
+their commit — the owner's manual runs keep deploying `dev-v.0.4.x`
+until the release merge (ADR-0017, amendment of 2026-11-12) — under
+the two-step read of
+[IP §3 — Gates and release sequence](ip.md#3-gates-and-release-sequence)
+(Record of 2026-11-12): the texts follow the research group's
+wording (PDD D-51), and the OA-4 record covers them, with every
+listed text, before the release merge.
 
 *Verification (planned):* the site checks hook of
 [§6.1](#61-build-outputs-asset-paths-and-page-scaffold) — the
@@ -11981,9 +12005,11 @@ run is `webappMeasureReference` with `-Pegr.perf.target=published`,
 whose `EGR_BASE_URL` reaches the VM-side run of step 5; the specs
 measure `EGR_BASE_URL` when it is set and the lane's `BASE_URL`
 otherwise. That run follows each release's deployment, beginning
-with the deployment of the release that activates the page
-([§6.1](#61-build-outputs-asset-paths-and-page-scaffold)); the
-deployments of the unlisted prototype are not releases. A run of the
+with the v0.4.0 release's deployment (the scenario page's activation
+left v0.4.0:
+[ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md),
+amendment of 2026-11-12); the pre-release deployments are not
+software releases. A run of the
 `measure` project anywhere else — such as
 `npx playwright test --project=measure --workers=1` on a
 workstation, after `./gradlew :subprojects:webapp:playwrightInstall`
@@ -12510,18 +12536,27 @@ ends with the evidence ledger below; the implementation plan's gate
 section ([`docs/app/ip.md`, §3](ip.md#3-gates-and-release-sequence))
 carries this enumeration identically and schedules the checks. The
 checks run on the release branch ([§6.3](#63-ci-workflows),
-Branches) — for v0.4.0, the release that activates the scenario
-page, `dev-v.0.4.x`, which carries the activation commit of
-[§6.1](#61-build-outputs-asset-paths-and-page-scaffold) — before the
-merge that releases the change, its release merge into `main` (HLDD
-§9, Data refresh and deployment, step 7), except the published-site
-measurement of item 5, which follows the deployment, and items 10
-and 11, which run on the software release's tag while its release is
+Branches) — for v0.4.0, `dev-v.0.4.x` — before the merge that
+releases the change, its release merge into `main` (HLDD §9, Data
+refresh and deployment, step 7), except the published-site
+measurement of item 5, which follows the deployment; items 10 and
+11, which run on the software release's tag while its release is
 still a draft
-([§4.4](#44-licensing-archival-distribution-and-release-attachments)).
+([§4.4](#44-licensing-archival-distribution-and-release-attachments));
+and the human checks of items 13–15, which the owner runs on the
+deployed site after a deploy, by the owner's decisions of 2026-11-09
+([IP §3 — Gates and release sequence](ip.md#3-gates-and-release-sequence),
+Record of 2026-11-12). The evidence of each item-13–15 row names the
+manual Companion-site run it used (URL and `headSha`) and the
+software and data versions the page's footer showed; items 14 and 15
+run on the release candidate's deploy (the owner's decision of
+2026-11-09).
 
-**Phases.** The checklist gates public releases. The prototype
-deployment of [§6.1](#61-build-outputs-asset-paths-and-page-scaffold)
+**Phases.** The checklist gates software releases; a pre-release
+deploy that lists the explorer stays gated by the standing
+deployment safeguards below (ADR-0017, amendment of 2026-11-12).
+The prototype deployment of
+[§6.1](#61-build-outputs-asset-paths-and-page-scaffold)
 — Phase 1 of
 [ADR-0017 — An unadvertised prototype deployment precedes the public release](../adr/0017-unadvertised-prototype-before-public-release.md),
 not a public release, deployed by the owner's manual runs on
@@ -12531,9 +12566,12 @@ gates of §6.3, which keep a commit that fails them from
 `deploy`; the `site_checks` hook arms (a)–(e) in both strict builds,
 arm (d) checking the unlisted state; and the media rule of item 9,
 under which no third-party photograph is deployed without documented
-permission. Every item of the table applies at activation and at the
-first software release, v0.4.0 — one release, the one that activates
-the scenario page — and at every release after it.
+permission. Every item of the table applies at the first software
+release, v0.4.0 — which ships the listed explorer public, the
+scenario page staying an unlisted prototype
+([ADR-0017](../adr/0017-unadvertised-prototype-before-public-release.md),
+amendment of 2026-11-12) — at the scenario page's own activation
+release, and at every release after it.
 
 | # | Check | Applies to | Evidence recorded |
 |---|---|---|---|
@@ -12549,9 +12587,9 @@ the scenario page — and at every release after it.
 | 10 | Zero-`fig-*` archive: the item-10 listing below prints 0 — the `export-ignore` arrangement recorded in [`notes/Roadmap.md` — Decisions made](../../notes/Roadmap.md#decisions-made); from P2 the listing also holds no entry under `subprojects/mkdocs/docs/media/` ([§6.4](#64-product-pages-beyond-the-scenario-page-p2p3)). | Every release | The archive listing. |
 | 11 | Attachment identity ([DD-8](#1-ddd-decision-register)): on the draft software release of [§4.4](#44-licensing-archival-distribution-and-release-attachments), before it is published, run the checklist's `gh release upload` block of §4.4 — the files the committed pointer manifest names, their list generated from it, and beside them the dashboards' plotting CSVs that the block regenerates in `dist/csv/`, per [`notes/Roadmap.md` — Decisions made](../../notes/Roadmap.md#decisions-made) — then re-download every data asset the pointer names and compare SHA-256 checksums. Attachments must be "the same verified files identified by that release's committed pointer manifest" ([HLDD §9 — Testing and release architecture](hldd.md#9-testing-and-release-architecture), Software-release data attachments), byte for byte. Before the draft is published, `gh api repos/HarvardRC/eps-ground-rupture/immutable-releases --jq .enabled` prints `true`, so publication locks the verified attachments. | Every release | The checksum comparison output and the immutability command's output. |
 | 12 | Rollback readiness: the release's rollback target of [§4.3](#43-retention-rollback-recovery-and-withdrawal) (Rollback), which the owner approves — an earlier software tag, not necessarily the immediately preceding one, whose vintage no withdrawal excludes — and the §4.3 retention check of the vintage that the tag's pointer manifest (`git show <tag>:subprojects/webapp/data/pointer.json`) names; or, when no tag qualifies, the owner-approved absence of §4.3, which for the first software release reads `no rollback target: first release`. | Every release | The target's tag and its retention check output, or the absence line. |
-| 13 | Acceptance walkthroughs: [US-1](prd.md#us-1-dam-foundation-scenario) (Dam foundation scenario), [US-2](prd.md#us-2-pipeline-crossing) (Pipeline crossing), and [US-3](prd.md#us-3-design-review) (Design review) executed against the golden scenarios ([PDD §10.3 — Acceptance walkthroughs](pdd.md#103-acceptance-walkthroughs)); [US-4](prd.md#us-4-interpreting-observed-deformation) (Interpreting observed deformation) and [US-5](prd.md#us-5-teaching-surface-rupture-morphology) (Teaching surface-rupture morphology) join when their P2 capabilities ship. | Every release | Reviewer records. |
-| 14 | Representative assistive-technology pass — a human check beyond the automatable lane checks ([HLDD §7.2 — Accessibility and supported environments](hldd.md#72-accessibility-and-supported-environments)) — which reads one chart's bin table and one field table with the chart-data disclosure open. | Every release | Reviewer record. |
-| 15 | Representative engines and mobile browsers (manual): the procedure below, run by the owner against the preview tree served by `playwright/serve.mjs`, started in the form of Node.js outside Gradle of [§2](#2-repository-structure-naming-and-toolchain). | Every release | The engine record. |
+| 13 | Acceptance walkthroughs: [US-1](prd.md#us-1-dam-foundation-scenario) (Dam foundation scenario), [US-2](prd.md#us-2-pipeline-crossing) (Pipeline crossing), and [US-3](prd.md#us-3-design-review) (Design review) executed against the golden scenarios ([PDD §10.3 — Acceptance walkthroughs](pdd.md#103-acceptance-walkthroughs)) — for v0.4.0, the try-outs of `docs/testing/acceptance-try-outs.md` run on the deployed explorer (the owner's decisions of 2026-11-09; PDD §10.3); [US-4](prd.md#us-4-interpreting-observed-deformation) (Interpreting observed deformation) and [US-5](prd.md#us-5-teaching-surface-rupture-morphology) (Teaching surface-rupture morphology) join when their P2 capabilities ship. | Every release | Reviewer records. |
+| 14 | Representative assistive-technology pass — a human check beyond the automatable lane checks ([HLDD §7.2 — Accessibility and supported environments](hldd.md#72-accessibility-and-supported-environments)) — for v0.4.0, VoiceOver with Safari on the deployed site (the owner's decision of 2026-11-09) — which reads one chart's bin table and one field table with the chart-data disclosure open. | Every release | Reviewer record. |
+| 15 | Representative engines and mobile browsers (manual): the procedure below, run by the owner against the preview tree served by `playwright/serve.mjs`, started in the form of Node.js outside Gradle of [§2](#2-repository-structure-naming-and-toolchain). For v0.4.0 the subject is the deployed explorer, and at least one mobile environment is a real phone (the owner's decisions of 2026-11-09); the procedure's `/scenario/` steps stand for the activation release. The For v0.4.0 block of [`docs/app/release-checklist.md`](release-checklist.md) names the deployed-explorer steps. | Every release | The engine record. |
 | 16 | Traceability: `python3 .github/scripts/check_traceability.py --release` exits 0 on the release commit — the [§8](#8-traceability) matrix lint, which under `--release` exits non-zero on any gap ([§6.3](#63-ci-workflows) runs it without the flag). | Every release | The command output, with its gap count of 0. |
 | 17 | Data terms: the pinned vintage's terms file holds the confirmed record of [§4.2](#42-publication-of-a-data-vintage) step 1, never the assumed one ([§4.4](#44-licensing-archival-distribution-and-release-attachments)): the item-17 search below prints 1. | Every release | The search output. |
 
@@ -12759,13 +12797,13 @@ criteria are
 
 | Criterion | Verifying artifact |
 |---|---|
-| [SC-1 (core workflow)](pdd.md#101-success-criteria) | The US-1 walkthrough executed by an engineer new to the product, unassisted; the lane's `golden-scenario` spec is its scripted twin, not its substitute. |
-| [SC-2 (download reproducibility)](pdd.md#101-success-criteria) | The lane's `consistency` spec — the downloaded `scenario.json` equals the scenario built, and `test/zipcheck.py` accepts the archive — plus the walkthrough reviewer identifying scenario settings, data-export version, matching-record count, and every statistic from the downloaded package alone. |
+| [SC-1 (core workflow)](pdd.md#101-success-criteria) | The US-1 walkthrough executed by an engineer new to the product, unassisted (for v0.4.0, try-out Task 1 of `docs/testing/acceptance-try-outs.md` on the deployed explorer — the owner's decisions of 2026-11-09); the lane's `golden-scenario` spec is its scripted twin, not its substitute. |
+| [SC-2 (download reproducibility)](pdd.md#101-success-criteria) | The lane's `consistency` spec — the downloaded `scenario.json` equals the scenario built, and `test/zipcheck.py` accepts the archive — plus the walkthrough reviewer identifying scenario settings, data-export version, matching-record count, and every statistic from the downloaded package alone (for v0.4.0, performed on the ZIP kept by try-out Task 1). |
 | [SC-3 (correctness)](pdd.md#101-success-criteria) | The [§7.2](#72-calculation-parity-tests) parity run on the release commit (both **Parity** steps), and the lane's `golden-scenario` spec: displayed strings equal the reference display strings exactly. |
 | [SC-4 (performance)](pdd.md#101-success-criteria) | The [§7.6](#76-performance-and-compatibility-measurements) reports of item 5 from the reference environment (`environment.kind` `aws-ec2`, the instance type, region, and AMI of [DD-12](#1-ddd-decision-register), and the DD-12 `network` values): nearest-rank 95th percentiles of 30 runs at most 2.0 s cold, 1.0 s warm, and 200 ms per interaction workload, with the payload at most 4 MB compressed; and the published-site run after deployment. |
 | [SC-5 (candor)](pdd.md#101-success-criteria) | The lane's default-view caveat assertions plus the acceptance review: every applicable caveat present in the default view, the population name always visible with its explainer one action away. |
 | [SC-6 (site integrity)](pdd.md#101-success-criteria) | The strict builds' exit status on both trees, the `site_checks` hook included, the lane's `site-regression` spec, and the acceptance confirmation that the existing dashboards, navigation, citation pages, and deployment are unaffected. |
-| [SC-7 (scientific sign-off)](pdd.md#101-success-criteria) | The recorded research-group approval ([OA-4](ip.md#4-owner-and-research-group-actions)) of the reader-facing texts — the [PDD §5 — Copy deck](pdd.md#5-copy-deck) texts and every fixed-here text `check_pdd_agreement.py` lists, in `copy.json` or between copy markers ([§5.13](#513-application-configuration)), the glossary additions of [§6.4](#64-product-pages-beyond-the-scenario-page-p2p3) among them — as the SC-7 approval record below, referenced from the release record: the newest record's listing, `data_tag`, and bundle digests equal the step-8 listing printed at the release commit, its pointer's `data_tag`, and its build's digests, and the record follows the activation commit of [§6.1](#61-build-outputs-asset-paths-and-page-scaffold) and precedes the release merge that deploys the activated page. |
+| [SC-7 (scientific sign-off)](pdd.md#101-success-criteria) | The recorded research-group approval ([OA-4](ip.md#4-owner-and-research-group-actions)) of the reader-facing texts — the [PDD §5 — Copy deck](pdd.md#5-copy-deck) texts and every fixed-here text `check_pdd_agreement.py` lists, in `copy.json` or between copy markers ([§5.13](#513-application-configuration)), the glossary additions of [§6.4](#64-product-pages-beyond-the-scenario-page-p2p3) among them — as the SC-7 approval record below, referenced from the release record: the newest record's listing, `data_tag`, and bundle digests equal the step-8 listing printed at the release commit, its pointer's `data_tag`, and its build's digests, and the record follows every release-branch commit that changes a listed text and precedes the release merge (the activation left v0.4.0: ADR-0017, amendment of 2026-11-12). |
 
 **SC-7 approval record.** The record of owner action
 [OA-4](ip.md#4-owner-and-research-group-actions) is a dated file
@@ -12786,17 +12824,20 @@ with that of `HEAD`'s pointer manifest, and its two digests with
 those of a successful Companion site run on `HEAD`; a difference, a
 missing file, or a file without its date, roles, commit, `data_tag`,
 or digests stops the task, which reports it. The approval precedes
-public deployment: the record postdates every commit of the release
+the release merge: the record postdates every commit of the release
 branch that changes, adds, or removes a listed text — in the
 release-branch order of
 [IP §3 — Gates and release sequence](ip.md#3-gates-and-release-sequence),
-the D-10 commit, the glossary commit, and the activation commit,
-which removes the prototype notice of [§5.8](#58-view-layer),
-precede it — and the release merge, which deploys the activated
-page, follows it; owner action
-[OA-21](ip.md#4-owner-and-research-group-actions), taken just before the
-first of those commits, keeps every run from deploying the release
-branch until that merge ([§6.3](#63-ci-workflows), Branches). The
+the glossary commit — and, before the order begins, the D-10 commit
+(landed 2026-11-09) — precede it — and the release merge follows
+it. The owner's manual runs may
+deploy the release branch until that merge (OA-21 retired:
+[ADR-0017](../adr/0017-unadvertised-prototype-before-public-release.md),
+amendment of 2026-11-12): the approval the record gives is the
+formal second step of the two-step read, after the research group's
+informal read of the deployed explorer
+([IP §3](ip.md#3-gates-and-release-sequence), Record of
+2026-11-12). The
 release commit between them changes only the version, which enters none
 of the listing, the pointer, or the bundle
 ([§6.2](#62-software-and-data-version-stamps)), so one record covers the
@@ -12878,7 +12919,11 @@ or
 all accepted, each row with the line numbers its source has at
 this document's revision; ADR-0017's rows include one for its
 amendment of 2026-11-01, the owner's decision of that day on
-versions and branches. ADR-0018 amends
+versions and branches. The ADR-0017 rows keep the sweep's wording:
+its amendment of 2026-11-12 drops the pre-release deploy stop (OA-21
+retired unexecuted), makes the listed explorer public before the
+release, and defers the scenario page's activation past v0.4.0; the
+rows regenerate when the sweep next runs. ADR-0018 amends
 [ADR-0013 — Row-level, trial-major columnar scenario artifact](../adr/0013-row-level-scenario-artifact.md),
 replacing its fixed 101-stage stride. Two ADR-0018 rows succeed the
 ADR-0013 Decision rows (L88-94 and L137-142) whose obligations named
