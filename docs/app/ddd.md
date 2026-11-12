@@ -9879,6 +9879,21 @@ concurrency key above lets an in-flight deploy finish rather than be
 replaced mid-publication, and keeps pull-request runs and push runs
 on `dev-v.*` branches from cancelling a pending deploy.
 
+**JDK for the Gradle jobs (2026-11-11).** The jobs that run the
+Gradle wrapper — `webapp-test`, `webapp-bundle`, and `build` — ran
+it on the runner's preinstalled JDK, as the job descriptions above
+say. GitHub then moved `ubuntu-latest` from Ubuntu 24.04 to Ubuntu
+26.04, whose preinstalled JDK is 25, and the 8.10.2 wrapper runs on
+JDK 8 to 23 ([ADR-0001](../adr/0001-gradle-multi-project-build.md)),
+so those jobs stopped at Gradle's start-up — on pull requests and on
+the owner's manual deploy alike. By the owner's decision of
+2026-11-11, each of the three jobs sets up JDK 21 (Temurin) with
+`actions/setup-java` before its first Gradle step; the jobs keep
+`runs-on: ubuntu-latest`, and the wrapper stays at 8.10.2. Where this
+section says the wrapper runs on the runner's preinstalled JDK, read
+JDK 21 as set up by that step. Upgrading the wrapper to a release
+that runs on newer JDKs is a separate change. Guided task G-31.
+
 **Required checks.** Blocking a merge is a repository setting, not
 workflow text. The owner's ruleset on `main` and the release branch
 (Branches, above; `dev-v.0.5.x` joins it when that branch is created) —
