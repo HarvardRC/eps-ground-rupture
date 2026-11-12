@@ -311,7 +311,8 @@ Verified 2026-10-12:
   `pytest.approx(..., abs=0.001)`, so despite being written to four
   decimals they are enforced to three.
 - `./gradlew :subprojects:python:pytest` — same suite via the orchestrator
-  (Gradle 8.10.2 wrapper; nothing in the build pins a JDK toolchain).
+  (Gradle 8.10.2 wrapper; nothing in the build pins a JDK toolchain, and
+  CI installs JDK 21 before every job that runs the wrapper).
 - `poetry run egr-build` — requires all four raw inputs, exits 2 naming any
   that are missing.
 - The companion site builds `--strict` on every pull request that touches
