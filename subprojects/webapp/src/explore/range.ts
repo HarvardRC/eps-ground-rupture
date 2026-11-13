@@ -19,7 +19,7 @@ export function fullRangeName(field: RangeField): string {
 }
 
 /** The hint under an unanswered (empty) range group: a fresh one, or a restored empty set (§14.6 items 1–2). */
-export const RANGE_EMPTY_HINT = 'Move a thumb or choose Full range to continue.';
+export const RANGE_EMPTY_HINT = 'Drag a range handle or choose Full range to continue.';
 
 const NAMES: Record<RangeField, string> = { faultDip: 'fault angle', depth: 'sediment depth' };
 const NOUNS: Record<RangeField, string> = { faultDip: 'angles', depth: 'depths' };

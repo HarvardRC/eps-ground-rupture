@@ -36,8 +36,10 @@ model's range is broken down.[^spec] The six are
 [`Monoclinal`](../glossary.md#monoclinal),
 [`Pressure Ridge`](../glossary.md#pressure-ridge),
 [`Simple`](../glossary.md#simple) and a
-[`… Collapse`](../glossary.md#collapse) variant of each, shown side by side
-in [Figure 2](../figures.md#fig-2).
+[`… Collapse`](../glossary.md#collapse) variant of each. See the
+[description of Figure 2](../figures.md#fig-2) for the paper's comparison
+of these shapes with field examples; the figure itself is not reproduced
+here.
 The two quantities compared here — width and height — are defined on the
 model geometry in [Figure 5](../figures.md#fig-5){ .figure-pop data-img="../../images/fig-05-ml-model-measurements.jpg" data-title="Figure 5 — the quantities every dashboard plots" }.
 

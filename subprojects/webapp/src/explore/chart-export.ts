@@ -69,7 +69,7 @@ export function caveatTexts(input: RenderInput): readonly string[] {
 export function panelNotes(input: RenderInput, m: MeasurementName): readonly string[] {
   const notes: string[] = [];
   if (m === 'dzw') notes.push(guided(copyText('pdd5.7.widthScopeNote')));
-  if (m === 'scarp_dip') notes.push(copyText('pdd5.4.scarpDipNotice'));
+  if (m === 'scarp_dip') notes.push(guided(copyText('pdd5.4.scarpDipNotice')));
   const notice = selectNotices(input, config).panels[m];
   if (notice !== null && notice.key === NOTICE_KEYS.warning) notes.push(guided(noticeText(notice)));
   if (negativeHeights(input, m)) notes.push(NEGATIVE_HEIGHT_NOTE);

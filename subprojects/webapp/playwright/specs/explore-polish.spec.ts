@@ -32,7 +32,7 @@ test('the results screen: compact scenario and its warning first, results next, 
   await expect(context.locator('h3')).toHaveText('Your confirmed scenario');
   await expect(context.locator('.gx-compact')).toHaveText([
     'Fault angle: 30°; 40° · Sediment depth: 5 m · Sediment density: Dense · Sediment strength and structure: Layered: Strong; Uniform: Strong',
-    'Fault slip: 0–3 m surface offset · Included: All stages within the slip range · All scarp types (no filter)',
+    'Vertical surface offset: 0–3 m · Included: All stages within the slip range · All scarp types (no filter)',
   ]);
   // The critical coverage warning stays visible; the conversion table does not repeat up here.
   await expect(context.locator('.gx-warning')).toContainText('The simulations do not cover the full requested range');

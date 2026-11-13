@@ -21,7 +21,7 @@ through them is the relationship you are reading.
     **Slip**, **fault dip**, **DZW**, **Us − Ud**,
     [**r²**](../glossary.md#r2), and the sediment settings — all defined in
     the [glossary](../glossary.md), which also explains
-    [why each curve's slope lands near sin(fault dip)](../glossary.md#how-the-quantities-relate).
+    [how fault slip relates to vertical displacement](../glossary.md#how-the-quantities-relate).
 
 Three controls define the view:
 
@@ -152,10 +152,11 @@ The underlying data is the DEM experiment set described on the
   side with measurements from real earthquakes.
 - **[Per-event boxplots](per-event-boxplots.md)** — how much the field
   measurements vary within a single earthquake.
-- **[Slip regression](slip-regression.md)** — that same sin(dip) relationship
-  fitted per dip, then inverted to infer slip from a field measurement.
-- **[Glossary](../glossary.md#how-the-quantities-relate)** — why each curve's
-  slope lands so close to sin(fault dip).
+- **[Slip regression](slip-regression.md)** — the relationship between
+  fault slip and vertical displacement, fitted for each fault dip and
+  inverted to estimate slip from a field measurement.
+- **[Glossary](../glossary.md#how-the-quantities-relate)** — how fault slip
+  relates to vertical displacement.
 
 <p class="cite-open-row"><button class="cite-open" type="button">How to cite</button></p>
 

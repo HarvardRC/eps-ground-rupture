@@ -13,6 +13,9 @@ import { copyEntry } from '../views/copy';
 import type { SvgNode } from '../views/svg';
 
 export const GUIDED_COPY: Readonly<Record<string, string>> = {
+  // D-5: the correction is reported ready; the served release's column still needs verification
+  // (guided DDD §15.12, assembled under D-51; PDD §5.4, correction of 2026-11-12).
+  'pdd5.4.scarpDipNotice': 'Scarp-dip results remain provisional while we confirm that this data release contains the approved corrections.',
   'pdd4.1.cumulativeAccuracy': 'The curve may be simplified for display. Simplification changes cumulative percentages by less than 0.2 percentage points. Statistics and percentile read-offs rely on all measurements used for this scenario.',
   // The small-count reframe (guided DDD §15.5; PDD D-51), assembled from the research group's review.
   'pdd5.8.smallResultWarning': 'Only {N} measurements can be used for this scenario. They are not less trustworthy — a very specific set of site conditions matches few simulations, so the distribution is coarse. Try adding more options to include a range of results.',

@@ -164,6 +164,7 @@
  * else inside would be hidden. */
 .tableau-fit {
   position: relative;
+  box-sizing: border-box;
   width: 100%;
   margin: 1.2rem 0 0.4rem;
   border: 1px solid var(--md-default-fg-color--lightest);
@@ -180,15 +181,15 @@
 
 .tableau-fit tableau-viz {
   display: block;
-  /* Positioned so it paints above the ::before skeleton text — the viz's
-     iframe covers the message the moment Tableau draws. */
+  /* tableau-fit.js sets the host's native pixel dimensions before scaling.
+     Positioned so it paints above the loading message while rendering. */
   position: relative;
 }
 
 /* Loading skeleton — visual-identity.md: "Loading skeleton text on
    .tableau-fit while Tableau paints." The message lives in the wrapper's
-   own ::before layer, BEHIND the viz, so nothing has to dismiss it: the
-   iframe's opaque background covers it on first paint. If the Embedding
+   own ::before layer, BEHIND the viz; tableau-fit.js dismisses it when
+   that viz reports firstinteractive. If the Embedding
    API never loads (blocked, offline, JS off), the text stays put and the
    escape-hatch link below the wrapper is the way out. */
 .tableau-fit::before {
@@ -202,6 +203,11 @@
   font-size: 0.75rem;
   color: var(--md-default-fg-color--light);
   animation: tableau-skeleton-pulse 2.4s ease-in-out infinite;
+}
+
+.tableau-fit[data-tableau-ready="true"]::before {
+  content: none;
+  animation: none;
 }
 
 @keyframes tableau-skeleton-pulse {

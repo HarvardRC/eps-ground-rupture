@@ -75,8 +75,10 @@ simulation produces are shapes that occur in the field. It is also the
 practical key to the dashboards, because these six classes are the colour
 legend on **[Model vs reality](dashboards/model-vs-reality.md)**,
 **[Distributions](dashboards/distributions.md)** and the model panels of
-**[Per-event boxplots](dashboards/per-event-boxplots.md)**. When a legend
-entry means nothing to you, this is the figure to look at.
+**[Per-event boxplots](dashboards/per-event-boxplots.md)**. For an
+explanation of each legend entry, see the
+[scarp-class definitions](glossary.md#scarp-classes). To see the images,
+consult Figure 2 in the paper; they are not reproduced here.
 
 ## Figure 3 — what a simulation actually is { #fig-3 }
 

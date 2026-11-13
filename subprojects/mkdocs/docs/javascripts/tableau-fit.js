@@ -26,11 +26,22 @@ function fitTableauVizzes() {
     const w = +wrap.dataset.width;
     const h = +wrap.dataset.height;
     if (!w || !h) return;
+    // The component's width/height attributes size its iframe, not the
+    // CSS box of the custom element. Give both the same native size
+    // before scaling; an auto-width host would be scaled a second time.
+    for (const [name, value] of [["width", w], ["height", h]]) {
+      const pixels = String(value);
+      if (viz.getAttribute(name) !== pixels) viz.setAttribute(name, pixels);
+      viz.style[name] = `${pixels}px`;
+    }
     const cap = +wrap.dataset.maxScale || DEFAULT_MAX_SCALE;
     const scale = Math.min(cap, wrap.clientWidth / w);
     viz.style.transform = `scale(${scale})`;
     viz.style.transformOrigin = "top left";
-    wrap.style.height = `${h * scale}px`;
+    // The wrapper uses border-box sizing; retain its border around the
+    // complete scaled iframe, including Tableau's bottom toolbar.
+    const borderHeight = wrap.offsetHeight - wrap.clientHeight;
+    wrap.style.height = `${h * scale + borderHeight}px`;
     wrap.style.overflow = "hidden";
   });
 }
@@ -42,6 +53,13 @@ window.addEventListener("resize", fitTableauVizzes);
 // load event never fires again — re-fit on each navigation.
 if (typeof document$ !== "undefined") document$.subscribe(fitTableauVizzes);
 
-// The viz renders asynchronously; re-fit once it reports ready so the
-// wrapper height matches what actually got drawn.
-document.addEventListener("firstinteractive", fitTableauVizzes, true);
+// The viz renders asynchronously. Dismiss this wrapper's loading message
+// explicitly: a short or transparent dashboard need not cover that text.
+// The delegated listener also covers embeds added by instant navigation.
+document.addEventListener("firstinteractive", (event) => {
+  const viz = event.target?.closest?.("tableau-viz");
+  const wrap = viz?.closest(".tableau-fit");
+  if (!wrap) return;
+  wrap.dataset.tableauReady = "true";
+  fitTableauVizzes();
+}, true);

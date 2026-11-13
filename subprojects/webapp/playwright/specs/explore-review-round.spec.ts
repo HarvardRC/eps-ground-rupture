@@ -28,7 +28,7 @@ test('the theme\'s Back to top control leaves the guided page only (§12.3)', as
   await action(page, 'Build your scenario').click();
   await answerEverySite(page);
   await action(page, 'Continue to fault slip').click();
-  await expect(page.locator('#gx-heading')).toHaveText('Choose the assumed fault slip');
+  await expect(page.locator('#gx-heading')).toHaveText('Specify fault slip or surface offset');
   await revealBackToTop(page);
   // The theme's control is there but never rendered: out of view, the tab order and the accessibility tree.
   await expect(page.locator('.md-top')).toHaveCount(1);

@@ -106,7 +106,7 @@ describe('chart export: the strip (§16.2, §16.6)', () => {
     assert.deepEqual(panelNotes(full, 'dzw'), [guided(copyText('pdd5.7.widthScopeNote'))]);
     assert.match(panelNotes(full, 'dzw')[0]!, /^Deformation zone width measures/);
     // Dip: the provisional notice, everywhere the measurement appears (PDD §5.4).
-    assert.deepEqual(panelNotes(full, 'scarp_dip'), [copyText('pdd5.4.scarpDipNotice')]);
+    assert.deepEqual(panelNotes(full, 'scarp_dip'), [guided(copyText('pdd5.4.scarpDipNotice'))]);
     // The negative-height note only below zero, only on scarp height.
     assert.deepEqual(panelNotes(withMin(full, 'scarp_height', -0.02), 'scarp_height'), [NEGATIVE_HEIGHT_NOTE]);
     assert.deepEqual(panelNotes(withMin(full, 'scarp_height', 0), 'scarp_height'), []);

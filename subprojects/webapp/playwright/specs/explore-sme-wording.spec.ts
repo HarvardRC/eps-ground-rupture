@@ -28,6 +28,9 @@ async function confirmKern(page: Page): Promise<void> {
 
 test('the introduction and the step list carry the amended wording (§§15.1–15.2)', async ({ page }) => {
   await gotoExplore(page);
+  // The embedded app labels its section without adding a second main landmark.
+  await expect(page.getByRole('main')).toHaveCount(1);
+  await expect(page.locator('#gre-explore .gx-main')).toHaveAttribute('aria-labelledby', 'gx-heading');
   await expect(page.locator('#gre-explore .gx-main')).toContainText(INTRO_LINE);
   await expect(page.locator('#gre-explore .gx-main .gx-research')).toHaveText(FORECAST);
   const cards = page.locator('.gx-intro-grid p');
@@ -52,7 +55,7 @@ test('site-condition hints, the fault-slip step, and the review blocks (§§15.1
   await expect(page.locator('#gx-group-depth > p').first()).toContainText('Thickness of the sediment above bedrock. If unknown, select the full range.');
 
   await action(page, 'Continue to fault slip').click();
-  await expect(heading(page)).toHaveText('Choose the assumed fault slip');
+  await expect(heading(page)).toHaveText('Specify fault slip or surface offset');
   await expect(page.locator('details.gx-help', { hasText: 'How is surface offset related to fault slip?' }).locator('p')).toContainText('pressure ridges can make that estimate too large.');
   await page.locator('#gx-offset-feedback table').waitFor();
   await expect(page.locator('#gx-offset-feedback .gx-hint')).toContainText('Pressure ridges can cause it to overestimate fault slip.');
@@ -74,11 +77,11 @@ test('site-condition hints, the fault-slip step, and the review blocks (§§15.1
 
 test('results: the Fault slip summaries, the renamed actions, the width spelling, and the negative-height note (§§15.1, 15.7–15.8, 15.11)', async ({ page }) => {
   await confirmKern(page);
-  await expect(page.locator('.gx-context')).toContainText('Fault slip: 0–1.3 m surface offset');
+  await expect(page.locator('.gx-context')).toContainText('Vertical surface offset: 0–1.3 m');
   await expect(page.locator('.gx-footer').getByRole('button', { name: 'Change geological site conditions' })).toHaveCount(1);
   await expect(page.locator('.gx-footer').getByRole('button', { name: 'Change fault slip' })).toHaveCount(1);
   await page.locator('details#gx-full-scenario summary').click();
-  await expect(page.locator('details#gx-full-scenario')).toContainText('Fault slip: 0–1.3 m surface offset');
+  await expect(page.locator('details#gx-full-scenario')).toContainText('Vertical surface offset: 0–1.3 m');
 
   // The Kern sample's matched minimum scarp height is −0.02 m (briefing question 6).
   await expect(page.locator('.gx-statistics tbody tr', { hasText: 'Minimum' }).locator('td')).toHaveText(/^[−-]0\.\d+ m$/);
@@ -184,7 +187,7 @@ test('slip mode: the summary value drops its redundant tail under the Fault slip
   await expect(page.locator('.gx-review-section').nth(1)).toContainText('3–5 m fault slip');
   await action(page, 'Show results').click();
   await page.locator('.gx-context').waitFor();
-  await expect(page.locator('.gx-context .gx-compact').nth(1)).toHaveText(/^Fault slip: 3–5 m · Included: /);
+  await expect(page.locator('.gx-context .gx-compact').nth(1)).toHaveText(/^Fault slip at depth: 3–5 m · Included: /);
   await page.locator('details#gx-full-scenario summary').click();
-  await expect(page.locator('details#gx-full-scenario p').first()).toHaveText('Fault slip: 3–5 m');
+  await expect(page.locator('details#gx-full-scenario p').first()).toHaveText('Fault slip at depth: 3–5 m');
 });

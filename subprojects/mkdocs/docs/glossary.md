@@ -2,10 +2,9 @@
 
 <p class="cite-open-row"><button class="cite-open" type="button">How to cite</button></p>
 
-The paper this site accompanies is written for specialists. This page is the
-opposite: it assumes you know nothing about faults, and defines the terms and
-abbreviations used across this site in plain language. Nothing here is needed
-to *look* at the dashboards — but it should make them mean something.
+This page explains the geological and statistical terms and
+abbreviations used across the site. Use it to understand the model
+settings, measured quantities, and charts.
 
 !!! tip "Two shortcuts"
     Acronyms across the site carry a **tooltip** — DZW, FDHI, DEM and the

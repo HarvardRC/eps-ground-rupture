@@ -37,6 +37,10 @@ No new framework or runtime dependency. Use these files:
 data URLs point to the already staged `assets/scenario/data/`.
 No existing scenario bundle or page is replaced.
 
+The app's `.gx-main` container is a `section` labelled by
+`gx-heading`. MkDocs supplies the page's single `main` landmark;
+the embedded app does not add a nested one (G-33, 2026-11-12).
+
 ## 2. State and pure module interface
 
 Export the following from `explore/state.ts`:
@@ -974,16 +978,35 @@ and its availability (confirmed results only). Its archive adds
 one final member, `report.docx`, after the four members of DDD
 §5.9. The guided download handler composes the archive itself: it
 takes the four text members from the shared `packageTexts`
-(unchanged), appends the report member, and writes the archive
+(unchanged), applies the guided copy overlay to the human-readable
+labels in `statistics.csv` and the text in `provenance.txt`,
+appends the report member, and writes the archive
 with the shared `zip` writer (unchanged), all at the handler's
 one `generatedAt` instant. The shared `buildPackage`, the
 `/scenario/` button and delivery, and every shared module keep
 their bytes.
 
+**Consistency correction (2026-11-12, G-33).** The guided overlay is
+applied by the archive composer, not by the shared package builder.
+`records.csv` and `scenario.json` remain byte-identical to shared
+output; CSV column names, measurement IDs, numeric values, and
+missing fields do not change. Apply provenance rewrites one line
+at a time so a template slot cannot consume later blocks. This
+also applies to the archive delivered without a Word report. A
+fitting decision of the planning session under D-51 that the owner
+approved with PDD D-55; it supersedes the G-25 split, by which
+`provenance.txt` kept the registry wording.
+
 The hint under the button names the report (§13.7); the button
 label and the ready status line stay. A second activation while
 the archive is being assembled is ignored — a download-local busy
 flag, released when delivery or failure settles.
+
+The download status is visible beneath the download hint, with
+`role="status"`. It first says "Preparing your download…", then
+shows the existing ready or report-failure message. Keep the
+message across presentation changes for that confirmed result;
+do not show an old result's message on a newer result or scenario.
 
 ### 13.2 Document content
 
@@ -1078,8 +1101,10 @@ last. `test/zipcheck.py` learns the guided case: the expected
 member list becomes an argument (the four names, or the four plus
 `report.docx`), and for the guided list it also opens
 `report.docx` as a nested archive and asserts the §13.4 part set,
-every part stored, names ASCII. The Node tests keep their digests
-for the four text members; the report member is asserted
+every part stored, names ASCII. The shared package tests keep
+their four-member digests. Guided archive tests additionally
+verify the adopted text and unchanged records, settings,
+identifiers, numbers, and missing fields. The report member is asserted
 structurally, never by digest, because PNG bytes vary by browser.
 
 ### 13.7 Strings
@@ -1116,7 +1141,9 @@ for anything the page already says.
   rasterizer, and a fixed-scenario `document.xml` snapshot.
 - `zipcheck.py` passes over a guided archive produced by the Node
   tests: the outer layout, the nested part set, stored methods
-  throughout, and the DDD §5.9 digests for the four text members.
+  throughout, and the guided archive's text-member digests.
+  Records and settings retain their shared-package bytes; the
+  shared-package tests retain the original DDD §5.9 digests.
 - The guided browser specs (both lane projects) download a
   confirmed scenario's archive, read it, and assert the member
   list, the nested parts, one image per non-suppressed chart, the
@@ -1467,6 +1494,52 @@ precedent, amendable by the owner on sight:
    research-tool sentence with §15.2's amended forecast sentence,
    keeping the Full disclaimer link — so the page carries one
    framing, not two. Both join the assembled list.
+
+### 15.12 Review-round corrections (2026-11-12, G-33)
+
+Corrections from the outside site review
+(`notes/site-review-2026-11-12.md`), fitting decisions of the
+planning session under D-51 that the owner approved with PDD D-55.
+Every reader-facing string below is assembled and goes to the
+research group for sight with the next briefing round. The restored
+records of §14.6 item 1, §15.1, and §15.11 item 3 keep their
+gate-time text; the entries here supersede them for the shipped
+strings.
+
+1. Scarp-dip verification wording: the guided overlay rewrites
+   `pdd5.4.scarpDipNotice` to the PDD §5.4 corrected sentence
+   (assembled); panel, empty state, Word report, ZIP provenance, and
+   chart-image strip and sidecar carry it. The provisional mark and
+   its removal condition stay (D-5).
+2. Fault-slip definition on the mode selector: "Movement of one side
+   relative to the other along the fault plane." (assembled; replaces
+   the prototype's "The distance the fault moves underground.").
+3. Step-3 heading: "Specify fault slip or surface offset" — a
+   mode-neutral heading; supersedes §15.1's gate-time rename for this
+   heading.
+4. Result summaries label the entered quantity with the CR-3 mode
+   labels — "Fault slip at depth: …" in slip mode, "Vertical surface
+   offset: …" in offset mode — superseding item 3's single-label
+   presentation; the review hint reads "as fault slip increases".
+5. Range hint: "Drag a range handle or choose Full range to
+   continue." — supersedes §14.6 item 1's gate-time string; an
+   owner-gated string, re-approved with PDD D-55.
+6. Download statuses: "Preparing your download…" and the visible
+   ready/partial-failure messages of §13.1's correction; PDD D-55
+   approves them in place of §13.7's string gate.
+7. Distributions scarp-dip footnote: the release-verification
+   wording, keeping the group-sourced facts — the lead author's
+   confirmation of `Convert_Scarp_Dip` and the mis-oriented raw
+   Simple-class dips (assembled).
+8. Response-curves wording: the link text "how fault slip relates to
+   vertical displacement" and the fitted-relation sentence on the
+   Slip-regression bullet (assembled).
+9. Editorial, no science claim: the four-figure count with the
+   paper page's rights rationale kept, Figure-2 pointers, the SDC
+   abbreviation gaining additional uplift (Us − Ud), the glossary
+   introduction. Held for pending research-group answers: the
+   fault-steepness word choice (the glossary keeps its baseline
+   wording) and every R1/R2/R5/R7 change — none ships in G-33.
 
 ## 16. Chart-image export (D-14, FR-D2)
 

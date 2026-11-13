@@ -54,7 +54,8 @@ for (const id of ['illustrative', 'kern'] as const) {
     const matching = (await confirmedCount(page).textContent())!;
 
     const [download] = await Promise.all([page.waitForEvent('download'), downloadButton(page).click()]);
-    await expect(page.getByRole('status').filter({ hasText: READY })).toHaveCount(1);
+    await expect(page.locator('#gx-download-status')).toBeVisible();
+    await expect(page.locator('#gx-download-status')).toHaveText(READY);
     const captured = await readDownload(download, testInfo, `report-${id}`);
     expect([...captured.members.keys()]).toEqual([...GUIDED_MEMBER_NAMES]);
 
@@ -76,12 +77,18 @@ for (const id of ['illustrative', 'kern'] as const) {
 
     const document = report.get('word/document.xml')!.toString('utf8');
     expect((document.match(/<w:drawing>/g) ?? []).length).toBe(media.length);
-    for (const text of [REPORT_TITLE, PROVENANCE_HEADING, copyText('pdd5.4.scarpDipNotice')]) expect(document).toContain(xmlEscape(text));
-    // Both samples' offset windows start at 0 m: the Provenance caveat is PDD §5.9's decided text (G-25),
-    // while provenance.txt in the same archive keeps the registry baseline.
+    for (const text of [REPORT_TITLE, PROVENANCE_HEADING, guided(copyText('pdd5.4.scarpDipNotice'))]) expect(document).toContain(xmlEscape(text));
+    // Both samples' offset windows start at 0 m: the archive and report carry
+    // the same decided low-slip and provisional-data notices as the guided page.
     expect(document).toContain(xmlEscape(guided(copyText('pdd5.9.lowSlipCaveat'))));
     expect(document).not.toContain(xmlEscape(copyText('pdd5.9.lowSlipCaveat')));
-    expect(captured.members.get('provenance.txt')!.toString('utf8')).toContain(copyText('pdd5.9.lowSlipCaveat'));
+    const provenance = captured.members.get('provenance.txt')!.toString('utf8');
+    expect(provenance).toContain(guided(copyText('pdd5.9.lowSlipCaveat')));
+    expect(provenance).not.toContain(copyText('pdd5.9.lowSlipCaveat'));
+    expect(provenance).toContain(guided(copyText('pdd5.4.scarpDipNotice')));
+    expect(provenance).not.toContain(copyText('pdd5.4.scarpDipNotice'));
+    expect(provenance).not.toMatch(/deformation-zone/i);
+    expect(captured.members.get('statistics.csv')!.toString('utf8')).toContain('dzw,Deformation zone width (m),');
     // The research group's width spelling throughout the report (guided DDD §15.7).
     expect(document).not.toMatch(/deformation-zone/i);
     // Both samples confirm in offset mode: the scenario table's movement row carries that name.
@@ -101,10 +108,16 @@ test('a failing canvas still delivers the data files and says the report is miss
   });
   await confirmSample(page, 'illustrative');
   const [download] = await Promise.all([page.waitForEvent('download'), downloadButton(page).click()]);
-  await expect(page.getByRole('status').filter({ hasText: REPORT_FAILED })).toHaveCount(1);
+  await expect(page.locator('#gx-download-status')).toBeVisible();
+  await expect(page.locator('#gx-download-status')).toHaveText(REPORT_FAILED);
   await expect(page.getByRole('alert').filter({ hasText: 'could not be created' })).toHaveCount(0);
   const captured = await readDownload(download, testInfo, 'report-fallback');
   expect([...captured.members.keys()]).toEqual([...GUIDED_FALLBACK_MEMBER_NAMES]);
+  const provenance = captured.members.get('provenance.txt')!.toString('utf8');
+  expect(provenance).toContain(guided(copyText('pdd5.9.lowSlipCaveat')));
+  expect(provenance).not.toContain(copyText('pdd5.9.lowSlipCaveat'));
+  expect(provenance).toContain(guided(copyText('pdd5.4.scarpDipNotice')));
+  expect(captured.members.get('statistics.csv')!.toString('utf8')).toContain('dzw,Deformation zone width (m),');
   // Without the report, the README names only what the archive carries (G-30).
   const canonical = await page.locator('link[rel="canonical"]').getAttribute('href');
   expect(captured.members.get('README.txt')!.toString('utf8')).toBe(readmeText(false, canonical!));
@@ -125,6 +138,8 @@ test('a second activation while the archive is assembled is ignored', async ({ p
   page.on('download', () => { downloads += 1; });
   const first = page.waitForEvent('download');
   await downloadButton(page).click();
+  await expect(page.locator('#gx-download-status')).toBeVisible();
+  await expect(page.locator('#gx-download-status')).toHaveText('Preparing your download…');
   await downloadButton(page).click();
   await first;
   await expect(page.getByRole('status').filter({ hasText: READY })).toHaveCount(1);

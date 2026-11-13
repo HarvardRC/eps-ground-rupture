@@ -25,7 +25,7 @@ describe('guided range controls', () => {
   test('the owner-gated strings', () => {
     assert.equal(RANGE_IF_UNKNOWN, 'If unknown, select the full range.');
     assert.equal(FULL_RANGE, 'Full range');
-    assert.equal(RANGE_EMPTY_HINT, 'Move a thumb or choose Full range to continue.');
+    assert.equal(RANGE_EMPTY_HINT, 'Drag a range handle or choose Full range to continue.');
     assert.equal(thumbName('faultDip', 'min'), 'Minimum fault angle');
     assert.equal(thumbName('faultDip', 'max'), 'Maximum fault angle');
     assert.equal(thumbName('depth', 'min'), 'Minimum sediment depth');

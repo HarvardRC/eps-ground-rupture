@@ -13,7 +13,8 @@
 // - A fixed-scenario `document.xml` snapshot
 //   (test/snapshots/report-document.xml; REPORT_SNAPSHOT_UPDATE=1 rewrites it).
 // - test/zipcheck.py over the guided archive: the outer layout, the nested
-//   part set, stored throughout, the DDD §5.9 digests of the text members.
+//   part set, stored throughout, the guided text-member digests; records
+//   and settings retain shared-package bytes and labels retain numbers.
 
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
@@ -101,6 +102,34 @@ function unzip(bytes: Uint8Array): Map<string, Uint8Array> {
 }
 
 const decode = (bytes: Uint8Array | undefined): string => new TextDecoder().decode(bytes);
+
+/** Guided copy changes labels and prose, never CSV identifiers, numbers, records, or scenario state. */
+function assertGuidedDataMembers(members: Map<string, Uint8Array>, input: RenderInput): void {
+  const shared = new Map(packageTexts(input, STAMPS, AT).map(member => [member.name, member.text]));
+  for (const name of ['records.csv', 'scenario.json']) {
+    assert.deepEqual(members.get(name), new TextEncoder().encode(shared.get(name)!), `${name}: shared bytes preserved`);
+  }
+
+  // Fixture labels contain no CSV delimiters; compare every other field verbatim,
+  // including the measurement identifiers, counts, blanks, and full-precision values.
+  const rows = (value: string): string[][] => value.trimEnd().split('\n').map(line => line.split(','));
+  const original = rows(shared.get('statistics.csv')!);
+  const actual = rows(decode(members.get('statistics.csv')));
+  assert.deepEqual(actual[0], original[0], 'statistics.csv: column names unchanged');
+  assert.equal(actual.length, original.length);
+  actual.slice(1).forEach((row, i) => {
+    assert.equal(row[1], measurementLabel(MEASUREMENT_NAMES[i]));
+    assert.deepEqual([row[0], ...row.slice(2)], [original[i + 1][0], ...original[i + 1].slice(2)], 'statistics.csv: only the human label changes');
+  });
+
+  const provenance = decode(members.get('provenance.txt'));
+  assert.equal(provenance, shared.get('provenance.txt')!.split('\n').map(line => guided(line)).join('\n'));
+  assert.doesNotMatch(provenance, /deformation-zone/i);
+  const document = paragraphs(documentXml(input, STAMPS, AT));
+  const at = document.indexOf(PROVENANCE_HEADING) + 1;
+  const lines = provenance.split('\n').filter(line => line !== '');
+  assert.deepEqual(document.slice(at, at + lines.length), lines, 'archive and report provenance agree');
+}
 
 /** Throws unless `text` is one balanced element tree after its declaration, with no unescaped `&`. */
 function assertWellFormed(text: string, name: string): void {
@@ -233,7 +262,7 @@ describe('report: the document (§13.2, §13.3)', () => {
     }
   });
 
-  test('a low-slip window: the report carries the decided caveat, provenance.txt keeps the registry text (G-25)', () => {
+  test('a low-slip window: the report carries the decided caveat, the shared builder keeps the registry text', () => {
     const decided = 'Low-slip measurements may be less reliable. Below 0.5 m of fault slip, surface deformation can be difficult to distinguish from model roughness. These values are shown, but interpret them with caution.';
     const registry = copyText('pdd5.9.lowSlipCaveat');
     assert.notEqual(registry, decided);
@@ -273,7 +302,7 @@ describe('report: the document (§13.2, §13.3)', () => {
       assert.equal(lines.filter(line => line === label).length, 3, label);
     }
     const dip = lines.indexOf(measurementLabel('scarp_dip'));
-    assert.equal(lines[dip + 1], copyText('pdd5.4.scarpDipNotice'));
+    assert.equal(lines[dip + 1], guided(copyText('pdd5.4.scarpDipNotice')));
     const width = lines.indexOf(measurementLabel('dzw'));
     assert.equal(lines[width + 1], 'Deformation zone width measures the main modeled rupture zone. Real earthquakes can also produce separate deformation away from the main trace, which the model does not represent.');
   });
@@ -311,7 +340,7 @@ describe('report: the document (§13.2, §13.3)', () => {
     }
   });
 
-  test('the width term is unhyphenated throughout the report (§15.7), provenance.txt keeping the registry spelling', () => {
+  test('the width term is unhyphenated throughout the report, the shared builder keeping the registry spelling', () => {
     for (const input of [full, noValid, mixed]) assert.doesNotMatch(documentXml(input, STAMPS, AT), /deformation-zone/i);
     assert.match(provenanceText(full, STAMPS, AT), /Deformation-zone width \(m\): N = /);
   });
@@ -398,15 +427,31 @@ describe('report: the guided chart presentation', () => {
 });
 
 describe('report: the guided archive (§13.1, §13.5, §13.6)', () => {
-  test('the four data members, then report.docx, at one instant', async () => {
+  test('the guided data members, then report.docx, at one instant', async () => {
     const archive = await guidedArchive(full, STAMPS, AT, recording().rasterize);
     assert.equal(archive.reportError, null);
     const members = unzip(archive.bytes);
     assert.deepEqual([...members.keys()], [...GUIDED_MEMBER_NAMES]);
-    const texts = packageTexts(full, STAMPS, AT);
-    texts.forEach(member => assert.equal(decode(members.get(member.name)), member.text));
+    assertGuidedDataMembers(members, full);
     assert.deepEqual(members.get(REPORT_MEMBER), await reportDocx(full, STAMPS, AT, recording().rasterize));
     assert.match(archive.fileName, /\.zip$/);
+  });
+
+  test('adopted caveats and labels survive both a complete archive and report fallback', async () => {
+    const lowSlip = computeResult(large, { ...defaultScenario(large.manifest), window: { mode: 'slip', min: '0', max: '1' } }, 10, null);
+    const decided = 'Low-slip measurements may be less reliable. Below 0.5 m of fault slip, surface deformation can be difficult to distinguish from model roughness. These values are shown, but interpret them with caution.';
+    assert.ok(reportCharts(lowSlip).length > 0, 'the failing rasterizer is reached');
+    for (const rasterize of [recording().rasterize, async () => { throw new Error('no canvas'); }]) {
+      const archive = await guidedArchive(lowSlip, STAMPS, AT, rasterize);
+      const members = unzip(archive.bytes);
+      assertGuidedDataMembers(members, lowSlip);
+      const provenance = decode(members.get('provenance.txt'));
+      assert.ok(provenance.includes(decided));
+      assert.ok(!provenance.includes(copyText('pdd5.9.lowSlipCaveat')));
+      assert.ok(provenance.includes(guided(copyText('pdd5.4.scarpDipNotice'))));
+    }
+    // Empty measurements retain blank statistics and zero counts under the same label change.
+    assertGuidedDataMembers(unzip((await guidedArchive(noValid, STAMPS, AT, recording().rasterize)).bytes), noValid);
   });
 
   test('a failing rasterizer leaves report.docx out entirely and says why', async () => {
@@ -415,7 +460,9 @@ describe('report: the guided archive (§13.1, §13.5, §13.6)', () => {
     for (const rasterize of [failing, notPng]) {
       const archive = await guidedArchive(full, STAMPS, AT, rasterize);
       assert.ok(archive.reportError instanceof Error);
-      assert.deepEqual([...unzip(archive.bytes).keys()], [...GUIDED_FALLBACK_MEMBER_NAMES]);
+      const members = unzip(archive.bytes);
+      assert.deepEqual([...members.keys()], [...GUIDED_FALLBACK_MEMBER_NAMES]);
+      assertGuidedDataMembers(members, full);
     }
   });
 
@@ -430,7 +477,10 @@ describe('report: the guided archive (§13.1, §13.5, §13.6)', () => {
     const fallbackZip = `${OUT_DIR}fallback.zip`;
     writeFileSync(guidedZip, (await guidedArchive(full, STAMPS, AT, recording().rasterize)).bytes);
     writeFileSync(fallbackZip, (await guidedArchive(full, STAMPS, AT, async () => { throw new Error('no'); })).bytes);
-    const digests = packageTexts(full, STAMPS, AT).map(m => createHash('sha256').update(m.text, 'utf8').digest('hex'));
+    const digests = packageTexts(full, STAMPS, AT).map(m => {
+      const text = m.name === 'statistics.csv' || m.name === 'provenance.txt' ? m.text.split('\n').map(line => guided(line)).join('\n') : m.text;
+      return createHash('sha256').update(text, 'utf8').digest('hex');
+    });
     const zipcheck = (args: readonly string[]) => {
       const run = spawnSync('python3', ['-I', 'test/zipcheck.py', ...args], { cwd: WEBAPP_DIR, encoding: 'utf8' });
       assert.equal(run.error, undefined, `python3 must run: ${String(run.error)}`);

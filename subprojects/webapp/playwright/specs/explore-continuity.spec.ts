@@ -189,7 +189,7 @@ test('superseding a stalled restore releases Show results at once, and the late 
   await expect(action(page, 'Show results')).toBeEnabled();
   await action(page, 'Show results').click();
   await expect(heading(page)).toHaveText(RESULTS_HEADING);
-  await expect(page.locator('.gx-context')).toContainText('Fault slip: 0–1 m');
+  await expect(page.locator('.gx-context')).toContainText('Fault slip at depth: 0–1 m');
   // Under the Fault slip label, slip mode drops its redundant tail (guided DDD §15.11).
   await expect(page.locator('.gx-context')).not.toContainText('m fault slip');
   const count = await confirmedCount(page).textContent();
@@ -210,7 +210,7 @@ test('superseding a stalled restore releases Show results at once, and the late 
   await stepButton(page, 'results').click();
   await expect(heading(page)).toHaveText(RESULTS_HEADING);
   await expect(confirmedCount(page)).toHaveText(count!);
-  await expect(page.locator('.gx-context')).toContainText('Fault slip: 0–1 m');
+  await expect(page.locator('.gx-context')).toContainText('Fault slip at depth: 0–1 m');
   await expect(page.locator('.gx-restored')).toHaveCount(0);
   await expect(page.locator('.gx-restoring')).toHaveCount(0);
   await expect(page.locator('.gx-restore-retry')).toHaveCount(0);

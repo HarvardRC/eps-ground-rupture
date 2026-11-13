@@ -14,7 +14,7 @@ test.describe.configure({ timeout: 120_000 });
 
 const NONE_ANGLES = 'Selected: none — 0 of 7 modeled angles.';
 const NONE_DEPTHS = 'Selected: none — 0 of 3 modeled depths.';
-const EMPTY_HINT = 'Move a thumb or choose Full range to continue.';
+const EMPTY_HINT = 'Drag a range handle or choose Full range to continue.';
 
 /** The scale labels' boxes, in stop order. */
 const scaleBoxes = (page: Page, group: 'faultDip' | 'depth') =>

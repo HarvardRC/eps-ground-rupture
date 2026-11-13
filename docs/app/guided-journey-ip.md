@@ -279,6 +279,18 @@ and routed for the research group's sight with the OA-4 sign-off
 package. Exact strings go to the owner before the merge; the owner's
 commit of this paragraph is the release.
 
+**Owner decision, 2026-11-12 (site-review corrections, G-33).** An
+outside review of the deployed site and repository
+(`notes/site-review-2026-11-12.md`) prepared corrections on a working
+branch; the planning session reviewed and repaired them, and the
+owner directed that the Implementation Session finish them as this
+task. The owner approves the task's decisions and reader-facing
+strings through one commit of PDD D-55, which is the release; the
+strings are assembled under D-51 (guided DDD §15.12) and go to the
+research group for sight with the next briefing round. The pull
+request merges on green under the standing terms once that commit is
+on `dev-v.0.4.x`.
+
 | Task | Prerequisite | Exact work and authority | Completion |
 | --- | --- | --- | --- |
 | G-13 | Released 2026-11-05; guided DDD §13; PDD D-40 (P1.5 by D-48, release-blocking in v0.4, first in the band) and D-14 | Implement the result report exactly to guided DDD §13: `report.docx` composed beside the shared `packageTexts` and written by the shared `zip` writer into the FR-D1 download ZIP, the hint updated, no new control; document content, fixed chart set, `.docx` assembly, failure fallback, checker amendment, and strings per §§13.1–13.7 and [PDD §6.5](pdd.md#65-result-report-d-40-p2). | `report.docx` verified in the lane (outer members, nested parts, one image per non-suppressed chart, captions asserted); zipcheck covers the guided layout; Node tests cover the assembly and the failure fallback; the `/scenario/` bundles stay byte-identical; the owner's Word-open check is recorded in the evidence; the §6.1 content rules and D-14 caption fields apply unchanged. |
@@ -301,6 +313,7 @@ commit of this paragraph is the release.
 | G-30 | Released 2026-11-09 (the owner's decision of that date); after G-28, before the OA-4 text record | Add a `README.txt` member to the guided page's download ZIP, composed beside the shared `packageTexts` as `report.docx` is (G-13), so the shared download code and the `/scenario/` package do not change: what the package is, one line per member saying what it holds, the meaning and unit of each `records.csv` and `statistics.csv` column in the glossary's and the page's own wording (D-51; assembled lines marked for the research group's sight), and a pointer to `provenance.txt` for the citation, the caveats, and the licences. Plain UTF-8 text with LF line ends, first in the archive; the zip checker's guided layout, the download hint if it names the members, and the specs updated. Final strings to the owner before merge. | The guided ZIP opens with `README.txt` naming every member and every CSV column; zipcheck covers the guided layout; specs pass in the lane's desktop and mobile projects; `/scenario/` bundles stay byte-identical; the evidence lists the assembled lines sent for the group's sight and records the strings' approval. |
 | G-31 | Released 2026-11-11 (the owner's decision of that date); before G-30's merge | Install JDK 21 for the Gradle jobs (DDD §6.3, JDK for the Gradle jobs): in `.github/workflows/tests.yml` (`webapp-test`) and `.github/workflows/mkdocs.yml` (`webapp-bundle`, `build`), add an `actions/setup-java` step — distribution Temurin, Java 21 — before each job's first Gradle step. Nothing else changes: `runs-on: ubuntu-latest`, the 8.10.2 wrapper, and every other step stay; `docs/setup.md` may note that CI installs JDK 21. | A green run's log shows each of the three jobs starting Gradle on Java 21 on the current `ubuntu-latest` image; CI is green on the pull request and on `dev-v.0.4.x` after the merge; G-30's pull request (#96) then passes CI and merges; the `/scenario/` bundles stay byte-identical; the evidence quotes the Java and image lines. |
 | G-32 | Released 2026-11-12 (PDD D-54); after G-31 | Introduce the explorer on the home page: in `subprojects/mkdocs/docs/index.md`, one sentence with the `explore.md` link as its own paragraph directly after the dashboard cards `</div>`, assembled from the `CITATION.cff` explorer paragraph (D-51; the assembled line marked for the research group's sight): "And the **Ground Rupture Explorer** lets you choose modeled geological conditions and a range of fault slip, then examine the corresponding results from the same simulations." — "Ground Rupture Explorer" carrying the `explore.md` link. Nothing else on the page changes; final strings to the owner before merge. | The home page introduces the explorer and links `explore.md`; the strict builds and the site checks hook pass; the `/scenario/` bundles stay byte-identical; the evidence records the assembled wording routed for the group's sight. |
+| G-33 | Released 2026-11-12 by the owner's commit of PDD D-55; after G-32's release | Land the site-review corrections with the planning session's repairs (guided DDD §13.1 correction and §15.12): the Tableau host and iframe sized before scaling, with per-embed ready dismissal and a regression test (review R3); one labelled `section` landmark in place of the nested `main` (R16, page portion); visible download preparation, ready, and partial-failure status beside the download (R17, archive portion); the guided archive's `statistics.csv` labels and `provenance.txt` through the D-51 overlay, superseding the G-25 split (R8); mode-specific movement labels and a mode-neutral step heading (R9); the scarp-dip release-verification wording on guided surfaces and the Distributions footnote (R6); and verified editorial corrections (figure count, Figure 2 pointers, SDC expansion, range hint, glossary introduction). The pull request leaves the PDD untouched: PDD D-55 and its §5.4 note land by the owner's commit. Held, not in this task: the fault-steepness word choice and every R1, R2, R5, and R7 change (pending research-group answers); workbook edits (R10); layout proposals (R11). | The three repo checkers, both TypeScript configurations, the Node suite, and the strict builds pass; both lane projects pass, the seven edited specs among them; the `/scenario/` bundles stay byte-identical; the shipped strings equal PDD D-55's; the evidence section records the review disposition. |
 
 Queued definitions and decisions, with their authorities:
 
@@ -3645,6 +3658,116 @@ on 2026-11-10, was on ubuntu-24.04. No workflow had pinned a JDK.
 Not verified: the owner's manual deploy run (`workflow_dispatch`),
 which uses the same `build` job and so the same step; it has not run
 since this change.
+
+### Site-review corrections, 2026-11-12 (G-33)
+
+G-33 ran under the owner's release of 2026-11-12: the owner's commit of
+PDD D-55 (`3f9ed67`, "Wording correction") on `dev-v.0.4.x`, which
+approves the task's decisions and reader-facing strings in place of a
+pull-request review. The task row and owner-decision paragraph are
+above; the records are guided DDD §13.1 (the consistency correction)
+and §15.12. The pull request leaves `docs/app/pdd.md` untouched.
+
+**What changed.**
+
+- **Outside review's corrections.** `0214a05` carries the outside
+  review agent's prepared changes as delivered, with
+  `notes/site-review-2026-11-12.md`: the Tableau host sized before
+  scaling with per-embed ready dismissal and a regression test (R3);
+  one labelled `section` landmark in place of the nested `main` (R16,
+  page portion); visible download status (R17, archive portion); the
+  guided archive's `statistics.csv` labels and `provenance.txt`
+  through the D-51 overlay (R8); mode-specific movement labels and a
+  mode-neutral step heading (R9); the scarp-dip release-verification
+  wording (R6); and editorial corrections.
+- **Planning session's repairs.** `f38eedc` restored the approved
+  results sentence, held the fault-steepness word choice (the glossary
+  keeps its baseline definition), restored the three rewritten design
+  records and added §15.12, and merged the Distributions footnote with
+  the group-sourced facts. `e283e38` left the PDD to the owner.
+- **This session.** The paper page keeps the four-figure count and the
+  rights rationale; the owner-decision paragraph and task row above;
+  the overlay comment names its records; and the lane's step-heading
+  constant (`MOVEMENT_HEADING` in `playwright/explore-support.ts`)
+  takes D-55's "Specify fault slip or surface offset".
+- **Held, not shipped.** The fault-steepness word choice, every R1, R2,
+  R5, and R7 change, workbook edits (R10), layout proposals (R11).
+
+**Review disposition.** The planning session's four-lens review
+(claims, diff, discipline, mechanics) produced the repairs above.
+This session re-verified the earlier repairs against those reports
+before finishing:
+
+- the results sentence equals its base text (two `Model vs reality`
+  links) and `explore-nav` asserts it;
+- the branch adds "more gently inclined" to neither the glossary nor
+  any shipped page; the only added occurrences are this bullet
+  and the review note's table row, and the README `fault_dip` text
+  and its design records keep their existing mentions;
+- the three restored records equal their base text and §15.11 item 9
+  is gone; §13.1, §1 and §15.12 carry the G-33 dates and cite D-55;
+- the Distributions footnote equals the repair memo's text.
+
+**Strings.** Each reader-facing string the branch adds or changes
+equals its quote in PDD D-55 (the scarp-dip sentence, the fault-slip
+description, the step heading, the two mode labels, the range hint, the
+download statuses, the Response curves link text). The editorial fixes
+(figure count, Figure 2 pointers, SDC, glossary introduction) are named
+in D-55 by category, without a quoted sentence. The strings are marked
+assembled under D-51 and go to the research group for sight with the
+next briefing round.
+
+**Evidence from the checks.**
+
+At this verification, on `task/g-33-site-review-fixes`, over `3f9ed67`:
+
+- **Build and unit tests.** `tscCheck` passed; the pinned Node suite
+  passed all 505 tests (501 at the base; the branch adds four: three
+  for the Tableau fit, one for the guided archive).
+- **Site builds.** The strict publication and preview builds passed
+  from a clean state.
+- **Unchanged (D-39).** The `/scenario/` bundles `app-066e39f81672.js`
+  and `app-08bebc049c15.css` did not change: both names are content
+  hashes, equal to those recorded at G-30, and the files' SHA-256 are
+  `066e39f816726221df70df243b5276f6d0cee366b42aee0b305454247240ace1`
+  and `08bebc049c157149a65bc99a241d651853cba8754702b9b8580adb37afe5f0bf`
+  in both the publication and the preview trees. The branch changes
+  no file under `src/views`, so the shared copy and download code the
+  bundle includes keep their bytes. The guided bundles became
+  `explore-ac4e15ec645e.js` and `explore-2eabbd6235db.css`.
+- **Document checks.** Relative links resolved (5612 links, 65 files),
+  PDD agreement passed, and traceability reported no gap rows.
+- **Lane.** The full lane passed 391 and skipped 11, in `desktop` and
+  `mobile`. The first run failed 28 tests, in `explore-continuity`,
+  `explore-draft-boundary`, `explore-journey`, `explore-race`,
+  `explore-sample`, and `explore-validation`: the lane's shared
+  step-heading constant still held the prototype's heading, which
+  contradicts D-55. The constant was updated; no app change. The
+  second run passed.
+- **Edited specs.** `explore-continuity`, `explore-draft-boundary`,
+  `explore-polish`, `explore-range-controls`, `explore-report`,
+  `explore-review-round`, and `explore-sme-wording`, and `explore-nav`,
+  passed in both projects, apart from skips counted in the 11 above
+  (`explore-range-controls`: 2 desktop, 3 mobile; `explore-nav`: 1
+  mobile).
+- **Pull request and CI.** PR
+  [#99](https://github.com/HarvardRC/eps-ground-rupture/pull/99). CI on
+  `2bb94bb`, the head before this section's final edit: Tests
+  ([run](https://github.com/HarvardRC/eps-ground-rupture/actions/runs/43364410767)), Companion site
+  ([run](https://github.com/HarvardRC/eps-ground-rupture/actions/runs/43364410713)) and Doc links ([run](https://github.com/HarvardRC/eps-ground-rupture/actions/runs/43364410867))
+  passed, `deploy` skipped. Independent review: ready, nothing
+  blocking; it re-ran the three checkers, the 505 tests, both strict
+  builds and the full browser lane (391 passed, 11 skipped on its
+  second run; its first run had one failure in
+  `navigation-lifecycle`, a `/scenario/` back-navigation spec this
+  branch does not touch, which passed on rerun). Its two corrections
+  to this section are applied.
+
+Not verified:
+
+- the new wording in Word's rendering of `report.docx`;
+- screen-reader reading of the download status;
+- browsers other than Chromium.
 
 ## Separate CI investigation
 

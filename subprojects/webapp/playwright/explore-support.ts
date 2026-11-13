@@ -13,7 +13,7 @@ export const EXPLORE_PATH = 'explore/';
 export const SESSION_KEY = 'gre-explore-session';
 export const INTRO_HEADING = 'Use simulations to understand ground rupture.';
 export const SITE_HEADING = 'Describe the geological site conditions';
-export const MOVEMENT_HEADING = 'Choose the assumed fault slip';
+export const MOVEMENT_HEADING = 'Specify fault slip or surface offset';
 export const REVIEW_HEADING = 'Review your scenario';
 export const RESULTS_HEADING = 'Explore your scenario';
 
