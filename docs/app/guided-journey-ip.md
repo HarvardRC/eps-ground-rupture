@@ -3840,6 +3840,71 @@ No findings.
 Not verified: browsers other than Chromium, and the home page on a
 real phone.
 
+### Download retry and briefing, 2026-11-13 (G-34)
+
+G-34 ran under the owner's release of 2026-11-13: the owner's answer
+quoted in the owner-decision paragraph above the task table. The
+planning session wrote the records in `dc47234` and carried out the
+task with an implementation agent, because its messages to the
+Implementation Session did not arrive; an independent reviewer
+checked the whole branch.
+
+**What changed.** In `subprojects/webapp/src/explore/app.ts`,
+`download()` now clears an earlier whole-download failure when a new
+attempt starts. When the general error is that failure, it clears the
+error, the screen-reader alert and the rendered warning without
+re-rendering the page, so focus stays on the Download button; any
+other general error stays. The failure text moves unchanged into
+`wording.ts` as `DOWNLOAD_FAILED`. The new browser check
+`playwright/specs/explore-download-retry.spec.ts` makes the first
+archive fail through `URL.createObjectURL`, then retries; its
+archive-dependent assertions wait up to 30 s, because assembling the
+archive in `desktop` sometimes takes longer than the default 5 s.
+Guided DDD §13.5 records the rule, the research-group briefing
+carries dated current-disposition notes, and the follow-up review
+joins the repository with the planning session's verification note.
+
+At this verification, on `task/g-34-download-retry-and-briefing` at
+`24a8e20`, over `7c033a0`:
+
+- **Document checks.** Relative links resolved (5622 links, 66
+  files), PDD agreement passed, and traceability reported no gap rows.
+- **The new check catches the defect.** Without the clearing block it
+  failed in `desktop` and `mobile`, finding the failure text twice
+  (the warning and the alert); with the block it passed, and 12 of 12
+  repeated runs passed.
+- **Tests.** `tscCheck` passed; the pinned Node suite passed 505 of
+  505; the full browser lane passed 393 and skipped 11, in `desktop`
+  and `mobile`.
+- **Site builds.** The strict publication and preview builds passed.
+- **Bundles.** The explorer script is now `explore-52ef177771da.js`;
+  its stylesheet stays `explore-2eabbd6235db.css`. The `/scenario/`
+  bundles `app-066e39f81672.js` and `app-08bebc049c15.css` keep the
+  SHA-256 values recorded at G-33, in both trees (D-39).
+- **Pull request and CI.** PR
+  [#101](https://github.com/HarvardRC/eps-ground-rupture/pull/101).
+  CI on it passed — Tests
+  ([run](https://github.com/HarvardRC/eps-ground-rupture/actions/runs/43480166889)),
+  Companion site
+  ([run](https://github.com/HarvardRC/eps-ground-rupture/actions/runs/43480167018))
+  and Doc links
+  ([run](https://github.com/HarvardRC/eps-ground-rupture/actions/runs/43480167056))
+  — with `deploy` skipped.
+
+**Review.** An independent reviewer re-ran the three checkers, the
+unit and browser lanes, both builds and the bundle hashes. In a
+separate worktree it confirmed that the new check fails without the
+fix and passes with it. It confirmed that only the download's own
+failure is cleared, that the failure text is byte-identical, that no
+other string and not the PDD changed, and that no commit carries
+attribution lines. It passed the task with three minor notes on the
+planning records, all applied here: three lengthened briefing lines
+are re-wrapped, the briefing's sentence on question 1 now names the
+sign-off it rests on (OA-4), and this evidence section is added.
+
+Not verified: browsers other than Chromium, and an archive failure
+that occurs naturally (the check injects one).
+
 ## Separate CI investigation
 
 The reported job `126383105016` belongs to historical run

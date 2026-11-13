@@ -36,33 +36,33 @@ exists; edits to this file do not update that copy automatically.
 **Current disposition (2026-11-13).** The explorer at `/explore/` is
 public: the owner's deploy of 2026-11-12 listed it in the site
 navigation (PDD D-52, D-54), which ADR-0017's amendment of that date
-counts as a public release. Question 1's answer is now needed before
-the group's formal sign-off of the site's texts, which comes before
-the v0.4.0 software release; the group reads in two steps, an
-informal read of the deployed explorer and then that sign-off (the
-owner's decision of 2026-11-09). Question 14 no longer gates the
-release (PDD D-53). The paragraphs below keep the earlier status.
+counts as a public release. The group reads in two steps (the owner's
+decision of 2026-11-09): an informal read of the deployed explorer,
+then the formal sign-off of one listing of every reader-facing text
+(OA-4) before the v0.4.0 software release. That sign-off covers
+question 1's explanations. Question 14 no longer gates the release
+(PDD D-53). The paragraphs below keep the earlier status.
 
 The prototype is already accessible to anyone with its address.
 Here, **before public release** means before it is advertised through
 site navigation and search, or published as the first software
 release. It does not mean before the group can try the prototype.
 
-**Status 2026-11-06.** Question 1 still needs its answer before that release; questions 2
-and 3 were answered on 2026-11-06 and are recorded below, and the
-group's written review of the same date answered questions 4–9, 11,
-12, and 13 in one pass — each answer is recorded under its
-question. Question 10 got no reply yet and stays with question 1.
-Question 14 — the group will come back to it — still
-needs a pre-release decision, including an owner decision about
-field comparisons in the guided app. The remaining open questions
-concern temporary approaches already in use, proposed rules, or
-later features. **P2** means a later delivery priority, not the
-prototype review phase.
+**Status 2026-11-06.** Question 1 still needs its answer before that
+release; questions 2 and 3 were answered on 2026-11-06 and are
+recorded below, and the group's written review of the same date
+answered questions 4–9, 11, 12, and 13 in one pass — each answer is
+recorded under its question. Question 10 got no reply yet and stays
+with question 1. Question 14 — the group will come back to it — still
+needs a pre-release decision, including an owner decision about field
+comparisons in the guided app. The remaining open questions concern
+temporary approaches already in use, proposed rules, or later
+features. **P2** means a later delivery priority, not the prototype
+review phase.
 
 | # | Topic | When the answer is needed |
 | --- | --- | --- |
-| 1 | Scientific explanations in the app | Before the formal sign-off of the texts (current disposition above) |
+| 1 | Scientific explanations in the app | Before the formal sign-off of the texts (OA-4; current disposition above) |
 | 2 | Permission and license for sharing data | Answered 2026-11-06: CC BY 4.0 confirmed; refined 2026-11-08: DEM-derived data exports under ODC-By 1.0 |
 | 3 | Kern County comparison with real measurements | Answered 2026-11-06: deferred past the MVP (PDD D-49) |
 | 4 | Reliability at small fault movements | Answered 2026-11-06: 0.5 m warning kept, text supplied (PDD D-4) |
@@ -514,10 +514,10 @@ apply one angle's converted range to every simulation.
 **Ask:** Is that scientifically appropriate? What limitations should
 we explain when results for several angles are combined?
 
-**Status (until 2026-11-06):** product-owner proposal awaiting research review. When
-the reader enters fault slip directly, the same entered range
-applies to all selected angles; this question concerns the
-surface-offset conversion.
+**Status (until 2026-11-06):** product-owner proposal awaiting
+research review. When the reader enters fault slip directly, the same
+entered range applies to all selected angles; this question concerns
+the surface-offset conversion.
 
 **Answered 2026-11-06.** Yes — convert per angle; the geometry is
 the dip-slip relation (vertical component = slip × sin of the
@@ -563,12 +563,13 @@ proposal keeps the sources separate and labels the comparisons
 “Analogous, not identical.” SURE is a published database of surface
 ruptures; [the data guide][data-guide] describes all three sources.
 
-**Release significance (superseded 2026-11-09):** this is not merely an optional wording
-review. ADR-0017 includes D-18 among the decisions required before
-public release. The later decision to make `/explore/` the public
-entry point also requires the owner to settle whether and how field
-comparisons belong in that guided app. The research group reviews
-the scientific comparisons; the owner records their product scope.
+**Release significance (superseded 2026-11-09):** this is not merely
+an optional wording review. ADR-0017 includes D-18 among the decisions
+required before public release. The later decision to make `/explore/`
+the public entry point also requires the owner to settle whether and
+how field comparisons belong in that guided app. The research group
+reviews the scientific comparisons; the owner records their product
+scope.
 
 **Status 2026-11-06.** The group will come back to this one (“I'll
 circle back”). With questions 2 and 3 resolved, this is the one
