@@ -3700,8 +3700,8 @@ before finishing:
 
 - the results sentence equals its base text (two `Model vs reality`
   links) and `explore-nav` asserts it;
-- the branch adds "more gently inclined" to the glossary or any
-  shipped page nowhere; the only added occurrences are this bullet
+- the branch adds "more gently inclined" to neither the glossary nor
+  any shipped page; the only added occurrences are this bullet
   and the review note's table row, and the README `fault_dip` text
   and its design records keep their existing mentions;
 - the three restored records equal their base text and §15.11 item 9
