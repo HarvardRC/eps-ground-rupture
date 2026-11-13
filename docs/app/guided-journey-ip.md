@@ -3700,8 +3700,10 @@ before finishing:
 
 - the results sentence equals its base text (two `Model vs reality`
   links) and `explore-nav` asserts it;
-- no "more gently inclined" in any file the branch touches except the
-  review note itself, which quotes the phrase in a table row;
+- the branch adds "more gently inclined" to the glossary or any
+  shipped page nowhere; the only added occurrences are this bullet
+  and the review note's table row, and the README `fault_dip` text
+  and its design records keep their existing mentions;
 - the three restored records equal their base text and §15.11 item 9
   is gone; §13.1, §1 and §15.12 carry the G-33 dates and cite D-55;
 - the Distributions footnote equals the repair memo's text.
@@ -3720,7 +3722,8 @@ next briefing round.
 At this verification, on `task/g-33-site-review-fixes`, over `3f9ed67`:
 
 - **Build and unit tests.** `tscCheck` passed; the pinned Node suite
-  passed all 505 tests (no tests were added).
+  passed all 505 tests (501 at the base; the branch adds four: three
+  for the Tableau fit, one for the guided archive).
 - **Site builds.** The strict publication and preview builds passed
   from a clean state.
 - **Unchanged (D-39).** The `/scenario/` bundles `app-066e39f81672.js`
@@ -3747,9 +3750,18 @@ At this verification, on `task/g-33-site-review-fixes`, over `3f9ed67`:
   passed in both projects, apart from skips counted in the 11 above
   (`explore-range-controls`: 2 desktop, 3 mobile; `explore-nav`: 1
   mobile).
-- **Pull request and CI.** PR: PLACEHOLDER (number and URL, to be
-  filled by the coordinator). CI run on the pull request: PLACEHOLDER
-  (run URL). Independent review: PLACEHOLDER (result).
+- **Pull request and CI.** PR
+  [#99](https://github.com/HarvardRC/eps-ground-rupture/pull/99). CI on
+  `2bb94bb`, the head before this section's final edit: Tests
+  ([run](https://github.com/HarvardRC/eps-ground-rupture/actions/runs/43364410767)), Companion site
+  ([run](https://github.com/HarvardRC/eps-ground-rupture/actions/runs/43364410713)) and Doc links ([run](https://github.com/HarvardRC/eps-ground-rupture/actions/runs/43364410867))
+  passed, `deploy` skipped. Independent review: ready, nothing
+  blocking; it re-ran the three checkers, the 505 tests, both strict
+  builds and the full browser lane (391 passed, 11 skipped on its
+  second run; its first run had one failure in
+  `navigation-lifecycle`, a `/scenario/` back-navigation spec this
+  branch does not touch, which passed on rerun). Its two corrections
+  to this section are applied.
 
 Not verified:
 
