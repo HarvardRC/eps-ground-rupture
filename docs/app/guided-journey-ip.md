@@ -3769,6 +3769,60 @@ Not verified:
 - screen-reader reading of the download status;
 - browsers other than Chromium.
 
+### The explorer on the home page, 2026-11-13 (G-32)
+
+G-32 ran under the owner's release of 2026-11-12: the G-32 row and
+its owner-decision paragraph, committed by the owner in `15d0451`
+with PDD D-54, which fix the sentence word for word. On the owner's
+direction of 2026-11-13 the planning session carried it out, because
+its messages to the Implementation Session did not arrive; an
+independent reviewer checked the result.
+
+**What changed.** `subprojects/mkdocs/docs/index.md` gains one
+paragraph directly after the dashboard cards, before the glossary
+tip: "And the **Ground Rupture Explorer** lets you choose modeled
+geological conditions and a range of fault slip, then examine the
+corresponding results from the same simulations.", with "Ground
+Rupture Explorer" linking `explore.md`. The sentence is assembled
+from the explorer paragraph of the citation description
+(`CITATION.cff`) under D-51 and goes to the research group for sight
+with the next briefing round. Nothing else on the page changes.
+
+At this verification, on `task/g-32-home-page-explorer` at `c04d0de`,
+over `415aaad`:
+
+- **Document checks.** Relative links resolved (5612 links, 65
+  files), PDD agreement passed, and traceability reported no gap rows.
+- **Site builds.** The strict publication and preview builds passed
+  with the site checks hook. In the built `index.html` the sentence
+  links `explore/`, which exists in both trees.
+- **Unchanged (D-39).** The `/scenario/` bundles
+  `app-066e39f81672.js` and `app-08bebc049c15.css` keep the SHA-256
+  values recorded at G-33, in both trees.
+- **Tests.** The pinned Node suite passed 505 of 505; the full
+  browser lane passed 391 and skipped 11, in `desktop` and `mobile`.
+- **Pull request and CI.** PR
+  [#100](https://github.com/HarvardRC/eps-ground-rupture/pull/100).
+  CI on it passed — Tests
+  ([run](https://github.com/HarvardRC/eps-ground-rupture/actions/runs/43371564307)),
+  Companion site
+  ([run](https://github.com/HarvardRC/eps-ground-rupture/actions/runs/43371564311))
+  and Doc links
+  ([run](https://github.com/HarvardRC/eps-ground-rupture/actions/runs/43371564398))
+  — with `deploy` skipped. The Companion site run's first attempt
+  failed in `webapp-bundle` while Gradle configured the build: the
+  Gradle Plugin Portal did not serve `jackson-databind` 2.14.2, a
+  dependency of the Node plugin. The file was served again minutes
+  later, and the rerun of the failed jobs passed.
+
+**Review.** An independent reviewer re-ran the three checkers and
+both builds and confirmed the single-file diff, the sentence word for
+word, its placement and link, and the unchanged `/scenario/` bundles.
+No findings.
+
+Not verified: browsers other than Chromium, and the home page on a
+real phone.
+
 ## Separate CI investigation
 
 The reported job `126383105016` belongs to historical run
