@@ -3659,6 +3659,104 @@ Not verified: the owner's manual deploy run (`workflow_dispatch`),
 which uses the same `build` job and so the same step; it has not run
 since this change.
 
+### Site-review corrections, 2026-11-12 (G-33)
+
+G-33 ran under the owner's release of 2026-11-12: the owner's commit of
+PDD D-55 (`3f9ed67`, "Wording correction") on `dev-v.0.4.x`, which
+approves the task's decisions and reader-facing strings in place of a
+pull-request review. The task row and owner-decision paragraph are
+above; the records are guided DDD §13.1 (the consistency correction)
+and §15.12. The pull request leaves `docs/app/pdd.md` untouched.
+
+**What changed.**
+
+- **Outside review's corrections.** `0214a05` carries the outside
+  review agent's prepared changes as delivered, with
+  `notes/site-review-2026-11-12.md`: the Tableau host sized before
+  scaling with per-embed ready dismissal and a regression test (R3);
+  one labelled `section` landmark in place of the nested `main` (R16,
+  page portion); visible download status (R17, archive portion); the
+  guided archive's `statistics.csv` labels and `provenance.txt`
+  through the D-51 overlay (R8); mode-specific movement labels and a
+  mode-neutral step heading (R9); the scarp-dip release-verification
+  wording (R6); and editorial corrections.
+- **Planning session's repairs.** `f38eedc` restored the approved
+  results sentence, held the fault-steepness word choice (the glossary
+  keeps its baseline definition), restored the three rewritten design
+  records and added §15.12, and merged the Distributions footnote with
+  the group-sourced facts. `e283e38` left the PDD to the owner.
+- **This session.** The paper page keeps the four-figure count and the
+  rights rationale; the owner-decision paragraph and task row above;
+  the overlay comment names its records; and the lane's step-heading
+  constant (`MOVEMENT_HEADING` in `playwright/explore-support.ts`)
+  takes D-55's "Specify fault slip or surface offset".
+- **Held, not shipped.** The fault-steepness word choice, every R1, R2,
+  R5, and R7 change, workbook edits (R10), layout proposals (R11).
+
+**Review disposition.** The planning session's four-lens review
+(claims, diff, discipline, mechanics) produced the repairs above.
+This session re-verified the earlier repairs against those reports
+before finishing:
+
+- the results sentence equals its base text (two `Model vs reality`
+  links) and `explore-nav` asserts it;
+- no "more gently inclined" in any file the branch touches except the
+  review note itself, which quotes the phrase in a table row;
+- the three restored records equal their base text and §15.11 item 9
+  is gone; §13.1, §1 and §15.12 carry the G-33 dates and cite D-55;
+- the Distributions footnote equals the repair memo's text.
+
+**Strings.** Each reader-facing string the branch adds or changes
+equals its quote in PDD D-55 (the scarp-dip sentence, the fault-slip
+description, the step heading, the two mode labels, the range hint, the
+download statuses, the Response curves link text). The editorial fixes
+(figure count, Figure 2 pointers, SDC, glossary introduction) are named
+in D-55 by category, without a quoted sentence. The strings are marked
+assembled under D-51 and go to the research group for sight with the
+next briefing round.
+
+**Evidence from the checks.**
+
+At this verification, on `task/g-33-site-review-fixes`, over `3f9ed67`:
+
+- **Build and unit tests.** `tscCheck` passed; the pinned Node suite
+  passed all 505 tests (no tests were added).
+- **Site builds.** The strict publication and preview builds passed
+  from a clean state.
+- **Unchanged (D-39).** The `/scenario/` bundles `app-066e39f81672.js`
+  and `app-08bebc049c15.css` did not change: both names are content
+  hashes, equal to those recorded at G-30, and the files' SHA-256 are
+  `066e39f816726221df70df243b5276f6d0cee366b42aee0b305454247240ace1`
+  and `08bebc049c157149a65bc99a241d651853cba8754702b9b8580adb37afe5f0bf`
+  in both the publication and the preview trees. The branch changes
+  no file under `src/views`, so the shared copy and download code the
+  bundle includes keep their bytes. The guided bundles became
+  `explore-ac4e15ec645e.js` and `explore-2eabbd6235db.css`.
+- **Document checks.** Relative links resolved (5612 links, 65 files),
+  PDD agreement passed, and traceability reported no gap rows.
+- **Lane.** The full lane passed 391 and skipped 11, in `desktop` and
+  `mobile`. The first run failed 28 tests, in `explore-continuity`,
+  `explore-draft-boundary`, `explore-journey`, `explore-race`,
+  `explore-sample`, and `explore-validation`: the lane's shared
+  step-heading constant still held the prototype's heading, which
+  contradicts D-55. The constant was updated; no app change. The
+  second run passed.
+- **Edited specs.** `explore-continuity`, `explore-draft-boundary`,
+  `explore-polish`, `explore-range-controls`, `explore-report`,
+  `explore-review-round`, and `explore-sme-wording`, and `explore-nav`,
+  passed in both projects, apart from skips counted in the 11 above
+  (`explore-range-controls`: 2 desktop, 3 mobile; `explore-nav`: 1
+  mobile).
+- **Pull request and CI.** PR: PLACEHOLDER (number and URL, to be
+  filled by the coordinator). CI run on the pull request: PLACEHOLDER
+  (run URL). Independent review: PLACEHOLDER (result).
+
+Not verified:
+
+- the new wording in Word's rendering of `report.docx`;
+- screen-reader reading of the download status;
+- browsers other than Chromium.
+
 ## Separate CI investigation
 
 The reported job `126383105016` belongs to historical run
