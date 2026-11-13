@@ -20,10 +20,11 @@ stage, split into translucent overlapping distributions — one per value of
 a chosen model parameter, each rising from zero so their shapes can be
 compared directly. Beneath it sit two summaries of the same data, both
 as a mean and a one-standard-deviation band for each
-[scarp class](../glossary.md#scarp-classes) — the six shapes shown in
-[Figure 2](../figures.md#fig-2): one pooling every model stage into a single
-value per class, one tracking how those values move as slip accumulates —
-the paper's Figure 8. What the three measures
+[scarp class](../glossary.md#scarp-classes). One pools every model stage
+into a single value per class; the other tracks how those values move
+as slip accumulates — the paper's Figure 8. For descriptions of the six
+scarp shapes, see [the description of Figure 2](../figures.md#fig-2);
+the figure itself is not reproduced here. What the three measures
 are, and where on a scarp each is taken, is
 [Figure 5](../figures.md#fig-5){ .figure-pop data-img="../../images/fig-05-ml-model-measurements.jpg" data-title="Figure 5 — the quantities every dashboard plots" }.
 
@@ -133,15 +134,12 @@ its means and its sample standard deviations exactly.[^pins]
     curves start earlier. Where the paper draws a fitted polynomial
     through the means, this draws the binned means themselves — dense
     enough, at up to a hundred points per class, to carry the same shape.
-    And scarp dip is **known to be wrong here, pending a correction**.
-    The authors' code reads a `Convert_Scarp_Dip` column that the
-    published dataset does not carry, so this series applies the same
-    method to the dataset's `Scarp_Dip` instead. The lead author has since
-    confirmed that `Convert_Scarp_Dip` is the authoritative column: the
-    raw dip measurements for the Simple classes were mis-oriented, and
-    the Convert column holds the corrected angles. Until that column or
-    its derivation reaches us, **treat every scarp-dip value on this page
-    as provisional** — the error is concentrated in the Simple classes.
+    Scarp-dip results **remain provisional while we confirm that this
+    data release contains the approved corrections**. The research group
+    reports that corrected angles are available. The authors' code uses
+    `Convert_Scarp_Dip`, while this dashboard uses the imported
+    `Scarp_Dip` column. We still need to confirm whether that column
+    contains the corrected series before removing the provisional label.
     The other three measures come from the same columns the authors used.
 
 <div class="tableau-fit" data-width="800" data-height="1400" markdown="0">

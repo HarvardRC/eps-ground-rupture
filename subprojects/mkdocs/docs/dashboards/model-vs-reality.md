@@ -73,10 +73,10 @@ simulations produce: [`Monoclinal`](../glossary.md#monoclinal) and
 pop-up structure respectively — [`Simple`](../glossary.md#simple), where the
 fault offsets the surface directly, and a
 [`… Collapse`](../glossary.md#collapse) variant of each, where the
-oversteepened face gave way. To see each of the six as the model draws it
-and as it looks in the field, open
-[Figure 2](../figures.md#fig-2); the two axes here are
-defined in
+oversteepened face gave way. The
+[description of Figure 2](../figures.md#fig-2) explains how the paper
+compares these shapes with field examples; the figure itself is not
+reproduced here. The two axes here are defined in
 [Figure 5](../figures.md#fig-5){ .figure-pop data-img="../../images/fig-05-ml-model-measurements.jpg" data-title="Figure 5 — the quantities every dashboard plots" }.
 
 <div class="tableau-fit" data-width="800" data-height="1200" markdown="0">

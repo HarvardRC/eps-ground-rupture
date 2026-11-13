@@ -24,7 +24,7 @@ test('draft edits leave the confirmed result until review, and Discard restores 
   await expect(page.locator('.gx-pending')).toContainText('You have unapplied changes');
   await expect(page.locator('.gx-pending')).toContainText('These results still describe your confirmed scenario.');
   await expect(confirmedCount(page)).toHaveText(count);
-  await expect(page.locator('.gx-context')).toContainText(`Fault slip: ${window.min}–${window.max} m`);
+  await expect(page.locator('.gx-context')).toContainText(`Fault slip at depth: ${window.min}–${window.max} m`);
 
   // A refinement edit joins the same draft.
   await page.locator('#gx-refine-button').click();

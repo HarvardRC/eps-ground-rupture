@@ -1611,6 +1611,15 @@ published set is reported corrected and checked (briefing question
 `Scarp_Dip` column is the corrected series (D-5 — the register row
 holds the verification figures).
 
+**Guided wording correction (2026-11-12).** The `/explore/` page
+and its downloads describe that verification accurately:
+
+> Scarp-dip results remain provisional while we confirm that this
+> data release contains the approved corrections.
+
+The provisional status and its removal condition are unchanged.
+The earlier text remains the unlisted `/scenario/` baseline.
+
 ### 5.5 Statistics framing (CR-5)
 
 > These are statistics of the matching simulation records. The median

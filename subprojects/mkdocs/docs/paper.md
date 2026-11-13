@@ -13,8 +13,8 @@
 The article carries a "© The Author(s) 2025" line with no Creative Commons
 licence, so it is treated here as **not open access**: nothing is
 reproduced from the typeset article and its wording is quoted only
-sparingly. Six of its illustrations *are* shown here, as the authors' own
-pre-typeset originals which they are free to share — see
+sparingly. Four illustrations — Figures 3, 4, 5 and 7 — are shown here,
+from the authors' accepted manuscript — see
 [Figures from the paper](figures.md), which also carries their reuse terms.
 
 !!! info "Using the data? Cite the papers and the archives"

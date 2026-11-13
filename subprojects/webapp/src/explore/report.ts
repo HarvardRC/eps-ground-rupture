@@ -1,6 +1,6 @@
 // The result report of guided DDD §13 (PDD §6.5, D-40, D-48): the guided
 // download's archive, composed here from README.txt first (G-30), the four
-// shared text members of DDD §5.9 (`packageTexts`, unchanged), and
+// shared text members of DDD §5.9 (with guided labels and caveats), and
 // `report.docx` last, written by
 // the shared `zip` writer (unchanged) at the handler's one `generatedAt`.
 //
@@ -258,7 +258,7 @@ export function captionLines(input: RenderInput, stamps: VersionStamps, chart: P
 /** The notes the page shows under a measurement's heading: width's scope note, scarp dip's provisional notice (PDD §5.4). */
 function measurementNotes(m: MeasurementName): readonly string[] {
   if (m === 'dzw') return [guided(copyText('pdd5.7.widthScopeNote'))];
-  if (m === 'scarp_dip') return [copyText('pdd5.4.scarpDipNotice')];
+  if (m === 'scarp_dip') return [guided(copyText('pdd5.4.scarpDipNotice'))];
   return [];
 }
 
@@ -277,8 +277,8 @@ function documentBody(input: RenderInput, stamps: VersionStamps, generatedAt: Da
 
   // 2. Provenance: the blocks of provenance.txt in the page's wording
   // (§13.7): each line through the guided overlay, so a caveat the
-  // overlay rewords (the decided low-slip text, D-4) reads as on the page,
-  // while provenance.txt itself keeps the registry wording (G-25).
+  // overlay rewords (the decided low-slip text, D-4) reads as on the page
+  // and in the guided archive's provenance.txt.
   parts.push(heading(PROVENANCE_HEADING));
   for (const block of provenanceText(input, stamps, generatedAt).split('\n\n')) {
     const [label, ...lines] = block.split('\n').filter(line => line !== '').map(line => guided(line));
@@ -397,7 +397,15 @@ export interface GuidedArchive {
  */
 export async function guidedArchive(input: RenderInput, stamps: VersionStamps, generatedAt: Date, rasterize: Rasterize, explorerUrl = ''): Promise<GuidedArchive> {
   const encoder = new TextEncoder();
-  const members: ZipMember[] = packageTexts(input, stamps, generatedAt).map(member => ({ name: member.name, bytes: encoder.encode(member.text) }));
+  const members: ZipMember[] = packageTexts(input, stamps, generatedAt).map(member => {
+    // Only the human-readable labels and caveats adopt the guided wording.
+    // Raw records and machine-readable scenario state keep their exact bytes;
+    // the shared /scenario/ package builder remains unchanged.
+    const text = member.name === 'statistics.csv' || member.name === 'provenance.txt'
+      ? member.text.split('\n').map(line => guided(line)).join('\n')
+      : member.text;
+    return { name: member.name, bytes: encoder.encode(text) };
+  });
   const fileName = downloadFileName(input.scenario, input.vintage.manifest, generatedAt);
   // README.txt opens the archive (G-30), naming the report only when the archive carries it.
   const readme = (withReport: boolean): ZipMember => ({ name: README_MEMBER, bytes: encoder.encode(readmeText(withReport, explorerUrl)) });
