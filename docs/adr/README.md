@@ -44,11 +44,12 @@ old number to its fate. The originals remain in git history.
 | [0018](0018-manifest-defined-stage-count.md)          | Manifest-defined uniform stage count | Accepted; amends [0013](0013-row-level-scenario-artifact.md) |
 | [0019](0019-release-based-data-identity.md)           | Release-based data identity | Accepted; amends [0014](0014-committed-content-hashed-artifacts.md) |
 | [0020](0020-parallel-guided-explorer.md) | Parallel guided explorer over the shared scientific core | Decided for implementation candidate, 2026-11-04; owner review pending |
+| [0021](0021-sediment-profile-coverage.md) | Telling readers when a chosen sediment profile adds no simulations | Proposed |
 | [—](dead-ends.md)                                     | **Dead ends** — the retired 2026-05/06 architecture, as one story | Retrospective |
 
 ## Adding a new ADR
 
-1. Pick the next number (`0021` is next).
+1. Pick the next number (`0022` is next).
 2. Filename: `NNNN-short-kebab-title.md`.
 3. Copy the structure of an existing ADR (or use MADR's template).
 4. Add a row to this index.
