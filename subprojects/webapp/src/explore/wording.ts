@@ -27,6 +27,9 @@ export const NO_MATCHES = 'No matching simulation stages';
 /** What Download data (ZIP) holds, shown before the click (§11.1; §13.7). */
 export const DOWNLOAD_CONTENTS = 'Matching simulation stages, statistics, scenario settings and sources, with a report of this result in Microsoft Word format (report.docx) and a README.txt that describes each file.';
 
+/** The whole-download failure, shown until the next attempt starts (§13.5). */
+export const DOWNLOAD_FAILED = 'The download could not be created. Your confirmed result is unchanged; select Download data (ZIP) to retry.';
+
 /** The status line after a delivery without the report (§13.5, §13.7). */
 export const REPORT_FAILED = 'Your data download is ready. The report in Microsoft Word format could not be built this time, so the archive holds the data files without it.';
 

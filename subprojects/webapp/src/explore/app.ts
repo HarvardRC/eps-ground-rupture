@@ -21,7 +21,7 @@ import { statsRows, unclassifiedLine } from '../views/stats-table';
 import { computeResult } from './compute';
 import { rasterizeSvg } from './rasterize';
 import { guidedArchive } from './report';
-import { CHART_EXPORT_BUTTON, CHART_EXPORT_FAILED, CHART_EXPORT_READY, CHART_SIDECAR_BLOCKED, DOWNLOAD_CONTENTS, matchingStages, measurementsUsed, NEGATIVE_HEIGHT_NOTE, negativeHeights, REPORT_FAILED } from './wording';
+import { CHART_EXPORT_BUTTON, CHART_EXPORT_FAILED, CHART_EXPORT_READY, CHART_SIDECAR_BLOCKED, DOWNLOAD_CONTENTS, DOWNLOAD_FAILED, matchingStages, measurementsUsed, NEGATIVE_HEIGHT_NOTE, negativeHeights, REPORT_FAILED } from './wording';
 import { buildChartExport, caveatTexts, type ChartKind } from './chart-export';
 import { DEFINITIONS, type DefinitionKey } from './glossary';
 import { classifySession, clearSession, loadSession, saveSession, type DisplayChoices, type SessionRecord } from './session';
@@ -1134,6 +1134,12 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       const node = $('#gx-download-status');
       if (node && result === input) node.textContent = text;
     };
+    // A new attempt withdraws the earlier whole-download failure in place, without render(), so focus stays on the button (§13.5).
+    if (generalError === DOWNLOAD_FAILED) {
+      generalError = '';
+      if (alert.textContent === DOWNLOAD_FAILED) alert.textContent = '';
+      shell.querySelector('.gx-warning')?.remove();
+    }
     downloading = true;
     say('Preparing your download…');
     try {
@@ -1151,7 +1157,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
       console.error('Guided download:', error);
       if (!alive() || result !== input) return;
       downloadStatus = null;
-      generalError = 'The download could not be created. Your confirmed result is unchanged; select Download data (ZIP) to retry.';
+      generalError = DOWNLOAD_FAILED;
       alert.textContent = generalError; render();
     } finally {
       downloading = false;
