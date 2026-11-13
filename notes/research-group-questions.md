@@ -33,12 +33,22 @@ exists; edits to this file do not update that copy automatically.
 
 ## What needs an answer, and when?
 
+**Current disposition (2026-11-13).** The explorer at `/explore/` is
+public: the owner's deploy of 2026-11-12 listed it in the site
+navigation (PDD D-52, D-54), which ADR-0017's amendment of that date
+counts as a public release. Question 1's answer is now needed before
+the group's formal sign-off of the site's texts, which comes before
+the v0.4.0 software release; the group reads in two steps, an
+informal read of the deployed explorer and then that sign-off (the
+owner's decision of 2026-11-09). Question 14 no longer gates the
+release (PDD D-53). The paragraphs below keep the earlier status.
+
 The prototype is already accessible to anyone with its address.
 Here, **before public release** means before it is advertised through
 site navigation and search, or published as the first software
 release. It does not mean before the group can try the prototype.
 
-Question 1 still needs its answer before that release; questions 2
+**Status 2026-11-06.** Question 1 still needs its answer before that release; questions 2
 and 3 were answered on 2026-11-06 and are recorded below, and the
 group's written review of the same date answered questions 4–9, 11,
 12, and 13 in one pass — each answer is recorded under its
@@ -52,8 +62,8 @@ prototype review phase.
 
 | # | Topic | When the answer is needed |
 | --- | --- | --- |
-| 1 | Scientific explanations in the app | Before public release |
-| 2 | Permission and license for sharing data | Answered 2026-11-06: CC BY 4.0 confirmed |
+| 1 | Scientific explanations in the app | Before the formal sign-off of the texts (current disposition above) |
+| 2 | Permission and license for sharing data | Answered 2026-11-06: CC BY 4.0 confirmed; refined 2026-11-08: DEM-derived data exports under ODC-By 1.0 |
 | 3 | Kern County comparison with real measurements | Answered 2026-11-06: deferred past the MVP (PDD D-49) |
 | 4 | Reliability at small fault movements | Answered 2026-11-06: 0.5 m warning kept, text supplied (PDD D-4) |
 | 5 | Correction to scarp-slope measurements | Answered 2026-11-06: corrected; one confirmation still needed (PDD D-5) |
@@ -65,7 +75,7 @@ prototype review phase.
 | 11 | Additional uplift as another result | Answered 2026-11-06: yes — still a later feature (PDD D-20) |
 | 12 | Animations and other supporting material | Answered 2026-11-06: full collection, rights confirmed in writing |
 | 13 | Surface-offset conversion for several angles | Answered 2026-11-06: approved (PDD D-3) |
-| 14 | Which real measurements to show alongside results | Before public release; the group will circle back (2026-11-06) |
+| 14 | Which real measurements to show alongside results | The group will circle back (2026-11-06); no longer gates the release since 2026-11-09 (PDD D-53) |
 
 The minimum viable product (**MVP**) is the initial agreed feature
 set. This table covers research questions, not every release task;
@@ -504,7 +514,7 @@ apply one angle's converted range to every simulation.
 **Ask:** Is that scientifically appropriate? What limitations should
 we explain when results for several angles are combined?
 
-**Status:** product-owner proposal awaiting research review. When
+**Status (until 2026-11-06):** product-owner proposal awaiting research review. When
 the reader enters fault slip directly, the same entered range
 applies to all selected angles; this question concerns the
 surface-offset conversion.
@@ -553,7 +563,7 @@ proposal keeps the sources separate and labels the comparisons
 “Analogous, not identical.” SURE is a published database of surface
 ruptures; [the data guide][data-guide] describes all three sources.
 
-**Release significance:** this is not merely an optional wording
+**Release significance (superseded 2026-11-09):** this is not merely an optional wording
 review. ADR-0017 includes D-18 among the decisions required before
 public release. The later decision to make `/explore/` the public
 entry point also requires the owner to settle whether and how field
@@ -564,23 +574,39 @@ the scientific comparisons; the owner records their product scope.
 circle back”). With questions 2 and 3 resolved, this is the one
 research-side decision still gating the public release.
 
+**Current disposition (2026-11-09).** No longer a release question:
+the owner moved real-earthquake measurements on the explorer page
+past this release (PDD D-53; ADR-0017's amendment of 2026-11-09), so
+D-18 stays open for that feature's return. The specific point above
+still applies to the dashboards, which show SURE's fault-normal
+component beside simulated widths.
+
 ## Separate product-owner decisions
 
 These belong in the same review discussion, but are not scientific
 questions for the group to settle alone:
 
-- **Liability text (D-10):** the owner must obtain or write the
-  final text before release. The prototype currently has a marked
-  placeholder.
+- **Liability text (D-10):** the owner had to obtain or write the
+  final text before release; until then the prototype carried a
+  marked placeholder. Decided 2026-11-09: the standing disclaimer
+  carries the Apache License 2.0's warranty and liability terms, and
+  the public explorer page shows it (PDD D-10).
 - **Export license:** the owner decides the license with the team,
   taking account of the source permissions requested in question 2.
   Decided with question 2's answer (2026-11-06): CC BY 4.0, the
-  ADR-0017 amendment of that date.
-- **Guided-page release scope (D-39):** the owner must reconcile the
+  ADR-0017 amendment of that date. Refined 2026-11-08: DEM-derived
+  data exports are under ODC-By 1.0; charts, reports, and the
+  field-data export stay under CC BY 4.0 (ADR-0017's amendment of
+  2026-11-08; see question 2).
+- **Guided-page release scope (D-39):** the owner had to reconcile the
   guided app with the release requirements, including field
   comparisons in question 14. The deferral of the Kern worked
   example in question 3 needed its own scope decision; the owner
-  took it on 2026-11-06 (PDD D-49).
+  took it on 2026-11-06 (PDD D-49). Settled by 2026-11-12: the
+  explorer page is listed and public (PDD D-52, D-54), real-earthquake
+  measurements on it wait until after this release (PDD D-53), and
+  `/scenario/` stays an unlisted prototype through the release (PDD
+  D-54).
 
 Already settled, so we need not ask again:
 

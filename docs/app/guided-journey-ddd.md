@@ -1091,7 +1091,10 @@ not be built this time (§13.7). The archive never carries a
 partial or corrupt `report.docx`, and the existing whole-download
 failure message is unchanged for failures before the four members
 exist. Failure honesty follows ADR-0010: the message names what
-is missing and claims nothing that did not happen.
+is missing and claims nothing that did not happen. A new download
+attempt clears an earlier whole-download failure message and its
+alert, but no other error; if that attempt fails too, the message
+returns (G-34).
 
 ### 13.6 Archive layout and the independent checker
 
