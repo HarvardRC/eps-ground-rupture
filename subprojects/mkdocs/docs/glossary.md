@@ -89,10 +89,9 @@ Everything below is the vocabulary needed to read that.
 **Thrust and reverse faults** { #thrust-reverse }
 : Faults where the crust is being *squeezed*, so one block is pushed up and
   over the other. The two words describe the same motion at different
-  steepnesses — thrust faults are the more gently inclined ones
-  (conventionally under about 45°), reverse faults the steeper. This study
-  covers only these; sideways-sliding faults like the San Andreas are
-  out of scope. The
+  steepnesses — thrust faults are the shallower-dipping ones (conventionally
+  under about 45°), reverse faults the steeper. This study covers only these;
+  sideways-sliding faults like the San Andreas are out of scope. The
   motivation is practical: this kind of rupture damages infrastructure, and
   field measurements of it are comparatively scarce.[^scope]
 

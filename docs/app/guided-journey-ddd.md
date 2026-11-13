@@ -39,7 +39,7 @@ No existing scenario bundle or page is replaced.
 
 The app's `.gx-main` container is a `section` labelled by
 `gx-heading`. MkDocs supplies the page's single `main` landmark;
-the embedded app does not add a nested one.
+the embedded app does not add a nested one (G-33, 2026-11-12).
 
 ## 2. State and pure module interface
 
@@ -986,13 +986,17 @@ one `generatedAt` instant. The shared `buildPackage`, the
 `/scenario/` button and delivery, and every shared module keep
 their bytes.
 
-**Consistency correction (2026-11-12).** The guided overlay is
+**Consistency correction (2026-11-12, G-33).** The guided overlay is
 applied by the archive composer, not by the shared package builder.
 `records.csv` and `scenario.json` remain byte-identical to shared
 output; CSV column names, measurement IDs, numeric values, and
 missing fields do not change. Apply provenance rewrites one line
 at a time so a template slot cannot consume later blocks. This
-also applies to the archive delivered without a Word report.
+also applies to the archive delivered without a Word report. A
+fitting decision of the planning session under D-51, amendable by
+the owner on sight; it supersedes the G-25 split, by which
+`provenance.txt` kept the registry wording, at the owner's string
+gate of G-33's pull request.
 
 The hint under the button names the report (§13.7); the button
 label and the ready status line stay. A second activation while
@@ -1260,7 +1264,7 @@ with screenshots before the merge.
    parks its thumbs at the scale ends, muted, with no
    selected-segment fill; the echo reads "Selected: none — 0 of 7
    modeled angles." (depths: "Selected: none — 0 of 3 modeled
-   depths."); the hint below reads "Drag a range handle or choose Full
+   depths."); the hint below reads "Move a thumb or choose Full
    range to continue."; and each thumb's spoken value adds ",
    not chosen". The first thumb move answers the group with the
    contiguous range between the two thumbs' new positions; Full
@@ -1325,7 +1329,7 @@ go back to the group for sight with the next briefing round.
   heading follows the new name.
 - Step 3 name: **Fault slip** (was Fault movement — the review:
   "rather than fault movement, it is fault slip or fault
-  displacement"); heading **Specify fault slip or surface offset**;
+  displacement"); heading **Choose the assumed fault slip**;
   buttons **Continue to fault slip** and **Change fault slip**.
 - The stepper, step list, readiness lines, and session labels
   follow the two names; the mode labels of CR-3 (**Fault slip at
@@ -1462,14 +1466,12 @@ precedent, amendable by the owner on sight:
    help's "raised surface ridges can make that estimate too large"
    and the conversion hint's counterpart — say **pressure ridges**;
    both altered sentences join the assembled list.
-3. **Mode-label correction (2026-11-12).** Both result summaries
-   label the entered quantity: **Fault slip at depth:** or
-   **Vertical surface offset:**. Values omit the redundant tail:
-   "Fault slip at depth: 0–5 m" and "Vertical surface offset:
-   0–1.3 m". The offset conversion table separately labels the
-   estimated slip. The mode selector describes fault slip as
-   "Movement of one side relative to the other along the fault
-   plane." The review hint reads "as fault slip increases".
+3. The summaries' "Movement:" label follows the renamed block —
+   **Fault slip:** — and in slip mode the value drops its now
+   redundant tail: "Fault slip: 0–5 m" (offset mode keeps its mode
+   words, "Fault slip: 0–1.3 m surface offset"); the review hint
+   reads "as fault slip increases". The trimmed slip-mode value
+   joins the assembled list.
 4. The sediment-depth tooltip adopts the review's definition ("The
    thickness of the sediment above bedrock."); the fault-angle
    tooltip stands — "tilted" does not contradict "dipping" — and
@@ -1493,11 +1495,52 @@ precedent, amendable by the owner on sight:
    research-tool sentence with §15.2's amended forecast sentence,
    keeping the Full disclaimer link — so the page carries one
    framing, not two. Both join the assembled list.
-9. **Verification wording correction (2026-11-12).** The guided
-   overlay for `pdd5.4.scarpDipNotice` uses PDD §5.4's corrected
-   release-verification sentence. Apply it to the panel, empty
-   state, Word report, ZIP provenance, and chart-image text and
-   sidecar. The provisional mark and removal condition stay.
+
+### 15.12 Review-round corrections (2026-11-12, G-33)
+
+Corrections from the outside site review
+(`notes/site-review-2026-11-12.md`), fitting decisions of the
+planning session under D-51, amendable by the owner on sight. Every
+reader-facing string below is assembled, listed in G-33's pull
+request for the research group's sight, and goes to the owner as
+final strings before the merge. The restored records of §14.6 item 1,
+§15.1, and §15.11 item 3 keep their gate-time text; the entries here
+supersede them for the shipped strings.
+
+1. Scarp-dip verification wording: the guided overlay rewrites
+   `pdd5.4.scarpDipNotice` to the PDD §5.4 corrected sentence
+   (assembled); panel, empty state, Word report, ZIP provenance, and
+   chart-image strip and sidecar carry it. The provisional mark and
+   its removal condition stay (D-5).
+2. Fault-slip definition on the mode selector: "Movement of one side
+   relative to the other along the fault plane." (assembled; replaces
+   the prototype's "The distance the fault moves underground.").
+3. Step-3 heading: "Specify fault slip or surface offset" — a
+   mode-neutral heading; supersedes §15.1's gate-time rename for this
+   heading.
+4. Result summaries label the entered quantity with the CR-3 mode
+   labels — "Fault slip at depth: …" in slip mode, "Vertical surface
+   offset: …" in offset mode — superseding item 3's single-label
+   presentation; the review hint reads "as fault slip increases".
+5. Range hint: "Drag a range handle or choose Full range to
+   continue." — supersedes §14.6 item 1's gate-time string; an
+   owner-gated string, re-approved at G-33's string gate.
+6. Download statuses: "Preparing your download…" and the visible
+   ready/partial-failure messages of §13.1's correction; §13.7's
+   string gate covers them.
+7. Distributions scarp-dip footnote: the release-verification
+   wording, keeping the group-sourced facts — the lead author's
+   confirmation of `Convert_Scarp_Dip` and the mis-oriented raw
+   Simple-class dips (assembled).
+8. Response-curves wording: the link text "how fault slip relates to
+   vertical displacement" and the fitted-relation sentence on the
+   Slip-regression bullet (assembled).
+9. Editorial, no science claim: the four-figure count with the
+   paper page's rights rationale kept, Figure-2 pointers, the SDC
+   abbreviation gaining additional uplift (Us − Ud), the glossary
+   introduction. Held for pending research-group answers: the
+   fault-steepness word choice (the glossary keeps its baseline
+   wording) and every R1/R2/R5/R7 change — none ships in G-33.
 
 ## 16. Chart-image export (D-14, FR-D2)
 

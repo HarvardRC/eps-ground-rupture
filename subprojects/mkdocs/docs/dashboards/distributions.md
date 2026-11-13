@@ -134,12 +134,14 @@ its means and its sample standard deviations exactly.[^pins]
     curves start earlier. Where the paper draws a fitted polynomial
     through the means, this draws the binned means themselves — dense
     enough, at up to a hundred points per class, to carry the same shape.
-    Scarp-dip results **remain provisional while we confirm that this
-    data release contains the approved corrections**. The research group
-    reports that corrected angles are available. The authors' code uses
-    `Convert_Scarp_Dip`, while this dashboard uses the imported
-    `Scarp_Dip` column. We still need to confirm whether that column
-    contains the corrected series before removing the provisional label.
+    Scarp-dip results remain provisional while we confirm that this data
+    release contains the approved corrections. The research group reports
+    the corrected angles ready: the lead author confirmed
+    `Convert_Scarp_Dip` as the authoritative column after the raw
+    Simple-class dips were found mis-oriented. The dataset served here
+    carries only the imported `Scarp_Dip` column — whose Simple classes
+    hold no negative dips — and we still need to confirm that it contains
+    the corrected series before removing the provisional label.
     The other three measures come from the same columns the authors used.
 
 <div class="tableau-fit" data-width="800" data-height="1400" markdown="0">
