@@ -1611,22 +1611,6 @@ published set is reported corrected and checked (briefing question
 `Scarp_Dip` column is the corrected series (D-5 — the register row
 holds the verification figures).
 
-**Guided wording correction (2026-11-12, G-33).** The corrected
-sentence — "Scarp-dip results remain provisional while we confirm
-that this data release contains the approved corrections." — is the
-guided overlay's text for this notice on `/explore/` and its
-downloads, a fitting decision of the planning session under D-51
-after the outside site review
-(`notes/site-review-2026-11-12.md`, R6), amendable by the owner on
-sight: the group reports the correction ready, so the open question
-is whether the served release's `Scarp_Dip` column carries it (D-5),
-not whether a correction is awaited. The string is assembled and goes
-to the research group for sight with G-33's pull request; final
-strings go to the owner before the merge. The blockquote above stays
-the registry baseline, byte for byte, per §3.7's supersession pattern
-until the registry itself moves; the unlisted `/scenario/` page keeps
-it.
-
 ### 5.5 Statistics framing (CR-5)
 
 > These are statistics of the matching simulation records. The median

@@ -993,10 +993,9 @@ output; CSV column names, measurement IDs, numeric values, and
 missing fields do not change. Apply provenance rewrites one line
 at a time so a template slot cannot consume later blocks. This
 also applies to the archive delivered without a Word report. A
-fitting decision of the planning session under D-51, amendable by
-the owner on sight; it supersedes the G-25 split, by which
-`provenance.txt` kept the registry wording, at the owner's string
-gate of G-33's pull request.
+fitting decision of the planning session under D-51 that the owner
+approved with PDD D-55; it supersedes the G-25 split, by which
+`provenance.txt` kept the registry wording.
 
 The hint under the button names the report (§13.7); the button
 label and the ready status line stay. A second activation while
@@ -1500,12 +1499,12 @@ precedent, amendable by the owner on sight:
 
 Corrections from the outside site review
 (`notes/site-review-2026-11-12.md`), fitting decisions of the
-planning session under D-51, amendable by the owner on sight. Every
-reader-facing string below is assembled, listed in G-33's pull
-request for the research group's sight, and goes to the owner as
-final strings before the merge. The restored records of §14.6 item 1,
-§15.1, and §15.11 item 3 keep their gate-time text; the entries here
-supersede them for the shipped strings.
+planning session under D-51 that the owner approved with PDD D-55.
+Every reader-facing string below is assembled and goes to the
+research group for sight with the next briefing round. The restored
+records of §14.6 item 1, §15.1, and §15.11 item 3 keep their
+gate-time text; the entries here supersede them for the shipped
+strings.
 
 1. Scarp-dip verification wording: the guided overlay rewrites
    `pdd5.4.scarpDipNotice` to the PDD §5.4 corrected sentence
@@ -1524,10 +1523,10 @@ supersede them for the shipped strings.
    presentation; the review hint reads "as fault slip increases".
 5. Range hint: "Drag a range handle or choose Full range to
    continue." — supersedes §14.6 item 1's gate-time string; an
-   owner-gated string, re-approved at G-33's string gate.
+   owner-gated string, re-approved with PDD D-55.
 6. Download statuses: "Preparing your download…" and the visible
-   ready/partial-failure messages of §13.1's correction; §13.7's
-   string gate covers them.
+   ready/partial-failure messages of §13.1's correction; PDD D-55
+   approves them in place of §13.7's string gate.
 7. Distributions scarp-dip footnote: the release-verification
    wording, keeping the group-sourced facts — the lead author's
    confirmation of `Convert_Scarp_Dip` and the mis-oriented raw
