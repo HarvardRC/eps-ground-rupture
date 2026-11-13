@@ -74,6 +74,10 @@ one back to the figure it derives from.
 
 </div>
 
+And the **[Ground Rupture Explorer](explore.md)** lets you choose modeled
+geological conditions and a range of fault slip, then examine the
+corresponding results from the same simulations.
+
 !!! tip "New to this? Start with the glossary"
     Faults, scarps, DZW, FDHI, SURE — the field has a lot of vocabulary, and
     the paper assumes you already have it. **[The glossary](glossary.md)**
