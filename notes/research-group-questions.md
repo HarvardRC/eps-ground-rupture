@@ -69,7 +69,7 @@ review phase.
 | 5 | Correction to scarp-slope measurements | Answered 2026-11-06: corrected; one confirmation still needed (PDD D-5) |
 | 6 | Meaning of negative scarp heights | Answered 2026-11-06: particle-scale resolution effect (PDD D-46) |
 | 7 | Weak / Moderate / Strong in different models | Answered 2026-11-06: parameter tables supplied |
-| 8 | Names of layered sediment arrangements | Answered 2026-11-06: arrangements described (see question 7) |
+| 8 | Layered sediment names and model availability | Arrangements answered 2026-11-06; 0.4.0 availability wording follows question 1/OA-4; additional models and guidance follow after 0.4.0 (disposition 2026-11-14 below) |
 | 9 | Explanation of a raised ridge | Answered 2026-11-06: pressure ridge, additional uplift (Us − Ud) |
 | 10 | Scientific accuracy of the sample stories | Part of question 1; no reply yet (2026-11-06) |
 | 11 | Additional uplift as another result | Answered 2026-11-06: yes — still a later feature (PDD D-20) |
@@ -368,6 +368,60 @@ the dataset names stays an open wording choice under question 1.
 The dense-10 m restriction on two of the three is stated nowhere a
 reader can see it — logged as intake in the review record.
 
+**Current disposition (2026-11-14).** The owner chose
+[ADR-0021's 0.4.0 approach][availability-decision]: distinguish the
+reader's requested conditions from those represented in the results
+(option 1F), and put stable, data-derived availability notes beside
+the limited profiles (2B). This is for the first official 0.4.0
+software release. The preceding answer remains the historical record
+of what the group supplied on 2026-11-06.
+
+The release data establish that Random Heterogeneous has simulations
+only for Dense sediment, 10 m deep, at all seven modeled fault angles.
+Alternating Strong-Weak has simulations only for Dense sediment,
+10 m deep, at 20, 40 and 60 degrees. The three-angle restriction was
+not in the group's earlier answer; include this verified fact with
+the new wording for the group's sight. It is an availability limit
+of this dataset, not evidence that other site conditions are
+physically impossible.
+
+The new availability explanations and result qualifications will be
+assembled from the group's answer and the release data under D-51.
+They belong in [question 1's wording review][wording-question] and the
+existing OA-4 sign-off before 0.4.0. Keep the open choice of plainer
+display names there too; do not ask again for definitions the group
+has already supplied. This adds no separate scientific sign-off gate.
+
+**Follow-up after 0.4.0.** The owner wants to discuss filling the gaps
+and further guidance with the group after this release, following
+[ADR-0021's follow-up][availability-follow-up]. Prepare that discussion
+in this order:
+
+1. Inspect the published DesignSafe model archives linked from the
+   [data guide][data-guide] and compare their inventory with the
+   release's 210 Random Heterogeneous and 9 Alternating Strong-Weak
+   simulations. Record what was checked before asking the group to
+   locate outputs that may already be archived.
+2. Ask whether any additional simulations of these profiles exist
+   beyond those 210 and 9, including unpublished or separately
+   archived outputs. Which could be validated and imported?
+3. Ask why these profiles were limited to Dense sediment at 10 m,
+   and why Alternating Strong-Weak used only 20, 40 and 60 degrees.
+   Which missing combinations would be scientifically useful to
+   investigate next, and what new experiments would they require?
+   The reasons are not established by the availability facts alone.
+4. Discuss what further guidance would help readers. The owner's
+   current inclination is an explicit action to explore available
+   conditions (2G), or possibly simulation counts (2F). Neither is
+   accepted yet; 2D is not an automatic next step. Any action must
+   make changes to site assumptions explicit, and counts must not
+   imply scientific confidence or importance.
+
+The archive investigation, further research questions, possible data
+expansion and additional guidance are post-0.4.0 work. They do not
+add release gates or defer the existing OA-4 review of the wording
+that will ship in 0.4.0.
+
 ## 9. How should we explain the extra height of a raised ridge?
 
 **Reference: wording audit, entry 39; [review record][audit].**
@@ -644,3 +698,6 @@ Already settled, so we need not ask again:
 [conversion]: ../docs/app/pdd.md#36-multi-dip-conversion-rule-d-3-proposed
 [field-comparison]: ../docs/app/pdd.md#44-field-overlay-fr-o5-d-18-proposed
 [data-guide]: ../subprojects/mkdocs/docs/data.md
+[wording-question]: #1-are-the-scientific-explanations-in-the-app-accurate
+[availability-decision]: ../docs/adr/0021-sediment-profile-coverage.md#decision-for-040
+[availability-follow-up]: ../docs/adr/0021-sediment-profile-coverage.md#follow-up-after-040

@@ -49,7 +49,7 @@ staged documents (PRD → PDD → HLDD). It has two parts:
 - [6. Downloads, citation, and provenance](#6-downloads-citation-and-provenance)
   * [6.1 Download package (FR-D1)](#61-download-package-fr-d1)
   * [6.2 File naming](#62-file-naming)
-  * [6.3 Chart export (FR-D2, P2; D-14 Proposed)](#63-chart-export-fr-d2-p2-d-14-proposed)
+  * [6.3 Chart export (FR-D2, P1.5; D-14 Decided)](#63-chart-export-fr-d2-p15-d-14-decided)
   * [6.4 Animation offer and dominance (FR-D4, P2; D-7 Proposed)](#64-animation-offer-and-dominance-fr-d4-p2-d-7-proposed)
 - [7. Sharing and versioning](#7-sharing-and-versioning)
   * [7.1 Shared links](#71-shared-links)
@@ -115,7 +115,7 @@ named in the last column carry the detail.
 | D-11 | Small-result warning threshold, chart floor, and empty-result diagnosis rule. | FR-O3 | Product owner | Proposed | Warn below 30 valid; suppress chart below 10; single-condition diagnosis; no-match state distinct from no-valid-measurement state; §4.5. |
 | D-12 | Unclassified records: population and display semantics. | FR-G2, FR-S7 | Product owner | Proposed | "All scarp types" applies no filter — unclassified records stay in the matching population (GS-0's 346,834); excluded from class-colored charts and class counts; §3.7, §4.3. |
 | D-13 | Scarp-family view availability and label. | FR-G2 | Product owner | Proposed | Toggle "Group collapse variants"; §3.7. |
-| D-14 | Chart-export provenance format. | FR-D2 (P1.5, D-48) | Product owner | Decided (2026-11-06) | Caption strip + sidecar text; §6.3. The owner adopted the proposed format on 2026-11-06: strip fields in the page's own wording (the §13.3 precedent), the §4.1 accuracy statement on cumulative images, the §6.1 provenance sidecar rendered through the guided overlay (the G-25 rule), and the displayed panel's active caveats on the strip (§5.4's everywhere-rule; CR-8). The PNG alone satisfies FR-D2's include branch; a blocked sidecar save is reported, not fatal. Guided DDD §16; task G-27, second in the D-48 band, before G-24. |
+| D-14 | Chart-export provenance format. | FR-D2 (P1.5, D-48) | Product owner | Decided (2026-11-06) | Caption strip + sidecar text; §6.3. The owner adopted the proposed format on 2026-11-06: strip fields in the page's own wording (the §13.3 precedent), the §4.1 accuracy statement on cumulative images, the §6.1 provenance sidecar rendered through the guided overlay (the G-25 rule), and the displayed panel's active caveats on the strip (§5.4's everywhere-rule; CR-8). The PNG alone satisfies FR-D2's include branch; a blocked sidecar save is reported, not fatal. Guided DDD §16; task G-27, second in the D-48 band, before G-24. Amendment, 2026-11-14 (D-56): the guided chart's caption distinguishes requested settings from conditions represented by its measurement, visibly qualifying absent or partial representation on the image itself. Every previously required strip field remains; the sidecar carries the fuller explanation. §6.3. |
 | D-15 | Shared-link version notice. | FR-X1 (P2) | Product owner | Proposed | URLs carry no version stamp when links first ship (P2); notice rule for later; §7.2. |
 | D-16 | Browser and mobile baseline. | NFR-4 | Product owner | Proposed | Evergreen 12-month window; 360 px floor; §9.2. Browser window amended at owner review, 2026-11-01. |
 | D-17 | Accessibility conformance target. | NFR-5 | Product owner | Proposed | WCAG 2.2 AA for new pages; §9.3. |
@@ -156,7 +156,8 @@ named in the last column carry the detail.
 | D-52 | `/explore/` is linked from the site navigation ahead of the v0.4 release. | D-2, D-39, ADR-0017, G-5 | Product owner | Decided (2026-11-08) | The owner's instruction of 2026-11-08: link the explorer, not `/scenario/`, from the sidebar. The entry sits where D-2 placed the scenario page — after Dashboards, before Data — under the page's own title, Ground Rupture Explorer; `/explore/` joins search and the sitemap; `/scenario/` stays unlisted. D-39's two preconditions for advertising: the licence decision is recorded (ADR-0017, amendment of 2026-11-08), and the planning session reads the owner's 2026-11-06 walkthrough of `/explore/` with the research group's lead author as the team demonstration, amendable by the owner. Listing ends `/explore/`'s exemption to link the unlisted `/scenario/` (site-checks arm (d)), so its links there are retargeted or removed. The link reaches readers only with the owner's next deploy, and G-5 governs that deploy: no deploy lists the page while its disclaimer still carries the D-10 placeholder. Task G-29; the release reconciliation amends T-55 to match. |
 | D-53 | FR-O5 (field-data context) is out of the v0.4 release. | FR-O5, D-18, §4.4; PRD Appendix A; ADR-0017 | Product owner | Decided (2026-11-09) | The owner deferred the field overlay to P2, after the MVP: it exists only on the unlisted `/scenario/` page, and building it on `/explore/` waits on research question 14 (D-18), which has no date. FR-O5 moves from P1 to P2 in the PRD, its Appendix A row included; §4.4 stands for the overlay's return; D-18 stays Proposed as its gate and leaves ADR-0017's pre-activation set (its amendment of the same date), so OA-14 no longer precedes the release vintage or the activation (IP T-63, T-55). `/scenario/` keeps its overlay, unlisted, on the Proposed set; the guided results link the Model vs reality dashboard for field comparisons (G-29). |
 | D-54 | The pre-release deploy stop is dropped; v0.4.0 ships the guided explorer public; `/scenario/` is not activated at v0.4.0. | D-2, D-39, D-52; ADR-0017; PRD CR-10, NFR-2 | Product owner | Decided (2026-11-12) | The owner's decision of 2026-11-12: the owner's manual deploys of `dev-v.0.4.x` continue at his discretion until the release merge — OA-21 is retired unexecuted (ADR-0017, amendment of 2026-11-12) — so the explorer listed by D-52 becomes public with the next deploy, before the release. T-55 (the scenario page's activation) leaves the release-branch order and T-65's preconditions; `/scenario/` stays an unlisted prototype, its rework decision queued (D-39). The remaining human release checks run on the deployed site after a deploy, per the owner's decisions of 2026-11-09: the try-outs of `docs/testing/acceptance-try-outs.md` as the acceptance walkthroughs (§10.3; D-21 stays Proposed), the assistive-technology pass with VoiceOver and Safari, and at least one real phone in the engine pass. The research group reads in two steps (the owner's decision of 2026-11-09): an informal read of the deployed explorer, then the formal sign-off of one listing of every reader-facing text (OA-4). The same day the owner decided to introduce the explorer on the home page with one sentence and a link (guided task G-32; assembled wording routed for the group's sight). IP §3, Record of 2026-11-12. |
-| D-55 | Corrections from the outside site review of 2026-11-12 land as guided task G-33. | D-5, D-39, D-51; CR-3, CR-10 | Product owner | Decided (2026-11-12) | The owner's direction of 2026-11-12, after the planning session reviewed the outside review (`notes/site-review-2026-11-12.md`) and repaired its prepared corrections. The owner approves the task's decisions and strings by committing this row, in place of reading its pull request; the commit releases task G-33. New reader-facing strings, assembled under D-51 and sent to the research group for sight with the next briefing round: the scarp-dip notice on `/explore/` and in its downloads (§5.4, Guided wording correction); the fault-slip mode's description, "Movement of one side relative to the other along the fault plane."; the step heading "Specify fault slip or surface offset"; result summaries labelled Fault slip at depth or Vertical surface offset, the mode labels of CR-3; the range hint "Drag a range handle or choose Full range to continue."; and a visible download status beside the button — "Preparing your download…", then "Your confirmed result download is ready." or, when the Word report could not be built, the existing partial-download message. The download's `statistics.csv` labels and `provenance.txt` now carry the same adopted wording as the page and the Word report. Dashboard pages: the Distributions scarp-dip footnote takes the §5.4 wording and keeps the facts the group supplied; the Response curves link reads "how fault slip relates to vertical displacement"; editorial fixes to the paper page's figure count, the Figure 2 pointers, the SDC abbreviation, and the glossary's introduction. Without new wording: dashboards scale to the page width on phones and desktops, and screen readers find one main region on the explorer page. Held for the group's answers, not shipped: the word for how steep thrust faults are, the SURE width comparison, sediment-profile coverage, the offset-conversion formula, and the negative-height wording. `/scenario/` keeps its registry texts byte for byte (D-39). Guided DDD §13.1 and §15.12; task G-33. |
+| D-55 | Corrections from the outside site review of 2026-11-12 land as guided task G-33. | D-5, D-39, D-51; CR-3, CR-10 | Product owner | Decided (2026-11-12) | The owner's direction of 2026-11-12, after the planning session reviewed the outside review (`notes/site-review-2026-11-12.md`) and repaired its prepared corrections. The owner approves the task's decisions and strings by committing this row, in place of reading its pull request; the commit releases task G-33. New reader-facing strings, assembled under D-51 and sent to the research group for sight with the next briefing round: the scarp-dip notice on `/explore/` and in its downloads (§5.4, Guided wording correction); the fault-slip mode's description, "Movement of one side relative to the other along the fault plane."; the step heading "Specify fault slip or surface offset"; result summaries labelled Fault slip at depth or Vertical surface offset, the mode labels of CR-3; the range hint "Drag a range handle or choose Full range to continue."; and a visible download status beside the button — "Preparing your download…", then "Your confirmed result download is ready." or, when the Word report could not be built, the existing partial-download message. The download's `statistics.csv` labels and `provenance.txt` now carry the same adopted wording as the page and the Word report. Dashboard pages: the Distributions scarp-dip footnote takes the §5.4 wording and keeps the facts the group supplied; the Response curves link reads "how fault slip relates to vertical displacement"; editorial fixes to the paper page's figure count, the Figure 2 pointers, the SDC abbreviation, and the glossary's introduction. Without new wording: dashboards scale to the page width on phones and desktops, and screen readers find one main region on the explorer page. Held for the group's answers, not shipped: the word for how steep thrust faults are, the SURE width comparison, sediment-profile coverage, the offset-conversion formula, and the negative-height wording. `/scenario/` keeps its registry texts byte for byte (D-39). Guided DDD §13.1 and §15.12; task G-33. Amendment, 2026-11-14 (D-56): the owner releases only the sediment-profile coverage hold for v0.4.0, using the group's 2026-11-06 description and coverage verified in data-v1. No renewed scientific-answer gate applies to disclosing these established facts; D-51 and OA-4 still govern the final wording. The other holds remain. |
+| D-56 | Sediment-profile availability and result contribution for v0.4.0. | FR-S2, FR-G3, FR-D1–D2, CR-8, CR-10; D-27, D-55 | Product owner | Decided (2026-11-14) | The owner adopts ADR-0021 options 1F + 2B for the official v0.4.0 release: integrate requested versus represented conditions into review, results and saved results; give each limited profile a stable, data-derived note describing its general availability while choosing site conditions. Review describes model availability without previewing result counts; confirmed results distinguish missing models, stages excluded by filters, and missing measurement values. Keep every profile and explicit selection; `/scenario/` is unchanged. §3.2 and §6.3 define the observable behavior. This releases D-55's sediment-coverage hold only; the new strings are recorded in §3.2 (Coverage strings, 2026-11-14), assembled under D-51, for the group's sight with the next briefing round and the existing OA-4 release approval. After v0.4.0, evaluate optional explicit adjustments (2G), simulation counts (2F) and research-data expansion separately; per-profile live status (2D) is not a default next step. Guided DDD §17; task G-35. |
 
 ---
 
@@ -853,6 +854,209 @@ same word means different built profiles in the two arms. The
 letter-coded profile refinement (five uniform values, lettered layered
 profiles) is reserved as a collapsed "Advanced" group, disabled in
 v0.4 pending R-2.
+
+**Guided coverage explanation (D-56, 2026-11-14).** For the official
+v0.4.0 release, `/explore/` adopts options 1F and 2B of
+[ADR-0021](../adr/0021-sediment-profile-coverage.md): the normal
+summary distinguishes the reader's request from the evidence that
+can represent it, and the site step explains general profile limits
+before the reader finishes choosing.
+
+Beside each profile with limited coverage, show a stable note naming
+the combinations of fault angle, sediment depth and density for which
+the selected data release contains simulations. The note describes
+the release, not whether the reader's current choices match. It stays
+available before other conditions are answered and does not change
+when those choices change. Limits follow the data release; they are
+not a permanent description of what the profile can represent.
+Where independent lists would imply combinations that do not exist,
+describe the actual combinations together, with readable detail when
+needed. The note is information about the available evidence, not an
+input error or a recommendation to change geological assumptions.
+
+At review, retain the selected profiles and explain whether each has
+simulations for all, some or none of the selected combinations. Name
+the relevant conditions when coverage is partial or absent. This is
+model availability only: review does not preview result counts or
+promise that a profile will contribute after the movement range and
+result refinements apply.
+
+In confirmed results, distinguish requested profiles and conditions
+from those represented by matching stages. Explain absent or partial
+representation beside the affected profiles. Keep three reasons
+distinct: no simulation exists for the requested site conditions;
+simulations exist but the confirmed filters leave no matching stages;
+or matching stages contain no recorded value for a measurement.
+Missing measurements do not mean missing simulations. Do not attribute
+an absence to one filter when several restrictions act together.
+The explanation describes the confirmed scenario; editing the draft
+does not change the explanation attached to retained results.
+
+Saved results preserve the same distinction. The scenario settings
+remain the request, and the records remain the matching stages. The
+provenance note and Word report explain coverage and contribution for
+the confirmed scenario and its data release. Chart captions qualify
+representation for the measurement shown, including on standalone
+images under §6.3. Full coverage of selected modeled combinations
+does not promise equal representation or coverage between modeled
+values.
+
+All profiles and explicit selections remain available. No profile is
+hidden, disabled, reordered or silently removed to make coverage
+appear complete. Select all, required-input guidance and confirmation
+retain their existing meanings. `/scenario/` keeps its current
+behavior. After v0.4.0, optional explicit adjustments (ADR-0021 2G),
+simulation counts (2F) and research-data expansion may be evaluated
+separately; live per-profile status (2D) is not an agreed next step.
+
+**Coverage strings (D-56, recorded 2026-11-14; assembled under
+D-51).** The sentences below are the copy for this correction,
+assembled from the research group's 2026-11-06 answer (briefing
+question 8), the Response curves page's statement of the three-angle
+restriction, and the verified release data. The three-angle
+restriction is a verified data fact the group has not yet seen; the
+group sees these strings with question 1 and the existing OA-4
+release approval. Placement and composition are design detail (guided
+DDD); the sentences and facts are fixed here.
+
+Name forms, as the surfaces render them today: the site step shows
+the dataset spelling beside each checkbox ("Alternating Strong-Weak",
+hyphen); review and results list profiles as "Uniform: Strong;
+Layered: Alternating Strong-Weak" (hyphen); the one-line summary,
+`provenance.txt`, the Word report and the chart strip use the summary
+form "Alternating Strong–Weak (layered)" (en dash, this section's
+label). Condition values are the reader's selected modeled values,
+written "fault angle 40°" / "fault angles 20°, 40° and 60°",
+"sediment depth 3 m and 5 m", "density Medium and Loose" — angles and
+depths ascending, densities in the page's order — joined with commas
+and "and". "Modeled values" means the distinct values present in the
+loaded release.
+
+Site step — a stable note beside each limited profile, derived from
+the loaded release. The pattern is "{profile}: this data release has
+simulations only for {combinations}.", which in data-v1 renders as:
+
+- "Random Heterogeneous: this data release has simulations only for
+  Dense sediment, 10 m deep, at every modeled fault angle."
+- "Alternating Strong-Weak: this data release has simulations only
+  for Dense sediment, 10 m deep, at fault angles 20°, 40° and 60°."
+
+In the note, a dimension covering every modeled value renders as "at
+every modeled fault angle", "at every modeled sediment depth" or "for
+every modeled density"; otherwise the available values are listed
+("at fault angles 20°, 40° and 60°"). If a release's available
+combinations do not form a full cross-product of per-dimension
+values, the note lists the exact combinations ("for Dense sediment at
+10 m; Loose sediment at 3 m") instead of per-dimension phrases. The
+note carries no advice; the "If unknown, select all." hint and the
+Select all control are unchanged.
+
+Review — when at least one selected profile has no or partial
+availability for the selected site conditions, inside the Geological
+site conditions review block: heading "Simulations for these site
+conditions"; hint "This describes what this data release contains for
+these site conditions. Your assumed range and the Refine results
+choices decide which stages reach the results."; then one line per
+affected profile and one closing line for the rest:
+
+- none: "{profile} — this data release has no simulations for your
+  selected site conditions."
+- partial: "{profile} — simulations at {available}; none at
+  {missing}.", each half naming its condition — the 40–45° example
+  renders "Layered: Alternating Strong-Weak — simulations at fault
+  angle 40°; none at fault angle 45°." The named values are the
+  reader's selected modeled values, listed in the summary directly
+  above.
+- the rest: "All other selected profiles have simulations for every
+  site condition you selected." (omitted when every selected profile
+  is affected)
+
+When the available part of a selection is not a full cross-product of
+per-dimension values, the review and results lines use the
+exact-combination form: "{profile} — simulations only for Dense
+sediment at 10 m; none for the other selected combinations."
+
+Results and saved results — when a selected profile is absent from or
+only partly represented in the confirmed result, in the
+confirmed-scenario section: heading "Represented in these results",
+the represented profiles listed in the page's profile form, then one
+line per affected profile. In these lines, {represented} names the
+conditions whose stages are actually in the confirmed result, never
+mere availability; the reasons stay distinct, and when different
+conditions are missing for different reasons, both reason sentences
+follow:
+
+- no simulations anywhere in the selection: "{profile} — this data
+  release has no simulations for your selected site conditions, so it
+  is not in these results. It remains part of your selection."
+- simulations exist, no stages remain: "{profile} — simulations exist
+  for your selected site conditions, but no stages remain after the
+  confirmed range and refinements." When availability is itself
+  partial: "{profile} — simulations exist for some of your selected
+  site conditions (at {available}), but no stages remain after the
+  confirmed range and refinements."
+- partly represented: "{profile} — represented at {represented}. No
+  simulations at {conditions} in this data release." and/or "No
+  stages at {conditions} remain after the confirmed range and
+  refinements." — the 40–45° example renders "Layered: Alternating
+  Strong-Weak — represented at fault angle 40°. No simulations at
+  fault angle 45° in this data release."
+
+A profile whose stages carry no recorded value for the displayed
+measurement, while other profiles' stages do, takes the measurement
+panel's note: "Simulations for {profile} are in your results, but
+their stages have no recorded {measurement} values, so this chart
+cannot show them. Their stages are part of the Missing values
+(excluded) count in the statistics table." ({measurement} is the
+lowercase name without unit, as §5.8's notice writes it.) When the
+whole panel has no valid values, §5.8's
+matching-but-no-valid-measurement notice stands alone.
+
+Chart caption strip (§6.3, the D-14 amendment): the strip's
+scenario-summary line becomes "Requested scenario: {summary}" — the
+prefix is applied only where the strip and the report's chart
+captions are rendered; `views/summary.ts`, the report's scenario
+table and its seven-token parsing are unchanged and carry no prefix.
+When a selected profile is absent from or only partly represented in
+the plotted measurement, one line per affected profile follows the
+count line:
+
+- "Not represented in this chart: {profile} — {reason}." with the
+  short reasons "no simulations for the selected site conditions",
+  "no stages after the range and refinements" and "no recorded
+  {measurement} values". Render: "Not represented in this chart:
+  Alternating Strong–Weak (layered) — no simulations for the selected
+  site conditions."
+- "Partly represented in this chart: {profile} — {represented}
+  only." Render: "Partly represented in this chart: Alternating
+  Strong–Weak (layered) — fault angle 40° only."
+
+The Word report's chart captions carry the same lines. Every
+previously required strip field stays.
+
+Download provenance — appended as an explorer-side block (D-39: the
+shared builder, `views/summary.ts`, `views/notices.ts` and
+`views/copy.json` are unchanged) labelled "Sediment-profile coverage"
+in `provenance.txt`, the chart sidecar and the Word report's
+Provenance section. It carries, in the summary profile form: the
+no-simulations line without "It remains part of your selection.", the
+no-stages-remain line, the partly-represented line, and, per affected
+measurement, the no-recorded-values note; or, when no selected
+profile is absent, partly represented, or without recorded values for
+a reported measurement: "Every selected profile has simulations for
+the selected site conditions and contributes matching stages to this
+result." The download README's `provenance.txt` line gains the
+coverage item: "The paper citation, the data DOIs, the software and
+data versions, the scenario settings, the population, the counts, the
+sediment-profile coverage, the time the download was made, the
+caveats, and the licences."
+
+This decision approves the behavior and the strings above. The
+strings follow D-51's assembled-wording process — marked assembled,
+to the group for sight with the next briefing round — and OA-4's
+existing release approval. No new scientific answer is needed merely
+to state the verified coverage. Display-name changes remain a
+separate question.
 
 ### 3.3 Sediment depth (FR-S3) and density (FR-S4)
 
@@ -1814,7 +2018,9 @@ portion, excluding the matching-record count and the population
 (which has its own token). Exact slug rules are presentation detail
 left to implementation.
 
-### 6.3 Chart export (FR-D2, P2; D-14 Proposed)
+<a id="63-chart-export-fr-d2-p2-d-14-proposed"></a>
+
+### 6.3 Chart export (FR-D2, P1.5; D-14 Decided)
 
 D-48 (2026-11-05) promotes this export from P2 to P1.5,
 release-blocking for v0.4, second in the band after the result
@@ -1839,7 +2045,21 @@ sidecar. The displayed panel's active caveats join the strip —
 keeps warnings with results. The PNG alone satisfies FR-D2's
 include branch, so a blocked sidecar save is reported, not fatal.
 Delivery design: guided DDD §16; task G-27, second in the D-48
-band. The heading keeps its anchor.
+band. The former heading's anchor is retained above for existing links.
+
+**Coverage amendment (D-14 and D-56, 2026-11-14).** For the guided
+export in v0.4.0, the caption identifies the scenario settings as the
+reader's request and visibly qualifies profiles or conditions absent
+or only partly represented in the plotted measurement. A profile's
+matching stages may contain no usable values for that measurement;
+the caption must not imply that the profile contributed to the chart.
+The image carries this qualification itself, even when its provenance
+sidecar is unavailable. The sidecar and the Word report carry the
+fuller explanation required by §3.2. Every previously required caption
+field, caveat and accuracy statement remains. The new wording follows
+D-51 and OA-4; this amendment does not approve illustrative sentences
+from the ADR as final copy. The caption strings are recorded with the
+§3.2 coverage strings (D-56).
 
 ### 6.4 Animation offer and dominance (FR-D4, P2; D-7 Proposed)
 
