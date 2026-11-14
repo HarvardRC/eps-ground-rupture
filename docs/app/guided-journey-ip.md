@@ -322,7 +322,9 @@ to the research group for sight with the next briefing round under
 D-51 and the existing OA-4 release approval. The owner's follow-up
 commit `ab717fe` (2026-11-14) points D-56 to guided DDD §19, since
 §17 and §18 were already taken, and places the provenance block
-directly before the Licences block; the pull request leaves the PDD
+directly before the Licences block. Its commit `13ee401` records the
+composed closing forms of guided DDD §19.3 (rules 2, 8 and 10) and
+the two Select-all lines in PDD §3.2. The pull request leaves the PDD
 untouched.
 
 | Task | Prerequisite | Exact work and authority | Completion |
@@ -3957,10 +3959,11 @@ takes the new number §19, because §17 and §18 were already taken;
 and the provenance block goes directly before Licences, which still
 closes the text (PDD §6.1, G-28).
 
-At this verification, on `task/g-35-sediment-coverage` at `384b9b6`,
-over `ab717fe` (the same tree as `dd1d28e` over `1050d25`, rebased
-onto the PDD pointer fix). The later commits on the branch change
-only the guided DDD and this plan, so the code results below stand:
+At this verification, on `task/g-35-sediment-coverage` at `52fd2c6`,
+over `13ee401` (the same code as `dd1d28e` over `1050d25`, rebased
+onto the owner's two PDD commits). The later commits on the branch
+change only the guided DDD and this plan, so the code results below
+stand:
 
 - **Document checks.** Relative links resolved (5679 links, 67
   files), PDD agreement passed, traceability reported no gap rows,
@@ -3969,7 +3972,11 @@ only the guided DDD and this plan, so the code results below stand:
   block is asserted verbatim in the Node suite or the browser spec:
   the two site notes; the 45° and 40–45° examples at review, in
   results and on the strip; the headings, the hint, the closing line,
-  the provenance label and full line, and the README entry. Page
+  the provenance label and full line, and the README entry. The
+  composed closing forms recorded in `13ee401` (the results catch-all,
+  the review tail, the exact item with angles, and both Select-all
+  lines) match the shipped code and the test assertions byte for
+  byte. Page
   surfaces use the hyphen, summary surfaces the en dash. The
   sentences the PDD records as patterns are written once, in
   `coverage.ts`.
