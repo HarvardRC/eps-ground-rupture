@@ -34,6 +34,7 @@ import { summaryText } from '../views/summary';
 import { serializeSvg, type SvgNode } from '../views/svg';
 import { canChart, cumulativeChart, histogramBins, histogramChart } from './charts';
 import { guided } from './copy-overlay';
+import { chartCoverageLines, REQUESTED_PREFIX, withCoverage } from './coverage';
 import { measurementsUsed, matchingStages, missingExcluded, NEGATIVE_HEIGHT_NOTE, negativeHeights, NO_MATCHES, PROVENANCE_HEADING, REPORT_TITLE, STATISTIC_HEADING, VALUE_HEADING, VIEW_NAMES } from './wording';
 
 /**
@@ -243,12 +244,18 @@ export function scenarioRows(input: RenderInput): readonly (readonly [string, st
   });
 }
 
-/** A chart's caption (§13.2): the D-14 fields as document text, and the accuracy statement on the cumulative chart. */
+/**
+ * A chart's caption (§13.2): the D-14 fields as document text — the
+ * scenario summary as the request, and after the count line the strip's
+ * representation lines (the D-14 amendment; guided DDD §16.2, §17.6) —
+ * and the accuracy statement on the cumulative chart.
+ */
 export function captionLines(input: RenderInput, stamps: VersionStamps, chart: Pick<ReportChart, 'measurement' | 'view'>): readonly string[] {
   return [
     `${guided(measurementLabel(chart.measurement))} · ${VIEW_NAMES[chart.view]}`,
-    scenarioSummary(input),
+    `${REQUESTED_PREFIX}${scenarioSummary(input)}`,
     countLine(input, chart.measurement),
+    ...chartCoverageLines(input, chart.measurement),
     versionsLine(input, stamps),
     CITE,
     ...(chart.view === 'cumulative' ? [guided(copyText('pdd4.1.cumulativeAccuracy'))] : []),
@@ -278,10 +285,11 @@ function documentBody(input: RenderInput, stamps: VersionStamps, generatedAt: Da
   // 2. Provenance: the blocks of provenance.txt in the page's wording
   // (§13.7): each line through the guided overlay, so a caveat the
   // overlay rewords (the decided low-slip text, D-4) reads as on the page
-  // and in the guided archive's provenance.txt.
+  // and in the guided archive's provenance.txt — with the explorer-side
+  // Sediment-profile coverage block appended (guided DDD §17.7).
   parts.push(heading(PROVENANCE_HEADING));
-  for (const block of provenanceText(input, stamps, generatedAt).split('\n\n')) {
-    const [label, ...lines] = block.split('\n').filter(line => line !== '').map(line => guided(line));
+  for (const block of guidedProvenance(input, stamps, generatedAt).split('\n\n')) {
+    const [label, ...lines] = block.split('\n').filter(line => line !== '');
     if (label === undefined) continue;
     parts.push(text(label, { bold: true }, { after: 40, keepNext: lines.length > 0 }));
     lines.forEach((line, i) => parts.push(text(line, {}, { after: i === lines.length - 1 ? 160 : 40 })));
@@ -326,6 +334,17 @@ function documentBody(input: RenderInput, stamps: VersionStamps, generatedAt: Da
   }
   if (n !== charts.length) throw new Error(`report: ${n} drawings for ${charts.length} charts`);
   return parts.join('');
+}
+
+/**
+ * The guided provenance text (§13.7; guided DDD §17.7): the shared
+ * builder's text, each line through the guided overlay, then the
+ * explorer-side Sediment-profile coverage block. The one composition behind
+ * provenance.txt, the chart sidecar, and the report's Provenance section;
+ * the shared builder is untouched (D-39).
+ */
+export function guidedProvenance(input: RenderInput, stamps: VersionStamps, generatedAt: Date): string {
+  return withCoverage(provenanceText(input, stamps, generatedAt).split('\n').map(line => guided(line)).join('\n'), input);
 }
 
 function attribute(node: SvgNode, name: string): string {
@@ -398,12 +417,13 @@ export interface GuidedArchive {
 export async function guidedArchive(input: RenderInput, stamps: VersionStamps, generatedAt: Date, rasterize: Rasterize, explorerUrl = ''): Promise<GuidedArchive> {
   const encoder = new TextEncoder();
   const members: ZipMember[] = packageTexts(input, stamps, generatedAt).map(member => {
-    // Only the human-readable labels and caveats adopt the guided wording.
+    // Only the human-readable labels and caveats adopt the guided wording,
+    // and provenance.txt gains the Sediment-profile coverage block (§17.7).
     // Raw records and machine-readable scenario state keep their exact bytes;
     // the shared /scenario/ package builder remains unchanged.
-    const text = member.name === 'statistics.csv' || member.name === 'provenance.txt'
-      ? member.text.split('\n').map(line => guided(line)).join('\n')
-      : member.text;
+    const text = member.name === 'provenance.txt' ? withCoverage(member.text.split('\n').map(line => guided(line)).join('\n'), input)
+      : member.name === 'statistics.csv' ? member.text.split('\n').map(line => guided(line)).join('\n')
+        : member.text;
     return { name: member.name, bytes: encoder.encode(text) };
   });
   const fileName = downloadFileName(input.scenario, input.vintage.manifest, generatedAt);

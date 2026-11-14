@@ -20,6 +20,7 @@ import {
   buildChartExport, caveatTexts, CITE_LINE, composeExport, exportChart, exportFileNames, exportLegend, kindWords, WRAP_AT, panelNotes, PRODUCT_LINE, sidecarText, stripLines, wrap, type ExportRasterize,
 } from '../src/explore/chart-export';
 import { computeResult } from '../src/explore/compute';
+import { chartCoverageLines, provenanceCoverageLines, withCoverage } from '../src/explore/coverage';
 import { guided } from '../src/explore/copy-overlay';
 import { countLine, scenarioSummary, versionsLine } from '../src/explore/report';
 import { NEGATIVE_HEIGHT_NOTE } from '../src/explore/wording';
@@ -63,16 +64,21 @@ const withMin = (input: RenderInput, m: MeasurementName, min: number): RenderInp
 describe('chart export: the strip (§16.2, §16.6)', () => {
   test('slip mode: product, measurement and kind, summary, count, versions, citation, in order', () => {
     const lines = stripLines(slip, STAMPS, 'scarp_height', 'histogram');
-    assert.deepEqual(lines.slice(0, 6), [
+    // The summary is the request; the representation lines follow the count line (the D-14 amendment, guided DDD §17.6).
+    const coverage = chartCoverageLines(slip, 'scarp_height');
+    assert.ok(coverage.length > 0, 'the fixture selects every profile; most have no simulations in it');
+    const q = coverage.length;
+    assert.deepEqual(lines.slice(0, 6 + q), [
       PRODUCT_LINE,
       'Scarp height (m) — Distribution',
-      scenarioSummary(slip),
+      `Requested scenario: ${scenarioSummary(slip)}`,
       countLine(slip, 'scarp_height'),
+      ...coverage,
       versionsLine(slip, STAMPS),
       CITE_LINE,
     ]);
     // Every chart image carries the notice ODC-By 1.0 asks for, right after the citation (G-28).
-    assert.equal(lines[6], 'Contains information from the Homogeneous and Heterogeneous 2D DEM Experiments (Chiama et al. 2024a, 2024b; DesignSafe-CI), which is made available here under the Open Data Commons Attribution License (ODC-By 1.0).');
+    assert.equal(lines[6 + q], 'Contains information from the Homogeneous and Heterogeneous 2D DEM Experiments (Chiama et al. 2024a, 2024b; DesignSafe-CI), which is made available here under the Open Data Commons Attribution License (ODC-By 1.0).');
     assert.equal(PRODUCT_LINE, 'Ground Rupture Explorer — guided journey');
     assert.match(lines[2]!, /slip 0–2 m/);
     assert.match(lines[3]!, /^N = [\d,]+ measurements? used of [\d,]+ matching simulation stages? \([\d,]+ missing values? excluded\)$/);
@@ -84,8 +90,9 @@ describe('chart export: the strip (§16.2, §16.6)', () => {
     assert.equal(lines[1], 'Scarp height (m) — Cumulative');
     assert.match(lines[2]!, /offset 0–1 m \(converted to slip per dip\)/);
     // The ODC-By 1.0 notice follows the citation (G-28), then the accuracy statement.
-    assert.equal(lines[6], copyText('ddd5.9.licenceNotice'));
-    assert.equal(lines[7], guided(copyText('pdd4.1.cumulativeAccuracy')));
+    const q = chartCoverageLines(offset, 'scarp_height').length;
+    assert.equal(lines[6 + q], copyText('ddd5.9.licenceNotice'));
+    assert.equal(lines[7 + q], guided(copyText('pdd4.1.cumulativeAccuracy')));
   });
 
   test('kind words follow the page: Distribution, its logarithmic scale, Cumulative', () => {
@@ -101,7 +108,8 @@ describe('chart export: the strip (§16.2, §16.6)', () => {
     // A window starting at 0 m: the decided low-slip text, once.
     assert.deepEqual(caveatTexts(slip), [DECIDED_LOW_SLIP]);
     const height = stripLines(withMin(slip, 'scarp_height', 0.01), STAMPS, 'scarp_height', 'histogram');
-    assert.deepEqual(height.slice(7), [DECIDED_LOW_SLIP]);
+    const q = chartCoverageLines(slip, 'scarp_height').length;
+    assert.deepEqual(height.slice(7 + q), [DECIDED_LOW_SLIP]);
     // Width: its scope note in the research group's spelling.
     assert.deepEqual(panelNotes(full, 'dzw'), [guided(copyText('pdd5.7.widthScopeNote'))]);
     assert.match(panelNotes(full, 'dzw')[0]!, /^Deformation zone width measures/);
@@ -116,7 +124,7 @@ describe('chart export: the strip (§16.2, §16.6)', () => {
     assert.match(warning[0]!, /^Only \d+ measurements can be used for this scenario\. They are not less trustworthy/);
     // The strip ends with the caveat box, then the panel notes.
     const strip = stripLines(slip, STAMPS, 'dzw', 'histogram');
-    assert.deepEqual(strip.slice(7), [...caveatTexts(slip), ...panelNotes(slip, 'dzw')]);
+    assert.deepEqual(strip.slice(7 + chartCoverageLines(slip, 'dzw').length), [...caveatTexts(slip), ...panelNotes(slip, 'dzw')]);
   });
 });
 
@@ -188,14 +196,16 @@ describe('chart export: composition, sidecar, names, fallback (§§16.2–16.5)'
     }
   });
 
-  test('the sidecar is provenance.txt through the guided overlay; the shared text keeps the registry wording', () => {
+  test('the sidecar is provenance.txt through the guided overlay, with the coverage block before Licences; the shared text keeps the registry wording', () => {
     const shared = provenanceText(slip, STAMPS, AT);
     const sidecar = sidecarText(slip, STAMPS, AT);
-    assert.equal(sidecar, shared.split('\n').map(line => guided(line)).join('\n'));
+    assert.equal(sidecar, withCoverage(shared.split('\n').map(line => guided(line)).join('\n'), slip));
     assert.ok(sidecar.includes(DECIDED_LOW_SLIP));
     assert.ok(!sidecar.includes(copyText('pdd5.9.lowSlipCaveat')));
     assert.ok(shared.includes(copyText('pdd5.9.lowSlipCaveat')));
-    assert.equal(shared.split('\n').length, sidecar.split('\n').length);
+    assert.ok(!shared.includes('Sediment-profile coverage'));
+    assert.equal(sidecar.split('\n').length, shared.split('\n').length + provenanceCoverageLines(slip).length + 2);
+    assert.match(sidecar, /\n\nLicences\n[^\n]+\n[^\n]+\n[^\n]+\n\n$/);
   });
 
   test('names: {base}-{measurement}-{kind}.png and its -provenance.txt sidecar', () => {

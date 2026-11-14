@@ -9,7 +9,7 @@
 // A browser-and-Node file (DDD §5.1): no DOM global, no DOM type.
 
 import * as config from '../config';
-import { provenanceText, type VersionStamps } from '../download/package';
+import type { VersionStamps } from '../download/package';
 import { fileNameBase } from '../download/file-name';
 import { storedBounds } from '../engine/query';
 import type { MeasurementName } from '../state/state';
@@ -20,7 +20,8 @@ import type { RenderInput } from '../views/render-input';
 import { serializeSvg, type SvgNode } from '../views/svg';
 import { cumulativeChart, histogramBins, histogramChart } from './charts';
 import { guided } from './copy-overlay';
-import { countLine, REPORT_CHART_HEIGHT, REPORT_CHART_WIDTH, scenarioSummary, versionsLine } from './report';
+import { chartCoverageLines, REQUESTED_PREFIX } from './coverage';
+import { countLine, guidedProvenance, REPORT_CHART_HEIGHT, REPORT_CHART_WIDTH, scenarioSummary, versionsLine } from './report';
 import { NEGATIVE_HEIGHT_NOTE, negativeHeights, VIEW_NAMES } from './wording';
 
 /** The chart kinds of §16.4: the view as displayed, width's Distribution linear or logarithmic. */
@@ -78,16 +79,18 @@ export function panelNotes(input: RenderInput, m: MeasurementName): readonly str
 
 /**
  * The D-14 caption strip (§16.2), one entry per line before wrapping:
- * product, measurement and kind, scenario summary, count line, versions,
- * citation, the accuracy statement on a cumulative image, then the
- * displayed chart's active caveats and notes.
+ * product, measurement and kind, the scenario summary as the request, the
+ * count line and the representation lines that qualify it (the D-14
+ * amendment, §17.6), versions, citation, the accuracy statement on a
+ * cumulative image, then the displayed chart's active caveats and notes.
  */
 export function stripLines(input: RenderInput, stamps: VersionStamps, m: MeasurementName, kind: ChartKind): readonly string[] {
   return [
     PRODUCT_LINE,
     `${guided(measurementLabel(m))} — ${kindWords(kind)}`,
-    scenarioSummary(input),
+    `${REQUESTED_PREFIX}${scenarioSummary(input)}`,
     countLine(input, m),
+    ...chartCoverageLines(input, m),
     versionsLine(input, stamps),
     CITE_LINE,
     // The notice ODC-By 1.0 asks for, carried by every chart image (G-28).
@@ -104,9 +107,9 @@ export function exportFileNames(input: RenderInput, m: MeasurementName, kind: Ch
   return { png: `${stem}.png`, sidecar: `${stem}-provenance.txt` };
 }
 
-/** The sidecar (§16.3): provenance.txt's text, each line through the guided overlay; the shared builder is untouched. */
+/** The sidecar (§16.3): provenance.txt's guided text with its Sediment-profile coverage block (§17.7); the shared builder is untouched. */
 export function sidecarText(input: RenderInput, stamps: VersionStamps, generatedAt: Date): string {
-  return provenanceText(input, stamps, generatedAt).split('\n').map(line => guided(line)).join('\n');
+  return guidedProvenance(input, stamps, generatedAt);
 }
 
 /** The chart as displayed, at the report's width: the view, the log scale, and the cumulative read-off. */

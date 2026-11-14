@@ -28,6 +28,7 @@ import type { Vintage } from '../src/decode/decode';
 import { PACKAGE_MEMBER_NAMES, packageTexts, provenanceText, type VersionStamps } from '../src/download/package';
 import { cumulativeChart, guidedChart, histogramBins, histogramChart } from '../src/explore/charts';
 import { computeResult } from '../src/explore/compute';
+import { chartCoverageLines, withCoverage } from '../src/explore/coverage';
 import { guided } from '../src/explore/copy-overlay';
 import {
   captionLines, countLine, documentXml, GUIDED_FALLBACK_MEMBER_NAMES, GUIDED_MEMBER_NAMES, guidedArchive, REPORT_CHART_HEIGHT, REPORT_CHART_WIDTH,
@@ -123,7 +124,9 @@ function assertGuidedDataMembers(members: Map<string, Uint8Array>, input: Render
   });
 
   const provenance = decode(members.get('provenance.txt'));
-  assert.equal(provenance, shared.get('provenance.txt')!.split('\n').map(line => guided(line)).join('\n'));
+  // The guided overlay, and the Sediment-profile coverage block before Licences (guided DDD §17.7).
+  assert.equal(provenance, withCoverage(shared.get('provenance.txt')!.split('\n').map(line => guided(line)).join('\n'), input));
+  assert.ok(provenance.includes('\n\nSediment-profile coverage\n'));
   assert.doesNotMatch(provenance, /deformation-zone/i);
   const document = paragraphs(documentXml(input, STAMPS, AT));
   const at = document.indexOf(PROVENANCE_HEADING) + 1;
@@ -253,11 +256,12 @@ describe('report: the document (§13.2, §13.3)', () => {
     for (const chart of reportCharts(narrowed)) assert.equal(captionLines(narrowed, STAMPS, chart)[1], scenarioSummary(narrowed));
   });
 
-  test('provenance renders every line of provenance.txt in its order, in the page\u2019s wording', () => {
+  test('provenance renders every line of provenance.txt in its order, in the page\u2019s wording, with the coverage block (§17.7)', () => {
     for (const input of [full, noValid]) {
       const lines = paragraphs(documentXml(input, STAMPS, AT));
       const start = lines.indexOf(PROVENANCE_HEADING) + 1;
-      const expected = provenanceText(input, STAMPS, AT).split('\n').filter(line => line !== '').map(line => guided(line));
+      const expected = withCoverage(provenanceText(input, STAMPS, AT).split('\n').map(line => guided(line)).join('\n'), input).split('\n').filter(line => line !== '');
+      assert.ok(expected.includes('Sediment-profile coverage'));
       assert.deepEqual(lines.slice(start, start + expected.length), expected);
     }
   });
@@ -286,11 +290,14 @@ describe('report: the document (§13.2, §13.3)', () => {
       assert.ok(first > 0, caption[0]);
       assert.deepEqual(lines.slice(first, first + caption.length), [...caption]);
       assert.match(caption[0], new RegExp(`^${measurementLabel(chart.measurement).replace(/[()]/g, '\\$&')} · (Distribution|Cumulative)$`));
-      assert.equal(caption[1], scenarioSummary(full));
+      // The summary as the request, then after the count line the strip's representation lines (guided DDD §17.6).
+      assert.equal(caption[1], `Requested scenario: ${scenarioSummary(full)}`);
       assert.match(caption[1], /all recorded stages · all scarp types \(no filter\)$/);
       assert.equal(caption[2], countLine(full, chart.measurement));
-      assert.match(caption[3], /^Software version: v0\.4\.0-test · Data-export version and date: data-v0-test \(/);
-      assert.equal(caption[4], 'Cite: Chiama et al. (2025)');
+      const coverage = chartCoverageLines(full, chart.measurement);
+      assert.deepEqual(caption.slice(3, 3 + coverage.length), [...coverage]);
+      assert.match(caption[3 + coverage.length], /^Software version: v0\.4\.0-test · Data-export version and date: data-v0-test \(/);
+      assert.equal(caption[4 + coverage.length], 'Cite: Chiama et al. (2025)');
       assert.equal(caption.includes(accuracy), chart.view === 'cumulative');
     }
     assert.equal(countLine(full, 'scarp_height'), `N = ${full.selection.perMeasurement.scarp_height.valid} measurements used of 306 matching simulation stages (${full.selection.perMeasurement.scarp_height.excludedNull} missing values excluded)`);
@@ -478,7 +485,8 @@ describe('report: the guided archive (§13.1, §13.5, §13.6)', () => {
     writeFileSync(guidedZip, (await guidedArchive(full, STAMPS, AT, recording().rasterize)).bytes);
     writeFileSync(fallbackZip, (await guidedArchive(full, STAMPS, AT, async () => { throw new Error('no'); })).bytes);
     const digests = packageTexts(full, STAMPS, AT).map(m => {
-      const text = m.name === 'statistics.csv' || m.name === 'provenance.txt' ? m.text.split('\n').map(line => guided(line)).join('\n') : m.text;
+      const overlaid = m.name === 'statistics.csv' || m.name === 'provenance.txt' ? m.text.split('\n').map(line => guided(line)).join('\n') : m.text;
+      const text = m.name === 'provenance.txt' ? withCoverage(overlaid, full) : overlaid;
       return createHash('sha256').update(text, 'utf8').digest('hex');
     });
     const zipcheck = (args: readonly string[]) => {
