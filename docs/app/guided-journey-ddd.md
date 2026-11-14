@@ -2078,9 +2078,9 @@ three sites where the explorer already post-processes the shared
 text: `guidedArchive()` (`provenance.txt`), `sidecarText()` (the
 chart sidecar), and the Word report's Provenance section (through
 `guidedProvenance`). The shared builder is untouched. The block goes
-directly before the Licences block, because
+directly before the Licences block, as PDD §3.2 places it, because
 [PDD §6.1](pdd.md#61-download-package-fr-d1) makes Licences close
-the provenance text (G-28) and `test/zipcheck.py` enforces that.
+the provenance text (G-28); `test/zipcheck.py` enforces that.
 Its lines are in the summary form: the no-simulations line without
 "It remains part of your selection.", the no-stages-remain line,
 the partly-represented line, then, per reported measurement, the

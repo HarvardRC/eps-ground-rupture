@@ -319,10 +319,10 @@ is the release and the owner's approval of the task's decisions and
 strings, the G-33 pattern: the pull request merges on green after an
 independent review, without asking the owner again. The strings go
 to the research group for sight with the next briefing round under
-D-51 and the existing OA-4 release approval. The PDD's D-56 row
-points to "Guided DDD §17", but the design is §19, because §17 and
-§18 were already taken; the planning session staged that one-word
-fix for the owner's commit, and the pull request leaves the PDD
+D-51 and the existing OA-4 release approval. The owner's follow-up
+commit `ab717fe` (2026-11-14) points D-56 to guided DDD §19, since
+§17 and §18 were already taken, and places the provenance block
+directly before the Licences block; the pull request leaves the PDD
 untouched.
 
 | Task | Prerequisite | Exact work and authority | Completion |
@@ -3951,15 +3951,15 @@ their composition to the design. On 2026-11-14 the planning session
 reviewed the rules of guided DDD §19.3. It confirmed rules 1, 2 and
 4, corrected rule 5 (the all-null window keeps the provenance notes
 and drops the full-coverage line), refined rule 3, and added rule 6's
-placement and the catch-all rules 7–10. It also confirmed two points:
-the design takes the new number §19, because §17 and §18 were
-already taken (the PDD's D-56 row says "§17"; the planning session
-staged that fix for the owner's commit); and the provenance block
-goes directly before Licences, which still closes the text (PDD §6.1,
-G-28).
+placement and the catch-all rules 7–10. It also confirmed two points,
+which the owner then committed to the PDD in `ab717fe`: the design
+takes the new number §19, because §17 and §18 were already taken;
+and the provenance block goes directly before Licences, which still
+closes the text (PDD §6.1, G-28).
 
-At this verification, on `task/g-35-sediment-coverage` at `dd1d28e`,
-over `1050d25`:
+At this verification, on `task/g-35-sediment-coverage` at `384b9b6`,
+over `ab717fe` (the same tree as `dd1d28e` over `1050d25`, rebased
+onto the PDD pointer fix):
 
 - **Document checks.** Relative links resolved (5679 links, 67
   files), PDD agreement passed, traceability reported no gap rows,
