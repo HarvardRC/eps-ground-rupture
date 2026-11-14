@@ -3924,6 +3924,74 @@ sign-off it rests on (OA-4), and this evidence section is added.
 Not verified: browsers other than Chromium, and an archive failure
 that occurs naturally (the check injects one).
 
+### Sediment-profile coverage, 2026-11-14 (G-35)
+
+G-35 ran under the owner's release of 2026-11-14: the owner's commit
+`1050d25` of ADR-0021 and PDD D-56, quoted in the owner-decision
+paragraph above the task table. The Implementation Session carried
+out the task on `task/g-35-sediment-coverage`, under the planning
+session's supervision by message.
+
+**What changed.** A new explorer module,
+`subprojects/webapp/src/explore/coverage.ts`, derives each profile's
+available combinations from the loaded release's trial records and
+its represented combinations from the confirmed query's matching
+stages. From these it writes every coverage sentence of PDD §3.2.
+`app.ts` shows the site notes, the review block, the results block and
+the panel notes. `chart-export.ts` and `report.ts` add the
+"Requested scenario: " prefix and the representation lines to the
+strip and the captions. `report.ts` adds `guidedProvenance`, the one
+composition behind `provenance.txt`, the chart sidecar and the
+report's Provenance section. `readme.ts` gains the coverage item.
+`explore.css` styles the notes and blocks as neutral text. Guided
+DDD §16.7 and §19 record the design.
+
+**Composition decisions.** The PDD fixes the sentences and leaves
+their composition to the design. On 2026-11-14 the planning session
+reviewed the rules of guided DDD §19.3. It confirmed rules 1, 2 and
+4, corrected rule 5 (the all-null window keeps the provenance notes
+and drops the full-coverage line), refined rule 3, and added rule 6's
+placement and the catch-all rules 7–10. It also confirmed two points:
+the design takes the new number §19, because §17 and §18 were
+already taken (the PDD's D-56 row says "§17"; the planning session
+staged that fix for the owner's commit); and the provenance block
+goes directly before Licences, which still closes the text (PDD §6.1,
+G-28).
+
+At this verification, on `task/g-35-sediment-coverage` at `dd1d28e`,
+over `1050d25`:
+
+- **Document checks.** Relative links resolved (5679 links, 67
+  files), PDD agreement passed, traceability reported no gap rows,
+  and the 19 document-script self-tests passed.
+- **Strings.** Every concrete sentence of PDD §3.2's Coverage strings
+  block is asserted verbatim in the Node suite or the browser spec:
+  the two site notes; the 45° and 40–45° examples at review, in
+  results and on the strip; the headings, the hint, the closing line,
+  the provenance label and full line, and the README entry. Page
+  surfaces use the hyphen, summary surfaces the en dash. The
+  sentences the PDD records as patterns are written once, in
+  `coverage.ts`.
+- **Tests.** `tscCheck` passed; the pinned Node suite passed 534 of
+  534; the full browser lane passed 419 and skipped 11, in `desktop`
+  and `mobile`, the 26 checks of `explore-coverage.spec.ts` among
+  them. An earlier full run had one timeout in the `/scenario/` spec
+  `navigation-lifecycle.spec.ts` (a `waitForURL` after the data-stamp
+  change), which this task does not touch. That spec passed 24 of 24
+  when run alone three times, and in the final full run.
+- **Data facts.** On the served data-v1 release, 45°, 10 m, Dense,
+  Uniform Strong and Alternating Strong-Weak with 0–5 m slip gives
+  1,200 matching stages and 1,164 scarp heights, as ADR-0021 records.
+  Monoclinal Collapse alone over 20°–40° gives 174 stages, with
+  both reasons and the fixed sentence order.
+- **Site builds.** The strict publication and preview builds passed.
+- **Bundles.** The explorer script is now `explore-f0d0e048fa49.js`
+  and its stylesheet `explore-cb02ce90f2c3.css`. The `/scenario/`
+  bundles `app-066e39f81672.js` and `app-08bebc049c15.css` keep the
+  SHA-256 values recorded at G-33, in both trees (D-39).
+- **Unchanged.** `download/package.ts`, `views/summary.ts`,
+  `views/notices.ts`, `views/copy.json` and the PDD.
+
 ## Separate CI investigation
 
 The reported job `126383105016` belongs to historical run
