@@ -1,4 +1,4 @@
-// explore-coverage.test.ts (guided DDD §17.9): the sediment-profile
+// explore-coverage.test.ts (guided DDD §19.9): the sediment-profile
 // coverage assessment and its sentences, over code-built releases.
 //
 // - "release-v1": data-v1's joint availability — Random Heterogeneous at
@@ -6,7 +6,7 @@
 //   20°, 40° and 60°; Uniform Strong everywhere. Every recorded §3.2
 //   example renders character for character from it.
 // - "irregular": availability that is no cross-product, and the "for"
-//   absorption of the per-dimension site note (§17.3).
+//   absorption of the per-dimension site note (§19.3).
 // - "silent": one profile whose stages carry no scarp height.
 // - The saved-result compositions: the strip, the caption, the provenance
 //   block at its three sites, and the README line.
@@ -188,6 +188,11 @@ describe('review (1F)', () => {
   test('a depth restriction, and a density restriction, with no closing line when every selected profile is affected', () => {
     assert.deepEqual(reviewLines(v1, site([20], [5, 10], ['Dense'], [RANDOM])), ['Layered: Random Heterogeneous — simulations at sediment depth 10 m; none at sediment depth 5 m.']);
     assert.deepEqual(reviewLines(v1, site([20], [10], ['Dense', 'Loose'], [RANDOM])), ['Layered: Random Heterogeneous — simulations at density Dense; none at density Loose.']);
+  });
+
+  test('condition values as §3.2 writes them: "sediment depth 3 m and 5 m", "density Medium and Loose"', () => {
+    assert.deepEqual(reviewLines(v1, site([20], [3, 5, 10], ['Dense'], [RANDOM])), ['Layered: Random Heterogeneous — simulations at sediment depth 10 m; none at sediment depth 3 m and 5 m.']);
+    assert.deepEqual(reviewLines(v1, site([20], [10], ['Loose', 'Dense', 'Medium'], [RANDOM])), ['Layered: Random Heterogeneous — simulations at density Dense; none at density Medium and Loose.']);
   });
 
   test('two partial dimensions close with the recorded "other selected combinations" tail', () => {

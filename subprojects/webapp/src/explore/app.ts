@@ -23,7 +23,7 @@ import { rasterizeSvg } from './rasterize';
 import { guidedArchive } from './report';
 import { CHART_EXPORT_BUTTON, CHART_EXPORT_FAILED, CHART_EXPORT_READY, CHART_SIDECAR_BLOCKED, DOWNLOAD_CONTENTS, DOWNLOAD_FAILED, matchingStages, measurementsUsed, NEGATIVE_HEIGHT_NOTE, negativeHeights, REPORT_FAILED } from './wording';
 import { buildChartExport, caveatTexts, type ChartKind } from './chart-export';
-import { densityOrder, densityRank, panelCoverageNotes, resultsBlock, RESULTS_COVERAGE_HEADING, REVIEW_COVERAGE_HEADING, REVIEW_COVERAGE_HINT, reviewLines, siteNote } from './coverage';
+import { densityOrder, densityRank, panelCoverageNotes, resultsBlock, RESULTS_COVERAGE_HEADING, REVIEW_COVERAGE_HEADING, REVIEW_COVERAGE_HINT, REVIEW_REST, reviewLines, siteNote } from './coverage';
 import { DEFINITIONS, type DefinitionKey } from './glossary';
 import { classifySession, clearSession, loadSession, saveSession, type DisplayChoices, type SessionRecord } from './session';
 import { ANNOTATIONS, STORIES, type AnnotatedField, type StoryLink } from './stories';
@@ -483,7 +483,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   }
 
   function siteGroup(field: 'density' | 'sediment', title: string, hint: string, anchor: string): string {
-    // A limited profile carries its stable coverage note (guided DDD §17.2): release facts, the same whatever else is chosen.
+    // A limited profile carries its stable coverage note (guided DDD §19.2): release facts, the same whatever else is chosen.
     const choices: { value: string; label: string; group?: string; selected: boolean; note?: string | null }[] = field === 'sediment'
       ? manifest.armStrengthStates.map((pair, i) => ({ value: String(i), label: pair.sedimentStrength, group: sedimentGroup(pair.set), selected: draft.sediment.some(p => p.set === pair.set && p.sedimentStrength === pair.sedimentStrength), note: siteNote(vintage, pair) }))
       : orderChoices(field, manifest.trialColumns.density.map((value, i) => ({ value: String(i), label: value, selected: draft.density.includes(value) })));
@@ -656,7 +656,7 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   }
 
   /**
-   * The review's availability block (guided DDD §17.4): model availability
+   * The review's availability block (guided DDD §19.4): model availability
    * of the draft's selected profiles for its selected site conditions, no
    * result counts; absent when every selected profile has simulations for
    * every selected combination.
@@ -664,13 +664,13 @@ export function mountExplorer(root: HTMLElement, options: ExplorerOptions): void
   function reviewCoverage(): string {
     const lines = reviewLines(vintage, draft);
     if (lines === null) return '';
-    const rest = lines[lines.length - 1].startsWith('All other') ? lines[lines.length - 1] : null;
+    const rest = lines[lines.length - 1] === REVIEW_REST ? REVIEW_REST : null;
     const items = rest === null ? lines : lines.slice(0, -1);
     return `<div class="gx-coverage" id="gx-review-coverage"><h4>${escape(REVIEW_COVERAGE_HEADING)}</h4><p class="gx-hint">${escape(REVIEW_COVERAGE_HINT)}</p><ul>${items.map(line => `<li>${escape(line)}</li>`).join('')}</ul>${rest === null ? '' : `<p>${escape(rest)}</p>`}</div>`;
   }
 
   /**
-   * The confirmed result's representation block (guided DDD §17.5): the
+   * The confirmed result's representation block (guided DDD §19.5): the
    * represented profiles and one line per absent or partly represented
    * profile, from the confirmed snapshot only, so draft edits leave it.
    */

@@ -247,7 +247,7 @@ export function scenarioRows(input: RenderInput): readonly (readonly [string, st
 /**
  * A chart's caption (§13.2): the D-14 fields as document text — the
  * scenario summary as the request, and after the count line the strip's
- * representation lines (the D-14 amendment; guided DDD §16.2, §17.6) —
+ * representation lines (the D-14 amendment; guided DDD §16.2, §19.6) —
  * and the accuracy statement on the cumulative chart.
  */
 export function captionLines(input: RenderInput, stamps: VersionStamps, chart: Pick<ReportChart, 'measurement' | 'view'>): readonly string[] {
@@ -286,7 +286,7 @@ function documentBody(input: RenderInput, stamps: VersionStamps, generatedAt: Da
   // (§13.7): each line through the guided overlay, so a caveat the
   // overlay rewords (the decided low-slip text, D-4) reads as on the page
   // and in the guided archive's provenance.txt — with the explorer-side
-  // Sediment-profile coverage block appended (guided DDD §17.7).
+  // Sediment-profile coverage block before Licences (guided DDD §19.7).
   parts.push(heading(PROVENANCE_HEADING));
   for (const block of guidedProvenance(input, stamps, generatedAt).split('\n\n')) {
     const [label, ...lines] = block.split('\n').filter(line => line !== '');
@@ -337,7 +337,7 @@ function documentBody(input: RenderInput, stamps: VersionStamps, generatedAt: Da
 }
 
 /**
- * The guided provenance text (§13.7; guided DDD §17.7): the shared
+ * The guided provenance text (§13.7; guided DDD §19.7): the shared
  * builder's text, each line through the guided overlay, then the
  * explorer-side Sediment-profile coverage block. The one composition behind
  * provenance.txt, the chart sidecar, and the report's Provenance section;
@@ -418,7 +418,7 @@ export async function guidedArchive(input: RenderInput, stamps: VersionStamps, g
   const encoder = new TextEncoder();
   const members: ZipMember[] = packageTexts(input, stamps, generatedAt).map(member => {
     // Only the human-readable labels and caveats adopt the guided wording,
-    // and provenance.txt gains the Sediment-profile coverage block (§17.7).
+    // and provenance.txt gains the Sediment-profile coverage block (§19.7).
     // Raw records and machine-readable scenario state keep their exact bytes;
     // the shared /scenario/ package builder remains unchanged.
     const text = member.name === 'provenance.txt' ? withCoverage(member.text.split('\n').map(line => guided(line)).join('\n'), input)

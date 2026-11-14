@@ -1,4 +1,4 @@
-// Sediment-profile coverage on the guided page (guided DDD §17; PDD §3.2
+// Sediment-profile coverage on the guided page (guided DDD §19; PDD §3.2
 // "Guided coverage explanation" and "Coverage strings", D-56; ADR-0021
 // options 1F + 2B). One assessment, derived from the loaded release's
 // trial records and the confirmed query's matching stages, feeds every
@@ -17,7 +17,7 @@
 // sentence implies a simulation that does not exist.
 //
 // Every sentence below is the PDD §3.2 Coverage strings block's, character
-// for character; §17.3 of the guided DDD fixes how the recorded fragments
+// for character; §19.3 of the guided DDD fixes how the recorded fragments
 // compose for sets the PDD's examples do not show.
 //
 // A browser-and-Node file (DDD §5.1): no DOM global, no DOM type.
@@ -105,7 +105,7 @@ const intersect = (a: ReadonlySet<string>, b: ReadonlySet<string>): Set<string> 
 const minus = (a: ReadonlySet<string>, b: ReadonlySet<string>): Set<string> => new Set([...a].filter(k => !b.has(k)));
 const sameSet = <T>(a: readonly T[], b: readonly T[]): boolean => a.length === b.length && a.every(v => b.includes(v));
 
-/** What the loaded release contains (§17.1): each profile's combinations, and the modeled values. */
+/** What the loaded release contains (§19.1): each profile's combinations, and the modeled values. */
 export interface Availability {
   readonly byProfile: ReadonlyMap<string, ReadonlySet<string>>;
   /** "Modeled values": the distinct values present in the loaded release (§3.2). */
@@ -151,7 +151,7 @@ function trialPair(vintage: Vintage, t: number): string {
 }
 
 // --------------------------------------------------------------------
-// Phrases (§3.2 condition values; guided DDD §17.3)
+// Phrases (§3.2 condition values; guided DDD §19.3)
 // --------------------------------------------------------------------
 
 /** Joined with commas and "and": "a", "a and b", "a, b and c". */
@@ -178,7 +178,7 @@ function conditions(dims: Partial<Dims>): string {
 /**
  * The exact-combination form (§3.2): one item per density and depth, "Dense
  * sediment at 10 m", joined with semicolons; an item names its fault angles
- * only when they are not every angle in play (§17.3).
+ * only when they are not every angle in play (§19.3).
  */
 function exactList(set: ReadonlySet<string>, anglesInPlay: readonly number[]): string {
   const groups = new Map<string, { density: string; depth: number; dips: number[] }>();
@@ -221,7 +221,7 @@ function absentValues(outer: ReadonlySet<string>, inner: ReadonlySet<string>): P
   return [missing.faultDip, missing.depth, missing.density].filter(values => values.length > 0).length === 1 ? missing : null;
 }
 
-/** What `outer` holds beyond `inner`: the one dimension's absent values, or the exact combinations (§17.3). */
+/** What `outer` holds beyond `inner`: the one dimension's absent values, or the exact combinations (§19.3). */
 function absent(outer: ReadonlySet<string>, inner: ReadonlySet<string>, s: Dims): string {
   const values = absentValues(outer, inner);
   return values === null ? exactList(minus(outer, inner), s.faultDip) : conditions(values);
@@ -254,7 +254,7 @@ export function measurementNoun(m: MeasurementName): string {
 }
 
 // --------------------------------------------------------------------
-// The site step (2B): stable notes (§17.2)
+// The site step (2B): stable notes (§19.2)
 // --------------------------------------------------------------------
 
 /**
@@ -282,7 +282,7 @@ export function siteNote(vintage: Vintage, pair: SedimentPair): string | null {
 }
 
 // --------------------------------------------------------------------
-// Review (1F): model availability for the draft (§17.4)
+// Review (1F): model availability for the draft (§19.4)
 // --------------------------------------------------------------------
 
 /** The site part of a scenario or draft. */
@@ -325,7 +325,7 @@ function orderedPairs(vintage: Vintage, sediment: readonly SedimentPair[]): Sedi
 }
 
 // --------------------------------------------------------------------
-// Confirmed results (1F): representation (§17.5)
+// Confirmed results (1F): representation (§19.5)
 // --------------------------------------------------------------------
 
 /** One selected profile in the confirmed result. */
@@ -405,7 +405,7 @@ function resultLine(p: ProfileCoverage, cov: ResultCoverage, form: NameForm): st
       ? `${name} — simulations exist for your selected site conditions, ${NO_STAGES_TAIL}`
       : `${name} — simulations exist for some of your selected site conditions (at ${present(p.available, s)}), ${NO_STAGES_TAIL}`;
   }
-  // Order is fixed (§17.3): the represented part, then the no-stages part
+  // Order is fixed (§19.3): the represented part, then the no-stages part
   // with explicit values or combinations, and the no-simulations part last,
   // so its catch-all "other selected combinations" follows every set named.
   let line = `${name} — represented at ${present(p.represented, s)}.`;
@@ -445,7 +445,7 @@ export function panelCoverageNotes(input: RenderInput, m: MeasurementName): read
 }
 
 // --------------------------------------------------------------------
-// Saved results: the strip and the provenance block (§17.6, §17.7)
+// Saved results: the strip and the provenance block (§19.6, §19.7)
 // --------------------------------------------------------------------
 
 /**

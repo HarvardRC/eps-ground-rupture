@@ -124,7 +124,7 @@ function assertGuidedDataMembers(members: Map<string, Uint8Array>, input: Render
   });
 
   const provenance = decode(members.get('provenance.txt'));
-  // The guided overlay, and the Sediment-profile coverage block before Licences (guided DDD §17.7).
+  // The guided overlay, and the Sediment-profile coverage block before Licences (guided DDD §19.7).
   assert.equal(provenance, withCoverage(shared.get('provenance.txt')!.split('\n').map(line => guided(line)).join('\n'), input));
   assert.ok(provenance.includes('\n\nSediment-profile coverage\n'));
   assert.doesNotMatch(provenance, /deformation-zone/i);
@@ -256,7 +256,7 @@ describe('report: the document (§13.2, §13.3)', () => {
     for (const chart of reportCharts(narrowed)) assert.equal(captionLines(narrowed, STAMPS, chart)[1], scenarioSummary(narrowed));
   });
 
-  test('provenance renders every line of provenance.txt in its order, in the page\u2019s wording, with the coverage block (§17.7)', () => {
+  test('provenance renders every line of provenance.txt in its order, in the page\u2019s wording, with the coverage block (§19.7)', () => {
     for (const input of [full, noValid]) {
       const lines = paragraphs(documentXml(input, STAMPS, AT));
       const start = lines.indexOf(PROVENANCE_HEADING) + 1;
@@ -290,7 +290,7 @@ describe('report: the document (§13.2, §13.3)', () => {
       assert.ok(first > 0, caption[0]);
       assert.deepEqual(lines.slice(first, first + caption.length), [...caption]);
       assert.match(caption[0], new RegExp(`^${measurementLabel(chart.measurement).replace(/[()]/g, '\\$&')} · (Distribution|Cumulative)$`));
-      // The summary as the request, then after the count line the strip's representation lines (guided DDD §17.6).
+      // The summary as the request, then after the count line the strip's representation lines (guided DDD §19.6).
       assert.equal(caption[1], `Requested scenario: ${scenarioSummary(full)}`);
       assert.match(caption[1], /all recorded stages · all scarp types \(no filter\)$/);
       assert.equal(caption[2], countLine(full, chart.measurement));

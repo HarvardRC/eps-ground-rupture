@@ -81,7 +81,7 @@ export function panelNotes(input: RenderInput, m: MeasurementName): readonly str
  * The D-14 caption strip (§16.2), one entry per line before wrapping:
  * product, measurement and kind, the scenario summary as the request, the
  * count line and the representation lines that qualify it (the D-14
- * amendment, §17.6), versions, citation, the accuracy statement on a
+ * amendment, §19.6), versions, citation, the accuracy statement on a
  * cumulative image, then the displayed chart's active caveats and notes.
  */
 export function stripLines(input: RenderInput, stamps: VersionStamps, m: MeasurementName, kind: ChartKind): readonly string[] {
@@ -107,7 +107,7 @@ export function exportFileNames(input: RenderInput, m: MeasurementName, kind: Ch
   return { png: `${stem}.png`, sidecar: `${stem}-provenance.txt` };
 }
 
-/** The sidecar (§16.3): provenance.txt's guided text with its Sediment-profile coverage block (§17.7); the shared builder is untouched. */
+/** The sidecar (§16.3): provenance.txt's guided text with its Sediment-profile coverage block (§19.7); the shared builder is untouched. */
 export function sidecarText(input: RenderInput, stamps: VersionStamps, generatedAt: Date): string {
   return guidedProvenance(input, stamps, generatedAt);
 }

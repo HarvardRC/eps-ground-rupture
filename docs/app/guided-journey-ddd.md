@@ -1666,6 +1666,40 @@ merge:
    file." The error line stays for detectable failures; no manual
    fallback button in v0.4. Owner's choice, 2026-11-06.
 
+### 16.7 Coverage amendment (D-14 and D-56, 2026-11-14; G-35)
+
+[PDD D-56](pdd.md#1-decision-register) (Sediment-profile
+availability and result contribution for v0.4.0) amends
+[D-14](pdd.md#1-decision-register) (Chart-export provenance
+format) and [PDD §6.3](pdd.md#63-chart-export-fr-d2-p15-d-14-decided):
+the image must say which scenario was requested and which selected
+profiles its measurement actually represents, even with no sidecar.
+The strip of §16.2 changes in two places; every other field, caveat
+and note stays where §16.2 and §16.6 put it:
+
+1. The scenario-summary line reads "Requested scenario: {summary}".
+   The prefix is added only where the strip and the report's chart
+   captions are composed (`stripLines` in `chart-export.ts`,
+   `captionLines` in `report.ts`). `scenarioSummary`, the report's
+   scenario table and its seven-token split of the summary never see
+   it; `views/summary.ts` is unchanged.
+2. Directly after the count line come the representation lines of
+   [§19.6](#196-the-chart-strip-and-the-reports-captions), one per
+   selected profile that the plotted measurement does not represent
+   at every selected combination. On a full result there are none,
+   and the strip is unchanged except for the prefix.
+
+The order is therefore: product; measurement and kind; requested
+scenario; count line; representation lines; versions; citation;
+licence notice; the cumulative accuracy statement; caveats; panel
+notes. Lines wrap as §16.2 already wraps them (`wrap`, at
+`WRAP_AT` characters, breaking at spaces), so long profile names
+grow the strip downwards and never overrun the image. The Word
+report's chart captions (§13.2) carry the same prefix and lines,
+after their count line. The sidecar (§16.3) carries the full
+explanation through the provenance block of
+[§19.7](#197-the-provenance-block-and-the-readme).
+
 ## 17. Licence notices (G-28)
 
 The licences set on 2026-11-08 (ADR-0017, amendment of that date;
@@ -1731,7 +1765,9 @@ identifiers encode, and whether the page's own fault-dip
 explanation ("A smaller angle describes a shallower fault")
 should follow the README's "more gently inclined".
 
-The text, with the report present:
+The text, with the report present (the `provenance.txt` entry as
+amended by [PDD D-56](pdd.md#1-decision-register) on 2026-11-14,
+[§19.7](#197-the-provenance-block-and-the-readme)):
 
 ```text
 Ground Rupture Explorer — scenario download
@@ -1752,7 +1788,7 @@ records.csv
 statistics.csv
   Summary statistics for scarp height, deformation zone width, and scarp dip, with one row per measurement type.
 provenance.txt
-  The paper citation, the data DOIs, the software and data versions, the scenario settings, the population, the counts, the time the download was made, the caveats, and the licences.
+  The paper citation, the data DOIs, the software and data versions, the scenario settings, the population, the counts, the sediment-profile coverage, the time the download was made, the caveats, and the licences.
 scenario.json
   The scenario’s settings, in machine-readable form.
 report.docx
@@ -1817,3 +1853,284 @@ Percentiles use linear interpolation; sample standard deviation uses the n − 1
 The citation, the caveats, and the licences of these files are in provenance.txt.
 ```
 
+
+## 19. Sediment-profile coverage (D-56)
+
+[PDD D-56](pdd.md#1-decision-register) (Sediment-profile
+availability and result contribution for v0.4.0) adopts options 1F
+and 2B of
+[ADR-0021](../adr/0021-sediment-profile-coverage.md#decision-for-040).
+The behaviour is
+[PDD §3.2](pdd.md#32-sediment-strength-and-structure-fr-s2)'s
+"Guided coverage explanation" and the image rule is
+[§6.3](pdd.md#63-chart-export-fr-d2-p15-d-14-decided)'s "Coverage
+amendment". Every sentence is the §3.2 "Coverage strings (D-56,
+recorded 2026-11-14; assembled under D-51)" block's, character for
+character: the page form "Alternating Strong-Weak" (hyphen) on page
+surfaces, and the summary form "Alternating Strong–Weak (layered)"
+(en dash) in the strip, the captions and the provenance. This
+section fixes the derivation, placement and composition for task
+G-35. Everything is guided-only, in one explorer module,
+`src/explore/coverage.ts`. `download/package.ts`, `views/summary.ts`,
+`views/notices.ts` and `views/copy.json` are unchanged, and the
+`/scenario/` bundles keep their bytes
+([D-39](pdd.md#1-decision-register), Guided publication path;
+`/scenario/` paused). No query rule, weight, profile name or
+selection behaviour changes:
+[D-26](pdd.md#1-decision-register) (Explicit site-condition
+selections) and [D-47](pdd.md#1-decision-register) (Progression
+guidance and review fixes) still hold, so every profile stays
+listed, selectable and covered by Select all.
+
+### 19.1 Derivation
+
+- **Availability.** It is read once per loaded release from its trial
+  records (`availability(vintage)`). For each profile, a
+  `(set, sediment_strength)` pair, it is the set of (fault angle,
+  sediment depth, density) combinations with at least one
+  simulation. "Modeled values" are the distinct values present in
+  the release. No limit is written into the code; a new release
+  brings its own.
+- **Selection.** The reader's selected values per dimension, from
+  the draft at review and from the confirmed scenario in results. A
+  restored record may hold a gapped set
+  ([D-50](pdd.md#1-decision-register), Guided Step 2 range
+  controls for fault angle and sediment depth); its stored values
+  are assessed as they are.
+- **Representation.** It is read from the confirmed query's matching
+  stages (`Selection.indices`): the combinations of each selected
+  profile with at least one matching stage, and per measurement the
+  combinations whose matching stages carry a recorded value. No
+  earlier stage is substituted. The scarp-type filter and the
+  population act exactly as the query applies them.
+- **Cross-products.** A set is phrased per dimension only when it
+  equals the full cross-product of its per-dimension values;
+  otherwise the exact combinations are listed (§19.3, rule 2).
+
+### 19.2 The site step (2B)
+
+Beside each profile whose availability is not every modeled
+combination, a stable note: "{profile}: this data release has
+simulations only for {combinations}." It sits directly under the
+profile's checkbox, as a `p.gx-choice-note` spanning the choice row,
+and the checkbox's `aria-describedby` names it after the group's
+error slot. The note is in neutral text (muted, small): never a
+warning, an error or a live region. It depends on the release alone,
+so it reads the same on fresh, restored and sample drafts, before
+any other answer, and whatever else is chosen; slider movement
+re-renders nothing in it and announces nothing. The "If unknown,
+select all." hint, Select all and the required-input guidance are
+unchanged. In data-v1 the notes read:
+
+- "Random Heterogeneous: this data release has simulations only for
+  Dense sediment, 10 m deep, at every modeled fault angle."
+- "Alternating Strong-Weak: this data release has simulations only
+  for Dense sediment, 10 m deep, at fault angles 20°, 40° and 60°."
+
+### 19.3 Composition rules
+
+The PDD fixes the sentences and their fragments. These rules fix how
+the fragments compose for sets the PDD's examples do not show. The
+planning session reviewed them on 2026-11-14 (rules 1–6 as proposed,
+then its corrections to 3, 5 and 6 and the catch-all rules 7–10).
+
+1. **Site note, per-dimension form.** Parts in the order density,
+   depth, angle, joined with ", ". Listed forms: "Dense sediment" /
+   "Dense and Medium sediment"; "10 m deep" / "5 m and 10 m deep";
+   "at fault angle 40°" / "at fault angles 20°, 40° and 60°". The
+   "every" forms are the recorded "for every modeled density", "at
+   every modeled sediment depth" and "at every modeled fault angle".
+   When the density part is "every", the pattern's own "only for"
+   absorbs that part's "for": "…simulations only for every modeled
+   density, 10 m deep, at fault angles 20°, 40° and 60°."
+2. **Exact-combination lists** (site note, review and results). One
+   item per (density, depth) pair, "{Density} sediment at {d} m",
+   joined with "; ", densities in the page's order (Dense, Medium,
+   Loose), then depths ascending. An item adds ", at fault angle(s)
+   …" only when its angles are not all the angles in play: every
+   modeled angle for the note, every selected angle for review and
+   results. So the recorded example "Dense sediment at 10 m; Loose
+   sediment at 3 m" renders exactly.
+3. **Condition lists across dimensions** in review and results:
+   angle, then depth, then density, as the condition phrases "fault
+   angle 40°" / "fault angles 20°, 40° and 60°", "sediment depth 3 m
+   and 5 m", "density Medium and Loose", joined with commas and
+   "and" ("simulations at fault angles 20°, 40° and 60°, sediment
+   depth 10 m and density Dense"). The positive side names only
+   the dimensions where the set differs from the selection. A
+   missing side is written as values ("none at fault angle 45°")
+   only when exactly one dimension is partial; each value named then
+   has none anywhere in the selection.
+4. **Representation** is computed per combination from the
+   confirmed query's matching stages. When the represented set is
+   not a cross-product within the selection, its {represented} slot
+   takes the exact list of rule 2.
+5. **No recorded values.** The per-profile panel note renders on the
+   page only while that panel has recorded values from other
+   profiles; when the whole panel has none (PDD §4.5's 0–0.04 m
+   window), §5.8's notice stands alone on the page. The provenance
+   block, however, carries the note for every profile with
+   matching stages but no recorded values for a reported
+   measurement, the whole-panel case included. Its full-coverage
+   line then does not render, since the PDD's trigger excludes any
+   profile "without recorded values for a reported measurement".
+6. **Empty result.** The "Represented in these results" block also
+   renders when nothing matches, without the represented-profiles
+   list. It stands inside the empty state directly after the
+   existing explainer, which is unchanged, so the two read together:
+   the explainer speaks of the whole scenario, the lines tell
+   missing simulations from range and refinement exclusion. A
+   profile whose site conditions are available takes the
+   no-stages-remain wording, never the no-simulations wording.
+7. **Results, one partial dimension.** When the missing-for-no-
+   simulations part spans exactly one dimension, the recorded
+   explicit form: "No simulations at fault angle 45° in this data
+   release."
+8. **Results, two or more.** When it spans two or more dimensions,
+   the line names the positive sets first and closes with the
+   catch-all composed from recorded fragments: "No simulations for
+   the other selected combinations in this data release." "Other"
+   takes its antecedent from the sets already named, so the order is
+   fixed: "represented at {…}", then any "No stages at {…} remain
+   after the confirmed range and refinements." with explicit values
+   or combinations, then the no-simulations sentence last.
+9. **One catch-all per line.** The catch-all may serve only the last
+   sentence. When the no-stages set also spans two or more
+   dimensions, it is written as the exact list of rule 2.
+10. **Review, the same shape.** With one partial dimension, "none at
+    {values}"; with two or more, the recorded tail "; none for the
+    other selected combinations." (the available half already names
+    the whole cross-product). Availability that is no cross-product
+    takes the recorded exact form "{profile} — simulations only for
+    {exact list}; none for the other selected combinations."
+
+Select all on data-v1 therefore renders, in results:
+
+- "Layered: Random Heterogeneous — represented at sediment depth
+  10 m and density Dense. No simulations for the other selected
+  combinations in this data release."
+- "Layered: Alternating Strong-Weak — represented at fault angles
+  20°, 40° and 60°, sediment depth 10 m and density Dense. No
+  simulations for the other selected combinations in this data
+  release."
+
+The angles stay listed for Alternating Strong-Weak because they are
+partial within the selection, even when all three contribute.
+
+### 19.4 Review (1F)
+
+Inside the Geological site conditions review section, after the
+selection summary: heading "Simulations for these site conditions",
+the recorded hint, one list item per selected profile with no or
+partial availability for the selected combinations, then the
+closing line "All other selected profiles have simulations for every
+site condition you selected." when at least one selected profile is
+unaffected. The block renders only when a selected profile is
+affected, so neither sample shows it. It reports model availability
+only: no result count, no promise of contribution, and nothing about
+the movement range or the refinements. It sits apart from the
+offset-conversion table and its per-angle messages, which keep their
+place in the Fault slip section.
+
+### 19.5 Confirmed results (1F)
+
+In the confirmed-scenario section, after the compact summary and the
+coverage warning: heading "Represented in these results", the
+represented profiles in the page form joined with "; " (selected
+profiles with at least one matching stage), then one list item per
+absent or partly represented profile in the recorded sentences, the
+three reasons kept apart (no simulations; simulations but no stages
+after the confirmed range and refinements; no recorded values). On
+an empty result the block moves into the empty state (rule 6). It is
+computed from the confirmed `RenderInput` alone, so draft edits,
+including the pending-changes banner's draft, never change it
+([D-27](pdd.md#1-decision-register), Review before results change).
+A measurement panel with recorded values carries, under its other
+notes, one `p.gx-note` per profile whose matching stages have no
+recorded value for that measurement (rule 5), in the page form;
+`{measurement}` is the guided page's lowercase name without unit
+("deformation zone width").
+
+### 19.6 The chart strip and the report's captions
+
+Per §16.7: "Requested scenario: " before the summary, and after the
+count line one line per selected profile that the plotted
+measurement does not represent at every selected combination, in
+the summary form:
+
+- "Not represented in this chart: {profile} — {reason}.", where the
+  reason is "no simulations for the selected site conditions"
+  (no availability), "no stages after the range and refinements"
+  (no matching stage), or "no recorded {measurement} values"
+  (matching stages, none with a value);
+- "Partly represented in this chart: {profile} — {represented}
+  only.", {represented} per rule 3 or rule 2.
+
+The Word report's captions carry the same lines. The report's
+scenario table still splits the unprefixed summary into its seven
+rows.
+
+### 19.7 The provenance block and the README
+
+One composition, `withCoverage`, adds the block labelled
+"Sediment-profile coverage" to the guided provenance text at the
+three sites where the explorer already post-processes the shared
+text: `guidedArchive()` (`provenance.txt`), `sidecarText()` (the
+chart sidecar), and the Word report's Provenance section (through
+`guidedProvenance`). The shared builder is untouched. The block goes
+directly before the Licences block, because
+[PDD §6.1](pdd.md#61-download-package-fr-d1) makes Licences close
+the provenance text (G-28) and `test/zipcheck.py` enforces that.
+Its lines are in the summary form: the no-simulations line without
+"It remains part of your selection.", the no-stages-remain line,
+the partly-represented line, then, per reported measurement, the
+no-recorded-values note (rule 5). When none applies, the single
+line is "Every selected profile has simulations for the selected
+site conditions and contributes matching stages to this result."
+The README's `provenance.txt` entry gains "the sediment-profile
+coverage" (§18's text, as amended).
+
+### 19.8 Accessibility and layout
+
+The notes, the review block and the results block are static text in
+reading order: no new live region, no announcement on slider
+movement or on any choice. The range echo's existing `aria-live`
+announcements are unchanged. Each note is the accessible description
+of its checkbox. Long lines wrap (`overflow-wrap: anywhere`), so the
+320 px layout keeps the page free of horizontal scroll; on the
+image, the strip's wrapping (§16.7) keeps long names inside it.
+
+### 19.9 Verification
+
+- Node (`test/explore-coverage.test.ts`, code-built releases): the
+  two data-v1 notes; every §3.2 example (the 45° absence and the
+  40–45° split at review, in results and on the strip); a depth and
+  a density restriction; two partial dimensions; Select all and both
+  rule-8 sentences above; a restored gapped set; a scarp-type
+  exclusion with the fixed sentence order; no stages at all, with
+  whole and partial availability; irregular availability (exact
+  lists, the rule-1 absorption, the rule-2 angle suffix); a profile
+  without recorded values while others have them; the all-null
+  window; full coverage; the strip, caption and provenance
+  compositions at the three sites; the README entry. The existing
+  chart-export and report tests follow the new strip, caption,
+  sidecar and provenance texts, and the report snapshot is
+  refreshed.
+- Browser (`playwright/specs/explore-coverage.spec.ts`, desktop and
+  mobile, served data-v1): the notes before other answers, with
+  their accessible descriptions, outside live regions, stable under
+  slider movement and Select all; the 45° absence (1,200 stages,
+  1,164 heights) through review, results, a draft edit, the strip
+  PNG's text, the sidecar, `provenance.txt`, `README.txt` and
+  `report.docx`; the 40–45° split; depth and two-dimension
+  restrictions; Select all; both sample landings; a restored gapped
+  set; a scarp-type exclusion (Monoclinal Collapse, 20°–40°, 174
+  stages); the 0–0.04 m window; full coverage; an empty result; the
+  320 px layout.
+
+### 19.10 Out of scope
+
+Live per-profile statuses (ADR-0021 2C/2D), the reference view
+(2E), simulation counts (2F), adjustment actions (2G), any
+result-count preview at review, and any change to query semantics,
+weights, `/scenario/` or display names.

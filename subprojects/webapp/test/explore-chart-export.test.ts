@@ -64,7 +64,7 @@ const withMin = (input: RenderInput, m: MeasurementName, min: number): RenderInp
 describe('chart export: the strip (§16.2, §16.6)', () => {
   test('slip mode: product, measurement and kind, summary, count, versions, citation, in order', () => {
     const lines = stripLines(slip, STAMPS, 'scarp_height', 'histogram');
-    // The summary is the request; the representation lines follow the count line (the D-14 amendment, guided DDD §17.6).
+    // The summary is the request; the representation lines follow the count line (the D-14 amendment, guided DDD §19.6).
     const coverage = chartCoverageLines(slip, 'scarp_height');
     assert.ok(coverage.length > 0, 'the fixture selects every profile; most have no simulations in it');
     const q = coverage.length;

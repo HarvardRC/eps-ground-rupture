@@ -421,7 +421,7 @@ body:has(#gre-explore) .md-top { display: none !important; }
 #gre-explore .gx-chart-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin: 12px 0 0; }
 #gre-explore .gx-chart-export-status { margin: 0; }
 /* Kept rendered while empty: a live region must exist before its update for screen readers to announce it. */
-/* Sediment-profile coverage (guided DDD §17): information, never a warning or an error. The site note spans the
+/* Sediment-profile coverage (guided DDD §19): information, never a warning or an error. The site note spans the
    choice row under its profile; the review and results blocks are plain text in reading order, never live regions. */
 #gre-explore .gx-choice-note { flex-basis: 100%; margin: -2px 0 4px; font-size: .75rem; color: var(--gx-muted); overflow-wrap: anywhere; }
 #gre-explore .gx-coverage { margin: 16px 0 0; overflow-wrap: anywhere; }
