@@ -2128,7 +2128,30 @@ image, the strip's wrapping (§16.7) keeps long names inside it.
   stages); the 0–0.04 m window; full coverage; an empty result; the
   320 px layout.
 
-### 19.10 Out of scope
+### 19.10 Known limits
+
+None of these can occur on data-v1; each needs a decision before a
+release where it could.
+
+- A profile listed in the manifest with no trial records gets no
+  site note: §3.2 records no sentence for a profile with no
+  simulations at all. Review and results still say "this data
+  release has no simulations for your selected site conditions".
+  A note for that case would need new wording under D-51.
+- A restored scenario naming a profile the loaded release does not
+  list is assessed without it, as the query matches without it.
+  The coverage block says nothing about that profile.
+- On an empty result the block stands in the empty state (rule 6),
+  not in the confirmed-scenario section where §3.2 places it
+  otherwise. This placement is deliberate, so the explainer and the
+  coverage lines read together.
+- When a represented or available set is not a cross-product, the
+  exact list follows "represented at" or "(at" as rules 2 and 4
+  compose it ("represented at Dense sediment at 10 m; Loose
+  sediment at 3 m."). The doubled "at" is accepted for such a
+  release.
+
+### 19.11 Out of scope
 
 Live per-profile statuses (ADR-0021 2C/2D), the reference view
 (2E), simulation counts (2F), adjustment actions (2G), any

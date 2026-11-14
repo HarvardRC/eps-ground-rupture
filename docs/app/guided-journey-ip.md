@@ -3991,6 +3991,35 @@ onto the PDD pointer fix):
   SHA-256 values recorded at G-33, in both trees (D-39).
 - **Unchanged.** `download/package.ts`, `views/summary.ts`,
   `views/notices.ts`, `views/copy.json` and the PDD.
+- **Pull request and CI.** PR
+  [#102](https://github.com/HarvardRC/eps-ground-rupture/pull/102).
+  CI on it passed — Tests
+  ([run](https://github.com/HarvardRC/eps-ground-rupture/actions/runs/43655103818)),
+  Companion site
+  ([run](https://github.com/HarvardRC/eps-ground-rupture/actions/runs/43655103860))
+  and Doc links
+  ([run](https://github.com/HarvardRC/eps-ground-rupture/actions/runs/43655103792))
+  — with `deploy` skipped.
+
+**Review.** An independent reviewer re-ran the three checkers,
+`tscCheck`, the Node suite (534 of 534) and the task's browser spec
+(26 of 26, both projects), and checked the `/scenario/` bundle
+hashes. It compared every fixed sentence with PDD §3.2 with the line
+breaks unwrapped. It confirmed that the prefix reaches only the
+strip and the captions, that one composition feeds the three
+provenance sites before Licences, that the shared files and the PDD
+are untouched, and that no commit or PR text carries attribution
+lines. It read the coverage code against the query for empty
+results, one stage per simulation, out-of-range offset windows,
+all-null measurements and values missing from the release, and
+found no false claim. It passed the task with four minor notes, none
+blocking. Guided DDD §19.10 now records them as known limits that
+cannot occur on data-v1: a profile without trials, a restored profile
+the release does not list, the empty-state placement, and the doubled
+"at" of the exact-list form.
+
+Not verified: browsers other than Chromium, and releases with
+irregular availability beyond the code-built fixtures.
 
 ## Separate CI investigation
 
