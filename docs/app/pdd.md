@@ -1002,6 +1002,21 @@ follow:
   Strong-Weak — represented at fault angle 40°. No simulations at
   fault angle 45° in this data release."
 
+Composed closing forms (recorded 2026-11-14, the same assembly). When
+a line's missing part spans two or more dimensions, it closes with
+"No simulations for the other selected combinations in this data
+release." on results and in provenance, or with the tail "; none for
+the other selected combinations." at review; the named sets come
+first, and one such closing sentence ends a line. An exact-combination
+item carries its fault angles only when they are not all the angles in
+play: "Dense sediment at 10 m, at fault angles 20° and 40°". The
+data-v1 Select-all results lines are "Layered: Random Heterogeneous —
+represented at sediment depth 10 m and density Dense. No simulations
+for the other selected combinations in this data release." and
+"Layered: Alternating Strong-Weak — represented at fault angles 20°,
+40° and 60°, sediment depth 10 m and density Dense. No simulations
+for the other selected combinations in this data release."
+
 A profile whose stages carry no recorded value for the displayed
 measurement, while other profiles' stages do, takes the measurement
 panel's note: "Simulations for {profile} are in your results, but
