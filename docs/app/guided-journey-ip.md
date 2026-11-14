@@ -3959,7 +3959,8 @@ closes the text (PDD §6.1, G-28).
 
 At this verification, on `task/g-35-sediment-coverage` at `384b9b6`,
 over `ab717fe` (the same tree as `dd1d28e` over `1050d25`, rebased
-onto the PDD pointer fix):
+onto the PDD pointer fix). The later commits on the branch change
+only the guided DDD and this plan, so the code results below stand:
 
 - **Document checks.** Relative links resolved (5679 links, 67
   files), PDD agreement passed, traceability reported no gap rows,

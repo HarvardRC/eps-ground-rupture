@@ -2068,7 +2068,12 @@ the summary form:
 
 The Word report's captions carry the same lines. The report's
 scenario table still splits the unprefixed summary into its seven
-rows.
+rows. A profile can be fully represented by matching stages yet only
+partly represented in one measurement's chart. The provenance block
+of §19.7 speaks of stages and of measurements with no recorded value
+at all (the PDD's trigger), so the per-measurement "Partly
+represented in this chart" qualification belongs to the image and
+its caption alone and is not repeated in the provenance.
 
 ### 19.7 The provenance block and the README
 
