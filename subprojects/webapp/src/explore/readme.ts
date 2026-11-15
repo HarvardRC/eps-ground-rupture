@@ -25,7 +25,7 @@ function memberEntries(withReport: boolean): readonly Entry[] {
     [README_MEMBER, 'This file.'],
     ['records.csv', 'The matching simulation stages, one row per stage.'],
     ['statistics.csv', 'Summary statistics for scarp height, deformation zone width, and scarp dip, with one row per measurement type.'],
-    ['provenance.txt', 'The paper citation, the data DOIs, the software and data versions, the scenario settings, the population, the counts, the time the download was made, the caveats, and the licences.'],
+    ['provenance.txt', 'The paper citation, the data DOIs, the software and data versions, the scenario settings, the population, the counts, the sediment-profile coverage, the time the download was made, the caveats, and the licences.'],
     ['scenario.json', 'The scenario’s settings, in machine-readable form.'],
     ...(withReport ? [['report.docx', 'A report of this result in Microsoft Word format, with its charts.'] as const] : []),
   ];

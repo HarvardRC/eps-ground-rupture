@@ -307,6 +307,26 @@ green under the standing terms after independent review. The
 review's other findings stay where the records hold them (PDD D-55;
 the briefing).
 
+**Owner decision, 2026-11-14 (sediment-profile coverage, G-35).** The
+owner accepted [ADR-0021](../adr/0021-sediment-profile-coverage.md)
+(options 1F + 2B) and committed
+[PDD D-56](pdd.md#1-decision-register) (Sediment-profile availability
+and result contribution for v0.4.0) in `1050d25` on `dev-v.0.4.x`,
+with the D-55 and D-14 amendments, the PDD §3.2 "Guided coverage
+explanation" and its "Coverage strings (D-56, recorded 2026-11-14;
+assembled under D-51)", and the §6.3 coverage amendment. That commit
+is the release and the owner's approval of the task's decisions and
+strings, the G-33 pattern: the pull request merges on green after an
+independent review, without asking the owner again. The strings go
+to the research group for sight with the next briefing round under
+D-51 and the existing OA-4 release approval. The owner's follow-up
+commit `ab717fe` (2026-11-14) points D-56 to guided DDD §19, since
+§17 and §18 were already taken, and places the provenance block
+directly before the Licences block. Its commit `13ee401` records the
+composed closing forms of guided DDD §19.3 (rules 2, 8 and 10) and
+the two Select-all lines in PDD §3.2. The pull request leaves the PDD
+untouched.
+
 | Task | Prerequisite | Exact work and authority | Completion |
 | --- | --- | --- | --- |
 | G-13 | Released 2026-11-05; guided DDD §13; PDD D-40 (P1.5 by D-48, release-blocking in v0.4, first in the band) and D-14 | Implement the result report exactly to guided DDD §13: `report.docx` composed beside the shared `packageTexts` and written by the shared `zip` writer into the FR-D1 download ZIP, the hint updated, no new control; document content, fixed chart set, `.docx` assembly, failure fallback, checker amendment, and strings per §§13.1–13.7 and [PDD §6.5](pdd.md#65-result-report-d-40-p2). | `report.docx` verified in the lane (outer members, nested parts, one image per non-suppressed chart, captions asserted); zipcheck covers the guided layout; Node tests cover the assembly and the failure fallback; the `/scenario/` bundles stay byte-identical; the owner's Word-open check is recorded in the evidence; the §6.1 content rules and D-14 caption fields apply unchanged. |
@@ -331,6 +351,7 @@ the briefing).
 | G-32 | Released 2026-11-12 (PDD D-54); after G-31 | Introduce the explorer on the home page: in `subprojects/mkdocs/docs/index.md`, one sentence with the `explore.md` link as its own paragraph directly after the dashboard cards `</div>`, assembled from the `CITATION.cff` explorer paragraph (D-51; the assembled line marked for the research group's sight): "And the **Ground Rupture Explorer** lets you choose modeled geological conditions and a range of fault slip, then examine the corresponding results from the same simulations." — "Ground Rupture Explorer" carrying the `explore.md` link. Nothing else on the page changes; final strings to the owner before merge. | The home page introduces the explorer and links `explore.md`; the strict builds and the site checks hook pass; the `/scenario/` bundles stay byte-identical; the evidence records the assembled wording routed for the group's sight. |
 | G-33 | Released 2026-11-12 by the owner's commit of PDD D-55; after G-32's release | Land the site-review corrections with the planning session's repairs (guided DDD §13.1 correction and §15.12): the Tableau host and iframe sized before scaling, with per-embed ready dismissal and a regression test (review R3); one labelled `section` landmark in place of the nested `main` (R16, page portion); visible download preparation, ready, and partial-failure status beside the download (R17, archive portion); the guided archive's `statistics.csv` labels and `provenance.txt` through the D-51 overlay, superseding the G-25 split (R8); mode-specific movement labels and a mode-neutral step heading (R9); the scarp-dip release-verification wording on guided surfaces and the Distributions footnote (R6); and verified editorial corrections (figure count, Figure 2 pointers, SDC expansion, range hint, glossary introduction). The pull request leaves the PDD untouched: PDD D-55 and its §5.4 note land by the owner's commit. Held, not in this task: the fault-steepness word choice and every R1, R2, R5, and R7 change (pending research-group answers); workbook edits (R10); layout proposals (R11). | The three repo checkers, both TypeScript configurations, the Node suite, and the strict builds pass; both lane projects pass, the seven edited specs among them; the `/scenario/` bundles stay byte-identical; the shipped strings equal PDD D-55's; the evidence section records the review disposition. |
 | G-34 | Released 2026-11-13 by the owner's answer in chat (owner decision above); after G-33 | Fix the download retry and bring the research-group briefing up to date (follow-up review R18, R19), changing no reader-facing wording: in `subprojects/webapp/src/explore/app.ts`, a new download attempt clears an earlier whole-download failure (the general error and its alert) while any other general error stays, without re-rendering the page, so focus stays on the button; the failure text moves unchanged into `subprojects/webapp/src/explore/wording.ts` as a named constant; guided DDD §13.5 records the rule; a browser check covers failure, retry and success. `notes/research-group-questions.md` gains dated current-disposition notes where PDD D-52, D-53, D-54, D-10 and ADR-0017's amendment of 2026-11-08 replaced its statuses; question 13's conversion sentence stays as answered (held with R5 under D-55). The follow-up review joins the repository with the planning session's verification note appended. | The new browser check fails before the fix and passes after it: after a failed archive and a successful retry, no failure message or alert remains and the ready status shows; the unit and browser lanes, `tscCheck`, both strict builds and the three repository checkers pass; the `/scenario/` bundles stay byte-identical; the PDD is unchanged and no reader-facing string changes its text. |
+| G-35 | Released 2026-11-14 by the owner's commit `1050d25` of PDD D-56 and ADR-0021 (owner decision above); after G-34 | Explain sediment-profile coverage on the guided page and in saved results, exactly to guided DDD §19 and the §16.7 amendment: one explorer module, `subprojects/webapp/src/explore/coverage.ts`, derives each profile's available combinations from the loaded release's trial records and its represented combinations from the confirmed query; the site step shows the stable note beside each limited profile (2B); review shows the availability block and confirmed results the "Represented in these results" block and per-panel notes (1F); the chart strip and the Word report's captions read "Requested scenario: {summary}" with representation lines after the count line; the "Sediment-profile coverage" provenance block is added before Licences at the three guided sites (`provenance.txt`, the chart sidecar, the report's Provenance section); the README's `provenance.txt` entry gains the coverage item. Every sentence is PDD §3.2's verbatim. `download/package.ts`, `views/summary.ts`, `views/notices.ts` and `views/copy.json` stay unchanged. Out of scope: ADR-0021 2C–2G, result-count previews at review, and any change to query semantics, weights, `/scenario/` or display names. | Node tests and browser specs in both lane projects cover ADR-0021's verification list (guided DDD §19.9); the shipped strings equal PDD §3.2's character for character; `tscCheck`, the Node suite, both strict builds, both lane projects and the three repository checkers pass; the `/scenario/` bundles stay byte-identical; the PDD is unchanged. |
 
 Queued definitions and decisions, with their authorities:
 
@@ -3904,6 +3925,109 @@ sign-off it rests on (OA-4), and this evidence section is added.
 
 Not verified: browsers other than Chromium, and an archive failure
 that occurs naturally (the check injects one).
+
+### Sediment-profile coverage, 2026-11-14 (G-35)
+
+G-35 ran under the owner's release of 2026-11-14: the owner's commit
+`1050d25` of ADR-0021 and PDD D-56, quoted in the owner-decision
+paragraph above the task table. The Implementation Session carried
+out the task on `task/g-35-sediment-coverage`, under the planning
+session's supervision by message.
+
+**What changed.** A new explorer module,
+`subprojects/webapp/src/explore/coverage.ts`, derives each profile's
+available combinations from the loaded release's trial records and
+its represented combinations from the confirmed query's matching
+stages. From these it writes every coverage sentence of PDD §3.2.
+`app.ts` shows the site notes, the review block, the results block and
+the panel notes. `chart-export.ts` and `report.ts` add the
+"Requested scenario: " prefix and the representation lines to the
+strip and the captions. `report.ts` adds `guidedProvenance`, the one
+composition behind `provenance.txt`, the chart sidecar and the
+report's Provenance section. `readme.ts` gains the coverage item.
+`explore.css` styles the notes and blocks as neutral text. Guided
+DDD §16.7 and §19 record the design.
+
+**Composition decisions.** The PDD fixes the sentences and leaves
+their composition to the design. On 2026-11-14 the planning session
+reviewed the rules of guided DDD §19.3. It confirmed rules 1, 2 and
+4, corrected rule 5 (the all-null window keeps the provenance notes
+and drops the full-coverage line), refined rule 3, and added rule 6's
+placement and the catch-all rules 7–10. It also confirmed two points,
+which the owner then committed to the PDD in `ab717fe`: the design
+takes the new number §19, because §17 and §18 were already taken;
+and the provenance block goes directly before Licences, which still
+closes the text (PDD §6.1, G-28).
+
+At this verification, on `task/g-35-sediment-coverage` at `52fd2c6`,
+over `13ee401` (the same code as `dd1d28e` over `1050d25`, rebased
+onto the owner's two PDD commits). The later commits on the branch
+change only the guided DDD and this plan, so the code results below
+stand:
+
+- **Document checks.** Relative links resolved (5679 links, 67
+  files), PDD agreement passed, traceability reported no gap rows,
+  and the 19 document-script self-tests passed.
+- **Strings.** Every concrete sentence of PDD §3.2's Coverage strings
+  block is asserted verbatim in the Node suite or the browser spec:
+  the two site notes; the 45° and 40–45° examples at review, in
+  results and on the strip; the headings, the hint, the closing line,
+  the provenance label and full line, and the README entry. The
+  composed closing forms recorded in `13ee401` (the results catch-all,
+  the review tail, the exact item with angles, and both Select-all
+  lines) match the shipped code and the test assertions byte for
+  byte. Page
+  surfaces use the hyphen, summary surfaces the en dash. The
+  sentences the PDD records as patterns are written once, in
+  `coverage.ts`.
+- **Tests.** `tscCheck` passed; the pinned Node suite passed 534 of
+  534; the full browser lane passed 419 and skipped 11, in `desktop`
+  and `mobile`, the 26 checks of `explore-coverage.spec.ts` among
+  them. An earlier full run had one timeout in the `/scenario/` spec
+  `navigation-lifecycle.spec.ts` (a `waitForURL` after the data-stamp
+  change), which this task does not touch. That spec passed 24 of 24
+  when run alone three times, and in the final full run.
+- **Data facts.** On the served data-v1 release, 45°, 10 m, Dense,
+  Uniform Strong and Alternating Strong-Weak with 0–5 m slip gives
+  1,200 matching stages and 1,164 scarp heights, as ADR-0021 records.
+  Monoclinal Collapse alone over 20°–40° gives 174 stages, with
+  both reasons and the fixed sentence order.
+- **Site builds.** The strict publication and preview builds passed.
+- **Bundles.** The explorer script is now `explore-f0d0e048fa49.js`
+  and its stylesheet `explore-cb02ce90f2c3.css`. The `/scenario/`
+  bundles `app-066e39f81672.js` and `app-08bebc049c15.css` keep the
+  SHA-256 values recorded at G-33, in both trees (D-39).
+- **Unchanged.** `download/package.ts`, `views/summary.ts`,
+  `views/notices.ts`, `views/copy.json` and the PDD.
+- **Pull request and CI.** PR
+  [#102](https://github.com/HarvardRC/eps-ground-rupture/pull/102).
+  CI on it passed — Tests
+  ([run](https://github.com/HarvardRC/eps-ground-rupture/actions/runs/43655103818)),
+  Companion site
+  ([run](https://github.com/HarvardRC/eps-ground-rupture/actions/runs/43655103860))
+  and Doc links
+  ([run](https://github.com/HarvardRC/eps-ground-rupture/actions/runs/43655103792))
+  — with `deploy` skipped.
+
+**Review.** An independent reviewer re-ran the three checkers,
+`tscCheck`, the Node suite (534 of 534) and the task's browser spec
+(26 of 26, both projects), and checked the `/scenario/` bundle
+hashes. It compared every fixed sentence with PDD §3.2 with the line
+breaks unwrapped. It confirmed that the prefix reaches only the
+strip and the captions, that one composition feeds the three
+provenance sites before Licences, that the shared files and the PDD
+are untouched, and that no commit or PR text carries attribution
+lines. It read the coverage code against the query for empty
+results, one stage per simulation, out-of-range offset windows,
+all-null measurements and values missing from the release, and
+found no false claim. It passed the task with four minor notes, none
+blocking. Guided DDD §19.10 now records them as known limits that
+cannot occur on data-v1: a profile without trials, a restored profile
+the release does not list, the empty-state placement, and the doubled
+"at" of the exact-list form.
+
+Not verified: browsers other than Chromium, and releases with
+irregular availability beyond the code-built fixtures.
 
 ## Separate CI investigation
 
